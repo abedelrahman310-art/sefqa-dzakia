@@ -1,0 +1,19 @@
+# Node.js
+node_modules/
+*.log
+
+# Build output
+dist/
+build/
+
+# Environment Variables
+.env
+
+# React
+*.js
+*.jsx
+*.ts
+*.tsx
+/public/
+/build/
+/.cache/
