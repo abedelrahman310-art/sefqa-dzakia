@@ -1,0 +1,44 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Tenders - Tenders Dashboard{% endblock %}
+
+{% block content %}
+<div class="tenders-container">
+    <div class="tenders-header">
+        <h2>Available Tenders</h2>
+        {% if user.is_authenticated %}
+            <a href="{% url 'tenders:create' %}" class="btn btn-primary">Create New Tender</a>
+        {% endif %}
+    </div>
+
+    {% if tenders %}
+        <div class="tenders-grid">
+            {% for tender in tenders %}
+                <div class="tender-card">
+                    <h3><a href="{% url 'tenders:detail' tender.pk %}">{{ tender.title }}</a></h3>
+                    <p class="tender-org">{{ tender.organization }}</p>
+                    <p class="tender-category">{{ tender.category }}</p>
+                    <div class="tender-meta">
+                        <span class="tender-budget">
+                            {% if tender.budget_min and tender.budget_max %}
+                                ${{ tender.budget_min|floatformat:0 }} - ${{ tender.budget_max|floatformat:0 }}
+                            {% elif tender.budget_max %}
+                                Up to ${{ tender.budget_max|floatformat:0 }}
+                            {% else %}
+                                Budget on request
+                            {% endif %}
+                        </span>
+                        <span class="tender-deadline">Deadline: {{ tender.deadline|date:"M d, Y" }}</span>
+                    </div>
+                    <p class="tender-location">{{ tender.location|default:"Remote" }}</p>
+                    <a href="{% url 'tenders:detail' tender.pk %}" class="btn btn-secondary">View Details</a>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="no-tenders">
+            <p>No tenders available at the moment. Check back later!</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
