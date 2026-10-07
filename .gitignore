@@ -3,5 +3,11 @@ dist/
 client/dist/
 server/dist/
 .env
-.env.local
+.env.*
+!.env.example
+cookies.txt
+*.pem
+*.key
 *.tsbuildinfo
+uploads/
+server/uploads/
