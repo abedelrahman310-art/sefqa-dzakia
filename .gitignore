@@ -1,13 +1,61 @@
+﻿# ─── Python ───
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+.pytest_cache/
+.coverage
+htmlcov/
+*.sqlite3
+db.sqlite3
+*.log
+
+# ─── Django ───
+media/
+staticfiles/
+local_settings.py
+
+# ─── Node ───
 node_modules/
 dist/
-client/dist/
-server/dist/
+build/
+.pnpm-store/
+*.tsbuildinfo
+
+# ─── Env & Secrets ───
 .env
 .env.*
 !.env.example
-cookies.txt
 *.pem
 *.key
-*.tsbuildinfo
-uploads/
-server/uploads/
+credentials.json
+credentials.*
+secrets/
+.clario/
+.claude/settings.local.json
+
+# ─── IDE ───
+.vscode/
+.idea/
+*.swp
+*.swo
+.cursor/
+*.code-workspace
+
+# ─── OS ───
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ─── Project specific ───
+scratch/
+*.bak
+git-backup-*.txt
+git-diff-backup-*.txt
+
+# ─── Security ───
+cookies.txt
+*.cookies
+session.txt
