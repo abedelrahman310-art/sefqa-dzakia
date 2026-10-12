@@ -59,3 +59,19 @@ git-diff-backup-*.txt
 cookies.txt
 *.cookies
 session.txt
+
+# ─── AI Tools (Clario, Copilot, etc.) ───
+.mcp.json
+.clario/
+.claude/
+AGENT.md
+CLAUDE.md
+.windsurfrules
+.github/copilot-instructions.md
+.cursor/
+
+# ─── Evidence (يمكن commit يدوياً) ───
+# client/docs/evidence/  ← معطّل مؤقتاً
+
+# ─── Git backups ───
+git-*.txt
