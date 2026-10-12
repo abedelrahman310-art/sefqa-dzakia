@@ -1,0 +1,43 @@
+/* Raw values — لا تستخدم مباشرة في المكونات */
+:root {
+  /* Ink (النصوص) */
+  --ink-900: #0A2540;
+  --ink-700: #1E3A5F;
+  --ink-500: #4A5F7A;
+  --ink-300: #8B9BB0;
+  --ink-100: #D4DCE4;
+
+  /* Paper (الخلفيات) */
+  --paper-50: #FAFAF7;
+  --paper-100: #F5F4F0;
+  --paper-200: #EDEBE5;
+
+  /* Sepia (للمتعامل) */
+  --sepia-900: #3D2817;
+  --sepia-700: #6B4A2F;
+  --sepia-500: #8B7355;
+  --sepia-300: #B8A08A;
+
+  /* Stamp Green (للمصلحة) */
+  --stamp-green-900: #0F2419;
+  --stamp-green-700: #1B4332;
+  --stamp-green-500: #2D6A4F;
+  --stamp-green-300: #74C69D;
+
+  /* Official (للإدارة) */
+  --official-900: #0A1F33;
+  --official-700: #0A2540;
+  --official-500: #1E5A8E;
+  --official-300: #7BA7D0;
+
+  /* Status colors */
+  --stamp-red-700: #8B1A1A;
+  --stamp-red-500: #B02A2A;
+  --stamp-gold-700: #8B6914;
+  --stamp-gold-500: #B8860B;
+  --stamp-blue-700: #1A3A5C;
+
+  /* Neutral */
+  --white: #FFFFFF;
+  --black: #000000;
+}

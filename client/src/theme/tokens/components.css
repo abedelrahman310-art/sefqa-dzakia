@@ -1,0 +1,51 @@
+/* Component tokens */
+:root {
+  /* Button */
+  --button-bg:              var(--portal-primary);
+  --button-bg-hover:        var(--portal-primary-dark);
+  --button-fg:              var(--white);
+  --button-border:          transparent;
+  --button-radius:          4px;
+  --button-shadow:          none;
+
+  /* Card */
+  --card-bg:                var(--color-bg-elevated);
+  --card-border:            1px solid var(--color-border-subtle);
+  --card-radius:            4px;
+  --card-shadow:            none;
+  --card-padding:           20px;
+
+  /* Input */
+  --input-bg:               var(--white);
+  --input-border:           1px solid var(--color-border-strong);
+  --input-focus-border:     var(--portal-primary);
+  --input-radius:           4px;
+
+  /* Badge */
+  --badge-radius:           2px;
+  --badge-padding:          2px 8px;
+
+  /* Sidebar */
+  --sidebar-bg:             var(--color-bg-elevated);
+  --sidebar-border:         1px solid var(--color-border-subtle);
+  --sidebar-active-bg:      color-mix(in srgb, var(--portal-primary) 8%, transparent);
+  --sidebar-active-border:  3px solid var(--portal-primary);
+  --sidebar-active-fg:      var(--portal-primary);
+  --sidebar-fg:             var(--color-text-secondary);
+  --sidebar-hover-bg:       var(--color-bg-subtle);
+
+  /* Header */
+  --topbar-bg:              var(--color-bg-elevated);
+  --topbar-border:          1px solid var(--color-border-subtle);
+  --topbar-height:          64px;
+
+  /* KPI Card */
+  --kpi-border:             1px solid var(--color-border-subtle);
+  --kpi-radius:             4px;
+  --kpi-value-font:         var(--font-mono);
+
+  /* Table */
+  --table-header-bg:        var(--color-bg-subtle);
+  --table-row-border:       1px solid var(--color-border-subtle);
+  --table-row-hover:        var(--color-bg-subtle);
+}
