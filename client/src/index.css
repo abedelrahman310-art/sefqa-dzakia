@@ -1,3 +1,133 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+
+    /* Official Ledger Design System Tokens */
+    /* Paper — الخلفيات */
+    --paper-50:  #FAFAF7;   /* خلفية رسمية */
+    --paper-100: #F5F4F0;
+    --paper-200: #EDEBE5;
+    
+    /* Ink — النصوص */
+    --ink-900: #0A2540;     /* كحلي عميق — النص الأساسي */
+    --ink-700: #1E3A5F;
+    --ink-500: #4A5F7A;
+    --ink-300: #8B9BB0;
+    --ink-100: #D4DCE4;
+    
+    /* Stamp Green — الأخضر الرسمي (الختم) */
+    --stamp-green-900: #0F2419;
+    --stamp-green-700: #1B4332;   /* ← الأساسي */
+    --stamp-green-500: #2D6A4F;
+    --stamp-green-300: #74C69D;
+    
+    /* Gold — للإسناد الرسمي فقط */
+    --stamp-gold-700: #8B6914;
+    --stamp-gold-500: #B8860B;
+
+    /* Navy - Primary */
+    --navy-50: 216 100% 98%;
+    --navy-100: 214 32% 91%;
+    --navy-500: 215 25% 27%;
+    --navy-700: 215 32% 17%;
+    --navy-900: 217 33% 10%;
+
+    /* Emerald - Secondary */
+    --emerald-50: 160 84% 96%;
+    --emerald-100: 160 84% 90%;
+    --emerald-500: 160 84% 39%;
+    --emerald-700: 160 84% 29%;
+    --emerald-900: 160 84% 19%;
+
+    /* Gold - Accent */
+    --gold-50: 45 100% 96%;
+    --gold-100: 45 100% 90%;
+    --gold-500: 45 93% 47%;
+    --gold-700: 45 93% 37%;
+    --gold-900: 45 93% 27%;
+
+    /* Algerian National Flag Tokens */
+    --flag-green: 153 100% 19%;
+    --flag-white: 0 0% 100%;
+    --flag-red: 349 86% 44%;
+
+    /* Authority Dashboard Design Tokens */
+    --auth-navy: #12314d;
+    --auth-navy2: #265d85;
+    --auth-emerald: #0d7c6c;
+    --auth-emerald2: #27aa92;
+    --auth-gold: #bb862a;
+    --auth-gold2: #d4aa50;
+    --auth-red: #963c47;
+    --auth-red2: #bd5962;
+    --auth-bg: #f4f6f8;
+    --auth-card: #ffffff;
+    --auth-line: #dfe5ea;
+    --auth-text: #17212b;
+    --auth-muted: #65717c;
+
+    --primary: var(--navy-500);
+    --primary-foreground: var(--navy-50);
+
+    --secondary: var(--emerald-500);
+    --secondary-foreground: var(--emerald-50);
+
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    --accent: var(--gold-500);
+    --accent-foreground: var(--gold-900);
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: var(--navy-500);
+
+    --radius: 0.5rem;
+
+    /* Breakpoints موسّعة لـ 4K */
+    --breakpoint-3xl: 1920px;   /* Full HD+ */
+    --breakpoint-4xl: 2560px;   /* QHD / 2K */
+    --breakpoint-5xl: 3840px;   /* 4K UHD */
+
+    /* Container widths موسّعة */
+    --container-8xl: 1440px;    /* default max */
+    --container-9xl: 1920px;    /* 3xl */
+    --container-10xl: 2560px;   /* 4xl */
+    --container-11xl: 3000px;   /* 5xl / 4K */
+
+    /* Fluid type scale */
+    --fs-xs:     clamp(0.75rem, 0.7rem + 0.15vw, 0.875rem);
+    --fs-sm:     clamp(0.875rem, 0.8rem + 0.2vw, 1rem);
+    --fs-base:   clamp(1rem, 0.9rem + 0.3vw, 1.25rem);
+    --fs-lg:     clamp(1.125rem, 1rem + 0.4vw, 1.5rem);
+    --fs-xl:     clamp(1.25rem, 1.1rem + 0.5vw, 1.75rem);
+    --fs-2xl:    clamp(1.5rem, 1.2rem + 0.8vw, 2.25rem);
+    --fs-3xl:    clamp(1.875rem, 1.5rem + 1.2vw, 3rem);
+    --fs-4xl:    clamp(2.25rem, 1.8rem + 1.8vw, 4rem);
+    --fs-5xl:    clamp(2.75rem, 2rem + 2.5vw, 5rem);
+    --fs-6xl:    clamp(3.5rem, 2.5rem + 3.5vw, 6.5rem);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}

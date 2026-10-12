@@ -14,9 +14,23 @@ module.exports = {
       padding: '2rem',
       screens: {
         '2xl': '1400px',
+        '3xl': '1920px',
+        '4xl': '2560px',
+        '5xl': '3840px',
       },
     },
     extend: {
+      screens: {
+        '3xl': '1920px',
+        '4xl': '2560px',
+        '5xl': '3840px',
+      },
+      maxWidth: {
+        '8xl': '1440px',
+        '9xl': '1920px',
+        '10xl': '2560px',
+        '11xl': '3000px',
+      },
       fontFamily: {
         sans: ['Cairo', 'sans-serif'],
       },
