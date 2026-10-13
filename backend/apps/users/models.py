@@ -64,3 +64,62 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return f"{self.email} ({self.get_role_display()})"
+
+
+class OperatorProfile(models.Model):
+    """
+    الملف المهني للمتعامل الاقتصادي.
+    يحفظ: القطاع، الولايات المتاحة، القدرة المالية.
+    """
+    
+    user = models.OneToOneField(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name="operator_profile",
+    )
+    
+    # القطاع الرئيسي
+    sector = models.CharField(
+        max_length=20,
+        blank=True,
+        choices=[
+            ("works", "الأشغال العمومية"),
+            ("supplies", "اللوازم"),
+            ("services", "الخدمات"),
+            ("studies", "الدراسات"),
+            ("any", "متعدد القطاعات"),
+        ],
+        default="any",
+    )
+    
+    # الولايات المتاحة (JSON list)
+    available_wilayas = models.JSONField(
+        default=list,
+        blank=True,
+        help_text="قائمة رموز الولايات المتاحة (فارغ = كل الولايات)",
+    )
+    
+    # القدرة المالية
+    max_capacity = models.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        help_text="أقصى مبلغ يمكن للمؤسسة تنفيذه (دج)",
+    )
+    
+    # الخبرة
+    years_of_experience = models.PositiveIntegerField(default=0)
+    employee_count = models.PositiveIntegerField(default=0)
+    
+    # Metadata
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = "ملف المتعامل الاقتصادي"
+        verbose_name_plural = "ملفات المتعاملين الاقتصاديين"
+    
+    def __str__(self):
+        return f"{self.user.email} - {self.get_sector_display()}"
+
