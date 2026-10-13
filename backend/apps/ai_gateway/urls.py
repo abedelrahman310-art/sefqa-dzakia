@@ -10,6 +10,7 @@ from .views_admin import (
     AIHealthView,
     AuthorityInsightsView,
     PriceEstimateView,
+    OperatorRecommendationsView,
 )
 
 urlpatterns = [
@@ -29,5 +30,8 @@ urlpatterns = [
 
     # ─── Authority Portal (بوابة المصلحة المتعاقدة) ──────────────────────
     path("authority/insights/", AuthorityInsightsView.as_view(), name="ai-authority-insights"),
+
+    # ─── Operator Portal (بوابة المتعامل الاقتصادي) ───────────────────────
+    path("operator/recommendations/", OperatorRecommendationsView.as_view(), name="ai-operator-recommendations"),
 ]
 

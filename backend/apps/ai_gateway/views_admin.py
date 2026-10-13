@@ -14,6 +14,7 @@ from .serializers import (
     SmartAlertsSerializer,
     PriceEstimateRequestSerializer,
 )
+from rest_framework.permissions import IsAuthenticated
 from .permissions import IsAdminCenter, IsAuthorityOrAdmin
 from .throttles import AIChatThrottle, AIInsightsThrottle
 from .services.central_insights import generate_central_insights, generate_authority_insights
@@ -288,4 +289,48 @@ class PriceEstimateView(APIView):
             return Response({
                 "detail": "تعذر إتمام التقدير، حاول لاحقاً",
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class OperatorRecommendationsView(APIView):
+    """
+    GET /api/ai/operator/recommendations/
+    توصيات ذكية للفرص للمتعامل الحالي
+    """
+    permission_classes = [IsAuthenticated]
+    throttle_classes = [AIInsightsThrottle]
+    
+    def get(self, request):
+        # تحقق من الدور
+        if request.user.role != "operator":
+            return Response(
+                {"detail": "هذه الميزة متاحة للمتعاملين الاقتصاديين فقط"},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        
+        try:
+            limit = int(request.query_params.get("limit", 10))
+        except (ValueError, TypeError):
+            limit = 10
+        limit = min(max(limit, 1), 50)
+        
+        from .services.operator_matcher import recommend_tenders
+        
+        try:
+            recommendations = recommend_tenders(
+                operator=request.user,
+                limit=limit,
+            )
+            return Response({
+                "recommendations": recommendations,
+                "count": len(recommendations),
+                "is_advisory": True,
+                "human_verification_required": True,
+            })
+        except Exception as e:
+            logger.exception("Recommendations error")
+            return Response(
+                {"detail": "تعذر جلب التوصيات، حاول لاحقاً"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
 
