@@ -113,3 +113,44 @@ export interface ChatResponse {
   is_advisory: boolean;
   human_verification_required: boolean;
 }
+
+export interface PriceEstimateRequest {
+  template_type: "works" | "supplies" | "services" | "studies";
+  category?: string;
+  description?: string;
+  quantity?: number;
+  unit?: string;
+  wilaya?: string;
+}
+
+export interface PriceEstimateReference {
+  wilaya: string;
+  unit_price: number;
+  year: number;
+}
+
+export interface PriceEstimateResponse {
+  estimated_min: number;
+  estimated_max: number;
+  estimated_avg: number;
+  currency: "DZD";
+  template_type: string;
+  template_type_ar: string;
+  category: string;
+  subcategory?: string;
+  unit: string;
+  unit_price: number;
+  quantity: number;
+  wilaya: string;
+  wilaya_name: { ar: string; fr: string };
+  confidence: number;
+  confidence_level: "high" | "medium" | "low";
+  margin_percent: number;
+  references?: PriceEstimateReference[];
+  source: string;
+  last_updated?: string;
+  is_advisory: boolean;
+  human_verification_required: boolean;
+  disclaimer?: string;
+}
+

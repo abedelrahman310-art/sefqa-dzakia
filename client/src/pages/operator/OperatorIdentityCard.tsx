@@ -47,7 +47,7 @@ export function OperatorIdentityCard() {
   // Derive localized wilaya name if available
   let wilayaName = '';
   if (profile?.wilayaCode) {
-    const foundWilaya = REGISTRY_69W.find((w) => w.code === profile.wilayaCode);
+    const foundWilaya = REGISTRY_69W.units.find((w) => w.code === profile.wilayaCode);
     if (foundWilaya) {
       wilayaName = lang === 'ar' ? foundWilaya.nameAr : foundWilaya.nameFr;
     }

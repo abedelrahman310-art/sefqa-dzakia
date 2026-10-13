@@ -7,7 +7,12 @@ import type {
   SmartAlertsResponse,
   AIHealthResponse,
   ChatResponse,
+  PriceEstimateRequest,
+  PriceEstimateResponse,
 } from '../types';
+
+export const priceEstimate = (payload: PriceEstimateRequest): Promise<PriceEstimateResponse> =>
+  api.post<PriceEstimateResponse>('/ai/price-estimate/', payload).then((r) => r.data);
 
 export const aiApi = {
   // Insights
@@ -42,4 +47,8 @@ export const aiApi = {
   // AI Health Check
   getHealth: (): Promise<AIHealthResponse> =>
     api.get('/ai/health/').then((r) => r.data),
+
+  // Price Estimate (المساعد الذكي لتقدير الميزانية)
+  priceEstimate,
 };
+

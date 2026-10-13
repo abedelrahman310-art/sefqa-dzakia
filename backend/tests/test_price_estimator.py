@@ -33,7 +33,7 @@ def api_client():
 def authority_user(db):
     return CustomUser.objects.create_user(
         email="test_authority@safaqat.dz",
-        password="TestAuthPass123!",
+        password="auth_user_pass_2026",
         role="authority",
         organization_name="مديرية التجهيزات العمومية لولاية الجزائر",
     )
@@ -43,10 +43,11 @@ def authority_user(db):
 def operator_user(db):
     return CustomUser.objects.create_user(
         email="test_operator@safaqat.dz",
-        password="TestOpPass123!",
+        password="oper_user_pass_2026",
         role="operator",
         organization_name="شركة المقاولات والأشغال الحديثة",
     )
+
 
 
 @pytest.mark.django_db

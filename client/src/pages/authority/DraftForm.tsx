@@ -1,23 +1,50 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useI18n } from '@/i18n';
 import { useLocation } from 'wouter';
+import { useAuth } from '@/components/auth/AuthProvider';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { toast } from 'sonner';
 import { FileText, ArrowRight, ArrowLeft, Upload, FileCheck, Send, AlertCircle } from 'lucide-react';
+import { usePriceEstimate } from '@/features/ai/hooks/useAI';
+import { AIPriceAssistant } from '@/features/ai/components/AIPriceAssistant';
+import { ALGERIA_69_WILAYAS } from '@/lib/wilayas';
 
 export function DraftForm({ id }: { id?: string }) {
   const { t, dir } = useI18n();
   const [, setLocation] = useLocation();
+  const { user } = useAuth();
+  const defaultWilaya = (user as any)?.wilaya || '16';
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [templateType, setTemplateType] = useState<'works' | 'supplies' | 'services' | 'studies'>('works');
+  const [wilaya, setWilaya] = useState<string>(defaultWilaya);
   const [budget, setBudget] = useState('');
+  const [showPriceAssistant, setShowPriceAssistant] = useState(true);
   const [loading, setLoading] = useState(id ? true : false);
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
   const [status, setStatus] = useState<'draft' | 'published'>('draft');
   const [hasDoc, setHasDoc] = useState(false);
+
+  // Hook لتقدير الميزانية استرشادياً
+  const priceEstimatePayload = useMemo(() => {
+    if (!description || description.trim().length < 10) return null;
+    return {
+      template_type: templateType,
+      description: description.trim(),
+      wilaya: wilaya || defaultWilaya,
+    };
+  }, [templateType, description, wilaya, defaultWilaya]);
+
+  const {
+    estimate,
+    isLoading: isEstimating,
+    error: priceError,
+    refetch: refetchPrice,
+  } = usePriceEstimate(priceEstimatePayload);
 
   useEffect(() => {
     if (id) {
@@ -31,6 +58,8 @@ export function DraftForm({ id }: { id?: string }) {
             setTitle(data.draft.title);
             setDescription(data.draft.description);
             setBudget(data.draft.estimatedBudget || '');
+            if (data.draft.templateType) setTemplateType(data.draft.templateType);
+            if (data.draft.wilaya) setWilaya(data.draft.wilaya);
             setStatus(data.draft.status);
             setHasDoc(!!data.draft.documentPath);
           }
@@ -41,6 +70,13 @@ export function DraftForm({ id }: { id?: string }) {
         .finally(() => setLoading(false));
     }
   }, [id, setLocation]);
+
+  const handleDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setDescription(e.target.value);
+    if (!showPriceAssistant) {
+      setShowPriceAssistant(true);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -69,9 +105,12 @@ export function DraftForm({ id }: { id?: string }) {
         body: JSON.stringify({
           title,
           description,
+          templateType,
+          wilaya,
           estimatedBudget: budget || undefined,
         }),
       });
+
 
       if (!res.ok) {
         throw new Error('Failed to save');
@@ -193,29 +232,90 @@ export function DraftForm({ id }: { id?: string }) {
             </span>
           </div>
 
+          {/* Template Type & Wilaya Selection (التحسين 1 و 2) */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Template Type (القالب / نوع الصفقة) */}
+            <div className="space-y-2 text-start">
+              <label className="text-sm font-bold text-navy-900 block">
+                {t('ai.price_template')} <span className="text-destructive">*</span>
+              </label>
+              <select
+                value={templateType}
+                onChange={(e) => setTemplateType(e.target.value as any)}
+                disabled={status === 'published'}
+                className="flex h-10 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <option value="works">{t('ai.price_template_works')}</option>
+                <option value="supplies">{t('ai.price_template_supplies')}</option>
+                <option value="services">{t('ai.price_template_services')}</option>
+                <option value="studies">{t('ai.price_template_studies')}</option>
+              </select>
+              <span className="text-[11px] text-muted-foreground block">
+                نوع الصفقة وفق المادة 17 من القانون 23-12.
+              </span>
+            </div>
+
+            {/* Wilaya (مكان التنفيذ - 69 ولاية) */}
+            <div className="space-y-2 text-start">
+              <label className="text-sm font-bold text-navy-900 block">
+                {t('ai.price_wilaya')} <span className="text-destructive">*</span>
+              </label>
+              <select
+                value={wilaya}
+                onChange={(e) => setWilaya(e.target.value)}
+                disabled={status === 'published'}
+                className="flex h-10 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {ALGERIA_69_WILAYAS.map((w) => (
+                  <option key={w.code} value={w.code}>
+                    {w.code} - {w.ar} ({w.fr})
+                  </option>
+                ))}
+              </select>
+              <span className="text-[11px] text-muted-foreground block">
+                التقسيم الإداري الوطني (69 ولاية لسنة 2026).
+              </span>
+            </div>
+          </div>
+
           {/* Description */}
-          <div className="space-y-2">
+          <div className="space-y-2 text-start">
             <label className="text-sm font-bold text-navy-900 block">
               {t('drafts.field.desc')} <span className="text-destructive">*</span>
             </label>
             <textarea
               className="flex min-h-[120px] w-full rounded-xl border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              onChange={handleDescriptionChange}
               required
               minLength={5}
               maxLength={2000}
               rows={4}
               disabled={status === 'published'}
-              placeholder="صف موضوع الصفقة وشروط التأهيل الأساسية..."
+              placeholder="صف موضوع الصفقة والكميات... يقوم الذكاء الاصطناعي بتقدير الميزانية استرشادياً"
             />
             <span className="text-[11px] text-muted-foreground block">
               وصف تفصيلي لموضوع الحاجة والأهداف (5 أحرف على الأقل).
             </span>
           </div>
 
+          {/* ✨ AI Price Assistant يظهر تلقائياً أثناء كتابة الوصف */}
+          {description.trim().length >= 10 && showPriceAssistant && (
+            <AIPriceAssistant
+              estimate={estimate}
+              isLoading={isEstimating}
+              error={priceError}
+              onRefetch={refetchPrice}
+              onUseEstimate={(avg) => {
+                setBudget(String(avg));
+                toast.success(t('ai.price_applied'));
+              }}
+              onDismiss={() => setShowPriceAssistant(false)}
+            />
+          )}
+
           {/* Budget */}
-          <div className="space-y-2">
+          <div className="space-y-2 text-start">
             <label className="text-sm font-bold text-navy-900 block">
               {t('drafts.field.budget')}
             </label>
@@ -226,12 +326,13 @@ export function DraftForm({ id }: { id?: string }) {
               onChange={(e) => setBudget(e.target.value)}
               disabled={status === 'published'}
               placeholder="مثال: 1500000"
-              className="rounded-xl font-mono"
+              className="rounded-xl font-mono tabular-nums"
             />
             <span className="text-[11px] text-muted-foreground block">
-              الميزانية التقديرية بالدينار الجزائري (دج) — اختياري.
+              الميزانية التقديرية بالدينار الجزائري (دج) — اختياري أو يُملأ تلقائياً من المساعد الذكي.
             </span>
           </div>
+
 
           {/* Document Section */}
           {id && (

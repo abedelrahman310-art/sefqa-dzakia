@@ -1,7 +1,12 @@
+import { useState, useEffect, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { aiApi } from '../api/ai';
 import { toast } from 'sonner';
-import type { AIInsightFilters } from '../types';
+import type {
+  AIInsightFilters,
+  PriceEstimateRequest,
+  PriceEstimateResponse,
+} from '../types';
 
 export const useInsights = (params: AIInsightFilters = {}) =>
   useQuery({
@@ -76,3 +81,96 @@ export const useAIHealth = () =>
     queryFn: aiApi.getHealth,
     staleTime: 300000, // 5 دقائق
   });
+
+/**
+ * Hook لتقدير الميزانية المرجعية تلقائياً مع Debounce وزر تحديث فوري
+ */
+export function usePriceEstimate(
+  payload: PriceEstimateRequest | null,
+  debounceMs: number = 800
+) {
+  const [debouncedPayload, setDebouncedPayload] = useState<PriceEstimateRequest | null>(payload);
+  const [estimate, setEstimate] = useState<PriceEstimateResponse | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [fetchTrigger, setFetchTrigger] = useState(0);
+
+  // Debounce effect
+  useEffect(() => {
+    if (!payload) {
+      setEstimate(null);
+      setError(null);
+      setDebouncedPayload(null);
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      setDebouncedPayload(payload);
+    }, debounceMs);
+
+    return () => clearTimeout(timer);
+  }, [
+    payload?.template_type,
+    payload?.description,
+    payload?.category,
+    payload?.quantity,
+    payload?.unit,
+    payload?.wilaya,
+    debounceMs,
+  ]);
+
+  // Fetch logic
+  const fetchEstimate = useCallback((targetPayload: PriceEstimateRequest) => {
+    if (!targetPayload.description && !targetPayload.category) {
+      setEstimate(null);
+      return () => {};
+    }
+
+    let cancelled = false;
+    setIsLoading(true);
+    setError(null);
+
+    aiApi
+      .priceEstimate(targetPayload)
+      .then((data) => {
+        if (cancelled) return;
+        setEstimate(data);
+        setIsLoading(false);
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        const status = err?.response?.status;
+        if (status === 404) {
+          setError('no_match');
+        } else if (status === 400) {
+          setError('invalid_input');
+        } else {
+          setError('error');
+        }
+        setEstimate(null);
+        setIsLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Effect to trigger fetch when debounced payload or manual trigger changes
+  useEffect(() => {
+    if (!debouncedPayload) return;
+    const cancel = fetchEstimate(debouncedPayload);
+    return cancel;
+  }, [debouncedPayload, fetchEstimate, fetchTrigger]);
+
+  // Manual immediate refetch (التحسين 4)
+  const refetch = useCallback(() => {
+    if (payload) {
+      setDebouncedPayload(payload);
+      setFetchTrigger((c) => c + 1);
+    }
+  }, [payload]);
+
+  return { estimate, isLoading, error, refetch };
+}
+
