@@ -154,3 +154,29 @@ export interface PriceEstimateResponse {
   disclaimer?: string;
 }
 
+export interface TenderRecommendation {
+  tender_id: string;
+  reference: string;
+  title: string;
+  match_score: number;
+  match_level: 'excellent' | 'good' | 'fair' | 'low';
+  score_breakdown: {
+    sector: number;
+    wilaya: number;
+    budget: number;
+    deadline: number;
+    experience: number;
+  };
+  reasons: string[];
+  warnings: string[];
+  is_advisory: boolean;
+}
+
+export interface RecommendationsResponse {
+  recommendations: TenderRecommendation[];
+  count: number;
+  is_advisory: boolean;
+  human_verification_required: boolean;
+}
+
+

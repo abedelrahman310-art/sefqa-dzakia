@@ -946,6 +946,24 @@ export const ar = {
   'ai.price_template_supplies': 'اللوازم',
   'ai.price_template_services': 'الخدمات',
   'ai.price_template_studies': 'الدراسات',
+
+  // AI Operator Recommendations
+  'ai.rec_title': 'فرص موصى بها لك',
+  'ai.rec_advisory': 'استشاري فقط',
+  'ai.rec_based_on': 'بناءً على ملفك المهني:',
+  'ai.rec_sector': 'القطاع',
+  'ai.rec_wilayas': 'الولايات',
+  'ai.rec_match': 'مطابقة',
+  'ai.rec_score_excellent': 'مطابقة ممتازة',
+  'ai.rec_score_good': 'مطابقة جيدة',
+  'ai.rec_score_fair': 'مطابقة متوسطة',
+  'ai.rec_score_low': 'مطابقة ضعيفة',
+  'ai.rec_view_details': 'عرض التفاصيل',
+  'ai.rec_view_all': 'عرض كل الفرص',
+  'ai.rec_empty': 'لا توجد توصيات حالياً. أكمل ملفك المهني.',
+  'ai.rec_error': 'تعذر جلب التوصيات',
+  'ai.rec_reasons': 'أسباب التوصية:',
+  'ai.rec_warnings': 'تحذيرات:',
 };
 
 export type TranslationKey = keyof typeof ar;

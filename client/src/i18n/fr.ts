@@ -947,5 +947,23 @@ export const fr: Record<TranslationKey, string> = {
   'ai.price_template_supplies': 'Fournitures',
   'ai.price_template_services': 'Services',
   'ai.price_template_studies': 'Études',
+
+  // AI Operator Recommendations
+  'ai.rec_title': 'Opportunités recommandées pour vous',
+  'ai.rec_advisory': 'Consultatif uniquement',
+  'ai.rec_based_on': 'Basé sur votre profil professionnel :',
+  'ai.rec_sector': 'Secteur',
+  'ai.rec_wilayas': 'Wilayas',
+  'ai.rec_match': 'Correspondance',
+  'ai.rec_score_excellent': 'Excellente correspondance',
+  'ai.rec_score_good': 'Bonne correspondance',
+  'ai.rec_score_fair': 'Correspondance moyenne',
+  'ai.rec_score_low': 'Faible correspondance',
+  'ai.rec_view_details': 'Voir les détails',
+  'ai.rec_view_all': 'Voir toutes les opportunités',
+  'ai.rec_empty': 'Aucune recommandation pour le moment. Complétez votre profil.',
+  'ai.rec_error': 'Impossible de charger les recommandations',
+  'ai.rec_reasons': 'Raisons de la recommandation :',
+  'ai.rec_warnings': 'Avertissements :',
 };
 

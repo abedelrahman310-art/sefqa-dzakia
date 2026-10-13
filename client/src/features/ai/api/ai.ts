@@ -9,10 +9,16 @@ import type {
   ChatResponse,
   PriceEstimateRequest,
   PriceEstimateResponse,
+  RecommendationsResponse,
 } from '../types';
 
 export const priceEstimate = (payload: PriceEstimateRequest): Promise<PriceEstimateResponse> =>
   api.post<PriceEstimateResponse>('/ai/price-estimate/', payload).then((r) => r.data);
+
+export const operatorRecommendations = (limit = 10): Promise<RecommendationsResponse> =>
+  api
+    .get<RecommendationsResponse>(`/ai/operator/recommendations/?limit=${limit}`)
+    .then((r) => r.data);
 
 export const aiApi = {
   // Insights
@@ -50,5 +56,8 @@ export const aiApi = {
 
   // Price Estimate (المساعد الذكي لتقدير الميزانية)
   priceEstimate,
+
+  // Operator Matching Recommendations (التوصيات الذكية للفرص)
+  operatorRecommendations,
 };
 

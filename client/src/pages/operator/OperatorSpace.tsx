@@ -95,6 +95,7 @@ export function OperatorSpace() {
         {/* Content Views */}
         <Switch>
           <Route path="/operator/deals" component={OperatorOpportunities} />
+          <Route path="/operator/opportunities" component={OperatorOpportunities} />
           <Route path="/operator/profile" component={OperatorProfileView} />
           <Route path="/operator/smart-specs" component={OperatorSmartSpecsView} />
           <Route path="/operator/archive" component={OperatorArchiveView} />

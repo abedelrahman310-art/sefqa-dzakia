@@ -174,3 +174,15 @@ export function usePriceEstimate(
   return { estimate, isLoading, error, refetch };
 }
 
+/**
+ * Hook لجلب التوصيات الذكية لفرص الصفقات للمتعامل الاقتصادي
+ */
+export const useOperatorRecommendations = (limit: number = 10) =>
+  useQuery({
+    queryKey: ['ai-operator-recommendations', limit],
+    queryFn: () => aiApi.operatorRecommendations(limit),
+    refetchInterval: 120000, // كل دقيقتين
+    staleTime: 60000,
+  });
+
+

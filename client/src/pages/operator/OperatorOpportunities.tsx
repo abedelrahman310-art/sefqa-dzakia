@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Search, FileText, Lock, Sparkles, UserCheck } from 'lucide-react';
 import { SuitabilityModal } from './SuitabilityModal';
+import { OperatorRecommendationsCard } from '@/features/ai/components/OperatorRecommendationsCard';
 
 interface Opportunity {
   id: string;
@@ -124,8 +125,17 @@ export function OperatorOpportunities() {
         </div>
       )}
 
+      {/* AI Tender Recommendations Card */}
+      <OperatorRecommendationsCard
+        onSelectTender={(id) => setLocation(`/operator/opportunities/${id}`)}
+        onViewAll={() => {
+          const el = document.getElementById('opportunities-section');
+          el?.scrollIntoView({ behavior: 'smooth' });
+        }}
+      />
+
       {/* Main Panel with Search and Listing */}
-      <section className="bg-card border border-border rounded-2xl p-6 shadow-sm space-y-5">
+      <section id="opportunities-section" className="bg-card border border-border rounded-2xl p-6 shadow-sm space-y-5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-border">
           <div>
             <h3 className="text-lg font-bold text-navy-900">{t('toolbar.pill_deals')}</h3>
