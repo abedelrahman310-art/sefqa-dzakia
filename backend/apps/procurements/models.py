@@ -157,6 +157,7 @@ class OpeningEvent(models.Model):
     سجل وقائع وأحداث جلسة الفتح العلنية (فتح الأظرفة، الإعلان عن الأسعار، التحفظات).
     """
     EVENT_TYPE_CHOICES = (
+        ('session_started', 'افتتاح وبدء الجلسة'),
         ('offer_opened', 'فتح عرض وإعلان السعر'),
         ('offer_rejected', 'إقصاء أو رفض عرض'),
         ('session_paused', 'تعليق مؤقت للجلسة'),
