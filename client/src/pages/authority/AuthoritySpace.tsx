@@ -12,6 +12,8 @@ import { DealCommitteeManager } from './DealCommitteeManager';
 import { PortalNotFound } from '@/components/common/PortalNotFound';
 import { CahierSpecsEditor } from './CahierSpecsEditor';
 import { SpecsIndex } from './SpecsIndex';
+import { AuthoritySessionManager } from '@/features/opening/components/AuthoritySessionManager';
+import { AuthoritySessionControl } from '@/features/opening/components/AuthoritySessionControl';
 import { LogOut } from 'lucide-react';
 
 export function AuthoritySpace() {
@@ -26,10 +28,13 @@ export function AuthoritySpace() {
   const [isDraftsEditActive] = useRoute('/authority/drafts/:id/edit');
   const [isDraftsSpecsActive] = useRoute('/authority/drafts/:id/specs');
   const [isSpecsIndexActive] = useRoute('/authority/specs');
+  const [isOpeningSessionsActive] = useRoute('/authority/opening-sessions');
+  const [isOpeningSessionDetailActive] = useRoute('/authority/opening-sessions/:id');
 
   const overviewCurrent = isOverviewActive || isOverviewAliasActive;
   const draftsCurrent = isDraftsActive || isDraftsNewActive || isDraftsEditActive || isDraftsSpecsActive;
   const specsCurrent = isSpecsIndexActive;
+  const openingSessionsCurrent = isOpeningSessionsActive || isOpeningSessionDetailActive;
 
   const orgName = user?.organizationName || user?.displayName || user?.email || t('authority.preview.account');
 
@@ -162,14 +167,20 @@ export function AuthoritySpace() {
               </a>
             </Link>
 
-            {/* 4. لجنة فتح الأظرفة (مرتبط بصفقة محددة إجرائياً) */}
-            <div
-              className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm text-[#41505c]/50 cursor-not-allowed select-none whitespace-nowrap"
-              title={t('badge.under_development')}
-            >
-              <span>◈</span>
-              <span>{t('authority.preview.nav_opening_committee')}</span>
-            </div>
+            {/* 4. جلسات فتح الأظرفة */}
+            <Link href="/authority/opening-sessions">
+              <a
+                className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm transition-colors whitespace-nowrap ${
+                  openingSessionsCurrent
+                    ? 'text-white bg-[var(--auth-navy)] font-bold shadow-sm'
+                    : 'text-[#41505c] hover:bg-slate-100 hover:text-[var(--auth-navy)]'
+                }`}
+                aria-current={openingSessionsCurrent ? 'page' : undefined}
+              >
+                <span>◈</span>
+                <span>{t('nav.authority.opening_sessions')}</span>
+              </a>
+            </Link>
 
             {/* 5. العروض المستلمة (مرتبط بصفقة محددة إجرائياً) */}
             <div
@@ -239,6 +250,8 @@ export function AuthoritySpace() {
             <Route path="/authority/drafts/:id/specs">
               {(params) => <CahierSpecsEditor draftId={params.id} />}
             </Route>
+            <Route path="/authority/opening-sessions/:id" component={AuthoritySessionControl} />
+            <Route path="/authority/opening-sessions" component={AuthoritySessionManager} />
             <Route path="/authority/specs" component={SpecsIndex} />
             <Route path="/authority/overview" component={AuthorityOverview} />
             <Route path="/authority" component={AuthorityOverview} />

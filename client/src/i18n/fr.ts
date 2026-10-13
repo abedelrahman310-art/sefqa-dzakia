@@ -965,5 +965,26 @@ export const fr: Record<TranslationKey, string> = {
   'ai.rec_error': 'Impossible de charger les recommandations',
   'ai.rec_reasons': 'Raisons de la recommandation :',
   'ai.rec_warnings': 'Avertissements :',
+
+  // Opening Sessions (Séances d'ouverture des plis)
+  'nav.operator.opening_sessions': "Séances d'ouverture",
+  'nav.authority.opening_sessions': "Séances d'ouverture des plis",
+  'opening.title': "Séances d'ouverture des plis",
+  'opening.schedule_new': "Programmer une séance",
+  'opening.live': "🔴 En direct",
+  'opening.scheduled': "Programmée",
+  'opening.ended': "Terminée",
+  'opening.cancelled': "Annulée",
+  'opening.start': "Démarrer la séance",
+  'opening.end': "Clôturer la séance",
+  'opening.open_offer': "Ouvrir les plis",
+  'opening.your_offer': "Votre offre",
+  'opening.competitor': "Offre concurrente",
+  'opening.announced_price': "Prix annoncé",
+  'opening.opened_count': "Plis ouverts",
+  'opening.total_offers': "Total des offres",
+  'opening.privacy_notice': "⚠️ Loi 18-07 : Concernés uniquement",
+  'opening.no_sessions': "Aucune séance pour le moment",
+  'opening.waiting_start': "En attente du début de la séance...",
 };
 

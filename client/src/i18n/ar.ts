@@ -964,6 +964,27 @@ export const ar = {
   'ai.rec_error': 'تعذر جلب التوصيات',
   'ai.rec_reasons': 'أسباب التوصية:',
   'ai.rec_warnings': 'تحذيرات:',
+
+  // Opening Sessions (جلسات فتح الأظرفة)
+  'nav.operator.opening_sessions': 'جلسات الفتح',
+  'nav.authority.opening_sessions': 'جلسات فتح الأظرفة',
+  'opening.title': 'جلسات فتح الأظرفة',
+  'opening.schedule_new': 'برمجة جلسة فتح',
+  'opening.live': '🔴 جارية الآن',
+  'opening.scheduled': 'مبرمجة',
+  'opening.ended': 'منتهية',
+  'opening.cancelled': 'ملغاة',
+  'opening.start': 'ابدأ الجلسة',
+  'opening.end': 'إنهاء الجلسة',
+  'opening.open_offer': 'افتح الأظرفة',
+  'opening.your_offer': 'عرضك',
+  'opening.competitor': 'عرض منافس',
+  'opening.announced_price': 'السعر المُعلن',
+  'opening.opened_count': 'الأظرفة المفتوحة',
+  'opening.total_offers': 'إجمالي العروض',
+  'opening.privacy_notice': '⚠️ قانون 18-07: المعنيون فقط',
+  'opening.no_sessions': 'لا توجد جلسات حالياً',
+  'opening.waiting_start': 'بانتظار بدء الجلسة...',
 };
 
 export type TranslationKey = keyof typeof ar;

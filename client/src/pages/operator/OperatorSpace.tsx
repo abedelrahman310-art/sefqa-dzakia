@@ -1,7 +1,7 @@
 import { useI18n } from '@/i18n';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { AppShell, NavItem } from '@/components/layout/AppShell';
-import { Inbox, Archive, CheckSquare, LogOut, Briefcase, LayoutDashboard, Settings, UserCheck } from 'lucide-react';
+import { Inbox, Archive, CheckSquare, LogOut, Briefcase, LayoutDashboard, Settings, UserCheck, Radio } from 'lucide-react';
 import { Route, Switch } from 'wouter';
 import { OperatorOverview } from './OperatorOverview';
 import { OperatorOpportunities } from './OperatorOpportunities';
@@ -13,6 +13,8 @@ import { OperatorSmartSpecsView } from './OperatorSmartSpecsView';
 import { OperatorArchiveView } from './OperatorArchiveView';
 import { OperatorSettingsView } from './OperatorSettingsView';
 import { RequirementsResponse } from './RequirementsResponse';
+import { OperatorSessionList } from '@/features/opening/components/OperatorSessionList';
+import { OperatorSessionLive } from '@/features/opening/components/OperatorSessionLive';
 import { PortalNotFound } from '@/components/common/PortalNotFound';
 
 export function OperatorSpace() {
@@ -46,6 +48,12 @@ export function OperatorSpace() {
       labelKey: 'nav.operator.offers',
       href: '/operator/offers',
       icon: <Inbox className="w-4 h-4" />,
+    },
+    {
+      id: 'opening_sessions',
+      labelKey: 'nav.operator.opening_sessions',
+      href: '/operator/opening-sessions',
+      icon: <Radio className="w-4 h-4" />,
     },
     {
       id: 'smart_specs',
@@ -94,6 +102,8 @@ export function OperatorSpace() {
 
         {/* Content Views */}
         <Switch>
+          <Route path="/operator/opening-sessions/:id" component={OperatorSessionLive} />
+          <Route path="/operator/opening-sessions" component={OperatorSessionList} />
           <Route path="/operator/deals" component={OperatorOpportunities} />
           <Route path="/operator/opportunities" component={OperatorOpportunities} />
           <Route path="/operator/profile" component={OperatorProfileView} />
