@@ -75,3 +75,7 @@ CLAUDE.md
 
 # ─── Git backups ───
 git-*.txt
+
+# Node server (architectural cleanup pending)
+server/
+
