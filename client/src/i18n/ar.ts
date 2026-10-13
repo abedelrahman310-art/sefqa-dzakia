@@ -911,7 +911,43 @@ export const ar = {
   'ai.suggestions': 'اقتراحات:',
   'ai.health_ok': 'متصل',
   'ai.health_down': 'غير متصل',
+
+  // Price Estimate AI Assistant
+  'ai.price_title': 'المساعد الذكي — تقدير الميزانية',
+  'ai.price_advisory': 'استشاري فقط — القرار النهائي لك',
+  'ai.price_based_on': 'بناءً على:',
+  'ai.price_basis_69': '69 ولاية — السوق المحلي 2026',
+  'ai.price_template': 'القالب',
+  'ai.price_category': 'الفئة',
+  'ai.price_wilaya': 'الولاية',
+  'ai.price_expected': 'الميزانية المتوقعة:',
+  'ai.price_range': 'النطاق:',
+  'ai.price_unit': 'سعر الوحدة:',
+  'ai.price_qty': 'الكمية:',
+  'ai.price_confidence': 'الثقة:',
+  'ai.price_confidence_high': 'عالية',
+  'ai.price_confidence_medium': 'متوسطة',
+  'ai.price_confidence_low': 'منخفضة',
+  'ai.price_use_estimate': 'استخدم هذا التقدير',
+  'ai.price_edit_manually': 'عدّل يدوياً',
+  'ai.price_source': 'المصدر:',
+  'ai.price_thinking': 'المساعد الذكي يحلل...',
+  'ai.price_refresh': 'تحديث التقدير',
+  'ai.price_no_match_title': 'لم نجد تقديراً مطابقاً',
+  'ai.price_no_match_hint': 'جرّب كتابة الفئة بوضوح (مثلاً: "بناء" أو "حواسيب")',
+  'ai.price_error': 'تعذر الحصول على التقدير، حاول لاحقاً',
+  'ai.price_applied': 'تم تطبيق التقدير. يمكنك تعديله يدوياً.',
+  'ai.price_confirm_title': 'تطبيق التقدير في الميزانية',
+  'ai.price_confirm_desc': 'سيتم ملء حقل الميزانية التقديرية بالمبلغ المقترح:',
+  'ai.price_confirm_disclaimer': '⚠️ هذا تقدير استشاري واسترشادي وفق أسعار السوق المحلي والقانون 23-12. يمكنك تعديل المبلغ لاحقاً يدوياً.',
+  'ai.price_confirm_apply': 'تطبيق',
+  'ai.price_confirm_cancel': 'إلغاء',
+  'ai.price_template_works': 'الأشغال العمومية',
+  'ai.price_template_supplies': 'اللوازم',
+  'ai.price_template_services': 'الخدمات',
+  'ai.price_template_studies': 'الدراسات',
 };
 
 export type TranslationKey = keyof typeof ar;
+
 
