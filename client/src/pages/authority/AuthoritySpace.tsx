@@ -14,7 +14,10 @@ import { CahierSpecsEditor } from './CahierSpecsEditor';
 import { SpecsIndex } from './SpecsIndex';
 import { AuthoritySessionManager } from '@/features/opening/components/AuthoritySessionManager';
 import { AuthoritySessionControl } from '@/features/opening/components/AuthoritySessionControl';
-import { Gavel, Inbox, LogOut } from 'lucide-react';
+import { ReportsView } from './ReportsView';
+import { AuditView } from './AuditView';
+import { SettingsView } from './SettingsView';
+import { BarChart3, Shield, Settings as SettingsIcon, Gavel, Inbox, LogOut } from 'lucide-react';
 
 export function AuthoritySpace() {
   const { t, lang, setLang } = useI18n();
@@ -34,6 +37,9 @@ export function AuthoritySpace() {
   const [isCommitteeDetailActive] = useRoute('/authority/opportunities/:id/committee');
   const [isOffersActive] = useRoute('/authority/offers');
   const [isOffersDetailActive] = useRoute('/authority/opportunities/:id/received-offers');
+  const [isReportsActive] = useRoute('/authority/reports');
+  const [isAuditActive] = useRoute('/authority/audit');
+  const [isSettingsActive] = useRoute('/authority/settings');
 
   const overviewCurrent = isOverviewActive || isOverviewAliasActive;
   const draftsCurrent = isDraftsActive || isDraftsNewActive || isDraftsEditActive || isDraftsSpecsActive;
@@ -41,6 +47,9 @@ export function AuthoritySpace() {
   const openingSessionsCurrent = isOpeningSessionsActive || isOpeningSessionDetailActive;
   const committeeCurrent = isCommitteeActive || isCommitteeDetailActive;
   const offersCurrent = isOffersActive || isOffersDetailActive;
+  const reportsCurrent = isReportsActive;
+  const auditCurrent = isAuditActive;
+  const settingsCurrent = isSettingsActive;
 
   const orgName = user?.organizationName || user?.displayName || user?.email || t('authority.preview.account');
 
@@ -233,32 +242,50 @@ export function AuthoritySpace() {
               </a>
             </Link>
 
-            {/* 8. التقارير (غير نشط) */}
-            <div
-              className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm text-[#41505c]/50 cursor-not-allowed select-none whitespace-nowrap"
-              title={t('badge.under_development')}
-            >
-              <span>▥</span>
-              <span>{t('authority.preview.nav_reports')}</span>
-            </div>
+            {/* 8. التقارير */}
+            <Link href="/authority/reports">
+              <a
+                className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm transition-colors whitespace-nowrap ${
+                  reportsCurrent
+                    ? 'text-white bg-[var(--auth-navy)] font-bold shadow-sm'
+                    : 'text-[#41505c] hover:bg-slate-100 hover:text-[var(--auth-navy)]'
+                }`}
+                aria-current={reportsCurrent ? 'page' : undefined}
+              >
+                <BarChart3 className="w-4 h-4 shrink-0" />
+                <span>{t('authority.nav.reports')}</span>
+              </a>
+            </Link>
 
-            {/* 9. سجل التدقيق (غير نشط) */}
-            <div
-              className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm text-[#41505c]/50 cursor-not-allowed select-none whitespace-nowrap"
-              title={t('badge.under_development')}
-            >
-              <span>◌</span>
-              <span>{t('authority.preview.nav_audit_log')}</span>
-            </div>
+            {/* 9. سجل التدقيق */}
+            <Link href="/authority/audit">
+              <a
+                className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm transition-colors whitespace-nowrap ${
+                  auditCurrent
+                    ? 'text-white bg-[var(--auth-navy)] font-bold shadow-sm'
+                    : 'text-[#41505c] hover:bg-slate-100 hover:text-[var(--auth-navy)]'
+                }`}
+                aria-current={auditCurrent ? 'page' : undefined}
+              >
+                <Shield className="w-4 h-4 shrink-0" />
+                <span>{t('authority.nav.audit')}</span>
+              </a>
+            </Link>
 
-            {/* 10. الإعدادات (غير نشط) */}
-            <div
-              className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm text-[#41505c]/50 cursor-not-allowed select-none whitespace-nowrap"
-              title={t('badge.under_development')}
-            >
-              <span>⚙</span>
-              <span>{t('authority.preview.nav_settings')}</span>
-            </div>
+            {/* 10. الإعدادات */}
+            <Link href="/authority/settings">
+              <a
+                className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm transition-colors whitespace-nowrap ${
+                  settingsCurrent
+                    ? 'text-white bg-[var(--auth-navy)] font-bold shadow-sm'
+                    : 'text-[#41505c] hover:bg-slate-100 hover:text-[var(--auth-navy)]'
+                }`}
+                aria-current={settingsCurrent ? 'page' : undefined}
+              >
+                <SettingsIcon className="w-4 h-4 shrink-0" />
+                <span>{t('authority.nav.settings')}</span>
+              </a>
+            </Link>
           </nav>
         </aside>
 
@@ -269,6 +296,9 @@ export function AuthoritySpace() {
             <Route path="/authority/committee" component={DealCommitteeManager} />
             <Route path="/authority/offers" component={ReceivedOffers} />
             <Route path="/authority/evaluation/:tenderId" component={EvaluationWorkspace} />
+            <Route path="/authority/reports" component={ReportsView} />
+            <Route path="/authority/audit" component={AuditView} />
+            <Route path="/authority/settings" component={SettingsView} />
             <Route path="/authority/opportunities/:id/received-offers" component={ReceivedOffers} />
             <Route path="/authority/opportunities/:id/committee" component={DealCommitteeManager} />
             <Route path="/authority/opportunities/:id/opening" component={OpeningSessionView} />

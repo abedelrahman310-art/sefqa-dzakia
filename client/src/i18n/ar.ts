@@ -990,6 +990,20 @@ export const ar = {
   'authority.nav.committee': 'لجنة الصفقات',
   'authority.nav.offers': 'العروض المستلمة',
   'authority.nav.evaluation': 'ورشة التقييم',
+
+  // التقارير، سجل التدقيق، الإعدادات
+  'authority.nav.reports': 'التقارير',
+  'authority.nav.audit': 'سجل التدقيق',
+  'authority.nav.settings': 'الإعدادات',
+  'authority.reports.title': 'التقارير',
+  'authority.reports.subtitle': 'تقارير شهرية وربعية مع توليد AI',
+  'authority.reports.generate_ai': 'توليد تقرير AI',
+  'authority.audit.title': 'سجل التدقيق',
+  'authority.audit.subtitle': 'سجل غير قابل للتعديل (SHA-256)',
+  'authority.audit.verify': 'تحقق من السلامة',
+  'authority.audit.immutable': 'غير قابل للتعديل',
+  'authority.settings.title': 'الإعدادات',
+  'authority.settings.subtitle': 'إعدادات المؤسسة والأمان',
 };
 
 export type TranslationKey = keyof typeof ar;

@@ -991,5 +991,19 @@ export const fr: Record<TranslationKey, string> = {
   'authority.nav.committee': 'Commission des marchés',
   'authority.nav.offers': 'Offres reçues',
   'authority.nav.evaluation': "Espace d'évaluation",
+
+  // Rapports, Journal d'audit, Paramètres
+  'authority.nav.reports': 'Rapports',
+  'authority.nav.audit': "Journal d'audit",
+  'authority.nav.settings': 'Paramètres',
+  'authority.reports.title': 'Rapports',
+  'authority.reports.subtitle': 'Rapports mensuels et trimestriels avec génération IA',
+  'authority.reports.generate_ai': 'Générer un rapport IA',
+  'authority.audit.title': "Journal d'audit",
+  'authority.audit.subtitle': 'Registre infalsifiable (SHA-256)',
+  'authority.audit.verify': "Vérifier l'intégrité",
+  'authority.audit.immutable': 'Non modifiable',
+  'authority.settings.title': 'Paramètres',
+  'authority.settings.subtitle': "Paramètres de l'institution et sécurité",
 };
 
