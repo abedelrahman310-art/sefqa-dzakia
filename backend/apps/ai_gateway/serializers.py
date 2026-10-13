@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import AIInsight, AIConversation, AIMessage
+from .models import AIInsight, AIConversation, AIMessage, TemplateType
 
 
 class AIInsightSerializer(serializers.ModelSerializer):
@@ -139,3 +139,47 @@ class SuspicionItemSerializer(serializers.Serializer):
     deal_ids = serializers.ListField(child=serializers.CharField(), required=False, default=list)
     operator_ids = serializers.ListField(child=serializers.CharField(), required=False, default=list)
     statutory_violation = serializers.CharField(required=False, allow_blank=True)
+
+
+class PriceEstimateRequestSerializer(serializers.Serializer):
+    """
+    Serializer لطلب تقدير السعر المرجعي والميزانية من بيانات السوق المحلي.
+    """
+    template_type = serializers.ChoiceField(
+        choices=TemplateType.choices,
+        required=True,
+    )
+    category = serializers.CharField(
+        max_length=100,
+        required=False,
+        allow_blank=True,
+    )
+    quantity = serializers.FloatField(
+        required=False,
+        min_value=0.01,
+        max_value=1000000,
+    )
+    unit = serializers.CharField(max_length=20, required=False, allow_blank=True)
+    wilaya = serializers.CharField(
+        max_length=2,
+        required=False,
+        min_length=2,
+    )
+    description = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        max_length=1000,
+    )
+
+    def validate_wilaya(self, value):
+        if value and not value.isdigit():
+            raise serializers.ValidationError("رمز الولاية يجب أن يكون رقماً")
+        if value and (int(value) < 1 or int(value) > 69):
+            raise serializers.ValidationError("رمز الولاية يجب أن يكون بين 01 و 69")
+        return value
+
+    def validate(self, data):
+        if not data.get("category") and not data.get("description"):
+            raise serializers.ValidationError("يجب تحديد الفئة أو تقديم وصف تحليلي للصفقة.")
+        return data
+

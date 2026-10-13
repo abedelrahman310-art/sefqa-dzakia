@@ -6,12 +6,13 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 
-from .models import AIInsight
+from .models import AIInsight, MarketPriceReference
 from .serializers import (
     AIInsightSerializer,
     AIInsightResolveSerializer,
     AIChatRequestSerializer,
     SmartAlertsSerializer,
+    PriceEstimateRequestSerializer,
 )
 from .permissions import IsAdminCenter, IsAuthorityOrAdmin
 from .throttles import AIChatThrottle, AIInsightsThrottle
@@ -20,6 +21,10 @@ from .services.suspicion_detector import get_all_suspicions
 from .services.admin_assistant import chat_with_admin
 from .services.smart_alerts import generate_smart_alerts
 from .services.llm_client import get_llm_client
+from .services.price_estimator import (
+    estimate_price,
+    estimate_from_description,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -217,3 +222,70 @@ class AuthorityInsightsView(APIView):
             },
             status=status.HTTP_201_CREATED,
         )
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Price Estimate (تقدير الأسعار المرجعية والميزانية) Views
+# ─────────────────────────────────────────────────────────────────────────────
+
+class PriceEstimateView(APIView):
+    """
+    POST /api/ai/price-estimate/
+    تقدير الميزانية من السوق المحلي
+    """
+    permission_classes = [IsAuthorityOrAdmin]
+    throttle_classes = [AIInsightsThrottle]
+
+    def post(self, request):
+        serializer = PriceEstimateRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        data = serializer.validated_data
+
+        try:
+            # إن وُجد description فقط → استخدم estimate_from_description
+            if data.get("description") and not data.get("category"):
+                result = estimate_from_description(
+                    description=data["description"],
+                    wilaya=data.get("wilaya", "16"),
+                )
+            else:
+                result = estimate_price(
+                    template_type=data["template_type"],
+                    category=data["category"],
+                    quantity=data.get("quantity"),
+                    unit=data.get("unit"),
+                    wilaya=data.get("wilaya", "16"),
+                    description=data.get("description", ""),
+                )
+
+            return Response(result, status=status.HTTP_200_OK)
+
+        except MarketPriceReference.DoesNotExist:
+            # اقتراحات بديلة
+            suggestions = list(
+                MarketPriceReference.objects.filter(
+                    template_type=data["template_type"],
+                    wilaya=data.get("wilaya", "16"),
+                ).values_list("category", flat=True).distinct()[:5]
+            )
+
+            return Response({
+                "detail": "لا توجد أسعار مرجعية لهذه الفئة في هذه الولاية",
+                "suggestion": "جرّب إحدى الفئات التالية:",
+                "available_categories": suggestions,
+            }, status=status.HTTP_404_NOT_FOUND)
+
+        except ValueError as e:
+            return Response({
+                "detail": "تعذر استخراج البيانات من الوصف",
+                "suggestion": "وضّح الفئة والكمية في النص",
+                "error": str(e),
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        except Exception as e:
+            logger.exception("Price estimate error")
+            return Response({
+                "detail": "تعذر إتمام التقدير، حاول لاحقاً",
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+

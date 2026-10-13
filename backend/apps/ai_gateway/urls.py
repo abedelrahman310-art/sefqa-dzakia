@@ -9,12 +9,14 @@ from .views_admin import (
     SmartAlertsView,
     AIHealthView,
     AuthorityInsightsView,
+    PriceEstimateView,
 )
 
 urlpatterns = [
     # ─── الموجود — AI عام ─────────────────────────────────────────────────
     path("compliance-check/", AICheckComplianceView.as_view(), name="ai-compliance-check"),
     path("summarize/", AISummarizeTenderView.as_view(), name="ai-summarize-tender"),
+    path("price-estimate/", PriceEstimateView.as_view(), name="ai-price-estimate"),
 
     # ─── Central Admin (الرقابة الوطنية) ──────────────────────────────────
     path("central/insights/", CentralInsightsView.as_view(), name="ai-central-insights"),
@@ -28,3 +30,4 @@ urlpatterns = [
     # ─── Authority Portal (بوابة المصلحة المتعاقدة) ──────────────────────
     path("authority/insights/", AuthorityInsightsView.as_view(), name="ai-authority-insights"),
 ]
+

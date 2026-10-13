@@ -138,3 +138,63 @@ class AIMessage(models.Model):
 
     def __str__(self):
         return f"[{self.get_role_display()}] {self.content[:40]}..."
+
+
+class TemplateType(models.TextChoices):
+    """أنواع دفاتر الشروط والصفقات وفق أحكام المادة 17 من القانون 23-12"""
+    WORKS = "works", "الأشغال العمومية"
+    SUPPLIES = "supplies", "اللوازم"
+    SERVICES = "services", "الخدمات"
+    STUDIES = "studies", "الدراسات"
+
+
+class MarketPriceReference(models.Model):
+    """أسعار السوق المرجعية على مستوى الولاية لدعم تقدير ميزانيات الصفقات"""
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+
+    # التصنيف والنوع
+    template_type = models.CharField(
+        "نوع الصفقة",
+        max_length=20,
+        choices=TemplateType.choices,
+        db_index=True,
+    )
+    category = models.CharField("الفئة الأساسية", max_length=100, db_index=True)
+    subcategory = models.CharField("الفئة الفرعية", max_length=100, blank=True)
+
+    # الوحدة والسعر (Decimal للحسابات المالية الدقيقة)
+    unit = models.CharField("وحدة القياس", max_length=20)
+    unit_price = models.DecimalField(
+        "السعر الوحدوي المرجعي (دج)",
+        max_digits=14,
+        decimal_places=2,
+    )
+
+    # الموقع الإقليمي (الولايات الـ 69)
+    wilaya = models.CharField("رمز الولاية (01-69)", max_length=2, db_index=True)
+    wilaya_name_ar = models.CharField("اسم الولاية (عربية)", max_length=100)
+    wilaya_name_fr = models.CharField("اسم الولاية (فرنسية)", max_length=100)
+
+    # المصدر والموثوقية
+    source = models.CharField("المصدر الميداني أو الإحصائي", max_length=200)
+    source_date = models.DateField("تاريخ المصدر")
+    sample_size = models.IntegerField("حجم العينة", default=1)
+    confidence = models.FloatField("مستوى الثقة (0.0-1.0)", default=0.7)
+
+    # Metadata
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "سعر مرجعي"
+        verbose_name_plural = "الأسعار المرجعية"
+        unique_together = [["template_type", "category", "unit", "wilaya"]]
+        indexes = [
+            models.Index(fields=["template_type", "wilaya"]),
+            models.Index(fields=["template_type", "category", "wilaya"]),
+        ]
+        ordering = ["template_type", "category", "wilaya"]
+
+    def __str__(self):
+        return f"{self.template_type}/{self.category} @ {self.wilaya}"
