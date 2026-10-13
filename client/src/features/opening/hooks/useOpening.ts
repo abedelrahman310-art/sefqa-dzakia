@@ -90,7 +90,22 @@ export const useEligibleTenders = () =>
 
 export const useDealOffers = (dealId?: string) =>
   useQuery({
-    queryKey: ["deal-offers", dealId],
+    queryKey: ["tender-offers", dealId],
     queryFn: () => openingApi.listOffersForDeal(dealId!),
     enabled: !!dealId,
   });
+
+export const useTenderOffers = (tenderId?: string) =>
+  useQuery({
+    queryKey: ["tender-offers", tenderId],
+    queryFn: () => openingApi.listOffersForDeal(tenderId!),
+    enabled: !!tenderId,
+  });
+
+export const useSessionOffers = (sessionId?: string) =>
+  useQuery({
+    queryKey: ["session-offers", sessionId],
+    queryFn: () => openingApi.listSessionOffers(sessionId!),
+    enabled: !!sessionId,
+  });
+

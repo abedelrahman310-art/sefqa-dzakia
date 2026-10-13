@@ -8,6 +8,7 @@ from .views_opening import (
     SessionStartView,
     SessionOpenOfferView,
     SessionEndView,
+    SessionOffersView,
 )
 
 router = DefaultRouter()
@@ -18,6 +19,7 @@ urlpatterns = [
     path("sessions/", SessionListView.as_view(), name="session-list"),
     path("sessions/schedule/", SessionScheduleView.as_view(), name="session-schedule"),
     path("sessions/<uuid:pk>/", SessionDetailView.as_view(), name="session-detail"),
+    path("sessions/<uuid:pk>/offers/", SessionOffersView.as_view(), name="session-offers"),
     path("sessions/<uuid:pk>/start/", SessionStartView.as_view(), name="session-start"),
     path("sessions/<uuid:pk>/open-offer/", SessionOpenOfferView.as_view(), name="session-open-offer"),
     path("sessions/<uuid:pk>/end/", SessionEndView.as_view(), name="session-end"),

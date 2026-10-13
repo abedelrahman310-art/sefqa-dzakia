@@ -47,4 +47,9 @@ export const openingApi = {
     api
       .get<DealOfferSummary[]>("/bids/offers/", { params: { deal: dealId } })
       .then((r) => r.data),
+
+  listSessionOffers: (sessionId: string) =>
+    api
+      .get<DealOfferSummary[]>(`/procurements/sessions/${sessionId}/offers/`)
+      .then((r) => r.data),
 };

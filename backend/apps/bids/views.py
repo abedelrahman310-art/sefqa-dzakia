@@ -14,12 +14,24 @@ class BidOfferViewSet(viewsets.ModelViewSet):
         if not user.is_authenticated:
             return self.queryset.none()
         if user.role == 'operator':
-            return self.queryset.filter(operator=user)
+            qs = self.queryset.filter(operator=user)
         elif user.role == 'authority':
-            return self.queryset.filter(deal__authority=user)
+            qs = self.queryset.filter(deal__authority=user)
         elif user.role == 'central_admin':
-            return self.queryset
-        return self.queryset.none()
+            qs = self.queryset
+        else:
+            return self.queryset.none()
+
+        params = getattr(self.request, 'query_params', getattr(self.request, 'GET', {}))
+        deal_param = (
+            params.get('deal')
+            or params.get('deal_id')
+            or params.get('tender_id')
+            or params.get('tender')
+        )
+        if deal_param:
+            qs = qs.filter(deal_id=deal_param)
+        return qs
 
     def perform_create(self, serializer):
         user = self.request.user
