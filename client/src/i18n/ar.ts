@@ -985,6 +985,11 @@ export const ar = {
   'opening.privacy_notice': '⚠️ قانون 18-07: المعنيون فقط',
   'opening.no_sessions': 'لا توجد جلسات حالياً',
   'opening.waiting_start': 'بانتظار بدء الجلسة...',
+
+  // الأقسام الجديدة: لجنة الصفقات، العروض المستلمة، ورشة التقييم
+  'authority.nav.committee': 'لجنة الصفقات',
+  'authority.nav.offers': 'العروض المستلمة',
+  'authority.nav.evaluation': 'ورشة التقييم',
 };
 
 export type TranslationKey = keyof typeof ar;

@@ -986,5 +986,10 @@ export const fr: Record<TranslationKey, string> = {
   'opening.privacy_notice': "⚠️ Loi 18-07 : Concernés uniquement",
   'opening.no_sessions': "Aucune séance pour le moment",
   'opening.waiting_start': "En attente du début de la séance...",
+
+  // Nouvelles sections: commission des marchés, offres reçues, espace d'évaluation
+  'authority.nav.committee': 'Commission des marchés',
+  'authority.nav.offers': 'Offres reçues',
+  'authority.nav.evaluation': "Espace d'évaluation",
 };
 

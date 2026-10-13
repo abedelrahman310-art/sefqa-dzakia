@@ -30,7 +30,10 @@ export function ReceivedOffers() {
   const [offersCount, setOffersCount] = useState(0);
 
   useEffect(() => {
-    if (!id) return;
+    if (!id) {
+      setLoading(false);
+      return;
+    }
 
     fetch(`/api/authority/opportunities/${id}/received-offers`)
       .then((res) => {
@@ -58,6 +61,29 @@ export function ReceivedOffers() {
       <div className="py-24 flex flex-col items-center justify-center text-muted-foreground space-y-2">
         <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
         <span className="text-sm">جاري تحميل بيانات الأظرفة المستلمة...</span>
+      </div>
+    );
+  }
+
+  if (!id) {
+    return (
+      <div className="space-y-4 max-w-4xl mx-auto">
+        <div className="p-5 bg-card border border-border rounded-2xl shadow-sm space-y-3">
+          <div className="flex items-center gap-2.5 text-primary font-bold text-base">
+            <Lock className="w-5 h-5" />
+            <span>{t('authority.nav.offers')}</span>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            تُعرض الأظرفة المستلمة والمشفرة لكل صفقة على حدة احتراماً لمبدأ السرية وفق أحكام القانون 23-12. لعرض العروض المستلمة الخاصة بصفقة معينة، يرجى التوجه إلى قائمة الصفقات واختيار الصفقة المطلوبة.
+          </p>
+          <Button
+            variant="default"
+            className="rounded-xl text-xs"
+            onClick={() => setLocation('/authority/drafts')}
+          >
+            الانتقال إلى الصفقات والمسودات
+          </Button>
+        </div>
       </div>
     );
   }

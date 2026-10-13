@@ -14,7 +14,7 @@ import { CahierSpecsEditor } from './CahierSpecsEditor';
 import { SpecsIndex } from './SpecsIndex';
 import { AuthoritySessionManager } from '@/features/opening/components/AuthoritySessionManager';
 import { AuthoritySessionControl } from '@/features/opening/components/AuthoritySessionControl';
-import { LogOut } from 'lucide-react';
+import { Gavel, Inbox, LogOut } from 'lucide-react';
 
 export function AuthoritySpace() {
   const { t, lang, setLang } = useI18n();
@@ -30,11 +30,17 @@ export function AuthoritySpace() {
   const [isSpecsIndexActive] = useRoute('/authority/specs');
   const [isOpeningSessionsActive] = useRoute('/authority/opening-sessions');
   const [isOpeningSessionDetailActive] = useRoute('/authority/opening-sessions/:id');
+  const [isCommitteeActive] = useRoute('/authority/committee');
+  const [isCommitteeDetailActive] = useRoute('/authority/opportunities/:id/committee');
+  const [isOffersActive] = useRoute('/authority/offers');
+  const [isOffersDetailActive] = useRoute('/authority/opportunities/:id/received-offers');
 
   const overviewCurrent = isOverviewActive || isOverviewAliasActive;
   const draftsCurrent = isDraftsActive || isDraftsNewActive || isDraftsEditActive || isDraftsSpecsActive;
   const specsCurrent = isSpecsIndexActive;
   const openingSessionsCurrent = isOpeningSessionsActive || isOpeningSessionDetailActive;
+  const committeeCurrent = isCommitteeActive || isCommitteeDetailActive;
+  const offersCurrent = isOffersActive || isOffersDetailActive;
 
   const orgName = user?.organizationName || user?.displayName || user?.email || t('authority.preview.account');
 
@@ -182,16 +188,37 @@ export function AuthoritySpace() {
               </a>
             </Link>
 
-            {/* 5. العروض المستلمة (مرتبط بصفقة محددة إجرائياً) */}
-            <div
-              className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm text-[#41505c]/50 cursor-not-allowed select-none whitespace-nowrap"
-              title={t('badge.under_development')}
-            >
-              <span>▣</span>
-              <span>{t('authority.preview.nav_received_offers')}</span>
-            </div>
+            {/* 5. لجنة الصفقات */}
+            <Link href="/authority/committee">
+              <a
+                className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm transition-colors whitespace-nowrap ${
+                  committeeCurrent
+                    ? 'text-white bg-[var(--auth-navy)] font-bold shadow-sm'
+                    : 'text-[#41505c] hover:bg-slate-100 hover:text-[var(--auth-navy)]'
+                }`}
+                aria-current={committeeCurrent ? 'page' : undefined}
+              >
+                <Gavel className="w-4 h-4 shrink-0" />
+                <span>{t('authority.nav.committee')}</span>
+              </a>
+            </Link>
 
-            {/* 6. دفتر الشروط وسند */}
+            {/* 6. العروض المستلمة */}
+            <Link href="/authority/offers">
+              <a
+                className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm transition-colors whitespace-nowrap ${
+                  offersCurrent
+                    ? 'text-white bg-[var(--auth-navy)] font-bold shadow-sm'
+                    : 'text-[#41505c] hover:bg-slate-100 hover:text-[var(--auth-navy)]'
+                }`}
+                aria-current={offersCurrent ? 'page' : undefined}
+              >
+                <Inbox className="w-4 h-4 shrink-0" />
+                <span>{t('authority.nav.offers')}</span>
+              </a>
+            </Link>
+
+            {/* 7. دفتر الشروط وسند */}
             <Link href="/authority/specs">
               <a
                 className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm transition-colors whitespace-nowrap ${
@@ -206,7 +233,7 @@ export function AuthoritySpace() {
               </a>
             </Link>
 
-            {/* 7. التقارير (غير نشط) */}
+            {/* 8. التقارير (غير نشط) */}
             <div
               className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm text-[#41505c]/50 cursor-not-allowed select-none whitespace-nowrap"
               title={t('badge.under_development')}
@@ -215,7 +242,7 @@ export function AuthoritySpace() {
               <span>{t('authority.preview.nav_reports')}</span>
             </div>
 
-            {/* 8. سجل التدقيق (غير نشط) */}
+            {/* 9. سجل التدقيق (غير نشط) */}
             <div
               className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm text-[#41505c]/50 cursor-not-allowed select-none whitespace-nowrap"
               title={t('badge.under_development')}
@@ -224,7 +251,7 @@ export function AuthoritySpace() {
               <span>{t('authority.preview.nav_audit_log')}</span>
             </div>
 
-            {/* 9. الإعدادات (غير نشط) */}
+            {/* 10. الإعدادات (غير نشط) */}
             <div
               className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm text-[#41505c]/50 cursor-not-allowed select-none whitespace-nowrap"
               title={t('badge.under_development')}
@@ -239,6 +266,9 @@ export function AuthoritySpace() {
         <main className="min-w-0 p-4 sm:p-6 md:p-8">
           <Switch>
             <Route path="/authority/drafts" component={DraftsList} />
+            <Route path="/authority/committee" component={DealCommitteeManager} />
+            <Route path="/authority/offers" component={ReceivedOffers} />
+            <Route path="/authority/evaluation/:tenderId" component={EvaluationWorkspace} />
             <Route path="/authority/opportunities/:id/received-offers" component={ReceivedOffers} />
             <Route path="/authority/opportunities/:id/committee" component={DealCommitteeManager} />
             <Route path="/authority/opportunities/:id/opening" component={OpeningSessionView} />

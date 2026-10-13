@@ -33,7 +33,8 @@ interface EvaluationOffer {
 }
 
 export function EvaluationWorkspace() {
-  const { id } = useParams<{ id: string }>();
+  const params = useParams<{ id?: string; tenderId?: string }>();
+  const id = params.id || params.tenderId;
   const [, setLocation] = useLocation();
   const { t, dir } = useI18n();
 
@@ -62,7 +63,10 @@ export function EvaluationWorkspace() {
   const ArrowIcon = dir === 'rtl' ? ArrowRight : ArrowLeft;
 
   const loadData = async () => {
-    if (!id) return;
+    if (!id) {
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     setError('');
 
@@ -196,6 +200,29 @@ export function EvaluationWorkspace() {
       <div className="py-24 flex flex-col items-center justify-center text-muted-foreground space-y-2">
         <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
         <span className="text-sm">جاري فتح فضاء فحص وتقييم العروض...</span>
+      </div>
+    );
+  }
+
+  if (!id) {
+    return (
+      <div className="space-y-4 max-w-4xl mx-auto">
+        <div className="p-5 bg-card border border-border rounded-2xl shadow-sm space-y-3">
+          <div className="flex items-center gap-2.5 text-primary font-bold text-base">
+            <FileCheck className="w-5 h-5" />
+            <span>{t('authority.nav.evaluation')}</span>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            تتطلب ورشة فحص وتقييم العروض تحديد الصفقة المستهدفة وفقاً للإجراءات القانونية. يرجى اختيار الصفقة من قائمة الصفقات للبدء في تقييم العروض المقبولة.
+          </p>
+          <Button
+            variant="default"
+            className="rounded-xl text-xs"
+            onClick={() => setLocation('/authority/drafts')}
+          >
+            الانتقال إلى الصفقات والمسودات
+          </Button>
+        </div>
       </div>
     );
   }

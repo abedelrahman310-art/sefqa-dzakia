@@ -47,7 +47,10 @@ export function DealCommitteeManager() {
   const ArrowIcon = dir === 'rtl' ? ArrowRight : ArrowLeft;
 
   const loadMembers = () => {
-    if (!id) return;
+    if (!id) {
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     fetch(`/api/authority/opportunities/${id}/committee/members`)
       .then((res) => {
@@ -131,7 +134,7 @@ export function DealCommitteeManager() {
               variant="ghost"
               size="sm"
               className="text-white hover:bg-white/10 p-1.5 h-auto rounded-lg"
-              onClick={() => setLocation(`/authority/opportunities/${id}/received-offers`)}
+              onClick={() => setLocation(id ? `/authority/opportunities/${id}/received-offers` : '/authority/offers')}
             >
               <ArrowIcon className="w-4 h-4" />
             </Button>
