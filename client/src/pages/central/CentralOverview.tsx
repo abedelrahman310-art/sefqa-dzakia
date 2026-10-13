@@ -1,6 +1,13 @@
 import { useState, useMemo } from 'react';
 import { useI18n } from '@/i18n';
 import {
+  AIInsightsPanel,
+  SuspicionAlerts,
+  SmartKpiBadge,
+  AIHealthBadge,
+  useAlerts,
+} from '@/features/ai';
+import {
   Building,
   TrendingUp,
   AlertTriangle,
@@ -256,6 +263,8 @@ const WILAYAS_LIST = [
 
 export function CentralOverview() {
   const { t } = useI18n();
+  const { data: alertsData } = useAlerts();
+  const alerts = alertsData?.alerts;
 
   // --- Filter State Engine (Cross-filtering & Drill-down) ---
   const [searchQuery, setSearchQuery] = useState('');
@@ -459,6 +468,7 @@ export function CentralOverview() {
                 <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse"></span>
                 مؤشرات حية متصلة
               </span>
+              <AIHealthBadge />
             </div>
             <h1 className="text-2xl lg:text-3xl font-extrabold text-navy-900">
               {t('central.workspace.title')}
@@ -633,7 +643,7 @@ export function CentralOverview() {
       </section>
 
       {/* ==============================================================
-          2. KPI STRIP: 6 LIVE NATIONAL METRICS
+          2. KPI STRIP: 6 LIVE NATIONAL METRICS + AI BADGES
           ============================================================== */}
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3.5" aria-label="National KPI Strip">
         {/* KPI 1: Total Deals */}
@@ -645,9 +655,12 @@ export function CentralOverview() {
             </span>
           </div>
           <div className="text-2xl font-black text-navy-900">{totalDeals}</div>
-          <div className="text-[11px] text-muted-foreground flex items-center gap-1 font-medium">
-            <CheckCircle2 className="w-3 h-3 text-emerald-600" />
-            <span>خاضعة للتسجيل والرقابة</span>
+          <div className="flex items-center justify-between pt-1">
+            <div className="text-[11px] text-muted-foreground flex items-center gap-1 font-medium">
+              <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+              <span>خاضعة للتسجيل والرقابة</span>
+            </div>
+            <SmartKpiBadge alert="low" message="رصد نظامي" />
           </div>
         </div>
 
@@ -662,8 +675,11 @@ export function CentralOverview() {
           <div className="text-xl font-black text-emerald-900 truncate" title={formatDzd(totalBudgetDzd)}>
             {formatDzd(totalBudgetDzd)}
           </div>
-          <div className="text-[11px] text-muted-foreground font-medium">
-            مخصصات العمليات المفروزة
+          <div className="flex items-center justify-between pt-1">
+            <div className="text-[11px] text-muted-foreground font-medium">
+              مخصصات العمليات المفروزة
+            </div>
+            <SmartKpiBadge alert="medium" message="مراقبة مالية" />
           </div>
         </div>
 
@@ -676,8 +692,15 @@ export function CentralOverview() {
             </span>
           </div>
           <div className="text-2xl font-black text-blue-900">{activeDealsCount}</div>
-          <div className="text-[11px] text-muted-foreground font-medium">
-            إعلان، فتح أظرفة، تقييم
+          <div className="flex items-center justify-between pt-1">
+            <div className="text-[11px] text-muted-foreground font-medium">
+              إعلان، فتح أظرفة، تقييم
+            </div>
+            <SmartKpiBadge
+              alert={alerts?.critical_tenders?.alert}
+              value={alerts?.critical_tenders?.value}
+              message={alerts?.critical_tenders?.message}
+            />
           </div>
         </div>
 
@@ -690,9 +713,16 @@ export function CentralOverview() {
             </span>
           </div>
           <div className="text-2xl font-black text-rose-900">{delayedDealsCount}</div>
-          <div className="text-[11px] text-rose-700 font-semibold flex items-center gap-1">
-            <AlertCircle className="w-3 h-3" />
-            <span>تجاوزت المهل القانونية</span>
+          <div className="flex items-center justify-between pt-1">
+            <div className="text-[11px] text-rose-700 font-semibold flex items-center gap-1">
+              <AlertCircle className="w-3 h-3" />
+              <span>تجاوزت المهل القانونية</span>
+            </div>
+            <SmartKpiBadge
+              alert={alerts?.delayed_tenders?.alert}
+              value={alerts?.delayed_tenders?.value}
+              message={alerts?.delayed_tenders?.message}
+            />
           </div>
         </div>
 
@@ -705,8 +735,15 @@ export function CentralOverview() {
             </span>
           </div>
           <div className="text-2xl font-black text-amber-900">{highRiskCount}</div>
-          <div className="text-[11px] text-muted-foreground font-medium">
-            حالات عدم جدوى أو طعون
+          <div className="flex items-center justify-between pt-1">
+            <div className="text-[11px] text-muted-foreground font-medium">
+              حالات عدم جدوى أو طعون
+            </div>
+            <SmartKpiBadge
+              alert={alerts?.objections?.alert}
+              value={alerts?.objections?.value}
+              message={alerts?.objections?.message}
+            />
           </div>
         </div>
 
@@ -719,12 +756,30 @@ export function CentralOverview() {
             </span>
           </div>
           <div className="text-2xl font-black text-navy-900">{averageCompletion}%</div>
-          <div className="text-[11px] text-emerald-700 font-semibold flex items-center gap-1">
-            <ArrowUpRight className="w-3 h-3" />
-            <span>{t('central.kpi.source_audit')}</span>
+          <div className="flex items-center justify-between pt-1">
+            <div className="text-[11px] text-emerald-700 font-semibold flex items-center gap-1">
+              <ArrowUpRight className="w-3 h-3" />
+              <span>{t('central.kpi.source_audit')}</span>
+            </div>
+            <SmartKpiBadge
+              alert={alerts?.compliance_rate?.alert}
+              message={alerts?.compliance_rate?.message}
+            />
           </div>
         </div>
       </section>
+
+      {/* ==============================================================
+          2.5. NATIONAL AI OVERSIGHT LAYER (Insights & Suspicions)
+          ============================================================== */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div className="lg:col-span-8">
+          <AIInsightsPanel />
+        </div>
+        <div className="lg:col-span-4">
+          <SuspicionAlerts />
+        </div>
+      </div>
 
       {/* ==============================================================
           3. TREND AREA (Temporal Analysis with ZoomCharts Logic)
@@ -1470,6 +1525,7 @@ export function CentralOverview() {
           </div>
         )}
       </section>
+
     </div>
   );
 }

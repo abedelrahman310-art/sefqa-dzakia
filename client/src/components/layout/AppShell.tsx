@@ -7,6 +7,9 @@ import { Button } from '@/components/ui/button';
 import { Menu } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { LanguageSwitcher } from './LanguageSwitcher';
+import { UserDropdown } from './UserDropdown';
+import { useAuth } from '@/components/auth/AuthProvider';
+import { AIChatAssistant, AIHealthBadge } from '@/features/ai';
 
 export interface NavItem {
   id: string;
@@ -26,6 +29,7 @@ export interface AppShellProps {
 
 export function AppShell({ navItems, footerItem, header, children }: AppShellProps) {
   const { t } = useI18n();
+  const { user } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const renderNavLinks = (isMobile: boolean = false) => (
@@ -114,30 +118,46 @@ export function AppShell({ navItems, footerItem, header, children }: AppShellPro
       <main className="flex-1 flex flex-col min-w-0">
         {/* Mobile Header */}
         <header className="md:hidden h-14 flex items-center justify-between px-4 border-b border-border bg-card">
-          <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="-ms-2">
-                <Menu className="h-5 w-5" />
-                <span className="sr-only">Toggle Menu</span>
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="start" className="w-[250px] p-0">
-              <div className="h-14 flex items-center px-4 border-b border-border font-bold text-primary">
-                صفقات ذكية
-              </div>
-              {renderNavLinks(true)}
-            </SheetContent>
-          </Sheet>
-          <div className="font-bold text-primary">صفقات ذكية</div>
-          <LanguageSwitcher />
+          <div className="flex items-center gap-2">
+            <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="-ms-2">
+                  <Menu className="h-5 w-5" />
+                  <span className="sr-only">Toggle Menu</span>
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="start" className="w-[250px] p-0">
+                <div className="h-14 flex items-center px-4 border-b border-border font-bold text-primary">
+                  صفقات ذكية
+                </div>
+                {renderNavLinks(true)}
+              </SheetContent>
+            </Sheet>
+            <div className="font-bold text-primary">صفقات ذكية</div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            {user?.role === "central_admin" && <AIChatAssistant />}
+            <LanguageSwitcher />
+          </div>
         </header>
 
         {/* Desktop Custom Header */}
-        {header && (
-          <header className="hidden md:flex h-14 items-center px-6 border-b border-border bg-card">
+        <header className="hidden md:flex h-14 items-center justify-between px-6 border-b border-border bg-card gap-4">
+          <div className="flex-1 min-w-0 flex items-center">
             {header}
-          </header>
-        )}
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            {user?.role === "central_admin" && (
+              <>
+                <AIHealthBadge compact />
+                <AIChatAssistant />
+              </>
+            )}
+            <LanguageSwitcher />
+            <UserDropdown />
+          </div>
+        </header>
 
         {/* Page Content */}
         <div className="flex-1 p-4 md:p-6 overflow-auto">

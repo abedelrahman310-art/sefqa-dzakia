@@ -883,6 +883,34 @@ export const ar = {
   // Sub-tool Actions
   'opps.smart_specs_btn': 'دفتر الشروط الذكي والمتطلبات',
   'offers.sanad_requirements_btn': 'استجابة متطلبات سند',
+
+  // AI Central Module
+  'ai.insights_title': 'التوصيات الذكية',
+  'ai.advisory_only': 'استشارية فقط — القرار النهائي للمفتش',
+  'ai.generate': 'توليد توصيات',
+  'ai.refresh': 'تحديث',
+  'ai.severity.critical': 'حرجة',
+  'ai.severity.high': 'عالية',
+  'ai.severity.medium': 'متوسطة',
+  'ai.severity.low': 'منخفضة',
+  'ai.severity.info': 'معلومات',
+  'ai.category.fraud_suspicion': 'شبهة فساد',
+  'ai.category.price_anomaly': 'سعر شاذ',
+  'ai.category.delay': 'تأخير',
+  'ai.category.compliance': 'امتثال',
+  'ai.category.pattern': 'نمط مشبوه',
+  'ai.category.recommendation': 'توصية',
+  'ai.resolve': 'تحديد كمعالج',
+  'ai.resolving': 'جاري المعالجة...',
+  'ai.resolved': 'تمت المعالجة',
+  'ai.suspicions_title': 'الشبهات المكتشفة',
+  'ai.chat_title': 'المساعد الذكي',
+  'ai.chat_placeholder': 'اسأل عن أي شيء...',
+  'ai.chat_send': 'إرسال',
+  'ai.chat_thinking': 'جاري التحليل...',
+  'ai.suggestions': 'اقتراحات:',
+  'ai.health_ok': 'متصل',
+  'ai.health_down': 'غير متصل',
 };
 
 export type TranslationKey = keyof typeof ar;
