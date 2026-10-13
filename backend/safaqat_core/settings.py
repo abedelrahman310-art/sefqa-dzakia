@@ -139,6 +139,10 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
     ),
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    'DEFAULT_THROTTLE_RATES': {
+        'ai_chat': '20/hour',
+        'ai_insights': '10/hour',
+    },
 }
 
 # SimpleJWT Settings
@@ -164,4 +168,16 @@ SPECTACULAR_SETTINGS = {
     'DESCRIPTION': 'واجهة برمجة التطبيقات لمنصة تسيير الصفقات العمومية وفق القانون رقم 23-12',
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
+}
+
+# LLM Gateway Configuration
+LLM_PROVIDER = os.getenv("LLM_PROVIDER", "rule_based")
+LLM_MODEL = os.getenv("LLM_MODEL", "gemini-1.5-flash")
+
+# Cache Configuration (LocMemCache for dev/testing, Redis for prod)
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "LOCATION": "safaqat-cache",
+    }
 }
