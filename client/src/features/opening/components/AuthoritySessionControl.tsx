@@ -5,7 +5,7 @@ import {
   useStartSession,
   useEndSession,
   useOpenOffer,
-  useDealOffers,
+  useSessionOffers,
 } from "../hooks/useOpening";
 import { useI18n } from "@/i18n";
 import {
@@ -52,8 +52,8 @@ export function AuthoritySessionControl() {
   const { t, dir } = useI18n();
 
   const { data: session, isLoading, error } = useOpeningSession(id || null);
-  const { data: dealOffers, isLoading: offersLoading } = useDealOffers(
-    session?.tender_id
+  const { data: dealOffers, isLoading: offersLoading } = useSessionOffers(
+    session?.id
   );
 
   const startMutation = useStartSession();

@@ -8,6 +8,7 @@ from .models import (
     SessionAccess,
     OpeningEvent,
 )
+from apps.bids.models import BidOffer
 
 
 class CahierSpecsSerializer(serializers.ModelSerializer):
@@ -199,3 +200,34 @@ class OpenOfferRequestSerializer(serializers.Serializer):
     )
     is_accepted = serializers.BooleanField(required=False, default=True)
     notes = serializers.CharField(required=False, allow_blank=True, default='')
+
+
+class DealOfferSummarySerializer(serializers.ModelSerializer):
+    """
+    ملخص العروض المودعة لعرضها في لوحة التحكم بجلسة فتح الأظرفة.
+    لا يكشف إلا عن الحقول الضرورية للمصلحة المتعاقدة خلال الجلسة.
+    """
+    operator_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = BidOffer
+        fields = [
+            'id',
+            'operator',
+            'operator_name',
+            'status',
+            'financial_amount',
+            'submission_timestamp',
+            'created_at',
+        ]
+
+    def get_operator_name(self, obj):
+        op = obj.operator
+        if not op:
+            return None
+        return (
+            op.organization_name
+            or op.display_name
+            or op.email
+        )
+

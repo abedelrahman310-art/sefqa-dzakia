@@ -12,6 +12,7 @@ from apps.users.models import CustomUser
 
 from .models import OpeningEvent, OpeningSession, ProcurementDeal, SessionAccess
 from .serializers import (
+    DealOfferSummarySerializer,
     OpeningEventSerializer,
     OpeningSessionDetailSerializer,
     OpeningSessionListSerializer,
@@ -411,3 +412,27 @@ class SessionEndView(APIView):
             OpeningSessionDetailSerializer(session, context={"request": request}).data,
             status=status.HTTP_200_OK,
         )
+
+
+class SessionOffersView(APIView):
+    """
+    GET /api/procurements/sessions/{id}/offers/
+    استرجاع العروض المودعة الخاصة بصفقة هذه الجلسة حصراً
+    """
+
+    permission_classes = [permissions.IsAuthenticated, HasSessionAccess]
+
+    def get(self, request, pk):
+        session = get_object_or_404(OpeningSession.objects.select_related("tender"), pk=pk)
+        self.check_object_permissions(request, session)
+
+        # تصفية العروض حسب صفقة الجلسة حصراً (defense-in-depth)
+        offers = (
+            BidOffer.objects
+            .filter(deal=session.tender)
+            .select_related("operator")
+            .order_by("created_at")
+        )
+        serializer = DealOfferSummarySerializer(offers, many=True, context={"request": request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
