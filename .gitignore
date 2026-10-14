@@ -85,3 +85,6 @@ server/
 Run_Safaqat_Desktop.bat
 Safaqat_Desktop.url
 *.url
+
+# Root-level docs (use docs/ instead)
+/EVIDENCE-CHECKLIST.md
