@@ -52,34 +52,10 @@ export function OperatorOverview() {
 
   return (
     <div className="space-y-6">
-      {/* Header Banner - Clean & Official */}
-      <section className="bg-card border border-border rounded-2xl p-6 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div className="space-y-1.5 max-w-2xl">
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-navy-50 text-navy-800 border border-navy-100">
-              {t('overview.hero.eyebrow')}
-            </span>
-          </div>
-          <h2 className="text-2xl font-extrabold text-navy-900">
-            {t('overview.hero.title')}
-          </h2>
-          <p className="text-xs md:text-sm text-muted-foreground leading-relaxed">
-            {t('overview.hero.desc')}
-          </p>
-        </div>
-        <Button
-          className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-2.5 rounded-xl shadow-sm transition-colors flex items-center gap-2 self-stretch sm:self-auto justify-center shrink-0"
-          onClick={() => setLocation('/operator/deals')}
-        >
-          <span>{t('overview.hero.cta')}</span>
-          <ArrowIcon className="w-4 h-4" />
-        </Button>
-      </section>
-
-      {/* Real Statistics derived strictly from API */}
+      {/* Real Statistics derived strictly from API: 3 KPI Cards */}
       <section className="grid grid-cols-1 md:grid-cols-3 gap-4" aria-label="Overview Statistics">
         {/* Available Opportunities */}
-        <div className="bg-white border border-[var(--color-border-subtle)] rounded-xl p-6 shadow-sm space-y-2">
+        <div className="bg-white border border-[var(--color-border-subtle)] rounded-xl p-5 shadow-sm space-y-2 hover:shadow-md transition-all">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-[var(--ink-500)]">{t('overview.stats.available')}</span>
             <span className="p-2 bg-[var(--paper-100)] text-[var(--ink-700)] rounded-lg border border-[var(--color-border-subtle)]">
@@ -93,7 +69,7 @@ export function OperatorOverview() {
         </div>
 
         {/* Submitted Offers */}
-        <div className="bg-white border border-[var(--color-border-subtle)] rounded-xl p-6 shadow-sm space-y-2">
+        <div className="bg-white border border-[var(--color-border-subtle)] rounded-xl p-5 shadow-sm space-y-2 hover:shadow-md transition-all">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-[var(--ink-500)]">{t('overview.stats.submitted')}</span>
             <span className="p-2 bg-[var(--paper-100)] text-[var(--ink-700)] rounded-lg border border-[var(--color-border-subtle)]">
@@ -107,7 +83,7 @@ export function OperatorOverview() {
         </div>
 
         {/* Draft Offers */}
-        <div className="bg-white border border-[var(--color-border-subtle)] rounded-xl p-6 shadow-sm space-y-2">
+        <div className="bg-white border border-[var(--color-border-subtle)] rounded-xl p-5 shadow-sm space-y-2 hover:shadow-md transition-all">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-[var(--ink-500)]">{t('overview.stats.drafts')}</span>
             <span className="p-2 bg-[var(--paper-100)] text-[var(--ink-700)] rounded-lg border border-[var(--color-border-subtle)]">
@@ -121,83 +97,111 @@ export function OperatorOverview() {
         </div>
       </section>
 
-      {/* Discovery Panel */}
-      <section className="bg-card border border-border rounded-2xl p-6 shadow-sm space-y-5">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-border">
-          <div>
-            <h3 className="text-lg font-bold text-navy-900">{t('overview.discovery.title')}</h3>
-            <p className="text-xs text-muted-foreground">{t('overview.discovery.desc')}</p>
-          </div>
-          <Button
-            variant="outline"
-            className="border-border hover:bg-muted text-xs font-bold self-start sm:self-center rounded-xl"
-            onClick={() => setLocation('/operator/deals')}
-          >
-            {t('overview.discovery.all')}
-          </Button>
+      {/* Main 3-Column Layout: Opportunities (2 cols) + Actions & AI (1 col) */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* عمودان: المحتوى الرئيسي (اكتشاف الفرص) */}
+        <div className="lg:col-span-2 space-y-6">
+          <section className="bg-white border border-[var(--color-border-subtle)] rounded-xl p-5 shadow-sm space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[var(--color-border-subtle)]">
+              <div>
+                <h3 className="text-lg font-bold text-[var(--ink-900)]">{t('overview.discovery.title')}</h3>
+                <p className="text-xs text-[var(--ink-500)]">{t('overview.discovery.desc')}</p>
+              </div>
+              <Button
+                variant="outline"
+                className="border-[var(--color-border-subtle)] hover:bg-[var(--paper-100)] text-xs font-bold self-start sm:self-center rounded-xl"
+                onClick={() => setLocation('/operator/deals')}
+              >
+                {t('overview.discovery.all')}
+              </Button>
+            </div>
+
+            {loading ? (
+              <div className="py-12 text-center text-[var(--ink-500)] text-xs">
+                جاري استرجاع البيانات...
+              </div>
+            ) : error || opportunities.length === 0 ? (
+              <div className="border border-dashed border-[var(--color-border-subtle)] rounded-xl p-8 text-center bg-[var(--paper-50)] space-y-3">
+                <FileText className="w-8 h-8 text-[var(--ink-300)] mx-auto" />
+                <p className="text-sm font-bold text-[var(--ink-900)]">{t('overview.discovery.empty')}</p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-xs rounded-xl"
+                  onClick={() => setLocation('/operator/deals')}
+                >
+                  <span>{t('overview.discovery.all')}</span>
+                </Button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {recentOpps.map((opp) => (
+                  <article
+                    key={opp.id}
+                    className="bg-white border border-[var(--color-border-subtle)] rounded-xl p-4 shadow-2xs hover:border-[var(--stamp-green-700)]/40 hover:shadow-xs transition-all flex flex-col justify-between space-y-3"
+                  >
+                    <div className="space-y-1.5 min-w-0">
+                      <div className="flex items-center justify-between gap-2">
+                        <span
+                          className="inline-block text-xs font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200"
+                          title={opp.authorityName}
+                        >
+                          {opp.authorityName}
+                        </span>
+                        <span className="text-xs text-[var(--ink-500)]">
+                          {new Date(opp.updatedAt).toLocaleDateString()}
+                        </span>
+                      </div>
+                      <h4 className="text-sm font-bold text-[var(--ink-900)] line-clamp-1" title={opp.title}>
+                        {opp.title}
+                      </h4>
+                      <p className="text-xs text-[var(--ink-500)] line-clamp-2 leading-relaxed">
+                        {opp.description}
+                      </p>
+                    </div>
+
+                    <div className="pt-2 flex items-center justify-between border-t border-[var(--color-border-subtle)]">
+                      <span className="text-xs font-mono font-semibold text-[var(--ink-900)]">
+                        {opp.estimatedBudget ? `${Number(opp.estimatedBudget).toLocaleString()} د.ج` : ''}
+                      </span>
+                      <Button
+                        size="sm"
+                        className="text-xs font-bold px-3 py-1.5 h-auto bg-[var(--stamp-green-700)] hover:bg-[var(--stamp-green-900)] text-white rounded-xl shadow-xs"
+                        onClick={() => setLocation(`/operator/opportunities/${opp.id}`)}
+                      >
+                        {t('overview.discovery.view_detail')}
+                      </Button>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            )}
+          </section>
         </div>
 
-        {loading ? (
-          <div className="py-12 text-center text-muted-foreground text-xs">
-            جاري استرجاع البيانات...
-          </div>
-        ) : error || opportunities.length === 0 ? (
-          <div className="border border-dashed border-border rounded-xl p-8 text-center bg-muted/20 space-y-3">
-            <FileText className="w-8 h-8 text-muted-foreground mx-auto" />
-            <p className="text-sm font-bold text-navy-900">{t('overview.discovery.empty')}</p>
+        {/* عمود: Actions & Quick Start */}
+        <div className="lg:col-span-1 space-y-6">
+          {/* Header Banner - Clean & Official */}
+          <section className="bg-white border border-[var(--color-border-subtle)] rounded-xl p-5 shadow-sm space-y-3">
+            <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-navy-50 text-navy-800 border border-navy-100 inline-block">
+              {t('overview.hero.eyebrow')}
+            </span>
+            <h2 className="text-xl font-extrabold text-[var(--ink-900)]">
+              {t('overview.hero.title')}
+            </h2>
+            <p className="text-xs text-[var(--ink-500)] leading-relaxed">
+              {t('overview.hero.desc')}
+            </p>
             <Button
-              variant="outline"
-              size="sm"
-              className="text-xs rounded-xl"
+              className="bg-[var(--stamp-green-700)] hover:bg-[var(--stamp-green-900)] text-white font-bold px-4 py-2 rounded-xl shadow-xs transition-colors flex items-center gap-2 w-full justify-center text-xs"
               onClick={() => setLocation('/operator/deals')}
             >
-              <span>{t('overview.discovery.all')}</span>
+              <span>{t('overview.hero.cta')}</span>
+              <ArrowIcon className="w-4 h-4" />
             </Button>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {recentOpps.map((opp) => (
-              <article
-                key={opp.id}
-                className="bg-card border border-border rounded-xl p-4 shadow-sm hover:border-navy-500/30 transition-all flex flex-col justify-between space-y-3"
-              >
-                <div className="space-y-1.5 min-w-0">
-                  <div className="flex items-center justify-between gap-2">
-                    <span
-                      className="inline-block text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-100"
-                      title={opp.authorityName}
-                    >
-                      {opp.authorityName}
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                      {new Date(opp.updatedAt).toLocaleDateString()}
-                    </span>
-                  </div>
-                  <h4 className="text-sm font-bold text-navy-900 line-clamp-1" title={opp.title}>
-                    {opp.title}
-                  </h4>
-                  <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
-                    {opp.description}
-                  </p>
-                </div>
-
-                <div className="pt-2 flex items-center justify-between border-t border-border/60">
-                  <span className="text-xs font-mono font-semibold text-navy-900">
-                    {opp.estimatedBudget ? `${Number(opp.estimatedBudget).toLocaleString()} د.ج` : ''}
-                  </span>
-                  <Button
-                    size="sm"
-                    className="text-xs font-bold px-3 py-1.5 h-auto bg-navy-900 hover:bg-navy-800 text-white rounded-xl shadow-sm"
-                    onClick={() => setLocation(`/operator/opportunities/${opp.id}`)}
-                  >
-                    {t('overview.discovery.view_detail')}
-                  </Button>
-                </div>
-              </article>
-            ))}
-          </div>
-        )}
-      </section>
+          </section>
+        </div>
+      </div>
     </div>
   );
 }

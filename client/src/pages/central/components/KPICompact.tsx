@@ -20,23 +20,23 @@ export function KPICompact({
   return (
     <div
       className={`
-        flex items-center gap-4 
+        flex items-center gap-3.5 
         p-4 rounded-xl 
-        border transition-colors
+        bg-white border transition-colors shadow-2xs
         ${
           urgent
-            ? 'bg-[var(--stamp-red-700)]/5 border-[var(--stamp-red-700)]/20'
-            : 'bg-[var(--paper-100)] border-transparent'
+            ? 'border-[var(--stamp-red-700)]/40 hover:border-[var(--stamp-red-700)]'
+            : 'border-[var(--color-border-subtle)] hover:border-[var(--color-border-strong)]'
         }
       `}
     >
       <div
         className={`
-          size-12 rounded-lg flex items-center justify-center shrink-0 shadow-xs
+          size-11 rounded-lg flex items-center justify-center shrink-0 border border-[var(--color-border-subtle)]
           ${
             urgent
-              ? 'bg-[var(--stamp-red-700)]/10 text-[var(--stamp-red-700)]'
-              : 'bg-white text-[var(--ink-700)]'
+              ? 'bg-[var(--paper-100)] text-[var(--stamp-red-700)]'
+              : 'bg-[var(--paper-100)] text-[var(--ink-700)]'
           }
         `}
       >

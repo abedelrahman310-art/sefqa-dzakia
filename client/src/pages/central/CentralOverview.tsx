@@ -456,7 +456,7 @@ export function CentralOverview() {
       {/* ==============================================================
           1. HEADER & STRICT RBAC NOTICE (Read-only Oversight)
           ============================================================== */}
-      <section className="bg-card border border-border rounded-2xl p-6 shadow-sm space-y-4">
+      <section className="bg-white border border-[var(--color-border-subtle)] rounded-xl p-5 shadow-sm space-y-4">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div className="space-y-1">
             <div className="flex items-center gap-2 flex-wrap">
@@ -645,149 +645,140 @@ export function CentralOverview() {
       {/* ==============================================================
           2. KPI STRIP: 6 LIVE NATIONAL METRICS + AI BADGES
           ============================================================== */}
-      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3.5" aria-label="National KPI Strip">
+      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4" aria-label="National KPI Strip">
         {/* KPI 1: Total Deals */}
-        <div className="bg-card border border-border rounded-2xl p-4.5 shadow-sm space-y-1.5 hover:border-navy-400/50 transition-colors">
+        <div className="bg-white border border-[var(--color-border-subtle)] rounded-xl p-5 shadow-sm space-y-2 hover:border-navy-400/50 transition-colors">
           <div className="flex items-center justify-between text-muted-foreground">
             <span className="text-xs font-bold">{t('central.kpi.total_deals')}</span>
             <span className="p-1.5 rounded-lg bg-navy-50 text-navy-800">
               <Briefcase className="w-4 h-4" />
             </span>
           </div>
-          <div className="text-2xl font-black text-navy-900">{totalDeals}</div>
+          <div className="text-3xl font-extrabold text-navy-900">{totalDeals}</div>
           <div className="flex items-center justify-between pt-1">
             <div className="text-[11px] text-muted-foreground flex items-center gap-1 font-medium">
               <CheckCircle2 className="w-3 h-3 text-emerald-600" />
-              <span>خاضعة للتسجيل والرقابة</span>
+              <span>رقابة نظامية</span>
             </div>
             <SmartKpiBadge alert="low" message="رصد نظامي" />
           </div>
         </div>
 
         {/* KPI 2: Total Financial Volume */}
-        <div className="bg-card border border-border rounded-2xl p-4.5 shadow-sm space-y-1.5 hover:border-navy-400/50 transition-colors">
+        <div className="bg-white border border-[var(--color-border-subtle)] rounded-xl p-5 shadow-sm space-y-2 hover:border-navy-400/50 transition-colors">
           <div className="flex items-center justify-between text-muted-foreground">
             <span className="text-xs font-bold">{t('central.kpi.total_budget')}</span>
             <span className="p-1.5 rounded-lg bg-emerald-50 text-emerald-800">
               <TrendingUp className="w-4 h-4" />
             </span>
           </div>
-          <div className="text-xl font-black text-emerald-900 truncate" title={formatDzd(totalBudgetDzd)}>
+          <div className="text-2xl font-extrabold text-emerald-900 truncate" title={formatDzd(totalBudgetDzd)}>
             {formatDzd(totalBudgetDzd)}
           </div>
           <div className="flex items-center justify-between pt-1">
             <div className="text-[11px] text-muted-foreground font-medium">
-              مخصصات العمليات المفروزة
+              المخصصات
             </div>
             <SmartKpiBadge alert="medium" message="مراقبة مالية" />
           </div>
         </div>
 
         {/* KPI 3: Active Ongoing Deals */}
-        <div className="bg-card border border-border rounded-2xl p-4.5 shadow-sm space-y-1.5 hover:border-navy-400/50 transition-colors">
+        <div className="bg-white border border-[var(--color-border-subtle)] rounded-xl p-5 shadow-sm space-y-2 hover:border-navy-400/50 transition-colors">
           <div className="flex items-center justify-between text-muted-foreground">
             <span className="text-xs font-bold">{t('central.kpi.active_deals')}</span>
             <span className="p-1.5 rounded-lg bg-blue-50 text-blue-800">
               <Activity className="w-4 h-4" />
             </span>
           </div>
-          <div className="text-2xl font-black text-blue-900">{activeDealsCount}</div>
+          <div className="text-3xl font-extrabold text-blue-900">{activeDealsCount}</div>
           <div className="flex items-center justify-between pt-1">
             <div className="text-[11px] text-muted-foreground font-medium">
-              إعلان، فتح أظرفة، تقييم
+              قيد الإجراء
             </div>
             <SmartKpiBadge
               alert={alerts?.critical_tenders?.alert}
               value={alerts?.critical_tenders?.value}
-              message={alerts?.critical_tenders?.message}
+              message={alerts?.critical_tenders?.message ? "1 مشددة" : "على الأجل"}
             />
           </div>
         </div>
 
         {/* KPI 4: Overdue/Delayed Deals */}
-        <div className="bg-card border border-border rounded-2xl p-4.5 shadow-sm space-y-1.5 hover:border-rose-400/50 transition-colors">
+        <div className="bg-white border border-[var(--color-border-subtle)] rounded-xl p-5 shadow-sm space-y-2 hover:border-rose-400/50 transition-colors">
           <div className="flex items-center justify-between text-muted-foreground">
             <span className="text-xs font-bold">{t('central.kpi.delayed_deals')}</span>
             <span className="p-1.5 rounded-lg bg-rose-50 text-rose-800">
               <Clock className="w-4 h-4" />
             </span>
           </div>
-          <div className="text-2xl font-black text-rose-900">{delayedDealsCount}</div>
+          <div className="text-3xl font-extrabold text-rose-900">{delayedDealsCount}</div>
           <div className="flex items-center justify-between pt-1">
             <div className="text-[11px] text-rose-700 font-semibold flex items-center gap-1">
               <AlertCircle className="w-3 h-3" />
-              <span>تجاوزت المهل القانونية</span>
+              <span>تجاوزت المهل</span>
             </div>
             <SmartKpiBadge
               alert={alerts?.delayed_tenders?.alert}
               value={alerts?.delayed_tenders?.value}
-              message={alerts?.delayed_tenders?.message}
+              message={alerts?.delayed_tenders?.message ? "على الأجل" : undefined}
             />
           </div>
         </div>
 
         {/* KPI 5: Risks & Disputes Index */}
-        <div className="bg-card border border-border rounded-2xl p-4.5 shadow-sm space-y-1.5 hover:border-amber-400/50 transition-colors">
+        <div className="bg-white border border-[var(--color-border-subtle)] rounded-xl p-5 shadow-sm space-y-2 hover:border-amber-400/50 transition-colors">
           <div className="flex items-center justify-between text-muted-foreground">
             <span className="text-xs font-bold">{t('central.kpi.risk_disputes')}</span>
             <span className="p-1.5 rounded-lg bg-amber-50 text-amber-800">
               <AlertTriangle className="w-4 h-4" />
             </span>
           </div>
-          <div className="text-2xl font-black text-amber-900">{highRiskCount}</div>
+          <div className="text-3xl font-extrabold text-amber-900">{highRiskCount}</div>
           <div className="flex items-center justify-between pt-1">
             <div className="text-[11px] text-muted-foreground font-medium">
-              حالات عدم جدوى أو طعون
+              مخاطر وطعون
             </div>
             <SmartKpiBadge
               alert={alerts?.objections?.alert}
               value={alerts?.objections?.value}
-              message={alerts?.objections?.message}
+              message={alerts?.objections?.message ? "لا طعون" : undefined}
             />
           </div>
         </div>
 
         {/* KPI 6: Average Completion & Legal Compliance */}
-        <div className="bg-card border border-border rounded-2xl p-4.5 shadow-sm space-y-1.5 hover:border-navy-400/50 transition-colors">
+        <div className="bg-white border border-[var(--color-border-subtle)] rounded-xl p-5 shadow-sm space-y-2 hover:border-navy-400/50 transition-colors">
           <div className="flex items-center justify-between text-muted-foreground">
             <span className="text-xs font-bold">{t('central.kpi.compliance_rate')}</span>
             <span className="p-1.5 rounded-lg bg-navy-50 text-navy-800">
               <Scale className="w-4 h-4" />
             </span>
           </div>
-          <div className="text-2xl font-black text-navy-900">{averageCompletion}%</div>
+          <div className="text-3xl font-extrabold text-navy-900">{averageCompletion}%</div>
           <div className="flex items-center justify-between pt-1">
             <div className="text-[11px] text-emerald-700 font-semibold flex items-center gap-1">
               <ArrowUpRight className="w-3 h-3" />
-              <span>{t('central.kpi.source_audit')}</span>
+              <span>تدقيق إجرائي</span>
             </div>
             <SmartKpiBadge
               alert={alerts?.compliance_rate?.alert}
-              message={alerts?.compliance_rate?.message}
+              message={alerts?.compliance_rate?.message ? "100% ممتازة" : undefined}
             />
           </div>
         </div>
       </section>
 
       {/* ==============================================================
-          2.5. NATIONAL AI OVERSIGHT LAYER (Insights & Suspicions)
+          3. MAIN RESPONSIVE DASHBOARD: 2-COLUMN OPS + 1-COLUMN AI INTELLIGENCE
           ============================================================== */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <div className="lg:col-span-8">
-          <AIInsightsPanel />
-        </div>
-        <div className="lg:col-span-4">
-          <SuspicionAlerts />
-        </div>
-      </div>
-
-      {/* ==============================================================
-          3. TREND AREA (Temporal Analysis with ZoomCharts Logic)
-             & 4. NATIONAL INTERACTIVE MAP
-          ============================================================== */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Trend Area (7 cols on Desktop) */}
-        <section className="lg:col-span-7 bg-card border border-border rounded-2xl p-6 shadow-sm space-y-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* عمودان: المحتوى التشغيلي والتحليلي الرئيسي */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Trend Area & National Interactive Map */}
+          <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
+            {/* Trend Area (7 cols on XL) */}
+            <section className="xl:col-span-7 bg-white border border-[var(--color-border-subtle)] rounded-xl p-5 shadow-sm space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
               <h2 className="text-base font-bold text-navy-900 flex items-center gap-2">
@@ -907,8 +898,8 @@ export function CentralOverview() {
           </div>
         </section>
 
-        {/* National Interactive Map (5 cols on Desktop) */}
-        <section className="lg:col-span-5 bg-card border border-border rounded-2xl p-6 shadow-sm space-y-4">
+        {/* National Interactive Map (5 cols on XL) */}
+        <section className="xl:col-span-5 bg-white border border-[var(--color-border-subtle)] rounded-xl p-5 shadow-sm space-y-4">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-base font-bold text-navy-900 flex items-center gap-2">
@@ -981,9 +972,9 @@ export function CentralOverview() {
       {/* ==============================================================
           4. ENTITY RANKING & 5. SECTOR ANALYTICS & RISK PANEL
           ============================================================== */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Entity Ranking Table (6 cols) */}
-        <section className="lg:col-span-6 bg-card border border-border rounded-2xl p-6 shadow-sm space-y-4">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        {/* Entity Ranking Table */}
+        <section className="bg-white border border-[var(--color-border-subtle)] rounded-xl p-5 shadow-sm space-y-4">
           <div>
             <h2 className="text-base font-bold text-navy-900 flex items-center gap-2">
               <Building className="w-4 h-4 text-navy-800" />
@@ -1053,8 +1044,8 @@ export function CentralOverview() {
           </div>
         </section>
 
-        {/* Sector Analytics & Risk Matrix (6 cols) */}
-        <section className="lg:col-span-6 bg-card border border-border rounded-2xl p-6 shadow-sm space-y-4">
+        {/* Sector Analytics & Risk Matrix */}
+        <section className="bg-white border border-[var(--color-border-subtle)] rounded-xl p-5 shadow-sm space-y-4">
           <div>
             <h2 className="text-base font-bold text-navy-900 flex items-center gap-2">
               <PieChart className="w-4 h-4 text-navy-800" />
@@ -1111,282 +1102,9 @@ export function CentralOverview() {
       </div>
 
       {/* ==============================================================
-          5. 6 EMBEDDED AI AGENTS STRIP (NO CHATBOT - AUTOMATIC AUDIT LOOPS)
-             Observe → Analyze → Detect → Predict → Recommend → Explain
-          ============================================================== */}
-      <section className="bg-card border border-border rounded-2xl p-6 shadow-sm space-y-5" aria-label="Embedded AI Agents Panel">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border pb-4">
-          <div className="space-y-0.5">
-            <div className="flex items-center gap-2">
-              <span className="p-1.5 rounded-lg bg-navy-900 text-gold-400">
-                <Brain className="w-4 h-4" />
-              </span>
-              <h2 className="text-lg font-extrabold text-navy-900">
-                منظومة الوكلاء الأذكياء الستة المدمجة (Embedded AI Agents)
-              </h2>
-            </div>
-            <p className="text-xs text-muted-foreground">
-              {t('central.agent.methodology')}{' '}
-              <span className="font-bold text-navy-900">
-                الملاحظة ➔ التحليل ➔ رصد الانحراف ➔ التنبؤ ➔ التوصية ➔ التفسير القانوني
-              </span>
-            </p>
-          </div>
-
-          <span className="text-[11px] font-bold px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 self-start sm:self-auto">
-            تحليل آلي فوري دون شات بوت
-          </span>
-        </div>
-
-        {/* Agents Navigation Buttons */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
-          {[
-            { id: 'executive', name: t('central.agent.executive.name'), title: t('central.agent.executive.title') },
-            { id: 'entity', name: t('central.agent.entity.name'), title: t('central.agent.entity.title') },
-            { id: 'monitoring', name: t('central.agent.monitoring.name'), title: t('central.agent.monitoring.title') },
-            { id: 'analytics', name: t('central.agent.analytics.name'), title: t('central.agent.analytics.title') },
-            { id: 'risk', name: t('central.agent.risk.name'), title: t('central.agent.risk.title') },
-            { id: 'geo', name: t('central.agent.geo.name'), title: t('central.agent.geo.title') }
-          ].map((agent) => (
-            <button
-              key={agent.id}
-              onClick={() => setActiveAgentTab(agent.id as any)}
-              className={`p-3 rounded-xl border text-start transition-all ${
-                activeAgentTab === agent.id
-                  ? 'bg-navy-900 text-white border-navy-900 shadow-sm'
-                  : 'bg-muted/30 border-border hover:bg-muted/60 text-navy-900'
-              }`}
-            >
-              <div className="text-[11px] font-extrabold truncate">{agent.name}</div>
-              <div
-                className={`text-[10px] truncate mt-0.5 ${
-                  activeAgentTab === agent.id ? 'text-gold-400' : 'text-muted-foreground'
-                }`}
-              >
-                {agent.title}
-              </div>
-            </button>
-          ))}
-        </div>
-
-        {/* Embedded Active Agent Card (Deep Reasoning Display) */}
-        <div className="bg-muted/20 border border-border rounded-xl p-5 space-y-4">
-          {activeAgentTab === 'executive' && (
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="font-extrabold text-sm text-navy-900">
-                    {t('central.agent.executive.name')} — {t('central.agent.executive.title')}
-                  </span>
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-navy-100 text-navy-800 font-bold">
-                    نطاق: المستوى الوطني العام
-                  </span>
-                </div>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
-                <div className="p-3 bg-card rounded-lg border border-border space-y-1">
-                  <span className="font-bold text-navy-900 block text-[11px]">1. {t('central.agent.observe')} & {t('central.agent.analyze')}</span>
-                  <p className="text-muted-foreground leading-relaxed">
-                    متابعة {totalDeals} صفقات بحجم مالي {formatDzd(totalBudgetDzd)}. وتيرة الإنجاز العامة تبلغ {averageCompletion}% مع تسجيل استقرار في وتيرة النشر.
-                  </p>
-                </div>
-                <div className="p-3 bg-card rounded-lg border border-border space-y-1">
-                  <span className="font-bold text-amber-900 block text-[11px]">2. {t('central.agent.detect')} & {t('central.agent.predict')}</span>
-                  <p className="text-muted-foreground leading-relaxed">
-                    رصد {delayedDealsCount} عمليات متأخرة في مرحلة التقييم الفني. التنبؤ بتأخر انطلاق المشاريع بنحو 45 يوماً في حال عدم تسريع لجان الفتح.
-                  </p>
-                </div>
-                <div className="p-3 bg-card rounded-lg border border-border space-y-1">
-                  <span className="font-bold text-emerald-900 block text-[11px]">3. {t('central.agent.recommend')} & {t('central.agent.explain')}</span>
-                  <p className="text-muted-foreground leading-relaxed">
-                    إصدار تعليمة وزارية للمصالح المتعاقدة المعنية لجدولة جلسات تقييم مكثفة طبقاً لأحكام المادة 72 من المرسوم الرئاسي 15-247 لتفادي انقضاء صلاحية العروض.
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {activeAgentTab === 'entity' && (
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="font-extrabold text-sm text-navy-900">
-                    {t('central.agent.entity.name')} — {t('central.agent.entity.title')}
-                  </span>
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-navy-100 text-navy-800 font-bold">
-                    نطاق: أداء المصالح ولجان التقييم
-                  </span>
-                </div>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
-                <div className="p-3 bg-card rounded-lg border border-border space-y-1">
-                  <span className="font-bold text-navy-900 block text-[11px]">1. {t('central.agent.observe')} & {t('central.agent.analyze')}</span>
-                  <p className="text-muted-foreground leading-relaxed">
-                    تقييم أداء {entityRanking.length} مصالح متعاقدة. نسبة المصالح الملتزمة بالمواعيد تبلغ {entityRanking.filter(e => e.delayedCount === 0).length} من أصل {entityRanking.length}.
-                  </p>
-                </div>
-                <div className="p-3 bg-card rounded-lg border border-border space-y-1">
-                  <span className="font-bold text-amber-900 block text-[11px]">2. {t('central.agent.detect')} & {t('central.agent.predict')}</span>
-                  <p className="text-muted-foreground leading-relaxed">
-                    رصد اختناق إداري في لجان التقييم لدى قطاع الأشغال العمومية بسبب تشابك المعايير الفنية وصعوبة فرز العروض يدوياً.
-                  </p>
-                </div>
-                <div className="p-3 bg-card rounded-lg border border-border space-y-1">
-                  <span className="font-bold text-emerald-900 block text-[11px]">3. {t('central.agent.recommend')} & {t('central.agent.explain')}</span>
-                  <p className="text-muted-foreground leading-relaxed">
-                    تطبيق نظام التنقيط الفني المؤتمت وتوحيد كراسات الشروط النموذجية لتقليص مدة المداولات بنسبة 50%.
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {activeAgentTab === 'monitoring' && (
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="font-extrabold text-sm text-navy-900">
-                    {t('central.agent.monitoring.name')} — {t('central.agent.monitoring.title')}
-                  </span>
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-navy-100 text-navy-800 font-bold">
-                    نطاق: دورة حياة الصفقات الفردية
-                  </span>
-                </div>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
-                <div className="p-3 bg-card rounded-lg border border-border space-y-1">
-                  <span className="font-bold text-navy-900 block text-[11px]">1. {t('central.agent.observe')} & {t('central.agent.analyze')}</span>
-                  <p className="text-muted-foreground leading-relaxed">
-                    تتبع المسار الإجرائي للصفقات الجارية. رصد {activeDealsCount} صفقات في مراحل النشر والفتح والتقييم.
-                  </p>
-                </div>
-                <div className="p-3 bg-card rounded-lg border border-border space-y-1">
-                  <span className="font-bold text-amber-900 block text-[11px]">2. {t('central.agent.detect')} & {t('central.agent.predict')}</span>
-                  <p className="text-muted-foreground leading-relaxed">
-                    رصد صفقة الطريق الالتفافي (DZ-2026-TP-014) متأخرة 12 يوماً عن أجل إيداع تقرير التقييم. احتمال إلغاء العروض حال انقضاء 90 يوماً.
-                  </p>
-                </div>
-                <div className="p-3 bg-card rounded-lg border border-border space-y-1">
-                  <span className="font-bold text-emerald-900 block text-[11px]">3. {t('central.agent.recommend')} & {t('central.agent.explain')}</span>
-                  <p className="text-muted-foreground leading-relaxed">
-                    إرسال إشعار فوري لرئيس لجنة تقييم العروض لتوقيع محضر المنح المؤقت قبل حلول أجل انتهاء التعهد.
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {activeAgentTab === 'analytics' && (
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="font-extrabold text-sm text-navy-900">
-                    {t('central.agent.analytics.name')} — {t('central.agent.analytics.title')}
-                  </span>
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-navy-100 text-navy-800 font-bold">
-                    نطاق: التحليل المالي والقطاعي
-                  </span>
-                </div>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
-                <div className="p-3 bg-card rounded-lg border border-border space-y-1">
-                  <span className="font-bold text-navy-900 block text-[11px]">1. {t('central.agent.observe')} & {t('central.agent.analyze')}</span>
-                  <p className="text-muted-foreground leading-relaxed">
-                    تحليل التوزيع المالي القطاعي: قطاع الأشغال العمومية يستحوذ على الحصة الأكبر متبوعاً بالري والموارد المائية والرقمنة.
-                  </p>
-                </div>
-                <div className="p-3 bg-card rounded-lg border border-border space-y-1">
-                  <span className="font-bold text-amber-900 block text-[11px]">2. {t('central.agent.detect')} & {t('central.agent.predict')}</span>
-                  <p className="text-muted-foreground leading-relaxed">
-                    تباين نسبي بين التقديرات الإدارية الأولية والمبالغ المقترحة في العروض المقدمة بنسبة تتجاوز +15% في مشاريع الري.
-                  </p>
-                </div>
-                <div className="p-3 bg-card rounded-lg border border-border space-y-1">
-                  <span className="font-bold text-emerald-900 block text-[11px]">3. {t('central.agent.recommend')} & {t('central.agent.explain')}</span>
-                  <p className="text-muted-foreground leading-relaxed">
-                    تفعيل جدول الأسعار المرجعية الوطنية (Mercuriale des Prix) وتحديث التقديرات وفق متغيرات السوق لضمان الجدوى المالية.
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {activeAgentTab === 'risk' && (
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="font-extrabold text-sm text-navy-900">
-                    {t('central.agent.risk.name')} — {t('central.agent.risk.title')}
-                  </span>
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-navy-100 text-navy-800 font-bold">
-                    نطاق: إدارة المخاطر والنزاعات
-                  </span>
-                </div>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
-                <div className="p-3 bg-card rounded-lg border border-border space-y-1">
-                  <span className="font-bold text-navy-900 block text-[11px]">1. {t('central.agent.observe')} & {t('central.agent.analyze')}</span>
-                  <p className="text-muted-foreground leading-relaxed">
-                    رصد {highRiskCount} حالات مخاطر حرجة. تحليل أسباب عدم الجدوى في الصفقات المعلنة للمرة الثانية.
-                  </p>
-                </div>
-                <div className="p-3 bg-card rounded-lg border border-border space-y-1">
-                  <span className="font-bold text-rose-900 block text-[11px]">2. {t('central.agent.detect')} & {t('central.agent.predict')}</span>
-                  <p className="text-muted-foreground leading-relaxed">
-                    شروط الأهلية المفرطة في صفقة ورقلة (DZ-2025-SP-088) أدت إلى إقصاء 100% من العروض. احتمالية تكرار الفشل إذا لم تُعدل المعايير.
-                  </p>
-                </div>
-                <div className="p-3 bg-card rounded-lg border border-border space-y-1">
-                  <span className="font-bold text-emerald-900 block text-[11px]">3. {t('central.agent.recommend')} & {t('central.agent.explain')}</span>
-                  <p className="text-muted-foreground leading-relaxed">
-                    إعادة صياغة شروط التأهيل لتتوافق مع طبيعة السوق المحلية دون الإخلال بضمانات الجودة الفنية المطلوبة.
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {activeAgentTab === 'geo' && (
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="font-extrabold text-sm text-navy-900">
-                    {t('central.agent.geo.name')} — {t('central.agent.geo.title')}
-                  </span>
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-navy-100 text-navy-800 font-bold">
-                    نطاق: التوازن الإقليمي والولائي
-                  </span>
-                </div>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
-                <div className="p-3 bg-card rounded-lg border border-border space-y-1">
-                  <span className="font-bold text-navy-900 block text-[11px]">1. {t('central.agent.observe')} & {t('central.agent.analyze')}</span>
-                  <p className="text-muted-foreground leading-relaxed">
-                    متابعة توزيع الصفقات عبر أقاليم الوسط والغرب والشرق والجنوب. تركز أكبر للقيم المالية في ولايات الجزائر ووهران وقسنطينة.
-                  </p>
-                </div>
-                <div className="p-3 bg-card rounded-lg border border-border space-y-1">
-                  <span className="font-bold text-amber-900 block text-[11px]">2. {t('central.agent.detect')} & {t('central.agent.predict')}</span>
-                  <p className="text-muted-foreground leading-relaxed">
-                    ضعف الإقبال على المناقصات في ولايات الجنوب (ورقلة، بشار) بمتوسط أقل من عرضين مؤهلين لكل عملية.
-                  </p>
-                </div>
-                <div className="p-3 bg-card rounded-lg border border-border space-y-1">
-                  <span className="font-bold text-emerald-900 block text-[11px]">3. {t('central.agent.recommend')} & {t('central.agent.explain')}</span>
-                  <p className="text-muted-foreground leading-relaxed">
-                    تشجيع صيغ التجمع (Groupement d&apos;entreprises) وتوسيع نطاق الإشهار عبر البوابة الوطنية لتوسيع قاعدة المشاركة الجغرافية.
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* ==============================================================
           6. FILTERED DEALS DIRECTORY & AUDIT TRAIL LOG
           ============================================================== */}
-      <section className="bg-card border border-border rounded-2xl p-6 shadow-sm space-y-4">
+      <section className="bg-white border border-[var(--color-border-subtle)] rounded-xl p-5 shadow-sm space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div>
             <h2 className="text-base font-bold text-navy-900 flex items-center gap-2">
@@ -1525,6 +1243,287 @@ export function CentralOverview() {
           </div>
         )}
       </section>
+        </div>
+
+        {/* عمود: AI + Insights */}
+        <div className="lg:col-span-1 space-y-6">
+          <AIInsightsPanel />
+          <SuspicionAlerts />
+
+          {/* ==============================================================
+          5. 6 EMBEDDED AI AGENTS STRIP (NO CHATBOT - AUTOMATIC AUDIT LOOPS)
+             Observe → Analyze → Detect → Predict → Recommend → Explain
+          ============================================================== */}
+      <section className="bg-white border border-[var(--color-border-subtle)] rounded-xl p-5 shadow-sm space-y-4" aria-label="Embedded AI Agents Panel">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border pb-4">
+          <div className="space-y-0.5">
+            <div className="flex items-center gap-2">
+              <span className="p-1.5 rounded-lg bg-navy-900 text-gold-400">
+                <Brain className="w-4 h-4" />
+              </span>
+              <h2 className="text-lg font-extrabold text-navy-900">
+                منظومة الوكلاء الأذكياء الستة المدمجة (Embedded AI Agents)
+              </h2>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {t('central.agent.methodology')}{' '}
+              <span className="font-bold text-navy-900">
+                الملاحظة ➔ التحليل ➔ رصد الانحراف ➔ التنبؤ ➔ التوصية ➔ التفسير القانوني
+              </span>
+            </p>
+          </div>
+
+          <span className="text-[11px] font-bold px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 self-start sm:self-auto">
+            تحليل آلي فوري دون شات بوت
+          </span>
+        </div>
+
+        {/* Agents Navigation Buttons */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+          {[
+            { id: 'executive', name: t('central.agent.executive.name'), title: t('central.agent.executive.title') },
+            { id: 'entity', name: t('central.agent.entity.name'), title: t('central.agent.entity.title') },
+            { id: 'monitoring', name: t('central.agent.monitoring.name'), title: t('central.agent.monitoring.title') },
+            { id: 'analytics', name: t('central.agent.analytics.name'), title: t('central.agent.analytics.title') },
+            { id: 'risk', name: t('central.agent.risk.name'), title: t('central.agent.risk.title') },
+            { id: 'geo', name: t('central.agent.geo.name'), title: t('central.agent.geo.title') }
+          ].map((agent) => (
+            <button
+              key={agent.id}
+              onClick={() => setActiveAgentTab(agent.id as any)}
+              className={`p-3 rounded-xl border text-start transition-all ${
+                activeAgentTab === agent.id
+                  ? 'bg-navy-900 text-white border-navy-900 shadow-sm'
+                  : 'bg-muted/30 border-border hover:bg-muted/60 text-navy-900'
+              }`}
+            >
+              <div className="text-[11px] font-extrabold truncate">{agent.name}</div>
+              <div
+                className={`text-[10px] truncate mt-0.5 ${
+                  activeAgentTab === agent.id ? 'text-gold-400' : 'text-muted-foreground'
+                }`}
+              >
+                {agent.title}
+              </div>
+            </button>
+          ))}
+        </div>
+
+        {/* Embedded Active Agent Card (Deep Reasoning Display) */}
+        <div className="bg-muted/20 border border-border rounded-xl p-5 space-y-4">
+          {activeAgentTab === 'executive' && (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="font-extrabold text-sm text-navy-900">
+                    {t('central.agent.executive.name')} — {t('central.agent.executive.title')}
+                  </span>
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-navy-100 text-navy-800 font-bold">
+                    نطاق: المستوى الوطني العام
+                  </span>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 gap-2.5 text-xs">
+                <div className="p-3 bg-white rounded-lg border border-border shadow-2xs space-y-1">
+                  <span className="font-bold text-navy-900 block text-[11px]">1. {t('central.agent.observe')} & {t('central.agent.analyze')}</span>
+                  <p className="text-muted-foreground leading-relaxed">
+                    متابعة {totalDeals} صفقات بحجم مالي {formatDzd(totalBudgetDzd)}. وتيرة الإنجاز العامة تبلغ {averageCompletion}% مع تسجيل استقرار في وتيرة النشر.
+                  </p>
+                </div>
+                <div className="p-3 bg-white rounded-lg border border-border shadow-2xs space-y-1">
+                  <span className="font-bold text-amber-900 block text-[11px]">2. {t('central.agent.detect')} & {t('central.agent.predict')}</span>
+                  <p className="text-muted-foreground leading-relaxed">
+                    رصد {delayedDealsCount} عمليات متأخرة في مرحلة التقييم الفني. التنبؤ بتأخر انطلاق المشاريع بنحو 45 يوماً في حال عدم تسريع لجان الفتح.
+                  </p>
+                </div>
+                <div className="p-3 bg-white rounded-lg border border-border shadow-2xs space-y-1">
+                  <span className="font-bold text-emerald-900 block text-[11px]">3. {t('central.agent.recommend')} & {t('central.agent.explain')}</span>
+                  <p className="text-muted-foreground leading-relaxed">
+                    إصدار تعليمة وزارية للمصالح المتعاقدة المعنية لجدولة جلسات تقييم مكثفة طبقاً لأحكام المادة 72 من المرسوم الرئاسي 15-247 لتفادي انقضاء صلاحية العروض.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeAgentTab === 'entity' && (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="font-extrabold text-sm text-navy-900">
+                    {t('central.agent.entity.name')} — {t('central.agent.entity.title')}
+                  </span>
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-navy-100 text-navy-800 font-bold">
+                    نطاق: أداء المصالح ولجان التقييم
+                  </span>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 gap-2.5 text-xs">
+                <div className="p-3 bg-white rounded-lg border border-border shadow-2xs space-y-1">
+                  <span className="font-bold text-navy-900 block text-[11px]">1. {t('central.agent.observe')} & {t('central.agent.analyze')}</span>
+                  <p className="text-muted-foreground leading-relaxed">
+                    تقييم أداء {entityRanking.length} مصالح متعاقدة. نسبة المصالح الملتزمة بالمواعيد تبلغ {entityRanking.filter(e => e.delayedCount === 0).length} من أصل {entityRanking.length}.
+                  </p>
+                </div>
+                <div className="p-3 bg-white rounded-lg border border-border shadow-2xs space-y-1">
+                  <span className="font-bold text-amber-900 block text-[11px]">2. {t('central.agent.detect')} & {t('central.agent.predict')}</span>
+                  <p className="text-muted-foreground leading-relaxed">
+                    رصد اختناق إداري في لجان التقييم لدى قطاع الأشغال العمومية بسبب تشابك المعايير الفنية وصعوبة فرز العروض يدوياً.
+                  </p>
+                </div>
+                <div className="p-3 bg-white rounded-lg border border-border shadow-2xs space-y-1">
+                  <span className="font-bold text-emerald-900 block text-[11px]">3. {t('central.agent.recommend')} & {t('central.agent.explain')}</span>
+                  <p className="text-muted-foreground leading-relaxed">
+                    تطبيق نظام التنقيط الفني المؤتمت وتوحيد كراسات الشروط النموذجية لتقليص مدة المداولات بنسبة 50%.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeAgentTab === 'monitoring' && (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="font-extrabold text-sm text-navy-900">
+                    {t('central.agent.monitoring.name')} — {t('central.agent.monitoring.title')}
+                  </span>
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-navy-100 text-navy-800 font-bold">
+                    نطاق: دورة حياة الصفقات الفردية
+                  </span>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 gap-2.5 text-xs">
+                <div className="p-3 bg-white rounded-lg border border-border shadow-2xs space-y-1">
+                  <span className="font-bold text-navy-900 block text-[11px]">1. {t('central.agent.observe')} & {t('central.agent.analyze')}</span>
+                  <p className="text-muted-foreground leading-relaxed">
+                    تتبع المسار الإجرائي للصفقات الجارية. رصد {activeDealsCount} صفقات في مراحل النشر والفتح والتقييم.
+                  </p>
+                </div>
+                <div className="p-3 bg-white rounded-lg border border-border shadow-2xs space-y-1">
+                  <span className="font-bold text-amber-900 block text-[11px]">2. {t('central.agent.detect')} & {t('central.agent.predict')}</span>
+                  <p className="text-muted-foreground leading-relaxed">
+                    رصد صفقة الطريق الالتفافي (DZ-2026-TP-014) متأخرة 12 يوماً عن أجل إيداع تقرير التقييم. احتمال إلغاء العروض حال انقضاء 90 يوماً.
+                  </p>
+                </div>
+                <div className="p-3 bg-white rounded-lg border border-border shadow-2xs space-y-1">
+                  <span className="font-bold text-emerald-900 block text-[11px]">3. {t('central.agent.recommend')} & {t('central.agent.explain')}</span>
+                  <p className="text-muted-foreground leading-relaxed">
+                    إرسال إشعار فوري لرئيس لجنة تقييم العروض لتوقيع محضر المنح المؤقت قبل حلول أجل انتهاء التعهد.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeAgentTab === 'analytics' && (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="font-extrabold text-sm text-navy-900">
+                    {t('central.agent.analytics.name')} — {t('central.agent.analytics.title')}
+                  </span>
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-navy-100 text-navy-800 font-bold">
+                    نطاق: التحليل المالي والقطاعي
+                  </span>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 gap-2.5 text-xs">
+                <div className="p-3 bg-white rounded-lg border border-border shadow-2xs space-y-1">
+                  <span className="font-bold text-navy-900 block text-[11px]">1. {t('central.agent.observe')} & {t('central.agent.analyze')}</span>
+                  <p className="text-muted-foreground leading-relaxed">
+                    تحليل التوزيع المالي القطاعي: قطاع الأشغال العمومية يستحوذ على الحصة الأكبر متبوعاً بالري والموارد المائية والرقمنة.
+                  </p>
+                </div>
+                <div className="p-3 bg-white rounded-lg border border-border shadow-2xs space-y-1">
+                  <span className="font-bold text-amber-900 block text-[11px]">2. {t('central.agent.detect')} & {t('central.agent.predict')}</span>
+                  <p className="text-muted-foreground leading-relaxed">
+                    تباين نسبي بين التقديرات الإدارية الأولية والمبالغ المقترحة في العروض المقدمة بنسبة تتجاوز +15% في مشاريع الري.
+                  </p>
+                </div>
+                <div className="p-3 bg-white rounded-lg border border-border shadow-2xs space-y-1">
+                  <span className="font-bold text-emerald-900 block text-[11px]">3. {t('central.agent.recommend')} & {t('central.agent.explain')}</span>
+                  <p className="text-muted-foreground leading-relaxed">
+                    تفعيل جدول الأسعار المرجعية الوطنية (Mercuriale des Prix) وتحديث التقديرات وفق متغيرات السوق لضمان الجدوى المالية.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeAgentTab === 'risk' && (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="font-extrabold text-sm text-navy-900">
+                    {t('central.agent.risk.name')} — {t('central.agent.risk.title')}
+                  </span>
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-navy-100 text-navy-800 font-bold">
+                    نطاق: إدارة المخاطر والنزاعات
+                  </span>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 gap-2.5 text-xs">
+                <div className="p-3 bg-white rounded-lg border border-border shadow-2xs space-y-1">
+                  <span className="font-bold text-navy-900 block text-[11px]">1. {t('central.agent.observe')} & {t('central.agent.analyze')}</span>
+                  <p className="text-muted-foreground leading-relaxed">
+                    رصد {highRiskCount} حالات مخاطر حرجة. تحليل أسباب عدم الجدوى في الصفقات المعلنة للمرة الثانية.
+                  </p>
+                </div>
+                <div className="p-3 bg-white rounded-lg border border-border shadow-2xs space-y-1">
+                  <span className="font-bold text-rose-900 block text-[11px]">2. {t('central.agent.detect')} & {t('central.agent.predict')}</span>
+                  <p className="text-muted-foreground leading-relaxed">
+                    شروط الأهلية المفرطة في صفقة ورقلة (DZ-2025-SP-088) أدت إلى إقصاء 100% من العروض. احتمالية تكرار الفشل إذا لم تُعدل المعايير.
+                  </p>
+                </div>
+                <div className="p-3 bg-white rounded-lg border border-border shadow-2xs space-y-1">
+                  <span className="font-bold text-emerald-900 block text-[11px]">3. {t('central.agent.recommend')} & {t('central.agent.explain')}</span>
+                  <p className="text-muted-foreground leading-relaxed">
+                    إعادة صياغة شروط التأهيل لتتوافق مع طبيعة السوق المحلية دون الإخلال بضمانات الجودة الفنية المطلوبة.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeAgentTab === 'geo' && (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="font-extrabold text-sm text-navy-900">
+                    {t('central.agent.geo.name')} — {t('central.agent.geo.title')}
+                  </span>
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-navy-100 text-navy-800 font-bold">
+                    نطاق: التوازن الإقليمي والولائي
+                  </span>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 gap-2.5 text-xs">
+                <div className="p-3 bg-white rounded-lg border border-border shadow-2xs space-y-1">
+                  <span className="font-bold text-navy-900 block text-[11px]">1. {t('central.agent.observe')} & {t('central.agent.analyze')}</span>
+                  <p className="text-muted-foreground leading-relaxed">
+                    متابعة توزيع الصفقات عبر أقاليم الوسط والغرب والشرق والجنوب. تركز أكبر للقيم المالية في ولايات الجزائر ووهران وقسنطينة.
+                  </p>
+                </div>
+                <div className="p-3 bg-white rounded-lg border border-border shadow-2xs space-y-1">
+                  <span className="font-bold text-amber-900 block text-[11px]">2. {t('central.agent.detect')} & {t('central.agent.predict')}</span>
+                  <p className="text-muted-foreground leading-relaxed">
+                    ضعف الإقبال على المناقصات في ولايات الجنوب (ورقلة، بشار) بمتوسط أقل من عرضين مؤهلين لكل عملية.
+                  </p>
+                </div>
+                <div className="p-3 bg-white rounded-lg border border-border shadow-2xs space-y-1">
+                  <span className="font-bold text-emerald-900 block text-[11px]">3. {t('central.agent.recommend')} & {t('central.agent.explain')}</span>
+                  <p className="text-muted-foreground leading-relaxed">
+                    تشجيع صيغ التجمع (Groupement d&apos;entreprises) وتوسيع نطاق الإشهار عبر البوابة الوطنية لتوسيع قاعدة المشاركة الجغرافية.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </section>
+        </div>
+      </div>
 
     </div>
   );

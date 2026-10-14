@@ -144,13 +144,13 @@ export function CentralSpace() {
           return (
             <Link key={item.id} href={item.href}>
               <a
-                className={`flex items-center gap-3 px-4 py-3.5 rounded-lg text-[15px] transition-colors duration-150 ${
+                className={`flex items-center gap-3 px-4 py-3 rounded-lg text-base transition-colors duration-150 ${
                   item.isActive
                     ? 'bg-[var(--stamp-green-700)] text-white font-semibold shadow-sm'
                     : 'text-[var(--ink-700)] hover:bg-[var(--paper-100)] hover:text-[var(--stamp-green-700)]'
                 }`}
               >
-                <Icon className="w-[18px] h-[18px] shrink-0" strokeWidth={2} />
+                <Icon className="size-5 shrink-0" strokeWidth={2} />
                 <span className="truncate">{item.label}</span>
               </a>
             </Link>
@@ -224,7 +224,7 @@ export function CentralSpace() {
               </SheetContent>
             </Sheet>
 
-            <span className="font-bold text-sm text-[var(--ink-900)]">
+            <span className="font-bold text-lg text-[var(--ink-900)]">
               صفقات ذكية · الإدارة المركزية
             </span>
 

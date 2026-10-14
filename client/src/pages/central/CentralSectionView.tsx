@@ -19,7 +19,7 @@ export function CentralSectionView({ titleKey, descKey, icon }: CentralSectionVi
 
   return (
     <div className="space-y-6">
-      <section className="bg-card border border-border rounded-2xl p-6 md:p-8 shadow-sm space-y-6">
+      <section className="bg-white border border-[var(--color-border-subtle)] rounded-xl p-5 shadow-sm space-y-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-border pb-6">
           <div className="flex items-center gap-3">
             {icon && (

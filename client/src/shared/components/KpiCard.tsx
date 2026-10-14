@@ -39,25 +39,25 @@ export function KpiCard({
   };
 
   return (
-    <div className="group relative bg-white border border-[var(--color-border-subtle)] rounded-xl p-6 transition-all duration-200 hover:shadow-[var(--card-shadow-hover)] hover:-translate-y-0.5">
+    <div className="group relative bg-white border border-[var(--color-border-subtle)] rounded-xl p-5 transition-all duration-200 hover:shadow-[var(--card-shadow-hover)] hover:-translate-y-0.5">
       {/* Header */}
-      <div className="flex items-start justify-between mb-4">
-        <div className="eyebrow">{eyebrow}</div>
+      <div className="flex items-start justify-between mb-3">
+        <div className="eyebrow !text-xs text-[var(--ink-500)]">{eyebrow}</div>
         {Icon && (
-          <div className="size-10 rounded-lg bg-[var(--paper-100)] border border-[var(--color-border-subtle)] flex items-center justify-center text-[var(--ink-700)]">
-            <Icon className="size-[18px]" strokeWidth={2.5} />
+          <div className="size-9 rounded-lg bg-[var(--paper-100)] border border-[var(--color-border-subtle)] flex items-center justify-center text-[var(--ink-700)]">
+            <Icon className="size-4" strokeWidth={2.5} />
           </div>
         )}
       </div>
 
       {/* Hero Number */}
-      <div className="font-mono text-[var(--text-display)] font-bold tracking-tight leading-none text-[var(--ink-900)] mb-2">
+      <div className="font-mono text-4xl font-bold tracking-tight leading-none text-[var(--ink-900)] mb-2">
         {value}
       </div>
 
       {/* Trend */}
       {trend !== undefined && (
-        <div className="flex items-center gap-2 text-sm mb-4">
+        <div className="flex items-center gap-2 text-sm mb-3">
           <span
             className={`font-mono tabular-nums font-semibold ${
               trend >= 0 ? 'text-[var(--stamp-green-700)]' : 'text-[var(--stamp-red-700)]'

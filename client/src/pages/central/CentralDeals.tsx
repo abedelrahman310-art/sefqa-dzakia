@@ -216,7 +216,7 @@ export function CentralDeals() {
   });
 
   return (
-    <div className="space-y-8 page-container py-6">
+    <div className="space-y-6 page-container py-4">
       <PageHeader
         eyebrow="المراقبة الوطنية"
         title="مراقبة الصفقات"
@@ -224,7 +224,7 @@ export function CentralDeals() {
       />
 
       {/* 4 KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 section-gap">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <KpiCard
           eyebrow="إجمالي الصفقات"
           value="1,248"
