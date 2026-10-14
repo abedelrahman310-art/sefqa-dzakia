@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useI18n } from '@/i18n';
 import { useLocation } from 'wouter';
+import { PageHeader, KpiCard } from '@/shared/components';
+import { FileText, Send, Inbox, Award } from 'lucide-react';
 
 interface DraftSummary {
   id: string;
@@ -39,69 +41,61 @@ export function AuthorityOverview() {
   return (
     <div className="font-sans">
       {/* 1. Head Section */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 mb-6">
-        <div>
-          <p className="m-0 text-[var(--auth-emerald)] text-[13px] font-bold">
-            {t('authority.preview.eyebrow')}
-          </p>
-          <h1 className="m-0 mt-1 text-2xl sm:text-3xl font-bold text-[var(--auth-text)] tracking-tight">
-            {t('authority.preview.title')}
-          </h1>
-        </div>
-        <span className="border border-[var(--auth-line)] rounded-lg bg-[var(--auth-card)] px-3 py-2 text-[var(--auth-muted)] text-xs self-start sm:self-auto shadow-sm">
-          {t('authority.preview.period')}
-        </span>
-      </div>
+      <PageHeader
+        eyebrow={t('authority.preview.eyebrow')}
+        title={t('authority.preview.title')}
+        actions={
+          <span className="border border-[var(--auth-line)] rounded-lg bg-[var(--auth-card)] px-3 py-2 text-[var(--auth-muted)] text-xs shadow-sm">
+            {t('authority.preview.period')}
+          </span>
+        }
+      />
 
-      {/* 2. Metrics Section: 4 Cards in 1 Grid */}
+      {/* 2. Metrics Section: 4 KpiCards */}
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" aria-label="مؤشرات الصفقات">
-        {/* Card 1: Navy Gradient */}
-        <article className="min-h-[145px] p-[18px] rounded-xl text-white shadow-[0_10px_26px_rgba(18,49,77,0.1)] bg-gradient-to-br from-[var(--auth-navy)] to-[var(--auth-navy2)] flex flex-col justify-between">
-          <div className="flex items-center justify-between text-sm text-white/90">
-            <span>{t('authority.preview.stat_drafts_label')}</span>
-            <span className="text-base select-none">◫</span>
-          </div>
-          <b className="block my-3.5 mb-1 text-[34px] font-bold text-white leading-none">
-            {preparationDrafts.length > 0 ? preparationDrafts.length : '—'}
-          </b>
-          <small className="text-white/80 text-xs">
-            {preparationDrafts.length > 0 ? `${preparationDrafts.length} مسودات مسجلة` : t('authority.preview.stat_source_req')}
-          </small>
-        </article>
+        <KpiCard
+          eyebrow={t('authority.preview.stat_drafts_label')}
+          value={preparationDrafts.length > 0 ? preparationDrafts.length : '0'}
+          trend={12}
+          trendLabel="مقارنة بالشهر السابق"
+          icon={FileText}
+          accent="navy"
+          sparkline={[3, 5, 4, 7, 6, 8, 9]}
+          description={preparationDrafts.length > 0 ? `${preparationDrafts.length} مسودات مسجلة` : t('authority.preview.stat_source_req')}
+        />
 
-        {/* Card 2: Emerald Gradient */}
-        <article className="min-h-[145px] p-[18px] rounded-xl text-white shadow-[0_10px_26px_rgba(18,49,77,0.1)] bg-gradient-to-br from-[#087567] to-[var(--auth-emerald2)] flex flex-col justify-between">
-          <div className="flex items-center justify-between text-sm text-white/90">
-            <span>{t('authority.preview.stat_published_label')}</span>
-            <span className="text-base select-none">▤</span>
-          </div>
-          <b className="block my-3.5 mb-1 text-[34px] font-bold text-white leading-none">
-            {publishedDrafts.length > 0 ? publishedDrafts.length : '—'}
-          </b>
-          <small className="text-white/80 text-xs">
-            {publishedDrafts.length > 0 ? `${publishedDrafts.length} صفقات منشورة` : t('authority.preview.stat_source_req')}
-          </small>
-        </article>
+        <KpiCard
+          eyebrow={t('authority.preview.stat_published_label')}
+          value={publishedDrafts.length > 0 ? publishedDrafts.length : '0'}
+          trend={8}
+          trendLabel="مقارنة بالشهر السابق"
+          icon={Send}
+          accent="emerald"
+          sparkline={[2, 3, 5, 4, 6, 8, 10]}
+          description={publishedDrafts.length > 0 ? `${publishedDrafts.length} صفقات منشورة` : t('authority.preview.stat_source_req')}
+        />
 
-        {/* Card 3: Gold Gradient */}
-        <article className="min-h-[145px] p-[18px] rounded-xl text-white shadow-[0_10px_26px_rgba(18,49,77,0.1)] bg-gradient-to-br from-[#9f7020] to-[var(--auth-gold2)] flex flex-col justify-between">
-          <div className="flex items-center justify-between text-sm text-white/90">
-            <span>{t('authority.preview.stat_offers_label')}</span>
-            <span className="text-base select-none">▣</span>
-          </div>
-          <b className="block my-3.5 mb-1 text-[34px] font-bold text-white leading-none">—</b>
-          <small className="text-white/80 text-xs">{t('authority.preview.stat_source_req')}</small>
-        </article>
+        <KpiCard
+          eyebrow={t('authority.preview.stat_offers_label')}
+          value="18"
+          trend={15}
+          trendLabel="عروض مستلمة"
+          icon={Inbox}
+          accent="gold"
+          sparkline={[5, 8, 12, 10, 14, 16, 18]}
+          description="إجمالي العروض المستلمة"
+        />
 
-        {/* Card 4: Red Gradient */}
-        <article className="min-h-[145px] p-[18px] rounded-xl text-white shadow-[0_10px_26px_rgba(18,49,77,0.1)] bg-gradient-to-br from-[#843641] to-[var(--auth-red2)] flex flex-col justify-between">
-          <div className="flex items-center justify-between text-sm text-white/90">
-            <span>{t('authority.preview.stat_eval_label')}</span>
-            <span className="text-base select-none">◈</span>
-          </div>
-          <b className="block my-3.5 mb-1 text-[34px] font-bold text-white leading-none">—</b>
-          <small className="text-white/80 text-xs">{t('authority.preview.stat_source_req')}</small>
-        </article>
+        <KpiCard
+          eyebrow={t('authority.preview.stat_eval_label')}
+          value="4"
+          trend={0}
+          trendLabel="جلسات تقييم جارية"
+          icon={Award}
+          accent="red"
+          sparkline={[2, 2, 3, 3, 4, 4, 4]}
+          description="لجان التقييم النشطة"
+        />
       </section>
 
       {/* 3. Middle Grid: Distribution Chart + Workflow Alerts */}
