@@ -1,20 +1,22 @@
 import { useState, useMemo } from 'react';
-import { useLocation } from 'wouter';
+import { Link, useLocation } from 'wouter';
 import {
   Sparkles,
-  TrendingUp,
-  TrendingDown,
   AlertTriangle,
-  Search,
-  RotateCcw,
-  SlidersHorizontal,
+  FileText,
+  Coins,
+  MapPin,
+  Plus,
+  Minus,
+  Maximize2,
+  ArrowRight,
   ChevronRight,
   ShieldAlert,
-  Building2,
-  CheckCircle2,
 } from 'lucide-react';
 import AlgeriaMap, { WilayaDataPoint } from '@/pages/landing/assets/AlgeriaMap';
 import { WilayaDetailCard, WilayaDetail } from './components/WilayaDetailCard';
+import { KPICompact } from './components/KPICompact';
+import { SearchBox } from './components/SearchBox';
 import { ALGERIA_69_WILAYAS } from '@/lib/wilayas';
 
 // Seed raw high-activity / flagged wilayas
@@ -59,7 +61,6 @@ function buildNational69Dataset(): Record<string, WilayaDetail> {
         warningDetails: preset.warningDetails ?? [],
       };
     } else {
-      // Deterministic, realistic distribution for other wilayas
       const seed = (index * 7 + 13) % 19;
       const count = Math.max(3, seed);
       const budget = Number((count * 0.16 + 0.3).toFixed(1));
@@ -83,7 +84,7 @@ export function CentralMapView() {
   const [selectedWilaya, setSelectedWilaya] = useState<WilayaDetail | null>(null);
   const [hoveredWilayaName, setHoveredWilayaName] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [notificationToast, setNotificationToast] = useState<string | null>(null);
+  const [zoom, setZoom] = useState(1);
 
   // Full 69-wilayas data
   const nationalData = useMemo(() => buildNational69Dataset(), []);
@@ -112,8 +113,8 @@ export function CentralMapView() {
       .slice(0, 5);
   }, [nationalData]);
 
-  // Filtered search list for the dropdown/selector
-  const filteredSearchList = useMemo(() => {
+  // Filtered search list
+  const searchResults = useMemo(() => {
     if (!searchQuery.trim()) return [];
     const query = searchQuery.trim().toLowerCase();
     return Object.values(nationalData)
@@ -127,7 +128,6 @@ export function CentralMapView() {
   }, [nationalData, searchQuery]);
 
   const handleWilayaClick = (identifier: string, details?: any) => {
-    // Look up by code, name, or details passed
     let matched: WilayaDetail | undefined;
     if (details?.code && nationalData[details.code]) {
       matched = nationalData[details.code];
@@ -144,243 +144,251 @@ export function CentralMapView() {
     }
   };
 
-  const handleNotifyAuthority = (code: string) => {
-    const target = nationalData[code];
-    setNotificationToast(
-      `تم إرسال إشعار رقابي فوري إلى المصلحة المتعاقدة بولاية ${target?.name || code} عبر القناة المشفرة.`
-    );
-    setTimeout(() => setNotificationToast(null), 5000);
-  };
-
-  const handleViewTenders = (code: string) => {
-    setLocation(`/central/deals?wilaya=${code}`);
-  };
+  const handleZoomIn = () => setZoom((z) => Math.min(Number((z + 0.15).toFixed(2)), 2.0));
+  const handleZoomOut = () => setZoom((z) => Math.max(Number((z - 0.15).toFixed(2)), 0.8));
+  const handleZoomReset = () => setZoom(1);
 
   return (
-    <div className="flex flex-col lg:flex-row h-screen w-full overflow-hidden bg-[var(--paper-50)] text-[var(--ink-900)]">
-      {/* Toast Notification */}
-      {notificationToast && (
-        <div className="fixed top-5 start-1/2 -translate-x-1/2 z-50 bg-[var(--ink-900)] text-white px-5 py-3 rounded-xl shadow-2xl text-xs flex items-center gap-2 border border-white/20 animate-in fade-in slide-in-from-top-4">
-          <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-none" />
-          <span>{notificationToast}</span>
-        </div>
-      )}
+    <div className="flex flex-col lg:flex-row h-screen w-full overflow-hidden bg-[var(--paper-50)] text-[var(--ink-900)]" dir="rtl">
+      
+      {/* 1. الخريطة — البطل (70%) */}
+      <main className="flex-1 h-screen relative bg-gradient-to-br from-[var(--paper-50)] via-[#f3f6f9] to-[var(--paper-100)] overflow-hidden flex items-center justify-center">
+        
+        {/* Floating Top Controls: Search + Back to Dashboard */}
+        <div className="absolute top-6 start-6 z-20 flex flex-col gap-2">
+          <div className="flex items-center gap-2">
+            <Link href="/central/dashboard">
+              <a
+                className="h-11 px-3.5 rounded-xl bg-white/95 backdrop-blur-md border border-[var(--color-border-subtle)] shadow-lg hover:bg-[var(--paper-100)] text-xs font-bold text-[var(--ink-700)] flex items-center gap-1.5 transition-all"
+                title="الرجوع إلى لوحة القيادة المركزية"
+              >
+                <ArrowRight className="size-4 rtl:rotate-0" />
+                <span className="hidden sm:inline">لوحة القيادة</span>
+              </a>
+            </Link>
 
-      {/* Main Area: Map & Overlay Controls */}
-      <main className="flex-1 h-[65vh] lg:h-screen overflow-hidden relative flex flex-col">
-        {/* Header Overlay */}
-        <div className="absolute top-0 start-0 end-0 z-10 p-4 md:p-6 pointer-events-none">
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div className="bg-white/95 backdrop-blur-md border border-[var(--color-border-subtle)] shadow-sm rounded-xl p-4 inline-block pointer-events-auto">
-              <div className="eyebrow mb-1">المراقبة الوطنية المركزية</div>
-              <div className="flex items-center gap-3">
-                <h1 className="heading-h2 text-xl md:text-2xl font-bold text-[var(--ink-900)]">
-                  الخريطة الحرارية للصفقات
-                </h1>
-                <span className="hidden sm:inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-[var(--stamp-green-700)] border border-emerald-200">
-                  تغطية 69 ولاية
-                </span>
-              </div>
-            </div>
-
-            {/* Quick Wilaya Search Bar */}
-            <div className="relative pointer-events-auto w-full sm:w-64">
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="ابحث عن ولاية أو رقم..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full h-10 ps-9 pe-3 text-xs rounded-xl bg-white/95 backdrop-blur-md border border-[var(--color-border-subtle)] focus:outline-none focus:ring-2 focus:ring-[var(--stamp-green-700)] shadow-sm"
-                />
-                <Search className="w-4 h-4 text-[var(--ink-500)] absolute start-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-              </div>
-
-              {/* Search dropdown results */}
-              {filteredSearchList.length > 0 && (
-                <div className="absolute top-12 start-0 end-0 bg-white rounded-xl border border-[var(--color-border-subtle)] shadow-xl overflow-hidden z-30 py-1">
-                  {filteredSearchList.map((item) => (
-                    <button
-                      key={item.code}
-                      type="button"
-                      onClick={() => {
-                        setSelectedWilaya(item);
-                        setSearchQuery('');
-                      }}
-                      className="w-full text-start px-3 py-2 text-xs hover:bg-[var(--paper-100)] flex items-center justify-between transition-colors"
-                    >
-                      <div className="flex items-center gap-2">
-                        <span className="font-mono font-bold text-[var(--ink-500)]">
-                          {item.code}
-                        </span>
-                        <span className="font-medium text-[var(--ink-900)]">{item.name}</span>
-                        {item.nameFr && (
-                          <span className="text-[10px] text-[var(--ink-500)]">({item.nameFr})</span>
-                        )}
-                      </div>
-                      <span className="font-mono text-[var(--stamp-green-700)] font-semibold">
-                        {item.tenders_count} صفقة
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
+            <SearchBox
+              compact
+              value={searchQuery}
+              onChange={setSearchQuery}
+              results={searchResults}
+              onSelect={(w) => setSelectedWilaya(w)}
+            />
           </div>
 
           {hoveredWilayaName && (
-            <div className="mt-2 text-xs font-medium text-[var(--ink-700)] bg-white/80 backdrop-blur px-3 py-1 rounded-lg inline-block border border-[var(--color-border-subtle)] shadow-sm pointer-events-auto">
-              المؤشر: <strong className="text-[var(--ink-900)]">{hoveredWilayaName}</strong>
+            <div className="text-xs font-semibold text-[var(--ink-700)] bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-lg inline-flex items-center gap-1.5 border border-[var(--color-border-subtle)] shadow-md w-fit animate-in fade-in">
+              <span className="size-2 rounded-full bg-[var(--stamp-green-700)]" />
+              <span>الولاية:</span>
+              <strong className="text-[var(--ink-900)]">{hoveredWilayaName}</strong>
             </div>
           )}
         </div>
 
-        {/* Map Viewport */}
-        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[var(--paper-50)] via-[#f3f6f9] to-[var(--paper-100)] p-4 pt-20">
+        {/* الخريطة تملأ كل شيء بدون حجب */}
+        <div
+          className="w-full h-full flex items-center justify-center p-6 md:p-12 transition-transform duration-300 ease-out select-none"
+          style={{ transform: `scale(${zoom})`, transformOrigin: 'center center' }}
+        >
           <AlgeriaMap
             data={mapData}
             colorMode="heatmap"
             onWilayaClick={handleWilayaClick}
             onWilayaHover={setHoveredWilayaName}
+            height="100%"
+            width="100%"
           />
         </div>
 
-        {/* Legend Overlay — Bottom Start */}
-        <div className="absolute bottom-6 start-6 z-10 pointer-events-auto">
-          <div className="bg-white/95 backdrop-blur-md rounded-2xl border border-[var(--color-border-subtle)] shadow-xl p-4 min-w-[210px]">
-            <div className="eyebrow mb-3 flex items-center justify-between">
-              <span>مستوى النشاط</span>
-              <span className="text-[10px] text-[var(--ink-500)]">صفقات 2026</span>
-            </div>
-            <div className="space-y-2 text-xs">
-              <LegendItem color="#1B4332" label="نشاط عالٍ" count="50+" />
-              <LegendItem color="#2D6A4F" label="نشاط متوسط" count="20-49" />
-              <LegendItem color="#74C69D" label="نشاط منخفض" count="5-19" />
-              <LegendItem color="#D4DCE4" label="لا نشاط" count="0-4" />
-              <div className="pt-1 border-t border-[var(--color-border-subtle)]">
-                <LegendItem color="#B02A2A" label="شبهات مرصودة" count="⚠️ 12" />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Selected Wilaya Card — Bottom End */}
+        {/* WilayaDetailCard — يظهر عند النقر في bottom-start */}
         {selectedWilaya && (
-          <div className="absolute bottom-6 end-6 z-20 w-80 md:w-96 pointer-events-auto max-h-[85vh] overflow-y-auto">
+          <div className="absolute bottom-6 start-6 z-30 w-[420px] max-w-[calc(100vw-3rem)]">
             <WilayaDetailCard
               wilaya={selectedWilaya}
               onClose={() => setSelectedWilaya(null)}
-              onNotifyAuthority={handleNotifyAuthority}
-              onViewTenders={handleViewTenders}
+              onViewTenders={(code) => setLocation(`/central/deals?wilaya=${code}`)}
+              onNotifyAuthority={(code) => {
+                alert(`تم توجيه إخطار رقابي فوري إلى المصلحة المتعاقدة بولاية ${selectedWilaya.name} (${code})`);
+              }}
             />
           </div>
         )}
+
+        {/* Zoom Controls — صغيرة في الزاوية السفلى */}
+        <div className="absolute bottom-6 end-6 z-20 flex flex-col gap-2">
+          <button
+            type="button"
+            onClick={handleZoomIn}
+            title="تكبير الخريطة"
+            aria-label="تكبير"
+            className="size-10 rounded-xl bg-white/95 backdrop-blur-md border border-[var(--color-border-subtle)] shadow-lg hover:bg-[var(--paper-100)] active:scale-95 text-[var(--ink-700)] flex items-center justify-center transition-all"
+          >
+            <Plus className="size-4" />
+          </button>
+          <button
+            type="button"
+            onClick={handleZoomOut}
+            title="تصغير الخريطة"
+            aria-label="تصغير"
+            className="size-10 rounded-xl bg-white/95 backdrop-blur-md border border-[var(--color-border-subtle)] shadow-lg hover:bg-[var(--paper-100)] active:scale-95 text-[var(--ink-700)] flex items-center justify-center transition-all"
+          >
+            <Minus className="size-4" />
+          </button>
+          <button
+            type="button"
+            onClick={handleZoomReset}
+            title="إعادة ضبط الحجم الأصلي"
+            aria-label="إعادة ضبط"
+            className="size-10 rounded-xl bg-white/95 backdrop-blur-md border border-[var(--color-border-subtle)] shadow-lg hover:bg-[var(--paper-100)] active:scale-95 text-[var(--ink-700)] flex items-center justify-center transition-all"
+          >
+            <Maximize2 className="size-4" />
+          </button>
+        </div>
+
       </main>
 
-      {/* Sidebar: National KPIs & AI Insights */}
-      <aside className="w-full lg:w-[340px] xl:w-[380px] h-[35vh] lg:h-screen overflow-y-auto border-s border-[var(--color-border-subtle)] bg-white p-6 flex flex-col gap-6 shadow-sm">
-        {/* National KPIs Section */}
-        <div>
-          <div className="flex items-center justify-between mb-4">
-            <div className="eyebrow mb-0">المؤشرات الوطنية المركزية</div>
-            <span className="text-[11px] text-[var(--ink-500)] font-mono">Q1 2026</span>
-          </div>
+      {/* 2. Sidebar معلوماتي (30%) */}
+      <aside className="w-full lg:w-[420px] h-screen bg-white border-s border-[var(--color-border-subtle)] overflow-y-auto flex-none flex flex-col shadow-sm">
+        
+        {/* Header */}
+        <div className="p-6 border-b border-[var(--color-border-subtle)]">
+          <div className="eyebrow text-[var(--stamp-green-700)]">المراقبة الوطنية</div>
+          <h1 className="heading-h2 text-2xl font-bold text-[var(--ink-900)] mt-1.5">الخريطة الحرارية</h1>
+          <p className="text-sm text-[var(--ink-500)] mt-1">
+            تغطية 69 ولاية — رصد الأنشطة والتدفقات المالية
+          </p>
+        </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <NationalKPI
-              eyebrow="إجمالي الصفقات"
-              value="1,248"
-              trend={12}
-            />
-            <NationalKPI
-              eyebrow="الحجم المالي"
-              value="185"
-              unit="مليار دج"
-              trend={8}
-            />
-            <NationalKPI
-              eyebrow="الولايات النشطة"
-              value="69"
-              unit="ولاية"
-              trend={0}
-            />
-            <NationalKPI
-              eyebrow="شبهات مرصودة"
-              value="12"
-              trend={-5}
-              urgent
-            />
+        {/* KPIs — مكدّسة عمودياً (واضحة ومنظمة) */}
+        <div className="p-6 space-y-3.5 border-b border-[var(--color-border-subtle)]">
+          <KPICompact
+            eyebrow="إجمالي الصفقات"
+            value="1,248"
+            trend={12}
+            icon={FileText}
+          />
+          <KPICompact
+            eyebrow="الحجم المالي"
+            value="185"
+            unit="مليار دج"
+            trend={8}
+            icon={Coins}
+          />
+          <KPICompact
+            eyebrow="الولايات النشطة"
+            value="69"
+            unit="ولاية"
+            icon={MapPin}
+          />
+          <KPICompact
+            eyebrow="شبهات مرصودة"
+            value="12"
+            trend={-5}
+            urgent
+            icon={AlertTriangle}
+          />
+        </div>
+
+        {/* Legend — هنا (وليس على الخريطة) */}
+        <div className="p-6 border-b border-[var(--color-border-subtle)]">
+          <h3 className="eyebrow mb-3.5 text-[var(--ink-600)]">مستوى النشاط</h3>
+          <div className="space-y-2.5">
+            <LegendItem color="var(--stamp-green-700)" label="نشاط عالٍ" range="50+" />
+            <LegendItem color="var(--stamp-green-500)" label="نشاط متوسط" range="20-49" />
+            <LegendItem color="var(--stamp-green-300)" label="نشاط منخفض" range="5-19" />
+            <LegendItem color="var(--ink-100)" label="لا نشاط" range="0-4" />
+            <LegendItem color="var(--stamp-red-700)" label="⚠ شبهات مرصودة" range="12 حالة" />
           </div>
         </div>
 
-        {/* AI Insights Card */}
-        <div className="ai-card">
-          <div className="flex items-center justify-between mb-3 relative z-10">
-            <div className="flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-[var(--ai-text)] ai-sparkle" />
+        {/* AI Insights */}
+        <div className="p-6 border-b border-[var(--color-border-subtle)]">
+          <div className="ai-card">
+            <div className="flex items-center gap-2 mb-3 relative z-10">
+              <Sparkles className="size-4 text-[var(--ai-text)] ai-sparkle" />
               <h3 className="font-bold text-sm text-[var(--ai-text-strong)]">تحليل AI الاستباقي</h3>
               <span className="ai-badge">AI</span>
             </div>
-            <span className="text-[10px] text-[var(--ai-text)]/80 font-medium">استشاري فقط</span>
+            <ul className="space-y-2 text-sm text-[var(--ink-700)] relative z-10 leading-relaxed">
+              <li className="flex items-start gap-2">
+                <span className="text-[var(--stamp-red-700)] text-base leading-none">●</span>
+                <span><strong>تلمسان:</strong> 3 صفقات بدون تنافس تقني</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-[var(--stamp-gold-700)] text-base leading-none">●</span>
+                <span><strong>وهران:</strong> تأخير 30% في الإسناد</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-[var(--official-500)] text-base leading-none">●</span>
+                <span><strong>الجزائر:</strong> 234 صفقة نشطة</span>
+              </li>
+            </ul>
           </div>
-
-          <ul className="space-y-2.5 text-xs text-[var(--ink-700)] relative z-10 leading-relaxed">
-            <li className="flex items-start gap-2">
-              <span className="w-2 h-2 rounded-full bg-rose-600 flex-none mt-1.5" />
-              <div>
-                <strong className="text-rose-900 font-bold">تلمسان:</strong> 3 صفقات بدون تنافس تقني — شبهة تجزئة في بلدية الرمشي.
-              </div>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="w-2 h-2 rounded-full bg-amber-500 flex-none mt-1.5" />
-              <div>
-                <strong className="text-amber-900 font-bold">وهران:</strong> تأخير 30% في وتيرة الإسناد وجلسات الفتح.
-              </div>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="w-2 h-2 rounded-full bg-blue-600 flex-none mt-1.5" />
-              <div>
-                <strong className="text-blue-900 font-bold">الجزائر:</strong> 234 صفقة نشطة بحجم مالي 45.6 مليار دج.
-              </div>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="w-2 h-2 rounded-full bg-rose-600 flex-none mt-1.5" />
-              <div>
-                <strong className="text-rose-900 font-bold">قسنطينة:</strong> تركيز 70% من صفقات قطاع الأشغال لدى مقاولتين.
-              </div>
-            </li>
-          </ul>
         </div>
 
-        {/* Top 5 Wilayas List */}
-        <div>
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="eyebrow mb-0">أعلى 5 ولايات نشاطاً</h3>
-            <span className="text-[11px] text-[var(--ink-500)]">اضغط للتفاصيل</span>
-          </div>
-
+        {/* Top 5 Wilayas */}
+        <div className="p-6">
+          <h3 className="eyebrow mb-4 text-[var(--ink-600)]">أعلى 5 ولايات نشاطاً</h3>
           <div className="space-y-2">
-            {topWilayas.map((w, idx) => (
-              <TopWilayaItem
+            {topWilayas.map((w, i) => (
+              <button
                 key={w.code}
-                rank={idx + 1}
-                wilaya={w}
-                isSelected={selectedWilaya?.code === w.code}
-                onClick={() => handleWilayaClick(w.code)}
-              />
+                type="button"
+                onClick={() => handleWilayaClick(w.code, w)}
+                className={`
+                  w-full flex items-center gap-3 
+                  p-3 rounded-xl 
+                  transition-all text-start border
+                  ${
+                    selectedWilaya?.code === w.code
+                      ? 'bg-emerald-50/70 border-[var(--stamp-green-700)] shadow-xs'
+                      : 'bg-white border-[var(--color-border-subtle)] hover:bg-[var(--paper-100)]'
+                  }
+                `}
+              >
+                <span className="
+                  size-8 rounded-full 
+                  bg-[var(--paper-100)]
+                  flex items-center justify-center
+                  font-mono font-bold text-sm
+                  text-[var(--ink-700)] shrink-0
+                ">
+                  {i + 1}
+                </span>
+                <div className="flex-1 min-w-0">
+                  <p className="font-bold text-sm text-[var(--ink-900)] truncate flex items-center gap-1.5">
+                    <span>{w.name}</span>
+                    <span className="text-[11px] font-mono text-[var(--ink-500)]">({w.code})</span>
+                    {w.warnings > 0 && (
+                      <span className="text-[10px] px-1 py-0.2 rounded bg-rose-100 text-rose-700 font-semibold">
+                        ⚠️ {w.warnings}
+                      </span>
+                    )}
+                  </p>
+                  <p className="text-xs text-[var(--ink-500)] font-mono mt-0.5">{w.budget} مليار دج</p>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <span className="font-mono text-sm font-bold text-[var(--stamp-green-700)]">
+                    {w.tenders_count}
+                  </span>
+                  <ChevronRight className="w-4 h-4 text-[var(--ink-400)] rtl:rotate-180" />
+                </div>
+              </button>
             ))}
           </div>
         </div>
 
-        {/* Bottom System Status */}
-        <div className="mt-auto pt-4 border-t border-[var(--color-border-subtle)] text-[11px] text-[var(--ink-500)] flex items-center justify-between">
+        {/* Footer info */}
+        <div className="mt-auto p-6 border-t border-[var(--color-border-subtle)] bg-[var(--paper-50)] text-xs text-[var(--ink-500)] flex items-center justify-between">
           <span className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
-            تحديث البيانات اللحظي: نشط
+            <span className="size-2 rounded-full bg-emerald-500 animate-ping" />
+            تحديث البيانات: لحظي
           </span>
-          <span className="font-mono">قانون 23-12</span>
+          <span className="font-mono">القانون 23-12</span>
         </div>
+
       </aside>
+
     </div>
   );
 }
@@ -389,134 +397,28 @@ export function CentralMapView() {
 function LegendItem({
   color,
   label,
-  count,
+  range,
 }: {
   color: string;
   label: string;
-  count?: string;
+  range?: string;
 }) {
   return (
-    <div className="flex items-center justify-between gap-3">
-      <div className="flex items-center gap-2">
+    <div className="flex items-center justify-between text-sm">
+      <div className="flex items-center gap-2.5">
         <span
-          className="w-3.5 h-3.5 rounded-md flex-none shadow-sm"
+          className="size-3.5 rounded-md shrink-0 shadow-xs"
           style={{ backgroundColor: color }}
         />
         <span className="text-[var(--ink-700)] font-medium">{label}</span>
       </div>
-      {count && (
-        <span className="font-mono font-bold text-[var(--ink-500)] text-[11px]">
-          {count}
+      {range && (
+        <span className="font-mono text-xs text-[var(--ink-500)] font-semibold">
+          {range}
         </span>
       )}
     </div>
   );
 }
 
-// Subcomponents: NationalKPI
-function NationalKPI({
-  eyebrow,
-  value,
-  unit,
-  trend,
-  urgent,
-}: {
-  eyebrow: string;
-  value: string;
-  unit?: string;
-  trend?: number;
-  urgent?: boolean;
-}) {
-  const isPositive = trend !== undefined && trend > 0;
-  const isNegative = trend !== undefined && trend < 0;
-
-  return (
-    <div
-      className={`p-3.5 rounded-xl border transition-all ${
-        urgent
-          ? 'bg-rose-50/70 border-rose-200'
-          : 'bg-[var(--paper-50)] border-[var(--color-border-subtle)]'
-      }`}
-    >
-      <div className="text-[11px] text-[var(--ink-500)] mb-1 truncate">{eyebrow}</div>
-      <div className="flex items-baseline gap-1.5">
-        <span
-          className={`text-xl font-bold font-mono ${
-            urgent ? 'text-rose-700' : 'text-[var(--ink-900)]'
-          }`}
-        >
-          {value}
-        </span>
-        {unit && <span className="text-[10px] text-[var(--ink-500)]">{unit}</span>}
-      </div>
-
-      {trend !== undefined && (
-        <div className="flex items-center gap-1 mt-1.5 text-[10px] font-semibold">
-          {isPositive && (
-            <span className="text-emerald-700 flex items-center">
-              <TrendingUp className="w-3 h-3 inline me-0.5" />+{trend}%
-            </span>
-          )}
-          {isNegative && (
-            <span className={urgent ? 'text-rose-700 flex items-center' : 'text-emerald-700 flex items-center'}>
-              <TrendingDown className="w-3 h-3 inline me-0.5" />
-              {trend}%
-            </span>
-          )}
-          {trend === 0 && <span className="text-[var(--ink-500)]">0% ثابت</span>}
-          <span className="text-[var(--ink-500)] font-normal">مقارنة بـ 2025</span>
-        </div>
-      )}
-    </div>
-  );
-}
-
-// Subcomponents: TopWilayaItem
-function TopWilayaItem({
-  rank,
-  wilaya,
-  isSelected,
-  onClick,
-}: {
-  rank: number;
-  wilaya: WilayaDetail;
-  isSelected?: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`w-full text-start p-2.5 rounded-xl border transition-all flex items-center justify-between gap-3 ${
-        isSelected
-          ? 'bg-emerald-50 border-[var(--stamp-green-700)] shadow-sm'
-          : 'bg-[var(--paper-50)] border-[var(--color-border-subtle)] hover:bg-[var(--paper-100)]'
-      }`}
-    >
-      <div className="flex items-center gap-2.5 min-w-0">
-        <span className="w-5 h-5 rounded-full bg-[var(--paper-200)] text-[var(--ink-700)] font-mono text-[10px] font-bold flex items-center justify-center flex-none">
-          {rank}
-        </span>
-        <div className="truncate">
-          <div className="text-xs font-bold text-[var(--ink-900)] truncate flex items-center gap-1.5">
-            <span>{wilaya.name}</span>
-            <span className="text-[10px] font-mono text-[var(--ink-500)]">({wilaya.code})</span>
-            {wilaya.warnings > 0 && (
-              <span className="text-[10px] px-1 py-0.2 rounded bg-rose-100 text-rose-700 font-semibold">
-                ⚠️ {wilaya.warnings}
-              </span>
-            )}
-          </div>
-          <div className="text-[10px] text-[var(--ink-500)]">{wilaya.budget} مليار دج</div>
-        </div>
-      </div>
-
-      <div className="flex items-center gap-2 flex-none">
-        <span className="font-mono text-xs font-bold text-[var(--stamp-green-700)]">
-          {wilaya.tenders_count}
-        </span>
-        <ChevronRight className="w-3.5 h-3.5 text-[var(--ink-500)] rtl:rotate-180" />
-      </div>
-    </button>
-  );
-}
+export default CentralMapView;
