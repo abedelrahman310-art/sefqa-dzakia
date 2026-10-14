@@ -1,3 +1,7 @@
+@import './theme/tokens/primitives.css';
+@import './theme/tokens/semantic.css';
+@import './theme/tokens/components.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -15,14 +19,14 @@
 
     /* Official Ledger Design System Tokens */
     /* Paper — الخلفيات */
-    --paper-50:  #FAFAF7;   /* خلفية رسمية */
-    --paper-100: #F5F4F0;
-    --paper-200: #EDEBE5;
+    --paper-50:  #FFFAFA;   /* snow white — الخلفية */
+    --paper-100: #F5F5F7;
+    --paper-200: #EBEBEF;
     
     /* Ink — النصوص */
-    --ink-900: #0A2540;     /* كحلي عميق — النص الأساسي */
-    --ink-700: #1E3A5F;
-    --ink-500: #4A5F7A;
+    --ink-900: #0B1A2B;     /* primary — أسود كحلي */
+    --ink-700: #1A3247;     /* secondary */
+    --ink-500: #47586E;     /* muted */
     --ink-300: #8B9BB0;
     --ink-100: #D4DCE4;
     
@@ -71,11 +75,11 @@
     --auth-gold2: #d4aa50;
     --auth-red: #963c47;
     --auth-red2: #bd5962;
-    --auth-bg: #f4f6f8;
+    --auth-bg: var(--paper-50);
     --auth-card: #ffffff;
     --auth-line: #dfe5ea;
-    --auth-text: #17212b;
-    --auth-muted: #65717c;
+    --auth-text: var(--ink-900);
+    --auth-muted: var(--ink-500);
 
     --primary: var(--navy-500);
     --primary-foreground: var(--navy-50);
@@ -129,5 +133,136 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer components {
+  .page-container {
+    max-width: var(--page-max-width);
+    margin-inline: auto;
+    padding-inline: var(--spacing-24);
+  }
+
+  .eyebrow {
+    font-size: var(--text-eyebrow);
+    font-weight: 600;
+    letter-spacing: var(--tracking-eyebrow);
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+    margin-block-end: var(--spacing-8);
+  }
+
+  .heading-display {
+    font-family: var(--font-display);
+    font-size: var(--text-display);
+    font-weight: 700;
+    line-height: var(--leading-tight);
+    letter-spacing: var(--tracking-tighter);
+    color: var(--color-text-primary);
+  }
+
+  .heading-h1 {
+    font-family: var(--font-display);
+    font-size: var(--text-h1);
+    font-weight: 700;
+    line-height: var(--leading-tight);
+    letter-spacing: var(--tracking-tight);
+    color: var(--color-text-primary);
+  }
+
+  .heading-h2 {
+    font-family: var(--font-display);
+    font-size: var(--text-h2);
+    font-weight: 600;
+    line-height: var(--leading-snug);
+    color: var(--color-text-primary);
+  }
+
+  .heading-h3 {
+    font-family: var(--font-display);
+    font-size: var(--text-h3);
+    font-weight: 600;
+    line-height: var(--leading-snug);
+    color: var(--color-text-primary);
+  }
+
+  /* ═══ AI Card ═══ */
+  .ai-card {
+    position: relative;
+    background: var(--ai-bg);
+    border: 1px solid var(--ai-border);
+    border-radius: 12px;
+    padding: 20px;
+    overflow: hidden;
+  }
+
+  .ai-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      var(--ai-bg-strong),
+      transparent
+    );
+    transform: translateX(-100%);
+    animation: shimmer 3s infinite;
+    pointer-events: none;
+  }
+
+  @keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    50% { transform: translateX(100%); }
+    100% { transform: translateX(-100%); }
+  }
+
+  .ai-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    background: var(--ai-bg-strong);
+    color: var(--ai-text-strong);
+    border: 1px solid var(--ai-border);
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .ai-sparkle {
+    display: inline-block;
+    animation: pulse-sparkle 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse-sparkle {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.7; transform: scale(1.1); }
+  }
+
+  .section-gap {
+    margin-block-end: var(--section-gap);
+  }
+
+  .text-body-sm {
+    font-size: var(--text-body-sm, 13px);
+    line-height: var(--leading-normal, 1.5);
+  }
+
+  .text-body-lg {
+    font-size: var(--text-body-lg, 16px);
+    line-height: var(--leading-normal, 1.5);
+  }
+
+  .text-h3 {
+    font-size: var(--text-h3, 22px);
+    font-weight: 600;
+    line-height: var(--leading-snug, 1.25);
+  }
+
+  .badge-amber {
+    background-color: rgba(245, 158, 11, 0.1);
+    color: #b45309;
+    border: 1px solid rgba(245, 158, 11, 0.25);
   }
 }

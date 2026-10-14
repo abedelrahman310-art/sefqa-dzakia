@@ -1,43 +1,91 @@
-/* Raw values — لا تستخدم مباشرة في المكونات */
 :root {
-  /* Ink (النصوص) */
-  --ink-900: #0A2540;
-  --ink-700: #1E3A5F;
-  --ink-500: #4A5F7A;
+  /* ═══ Ink (النصوص) — Black Navy ═══ */
+  --ink-900: #0B1A2B;   /* primary — أسود كحلي */
+  --ink-700: #1A3247;   /* secondary */
+  --ink-500: #47586E;   /* muted */
   --ink-300: #8B9BB0;
   --ink-100: #D4DCE4;
 
-  /* Paper (الخلفيات) */
-  --paper-50: #FAFAF7;
-  --paper-100: #F5F4F0;
-  --paper-200: #EDEBE5;
+  /* ═══ Paper (الخلفيات) — Snow White ═══ */
+  --paper-50: #FFFAFA;   /* snow white — الخلفية */
+  --paper-100: #F5F5F7;
+  --paper-200: #EBEBEF;
 
-  /* Sepia (للمتعامل) */
-  --sepia-900: #3D2817;
-  --sepia-700: #6B4A2F;
-  --sepia-500: #8B7355;
-  --sepia-300: #B8A08A;
-
-  /* Stamp Green (للمصلحة) */
+  /* ═══ Stamp Green (الزمردي) ═══ */
   --stamp-green-900: #0F2419;
   --stamp-green-700: #1B4332;
   --stamp-green-500: #2D6A4F;
   --stamp-green-300: #74C69D;
 
-  /* Official (للإدارة) */
+  /* ═══ Stamp Gold (الذهبي) ═══ */
+  --stamp-gold-700: #8B6914;
+  --stamp-gold-500: #B8860B;
+
+  /* ═══ Official (الكحلي الرسمي) ═══ */
   --official-900: #0A1F33;
   --official-700: #0A2540;
   --official-500: #1E5A8E;
   --official-300: #7BA7D0;
 
-  /* Status colors */
+  /* ═══ Status ═══ */
   --stamp-red-700: #8B1A1A;
   --stamp-red-500: #B02A2A;
-  --stamp-gold-700: #8B6914;
-  --stamp-gold-500: #B8860B;
-  --stamp-blue-700: #1A3A5C;
 
-  /* Neutral */
+  /* ═══ AI (البنفسجي) ═══ */
+  --ai-bg: rgba(139, 92, 246, 0.04);
+  --ai-bg-strong: rgba(139, 92, 246, 0.08);
+  --ai-border: rgba(139, 92, 246, 0.20);
+  --ai-border-strong: rgba(139, 92, 246, 0.40);
+  --ai-text: #7c3aed;
+  --ai-text-strong: #6d28d9;
+  --ai-accent: #8b5cf6;
+
+  /* ═══ Typography Scale (Hero) ═══ */
+  --font-display: 'Cairo', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --text-caption: 11px;
+  --text-body-sm: 13px;
+  --text-body: 14px;
+  --text-body-lg: 16px;
+  --text-h3: 22px;
+  --text-h2: 28px;
+  --text-h1: 40px;          /* ← كان 24px */
+  --text-display: 56px;      /* ← Hero KPIs */
+  --text-display-xl: 72px;   /* ← Hero KPIs كبيرة */
+  --text-eyebrow: 11px;
+
+  --leading-tight: 1.15;
+  --leading-snug: 1.25;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.65;
+
+  --tracking-tight: -0.02em;
+  --tracking-tighter: -0.03em;
+  --tracking-eyebrow: 0.1em;
+
+  /* ═══ Spacing (Generous) ═══ */
+  --spacing-4: 4px;
+  --spacing-8: 8px;
+  --spacing-12: 12px;
+  --spacing-16: 16px;
+  --spacing-24: 24px;
+  --spacing-32: 32px;
+  --spacing-48: 48px;
+  --spacing-64: 64px;
+  --spacing-80: 80px;
+
+  /* ═══ Layout ═══ */
+  --page-max-width: 1200px;
+  --section-gap: 48px;
+  --card-padding: 24px;
+  --element-gap: 16px;
+
+  /* ═══ Shadows (4 levels) ═══ */
+  --shadow-xs: 0 1px 2px rgba(11, 26, 43, 0.04);
+  --shadow-sm: 0 1px 3px rgba(11, 26, 43, 0.06), 0 1px 2px rgba(11, 26, 43, 0.04);
+  --shadow-md: 0 4px 12px rgba(11, 26, 43, 0.08);
+  --shadow-lg: 0 8px 24px rgba(11, 26, 43, 0.12);
+
+  /* ═══ Neutral ═══ */
   --white: #FFFFFF;
   --black: #000000;
 }

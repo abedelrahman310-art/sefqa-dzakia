@@ -7,12 +7,12 @@
   --portal-accent:         var(--stamp-gold-500);
 
   /* Base semantic */
-  --color-text-primary:    var(--ink-900);
-  --color-text-secondary:  var(--ink-500);
-  --color-text-muted:      var(--ink-300);
+  --color-bg-base:         var(--paper-50);          /* Snow White */
+  --color-text-primary:    var(--ink-900);          /* Black Navy */
+  --color-text-secondary:  var(--ink-700);
+  --color-text-muted:      var(--ink-500);
   --color-text-inverse:    var(--paper-50);
 
-  --color-bg-base:         var(--paper-50);
   --color-bg-elevated:     var(--white);
   --color-bg-subtle:       var(--paper-100);
   --color-bg-muted:        var(--paper-200);

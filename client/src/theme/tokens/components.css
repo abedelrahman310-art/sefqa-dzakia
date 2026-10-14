@@ -5,21 +5,26 @@
   --button-bg-hover:        var(--portal-primary-dark);
   --button-fg:              var(--white);
   --button-border:          transparent;
-  --button-radius:          4px;
+  --button-radius:          6px;
+  --button-padding-y:       10px;
+  --button-padding-x:       16px;
   --button-shadow:          none;
 
   /* Card */
   --card-bg:                var(--color-bg-elevated);
   --card-border:            1px solid var(--color-border-subtle);
-  --card-radius:            4px;
-  --card-shadow:            none;
-  --card-padding:           20px;
+  --card-radius:            12px;                    /* ← من 4px */
+  --card-shadow:            var(--shadow-sm);         /* ← جديد */
+  --card-shadow-hover:      var(--shadow-lg);   /* ← جديد */
+  --card-padding:           24px;                    /* ← من 16px */
 
   /* Input */
   --input-bg:               var(--white);
   --input-border:           1px solid var(--color-border-strong);
   --input-focus-border:     var(--portal-primary);
-  --input-radius:           4px;
+  --input-radius:           6px;
+  --input-padding-y:        10px;
+  --input-padding-x:        12px;
 
   /* Badge */
   --badge-radius:           2px;
