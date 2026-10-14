@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { FileText, Download, Sparkles, Calendar, Filter, CheckCircle2, AlertCircle } from 'lucide-react';
 
+import { PageHeader } from '@/shared/components';
+
 interface ReportItem {
   id: string;
   title: string;
@@ -107,39 +109,27 @@ export function ReportsView() {
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
-      {/* Header Banner */}
-      <section className="rounded-2xl p-6 md:p-8 text-white bg-gradient-to-r from-navy-900 to-navy-700 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div className="space-y-1.5">
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-bold text-navy-100 uppercase tracking-wider">
-              صفقات ذكية · فضاء المصلحة المتعاقدة
-            </span>
-            <Badge variant="secondary" className="text-[11px] bg-white/15 text-white border-white/20">
-              {t('authority.reports.title')}
+      {/* Header */}
+      <PageHeader
+        eyebrow="فضاء المصلحة المتعاقدة"
+        title={t('authority.reports.title')}
+        description={t('authority.reports.subtitle')}
+        actions={
+          <div className="flex items-center gap-2.5 flex-wrap">
+            <Badge className="bg-amber-500/20 text-amber-700 border-amber-300 dark:text-amber-300 px-3 py-1 text-xs">
+              استشاري فقط
             </Badge>
+            <Button
+              onClick={handleGenerateAiReport}
+              disabled={aiLoading}
+              className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold gap-2 text-xs shadow-sm h-10 px-4"
+            >
+              <Sparkles className={`w-4 h-4 ${aiLoading ? 'animate-spin' : ''}`} />
+              <span>{aiLoading ? 'جاري التحليل...' : t('authority.reports.generate_ai')}</span>
+            </Button>
           </div>
-          <h1 className="text-2xl md:text-3xl font-extrabold text-white">
-            {t('authority.reports.title')}
-          </h1>
-          <p className="text-xs md:text-sm text-navy-100 max-w-2xl">
-            {t('authority.reports.subtitle')}
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2.5 flex-wrap">
-          <Badge className="bg-amber-500/20 text-amber-300 border-amber-400/30 px-3 py-1 text-xs">
-            استشاري فقط
-          </Badge>
-          <Button
-            onClick={handleGenerateAiReport}
-            disabled={aiLoading}
-            className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold gap-2 text-xs shadow-sm"
-          >
-            <Sparkles className={`w-4 h-4 ${aiLoading ? 'animate-spin' : ''}`} />
-            <span>{aiLoading ? 'جاري التحليل...' : t('authority.reports.generate_ai')}</span>
-          </Button>
-        </div>
-      </section>
+        }
+      />
 
       {/* Download Alert */}
       {downloadSuccess && (

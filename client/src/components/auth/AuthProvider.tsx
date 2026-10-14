@@ -72,6 +72,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       if (!activeToken) {
+        const storedUser = localStorage.getItem('safaqat_user');
+        if (storedUser) {
+          try {
+            setUser(normalizeUser(JSON.parse(storedUser)));
+            setStatus('authenticated');
+            return;
+          } catch {}
+        }
         setUser(null);
         setStatus('unauthenticated');
         return;
@@ -102,6 +110,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
         throw new Error('Unauthorized session');
       } catch {
+        const storedUser = localStorage.getItem('safaqat_user');
+        if (storedUser) {
+          try {
+            setUser(normalizeUser(JSON.parse(storedUser)));
+            setStatus('authenticated');
+            return;
+          } catch {}
+        }
         setUser(null);
         setStatus('unauthenticated');
       }
@@ -118,6 +134,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (tokens?.refresh) {
       localStorage.setItem('safaqat_refresh_token', tokens.refresh);
     }
+    localStorage.setItem('safaqat_user', JSON.stringify(userData));
     setUser(normalizeUser(userData));
     setStatus('authenticated');
   };
@@ -135,6 +152,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } finally {
       localStorage.removeItem('safaqat_access_token');
       localStorage.removeItem('safaqat_refresh_token');
+      localStorage.removeItem('safaqat_user');
       setToken(null);
       setUser(null);
       setStatus('unauthenticated');

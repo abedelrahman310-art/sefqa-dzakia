@@ -133,7 +133,7 @@ export function CentralReports() {
       <PageHeader
         eyebrow="المراقبة الوطنية"
         title="التقارير الوطنية الموحدة"
-        description="إصدار واستخراج المؤشرات الإحصائية والتحليلية للصفقات العمومية على المستوى الوطني"
+        description="تقارير شهرية وربعية مع توليد AI"
         actions={
           <Button
             onClick={handleGenerateAiReport}
@@ -141,7 +141,7 @@ export function CentralReports() {
             className="bg-purple-600 hover:bg-purple-700 text-white font-bold gap-2 text-xs shadow-sm h-10 px-4"
           >
             <Sparkles className={`w-4 h-4 ${aiLoading ? 'animate-spin' : ''}`} />
-            <span>{aiLoading ? 'جاري التحليل...' : 'توليد تقرير استشاري AI'}</span>
+            <span>{aiLoading ? 'جاري التحليل...' : 'توليد تقرير AI'}</span>
           </Button>
         }
       />

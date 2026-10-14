@@ -10,9 +10,11 @@ import {
   Shield,
   LogOut,
   Building,
+  Map as MapIcon,
 } from 'lucide-react';
 import { Route, Switch } from 'wouter';
 import { CentralOverview } from './CentralOverview';
+import { CentralMapView } from './CentralMapView';
 import { CentralSectionView } from './CentralSectionView';
 import { CentralDeals } from './CentralDeals';
 import { CentralAuthorities } from './CentralAuthorities';
@@ -35,6 +37,12 @@ export function CentralSpace() {
       labelKey: 'nav.central.dashboard',
       href: '/central/dashboard',
       icon: <LayoutDashboard className="w-4 h-4" />,
+    },
+    {
+      id: 'map',
+      labelKey: 'nav.central.map',
+      href: '/central/map',
+      icon: <MapIcon className="w-4 h-4" />,
     },
     {
       id: 'authorities',
@@ -114,6 +122,7 @@ export function CentralSpace() {
     >
       <Switch>
         <Route path="/central/dashboard" component={CentralOverview} />
+        <Route path="/central/map" component={CentralMapView} />
         <Route path="/central/deals" component={CentralDeals} />
         <Route path="/central/authorities" component={CentralAuthorities} />
         <Route path="/central/operators" component={CentralOperators} />

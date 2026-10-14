@@ -61,6 +61,25 @@ class Command(BaseCommand):
 
         if options.get('reset'):
             self.stdout.write(self.style.WARNING('تفعيل خيار --reset: حذف البيانات التجريبية السابقة...'))
+            from apps.procurements.models import OpeningEvent, SessionAccess, OpeningSession
+            from django.db.models import Q
+            OpeningEvent.objects.filter(
+                Q(session__tender__reference_number__in=test_deal_refs) |
+                Q(created_by__email__in=test_emails) |
+                Q(offer__deal__reference_number__in=test_deal_refs)
+            ).delete()
+            SessionAccess.objects.filter(
+                Q(session__tender__reference_number__in=test_deal_refs) |
+                Q(operator__email__in=test_emails)
+            ).delete()
+            OpeningSession.objects.filter(
+                Q(tender__reference_number__in=test_deal_refs) |
+                Q(created_by__email__in=test_emails)
+            ).delete()
+            BidOffer.objects.filter(
+                Q(deal__reference_number__in=test_deal_refs) |
+                Q(operator__email__in=test_emails)
+            ).delete()
             ProcurementDeal.objects.filter(reference_number__in=test_deal_refs).delete()
             CustomUser.objects.filter(email__in=test_emails).delete()
             AuditLog.objects.filter(description__contains='[SEED]').delete()
