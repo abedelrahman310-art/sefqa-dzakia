@@ -79,45 +79,45 @@ export function OperatorOverview() {
       {/* Real Statistics derived strictly from API */}
       <section className="grid grid-cols-1 md:grid-cols-3 gap-4" aria-label="Overview Statistics">
         {/* Available Opportunities */}
-        <div className="bg-card border border-border rounded-2xl p-6 shadow-sm space-y-2">
+        <div className="bg-white border border-[var(--color-border-subtle)] rounded-xl p-6 shadow-sm space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-muted-foreground">{t('overview.stats.available')}</span>
-            <span className="p-2 bg-navy-50 text-navy-900 rounded-xl">
+            <span className="text-xs font-semibold text-[var(--ink-500)]">{t('overview.stats.available')}</span>
+            <span className="p-2 bg-[var(--paper-100)] text-[var(--ink-700)] rounded-lg border border-[var(--color-border-subtle)]">
               <Briefcase className="w-4 h-4" />
             </span>
           </div>
-          <div className="text-3xl font-extrabold text-navy-900">
+          <div className="text-3xl font-extrabold font-mono text-[var(--ink-900)]">
             {loading ? '—' : error ? '0' : opportunities.length}
           </div>
-          <p className="text-xs text-muted-foreground">{t('overview.stats.available_sub')}</p>
+          <p className="text-xs text-[var(--ink-500)]">{t('overview.stats.available_sub')}</p>
         </div>
 
         {/* Submitted Offers */}
-        <div className="bg-emerald-50/50 border border-emerald-100 rounded-2xl p-6 shadow-sm space-y-2">
+        <div className="bg-white border border-[var(--color-border-subtle)] rounded-xl p-6 shadow-sm space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-emerald-800">{t('overview.stats.submitted')}</span>
-            <span className="p-2 bg-emerald-100 text-emerald-800 rounded-xl">
+            <span className="text-xs font-semibold text-[var(--ink-500)]">{t('overview.stats.submitted')}</span>
+            <span className="p-2 bg-[var(--paper-100)] text-[var(--ink-700)] rounded-lg border border-[var(--color-border-subtle)]">
               <CheckCircle2 className="w-4 h-4" />
             </span>
           </div>
-          <div className="text-3xl font-extrabold text-emerald-700">
+          <div className="text-3xl font-extrabold font-mono text-[var(--ink-900)]">
             {loading ? '—' : error ? '0' : submittedCount}
           </div>
-          <p className="text-xs text-emerald-700">{t('overview.stats.submitted_sub')}</p>
+          <p className="text-xs text-[var(--ink-500)]">{t('overview.stats.submitted_sub')}</p>
         </div>
 
         {/* Draft Offers */}
-        <div className="bg-card border border-border rounded-2xl p-6 shadow-sm space-y-2">
+        <div className="bg-white border border-[var(--color-border-subtle)] rounded-xl p-6 shadow-sm space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-muted-foreground">{t('overview.stats.drafts')}</span>
-            <span className="p-2 bg-gold-50 text-gold-700 rounded-xl">
+            <span className="text-xs font-semibold text-[var(--ink-500)]">{t('overview.stats.drafts')}</span>
+            <span className="p-2 bg-[var(--paper-100)] text-[var(--ink-700)] rounded-lg border border-[var(--color-border-subtle)]">
               <Clock className="w-4 h-4" />
             </span>
           </div>
-          <div className="text-3xl font-extrabold text-navy-900">
+          <div className="text-3xl font-extrabold font-mono text-[var(--ink-900)]">
             {loading ? '—' : error ? '0' : draftsCount}
           </div>
-          <p className="text-xs text-muted-foreground">{t('overview.stats.drafts_sub')}</p>
+          <p className="text-xs text-[var(--ink-500)]">{t('overview.stats.drafts_sub')}</p>
         </div>
       </section>
 
