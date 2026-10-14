@@ -1,4 +1,3 @@
-import React from 'react';
 import type { LucideIcon } from 'lucide-react';
 
 export interface KpiCardProps {
@@ -25,50 +24,59 @@ export function KpiCard({
   const getStrokeColor = () => {
     switch (accent) {
       case 'emerald':
-        return 'var(--stamp-green-500, #2D6A4F)';
+        return 'var(--stamp-green-700)'; // #1B4332
       case 'gold':
-        return 'var(--stamp-gold-500, #B8860B)';
-      case 'navy':
-        return 'var(--official-500, #1E5A8E)';
+        return 'var(--stamp-gold-700)';  // #8B6914
       case 'red':
-        return 'var(--stamp-red-500, #B02A2A)';
+        return 'var(--stamp-red-700)';   // #8B1A1A / #B02A2A
+      case 'navy':
+        return 'var(--official-700)';    // #0A2540
       case 'ai':
-        return 'var(--ai-accent, #8b5cf6)';
+        return 'var(--ai-accent)';       // #8b5cf6
       default:
-        return 'var(--color-primary, var(--stamp-green-500, #2D6A4F))';
+        return 'var(--ink-500)';
     }
   };
 
   return (
-    <div className="group relative bg-[var(--card-bg)] border border-[var(--color-border-subtle)] rounded-xl p-6 transition-all duration-200 hover:shadow-[var(--card-shadow-hover)] hover:-translate-y-0.5">
+    <div className="group relative bg-white border border-[var(--color-border-subtle)] rounded-xl p-6 transition-all duration-200 hover:shadow-[var(--card-shadow-hover)] hover:-translate-y-0.5">
+      {/* Header */}
       <div className="flex items-start justify-between mb-4">
         <div className="eyebrow">{eyebrow}</div>
         {Icon && (
-          <div className="size-10 rounded-lg bg-[var(--color-bg-subtle)] flex items-center justify-center text-[var(--color-text-secondary)]">
-            <Icon className="size-5" />
+          <div className="size-10 rounded-lg bg-[var(--paper-100)] border border-[var(--color-border-subtle)] flex items-center justify-center text-[var(--ink-700)]">
+            <Icon className="size-[18px]" strokeWidth={2.5} />
           </div>
         )}
       </div>
 
-      <div className="font-mono text-[var(--text-display)] font-bold tracking-tight leading-none text-[var(--color-text-primary)] mb-2">
+      {/* Hero Number */}
+      <div className="font-mono text-[var(--text-display)] font-bold tracking-tight leading-none text-[var(--ink-900)] mb-2">
         {value}
       </div>
 
+      {/* Trend */}
       {trend !== undefined && (
-        <div className="flex items-center gap-2 text-body-sm mb-4">
-          <span className={trend >= 0 ? 'text-emerald-600' : 'text-red-600'}>
+        <div className="flex items-center gap-2 text-sm mb-4">
+          <span
+            className={`font-mono tabular-nums font-semibold ${
+              trend >= 0 ? 'text-[var(--stamp-green-700)]' : 'text-[var(--stamp-red-700)]'
+            }`}
+          >
             {trend >= 0 ? '▲' : '▼'} {Math.abs(trend)}%
           </span>
           {trendLabel && (
-            <span className="text-[var(--color-text-muted)]">{trendLabel}</span>
+            <span className="text-[var(--ink-500)] text-xs">{trendLabel}</span>
           )}
         </div>
       )}
 
+      {/* Description fallback if no trend */}
       {description && trend === undefined && (
-        <p className="text-body-sm text-[var(--color-text-muted)] mb-3">{description}</p>
+        <p className="text-xs text-[var(--ink-500)] mb-3">{description}</p>
       )}
 
+      {/* Sparkline — Color accent strictly on stroke */}
       {sparkline && sparkline.length > 1 && (
         <div className="h-8 -mx-2 -mb-2 mt-2">
           <svg viewBox="0 0 100 30" preserveAspectRatio="none" className="w-full h-full">

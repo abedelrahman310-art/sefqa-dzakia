@@ -59,6 +59,10 @@ export const ar = {
   'central.map.notify_authority': 'إخطار المصلحة',
 
   'nav.logout': 'تسجيل الخروج',
+  'common.logout': 'تسجيل الخروج',
+  'common.logout_confirm_title': 'تأكيد تسجيل الخروج',
+  'common.logout_confirm_message': 'هل أنت متأكد من رغبتك في تسجيل الخروج؟',
+  'common.cancel': 'إلغاء',
 
   // DevShell specifics
   'dev.title': 'الصفحة الرئيسية للتطوير',
@@ -997,7 +1001,11 @@ export const ar = {
   'opening.no_sessions': 'لا توجد جلسات حالياً',
   'opening.waiting_start': 'بانتظار بدء الجلسة...',
 
-  // الأقسام الجديدة: لجنة الصفقات، العروض المستلمة، ورشة التقييم
+  // الأقسام الرئيسية للمصلحة المتعاقدة
+  'authority.nav.overview': 'لوحة المتابعة',
+  'authority.nav.drafts': 'مشاريع الدفاتر',
+  'authority.nav.specs': 'دفاتر الشروط والسندات',
+  'authority.nav.opening': 'جلسات فتح الأظرفة',
   'authority.nav.committee': 'لجنة الصفقات',
   'authority.nav.offers': 'العروض المستلمة',
   'authority.nav.evaluation': 'ورشة التقييم',

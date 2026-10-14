@@ -61,6 +61,10 @@ export const fr: Record<TranslationKey, string> = {
   'central.map.notify_authority': "Notifier l'autorité",
 
   'nav.logout': 'Déconnexion',
+  'common.logout': 'Déconnexion',
+  'common.logout_confirm_title': 'Confirmer la déconnexion',
+  'common.logout_confirm_message': 'Êtes-vous sûr de vouloir vous déconnecter ?',
+  'common.cancel': 'Annuler',
 
   // DevShell specifics
   'dev.title': 'Page de développement',
@@ -998,7 +1002,11 @@ export const fr: Record<TranslationKey, string> = {
   'opening.no_sessions': "Aucune séance pour le moment",
   'opening.waiting_start': "En attente du début de la séance...",
 
-  // Nouvelles sections: commission des marchés, offres reçues, espace d'évaluation
+  // Sections principales de l'autorité contractante
+  'authority.nav.overview': 'Tableau de bord',
+  'authority.nav.drafts': 'Projets de cahiers',
+  'authority.nav.specs': 'Cahiers des charges et bons',
+  'authority.nav.opening': "Séances d'ouverture des plis",
   'authority.nav.committee': 'Commission des marchés',
   'authority.nav.offers': 'Offres reçues',
   'authority.nav.evaluation': "Espace d'évaluation",
