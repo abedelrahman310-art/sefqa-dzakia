@@ -14,6 +14,12 @@ import {
 import { Route, Switch } from 'wouter';
 import { CentralOverview } from './CentralOverview';
 import { CentralSectionView } from './CentralSectionView';
+import { CentralDeals } from './CentralDeals';
+import { CentralAuthorities } from './CentralAuthorities';
+import { CentralOperators } from './CentralOperators';
+import { CentralAppeals } from './CentralAppeals';
+import { CentralReports } from './CentralReports';
+import { CentralPermissions } from './CentralPermissions';
 import { PortalNotFound } from '@/components/common/PortalNotFound';
 
 export function CentralSpace() {
@@ -35,42 +41,36 @@ export function CentralSpace() {
       labelKey: 'nav.central.authorities',
       href: '/central/authorities',
       icon: <Building className="w-4 h-4" />,
-      badge: t('badge.unavailable'),
     },
     {
       id: 'operators',
       labelKey: 'nav.central.operators',
       href: '/central/operators',
       icon: <Users className="w-4 h-4" />,
-      badge: t('badge.unavailable'),
     },
     {
       id: 'deals',
       labelKey: 'nav.central.deals',
       href: '/central/deals',
       icon: <Briefcase className="w-4 h-4" />,
-      badge: t('badge.unavailable'),
     },
     {
       id: 'appeals',
       labelKey: 'nav.central.appeals',
       href: '/central/appeals',
       icon: <AlertTriangle className="w-4 h-4" />,
-      badge: t('badge.unavailable'),
     },
     {
       id: 'reports',
       labelKey: 'nav.central.reports',
       href: '/central/reports',
       icon: <BarChart className="w-4 h-4" />,
-      badge: t('badge.unavailable'),
     },
     {
       id: 'permissions',
       labelKey: 'nav.central.permissions',
       href: '/central/permissions',
       icon: <Shield className="w-4 h-4" />,
-      badge: t('badge.unavailable'),
     },
   ];
 
@@ -114,60 +114,12 @@ export function CentralSpace() {
     >
       <Switch>
         <Route path="/central/dashboard" component={CentralOverview} />
-        <Route path="/central/authorities">
-          {() => (
-            <CentralSectionView
-              titleKey="nav.central.authorities"
-              descKey="central.section.desc.authorities"
-              icon={<Building className="w-5 h-5 text-navy-800" />}
-            />
-          )}
-        </Route>
-        <Route path="/central/operators">
-          {() => (
-            <CentralSectionView
-              titleKey="nav.central.operators"
-              descKey="central.section.desc.operators"
-              icon={<Users className="w-5 h-5 text-navy-800" />}
-            />
-          )}
-        </Route>
-        <Route path="/central/deals">
-          {() => (
-            <CentralSectionView
-              titleKey="nav.central.deals"
-              descKey="central.section.desc.deals"
-              icon={<Briefcase className="w-5 h-5 text-navy-800" />}
-            />
-          )}
-        </Route>
-        <Route path="/central/appeals">
-          {() => (
-            <CentralSectionView
-              titleKey="nav.central.appeals"
-              descKey="central.section.desc.appeals"
-              icon={<AlertTriangle className="w-5 h-5 text-navy-800" />}
-            />
-          )}
-        </Route>
-        <Route path="/central/reports">
-          {() => (
-            <CentralSectionView
-              titleKey="nav.central.reports"
-              descKey="central.section.desc.reports"
-              icon={<BarChart className="w-5 h-5 text-navy-800" />}
-            />
-          )}
-        </Route>
-        <Route path="/central/permissions">
-          {() => (
-            <CentralSectionView
-              titleKey="nav.central.permissions"
-              descKey="central.section.desc.permissions"
-              icon={<Shield className="w-5 h-5 text-navy-800" />}
-            />
-          )}
-        </Route>
+        <Route path="/central/deals" component={CentralDeals} />
+        <Route path="/central/authorities" component={CentralAuthorities} />
+        <Route path="/central/operators" component={CentralOperators} />
+        <Route path="/central/appeals" component={CentralAppeals} />
+        <Route path="/central/reports" component={CentralReports} />
+        <Route path="/central/permissions" component={CentralPermissions} />
         <Route path="/central/overview" component={CentralOverview} />
         <Route path="/central" component={CentralOverview} />
         <Route>
