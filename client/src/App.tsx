@@ -8,12 +8,15 @@ import { AuthoritySpace } from './pages/authority/AuthoritySpace';
 import { CentralSpace } from './pages/central/CentralSpace';
 import { RequireRole } from './components/auth/RequireRole';
 import { LandingPage } from './pages/landing/LandingPage';
+import { PWAInstallPrompt } from '@/shared/components/PWAInstallPrompt';
 
 export function App() {
   const isDev = import.meta.env.DEV;
 
   return (
-    <Switch>
+    <>
+      <PWAInstallPrompt />
+      <Switch>
       {isDev && (
         <Route path="/dev/shell" component={DevShell} />
       )}
@@ -51,5 +54,6 @@ export function App() {
         </div>
       </Route>
     </Switch>
+    </>
   );
 }

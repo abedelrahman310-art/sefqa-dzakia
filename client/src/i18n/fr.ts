@@ -1024,5 +1024,13 @@ export const fr: Record<TranslationKey, string> = {
   'authority.audit.immutable': 'Non modifiable',
   'authority.settings.title': 'Paramètres',
   'authority.settings.subtitle': "Paramètres de l'institution et sécurité",
+
+  // PWA (Progressive Web App)
+  'pwa.install_title': '📱 Installer Safaqat',
+  'pwa.install_description': 'Installez la plateforme comme application pour un accès rapide et hors ligne.',
+  'pwa.install_button': 'Installer',
+  'pwa.later': 'Plus tard',
+  'pwa.desktop_button': 'Application Bureau',
+  'pwa.desktop_button_title': 'Installer ou ouvrir la plateforme comme application bureau',
 };
 

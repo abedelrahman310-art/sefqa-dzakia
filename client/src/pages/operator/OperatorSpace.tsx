@@ -15,7 +15,7 @@ import { RequirementsResponse } from './RequirementsResponse';
 import { OperatorSessionList } from '@/features/opening/components/OperatorSessionList';
 import { OperatorSessionLive } from '@/features/opening/components/OperatorSessionLive';
 import { PortalNotFound } from '@/components/common/PortalNotFound';
-import { LogoutButton } from '@/shared/components';
+import { LogoutButton, DesktopAppButton } from '@/shared/components';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import {
   LayoutDashboard,
@@ -175,6 +175,7 @@ export function OperatorSpace() {
           </button>
         </div>
 
+        <DesktopAppButton className="w-full justify-center bg-white hover:bg-[var(--paper-200)] text-[var(--ink-800)] border border-[var(--color-border-subtle)]" />
         <LogoutButton variant="sidebar" />
       </div>
     </div>

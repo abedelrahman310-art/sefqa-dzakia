@@ -17,7 +17,7 @@ import { AuthoritySessionControl } from '@/features/opening/components/Authority
 import { ReportsView } from './ReportsView';
 import { AuditView } from './AuditView';
 import { SettingsView } from './SettingsView';
-import { LogoutButton } from '@/shared/components';
+import { LogoutButton, DesktopAppButton } from '@/shared/components';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import {
   LayoutDashboard,
@@ -188,6 +188,7 @@ export function AuthoritySpace() {
           </button>
         </div>
 
+        <DesktopAppButton className="w-full justify-center bg-white hover:bg-[var(--paper-200)] text-[var(--ink-800)] border border-[var(--color-border-subtle)]" />
         <LogoutButton variant="sidebar" />
       </div>
     </div>

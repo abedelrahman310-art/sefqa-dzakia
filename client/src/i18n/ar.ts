@@ -1023,6 +1023,14 @@ export const ar = {
   'authority.audit.immutable': 'غير قابل للتعديل',
   'authority.settings.title': 'الإعدادات',
   'authority.settings.subtitle': 'إعدادات المؤسسة والأمان',
+
+  // PWA (Progressive Web App)
+  'pwa.install_title': '📱 ثبّت صفقات ذكية',
+  'pwa.install_description': 'ثبّت المنصة كتطبيق على جهازك للوصول السريع والعمل بدون إنترنت.',
+  'pwa.install_button': 'تثبيت الآن',
+  'pwa.later': 'لاحقاً',
+  'pwa.desktop_button': 'تطبيق سطح المكتب',
+  'pwa.desktop_button_title': 'تثبيت أو فتح المنصة كتطبيق مستقل على سطح المكتب',
 };
 
 export type TranslationKey = keyof typeof ar;

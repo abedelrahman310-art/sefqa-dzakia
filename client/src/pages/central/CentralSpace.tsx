@@ -12,7 +12,7 @@ import { CentralAppeals } from './CentralAppeals';
 import { CentralReports } from './CentralReports';
 import { CentralPermissions } from './CentralPermissions';
 import { PortalNotFound } from '@/components/common/PortalNotFound';
-import { LogoutButton } from '@/shared/components';
+import { LogoutButton, DesktopAppButton } from '@/shared/components';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import {
   LayoutDashboard,
@@ -186,6 +186,7 @@ export function CentralSpace() {
           </button>
         </div>
 
+        <DesktopAppButton className="w-full justify-center bg-white hover:bg-[var(--paper-200)] text-[var(--ink-800)] border border-[var(--color-border-subtle)]" />
         <LogoutButton variant="sidebar" />
       </div>
     </div>
@@ -193,10 +194,12 @@ export function CentralSpace() {
 
   return (
     <div className="flex h-screen overflow-hidden bg-[var(--paper-50)]" dir="rtl">
-      {/* Desktop Sidebar: 280px fixed */}
-      <aside className="hidden md:flex flex-col w-[280px] h-screen bg-white border-e border-[var(--color-border-subtle)] flex-none">
-        {sidebarContent}
-      </aside>
+      {/* Desktop Sidebar: 280px fixed (hidden on map route so the map is the hero) */}
+      {!isMapRoute && (
+        <aside className="hidden md:flex flex-col w-[280px] h-screen bg-white border-e border-[var(--color-border-subtle)] flex-none">
+          {sidebarContent}
+        </aside>
+      )}
 
       {/* Main Content Area */}
       <main
@@ -204,34 +207,36 @@ export function CentralSpace() {
         className="flex-1 h-screen overflow-y-auto flex flex-col min-w-0"
       >
         {/* Mobile Header Bar with Sheet (side="start") */}
-        <div className="md:hidden flex items-center justify-between p-4 bg-white border-b border-[var(--color-border-subtle)] sticky top-0 z-30">
-          <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-            <SheetTrigger asChild>
-              <button
-                type="button"
-                className="p-2 rounded-lg bg-[var(--paper-100)] text-[var(--ink-900)] hover:bg-[var(--paper-200)] transition-colors"
-                aria-label="فتح القائمة"
-              >
-                <Menu className="w-5 h-5" />
-              </button>
-            </SheetTrigger>
-            <SheetContent side="start" className="p-0 w-[280px] border-e border-[var(--color-border-subtle)]">
-              {sidebarContent}
-            </SheetContent>
-          </Sheet>
+        {!isMapRoute && (
+          <div className="md:hidden flex items-center justify-between p-4 bg-white border-b border-[var(--color-border-subtle)] sticky top-0 z-30">
+            <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+              <SheetTrigger asChild>
+                <button
+                  type="button"
+                  className="p-2 rounded-lg bg-[var(--paper-100)] text-[var(--ink-900)] hover:bg-[var(--paper-200)] transition-colors"
+                  aria-label="فتح القائمة"
+                >
+                  <Menu className="w-5 h-5" />
+                </button>
+              </SheetTrigger>
+              <SheetContent side="start" className="p-0 w-[280px] border-e border-[var(--color-border-subtle)]">
+                {sidebarContent}
+              </SheetContent>
+            </Sheet>
 
-          <span className="font-bold text-sm text-[var(--ink-900)]">
-            صفقات ذكية · الإدارة المركزية
-          </span>
+            <span className="font-bold text-sm text-[var(--ink-900)]">
+              صفقات ذكية · الإدارة المركزية
+            </span>
 
-          <button
-            type="button"
-            onClick={() => setLang(lang === 'ar' ? 'fr' : 'ar')}
-            className="text-xs font-bold px-2.5 py-1 rounded-lg bg-[var(--paper-100)] text-[var(--ink-700)] border border-[var(--color-border-subtle)]"
-          >
-            {lang === 'ar' ? 'FR' : 'عربي'}
-          </button>
-        </div>
+            <button
+              type="button"
+              onClick={() => setLang(lang === 'ar' ? 'fr' : 'ar')}
+              className="text-xs font-bold px-2.5 py-1 rounded-lg bg-[var(--paper-100)] text-[var(--ink-700)] border border-[var(--color-border-subtle)]"
+            >
+              {lang === 'ar' ? 'FR' : 'عربي'}
+            </button>
+          </div>
+        )}
 
         {/* Dynamic Route View */}
         <div

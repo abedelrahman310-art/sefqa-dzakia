@@ -1,4 +1,4 @@
-﻿# ─── Python ───
+# ─── Python ───
 __pycache__/
 *.py[cod]
 *.egg-info/
@@ -20,6 +20,7 @@ local_settings.py
 # ─── Node ───
 node_modules/
 dist/
+dev-dist/
 build/
 .pnpm-store/
 *.tsbuildinfo
