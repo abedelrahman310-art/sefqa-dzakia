@@ -1,0 +1,153 @@
+/* Central Admin Top Bar - 56px slim institutional header */
+.central-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 56px;
+  min-height: 56px;
+  padding-inline: 1.5rem;
+  background-color: var(--color-bg-elevated, #ffffff);
+  border-bottom: 1px solid var(--color-border-subtle, #e5e7eb);
+  position: relative;
+  z-index: 20;
+}
+
+.central-topbar__start {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.central-topbar__breadcrumb {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--ink-900, #0b1a2b);
+  letter-spacing: -0.01em;
+}
+
+.central-topbar__clock {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.85rem;
+  border-radius: 9999px;
+  background-color: var(--paper-100, #f5f5f7);
+  border: 1px solid var(--color-border-subtle, #e5e7eb);
+  font-size: 0.75rem;
+  color: var(--ink-700, #1a3247);
+  user-select: none;
+}
+
+.central-topbar__clock-icon {
+  width: 0.875rem;
+  height: 0.875rem;
+  color: var(--stamp-green-500, #2d6a4f);
+}
+
+.central-topbar__time {
+  font-weight: 700;
+  color: var(--ink-900, #0b1a2b);
+  letter-spacing: 0.05em;
+}
+
+.central-topbar__divider {
+  color: var(--ink-300, #8b9bb0);
+  opacity: 0.6;
+}
+
+.central-topbar__date {
+  color: var(--ink-500, #47586e);
+  font-weight: 500;
+}
+
+.central-topbar__pulse {
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 9999px;
+  background-color: var(--stamp-green-500, #2d6a4f);
+  box-shadow: 0 0 0 0 rgba(45, 106, 79, 0.7);
+  animation: central-pulse 2s infinite;
+}
+
+@keyframes central-pulse {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(45, 106, 79, 0.7);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 6px rgba(45, 106, 79, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(45, 106, 79, 0);
+  }
+}
+
+.central-topbar__end {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.central-topbar__icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.6rem;
+  border-radius: 0.5rem;
+  color: var(--ink-700, #1a3247);
+  background-color: transparent;
+  border: 1px solid transparent;
+  transition: all 150ms ease;
+  cursor: pointer;
+}
+
+.central-topbar__icon-btn:hover {
+  background-color: var(--paper-100, #f5f5f7);
+  color: var(--ink-900, #0b1a2b);
+}
+
+.central-topbar__badge {
+  position: absolute;
+  top: -0.25rem;
+  inset-inline-end: -0.25rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1rem;
+  height: 1rem;
+  padding-inline: 0.25rem;
+  border-radius: 9999px;
+  background-color: var(--flag-red, #dc2626);
+  color: #ffffff;
+  font-size: 0.625rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.central-topbar__sep {
+  width: 1px;
+  height: 1.25rem;
+  background-color: var(--color-border-subtle, #e5e7eb);
+  margin-inline: 0.25rem;
+}
+
+.central-topbar__logout {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.65rem;
+  border-radius: 0.5rem;
+  color: var(--ink-700, #1a3247);
+  background-color: transparent;
+  border: 1px solid transparent;
+  transition: all 150ms ease;
+  cursor: pointer;
+}
+
+.central-topbar__logout:hover {
+  background-color: rgba(220, 38, 38, 0.08);
+  color: #dc2626;
+}

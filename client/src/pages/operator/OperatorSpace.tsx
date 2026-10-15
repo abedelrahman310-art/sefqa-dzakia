@@ -14,7 +14,9 @@ import { OperatorSettingsView } from './OperatorSettingsView';
 import { RequirementsResponse } from './RequirementsResponse';
 import { OperatorSessionList } from '@/features/opening/components/OperatorSessionList';
 import { OperatorSessionLive } from '@/features/opening/components/OperatorSessionLive';
+import { OperatorObjectionsView } from '@/features/objections/components/OperatorObjectionsView';
 import { PortalNotFound } from '@/components/common/PortalNotFound';
+import OperatorTopBar from '@/components/layout/OperatorTopBar';
 import { LogoutButton, DesktopAppButton } from '@/shared/components';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import {
@@ -28,6 +30,7 @@ import {
   Settings as SettingsIcon,
   Menu,
   Languages,
+  ShieldAlert,
 } from 'lucide-react';
 
 export function OperatorSpace() {
@@ -55,6 +58,7 @@ export function OperatorSpace() {
   const [isOffersIdActive] = useRoute('/operator/offers/:id');
   const [isSessionsActive] = useRoute('/operator/opening-sessions');
   const [isSessionsIdActive] = useRoute('/operator/opening-sessions/:id');
+  const [isObjectionsActive] = useRoute('/operator/objections');
   const [isSmartSpecsActive] = useRoute('/operator/smart-specs');
   const [isArchiveActive] = useRoute('/operator/archive');
   const [isSettingsActive] = useRoute('/operator/settings');
@@ -89,6 +93,12 @@ export function OperatorSpace() {
       href: '/operator/opening-sessions',
       icon: Radio,
       isActive: isSessionsActive || isSessionsIdActive,
+    },
+    {
+      label: 'الطعون والمنازعات',
+      href: '/operator/objections',
+      icon: ShieldAlert,
+      isActive: isObjectionsActive,
     },
     {
       label: t('nav.operator.smart_specs'),
@@ -214,13 +224,18 @@ export function OperatorSpace() {
             صفقات ذكية · المتعامل الاقتصادي
           </span>
 
-          <button
-            type="button"
-            onClick={() => setLang(lang === 'ar' ? 'fr' : 'ar')}
-            className="text-xs font-bold px-2.5 py-1 rounded-lg bg-[var(--paper-100)] text-[var(--ink-700)] border border-[var(--color-border-subtle)]"
-          >
-            {lang === 'ar' ? 'FR' : 'عربي'}
-          </button>
+            <button
+              type="button"
+              onClick={() => setLang(lang === 'ar' ? 'fr' : 'ar')}
+              className="text-xs font-bold px-2.5 py-1 rounded-lg bg-[var(--paper-100)] text-[var(--ink-700)] border border-[var(--color-border-subtle)]"
+            >
+              {lang === 'ar' ? 'FR' : 'عربي'}
+            </button>
+          </div>
+
+        {/* Desktop Operator TopBar (56px) */}
+        <div className="hidden md:block sticky top-0 z-20">
+          <OperatorTopBar />
         </div>
 
         {/* Dynamic Route View */}
@@ -228,6 +243,7 @@ export function OperatorSpace() {
           <Switch>
             <Route path="/operator/opening-sessions/:id" component={OperatorSessionLive} />
             <Route path="/operator/opening-sessions" component={OperatorSessionList} />
+            <Route path="/operator/objections" component={OperatorObjectionsView} />
             <Route path="/operator/deals" component={OperatorOpportunities} />
             <Route path="/operator/opportunities" component={OperatorOpportunities} />
             <Route path="/operator/profile" component={OperatorProfileView} />

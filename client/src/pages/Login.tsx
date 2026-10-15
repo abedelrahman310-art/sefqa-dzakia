@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { ArrowRight } from 'lucide-react';
+import { LanguageSwitcher } from '@/components/layout/LanguageSwitcher';
 
 export function Login() {
   const { login, logout, user, status } = useAuth();
@@ -96,14 +98,31 @@ export function Login() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-muted/40 p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold text-primary">صفقات ذكية</CardTitle>
-          <CardDescription>{t('login.title')}</CardDescription>
-        </CardHeader>
-        <form onSubmit={handleSubmit}>
-          <CardContent className="space-y-4">
+    <div className="min-h-screen bg-[var(--paper-50)] flex flex-col" dir="rtl">
+      {/* ═══ Top Bar ═══ */}
+      <header className="fixed top-0 start-0 end-0 z-50 flex items-center justify-between px-4 sm:px-6 py-4 bg-white/80 backdrop-blur-sm border-b border-[var(--color-border-subtle)]">
+        {/* زر العودة للرئيسية */}
+        <Link
+          href="/"
+          className="group inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-[var(--ink-700)] hover:text-[var(--official-700)] hover:bg-[var(--paper-100)] transition-all duration-150"
+        >
+          <ArrowRight className="size-4 transition-transform duration-150 group-hover:-translate-x-0.5" />
+          <span>العودة للرئيسية</span>
+        </Link>
+
+        {/* Language Switcher */}
+        <LanguageSwitcher />
+      </header>
+
+      {/* ═══ البطاقة (وسط الصفحة) ═══ */}
+      <main className="flex-1 flex items-center justify-center p-4 pt-20">
+        <div className="w-full max-w-md bg-white rounded-2xl shadow-sm border border-[var(--color-border-subtle)] p-6 sm:p-8">
+          <div className="text-center mb-6">
+            <h1 className="text-2xl font-bold text-primary">صفقات ذكية</h1>
+            <p className="text-sm text-muted-foreground mt-1">{t('login.title')}</p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
               <div className="p-3 text-sm font-medium text-destructive-foreground bg-destructive rounded-md" role="alert">
                 {error}
@@ -170,12 +189,12 @@ export function Login() {
                 </div>
               </div>
             )}
-          </CardContent>
-          <CardFooter className="flex flex-col space-y-4">
-            <Button type="submit" className="w-full" disabled={loading}>
+
+            <Button type="submit" className="w-full mt-2" disabled={loading}>
               {loading ? t('login.loading') : t('login.submit')}
             </Button>
-            <div className="text-center text-xs text-muted-foreground space-y-1.5 pt-1">
+
+            <div className="text-center text-xs text-muted-foreground space-y-1.5 pt-2">
               <div>{t('login.no_account')}</div>
               <div className="flex flex-wrap items-center justify-center gap-2">
                 <Link href="/register/operator" className="text-primary font-bold hover:underline">
@@ -187,9 +206,9 @@ export function Login() {
                 </Link>
               </div>
             </div>
-          </CardFooter>
-        </form>
-      </Card>
+          </form>
+        </div>
+      </main>
     </div>
   );
 }
