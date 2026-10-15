@@ -2,6 +2,7 @@ export interface WilayaItem {
   code: string;
   ar: string;
   fr: string;
+  name?: string;
 }
 
 export const ALGERIA_69_WILAYAS: WilayaItem[] = [
