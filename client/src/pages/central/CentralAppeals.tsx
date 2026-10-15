@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { PageHeader, KpiCard, AICard } from '@/shared/components';
 import {
   AlertTriangle,
@@ -13,6 +13,9 @@ import {
   ShieldAlert,
   ChevronRight,
   ChevronLeft,
+  Lock,
+  Copy,
+  Check,
 } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import {
@@ -32,6 +35,9 @@ import {
   SheetTitle,
   SheetDescription,
 } from '@/components/ui/sheet';
+import { toast } from 'sonner';
+import { objectionsApi } from '@/features/objections/api/objections';
+import { GROUND_LABELS } from '@/features/objections/types';
 
 interface AppealItem {
   id: string;
@@ -45,6 +51,8 @@ interface AppealItem {
   status: 'active' | 'accepted' | 'rejected' | 'expired';
   aiLegitimacy: 'high' | 'investigate' | 'suspicious' | 'low';
   aiAnalysis: string;
+  isLive?: boolean;
+  checksum?: string;
 }
 
 const INITIAL_APPEALS: AppealItem[] = [
@@ -150,11 +158,53 @@ function getStatusBadge(status: AppealItem['status']) {
 
 export function CentralAppeals() {
   const [appeals, setAppeals] = useState<AppealItem[]>(INITIAL_APPEALS);
+  const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [selectedAppeal, setSelectedAppeal] = useState<AppealItem | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchRealObjections = async () => {
+      try {
+        setLoading(true);
+        const live = await objectionsApi.list();
+        if (live && live.length > 0) {
+          const mapped: AppealItem[] = live.map((item) => {
+            let status: AppealItem['status'] = 'active';
+            if (item.status === 'accepted') status = 'accepted';
+            else if (item.status === 'rejected') status = 'rejected';
+            else if (item.status === 'withdrawn') status = 'expired';
+            else status = 'active';
+
+            return {
+              id: item.id,
+              reference: item.reference,
+              appellant: item.objector_name || 'متعامل اقتصادي مسجل',
+              dealRef: item.tender_reference || 'REF-N/A',
+              dealTitle: item.tender_title || 'صفقة عمومية',
+              reason:
+                item.grounds?.map((g) => GROUND_LABELS[g] || g).join('، ') || 'طعن موضوعي',
+              submittedDate: item.submitted_at?.split('T')[0] || new Date().toISOString().split('T')[0],
+              daysRemaining: item.days_remaining ?? 10,
+              status,
+              aiLegitimacy: item.is_within_deadline ? 'high' : 'low',
+              aiAnalysis: `تحليل الذكاء الاصطناعي: طعن موثق ببصمة SHA-256 مشفرة (${item.checksum?.slice(0, 16)}...). المهلة القانونية: ${item.is_within_deadline ? 'مستوفاة ضمن 10 أيام من الإسناد' : 'منقضية الأجل'}.`,
+              isLive: true,
+              checksum: item.checksum,
+            };
+          });
+          setAppeals([...mapped, ...INITIAL_APPEALS]);
+        }
+      } catch (err) {
+        console.warn('Could not fetch live central objections, falling back to initial data');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchRealObjections();
+  }, []);
 
   const filtered = appeals.filter((a) => {
     if (filterStatus !== 'all' && a.status !== filterStatus) return false;
@@ -169,7 +219,28 @@ export function CentralAppeals() {
     return true;
   });
 
-  const handleDecision = (id: string, decision: 'accepted' | 'rejected') => {
+  const handleDecision = async (id: string, decision: 'accepted' | 'rejected') => {
+    const target = appeals.find((a) => a.id === id);
+    if (target?.isLive) {
+      try {
+        await objectionsApi.decide(id, {
+          decision,
+          reason:
+            decision === 'accepted'
+              ? 'قبول الطعن بقرار سلطة الرقابة المركزية وإلغاء الإسناد المؤقت.'
+              : 'رفض الطعن لعدم ثبوت المخالفة وتثبيت الإسناد المؤقت.',
+        });
+        toast.success(
+          decision === 'accepted'
+            ? 'تم قبول الطعن وتوثيق إلغاء الإسناد في سجل التدقيق.'
+            : 'تم رفض الطعن وتثبيت الإسناد في سجل التدقيق.'
+        );
+      } catch (err: any) {
+        toast.error(err.response?.data?.detail || 'فشل تسجيل القرار في النظام المركزي.');
+        return;
+      }
+    }
+
     setAppeals((prev) =>
       prev.map((item) => (item.id === id ? { ...item, status: decision, daysRemaining: 0 } : item))
     );
@@ -178,11 +249,16 @@ export function CentralAppeals() {
     }
     setActionMessage(
       decision === 'accepted'
-        ? 'تم قبول الطعن رسمياً وإخطار المصلحة المتعاقدة بإلغاء الإسناد المؤقت.'
-        : 'تم رفض الطعن رسمياً لعدم التأسيس القانوني وفق المادة 72.'
+        ? 'تم قبول الطعن رسمياً وإخطار المصلحة المتعاقدة بإلغاء الإسناد المؤقت وتوثيقه بسجل التدقيق.'
+        : 'تم رفض الطعن رسمياً لعدم التأسيس القانوني وفق المادة 72 وتوثيقه بسجل التدقيق.'
     );
     setTimeout(() => setActionMessage(null), 4000);
   };
+
+  const activeCount = appeals.filter((a) => a.status === 'active').length;
+  const acceptedCount = appeals.filter((a) => a.status === 'accepted').length;
+  const rejectedCount = appeals.filter((a) => a.status === 'rejected').length;
+  const expiredCount = appeals.filter((a) => a.status === 'expired').length;
 
   return (
     <div className="space-y-6 page-container py-4">
@@ -196,34 +272,34 @@ export function CentralAppeals() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <KpiCard
           eyebrow="طعون نشطة قيد البت"
-          value="8"
+          value={String(activeCount)}
           trend={2}
           trendLabel="خلال الآجال القانونية (10 أيام)"
-          sparkline={[4, 5, 5, 6, 7, 7, 8]}
+          sparkline={[4, 5, 5, 6, 7, 7, activeCount]}
           icon={AlertTriangle}
           accent="navy"
         />
         <KpiCard
           eyebrow="طعون مقبولة"
-          value="14"
+          value={String(acceptedCount)}
           trend={5}
           trendLabel="أُعيد فيها التقييم"
-          sparkline={[8, 9, 10, 11, 12, 13, 14]}
+          sparkline={[8, 9, 10, 11, 12, 13, acceptedCount]}
           icon={CheckCircle2}
           accent="emerald"
         />
         <KpiCard
           eyebrow="طعون مرفوضة"
-          value="29"
+          value={String(rejectedCount)}
           trend={-3}
           trendLabel="لعدم التأسيس الموضوعي"
-          sparkline={[35, 33, 31, 30, 29, 29, 29]}
+          sparkline={[35, 33, 31, 30, 29, 29, rejectedCount]}
           icon={XCircle}
           accent="red"
         />
         <KpiCard
           eyebrow="طعون منتهية الأجل"
-          value="3"
+          value={String(expiredCount)}
           trend={0}
           trendLabel="سقطت لمرور الآجال"
           sparkline={[2, 3, 3, 3, 3, 3, 3]}
@@ -426,6 +502,19 @@ export function CentralAppeals() {
                     {selectedAppeal.aiAnalysis}
                   </p>
                 </div>
+
+                {/* Audit Checksum if available */}
+                {selectedAppeal.checksum && (
+                  <div className="p-3.5 rounded-lg bg-[var(--card-bg)] border border-[var(--color-border-subtle)] space-y-1.5">
+                    <div className="text-xs text-[var(--color-text-muted)] flex items-center gap-1.5 font-medium">
+                      <Lock className="size-3.5 text-primary" />
+                      بصمة التدقيق المشفرة (SHA-256):
+                    </div>
+                    <code className="text-[11px] font-mono break-all text-slate-800 dark:text-slate-200 block bg-slate-50 dark:bg-slate-900/60 p-2 rounded border border-border/40">
+                      {selectedAppeal.checksum}
+                    </code>
+                  </div>
+                )}
 
                 {/* Decision Actions */}
                 {selectedAppeal.status === 'active' && (

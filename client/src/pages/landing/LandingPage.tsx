@@ -5,6 +5,129 @@ import { Button } from '@/components/ui/button';
 import { useI18n } from '@/i18n';
 import './landing.css';
 import { HeroSection } from './components/HeroSection';
+import {
+  Bot,
+  FileSearch,
+  ShieldAlert,
+  Workflow,
+  KeyRound,
+  Radar,
+  Calculator,
+  Target,
+  Radio,
+  Lock,
+  MapPin,
+  Smartphone,
+  Building2,
+  CreditCard,
+  FileSignature,
+  LinkIcon,
+} from 'lucide-react';
+
+const availableFeatures = [
+  // ═══ الميزات الموجودة (6) ═══
+  {
+    icon: Bot,
+    title: 'وكلاء الذكاء الاصطناعي',
+    description: 'تحليل ومساعدة ذكية داخل مراحل العمل',
+    readiness: 95,
+  },
+  {
+    icon: FileSearch,
+    title: 'تحليل الوثائق',
+    description: 'استخراج وفهم المعلومات من الوثائق',
+    readiness: 90,
+  },
+  {
+    icon: ShieldAlert,
+    title: 'كشف المخاطر والحالات غير العادية',
+    description: 'اكتشاف المؤشرات التي تحتاج إلى مراجعة بشرية',
+    readiness: 85,
+  },
+  {
+    icon: Workflow,
+    title: 'تتبع دورة الصفقة',
+    description: 'متابعة مراحل الصفقة والعمليات المرتبطة بها',
+    readiness: 92,
+  },
+  {
+    icon: KeyRound,
+    title: 'إدارة الصلاحيات والأدوار',
+    description: 'وصول مخصص حسب دور كل مستخدم',
+    readiness: 88,
+  },
+  {
+    icon: Radar,
+    title: 'الرقابة والتحليل المركزي',
+    description: 'متابعة وتحليل الصفقات والجهات',
+    readiness: 85,
+  },
+
+  // ═══ الميزات المُهملة (6 جديدة) ═══
+  {
+    icon: Calculator,
+    title: 'المساعد الذكي لتقدير الأسعار',
+    description: 'تقدير الميزانية من قاعدة 69 ولاية و20 فئة',
+    readiness: 92,
+  },
+  {
+    icon: Target,
+    title: 'مطابقة ذكية للفرص',
+    description: 'AI يطابق ملف المتعامل مع الفرص المتاحة',
+    readiness: 88,
+  },
+  {
+    icon: Radio,
+    title: 'فتح الأظرفة الحي',
+    description: 'متابعة مباشرة مع حجب هويات المنافسين',
+    readiness: 85,
+  },
+  {
+    icon: Lock,
+    title: 'سجل تدقيق SHA-256',
+    description: 'كل قرار موثّق ببصمة رقمية غير قابلة للتعديل',
+    readiness: 95,
+  },
+  {
+    icon: MapPin,
+    title: 'الخريطة الحرارية الوطنية',
+    description: 'رصد تفاعلي لـ 69 ولاية حسب النشاط والشبهات',
+    readiness: 90,
+  },
+  {
+    icon: Smartphone,
+    title: 'تطبيق قابل للتثبيت',
+    description: 'PWA يعمل على سطح المكتب والهاتف',
+    readiness: 85,
+  },
+];
+
+const developingFeatures = [
+  {
+    icon: Building2,
+    title: 'التكامل مع الأنظمة الحكومية',
+    description: 'ربط المنصة بالخدمات والهيئات الحكومية',
+    readiness: 50,
+  },
+  {
+    icon: CreditCard,
+    title: 'الدفع الإلكتروني',
+    description: 'دعم المسارات الإلكترونية للدفع',
+    readiness: 40,
+  },
+  {
+    icon: FileSignature,
+    title: 'التوقيع الإلكتروني',
+    description: 'تطوير مسارات التوقيع الرقمي المعتمد',
+    readiness: 35,
+  },
+  {
+    icon: LinkIcon,
+    title: 'التكامل مع CNRC والهيئات',
+    description: 'جلب البيانات الحكومية المسموح بها آلياً',
+    readiness: 30,
+  },
+];
 
 export function LandingPage() {
   const { user, status } = useAuth();
@@ -385,8 +508,8 @@ export function LandingPage() {
               </p>
             </header>
 
-            {/* Subsection 1: الميزات المتاحة (Available in Code) */}
-            <div className="mb-12">
+            {/* Subsection 1: الميزات المتاحة (Available in Code - 12 Features) */}
+            <div className="mb-14">
               <div className="flex items-center gap-2 mb-6">
                 <span className="w-3 h-3 rounded-full bg-emerald-600" aria-hidden="true" />
                 <h3 className="text-lg font-bold text-slate-900">
@@ -398,75 +521,45 @@ export function LandingPage() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                {/* 1. وكلاء الذكاء الاصطناعي */}
-                <div className="p-5 rounded-xl border border-emerald-200/80 bg-emerald-50/30 flex flex-col justify-between">
-                  <div>
-                    <span className="inst-status-badge inst-status-available text-[11px] mb-2.5 inline-block">
-                      {t('landing.innovation.status_available')}
-                    </span>
-                    <h4 className="text-base font-bold text-slate-900 mb-1.5">{t('landing.innovation.f_ai_title')}</h4>
-                    <p className="text-xs text-slate-600 leading-relaxed">{t('landing.innovation.f_ai_desc')}</p>
-                  </div>
-                </div>
+                {availableFeatures.map((feature, idx) => {
+                  const Icon = feature.icon;
+                  return (
+                    <div
+                      key={idx}
+                      className="p-5 rounded-xl border border-slate-200/80 bg-white flex flex-col justify-between shadow-xs hover:shadow-md transition-shadow"
+                    >
+                      <div>
+                        <div className="flex items-center justify-between mb-3.5">
+                          <div className="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-100 flex items-center justify-center">
+                            <Icon className="w-5 h-5" />
+                          </div>
+                          <span className="inst-status-badge inst-status-available text-[11px]">
+                            {t('landing.innovation.status_available')}
+                          </span>
+                        </div>
+                        <h4 className="text-base font-bold text-slate-900 mb-1.5 text-start">{feature.title}</h4>
+                        <p className="text-xs text-slate-600 leading-relaxed text-start">{feature.description}</p>
+                      </div>
 
-                {/* 2. تحليل الوثائق */}
-                <div className="p-5 rounded-xl border border-emerald-200/80 bg-emerald-50/30 flex flex-col justify-between">
-                  <div>
-                    <span className="inst-status-badge inst-status-available text-[11px] mb-2.5 inline-block">
-                      {t('landing.innovation.status_available')}
-                    </span>
-                    <h4 className="text-base font-bold text-slate-900 mb-1.5">{t('landing.innovation.f_docs_title')}</h4>
-                    <p className="text-xs text-slate-600 leading-relaxed">{t('landing.innovation.f_docs_desc')}</p>
-                  </div>
-                </div>
-
-                {/* 3. كشف المخاطر والحالات غير العادية */}
-                <div className="p-5 rounded-xl border border-emerald-200/80 bg-emerald-50/30 flex flex-col justify-between">
-                  <div>
-                    <span className="inst-status-badge inst-status-available text-[11px] mb-2.5 inline-block">
-                      {t('landing.innovation.status_available')}
-                    </span>
-                    <h4 className="text-base font-bold text-slate-900 mb-1.5">{t('landing.innovation.f_risk_title')}</h4>
-                    <p className="text-xs text-slate-600 leading-relaxed">{t('landing.innovation.f_risk_desc')}</p>
-                  </div>
-                </div>
-
-                {/* 4. تتبع دورة الصفقة */}
-                <div className="p-5 rounded-xl border border-emerald-200/80 bg-emerald-50/30 flex flex-col justify-between">
-                  <div>
-                    <span className="inst-status-badge inst-status-available text-[11px] mb-2.5 inline-block">
-                      {t('landing.innovation.status_available')}
-                    </span>
-                    <h4 className="text-base font-bold text-slate-900 mb-1.5">{t('landing.innovation.f_cycle_title')}</h4>
-                    <p className="text-xs text-slate-600 leading-relaxed">{t('landing.innovation.f_cycle_desc')}</p>
-                  </div>
-                </div>
-
-                {/* 5. إدارة الصلاحيات والأدوار */}
-                <div className="p-5 rounded-xl border border-emerald-200/80 bg-emerald-50/30 flex flex-col justify-between">
-                  <div>
-                    <span className="inst-status-badge inst-status-available text-[11px] mb-2.5 inline-block">
-                      {t('landing.innovation.status_available')}
-                    </span>
-                    <h4 className="text-base font-bold text-slate-900 mb-1.5">{t('landing.innovation.f_roles_title')}</h4>
-                    <p className="text-xs text-slate-600 leading-relaxed">{t('landing.innovation.f_roles_desc')}</p>
-                  </div>
-                </div>
-
-                {/* 6. الرقابة والتحليل المركزي */}
-                <div className="p-5 rounded-xl border border-emerald-200/80 bg-emerald-50/30 flex flex-col justify-between">
-                  <div>
-                    <span className="inst-status-badge inst-status-available text-[11px] mb-2.5 inline-block">
-                      {t('landing.innovation.status_available')}
-                    </span>
-                    <h4 className="text-base font-bold text-slate-900 mb-1.5">{t('landing.innovation.f_central_title')}</h4>
-                    <p className="text-xs text-slate-600 leading-relaxed">{t('landing.innovation.f_central_desc')}</p>
-                  </div>
-                </div>
+                      <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+                        <span className="text-slate-500 font-medium text-[11px]">نسبة الجاهزية</span>
+                        <div className="flex items-center gap-2">
+                          <div className="w-16 h-1.5 rounded-full bg-slate-100 overflow-hidden">
+                            <div
+                              className="h-full rounded-full bg-emerald-600"
+                              style={{ width: `${feature.readiness}%` }}
+                            />
+                          </div>
+                          <span className="font-bold text-slate-700 text-[11px] font-mono">{feature.readiness}%</span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
 
-            {/* Subsection 2: ميزات قيد التطوير (In Development) */}
+            {/* Subsection 2: ميزات قيد التطوير (In Development - 4 Features) */}
             <div>
               <div className="flex items-center gap-2 mb-6">
                 <span className="w-3 h-3 rounded-full bg-amber-500" aria-hidden="true" />
@@ -478,61 +571,42 @@ export function LandingPage() {
                 </span>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                {/* 1. التكامل مع الأنظمة الحكومية */}
-                <div className="p-5 rounded-xl border border-amber-200/70 bg-amber-50/30 flex flex-col justify-between">
-                  <div>
-                    <span className="inst-status-badge inst-status-dev text-[11px] mb-2.5 inline-block">
-                      {t('landing.innovation.status_dev')}
-                    </span>
-                    <h4 className="text-base font-bold text-slate-900 mb-1.5">{t('landing.innovation.d_gov_title')}</h4>
-                    <p className="text-xs text-slate-600 leading-relaxed">{t('landing.innovation.d_gov_desc')}</p>
-                  </div>
-                </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                {developingFeatures.map((feature, idx) => {
+                  const Icon = feature.icon;
+                  return (
+                    <div
+                      key={idx}
+                      className="p-5 rounded-xl border border-slate-200/80 bg-white flex flex-col justify-between shadow-xs hover:shadow-md transition-shadow"
+                    >
+                      <div>
+                        <div className="flex items-center justify-between mb-3.5">
+                          <div className="w-9 h-9 rounded-lg bg-amber-50 text-amber-700 border border-amber-100 flex items-center justify-center">
+                            <Icon className="w-5 h-5" />
+                          </div>
+                          <span className="inst-status-badge inst-status-dev text-[11px]">
+                            {t('landing.innovation.status_dev')}
+                          </span>
+                        </div>
+                        <h4 className="text-base font-bold text-slate-900 mb-1.5 text-start">{feature.title}</h4>
+                        <p className="text-xs text-slate-600 leading-relaxed text-start">{feature.description}</p>
+                      </div>
 
-                {/* 2. الدفع الإلكتروني */}
-                <div className="p-5 rounded-xl border border-amber-200/70 bg-amber-50/30 flex flex-col justify-between">
-                  <div>
-                    <span className="inst-status-badge inst-status-dev text-[11px] mb-2.5 inline-block">
-                      {t('landing.innovation.status_dev')}
-                    </span>
-                    <h4 className="text-base font-bold text-slate-900 mb-1.5">{t('landing.innovation.d_pay_title')}</h4>
-                    <p className="text-xs text-slate-600 leading-relaxed">{t('landing.innovation.d_pay_desc')}</p>
-                  </div>
-                </div>
-
-                {/* 3. التوقيع الإلكتروني */}
-                <div className="p-5 rounded-xl border border-amber-200/70 bg-amber-50/30 flex flex-col justify-between">
-                  <div>
-                    <span className="inst-status-badge inst-status-dev text-[11px] mb-2.5 inline-block">
-                      {t('landing.innovation.status_dev')}
-                    </span>
-                    <h4 className="text-base font-bold text-slate-900 mb-1.5">{t('landing.innovation.d_sign_title')}</h4>
-                    <p className="text-xs text-slate-600 leading-relaxed">{t('landing.innovation.d_sign_desc')}</p>
-                  </div>
-                </div>
-
-                {/* 4. التكامل مع CNRC والهيئات ذات الصلة */}
-                <div className="p-5 rounded-xl border border-amber-200/70 bg-amber-50/30 flex flex-col justify-between">
-                  <div>
-                    <span className="inst-status-badge inst-status-dev text-[11px] mb-2.5 inline-block">
-                      {t('landing.innovation.status_dev')}
-                    </span>
-                    <h4 className="text-base font-bold text-slate-900 mb-1.5">{t('landing.innovation.d_cnrc_title')}</h4>
-                    <p className="text-xs text-slate-600 leading-relaxed">{t('landing.innovation.d_cnrc_desc')}</p>
-                  </div>
-                </div>
-
-                {/* 5. أتمتة متقدمة لعمل اللجان */}
-                <div className="p-5 rounded-xl border border-amber-200/70 bg-amber-50/30 flex flex-col justify-between">
-                  <div>
-                    <span className="inst-status-badge inst-status-dev text-[11px] mb-2.5 inline-block">
-                      {t('landing.innovation.status_dev')}
-                    </span>
-                    <h4 className="text-base font-bold text-slate-900 mb-1.5">{t('landing.innovation.d_comm_title')}</h4>
-                    <p className="text-xs text-slate-600 leading-relaxed">{t('landing.innovation.d_comm_desc')}</p>
-                  </div>
-                </div>
+                      <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+                        <span className="text-slate-500 font-medium text-[11px]">نسبة الجاهزية</span>
+                        <div className="flex items-center gap-2">
+                          <div className="w-16 h-1.5 rounded-full bg-slate-100 overflow-hidden">
+                            <div
+                              className="h-full rounded-full bg-amber-500"
+                              style={{ width: `${feature.readiness}%` }}
+                            />
+                          </div>
+                          <span className="font-bold text-slate-700 text-[11px] font-mono">{feature.readiness}%</span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </div>

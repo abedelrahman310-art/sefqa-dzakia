@@ -14,9 +14,11 @@ import { CahierSpecsEditor } from './CahierSpecsEditor';
 import { SpecsIndex } from './SpecsIndex';
 import { AuthoritySessionManager } from '@/features/opening/components/AuthoritySessionManager';
 import { AuthoritySessionControl } from '@/features/opening/components/AuthoritySessionControl';
+import { AuthorityObjectionsView } from '@/features/objections/components/AuthorityObjectionsView';
 import { ReportsView } from './ReportsView';
 import { AuditView } from './AuditView';
 import { SettingsView } from './SettingsView';
+import ServiceTopBar from '@/components/layout/ServiceTopBar';
 import { LogoutButton, DesktopAppButton } from '@/shared/components';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import {
@@ -31,6 +33,7 @@ import {
   Settings as SettingsIcon,
   Menu,
   Languages,
+  Scale,
 } from 'lucide-react';
 
 export function AuthoritySpace() {
@@ -62,6 +65,7 @@ export function AuthoritySpace() {
   const [isCommitteeDetailActive] = useRoute('/authority/opportunities/:id/committee');
   const [isOffersActive] = useRoute('/authority/offers');
   const [isOffersDetailActive] = useRoute('/authority/opportunities/:id/received-offers');
+  const [isObjectionsActive] = useRoute('/authority/objections');
   const [isReportsActive] = useRoute('/authority/reports');
   const [isAuditActive] = useRoute('/authority/audit');
   const [isSettingsActive] = useRoute('/authority/settings');
@@ -102,6 +106,12 @@ export function AuthoritySpace() {
       href: '/authority/offers',
       icon: Inbox,
       isActive: isOffersActive || isOffersDetailActive,
+    },
+    {
+      label: 'الطعون والإسناد',
+      href: '/authority/objections',
+      icon: Scale,
+      isActive: isObjectionsActive,
     },
     {
       label: t('authority.nav.reports'),
@@ -236,12 +246,18 @@ export function AuthoritySpace() {
           </button>
         </div>
 
+        {/* Desktop Service / Authority TopBar (56px) */}
+        <div className="hidden md:block sticky top-0 z-20">
+          <ServiceTopBar />
+        </div>
+
         {/* Dynamic Route View */}
         <div className="page-transition p-6 md:p-8 flex-1">
           <Switch>
             <Route path="/authority/drafts" component={DraftsList} />
             <Route path="/authority/committee" component={DealCommitteeManager} />
             <Route path="/authority/offers" component={ReceivedOffers} />
+            <Route path="/authority/objections" component={AuthorityObjectionsView} />
             <Route path="/authority/evaluation/:tenderId" component={EvaluationWorkspace} />
             <Route path="/authority/reports" component={ReportsView} />
             <Route path="/authority/audit" component={AuditView} />

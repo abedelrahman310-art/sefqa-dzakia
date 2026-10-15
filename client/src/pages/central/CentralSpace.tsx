@@ -12,7 +12,8 @@ import { CentralAppeals } from './CentralAppeals';
 import { CentralReports } from './CentralReports';
 import { CentralPermissions } from './CentralPermissions';
 import { PortalNotFound } from '@/components/common/PortalNotFound';
-import { LogoutButton, DesktopAppButton } from '@/shared/components';
+import { LogoutButton } from '@/shared/components';
+import CentralAdminTopBar from '@/components/layout/CentralAdminTopBar';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import {
   LayoutDashboard,
@@ -117,6 +118,7 @@ export function CentralSpace() {
   const initial = user?.displayName?.charAt(0) || user?.email?.charAt(0) || 'إ';
 
   const isMapRoute = location === '/central/map';
+  const currentTitle = navItems.find((item) => item.isActive)?.label ?? t('central.workspace.title');
 
   const sidebarContent = (
     <div className="flex flex-col h-full bg-white select-none">
@@ -186,7 +188,6 @@ export function CentralSpace() {
           </button>
         </div>
 
-        <DesktopAppButton className="w-full justify-center bg-white hover:bg-[var(--paper-200)] text-[var(--ink-800)] border border-[var(--color-border-subtle)]" />
         <LogoutButton variant="sidebar" />
       </div>
     </div>
@@ -235,6 +236,13 @@ export function CentralSpace() {
             >
               {lang === 'ar' ? 'FR' : 'عربي'}
             </button>
+          </div>
+        )}
+
+        {/* Desktop Central Admin TopBar (56px) */}
+        {!isMapRoute && (
+          <div className="hidden md:block sticky top-0 z-20">
+            <CentralAdminTopBar title={currentTitle} />
           </div>
         )}
 
