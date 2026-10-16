@@ -49,32 +49,14 @@ export function PortalSidebar({
       style={{ '--sidebar-accent': accentColor } as React.CSSProperties}
     >
       {/* 1. Header — ثابت أعلى */}
-      {brandInitial ? (
-        <div className="p-5 border-b border-[var(--color-border-subtle)] flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="size-10 rounded-xl bg-gradient-to-br from-[var(--stamp-green-700)] to-[#0A2540] text-white font-bold text-base flex items-center justify-center shadow-sm flex-none">
-              {brandInitial}
-            </div>
-            <div className="min-w-0">
-              <h2 className="text-lg font-bold text-[var(--ink-900)] leading-tight truncate">
-                {title}
-              </h2>
-              <p className="text-xs text-[var(--ink-500)] mt-0.5 truncate">
-                {subtitle}
-              </p>
-            </div>
-          </div>
-        </div>
-      ) : (
-        <div className="p-5 border-b border-[var(--color-border-subtle)]">
-          <h2 className="text-lg font-bold text-[var(--ink-900)] leading-tight">
-            {title}
-          </h2>
-          <p className="text-xs text-[var(--ink-500)] mt-0.5">
-            {subtitle}
-          </p>
-        </div>
-      )}
+      <div className="p-5 border-b border-[var(--color-border-subtle)]">
+        <h2 className="text-lg font-bold text-[var(--ink-900)] leading-tight">
+          {title}
+        </h2>
+        <p className="text-xs text-[var(--ink-500)] mt-0.5">
+          {subtitle}
+        </p>
+      </div>
 
       {/* 2. Nav — scrollable وسط */}
       <nav className="flex-1 overflow-y-auto p-4 space-y-1">
