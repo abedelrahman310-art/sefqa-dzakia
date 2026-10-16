@@ -68,9 +68,10 @@ export function PortalSidebar({
                 onClick={onLinkClick}
                 className={`flex items-center gap-3 px-4 py-3 rounded-lg text-base transition-colors duration-150 ${
                   item.isActive
-                    ? 'bg-[var(--sidebar-accent)] text-white font-semibold shadow-sm'
-                    : 'text-[var(--ink-700)] hover:bg-[var(--paper-100)] hover:text-[var(--sidebar-accent)]'
+                    ? 'text-white font-semibold shadow-sm'
+                    : 'text-[var(--ink-700)] hover:bg-[var(--paper-100)]'
                 }`}
+                style={item.isActive ? { backgroundColor: accentColor } : undefined}
               >
                 <Icon className="size-5 shrink-0" strokeWidth={2} />
                 <span className="truncate">{item.label}</span>
