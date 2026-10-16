@@ -37,11 +37,11 @@ export function PortalSidebar({
   showDesktopAppButton = false,
   onLinkClick,
 }: PortalSidebarProps) {
-  const { lang, setLang } = useI18n();
   const { user } = useAuth();
+  const { lang, setLang } = useI18n();
 
-  const orgName = user?.organizationName || user?.displayName || user?.email || subtitle;
-  const initial = user?.displayName?.charAt(0) || user?.email?.charAt(0) || brandInitial || 'م';
+  const orgName = user?.organizationName || user?.displayName || user?.email || '';
+  const initial = user?.displayName?.charAt(0) || user?.email?.charAt(0) || 'م';
 
   return (
     <div className="flex flex-col h-full bg-white select-none">
