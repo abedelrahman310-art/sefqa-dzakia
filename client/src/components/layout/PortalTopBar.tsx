@@ -1,6 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import type { LucideIcon } from 'lucide-react';
-import { Settings, Bell, LogOut, Languages, Clock } from 'lucide-react';
+import {
+  FileCheck,
+  Languages,
+  Sparkles,
+  Clock,
+  Search,
+  Calendar,
+  MessageSquare,
+  Bell,
+} from 'lucide-react';
 import { useI18n } from '@/i18n';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { useLocation } from 'wouter';
@@ -20,24 +29,32 @@ export interface PortalTopBarProps {
   hiddenOnRoutes?: string[];    // full pathnames
   showClock?: boolean;          // default true
   notificationCount?: number;   // default 0
-  logoutRedirect?: string;      // default '/login'
+  logoutRedirect?: string;      // default '/login' (retained for compatibility)
   pulseColor?: string;          // CSS var, default 'var(--color-success-500)'
 }
 
 const TOPBAR_TRANSLATIONS: Record<string, Record<string, string>> = {
   ar: {
+    'portal.brand': 'صفقات ذكية',
+    'portal.ai_assistant': 'المساعد الذكي',
+    'portal.default_org': 'الجمهورية الجزائرية الديمقراطية الشعبية',
     'portal.live_clock': 'الساعة الحية والتاريخ الميلادي',
     'common.change_language': 'تبديل اللغة',
     'common.notifications': 'التنبيهات',
-    'common.settings': 'الإعدادات',
-    'common.logout': 'تسجيل الخروج',
+    'common.search': 'بحث',
+    'common.calendar': 'التقويم',
+    'common.messages': 'الرسائل',
   },
   fr: {
+    'portal.brand': 'Safaqat Dhakia',
+    'portal.ai_assistant': 'Assistant IA',
+    'portal.default_org': 'République Algérienne Démocratique et Populaire',
     'portal.live_clock': 'Horloge et date grégorienne en direct',
     'common.change_language': 'Changer de langue',
     'common.notifications': 'Notifications',
-    'common.settings': 'Paramètres',
-    'common.logout': 'Déconnexion',
+    'common.search': 'Recherche',
+    'common.calendar': 'Calendrier',
+    'common.messages': 'Messages',
   },
 };
 
@@ -49,13 +66,14 @@ export function PortalTopBar({
   hiddenOnRoutes = [],
   showClock = true,
   notificationCount = 0,
-  logoutRedirect = '/login',
   pulseColor = 'var(--color-success-500, var(--stamp-green-500))',
 }: PortalTopBarProps) {
   const { lang, setLang } = useI18n();
-  const { logout } = useAuth();
+  const { user } = useAuth();
   const loc = useLocation();
   const [now, setNow] = useState(new Date());
+
+  const orgName = user?.organizationName || user?.displayName || user?.email || TOPBAR_TRANSLATIONS[lang]?.['portal.default_org'] || 'المؤسسة';
 
   // String pathname matching
   const pathname: string = typeof loc === 'string'
@@ -63,10 +81,6 @@ export function PortalTopBar({
     : Array.isArray(loc) && typeof loc[0] === 'string'
       ? loc[0]
       : ((loc as unknown as { pathname?: string })?.pathname ?? '');
-
-  const setLocation = Array.isArray(loc) && typeof loc[1] === 'function'
-    ? loc[1]
-    : () => { window.location.href = logoutRedirect; };
 
   useEffect(() => {
     if (!showClock) return;
@@ -108,11 +122,6 @@ export function PortalTopBar({
     setLang(lang === 'ar' ? 'fr' : 'ar');
   };
 
-  const handleLogout = () => {
-    logout();
-    setLocation(logoutRedirect);
-  };
-
   return (
     <header
       className="portal-topbar"
@@ -120,43 +129,97 @@ export function PortalTopBar({
       dir={lang === 'ar' ? 'rtl' : 'ltr'}
       style={{ '--portal-pulse-color': pulseColor } as React.CSSProperties}
     >
+      {/* 1. RTL Start: الشعار، pill المؤسسة، زر FR، زر المساعد الذكي */}
       <div className="portal-topbar__start">
-        <span className="portal-topbar__breadcrumb">
-          {resolvedTitle}
-        </span>
+        {/* 1. شعار + اسم: صفقات ذكية */}
+        <div className="flex items-center gap-1.5 text-[var(--stamp-green-700)] font-bold text-sm shrink-0">
+          <FileCheck className="w-5 h-5 text-[var(--stamp-green-700)]" />
+          <span className="hidden sm:inline tracking-tight">{t('portal.brand')}</span>
+        </div>
+
+        {/* 2. pill المؤسسة */}
+        <div className="bg-[var(--stamp-green-50)] text-[var(--stamp-green-800)] border border-[var(--stamp-green-200)] rounded-full px-3 py-1 text-xs font-semibold max-w-[180px] md:max-w-[240px] truncate shadow-xs shrink-0">
+          {orgName}
+        </div>
+
+        {/* 3. زر FR */}
+        <button
+          type="button"
+          onClick={toggleLang}
+          className="portal-topbar__icon-btn text-xs font-semibold shrink-0"
+          aria-label={t('common.change_language')}
+          title={t('common.change_language')}
+        >
+          <Languages className="w-4 h-4 text-[var(--ink-500)]" aria-hidden="true" />
+          <span>{lang === 'ar' ? 'FR' : 'عربي'}</span>
+        </button>
+
+        {/* 4. زر المساعد الذكي */}
+        <button
+          type="button"
+          className="flex items-center gap-1.5 bg-[var(--stamp-green-700)] hover:bg-[var(--stamp-green-800)] text-white rounded-lg px-3 py-1.5 text-xs font-bold transition-colors shadow-xs shrink-0"
+          title={t('portal.ai_assistant')}
+        >
+          <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+          <span className="hidden md:inline">{t('portal.ai_assistant')}</span>
+        </button>
       </div>
 
-      {showClock && (
-        <div
-          className="portal-topbar__clock"
-          role="status"
-          aria-live="polite"
-          aria-label={t('portal.live_clock')}
-        >
-          <Clock className="portal-topbar__clock-icon" aria-hidden="true" />
-          <span className="portal-topbar__time font-mono" dir="ltr">
-            {timeStr}
+      {/* 2. RTL Middle: عنوان الصفحة + الساعة والتاريخ */}
+      <div className="portal-topbar__middle">
+        {resolvedTitle && (
+          <span className="portal-topbar__breadcrumb hidden lg:inline text-xs font-semibold text-[var(--ink-700)]">
+            {resolvedTitle}
           </span>
-          <span className="portal-topbar__divider" aria-hidden="true">|</span>
-          <span className="portal-topbar__date hidden md:inline">
-            {gregorianDate}
-          </span>
-          <span className="portal-topbar__pulse" aria-hidden="true" />
-        </div>
-      )}
+        )}
 
+        {showClock && (
+          <div
+            className="portal-topbar__clock"
+            role="status"
+            aria-live="polite"
+            aria-label={t('portal.live_clock')}
+          >
+            <Clock className="portal-topbar__clock-icon" aria-hidden="true" />
+            <span className="portal-topbar__time font-mono" dir="ltr">
+              {timeStr}
+            </span>
+            <span className="portal-topbar__divider" aria-hidden="true">|</span>
+            <span className="portal-topbar__date hidden xl:inline">
+              {gregorianDate}
+            </span>
+            <span className="portal-topbar__pulse" aria-hidden="true" />
+          </div>
+        )}
+      </div>
+
+      {/* 3. RTL End: أيقونات (Search, Calendar, MessageSquare, Bell) */}
       <div className="portal-topbar__end">
         <button
           type="button"
           className="portal-topbar__icon-btn"
-          onClick={toggleLang}
-          aria-label={t('common.change_language')}
-          title={t('common.change_language')}
+          aria-label={t('common.search')}
+          title={t('common.search')}
         >
-          <Languages className="w-4 h-4" aria-hidden="true" />
-          <span className="hidden sm:inline text-xs font-semibold">
-            {lang === 'ar' ? 'FR' : 'عربي'}
-          </span>
+          <Search className="w-4 h-4" aria-hidden="true" />
+        </button>
+
+        <button
+          type="button"
+          className="portal-topbar__icon-btn"
+          aria-label={t('common.calendar')}
+          title={t('common.calendar')}
+        >
+          <Calendar className="w-4 h-4" aria-hidden="true" />
+        </button>
+
+        <button
+          type="button"
+          className="portal-topbar__icon-btn"
+          aria-label={t('common.messages')}
+          title={t('common.messages')}
+        >
+          <MessageSquare className="w-4 h-4" aria-hidden="true" />
         </button>
 
         <button
@@ -171,30 +234,6 @@ export function PortalTopBar({
               {notificationCount > 9 ? '9+' : notificationCount}
             </span>
           )}
-        </button>
-
-        <button
-          type="button"
-          className="portal-topbar__icon-btn"
-          aria-label={t('common.settings')}
-          title={t('common.settings')}
-        >
-          <Settings className="w-4 h-4" aria-hidden="true" />
-        </button>
-
-        <span className="portal-topbar__sep" aria-hidden="true" />
-
-        <button
-          type="button"
-          className="portal-topbar__logout"
-          onClick={handleLogout}
-          aria-label={t('common.logout')}
-          title={t('common.logout')}
-        >
-          <LogOut className="w-4 h-4" aria-hidden="true" />
-          <span className="hidden sm:inline text-xs font-semibold">
-            {t('common.logout')}
-          </span>
         </button>
       </div>
     </header>

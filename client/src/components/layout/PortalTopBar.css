@@ -6,18 +6,28 @@
   justify-content: space-between;
   height: 56px;
   min-height: 56px;
-  padding-inline: 1.5rem;
+  padding-inline: 1.25rem;
   background-color: var(--color-bg-elevated, #ffffff);
   border-bottom: 1px solid var(--color-border-subtle, #e5e7eb);
   position: relative;
   z-index: 20;
+  gap: 0.75rem;
 }
 
 .portal-topbar__start,
 .central-topbar__start {
   display: flex;
   align-items: center;
+  gap: 0.625rem;
+  min-width: 0;
+}
+
+.portal-topbar__middle,
+.central-topbar__middle {
+  display: flex;
+  align-items: center;
   gap: 0.75rem;
+  min-width: 0;
 }
 
 .portal-topbar__breadcrumb,
@@ -148,30 +158,3 @@
   line-height: 1;
 }
 
-.portal-topbar__sep,
-.central-topbar__sep {
-  width: 1px;
-  height: 1.25rem;
-  background-color: var(--color-border-subtle, #e5e7eb);
-  margin-inline: 0.25rem;
-}
-
-.portal-topbar__logout,
-.central-topbar__logout {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0.4rem 0.65rem;
-  border-radius: 0.5rem;
-  color: var(--ink-700, #1a3247);
-  background-color: transparent;
-  border: 1px solid transparent;
-  transition: all 150ms ease;
-  cursor: pointer;
-}
-
-.portal-topbar__logout:hover,
-.central-topbar__logout:hover {
-  background-color: rgba(220, 38, 38, 0.08);
-  color: #dc2626;
-}
