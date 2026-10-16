@@ -9,6 +9,16 @@ class IsContractingAuthorityOrReadOnly(permissions.BasePermission):
             return True
         return bool(request.user and request.user.is_authenticated and getattr(request.user, 'role', None) == 'authority')
 
+    def has_object_permission(self, request, view, obj):
+        if request.method in permissions.SAFE_METHODS:
+            return True
+        return bool(
+            request.user
+            and request.user.is_authenticated
+            and getattr(request.user, 'role', None) == 'authority'
+            and getattr(obj, 'authority_id', None) == request.user.id
+        )
+
 class ProcurementDealViewSet(viewsets.ModelViewSet):
     """إدارة الصفقات العمومية وفق القانون 23-12"""
     queryset = ProcurementDeal.objects.all().select_related('authority')

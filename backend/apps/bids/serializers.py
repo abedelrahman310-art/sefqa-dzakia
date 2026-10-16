@@ -9,3 +9,4 @@ class BidOfferSerializer(serializers.ModelSerializer):
     class Meta:
         model = BidOffer
         fields = '__all__'
+        read_only_fields = ['operator', 'submission_timestamp']

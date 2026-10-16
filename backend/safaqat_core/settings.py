@@ -1,19 +1,46 @@
 import os
+import sys
 from pathlib import Path
 from datetime import timedelta
 from dotenv import load_dotenv
+from django.core.exceptions import ImproperlyConfigured
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Load environment variables
+# Load environment variables (.env for local development only)
 load_dotenv(BASE_DIR.parent / '.env')
 load_dotenv(BASE_DIR / '.env')
 
-SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'safaqat-insecure-django-dev-key-change-in-production')
-DEBUG = os.environ.get('DJANGO_DEBUG', 'True').lower() in ('true', '1', 'yes')
+# Detect test execution environment
+IS_TESTING = (
+    'test' in sys.argv
+    or any('pytest' in m for m in sys.modules)
+    or bool(os.environ.get('PYTEST_CURRENT_TEST'))
+)
 
-ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1,testserver').split(',')
+# ═══ Security Settings (Priority 1: Production Security) ═══
+# DEBUG must default to False in production
+DEBUG = os.environ.get('DJANGO_DEBUG', 'False').lower() in ('true', '1', 'yes')
+
+# SECRET_KEY: No hardcoded fallback. Required; startup must fail if missing.
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
+if not SECRET_KEY:
+    if IS_TESTING:
+        SECRET_KEY = 'test-insecure-key-strictly-for-pytest-execution-exceeding-50-characters-length'
+    elif not DEBUG:
+        raise ImproperlyConfigured("DJANGO_SECRET_KEY environment variable is required in production.")
+    else:
+        raise ImproperlyConfigured("DJANGO_SECRET_KEY environment variable is missing. Please define it in your .env file.")
+
+# ALLOWED_HOSTS: Must be explicitly configured from environment
+raw_allowed_hosts = os.environ.get('DJANGO_ALLOWED_HOSTS')
+if raw_allowed_hosts:
+    ALLOWED_HOSTS = [h.strip() for h in raw_allowed_hosts.split(',') if h.strip()]
+elif DEBUG or IS_TESTING:
+    ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'testserver']
+else:
+    raise ImproperlyConfigured("DJANGO_ALLOWED_HOSTS environment variable must be explicitly configured in production.")
 
 # Application definition
 INSTALLED_APPS = [
@@ -75,22 +102,34 @@ WSGI_APPLICATION = 'safaqat_core.wsgi.application'
 # Database
 # Default to PostgreSQL, with fallback to SQLite for quick local test runs
 DB_ENGINE = os.environ.get('DB_ENGINE', 'postgresql')
-if DB_ENGINE == 'postgresql':
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': os.environ.get('POSTGRES_DB', 'safaqat_db'),
-            'USER': os.environ.get('POSTGRES_USER', 'safaqat_user'),
-            'PASSWORD': os.environ.get('POSTGRES_PASSWORD', 'safaqat_password'),
-            'HOST': os.environ.get('POSTGRES_HOST', 'localhost'),
-            'PORT': os.environ.get('POSTGRES_PORT', '5432'),
-        }
-    }
-else:
+if IS_TESTING or DB_ENGINE in ('sqlite', 'sqlite3'):
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
             'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
+else:
+    db_name = os.environ.get('POSTGRES_DB')
+    db_user = os.environ.get('POSTGRES_USER')
+    db_password = os.environ.get('POSTGRES_PASSWORD')
+    db_host = os.environ.get('POSTGRES_HOST')
+    db_port = os.environ.get('POSTGRES_PORT', '5432')
+
+    if not DEBUG:
+        if not (db_name and db_user and db_password and db_host):
+            raise ImproperlyConfigured(
+                "POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD, and POSTGRES_HOST must all be configured via environment variables in production."
+            )
+
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': db_name or 'safaqat_db',
+            'USER': db_user or 'safaqat_user',
+            'PASSWORD': db_password or '',
+            'HOST': db_host or 'localhost',
+            'PORT': db_port or '5432',
         }
     }
 
@@ -187,3 +226,14 @@ CACHES = {
         "LOCATION": "safaqat-cache",
     }
 }
+
+# ═══ Production Security Hardening (Priority 1) ═══
+if not DEBUG and not IS_TESTING:
+    SECURE_SSL_REDIRECT = os.environ.get('DJANGO_SECURE_SSL_REDIRECT', 'True').lower() in ('true', '1', 'yes')
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = int(os.environ.get('DJANGO_SECURE_HSTS_SECONDS', '31536000'))
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
