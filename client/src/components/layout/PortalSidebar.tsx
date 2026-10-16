@@ -44,10 +44,7 @@ export function PortalSidebar({
   const initial = user?.displayName?.charAt(0) || user?.email?.charAt(0) || brandInitial || 'م';
 
   return (
-    <div
-      className="flex flex-col h-full bg-white select-none"
-      style={{ '--sidebar-accent': accentColor } as React.CSSProperties}
-    >
+    <div className="flex flex-col h-full bg-white select-none">
       {/* 1. Header — ثابت أعلى */}
       <div className="p-5 border-b border-[var(--color-border-subtle)]">
         <h2 className="text-lg font-bold text-[var(--ink-900)] leading-tight">
@@ -83,9 +80,13 @@ export function PortalSidebar({
 
       {/* 3. User Info + Language Switcher + Logout — ثابت أسفل */}
       <div className="border-t border-[var(--color-border-subtle)] p-4 bg-[var(--paper-100)] flex flex-col gap-3">
+        {/* User row */}
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="size-10 rounded-full bg-[var(--sidebar-accent)] flex items-center justify-center text-white font-semibold text-sm flex-none shadow-sm">
+            <div
+              className="size-10 rounded-full flex items-center justify-center text-white font-semibold text-sm flex-none shadow-sm"
+              style={{ backgroundColor: accentColor }}
+            >
               {initial}
             </div>
             <div className="flex-1 min-w-0">
@@ -93,26 +94,29 @@ export function PortalSidebar({
                 {user?.displayName || orgName}
               </p>
               <p className="text-xs text-[var(--ink-500)] truncate">
-                {user?.email || (brandInitial ? 'admin@safaqat.dz' : 'user@safaqat.dz')}
+                {user?.email || ''}
               </p>
             </div>
           </div>
 
+          {/* Lang toggle */}
           <button
             type="button"
             onClick={() => setLang(lang === 'ar' ? 'fr' : 'ar')}
             className="flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-lg bg-white text-[var(--ink-700)] hover:bg-[var(--paper-200)] transition-colors border border-[var(--color-border-subtle)] shadow-xs flex-none"
             title="تبديل اللغة / Changer de langue"
-            aria-label="تبديل اللغة"
           >
             <Languages className="w-3.5 h-3.5 text-[var(--ink-500)]" />
             <span>{lang === 'ar' ? 'FR' : 'عربي'}</span>
           </button>
         </div>
 
+        {/* Optional Desktop App Button */}
         {showDesktopAppButton && (
           <DesktopAppButton className="w-full justify-center bg-white hover:bg-[var(--paper-200)] text-[var(--ink-800)] border border-[var(--color-border-subtle)]" />
         )}
+
+        {/* Logout */}
         <LogoutButton variant="sidebar" />
       </div>
     </div>
