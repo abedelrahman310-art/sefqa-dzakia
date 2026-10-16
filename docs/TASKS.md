@@ -24,26 +24,25 @@
 | P-010 | إعادة تصميم صفحة التسجيل (3 بطاقات وتحقق لحظي) | Antigravity | ✅ Done |
 | P-011 | تنظيف AuthorityOverview              | Antigravity | ✅ Done |
 | P-012 | إعادة تصميم صفحة التسجيل (مطابق للصورة) | Antigravity | ✅ Done |
-| P-013 | توحيد هيكل البوابات الثلاث (Portal Shell + Sidebar) | Antigravity | 🔄 المرحلة 1 منجزة |
+| P-013 | توحيد هيكل البوابات الثلاث (Portal Shell + Sidebar) | Antigravity | 🔄 المرحلة 2 منجزة |
 
-### P-013 — Portal Shell & Sidebar Unification (المرحلة 1: حذف الكود الميت)
-- Status: ✅ المرحلة 1 منجزة (بانتظار تأكيد المستخدم للانتقال للمرحلة 2)
+### P-013 — Portal Shell & Sidebar Unification
+- Status: ✅ المرحلة 1 و 2 منجزتان (بانتظار تأكيد المستخدم للمرحلة 3)
 - Branch: `feat/p-013-portal-shell`
-- Commit: `29ffd75` — `chore(layout): remove dead AppShell/UserDropdown code (P-013.1)`
-- Pre-deletion Verification:
-  - فحص كامل لكافة ملفات المشروع، والتأكد من أن `AppShell` و `UserDropdown` غير مستخدمين في أي بوابة حية (استخدام تجريبي فقط في `DevShell`).
-  - التأكد من أن `CentralAdminTopBar.css` غير مستورد في أي مكان بعد استبداله بـ `PortalTopBar.css`.
-- Files Deleted:
-  - `client/src/components/layout/AppShell.tsx` (حذف 219 سطر)
-  - `client/src/components/layout/UserDropdown.tsx` (حذف 82 سطر)
-  - `client/src/components/layout/CentralAdminTopBar.css` (حذف 133 سطر)
-- Files Modified:
-  - `client/src/pages/DevShell.tsx` (تبسيط صفحة التطوير وفك ارتباطها بـ AppShell)
-- Net Code Reduction: -406 أسطر كود ميت.
+- Commits:
+  - `29ffd75` — `chore(layout): remove dead AppShell/UserDropdown code (P-013.1)`
+  - `a03712b` — `feat(layout): create unified PortalSidebar component (P-013.2)`
+- Stage 1 (حذف الكود الميت):
+  - حذف `AppShell.tsx`, `UserDropdown.tsx`, `CentralAdminTopBar.css` (-406 أسطر كود ميت).
+  - تبسيط `DevShell.tsx`.
+- Stage 2 (إنشاء PortalSidebar):
+  - إنشاء `client/src/components/layout/PortalSidebar.tsx`.
+  - يدعم الخصائص: `title`, `subtitle`, `items`, `accentColor`, `brandInitial`, `showDesktopAppButton`, `onLinkClick`.
+  - يتوافق هيكلياً وبصرياً مع الأشرطة الجانبية في `AuthoritySpace`, `OperatorSpace`, و `CentralSpace`.
 - Tests & Verification:
   - `pnpm --filter client typecheck` ✅ (0 errors)
-  - `pnpm --filter client build` ✅ (19.57s, 0 errors)
-- Next Step (Stage 2): بناء المكوّن الموحد `PortalSidebar.tsx` ودعمه للأدوار الثلاثة بعد موافقة المستخدم.
+  - `pnpm --filter client build` ✅ (9.70s, 0 errors)
+- Next Step (Stage 3): استبدال الشريط الجانبي المكرر في البوابات أو بناء `PortalShell.tsx` بعد موافقة المستخدم.
 
 ### P-010 — Register Redesign (3 Cards & Live Validation)
 - Status: ✅ Done
