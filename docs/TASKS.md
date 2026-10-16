@@ -24,16 +24,17 @@
 | P-010 | إعادة تصميم صفحة التسجيل (3 بطاقات وتحقق لحظي) | Antigravity | ✅ Done |
 | P-011 | تنظيف AuthorityOverview              | Antigravity | ✅ Done |
 | P-012 | إعادة تصميم صفحة التسجيل (مطابق للصورة) | Antigravity | ✅ Done |
-| P-013 | توحيد هيكل البوابات الثلاث (Portal Shell + Sidebar) | Antigravity | 🔄 المرحلة 4 منجزة |
+| P-013 | توحيد هيكل البوابات الثلاث (Portal Shell + Sidebar) | Antigravity | 🔄 المرحلة 5 منجزة |
 
 ### P-013 — Portal Shell & Sidebar Unification
-- Status: ✅ المرحلة 1 و 2 و 3 و 4 منجزة
+- Status: ✅ المرحلة 1 و 2 و 3 و 4 و 5 منجزة
 - Branch: `feat/p-013-portal-shell`
 - Commits:
   - `29ffd75` — `chore(layout): remove dead AppShell/UserDropdown code (P-013.1)`
   - `5806a0e` — `feat(layout): PortalSidebar with unified header, nav style, and footer (P-013.2)`
   - `0b39f9d` — `feat(layout): create unified PortalShell component (P-013.3)`
-  - `79f675f` — `refactor(authority): migrate AuthoritySpace to PortalShell and PortalSidebar (P-013.4)`
+  - `7859f22` — `refactor(authority): migrate AuthoritySpace to PortalShell and PortalSidebar (P-013.4)`
+  - `refactor(central): migrate to PortalShell (P-013.5)`
 - Stage 1 (حذف الكود الميت):
   - حذف `AppShell.tsx`, `UserDropdown.tsx`, `CentralAdminTopBar.css` (-406 أسطر كود ميت).
   - تبسيط `DevShell.tsx`.
@@ -50,10 +51,17 @@
   - إحصائيات `Measure-Object`: 161 أسطر، 471 كلمة، 6356 أحرف.
   - الحفاظ على: كافة المسارات الـ 20 داخل `Switch`، جميع مطابقات `useRoute`، مصفوفة `navItems`، وتمرير `showDesktopAppButton`.
   - حذف الكود المكرر: `aside`، درج `Sheet`، رأس الهاتف، دالة `sidebarContent`، منطق التمرير اليدوي `useLocation`.
+- Stage 5 (ترحيل CentralSpace):
+  - ترحيل `client/src/pages/central/CentralSpace.tsx` لاستخدام `PortalShell` و `PortalSidebar`.
+  - تقليص الحجم من 274 إلى 134 سطراً (-140 سطراً، تخفيض 51.1%).
+  - إحصائيات `Measure-Object`: 134 أسطر، 371 كلمة، 4514 أحرف.
+  - الحفاظ على: كافة المسارات الـ 11 داخل `Switch`، جميع مطابقات `useRoute`، مصفوفة `navItems`، ومنطق `isMapRoute` مع `currentTitle`.
+  - تمرير: `brandInitial="ص"` و `accentColor="var(--stamp-green-700)"` و `hideSidebar={isMapRoute}` و `hideTopBar={isMapRoute}`.
+  - حذف الكود المكرر: `aside`، درج `Sheet`، رأس الهاتف، دالة `sidebarContent`، منطق التمرير اليدوي `useEffect` مع `useLocation`.
 - Tests & Verification:
   - `pnpm --filter client typecheck` ✅ (0 errors)
-  - `pnpm --filter client build` ✅ (47.85s, 0 errors)
-- Next Step (Stage 5): ترحيل `OperatorSpace` إلى `PortalShell` و `PortalSidebar`.
+  - `pnpm --filter client build` ✅ (29.88s, 0 errors)
+- Next Step (Stage 6): ترحيل `OperatorSpace` إلى `PortalShell` و `PortalSidebar`.
 
 ### P-010 — Register Redesign (3 Cards & Live Validation)
 - Status: ✅ Done
