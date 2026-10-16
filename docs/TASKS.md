@@ -1,4 +1,4 @@
-﻿# Safaqat — Tasks Board
+# Safaqat — Tasks Board
 
 ## Sprint 0 — التأسيس ✅
 | ID    | Title                   | Owner     | Status |
@@ -21,6 +21,82 @@
 | P-001 | توحيد Login (Login.tsx ↔ LoginPage)  | Antigravity | 🔄 التالي |
 | P-002 | إكمال Objections UI                  | Antigravity | Todo   |
 | P-003 | Central: قسم Appeals                 | Antigravity | Todo   |
+| P-010 | إعادة تصميم صفحة التسجيل (3 بطاقات وتحقق لحظي) | Antigravity | ✅ Done |
+| P-011 | تنظيف AuthorityOverview              | Antigravity | ✅ Done |
+| P-012 | إعادة تصميم صفحة التسجيل (مطابق للصورة) | Antigravity | ✅ Done |
+
+### P-010 — Register Redesign (3 Cards & Live Validation)
+- Status: ✅ Done
+- Branch: `feat/p-010-register-redesign`
+- Files:
+  - `client/src/components/auth/RegisterHero.tsx` (Shared Hero: Maqam Echahid, Algerian flag, 3 feature pills, compact header on mobile)
+  - `client/src/components/auth/RegisterRoleTabs.tsx` (Role tabs: Operator, Authority, Central Admin notice)
+  - `client/src/components/auth/PasswordStrengthMeter.tsx` (4-level password strength meter with animated color bars)
+  - `client/src/pages/auth/OperatorRegister.tsx` (3 visual cards layout, searchable Wilaya combobox, real-time validation for phone/email/passwords, shake animation on terms error, 3-state submit button)
+  - `client/src/pages/auth/AuthorityRegister.tsx` (3 visual cards layout, searchable Wilaya combobox, authority service code, live validation, preserved backend payload contract)
+  - `client/src/i18n/ar.ts` & `client/src/i18n/fr.ts` (Comprehensive bilingual strings for groups, field errors, hints, strength levels)
+- Visual Card Groups (Across both roles):
+  1. `بيانات الهوية والممثل` (Full Name, Email, Phone with hint)
+  2. `معلومات النشاط والولاية` / `معلومات المصلحة المتعاقدة والولاية` (Searchable Wilaya dropdown across 58 wilayas + RC or Service Code)
+  3. `الأمان وبيانات الدخول` (Password + Strength Meter, Confirm Password + Live Match feedback, Terms checkbox with shake effect)
+- Preserved Backend State & Payloads:
+  - All 14 fields maintained (`fullName`, `email`, `phone`, `password`, `confirmPassword`, `wilaya`, `rc`/`code`, `termsAccepted`, `company`, `legalForm`, `nif`, `nis`, `address`, `repRole`, `category`, `tutelle`, `docName`, `docValid`).
+- Verification & Tests:
+  - `pnpm --filter client typecheck` ✅ (0 errors)
+  - `pnpm --filter client build` ✅ (11.87s, 0 errors)
+- Screenshots:
+  - Desktop Operator: `register_operator_desktop.png`
+  - Desktop Authority: `register_authority_desktop.png`
+  - Mobile Operator: `register_operator_mobile.png`
+
+
+### P-011 — AuthorityOverview Cleanup & Refinement
+- Status: ✅ Done
+- Branch: `feat/p-011-cleanup-authority-overview`
+- Files:
+  - `client/src/pages/authority/AuthorityOverview.tsx` (Reduced from 273 lines to 121 lines, ≤ 180 lines constraint met)
+  - `client/src/pages/authority/components/DraftsTable.tsx` (Internal component for 5-column drafts table and empty state)
+  - `client/src/pages/authority/components/AlertsList.tsx` (Internal component for dynamic data-derived alerts)
+  - `client/src/shared/components/EmptyState.tsx` (Reusable shared EmptyState component)
+  - `client/src/shared/components/index.ts` (Exported EmptyState)
+  - `client/src/i18n/ar.ts` & `client/src/i18n/fr.ts` (Added all authority.overview translation keys)
+- Lines before/after:
+  - `AuthorityOverview.tsx`: 273 lines -> 121 lines (Strictly ≤ 180 lines)
+- Hardcoded Arabic Strings: 0 (`Select-String '[آ-ي]{3,}'` clean across all files)
+- Tests:
+  - `pnpm --filter client typecheck` ✅ (0 errors)
+  - `pnpm --filter client build` ✅ (10.19s, 0 errors)
+- Screenshot:
+  - `authority_overview_clean.png`
+
+
+### P-012 — Register Redesign
+- Status: ✅ Done
+- Branch: `feat/p-012-register-redesign`
+- Files:
+  - `client/src/components/auth/RegisterHero.tsx` (Shared Hero: Maqam Echahid, flag, 3 feature pills with teal/blue/purple badges, bottom slogan, compact header on mobile)
+  - `client/src/components/auth/RegisterRoleTabs.tsx` (Shared 3-role selector tab bar with active navy pill, icon-above-text vertical alignment, dividers, and wouter routing)
+  - `client/src/pages/auth/OperatorRegister.tsx` (Redesigned 55/45 split, 100vh desktop, RTL-aligned 5-row form, terms checkbox, primary submit button, Google button, login link)
+  - `client/src/pages/auth/AuthorityRegister.tsx` (Matching 55/45 split, active role "المصلحة المتعاقدة", preserved all authority state & submission logic)
+  - `client/src/i18n/ar.ts` (Arabic strings for register redesign)
+  - `client/src/i18n/fr.ts` (French strings for register redesign)
+- Lines before/after:
+  - `OperatorRegister.tsx`: 1000 lines before -> 538 lines after (-462 lines cleaner)
+  - `AuthorityRegister.tsx`: 1005 lines before -> 482 lines after (-523 lines cleaner)
+- Fields preserved (14 fields total across roles):
+  - Operator: `fullName`, `email`, `phone`, `password`, `confirmPassword`, `wilaya`, `rc` (commercial register / tax ID), `termsAccepted`, + preserved state payloads: `company`, `legalForm`, `nif`, `nis`, `address`, `repRole`.
+  - Authority: `fullName`, `email`, `phone`, `password`, `confirmPassword`, `wilaya`, `code` (service code / tax ID), `termsAccepted`, + preserved state payloads: `category`, `tutelle`, `address`, `repRole`, `docName`, `docValid`.
+- Fields added: 0 (Strict compliance with zero added fields rule).
+- Tests:
+  - `pnpm --filter client typecheck` ✅ (0 errors)
+  - `pnpm --filter client build` ✅ (11.72s, 0 errors)
+  - Zero console errors in Edge CDP runtime test.
+- Screenshots:
+  - Desktop Operator: `register_operator_desktop.png`
+  - Desktop Authority: `register_authority_desktop.png`
+  - Tablet: `register_operator_tablet.png`
+  - Mobile (compact header): `register_operator_mobile.png`
+
 
 ## Sprint 3 — بقية Central
 | ID    | Title                | Owner       | Status |

@@ -4,6 +4,7 @@ import { fr } from './fr';
 
 export type Language = 'ar' | 'fr';
 export type Direction = 'rtl' | 'ltr';
+export type { TranslationKey };
 
 interface I18nContextProps {
   lang: Language;
