@@ -189,6 +189,12 @@ class SessionScheduleRequestSerializer(serializers.Serializer):
     location = serializers.CharField(max_length=255, required=True)
     stream_url = serializers.URLField(required=False, allow_blank=True, default='')
 
+    def validate_scheduled_at(self, value):
+        from django.utils import timezone
+        if value <= timezone.now():
+            raise serializers.ValidationError('يجب أن يكون موعد جلسة الفتح في المستقبل؛ لا تُبرمج الجلسات بأثر رجعي.')
+        return value
+
 
 class OpenOfferRequestSerializer(serializers.Serializer):
     offer_id = serializers.UUIDField(required=True)

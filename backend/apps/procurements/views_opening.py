@@ -97,7 +97,8 @@ class SessionScheduleView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        # 3. التحقق من عدم وجود جلسة قائمة مسبقاً
+        # 3. التحقق من عدم وجود جلسة سابقة — الجلسات سجلات موثقة لا تُحذف
+        # ولا يُعاد فتحها ببرمجة جديدة (إعادة الفتح تتطلب إذناً صريحاً خارج هذا المسار)
         existing_session = OpeningSession.objects.filter(tender=tender).first()
         if existing_session and existing_session.status in ["scheduled", "live"]:
             return Response(
@@ -108,7 +109,13 @@ class SessionScheduleView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
         elif existing_session:
-            existing_session.delete()
+            return Response(
+                {
+                    "detail": f"توجد جلسة سابقة لهذه الصفقة بالحالة ({existing_session.get_status_display()})؛ الجلسات المغلقة سجلات موثقة لا تُحذف ولا يُعاد فتحها ببرمجة جديدة.",
+                    "session_id": str(existing_session.id),
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         # 4. إنشاء جلسة الفتح
         session = OpeningSession.objects.create(
@@ -244,6 +251,13 @@ class SessionStartView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+        # 4. الحارس الزمني: يُحظر بدء الجلسة قبل موعدها المبرمج
+        if timezone.now() < session.scheduled_at:
+            return Response(
+                {"detail": "لا يمكن بدء جلسة فتح الأظرفة قبل موعدها المبرمج رسمياً."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         session.status = "live"
         session.started_at = timezone.now()
         session.save(update_fields=["status", "started_at"])
@@ -311,6 +325,30 @@ class SessionOpenOfferView(APIView):
         if offer.deal_id != session.tender_id:
             return Response(
                 {"detail": "العرض المحدد لا ينتمي إلى صفقة هذه الجلسة."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # العروض المفتوحة في الجلسة هي المودَعة داخل الأجل حصراً — المسودات والمتأخرة مستبعدة
+        if offer.status == "draft":
+            return Response(
+                {"detail": "العرض المحدد مسودة غير مودعة رسمياً؛ لا يُفتح في الجلسة إلا العرض المودَع."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        deadline = session.tender.submission_deadline
+        if deadline and offer.submission_timestamp and offer.submission_timestamp > deadline:
+            return Response(
+                {"detail": "العرض المحدد أُودع بعد انقضاء الأجل القانوني؛ يُستبعد من الجلسة."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # منع التوثيق المكرر للعرض نفسه في الجلسة (سلامة المحضر)
+        if OpeningEvent.objects.filter(
+            session=session,
+            offer=offer,
+            event_type__in=["offer_opened", "offer_rejected"],
+        ).exists():
+            return Response(
+                {"detail": "هذا العرض موثق مسبقاً في محضر الجلسة؛ يُمنع فتحه وتوثيقه مرتين."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -427,12 +465,24 @@ class SessionOffersView(APIView):
         self.check_object_permissions(request, session)
 
         # تصفية العروض حسب صفقة الجلسة حصراً (defense-in-depth)
+        # + استبعاد المسودات والمتأخرة عن الأجل: الظاهر في الجلسة هو المودَع داخل الأجل فقط
         offers = (
             BidOffer.objects
             .filter(deal=session.tender)
+            .exclude(status="draft")
             .select_related("operator")
             .order_by("created_at")
         )
+        deadline = session.tender.submission_deadline
+        if deadline:
+            offers = offers.exclude(submission_timestamp__gt=deadline)
+
+        # القانون 18-07: المتعامل لا يرى في الجلسة إلا عرضه الخاص؛
+        # الكشف الكامل للمصلحة صاحبة الصفقة والرقابة المركزية فقط
+        role = getattr(request.user, "role", None)
+        if role == "operator" and not request.user.is_staff:
+            offers = offers.filter(operator=request.user)
+
         serializer = DealOfferSummarySerializer(offers, many=True, context={"request": request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
