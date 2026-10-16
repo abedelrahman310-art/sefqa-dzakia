@@ -19,14 +19,13 @@ import { PortalShell } from '@/components/layout/PortalShell';
 import { PortalSidebar } from '@/components/layout/PortalSidebar';
 import {
   LayoutDashboard,
-  Briefcase,
-  UserCheck,
-  Inbox,
-  Radio,
-  CheckSquare,
-  Archive,
-  Settings as SettingsIcon,
-  ShieldAlert,
+  Megaphone,
+  FileText,
+  ClipboardCheck,
+  Building2,
+  MessageSquare,
+  Scale,
+  Users,
 } from 'lucide-react';
 
 export function OperatorSpace() {
@@ -49,57 +48,51 @@ export function OperatorSpace() {
 
   const navItems = [
     {
-      label: t('nav.operator.overview'),
+      label: 'مساحة العمل',
       href: '/operator',
       icon: LayoutDashboard,
       isActive: isOverviewActive || isOverviewAliasActive,
     },
     {
-      label: t('nav.operator.deals'),
+      label: 'الإعلانات وفرص الصفقات',
       href: '/operator/deals',
-      icon: Briefcase,
+      icon: Megaphone,
       isActive: isDealsActive || isOppsActive,
     },
     {
-      label: t('nav.operator.profile'),
-      href: '/operator/profile',
-      icon: UserCheck,
-      isActive: isProfileActive,
-    },
-    {
-      label: t('nav.operator.offers'),
-      href: '/operator/offers',
-      icon: Inbox,
-      isActive: isOffersActive || isOffersIdActive,
-    },
-    {
-      label: t('nav.operator.opening_sessions'),
-      href: '/operator/opening-sessions',
-      icon: Radio,
-      isActive: isSessionsActive || isSessionsIdActive,
-    },
-    {
-      label: 'الطعون والمنازعات',
-      href: '/operator/objections',
-      icon: ShieldAlert,
-      isActive: isObjectionsActive,
-    },
-    {
-      label: t('nav.operator.smart_specs'),
+      label: 'دفاتر الشروط',
       href: '/operator/smart-specs',
-      icon: CheckSquare,
+      icon: FileText,
       isActive: isSmartSpecsActive,
     },
     {
-      label: t('nav.operator.archive'),
-      href: '/operator/archive',
-      icon: Archive,
-      isActive: isArchiveActive,
+      label: 'إدارة العروض',
+      href: '/operator/offers',
+      icon: ClipboardCheck,
+      isActive: isOffersActive || isOffersIdActive,
     },
     {
-      label: t('nav.operator.settings'),
+      label: 'ملف المؤسسة',
+      href: '/operator/profile',
+      icon: Building2,
+      isActive: isProfileActive,
+    },
+    {
+      label: 'المراسلات والاستفسارات',
+      href: '/operator/opening-sessions',
+      icon: MessageSquare,
+      isActive: isSessionsActive || isSessionsIdActive,
+    },
+    {
+      label: 'الطعون والتظلمات',
+      href: '/operator/objections',
+      icon: Scale,
+      isActive: isObjectionsActive,
+    },
+    {
+      label: 'الفريق والصلاحيات',
       href: '/operator/settings',
-      icon: SettingsIcon,
+      icon: Users,
       isActive: isSettingsActive,
     },
   ];
@@ -108,14 +101,15 @@ export function OperatorSpace() {
     <PortalShell
       mobileTitle="صفقات ذكية · المتعامل الاقتصادي"
       topBar={<OperatorTopBar />}
-      sidebarWidth="w-[264px]"
+      sidebarWidth="w-[250px]"
+      contentClassName="flex-1 min-h-0 flex flex-col p-4 md:px-7 md:py-4 bg-[#F4F7FB] overflow-y-auto"
       sidebar={
         <PortalSidebar
           title="صفقات ذكية"
           subtitle="فضاء المتعامل الاقتصادي"
           badgeTitle="• بوابة المتعامل الاقتصادي"
           items={navItems}
-          variant="mint"
+          variant="operator"
           hideUserInfo
         />
       }

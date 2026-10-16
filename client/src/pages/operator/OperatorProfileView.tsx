@@ -91,46 +91,143 @@ export function OperatorProfileView() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      {/* Header Banner - Clean & Official */}
-      <section className="bg-card border border-border rounded-2xl p-6 shadow-sm space-y-1.5">
-        <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-navy-50 text-navy-800 border border-navy-100 inline-block">
-          {t('topbar.brand_sub')}
-        </span>
-        <h2 className="text-2xl font-extrabold text-navy-900">
-          {t('operator.profile.title')}
-        </h2>
-        <p className="text-xs md:text-sm text-muted-foreground max-w-2xl leading-relaxed">
-          {t('operator.profile.desc')}
-        </p>
-      </section>
-
-      {/* Mandatory Self-Declaration Notice */}
-      <div className="bg-blue-50/80 border border-blue-200 text-blue-900 rounded-xl p-4 flex items-start gap-3 text-xs leading-relaxed">
-        <AlertCircle className="w-5 h-5 text-blue-700 flex-none mt-0.5" />
-        <div>
-          <strong className="block font-bold text-blue-950 mb-0.5">
-            إشعار الشفافية والنزاهة الإجرائية:
-          </strong>
-          {t('operator.profile.self_declared_notice')}
+    <div className="font-sans flex flex-col gap-4">
+      {/* 1. Page Header */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-col gap-0.5">
+          <h1 className="text-[26px] font-extrabold text-[#0B1F3A] leading-tight m-0">ملف المؤسسة</h1>
+          <p className="text-[14.5px] leading-relaxed text-[#5B6B82] m-0">
+            البيانات الأساسية لمؤسستك كما تظهر في ملف الترشح.
+          </p>
         </div>
+        <button
+          type="button"
+          onClick={handleSubmit}
+          disabled={saving}
+          className="inline-flex items-center justify-center gap-2 min-h-[46px] px-5 rounded-[10px] bg-[#047857] hover:bg-[#065F46] text-white text-[15px] font-bold transition-colors cursor-pointer border-0 disabled:opacity-50"
+        >
+          <span>{saving ? 'جاري الحفظ...' : 'حفظ البيانات'}</span>
+        </button>
       </div>
 
       {successMsg && (
-        <div className="bg-emerald-50 border border-emerald-200 text-emerald-900 rounded-xl p-4 flex items-center gap-2 text-xs font-bold">
-          <CheckCircle className="w-4 h-4 text-emerald-600 flex-none" />
+        <div className="bg-emerald-50 border border-emerald-200 text-emerald-900 rounded-[12px] p-3.5 flex items-center gap-2 text-xs font-bold">
+          <CheckCircle className="size-4 text-emerald-600 flex-none" />
           <span>{successMsg}</span>
         </div>
       )}
 
       {errorMsg && (
-        <div className="bg-destructive/10 border border-destructive/20 text-destructive rounded-xl p-4 flex items-center gap-2 text-xs font-bold">
-          <AlertCircle className="w-4 h-4 flex-none" />
+        <div className="bg-destructive/10 border border-destructive/20 text-destructive rounded-[12px] p-3.5 flex items-center gap-2 text-xs font-bold">
+          <AlertCircle className="size-4 flex-none" />
           <span>{errorMsg}</span>
         </div>
       )}
 
-      {/* Form Card */}
+      {/* 2. 8-Field Grid Form Card */}
+      <form onSubmit={handleSubmit} className="bg-white border border-[#D5DDEA] rounded-[16px] p-5 shadow-xs">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[14px] font-bold text-[#0B1F3A]">اسم المؤسسة</label>
+            <input
+              type="text"
+              placeholder="[اسم المؤسسة]"
+              defaultValue=""
+              className="h-[46px] px-3 rounded-[10px] border-[1.5px] border-[#7C8AA3] bg-white text-[#0B1F3A] text-[15px]"
+            />
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[14px] font-bold text-[#0B1F3A]">الشكل القانوني</label>
+            <select className="h-[46px] px-3 rounded-[10px] border-[1.5px] border-[#7C8AA3] bg-white text-[#0B1F3A] text-[15px]" defaultValue="sarl">
+              <option value="">اختر الشكل القانوني</option>
+              <option value="eurl">EURL</option>
+              <option value="sarl">SARL</option>
+              <option value="spa">SPA</option>
+              <option value="snc">SNC</option>
+              <option value="pp">شخص طبيعي</option>
+            </select>
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[14px] font-bold text-[#0B1F3A]">رقم السجل التجاري</label>
+            <input
+              type="text"
+              dir="ltr"
+              placeholder="[رقم السجل التجاري]"
+              className="h-[46px] px-3 rounded-[10px] border-[1.5px] border-[#7C8AA3] bg-white text-[#0B1F3A] text-[15px] text-end"
+            />
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[14px] font-bold text-[#0B1F3A]">رقم التعريف الجبائي (NIF)</label>
+            <input
+              type="text"
+              dir="ltr"
+              placeholder="[NIF]"
+              className="h-[46px] px-3 rounded-[10px] border-[1.5px] border-[#7C8AA3] bg-white text-[#0B1F3A] text-[15px] text-end"
+            />
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[14px] font-bold text-[#0B1F3A]">رقم التعريف الإحصائي (NIS)</label>
+            <input
+              type="text"
+              dir="ltr"
+              placeholder="[NIS]"
+              className="h-[46px] px-3 rounded-[10px] border-[1.5px] border-[#7C8AA3] bg-white text-[#0B1F3A] text-[15px] text-end"
+            />
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[14px] font-bold text-[#0B1F3A]">العنوان</label>
+            <input
+              type="text"
+              placeholder="[عنوان المقر]"
+              className="h-[46px] px-3 rounded-[10px] border-[1.5px] border-[#7C8AA3] bg-white text-[#0B1F3A] text-[15px]"
+            />
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[14px] font-bold text-[#0B1F3A]">البريد الإلكتروني للمؤسسة</label>
+            <input
+              type="email"
+              dir="ltr"
+              placeholder="name@company.dz"
+              className="h-[46px] px-3 rounded-[10px] border-[1.5px] border-[#7C8AA3] bg-white text-[#0B1F3A] text-[15px] text-end"
+            />
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[14px] font-bold text-[#0B1F3A]">الهاتف</label>
+            <input
+              type="tel"
+              dir="ltr"
+              placeholder="[رقم الهاتف]"
+              className="h-[46px] px-3 rounded-[10px] border-[1.5px] border-[#7C8AA3] bg-white text-[#0B1F3A] text-[15px] text-end"
+            />
+          </div>
+        </div>
+      </form>
+
+      {/* 3. Official Documents Empty State */}
+      <div className="flex flex-col items-center justify-center text-center gap-2 p-8 border-[1.5px] border-dashed border-[#AEB9CB] rounded-[16px] bg-white min-h-[180px]">
+        <div className="size-[52px] rounded-full bg-[#E8EFFA] text-[#14325C] flex items-center justify-center shrink-0">
+          <Building2 className="size-[26px]" strokeWidth={1.8} />
+        </div>
+        <h3 className="text-[17px] font-extrabold text-[#0B1F3A] mt-1 m-0">لم تُرفق أي وثيقة رسمية بعد</h3>
+        <p className="text-[14.5px] leading-relaxed text-[#5B6B82] max-w-[460px] m-0">
+          أرفق السجل التجاري وشهادات الوضعية الجبائية وشبه الجبائية والقانون الأساسي لتُستعمل في ملف الترشح.
+        </p>
+        <button
+          type="button"
+          className="inline-flex items-center justify-center gap-2 min-h-[44px] px-5 rounded-[10px] border-[1.5px] border-[#047857] bg-white text-[#065F46] hover:bg-[#ECFDF5] font-bold text-[14px] cursor-pointer mt-2"
+        >
+          إرفاق وثيقة
+        </button>
+      </div>
+
+      {/* 4. Professional Classification and Territory Settings */}
       <form onSubmit={handleSubmit} className="bg-card border border-border rounded-2xl p-6 shadow-sm space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Main Sector */}

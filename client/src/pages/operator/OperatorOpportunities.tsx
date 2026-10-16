@@ -86,20 +86,62 @@ export function OperatorOpportunities() {
     }
   };
 
+  const [selectedProc, setSelectedProc] = useState('open');
+
+  const procDefs = [
+    { id: 'open', title: 'طلب العروض المفتوح', desc: 'إجراء يتاح فيه لكل متعامل اقتصادي مؤهل تقديم عرضه.' },
+    { id: 'openMin', title: 'طلب العروض المفتوح مع اشتراط قدرات دنيا', desc: 'مفتوح للمتعاملين الذين يستوفون القدرات الدنيا المحددة في دفتر الشروط.' },
+    { id: 'limited', title: 'طلب العروض المحدود', desc: 'يُوجَّه إلى متعاملين اقتصاديين تم انتقاؤهم مسبقًا.' },
+    { id: 'contest', title: 'المسابقة', desc: 'إجراء يُختار فيه مشروع أو دراسة بعد المنافسة بين المشاركين.' },
+    { id: 'consult', title: 'الاستشارة', desc: 'إجراء مبسّط تُستشار فيه عدة متعاملين لتلبية حاجات محدودة.' },
+    { id: 'direct', title: 'التراضي', desc: 'إبرام الصفقة مع متعامل واحد في الحالات التي يحددها التنظيم.' },
+  ];
+
   return (
-    <div className="space-y-6">
-      {/* Header Banner - Streamlined */}
-      <section className="bg-card border border-border rounded-2xl p-6 shadow-sm space-y-1.5">
-        <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-navy-50 text-navy-800 border border-navy-100 inline-block">
-          {t('topbar.brand_sub')}
-        </span>
-        <h2 className="text-2xl font-extrabold text-navy-900">
-          {t('opps.title')}
-        </h2>
-        <p className="text-xs md:text-sm text-muted-foreground max-w-2xl leading-relaxed">
-          {t('topbar.brand_desc')}
-        </p>
-      </section>
+    <div className="font-sans flex flex-col gap-4">
+      {/* 1. Page Header */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-col gap-0.5">
+          <h1 className="text-[26px] font-extrabold text-[#0B1F3A] leading-tight m-0">الإعلانات وفرص الصفقات</h1>
+          <p className="text-[14.5px] leading-relaxed text-[#5B6B82] m-0">
+            اختر نوع الإجراء الذي يهم مؤسستك لعرض الإعلانات المناسبة.
+          </p>
+        </div>
+        <button
+          type="button"
+          className="inline-flex items-center justify-center gap-2 min-h-[46px] px-5 rounded-[10px] bg-[#047857] hover:bg-[#065F46] text-white text-[15px] font-bold transition-colors cursor-pointer border-0"
+        >
+          <span>إنشاء تنبيه مخصّص</span>
+        </button>
+      </div>
+
+      {/* 2. Procedure Cards Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3" role="group" aria-label="نوع الإجراء">
+        {procDefs.map((proc) => {
+          const isSelected = selectedProc === proc.id;
+          return (
+            <button
+              key={proc.id}
+              type="button"
+              aria-pressed={isSelected}
+              onClick={() => setSelectedProc(proc.id)}
+              className={`flex flex-col gap-2 min-h-[140px] p-4 rounded-[16px] bg-white text-start transition-all cursor-pointer border-2 ${
+                isSelected
+                  ? 'border-[#047857] shadow-sm'
+                  : 'border-transparent hover:border-[#BFE6D2] shadow-xs'
+              }`}
+            >
+              <div className="flex items-start justify-between gap-2.5 w-full">
+                <span className="text-[17px] font-extrabold text-[#0B1F3A] leading-normal">{proc.title}</span>
+                {isSelected && (
+                  <Sparkles className="size-5 shrink-0 text-[#047857]" strokeWidth={2} />
+                )}
+              </div>
+              <span className="text-[14px] leading-relaxed text-[#5B6B82]">{proc.desc}</span>
+            </button>
+          );
+        })}
+      </div>
 
       {/* Profile Setup Reminder Banner */}
       {!profileConfigured && (

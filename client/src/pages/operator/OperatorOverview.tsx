@@ -64,57 +64,86 @@ export function OperatorOverview() {
   const recentOpps = opportunities.slice(0, 4);
 
   return (
-    <div className="font-sans space-y-6">
-      {/* 1. Header Banner */}
-      <PageHeader
-        eyebrow={t('overview.hero.eyebrow')}
-        title={t('overview.hero.title')}
-        description={t('overview.hero.desc')}
-        actions={
-          <Button
-            className="bg-[var(--stamp-green-700)] hover:bg-[var(--stamp-green-800)] text-white font-bold px-4 py-2.5 rounded-xl shadow-xs text-xs flex items-center gap-2"
-            onClick={() => setLocation('/operator/deals')}
-          >
-            <Search className="w-4 h-4" />
-            <span>{t('overview.hero.cta')}</span>
-          </Button>
-        }
-      />
+    <div className="font-sans flex flex-col gap-4">
+      {/* 1. Page Header */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-col gap-0.5">
+          <div className="flex flex-wrap items-center gap-2.5">
+            <h1 className="text-[26px] font-extrabold text-[#0B1F3A] leading-tight m-0">مساحة العمل</h1>
+            <span className="inline-block px-2.5 py-0.5 rounded-full border border-[#EBDDB0] bg-[#FBF3DC] text-[#6B4F0E] text-[12px] font-bold">
+              بيانات تجريبية
+            </span>
+          </div>
+          <p className="text-[14.5px] leading-relaxed text-[#5B6B82] m-0">
+            نظرة سريعة على فرصك وجاهزية ملف مشاركتك.
+          </p>
+        </div>
+      </div>
 
-      {/* 2. Unified KPI Cards Strip */}
-      <section className="grid grid-cols-1 sm:grid-cols-3 gap-4" aria-label={t('overview.stats.available')}>
-        <Link href="/operator/deals" className="block focus:outline-none focus:ring-2 focus:ring-[var(--stamp-green-700)] rounded-xl">
-          <KpiCard
-            eyebrow={t('overview.stats.available')}
-            value={loading ? '—' : error ? '0' : opportunities.length}
-            icon={Briefcase}
-            accent="emerald"
-            description={t('overview.stats.available_sub')}
-          />
-        </Link>
-        <Link href="/operator/offers" className="block focus:outline-none focus:ring-2 focus:ring-[var(--official-700)] rounded-xl">
-          <KpiCard
-            eyebrow={t('overview.stats.submitted')}
-            value={loading ? '—' : error ? '0' : submittedCount}
-            icon={CheckCircle2}
-            accent="navy"
-            description={t('overview.stats.submitted_sub')}
-          />
-        </Link>
-        <Link href="/operator/offers" className="block focus:outline-none focus:ring-2 focus:ring-[var(--stamp-gold-700)] rounded-xl">
-          <KpiCard
-            eyebrow={t('overview.stats.drafts')}
-            value={loading ? '—' : error ? '0' : draftsCount}
-            icon={Clock}
-            accent="gold"
-            description={t('overview.stats.drafts_sub')}
-          />
-        </Link>
+      {/* 2. Large 4-Column KPIs Strip */}
+      <section className="grid grid-cols-2 md:grid-cols-4 gap-3" aria-label="مؤشرات الجاهزية">
+        <div className="bg-[#E8EFFA] text-[#14325C] border border-[#CFDCF0] rounded-[12px] p-4 flex flex-col justify-center items-center text-center gap-0.5 shadow-xs">
+          <span className="text-[32px] font-extrabold leading-tight">68%</span>
+          <span className="text-[13px] font-bold">نسبة الجاهزية</span>
+        </div>
+        <div className="bg-white text-[#0B1F3A] border border-[#D5DDEA] rounded-[12px] p-4 flex flex-col justify-center items-center text-center gap-0.5 shadow-xs">
+          <span className="text-[32px] font-extrabold leading-tight">12</span>
+          <span className="text-[13px] font-bold">الوثائق المطلوبة</span>
+        </div>
+        <div className="bg-[#FCEBEA] text-[#B42318] border border-[#F4C9C5] rounded-[12px] p-4 flex flex-col justify-center items-center text-center gap-0.5 shadow-xs">
+          <span className="text-[32px] font-extrabold leading-tight">1</span>
+          <span className="text-[13px] font-bold">وثائق ناقصة</span>
+        </div>
+        <div className="bg-[#FBF3DC] text-[#6B4F0E] border border-[#EBDDB0] rounded-[12px] p-4 flex flex-col justify-center items-center text-center gap-0.5 shadow-xs">
+          <span className="text-[32px] font-extrabold leading-tight">5</span>
+          <span className="text-[13px] font-bold">قيد الإنجاز</span>
+        </div>
       </section>
 
-      {/* 3. Main 3-Column Layout: Opportunities (2 cols) + Actions & Verification (1 col) */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Main Content (2 cols) */}
+      {/* 3. Split: Shortcuts Stack + Calendar Deadlines Empty State */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch">
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col items-start justify-center gap-2 p-5 border border-[#D5DDEA] rounded-[16px] bg-white shadow-xs">
+            <h2 className="text-[18px] font-extrabold text-[#0B1F3A] m-0">الإعلانات وفرص الصفقات</h2>
+            <p className="text-[14.5px] leading-relaxed text-[#5B6B82] m-0">
+              اعرض الإعلانات المنشورة حسب نوع الإجراء، وأنشئ تنبيهًا يناسب نشاط مؤسستك.
+            </p>
+            <button
+              type="button"
+              onClick={() => setLocation('/operator/deals')}
+              className="inline-flex items-center justify-center gap-2 min-h-[44px] px-4 border-[1.5px] border-[#047857] rounded-[10px] bg-white text-[#065F46] hover:bg-[#ECFDF5] font-bold text-[14px] transition-colors cursor-pointer mt-1"
+            >
+              فتح الإعلانات
+            </button>
+          </div>
+          <div className="flex flex-col items-start justify-center gap-2 p-5 border border-[#D5DDEA] rounded-[16px] bg-white shadow-xs">
+            <h2 className="text-[18px] font-extrabold text-[#0B1F3A] m-0">إدارة العروض</h2>
+            <p className="text-[14.5px] leading-relaxed text-[#5B6B82] m-0">
+              تابع جاهزية وثائق الصفقة المختارة، وحدّد ما ينقص ملف مشاركتك.
+            </p>
+            <button
+              type="button"
+              onClick={() => setLocation('/operator/offers')}
+              className="inline-flex items-center justify-center gap-2 min-h-[44px] px-4 border-[1.5px] border-[#047857] rounded-[10px] bg-white text-[#065F46] hover:bg-[#ECFDF5] font-bold text-[14px] transition-colors cursor-pointer mt-1"
+            >
+              فتح إعداد العرض
+            </button>
+          </div>
+        </div>
+
+        <div className="flex flex-col items-center justify-center text-center gap-2 p-6 border-[1.5px] border-dashed border-[#AEB9CB] rounded-[16px] bg-white shadow-xs min-h-[220px]">
+          <div className="size-[52px] rounded-full bg-[#E8EFFA] text-[#14325C] flex items-center justify-center shrink-0">
+            <Calendar className="size-[26px]" strokeWidth={1.8} />
+          </div>
+          <h3 className="text-[17px] font-extrabold text-[#0B1F3A] mt-1 m-0">لا توجد آجال إيداع قريبة</h3>
+          <p className="text-[14.5px] leading-relaxed text-[#5B6B82] max-w-[460px] m-0">
+            ستظهر هنا آجال إيداع العروض للصفقات التي اخترتها، لتُنبَّه قبل انتهائها.
+          </p>
+        </div>
+      </div>
+
+      {/* 4. Live Opportunities Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 pt-2">
         <div className="lg:col-span-2 space-y-6">
           <section className="bg-white border border-[var(--color-border-subtle)] rounded-xl p-5 shadow-sm space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[var(--color-border-subtle)]">

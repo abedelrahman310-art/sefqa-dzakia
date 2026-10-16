@@ -1,7 +1,7 @@
 import { useAuth } from '@/components/auth/AuthProvider';
 import { useI18n } from '@/i18n';
 import { Link } from 'wouter';
-import { Languages, LucideIcon, HelpCircle } from 'lucide-react';
+import { Languages, LucideIcon, HelpCircle, LogOut, X } from 'lucide-react';
 import { LogoutButton, DesktopAppButton } from '@/shared/components';
 
 export interface PortalSidebarItem {
@@ -29,8 +29,8 @@ export interface PortalSidebarProps {
   badgeTitle?: string;
   /** إخفاء اسم وبيانات المستخدم من التذييل */
   hideUserInfo?: boolean;
-  /** نمط القائمة الجانبية: 'default' | 'mint' */
-  variant?: 'default' | 'mint';
+  /** نمط القائمة الجانبية: 'default' | 'mint' | 'operator' */
+  variant?: 'default' | 'mint' | 'operator';
 }
 
 export function PortalSidebar({
@@ -44,12 +44,98 @@ export function PortalSidebar({
   hideUserInfo = false,
   variant = 'default',
 }: PortalSidebarProps) {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const { lang, setLang } = useI18n();
 
   const orgName = user?.organizationName || user?.displayName || user?.email || '';
   const initial = user?.displayName?.charAt(0) || user?.email?.charAt(0) || 'م';
+  const isOperator = variant === 'operator';
   const isMint = variant === 'mint';
+
+  if (isOperator) {
+    return (
+      <div className="flex flex-col h-full bg-gradient-to-b from-[#0B1F3A] to-[#0B6B57] select-none text-[#E6EEF7] font-sans w-full">
+        {/* 1. Logo area — 72px white header */}
+        <div className="h-[72px] flex-none bg-white flex items-center justify-between gap-2.5 px-4 border-b border-[#D5DDEA]">
+          <div className="flex items-center gap-2.5">
+            <svg width="40" height="40" viewBox="0 0 44 44" aria-hidden="true" className="shrink-0">
+              <rect width="44" height="44" rx="12" fill="#14325C" />
+              <rect x="1" y="1" width="42" height="42" rx="11" fill="none" stroke="#D9B45B" strokeWidth="1.5" />
+              <path d="M13 23l6 6 12-13" fill="none" stroke="#34D399" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            <span className="text-[20px] font-extrabold text-[#0B1F3A]">صفقات ذكية</span>
+          </div>
+          {onLinkClick && (
+            <button
+              type="button"
+              onClick={onLinkClick}
+              className="md:hidden size-11 rounded-[10px] bg-[#EEF3FA] text-[#14325C] flex items-center justify-center cursor-pointer border-0"
+              aria-label="إغلاق القائمة"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          )}
+        </div>
+
+        {/* 2. Role header badge */}
+        <div className="flex items-center gap-2 mx-4 mt-4 mb-2 text-[13px] font-bold text-[#E9D49A]">
+          <span className="size-2 rounded-full bg-[#D9B45B] inline-block shrink-0" />
+          <span>بوابة المتعامل الاقتصادي</span>
+        </div>
+
+        {/* 3. Navigation items */}
+        <nav className="flex-1 flex flex-col gap-1 p-2 px-3 overflow-y-auto" aria-label="التنقل الرئيسي">
+          {items.map((item) => {
+            const Icon = item.icon;
+            return (
+              <Link key={item.href} href={item.href}>
+                <a
+                  onClick={onLinkClick}
+                  className={`flex items-center gap-3 min-h-[44px] px-3.5 rounded-[12px] text-[15px] font-semibold transition-colors duration-150 ${
+                    item.isActive
+                      ? 'bg-white text-[#0B1F3A] hover:bg-white hover:text-[#0B1F3A] shadow-xs'
+                      : 'text-[#E6EEF7] hover:bg-white/10 hover:text-white'
+                  }`}
+                >
+                  <Icon
+                    className={`size-[22px] shrink-0 ${
+                      item.isActive ? 'text-[#0B1F3A]' : 'text-[#E6EEF7]'
+                    }`}
+                    strokeWidth={1.8}
+                  />
+                  <span className="truncate">{item.label}</span>
+                </a>
+              </Link>
+            );
+          })}
+        </nav>
+
+        {/* 4. Footer: المساعدة + تسجيل الخروج */}
+        <div className="flex flex-col gap-1 p-3 border-t border-white/20 flex-none">
+          <Link href="/operator/settings">
+            <a
+              onClick={onLinkClick}
+              className="flex items-center gap-3 min-h-[44px] px-3.5 rounded-[12px] text-[#E6EEF7] hover:bg-white/10 hover:text-white text-[15px] font-semibold transition-colors"
+            >
+              <HelpCircle className="size-[22px] shrink-0" strokeWidth={1.8} />
+              <span>المساعدة</span>
+            </a>
+          </Link>
+          <button
+            type="button"
+            onClick={() => {
+              logout();
+              window.location.href = '/login';
+            }}
+            className="w-full flex items-center gap-3 min-h-[44px] px-3.5 rounded-[12px] bg-[#B42318]/30 hover:bg-[#B42318]/50 text-[#FFE3E0] hover:text-white text-[15px] font-semibold transition-colors border-0 cursor-pointer text-start"
+          >
+            <LogOut className="size-[22px] shrink-0" strokeWidth={1.8} />
+            <span>تسجيل الخروج</span>
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   if (isMint) {
     return (
