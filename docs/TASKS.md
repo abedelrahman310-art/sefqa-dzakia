@@ -24,15 +24,16 @@
 | P-010 | إعادة تصميم صفحة التسجيل (3 بطاقات وتحقق لحظي) | Antigravity | ✅ Done |
 | P-011 | تنظيف AuthorityOverview              | Antigravity | ✅ Done |
 | P-012 | إعادة تصميم صفحة التسجيل (مطابق للصورة) | Antigravity | ✅ Done |
-| P-013 | توحيد هيكل البوابات الثلاث (Portal Shell + Sidebar) | Antigravity | 🔄 المرحلة 3 منجزة |
+| P-013 | توحيد هيكل البوابات الثلاث (Portal Shell + Sidebar) | Antigravity | 🔄 المرحلة 4 منجزة |
 
 ### P-013 — Portal Shell & Sidebar Unification
-- Status: ✅ المرحلة 1 و 2 و 3 منجزة
+- Status: ✅ المرحلة 1 و 2 و 3 و 4 منجزة
 - Branch: `feat/p-013-portal-shell`
 - Commits:
   - `29ffd75` — `chore(layout): remove dead AppShell/UserDropdown code (P-013.1)`
   - `5806a0e` — `feat(layout): PortalSidebar with unified header, nav style, and footer (P-013.2)`
-  - `9a19018` — `feat(layout): create unified PortalShell component (P-013.3)`
+  - `0b39f9d` — `feat(layout): create unified PortalShell component (P-013.3)`
+  - `79f675f` — `refactor(authority): migrate AuthoritySpace to PortalShell and PortalSidebar (P-013.4)`
 - Stage 1 (حذف الكود الميت):
   - حذف `AppShell.tsx`, `UserDropdown.tsx`, `CentralAdminTopBar.css` (-406 أسطر كود ميت).
   - تبسيط `DevShell.tsx`.
@@ -43,11 +44,16 @@
   - إنشاء `client/src/components/layout/PortalShell.tsx`.
   - إحصائيات `Measure-Object`: 105 أسطر، 370 كلمة، 3904 أحرف.
   - يدعم الخصائص: `sidebar`, `topBar`, `mobileTitle`, `hideSidebar`, `hideTopBar`, `contentClassName`, `children`.
-  - يتضمن غلاف الشاشات الكبيرة (`aside` 280px)، رأس الصفحة للهاتف مع `Sheet` ودرج القائمة، التمرير التلقائي للأعلى عند تغيير المسار (`useLocation`), وحاوية TopBar.
+- Stage 4 (ترحيل AuthoritySpace):
+  - ترحيل `client/src/pages/authority/AuthoritySpace.tsx` لاستخدام `PortalShell` و `PortalSidebar`.
+  - تقليص الحجم من 290 إلى 161 سطراً (-129 سطراً، تخفيض 44.5%).
+  - إحصائيات `Measure-Object`: 161 أسطر، 471 كلمة، 6356 أحرف.
+  - الحفاظ على: كافة المسارات الـ 20 داخل `Switch`، جميع مطابقات `useRoute`، مصفوفة `navItems`، وتمرير `showDesktopAppButton`.
+  - حذف الكود المكرر: `aside`، درج `Sheet`، رأس الهاتف، دالة `sidebarContent`، منطق التمرير اليدوي `useLocation`.
 - Tests & Verification:
   - `pnpm --filter client typecheck` ✅ (0 errors)
-  - `pnpm --filter client build` ✅ (36.19s, 0 errors)
-- Next Step (Stage 4): تفعيل `PortalShell` و `PortalSidebar` في البوابات الثلاث (`AuthoritySpace`, `OperatorSpace`, `CentralSpace`) وحذف التكرار.
+  - `pnpm --filter client build` ✅ (47.85s, 0 errors)
+- Next Step (Stage 5): ترحيل `OperatorSpace` إلى `PortalShell` و `PortalSidebar`.
 
 ### P-010 — Register Redesign (3 Cards & Live Validation)
 - Status: ✅ Done
