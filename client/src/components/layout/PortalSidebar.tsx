@@ -1,8 +1,7 @@
-import React from 'react';
-import { LucideIcon, Languages } from 'lucide-react';
-import { Link } from 'wouter';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { useI18n } from '@/i18n';
+import { Link } from 'wouter';
+import { Languages, LucideIcon } from 'lucide-react';
 import { LogoutButton, DesktopAppButton } from '@/shared/components';
 
 export interface PortalSidebarItem {
