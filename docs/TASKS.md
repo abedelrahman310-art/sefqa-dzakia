@@ -24,17 +24,18 @@
 | P-010 | إعادة تصميم صفحة التسجيل (3 بطاقات وتحقق لحظي) | Antigravity | ✅ Done |
 | P-011 | تنظيف AuthorityOverview              | Antigravity | ✅ Done |
 | P-012 | إعادة تصميم صفحة التسجيل (مطابق للصورة) | Antigravity | ✅ Done |
-| P-013 | توحيد هيكل البوابات الثلاث (Portal Shell + Sidebar) | Antigravity | 🔄 المرحلة 5 منجزة |
+| P-013 | توحيد هيكل البوابات الثلاث (Portal Shell + Sidebar) | Antigravity | ✅ Done |
 
 ### P-013 — Portal Shell & Sidebar Unification
-- Status: ✅ المرحلة 1 و 2 و 3 و 4 و 5 منجزة
+- Status: ✅ منجز بالكامل (المراحل 1 - 6)
 - Branch: `feat/p-013-portal-shell`
 - Commits:
   - `29ffd75` — `chore(layout): remove dead AppShell/UserDropdown code (P-013.1)`
   - `5806a0e` — `feat(layout): PortalSidebar with unified header, nav style, and footer (P-013.2)`
   - `0b39f9d` — `feat(layout): create unified PortalShell component (P-013.3)`
   - `7859f22` — `refactor(authority): migrate AuthoritySpace to PortalShell and PortalSidebar (P-013.4)`
-  - `refactor(central): migrate to PortalShell (P-013.5)`
+  - `40a1d21` — `refactor(central): migrate to PortalShell (P-013.5)`
+  - `d779c1a` — `refactor(operator): migrate OperatorSpace to PortalShell and PortalSidebar (P-013.6)`
 - Stage 1 (حذف الكود الميت):
   - حذف `AppShell.tsx`, `UserDropdown.tsx`, `CentralAdminTopBar.css` (-406 أسطر كود ميت).
   - تبسيط `DevShell.tsx`.
@@ -58,10 +59,16 @@
   - الحفاظ على: كافة المسارات الـ 11 داخل `Switch`، جميع مطابقات `useRoute`، مصفوفة `navItems`، ومنطق `isMapRoute` مع `currentTitle`.
   - تمرير: `brandInitial="ص"` و `accentColor="var(--stamp-green-700)"` و `hideSidebar={isMapRoute}` و `hideTopBar={isMapRoute}`.
   - حذف الكود المكرر: `aside`، درج `Sheet`، رأس الهاتف، دالة `sidebarContent`، منطق التمرير اليدوي `useEffect` مع `useLocation`.
+- Stage 6 (ترحيل OperatorSpace):
+  - ترحيل `client/src/pages/operator/OperatorSpace.tsx` لاستخدام `PortalShell` و `PortalSidebar`.
+  - تقليص الحجم من 272 إلى 144 سطراً (-128 سطراً، تخفيض 47.1%).
+  - إحصائيات `Measure-Object`: 144 أسطر، 409 كلمة، 5442 أحرف.
+  - الحفاظ على: كافة المسارات الـ 17 داخل `Switch`، جميع مطابقات `useRoute` (13 مساراً)، مصفوفة `navItems` (9 عناصر)، وتمرير `showDesktopAppButton`.
+  - حذف الكود المكرر: `aside`، درج `Sheet`، رأس الهاتف، دالة `sidebarContent`، منطق التمرير اليدوي `useEffect` مع `useLocation`.
 - Tests & Verification:
   - `pnpm --filter client typecheck` ✅ (0 errors)
-  - `pnpm --filter client build` ✅ (29.88s, 0 errors)
-- Next Step (Stage 6): ترحيل `OperatorSpace` إلى `PortalShell` و `PortalSidebar`.
+  - `pnpm --filter client build` ✅ (34.14s, 0 errors)
+- Summary: توحيد هيكل البوابات الثلاث وتقليص أكثر من 800 سطر من الكود المكرر والميت دون كسر أي وظيفة.
 
 ### P-010 — Register Redesign (3 Cards & Live Validation)
 - Status: ✅ Done
