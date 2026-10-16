@@ -1,4 +1,4 @@
-﻿# Safaqat — Team Operating System
+# Safaqat — Team Operating System
 
 ## الفريق
 - **Architect (ChatGPT):** المواصفات، المعمارية، المراجعة، القرارات.
@@ -36,3 +36,15 @@
 - commands: ما شغّلته
 - blockers: ما تعطّل
 - next: الخطوة التالية
+
+## قواعد مُحدَّثة بعد P-013 (2026-10-16)
+
+1. مهمة واحدة = فرع واحد.
+2. **commit واحد لكل مرحلة** — لا "fix" commits.
+3. إذا اكتشفت خطأ: عدّل الملف ثم `git commit --amend`.
+4. لا تعدّل ملفات خارج نطاق المهمة.
+5. لا تستكشف SDK / docs / skills إلا إذا طُلب.
+6. الأرقام في التقارير من `Measure-Object` فقط.
+7. توقف بعد Handoff — انتظر تأكيد Architect.
+8. لا تسأل "هل ننتقل؟" — انتظر بصمت.
+

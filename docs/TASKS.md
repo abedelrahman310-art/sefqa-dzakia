@@ -24,6 +24,51 @@
 | P-010 | إعادة تصميم صفحة التسجيل (3 بطاقات وتحقق لحظي) | Antigravity | ✅ Done |
 | P-011 | تنظيف AuthorityOverview              | Antigravity | ✅ Done |
 | P-012 | إعادة تصميم صفحة التسجيل (مطابق للصورة) | Antigravity | ✅ Done |
+| P-013 | توحيد هيكل البوابات الثلاث (Portal Shell + Sidebar) | Antigravity | ✅ Done |
+
+### P-013 — Portal Shell & Sidebar Unification
+- Status: ✅ منجز بالكامل (المراحل 1 - 6)
+- Branch: `feat/p-013-portal-shell`
+- Commits:
+  - `29ffd75` — `chore(layout): remove dead AppShell/UserDropdown code (P-013.1)`
+  - `5806a0e` — `feat(layout): PortalSidebar with unified header, nav style, and footer (P-013.2)`
+  - `0b39f9d` — `feat(layout): create unified PortalShell component (P-013.3)`
+  - `7859f22` — `refactor(authority): migrate AuthoritySpace to PortalShell and PortalSidebar (P-013.4)`
+  - `40a1d21` — `refactor(central): migrate to PortalShell (P-013.5)`
+  - `d779c1a` — `refactor(operator): migrate OperatorSpace to PortalShell and PortalSidebar (P-013.6)`
+- Stage 1 (حذف الكود الميت):
+  - حذف `AppShell.tsx`, `UserDropdown.tsx`, `CentralAdminTopBar.css` (-406 أسطر كود ميت).
+  - تبسيط `DevShell.tsx`.
+- Stage 2 (إنشاء PortalSidebar):
+  - إنشاء `client/src/components/layout/PortalSidebar.tsx` (127 سطراً).
+  - توحيد Header, Nav, Footer عبر الأدوار الثلاثة.
+- Stage 3 (إنشاء PortalShell):
+  - إنشاء `client/src/components/layout/PortalShell.tsx`.
+  - إحصائيات `Measure-Object`: 105 أسطر، 370 كلمة، 3904 أحرف.
+  - يدعم الخصائص: `sidebar`, `topBar`, `mobileTitle`, `hideSidebar`, `hideTopBar`, `contentClassName`, `children`.
+- Stage 4 (ترحيل AuthoritySpace):
+  - ترحيل `client/src/pages/authority/AuthoritySpace.tsx` لاستخدام `PortalShell` و `PortalSidebar`.
+  - تقليص الحجم من 290 إلى 161 سطراً (-129 سطراً، تخفيض 44.5%).
+  - إحصائيات `Measure-Object`: 161 أسطر، 471 كلمة، 6356 أحرف.
+  - الحفاظ على: كافة المسارات الـ 20 داخل `Switch`، جميع مطابقات `useRoute`، مصفوفة `navItems`، وتمرير `showDesktopAppButton`.
+  - حذف الكود المكرر: `aside`، درج `Sheet`، رأس الهاتف، دالة `sidebarContent`، منطق التمرير اليدوي `useLocation`.
+- Stage 5 (ترحيل CentralSpace):
+  - ترحيل `client/src/pages/central/CentralSpace.tsx` لاستخدام `PortalShell` و `PortalSidebar`.
+  - تقليص الحجم من 274 إلى 134 سطراً (-140 سطراً، تخفيض 51.1%).
+  - إحصائيات `Measure-Object`: 134 أسطر، 371 كلمة، 4514 أحرف.
+  - الحفاظ على: كافة المسارات الـ 11 داخل `Switch`، جميع مطابقات `useRoute`، مصفوفة `navItems`، ومنطق `isMapRoute` مع `currentTitle`.
+  - تمرير: `brandInitial="ص"` و `accentColor="var(--stamp-green-700)"` و `hideSidebar={isMapRoute}` و `hideTopBar={isMapRoute}`.
+  - حذف الكود المكرر: `aside`، درج `Sheet`، رأس الهاتف، دالة `sidebarContent`، منطق التمرير اليدوي `useEffect` مع `useLocation`.
+- Stage 6 (ترحيل OperatorSpace):
+  - ترحيل `client/src/pages/operator/OperatorSpace.tsx` لاستخدام `PortalShell` و `PortalSidebar`.
+  - تقليص الحجم من 272 إلى 144 سطراً (-128 سطراً، تخفيض 47.1%).
+  - إحصائيات `Measure-Object`: 144 أسطر، 409 كلمة، 5442 أحرف.
+  - الحفاظ على: كافة المسارات الـ 17 داخل `Switch`، جميع مطابقات `useRoute` (13 مساراً)، مصفوفة `navItems` (9 عناصر)، وتمرير `showDesktopAppButton`.
+  - حذف الكود المكرر: `aside`، درج `Sheet`، رأس الهاتف، دالة `sidebarContent`، منطق التمرير اليدوي `useEffect` مع `useLocation`.
+- Tests & Verification:
+  - `pnpm --filter client typecheck` ✅ (0 errors)
+  - `pnpm --filter client build` ✅ (34.14s, 0 errors)
+- Summary: توحيد هيكل البوابات الثلاث وتقليص أكثر من 800 سطر من الكود المكرر والميت دون كسر أي وظيفة.
 
 ### P-010 — Register Redesign (3 Cards & Live Validation)
 - Status: ✅ Done
