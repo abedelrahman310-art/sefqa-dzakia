@@ -647,15 +647,15 @@ export function CentralOverview() {
           ============================================================== */}
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4" aria-label="National KPI Strip">
         {/* KPI 1: Total Deals */}
-        <div className="bg-white border border-[var(--color-border-subtle)] rounded-xl p-5 shadow-sm space-y-2 hover:border-navy-400/50 transition-colors">
+        <div className="group bg-white border border-[var(--color-border-subtle)] rounded-xl p-5 shadow-xs space-y-2 hover:border-[var(--stamp-green-700)] hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
           <div className="flex items-center justify-between text-muted-foreground">
-            <span className="text-xs font-bold">{t('central.kpi.total_deals')}</span>
-            <span className="p-1.5 rounded-lg bg-navy-50 text-navy-800">
+            <span className="text-xs font-bold text-[var(--ink-500)]">{t('central.kpi.total_deals')}</span>
+            <span className="size-8 rounded-lg bg-[var(--paper-100)] border border-[var(--color-border-subtle)] flex items-center justify-center text-navy-800">
               <Briefcase className="w-4 h-4" />
             </span>
           </div>
-          <div className="text-3xl font-extrabold text-navy-900">{totalDeals}</div>
-          <div className="flex items-center justify-between pt-1">
+          <div className="text-3xl font-extrabold font-mono text-[var(--ink-900)] tracking-tight">{totalDeals}</div>
+          <div className="flex items-center justify-between pt-2 border-t border-[var(--color-border-subtle)]/70">
             <div className="text-[11px] text-muted-foreground flex items-center gap-1 font-medium">
               <CheckCircle2 className="w-3 h-3 text-emerald-600" />
               <span>رقابة نظامية</span>
@@ -665,17 +665,17 @@ export function CentralOverview() {
         </div>
 
         {/* KPI 2: Total Financial Volume */}
-        <div className="bg-white border border-[var(--color-border-subtle)] rounded-xl p-5 shadow-sm space-y-2 hover:border-navy-400/50 transition-colors">
+        <div className="group bg-white border border-[var(--color-border-subtle)] rounded-xl p-5 shadow-xs space-y-2 hover:border-[var(--stamp-green-700)] hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
           <div className="flex items-center justify-between text-muted-foreground">
-            <span className="text-xs font-bold">{t('central.kpi.total_budget')}</span>
-            <span className="p-1.5 rounded-lg bg-emerald-50 text-emerald-800">
+            <span className="text-xs font-bold text-[var(--ink-500)]">{t('central.kpi.total_budget')}</span>
+            <span className="size-8 rounded-lg bg-[var(--stamp-green-50)] border border-[var(--stamp-green-200)] flex items-center justify-center text-[var(--stamp-green-800)]">
               <TrendingUp className="w-4 h-4" />
             </span>
           </div>
-          <div className="text-2xl font-extrabold text-emerald-900 truncate" title={formatDzd(totalBudgetDzd)}>
+          <div className="text-2xl font-extrabold font-mono text-emerald-900 truncate" title={formatDzd(totalBudgetDzd)}>
             {formatDzd(totalBudgetDzd)}
           </div>
-          <div className="flex items-center justify-between pt-1">
+          <div className="flex items-center justify-between pt-2 border-t border-[var(--color-border-subtle)]/70">
             <div className="text-[11px] text-muted-foreground font-medium">
               المخصصات
             </div>
@@ -684,15 +684,15 @@ export function CentralOverview() {
         </div>
 
         {/* KPI 3: Active Ongoing Deals */}
-        <div className="bg-white border border-[var(--color-border-subtle)] rounded-xl p-5 shadow-sm space-y-2 hover:border-navy-400/50 transition-colors">
+        <div className="group bg-white border border-[var(--color-border-subtle)] rounded-xl p-5 shadow-xs space-y-2 hover:border-[var(--stamp-green-700)] hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
           <div className="flex items-center justify-between text-muted-foreground">
-            <span className="text-xs font-bold">{t('central.kpi.active_deals')}</span>
-            <span className="p-1.5 rounded-lg bg-blue-50 text-blue-800">
+            <span className="text-xs font-bold text-[var(--ink-500)]">{t('central.kpi.active_deals')}</span>
+            <span className="size-8 rounded-lg bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-800">
               <Activity className="w-4 h-4" />
             </span>
           </div>
-          <div className="text-3xl font-extrabold text-blue-900">{activeDealsCount}</div>
-          <div className="flex items-center justify-between pt-1">
+          <div className="text-3xl font-extrabold font-mono text-blue-900 tracking-tight">{activeDealsCount}</div>
+          <div className="flex items-center justify-between pt-2 border-t border-[var(--color-border-subtle)]/70">
             <div className="text-[11px] text-muted-foreground font-medium">
               قيد الإجراء
             </div>
@@ -705,15 +705,15 @@ export function CentralOverview() {
         </div>
 
         {/* KPI 4: Overdue/Delayed Deals */}
-        <div className="bg-white border border-[var(--color-border-subtle)] rounded-xl p-5 shadow-sm space-y-2 hover:border-rose-400/50 transition-colors">
+        <div className="group bg-white border border-[var(--color-border-subtle)] rounded-xl p-5 shadow-xs space-y-2 hover:border-rose-400 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
           <div className="flex items-center justify-between text-muted-foreground">
-            <span className="text-xs font-bold">{t('central.kpi.delayed_deals')}</span>
-            <span className="p-1.5 rounded-lg bg-rose-50 text-rose-800">
+            <span className="text-xs font-bold text-[var(--ink-500)]">{t('central.kpi.delayed_deals')}</span>
+            <span className="size-8 rounded-lg bg-rose-50 border border-rose-200 flex items-center justify-center text-rose-800">
               <Clock className="w-4 h-4" />
             </span>
           </div>
-          <div className="text-3xl font-extrabold text-rose-900">{delayedDealsCount}</div>
-          <div className="flex items-center justify-between pt-1">
+          <div className="text-3xl font-extrabold font-mono text-rose-900 tracking-tight">{delayedDealsCount}</div>
+          <div className="flex items-center justify-between pt-2 border-t border-[var(--color-border-subtle)]/70">
             <div className="text-[11px] text-rose-700 font-semibold flex items-center gap-1">
               <AlertCircle className="w-3 h-3" />
               <span>تجاوزت المهل</span>
@@ -727,15 +727,15 @@ export function CentralOverview() {
         </div>
 
         {/* KPI 5: Risks & Disputes Index */}
-        <div className="bg-white border border-[var(--color-border-subtle)] rounded-xl p-5 shadow-sm space-y-2 hover:border-amber-400/50 transition-colors">
+        <div className="group bg-white border border-[var(--color-border-subtle)] rounded-xl p-5 shadow-xs space-y-2 hover:border-amber-400 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
           <div className="flex items-center justify-between text-muted-foreground">
-            <span className="text-xs font-bold">{t('central.kpi.risk_disputes')}</span>
-            <span className="p-1.5 rounded-lg bg-amber-50 text-amber-800">
+            <span className="text-xs font-bold text-[var(--ink-500)]">{t('central.kpi.risk_disputes')}</span>
+            <span className="size-8 rounded-lg bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-800">
               <AlertTriangle className="w-4 h-4" />
             </span>
           </div>
-          <div className="text-3xl font-extrabold text-amber-900">{highRiskCount}</div>
-          <div className="flex items-center justify-between pt-1">
+          <div className="text-3xl font-extrabold font-mono text-amber-900 tracking-tight">{highRiskCount}</div>
+          <div className="flex items-center justify-between pt-2 border-t border-[var(--color-border-subtle)]/70">
             <div className="text-[11px] text-muted-foreground font-medium">
               مخاطر وطعون
             </div>
@@ -748,15 +748,15 @@ export function CentralOverview() {
         </div>
 
         {/* KPI 6: Average Completion & Legal Compliance */}
-        <div className="bg-white border border-[var(--color-border-subtle)] rounded-xl p-5 shadow-sm space-y-2 hover:border-navy-400/50 transition-colors">
+        <div className="group bg-white border border-[var(--color-border-subtle)] rounded-xl p-5 shadow-xs space-y-2 hover:border-[var(--stamp-green-700)] hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
           <div className="flex items-center justify-between text-muted-foreground">
-            <span className="text-xs font-bold">{t('central.kpi.compliance_rate')}</span>
-            <span className="p-1.5 rounded-lg bg-navy-50 text-navy-800">
+            <span className="text-xs font-bold text-[var(--ink-500)]">{t('central.kpi.compliance_rate')}</span>
+            <span className="size-8 rounded-lg bg-navy-50 border border-[var(--color-border-subtle)] flex items-center justify-center text-navy-800">
               <Scale className="w-4 h-4" />
             </span>
           </div>
-          <div className="text-3xl font-extrabold text-navy-900">{averageCompletion}%</div>
-          <div className="flex items-center justify-between pt-1">
+          <div className="text-3xl font-extrabold font-mono text-navy-900 tracking-tight">{averageCompletion}%</div>
+          <div className="flex items-center justify-between pt-2 border-t border-[var(--color-border-subtle)]/70">
             <div className="text-[11px] text-emerald-700 font-semibold flex items-center gap-1">
               <ArrowUpRight className="w-3 h-3" />
               <span>تدقيق إجرائي</span>
@@ -985,17 +985,17 @@ export function CentralOverview() {
             </p>
           </div>
 
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto rounded-xl border border-[var(--color-border-subtle)]">
             <table className="w-full text-xs text-start border-collapse">
-              <thead>
-                <tr className="border-b border-border text-muted-foreground">
+              <thead className="bg-[var(--paper-100)] border-b border-[var(--color-border-subtle)]">
+                <tr className="text-[var(--ink-700)]">
                   <th className="py-2.5 px-3 text-start font-bold">{t('central.ranking.col_entity')}</th>
                   <th className="py-2.5 px-2 text-center font-bold">{t('central.ranking.col_deals')}</th>
                   <th className="py-2.5 px-2 text-start font-bold">{t('central.kpi.total_budget')}</th>
                   <th className="py-2.5 px-2 text-center font-bold">{t('central.ranking.col_punctuality')}</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border">
+              <tbody className="divide-y divide-[var(--color-border-subtle)] bg-white">
                 {entityRanking.map((entity, idx) => {
                   const isSelected = selectedAuthority === entity.name;
                   return (
@@ -1120,10 +1120,10 @@ export function CentralOverview() {
           </span>
         </div>
 
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto rounded-xl border border-[var(--color-border-subtle)]">
           <table className="w-full text-xs text-start border-collapse">
-            <thead>
-              <tr className="border-b border-border text-muted-foreground">
+            <thead className="bg-[var(--paper-100)] border-b border-[var(--color-border-subtle)]">
+              <tr className="text-[var(--ink-700)]">
                 <th className="py-2.5 px-3 text-start font-bold">المرجع والعنوان</th>
                 <th className="py-2.5 px-2 text-start font-bold">{t('central.audit.authority_col')}</th>
                 <th className="py-2.5 px-2 text-start font-bold">الولاية / القطاع</th>
@@ -1133,7 +1133,7 @@ export function CentralOverview() {
                 <th className="py-2.5 px-2 text-center font-bold">سجل التدقيق</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border">
+            <tbody className="divide-y divide-[var(--color-border-subtle)] bg-white">
               {filteredDeals.map((deal) => {
                 const isSelected = selectedDealId === deal.id;
                 return (

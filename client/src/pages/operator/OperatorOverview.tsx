@@ -1,8 +1,23 @@
 import { useEffect, useState } from 'react';
 import { useI18n } from '@/i18n';
-import { useLocation } from 'wouter';
+import { Link, useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, ArrowRight, Briefcase, FileText, CheckCircle2, Clock } from 'lucide-react';
+import { PageHeader, KpiCard, EmptyState } from '@/shared/components';
+import {
+  Briefcase,
+  CheckCircle2,
+  Clock,
+  Search,
+  Building2,
+  Calendar,
+  FileText,
+  Radio,
+  BookOpen,
+  Scale,
+  Archive,
+  ShieldCheck,
+  ChevronLeft,
+} from 'lucide-react';
 
 interface Opportunity {
   id: string;
@@ -20,7 +35,7 @@ interface OfferItem {
 }
 
 export function OperatorOverview() {
-  const { t, dir } = useI18n();
+  const { t, lang } = useI18n();
   const [, setLocation] = useLocation();
 
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
@@ -48,63 +63,63 @@ export function OperatorOverview() {
   const draftsCount = offers.filter((o) => o.status === 'draft').length;
   const recentOpps = opportunities.slice(0, 4);
 
-  const ArrowIcon = dir === 'rtl' ? ArrowLeft : ArrowRight;
-
   return (
-    <div className="space-y-6">
-      {/* Real Statistics derived strictly from API: 3 KPI Cards */}
-      <section className="grid grid-cols-1 md:grid-cols-3 gap-4" aria-label="Overview Statistics">
-        {/* Available Opportunities */}
-        <div className="bg-white border border-[var(--color-border-subtle)] rounded-xl p-5 shadow-sm space-y-2 hover:shadow-md transition-all">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-[var(--ink-500)]">{t('overview.stats.available')}</span>
-            <span className="p-2 bg-[var(--paper-100)] text-[var(--ink-700)] rounded-lg border border-[var(--color-border-subtle)]">
-              <Briefcase className="w-4 h-4" />
-            </span>
-          </div>
-          <div className="text-3xl font-extrabold font-mono text-[var(--ink-900)]">
-            {loading ? '—' : error ? '0' : opportunities.length}
-          </div>
-          <p className="text-xs text-[var(--ink-500)]">{t('overview.stats.available_sub')}</p>
-        </div>
+    <div className="font-sans space-y-6">
+      {/* 1. Header Banner */}
+      <PageHeader
+        eyebrow={t('overview.hero.eyebrow')}
+        title={t('overview.hero.title')}
+        description={t('overview.hero.desc')}
+        actions={
+          <Button
+            className="bg-[var(--stamp-green-700)] hover:bg-[var(--stamp-green-800)] text-white font-bold px-4 py-2.5 rounded-xl shadow-xs text-xs flex items-center gap-2"
+            onClick={() => setLocation('/operator/deals')}
+          >
+            <Search className="w-4 h-4" />
+            <span>{t('overview.hero.cta')}</span>
+          </Button>
+        }
+      />
 
-        {/* Submitted Offers */}
-        <div className="bg-white border border-[var(--color-border-subtle)] rounded-xl p-5 shadow-sm space-y-2 hover:shadow-md transition-all">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-[var(--ink-500)]">{t('overview.stats.submitted')}</span>
-            <span className="p-2 bg-[var(--paper-100)] text-[var(--ink-700)] rounded-lg border border-[var(--color-border-subtle)]">
-              <CheckCircle2 className="w-4 h-4" />
-            </span>
-          </div>
-          <div className="text-3xl font-extrabold font-mono text-[var(--ink-900)]">
-            {loading ? '—' : error ? '0' : submittedCount}
-          </div>
-          <p className="text-xs text-[var(--ink-500)]">{t('overview.stats.submitted_sub')}</p>
-        </div>
-
-        {/* Draft Offers */}
-        <div className="bg-white border border-[var(--color-border-subtle)] rounded-xl p-5 shadow-sm space-y-2 hover:shadow-md transition-all">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-[var(--ink-500)]">{t('overview.stats.drafts')}</span>
-            <span className="p-2 bg-[var(--paper-100)] text-[var(--ink-700)] rounded-lg border border-[var(--color-border-subtle)]">
-              <Clock className="w-4 h-4" />
-            </span>
-          </div>
-          <div className="text-3xl font-extrabold font-mono text-[var(--ink-900)]">
-            {loading ? '—' : error ? '0' : draftsCount}
-          </div>
-          <p className="text-xs text-[var(--ink-500)]">{t('overview.stats.drafts_sub')}</p>
-        </div>
+      {/* 2. Unified KPI Cards Strip */}
+      <section className="grid grid-cols-1 sm:grid-cols-3 gap-4" aria-label={t('overview.stats.available')}>
+        <Link href="/operator/deals" className="block focus:outline-none focus:ring-2 focus:ring-[var(--stamp-green-700)] rounded-xl">
+          <KpiCard
+            eyebrow={t('overview.stats.available')}
+            value={loading ? '—' : error ? '0' : opportunities.length}
+            icon={Briefcase}
+            accent="emerald"
+            description={t('overview.stats.available_sub')}
+          />
+        </Link>
+        <Link href="/operator/offers" className="block focus:outline-none focus:ring-2 focus:ring-[var(--official-700)] rounded-xl">
+          <KpiCard
+            eyebrow={t('overview.stats.submitted')}
+            value={loading ? '—' : error ? '0' : submittedCount}
+            icon={CheckCircle2}
+            accent="navy"
+            description={t('overview.stats.submitted_sub')}
+          />
+        </Link>
+        <Link href="/operator/offers" className="block focus:outline-none focus:ring-2 focus:ring-[var(--stamp-gold-700)] rounded-xl">
+          <KpiCard
+            eyebrow={t('overview.stats.drafts')}
+            value={loading ? '—' : error ? '0' : draftsCount}
+            icon={Clock}
+            accent="gold"
+            description={t('overview.stats.drafts_sub')}
+          />
+        </Link>
       </section>
 
-      {/* Main 3-Column Layout: Opportunities (2 cols) + Actions & AI (1 col) */}
+      {/* 3. Main 3-Column Layout: Opportunities (2 cols) + Actions & Verification (1 col) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* عمودان: المحتوى الرئيسي (اكتشاف الفرص) */}
+        {/* Main Content (2 cols) */}
         <div className="lg:col-span-2 space-y-6">
           <section className="bg-white border border-[var(--color-border-subtle)] rounded-xl p-5 shadow-sm space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[var(--color-border-subtle)]">
               <div>
-                <h3 className="text-lg font-bold text-[var(--ink-900)]">{t('overview.discovery.title')}</h3>
+                <h3 className="text-base font-bold text-[var(--ink-900)]">{t('overview.discovery.title')}</h3>
                 <p className="text-xs text-[var(--ink-500)]">{t('overview.discovery.desc')}</p>
               </div>
               <Button
@@ -117,42 +132,49 @@ export function OperatorOverview() {
             </div>
 
             {loading ? (
-              <div className="py-12 text-center text-[var(--ink-500)] text-xs">
-                جاري استرجاع البيانات...
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
+                {[1, 2, 3, 4].map((i) => (
+                  <div key={i} className="h-40 rounded-xl bg-[var(--paper-100)] animate-pulse" />
+                ))}
               </div>
             ) : error || opportunities.length === 0 ? (
-              <div className="border border-dashed border-[var(--color-border-subtle)] rounded-xl p-8 text-center bg-[var(--paper-50)] space-y-3">
-                <FileText className="w-8 h-8 text-[var(--ink-300)] mx-auto" />
-                <p className="text-sm font-bold text-[var(--ink-900)]">{t('overview.discovery.empty')}</p>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="text-xs rounded-xl"
-                  onClick={() => setLocation('/operator/deals')}
-                >
-                  <span>{t('overview.discovery.all')}</span>
-                </Button>
-              </div>
+              <EmptyState
+                icon={FileText}
+                title={t('overview.discovery.empty')}
+                description={t('overview.discovery.desc')}
+                action={
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-xs rounded-xl"
+                    onClick={() => setLocation('/operator/deals')}
+                  >
+                    <span>{t('overview.discovery.all')}</span>
+                  </Button>
+                }
+              />
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {recentOpps.map((opp) => (
                   <article
                     key={opp.id}
-                    className="bg-white border border-[var(--color-border-subtle)] rounded-xl p-4 shadow-2xs hover:border-[var(--stamp-green-700)]/40 hover:shadow-xs transition-all flex flex-col justify-between space-y-3"
+                    className="bg-white border border-[var(--color-border-subtle)] rounded-xl p-4 shadow-xs hover:border-[var(--stamp-green-700)] hover:shadow-md transition-all duration-200 flex flex-col justify-between space-y-3 group"
                   >
-                    <div className="space-y-1.5 min-w-0">
+                    <div className="space-y-2 min-w-0">
                       <div className="flex items-center justify-between gap-2">
                         <span
-                          className="inline-block text-xs font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200"
+                          className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 truncate max-w-[200px]"
                           title={opp.authorityName}
                         >
-                          {opp.authorityName}
+                          <Building2 className="w-3 h-3 shrink-0" />
+                          <span className="truncate">{opp.authorityName}</span>
                         </span>
-                        <span className="text-xs text-[var(--ink-500)]">
-                          {new Date(opp.updatedAt).toLocaleDateString()}
+                        <span className="inline-flex items-center gap-1 text-xs text-[var(--ink-500)] shrink-0">
+                          <Calendar className="w-3 h-3" />
+                          {new Date(opp.updatedAt).toLocaleDateString(lang === 'ar' ? 'ar-DZ' : 'fr-FR')}
                         </span>
                       </div>
-                      <h4 className="text-sm font-bold text-[var(--ink-900)] line-clamp-1" title={opp.title}>
+                      <h4 className="text-sm font-bold text-[var(--ink-900)] line-clamp-1 group-hover:text-[var(--stamp-green-700)] transition-colors" title={opp.title}>
                         {opp.title}
                       </h4>
                       <p className="text-xs text-[var(--ink-500)] line-clamp-2 leading-relaxed">
@@ -160,13 +182,13 @@ export function OperatorOverview() {
                       </p>
                     </div>
 
-                    <div className="pt-2 flex items-center justify-between border-t border-[var(--color-border-subtle)]">
-                      <span className="text-xs font-mono font-semibold text-[var(--ink-900)]">
-                        {opp.estimatedBudget ? `${Number(opp.estimatedBudget).toLocaleString()} د.ج` : ''}
+                    <div className="pt-2.5 flex items-center justify-between border-t border-[var(--color-border-subtle)]">
+                      <span className="text-xs font-mono font-bold text-[var(--stamp-green-800)] bg-[var(--stamp-green-50)] px-2 py-0.5 rounded-md border border-[var(--stamp-green-200)]">
+                        {opp.estimatedBudget ? `${Number(opp.estimatedBudget).toLocaleString()} د.ج` : '—'}
                       </span>
                       <Button
                         size="sm"
-                        className="text-xs font-bold px-3 py-1.5 h-auto bg-[var(--stamp-green-700)] hover:bg-[var(--stamp-green-900)] text-white rounded-xl shadow-xs"
+                        className="text-xs font-bold px-3 py-1.5 h-auto bg-[var(--stamp-green-700)] hover:bg-[var(--stamp-green-800)] text-white rounded-lg shadow-xs"
                         onClick={() => setLocation(`/operator/opportunities/${opp.id}`)}
                       >
                         {t('overview.discovery.view_detail')}
@@ -179,29 +201,77 @@ export function OperatorOverview() {
           </section>
         </div>
 
-        {/* عمود: Actions & Quick Start */}
+        {/* Sidebar Column (1 col): Compliance status + Quick Actions */}
         <div className="lg:col-span-1 space-y-6">
-          {/* Header Banner - Clean & Official */}
-          <section className="bg-white border border-[var(--color-border-subtle)] rounded-xl p-5 shadow-sm space-y-3">
-            <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-navy-50 text-navy-800 border border-navy-100 inline-block">
-              {t('overview.hero.eyebrow')}
-            </span>
-            <h2 className="text-xl font-extrabold text-[var(--ink-900)]">
-              {t('overview.hero.title')}
-            </h2>
+          {/* Institutional Compliance Card */}
+          <article className="bg-white border border-[var(--color-border-subtle)] rounded-xl p-5 shadow-sm space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="inline-flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-50 text-[var(--stamp-green-800)] border border-emerald-200">
+                <ShieldCheck className="w-3.5 h-3.5" />
+                <span>حساب معتمد</span>
+              </span>
+              <span className="text-[11px] font-mono text-[var(--ink-500)]">القانون 23-12</span>
+            </div>
+            <h3 className="text-sm font-bold text-[var(--ink-900)]">
+              البوابة الوطنية للصفقات العمومية
+            </h3>
             <p className="text-xs text-[var(--ink-500)] leading-relaxed">
-              {t('overview.hero.desc')}
+              ملفك مسجل ومؤهل للمشاركة في الإعلانات التنافسية وإيداع الأظرفة الإلكترونية المؤمنة.
             </p>
-            <Button
-              className="bg-[var(--stamp-green-700)] hover:bg-[var(--stamp-green-900)] text-white font-bold px-4 py-2 rounded-xl shadow-xs transition-colors flex items-center gap-2 w-full justify-center text-xs"
-              onClick={() => setLocation('/operator/deals')}
-            >
-              <span>{t('overview.hero.cta')}</span>
-              <ArrowIcon className="w-4 h-4" />
-            </Button>
-          </section>
+          </article>
+
+          {/* Quick Access Card */}
+          <article className="bg-white border border-[var(--color-border-subtle)] rounded-xl shadow-sm p-5 space-y-3">
+            <h3 className="m-0 text-sm font-bold text-[var(--ink-900)]">
+              {t('authority.preview.nav_title')}
+            </h3>
+            <div className="space-y-2">
+              <Link
+                href="/operator/opening-sessions"
+                className="flex items-center justify-between p-2.5 rounded-lg border border-[var(--color-border-subtle)] bg-[var(--paper-50)] hover:bg-[var(--paper-100)] text-xs font-semibold text-[var(--ink-800)] transition-colors"
+              >
+                <span className="flex items-center gap-2">
+                  <Radio className="w-4 h-4 text-[var(--stamp-green-700)]" />
+                  {t('nav.operator.opening_sessions')}
+                </span>
+                <ChevronLeft className="w-4 h-4 text-[var(--ink-400)]" />
+              </Link>
+              <Link
+                href="/operator/smart-specs"
+                className="flex items-center justify-between p-2.5 rounded-lg border border-[var(--color-border-subtle)] bg-[var(--paper-50)] hover:bg-[var(--paper-100)] text-xs font-semibold text-[var(--ink-800)] transition-colors"
+              >
+                <span className="flex items-center gap-2">
+                  <BookOpen className="w-4 h-4 text-[var(--official-700)]" />
+                  {t('nav.operator.smart_specs')}
+                </span>
+                <ChevronLeft className="w-4 h-4 text-[var(--ink-400)]" />
+              </Link>
+              <Link
+                href="/operator/objections"
+                className="flex items-center justify-between p-2.5 rounded-lg border border-[var(--color-border-subtle)] bg-[var(--paper-50)] hover:bg-[var(--paper-100)] text-xs font-semibold text-[var(--ink-800)] transition-colors"
+              >
+                <span className="flex items-center gap-2">
+                  <Scale className="w-4 h-4 text-[var(--stamp-gold-700)]" />
+                  {t('nav.operator.appeals')}
+                </span>
+                <ChevronLeft className="w-4 h-4 text-[var(--ink-400)]" />
+              </Link>
+              <Link
+                href="/operator/archive"
+                className="flex items-center justify-between p-2.5 rounded-lg border border-[var(--color-border-subtle)] bg-[var(--paper-50)] hover:bg-[var(--paper-100)] text-xs font-semibold text-[var(--ink-800)] transition-colors"
+              >
+                <span className="flex items-center gap-2">
+                  <Archive className="w-4 h-4 text-[var(--ink-600)]" />
+                  {t('nav.operator.archive')}
+                </span>
+                <ChevronLeft className="w-4 h-4 text-[var(--ink-400)]" />
+              </Link>
+            </div>
+          </article>
         </div>
       </div>
     </div>
   );
 }
+
+export default OperatorOverview;

@@ -38,18 +38,19 @@ export function DraftsTable({ drafts, lang, t, onSelect }: DraftsTableProps) {
   }
 
   return (
-    <div className="overflow-x-auto pt-2">
-      <table className="w-full min-w-[550px] border-collapse text-sm">
-        <thead>
-          <tr className="border-b border-[var(--color-border-subtle)] text-[var(--ink-500)] text-xs font-semibold">
-            <th className="text-start py-2.5 px-3">{t('authority.preview.th_deal_topic')}</th>
-            <th className="text-start py-2.5 px-3">{t('authority.preview.th_proc_type')}</th>
-            <th className="text-start py-2.5 px-3">{t('authority.preview.th_pub_date')}</th>
-            <th className="text-start py-2.5 px-3">{t('authority.preview.th_status')}</th>
-            <th className="text-start py-2.5 px-3">{t('authority.preview.th_action')}</th>
-          </tr>
-        </thead>
-        <tbody>
+    <div className="overflow-x-auto pt-3">
+      <div className="rounded-lg border border-[var(--color-border-subtle)] overflow-hidden">
+        <table className="w-full min-w-[550px] border-collapse text-sm">
+          <thead className="bg-[var(--paper-100)] border-b border-[var(--color-border-subtle)]">
+            <tr className="text-[var(--ink-700)] text-xs font-bold">
+              <th className="text-start py-2.5 px-3">{t('authority.preview.th_deal_topic')}</th>
+              <th className="text-start py-2.5 px-3">{t('authority.preview.th_proc_type')}</th>
+              <th className="text-start py-2.5 px-3">{t('authority.preview.th_pub_date')}</th>
+              <th className="text-start py-2.5 px-3">{t('authority.preview.th_status')}</th>
+              <th className="text-start py-2.5 px-3">{t('authority.preview.th_action')}</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-[var(--color-border-subtle)] bg-white">
           {drafts.slice(0, 3).map((d) => (
             <tr
               key={d.id}
@@ -94,6 +95,7 @@ export function DraftsTable({ drafts, lang, t, onSelect }: DraftsTableProps) {
         </tbody>
       </table>
     </div>
+  </div>
   );
 }
 
