@@ -112,9 +112,10 @@ export function OperatorSpace() {
         <PortalSidebar
           title="صفقات ذكية"
           subtitle="فضاء المتعامل الاقتصادي"
+          badgeTitle="• بوابة المتعامل الاقتصادي"
           items={navItems}
-          accentColor="var(--stamp-green-700)"
-          showDesktopAppButton
+          accentColor="#0b4348"
+          hideUserInfo
         />
       }
     >
