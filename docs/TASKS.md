@@ -31,7 +31,7 @@
 - Branch: `feat/p-013-portal-shell`
 - Commits:
   - `29ffd75` — `chore(layout): remove dead AppShell/UserDropdown code (P-013.1)`
-  - `a03712b` — `feat(layout): create unified PortalSidebar component (P-013.2)`
+  - `5806a0e` — `feat(layout): PortalSidebar with unified header, nav style, and footer (P-013.2)`
 - Stage 1 (حذف الكود الميت):
   - حذف `AppShell.tsx`, `UserDropdown.tsx`, `CentralAdminTopBar.css` (-406 أسطر كود ميت).
   - تبسيط `DevShell.tsx`.
