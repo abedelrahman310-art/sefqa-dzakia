@@ -102,7 +102,7 @@ export function OperatorSpace() {
       mobileTitle="صفقات ذكية · المتعامل الاقتصادي"
       topBar={<OperatorTopBar />}
       sidebarWidth="w-[250px]"
-      contentClassName="flex-1 min-h-0 flex flex-col p-4 md:px-7 md:py-4 bg-[#F4F7FB] overflow-y-auto"
+      contentClassName="flex-1 min-h-0 flex flex-col p-4 md:px-7 md:py-4 bg-[#F4F7FB] overflow-y-auto text-[16px]"
       sidebar={
         <PortalSidebar
           title="صفقات ذكية"

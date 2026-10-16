@@ -103,13 +103,13 @@ export function OperatorOpportunities() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-col gap-0.5">
           <h1 className="text-[26px] font-extrabold text-[#0B1F3A] leading-tight m-0">الإعلانات وفرص الصفقات</h1>
-          <p className="text-[14.5px] leading-relaxed text-[#5B6B82] m-0">
+          <p className="text-[16px] leading-relaxed text-[#5B6B82] m-0">
             اختر نوع الإجراء الذي يهم مؤسستك لعرض الإعلانات المناسبة.
           </p>
         </div>
         <button
           type="button"
-          className="inline-flex items-center justify-center gap-2 min-h-[46px] px-5 rounded-[10px] bg-[#047857] hover:bg-[#065F46] text-white text-[15px] font-bold transition-colors cursor-pointer border-0"
+          className="inline-flex items-center justify-center gap-2 min-h-[46px] px-5 rounded-[10px] bg-[#047857] hover:bg-[#065F46] text-white text-[16px] font-bold transition-colors cursor-pointer border-0"
         >
           <span>إنشاء تنبيه مخصّص</span>
         </button>
@@ -137,7 +137,7 @@ export function OperatorOpportunities() {
                   <Sparkles className="size-5 shrink-0 text-[#047857]" strokeWidth={2} />
                 )}
               </div>
-              <span className="text-[14px] leading-relaxed text-[#5B6B82]">{proc.desc}</span>
+              <span className="text-[16px] leading-relaxed text-[#5B6B82]">{proc.desc}</span>
             </button>
           );
         })}

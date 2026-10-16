@@ -74,7 +74,7 @@ export function OperatorOverview() {
               بيانات تجريبية
             </span>
           </div>
-          <p className="text-[14.5px] leading-relaxed text-[#5B6B82] m-0">
+          <p className="text-[16px] leading-relaxed text-[#5B6B82] m-0">
             نظرة سريعة على فرصك وجاهزية ملف مشاركتك.
           </p>
         </div>
@@ -105,26 +105,26 @@ export function OperatorOverview() {
         <div className="flex flex-col gap-4">
           <div className="flex flex-col items-start justify-center gap-2 p-5 border border-[#D5DDEA] rounded-[16px] bg-white shadow-xs">
             <h2 className="text-[18px] font-extrabold text-[#0B1F3A] m-0">الإعلانات وفرص الصفقات</h2>
-            <p className="text-[14.5px] leading-relaxed text-[#5B6B82] m-0">
+            <p className="text-[16px] leading-relaxed text-[#5B6B82] m-0">
               اعرض الإعلانات المنشورة حسب نوع الإجراء، وأنشئ تنبيهًا يناسب نشاط مؤسستك.
             </p>
             <button
               type="button"
               onClick={() => setLocation('/operator/deals')}
-              className="inline-flex items-center justify-center gap-2 min-h-[44px] px-4 border-[1.5px] border-[#047857] rounded-[10px] bg-white text-[#065F46] hover:bg-[#ECFDF5] font-bold text-[14px] transition-colors cursor-pointer mt-1"
+              className="inline-flex items-center justify-center gap-2 min-h-[44px] px-4 border-[1.5px] border-[#047857] rounded-[10px] bg-white text-[#065F46] hover:bg-[#ECFDF5] font-bold text-[16px] transition-colors cursor-pointer mt-1"
             >
               فتح الإعلانات
             </button>
           </div>
           <div className="flex flex-col items-start justify-center gap-2 p-5 border border-[#D5DDEA] rounded-[16px] bg-white shadow-xs">
             <h2 className="text-[18px] font-extrabold text-[#0B1F3A] m-0">إدارة العروض</h2>
-            <p className="text-[14.5px] leading-relaxed text-[#5B6B82] m-0">
+            <p className="text-[16px] leading-relaxed text-[#5B6B82] m-0">
               تابع جاهزية وثائق الصفقة المختارة، وحدّد ما ينقص ملف مشاركتك.
             </p>
             <button
               type="button"
               onClick={() => setLocation('/operator/offers')}
-              className="inline-flex items-center justify-center gap-2 min-h-[44px] px-4 border-[1.5px] border-[#047857] rounded-[10px] bg-white text-[#065F46] hover:bg-[#ECFDF5] font-bold text-[14px] transition-colors cursor-pointer mt-1"
+              className="inline-flex items-center justify-center gap-2 min-h-[44px] px-4 border-[1.5px] border-[#047857] rounded-[10px] bg-white text-[#065F46] hover:bg-[#ECFDF5] font-bold text-[16px] transition-colors cursor-pointer mt-1"
             >
               فتح إعداد العرض
             </button>
@@ -136,7 +136,7 @@ export function OperatorOverview() {
             <Calendar className="size-[26px]" strokeWidth={1.8} />
           </div>
           <h3 className="text-[17px] font-extrabold text-[#0B1F3A] mt-1 m-0">لا توجد آجال إيداع قريبة</h3>
-          <p className="text-[14.5px] leading-relaxed text-[#5B6B82] max-w-[460px] m-0">
+          <p className="text-[16px] leading-relaxed text-[#5B6B82] max-w-[460px] m-0">
             ستظهر هنا آجال إيداع العروض للصفقات التي اخترتها، لتُنبَّه قبل انتهائها.
           </p>
         </div>

@@ -96,7 +96,7 @@ export function OperatorProfileView() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-col gap-0.5">
           <h1 className="text-[26px] font-extrabold text-[#0B1F3A] leading-tight m-0">ملف المؤسسة</h1>
-          <p className="text-[14.5px] leading-relaxed text-[#5B6B82] m-0">
+          <p className="text-[16px] leading-relaxed text-[#5B6B82] m-0">
             البيانات الأساسية لمؤسستك كما تظهر في ملف الترشح.
           </p>
         </div>
@@ -104,7 +104,7 @@ export function OperatorProfileView() {
           type="button"
           onClick={handleSubmit}
           disabled={saving}
-          className="inline-flex items-center justify-center gap-2 min-h-[46px] px-5 rounded-[10px] bg-[#047857] hover:bg-[#065F46] text-white text-[15px] font-bold transition-colors cursor-pointer border-0 disabled:opacity-50"
+          className="inline-flex items-center justify-center gap-2 min-h-[46px] px-5 rounded-[10px] bg-[#047857] hover:bg-[#065F46] text-white text-[16px] font-bold transition-colors cursor-pointer border-0 disabled:opacity-50"
         >
           <span>{saving ? 'جاري الحفظ...' : 'حفظ البيانات'}</span>
         </button>
@@ -128,18 +128,18 @@ export function OperatorProfileView() {
       <form onSubmit={handleSubmit} className="bg-white border border-[#D5DDEA] rounded-[16px] p-5 shadow-xs">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="flex flex-col gap-1.5">
-            <label className="text-[14px] font-bold text-[#0B1F3A]">اسم المؤسسة</label>
+            <label className="text-[16px] font-bold text-[#0B1F3A]">اسم المؤسسة</label>
             <input
               type="text"
               placeholder="[اسم المؤسسة]"
               defaultValue=""
-              className="h-[46px] px-3 rounded-[10px] border-[1.5px] border-[#7C8AA3] bg-white text-[#0B1F3A] text-[15px]"
+              className="h-[46px] px-3 rounded-[10px] border-[1.5px] border-[#7C8AA3] bg-white text-[#0B1F3A] text-[16px]"
             />
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-[14px] font-bold text-[#0B1F3A]">الشكل القانوني</label>
-            <select className="h-[46px] px-3 rounded-[10px] border-[1.5px] border-[#7C8AA3] bg-white text-[#0B1F3A] text-[15px]" defaultValue="sarl">
+            <label className="text-[16px] font-bold text-[#0B1F3A]">الشكل القانوني</label>
+            <select className="h-[46px] px-3 rounded-[10px] border-[1.5px] border-[#7C8AA3] bg-white text-[#0B1F3A] text-[16px]" defaultValue="sarl">
               <option value="">اختر الشكل القانوني</option>
               <option value="eurl">EURL</option>
               <option value="sarl">SARL</option>
@@ -150,61 +150,61 @@ export function OperatorProfileView() {
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-[14px] font-bold text-[#0B1F3A]">رقم السجل التجاري</label>
+            <label className="text-[16px] font-bold text-[#0B1F3A]">رقم السجل التجاري</label>
             <input
               type="text"
               dir="ltr"
               placeholder="[رقم السجل التجاري]"
-              className="h-[46px] px-3 rounded-[10px] border-[1.5px] border-[#7C8AA3] bg-white text-[#0B1F3A] text-[15px] text-end"
+              className="h-[46px] px-3 rounded-[10px] border-[1.5px] border-[#7C8AA3] bg-white text-[#0B1F3A] text-[16px] text-end"
             />
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-[14px] font-bold text-[#0B1F3A]">رقم التعريف الجبائي (NIF)</label>
+            <label className="text-[16px] font-bold text-[#0B1F3A]">رقم التعريف الجبائي (NIF)</label>
             <input
               type="text"
               dir="ltr"
               placeholder="[NIF]"
-              className="h-[46px] px-3 rounded-[10px] border-[1.5px] border-[#7C8AA3] bg-white text-[#0B1F3A] text-[15px] text-end"
+              className="h-[46px] px-3 rounded-[10px] border-[1.5px] border-[#7C8AA3] bg-white text-[#0B1F3A] text-[16px] text-end"
             />
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-[14px] font-bold text-[#0B1F3A]">رقم التعريف الإحصائي (NIS)</label>
+            <label className="text-[16px] font-bold text-[#0B1F3A]">رقم التعريف الإحصائي (NIS)</label>
             <input
               type="text"
               dir="ltr"
               placeholder="[NIS]"
-              className="h-[46px] px-3 rounded-[10px] border-[1.5px] border-[#7C8AA3] bg-white text-[#0B1F3A] text-[15px] text-end"
+              className="h-[46px] px-3 rounded-[10px] border-[1.5px] border-[#7C8AA3] bg-white text-[#0B1F3A] text-[16px] text-end"
             />
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-[14px] font-bold text-[#0B1F3A]">العنوان</label>
+            <label className="text-[16px] font-bold text-[#0B1F3A]">العنوان</label>
             <input
               type="text"
               placeholder="[عنوان المقر]"
-              className="h-[46px] px-3 rounded-[10px] border-[1.5px] border-[#7C8AA3] bg-white text-[#0B1F3A] text-[15px]"
+              className="h-[46px] px-3 rounded-[10px] border-[1.5px] border-[#7C8AA3] bg-white text-[#0B1F3A] text-[16px]"
             />
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-[14px] font-bold text-[#0B1F3A]">البريد الإلكتروني للمؤسسة</label>
+            <label className="text-[16px] font-bold text-[#0B1F3A]">البريد الإلكتروني للمؤسسة</label>
             <input
               type="email"
               dir="ltr"
               placeholder="name@company.dz"
-              className="h-[46px] px-3 rounded-[10px] border-[1.5px] border-[#7C8AA3] bg-white text-[#0B1F3A] text-[15px] text-end"
+              className="h-[46px] px-3 rounded-[10px] border-[1.5px] border-[#7C8AA3] bg-white text-[#0B1F3A] text-[16px] text-end"
             />
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-[14px] font-bold text-[#0B1F3A]">الهاتف</label>
+            <label className="text-[16px] font-bold text-[#0B1F3A]">الهاتف</label>
             <input
               type="tel"
               dir="ltr"
               placeholder="[رقم الهاتف]"
-              className="h-[46px] px-3 rounded-[10px] border-[1.5px] border-[#7C8AA3] bg-white text-[#0B1F3A] text-[15px] text-end"
+              className="h-[46px] px-3 rounded-[10px] border-[1.5px] border-[#7C8AA3] bg-white text-[#0B1F3A] text-[16px] text-end"
             />
           </div>
         </div>
@@ -216,12 +216,12 @@ export function OperatorProfileView() {
           <Building2 className="size-[26px]" strokeWidth={1.8} />
         </div>
         <h3 className="text-[17px] font-extrabold text-[#0B1F3A] mt-1 m-0">لم تُرفق أي وثيقة رسمية بعد</h3>
-        <p className="text-[14.5px] leading-relaxed text-[#5B6B82] max-w-[460px] m-0">
+        <p className="text-[16px] leading-relaxed text-[#5B6B82] max-w-[460px] m-0">
           أرفق السجل التجاري وشهادات الوضعية الجبائية وشبه الجبائية والقانون الأساسي لتُستعمل في ملف الترشح.
         </p>
         <button
           type="button"
-          className="inline-flex items-center justify-center gap-2 min-h-[44px] px-5 rounded-[10px] border-[1.5px] border-[#047857] bg-white text-[#065F46] hover:bg-[#ECFDF5] font-bold text-[14px] cursor-pointer mt-2"
+          className="inline-flex items-center justify-center gap-2 min-h-[44px] px-5 rounded-[10px] border-[1.5px] border-[#047857] bg-white text-[#065F46] hover:bg-[#ECFDF5] font-bold text-[16px] cursor-pointer mt-2"
         >
           إرفاق وثيقة
         </button>

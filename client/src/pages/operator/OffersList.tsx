@@ -110,7 +110,7 @@ export function OffersList() {
               بيانات تجريبية
             </span>
           </div>
-          <p className="text-[14.5px] leading-relaxed text-[#5B6B82] m-0">
+          <p className="text-[16px] leading-relaxed text-[#5B6B82] m-0">
             تحضير ملف المشاركة، ومتابعة جاهزية الوثائق، وتوزيع المهام على فريقك.
           </p>
         </div>
@@ -119,7 +119,7 @@ export function OffersList() {
           <label className="sr-only" htmlFor="deal-select">الصفقة</label>
           <select
             id="deal-select"
-            className="h-[46px] w-[260px] max-w-full px-3 rounded-[10px] border-[1.5px] border-[#7C8AA3] bg-white text-[#0B1F3A] text-[15px] font-sans"
+            className="h-[46px] w-[260px] max-w-full px-3 rounded-[10px] border-[1.5px] border-[#7C8AA3] bg-white text-[#0B1F3A] text-[16px] font-sans"
             defaultValue="demo"
           >
             <option value="">اختر الصفقة</option>
@@ -127,7 +127,7 @@ export function OffersList() {
           </select>
           <button
             type="button"
-            className="inline-flex items-center justify-center gap-2 min-h-[46px] px-5 rounded-[10px] bg-[#047857] hover:bg-[#065F46] text-white text-[15px] font-bold transition-colors cursor-pointer border-0"
+            className="inline-flex items-center justify-center gap-2 min-h-[46px] px-5 rounded-[10px] bg-[#047857] hover:bg-[#065F46] text-white text-[16px] font-bold transition-colors cursor-pointer border-0"
           >
             <FileText className="size-5 shrink-0" strokeWidth={1.8} />
             <span>حفظ التقدم</span>
@@ -143,7 +143,7 @@ export function OffersList() {
             role="tab"
             aria-selected={tab === 'list'}
             onClick={() => setTab('list')}
-            className={`min-h-[44px] px-4 rounded-[9px] border-0 text-[14.5px] font-bold transition-colors cursor-pointer ${
+            className={`min-h-[44px] px-4 rounded-[9px] border-0 text-[16px] font-bold transition-colors cursor-pointer ${
               tab === 'list'
                 ? 'bg-white text-[#0B1F3A] shadow-xs'
                 : 'bg-transparent text-[#3B4C66] hover:bg-white/60'
@@ -156,7 +156,7 @@ export function OffersList() {
             role="tab"
             aria-selected={tab === 'report'}
             onClick={() => setTab('report')}
-            className={`min-h-[44px] px-4 rounded-[9px] border-0 text-[14.5px] font-bold transition-colors cursor-pointer ${
+            className={`min-h-[44px] px-4 rounded-[9px] border-0 text-[16px] font-bold transition-colors cursor-pointer ${
               tab === 'report'
                 ? 'bg-white text-[#0B1F3A] shadow-xs'
                 : 'bg-transparent text-[#3B4C66] hover:bg-white/60'
@@ -169,7 +169,7 @@ export function OffersList() {
             role="tab"
             aria-selected={tab === 'team'}
             onClick={() => setTab('team')}
-            className={`min-h-[44px] px-4 rounded-[9px] border-0 text-[14.5px] font-bold transition-colors cursor-pointer ${
+            className={`min-h-[44px] px-4 rounded-[9px] border-0 text-[16px] font-bold transition-colors cursor-pointer ${
               tab === 'team'
                 ? 'bg-white text-[#0B1F3A] shadow-xs'
                 : 'bg-transparent text-[#3B4C66] hover:bg-white/60'
@@ -228,7 +228,7 @@ export function OffersList() {
                           <span className="shrink-0 px-2.5 py-0.5 rounded-full bg-[#EEF3FA] text-[#14325C] font-mono text-[12px] font-bold mt-0.5">
                             {ref}
                           </span>
-                          <span className="text-[14.5px] font-bold leading-normal text-[#0B1F3A]">
+                          <span className="text-[16px] font-bold leading-normal text-[#0B1F3A]">
                             {item.title}
                           </span>
                         </div>
@@ -286,7 +286,7 @@ export function OffersList() {
             <FileText className="size-[26px]" strokeWidth={1.8} />
           </div>
           <h3 className="text-[17px] font-extrabold text-[#0B1F3A] mt-1 m-0">لا يوجد تقرير بعد</h3>
-          <p className="text-[14.5px] leading-relaxed text-[#5B6B82] max-w-[460px] m-0">
+          <p className="text-[16px] leading-relaxed text-[#5B6B82] max-w-[460px] m-0">
             سيظهر هنا تحليل جاهزية العرض وتقرير الوثائق الناقصة بعد اختيار الصفقة واستكمال قائمة الوثائق.
           </p>
         </div>
@@ -298,12 +298,12 @@ export function OffersList() {
             <CheckCircle2 className="size-[26px]" strokeWidth={1.8} />
           </div>
           <h3 className="text-[17px] font-extrabold text-[#0B1F3A] mt-1 m-0">لم تُضَف أي أعضاء بعد</h3>
-          <p className="text-[14.5px] leading-relaxed text-[#5B6B82] max-w-[460px] m-0">
+          <p className="text-[16px] leading-relaxed text-[#5B6B82] max-w-[460px] m-0">
             أضف أعضاء فريقك لتوزيع إعداد وثائق العرض بينهم وتحديد من يراجع كل ظرف قبل الإيداع.
           </p>
           <button
             type="button"
-            className="inline-flex items-center justify-center gap-2 min-h-[44px] px-5 rounded-[10px] bg-[#047857] hover:bg-[#065F46] text-white text-[14px] font-bold cursor-pointer border-0 mt-2"
+            className="inline-flex items-center justify-center gap-2 min-h-[44px] px-5 rounded-[10px] bg-[#047857] hover:bg-[#065F46] text-white text-[16px] font-bold cursor-pointer border-0 mt-2"
           >
             إضافة عضو
           </button>
