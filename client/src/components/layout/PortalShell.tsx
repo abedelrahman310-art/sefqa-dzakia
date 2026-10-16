@@ -23,6 +23,9 @@ export interface PortalShellProps {
   /** Override لحشوة المحتوى — default "p-6 md:p-8" */
   contentClassName?: string;
 
+  /** عرض القائمة الجانبية لسطح المكتب — default "w-[280px]" */
+  sidebarWidth?: string;
+
   /** المحتوى */
   children: ReactNode;
 }
@@ -34,6 +37,7 @@ export function PortalShell({
   hideSidebar = false,
   hideTopBar = false,
   contentClassName = 'p-6 md:p-8',
+  sidebarWidth = 'w-[280px]',
   children,
 }: PortalShellProps) {
   const { lang, setLang } = useI18n();
@@ -51,9 +55,9 @@ export function PortalShell({
 
   return (
     <div className="flex h-screen overflow-hidden bg-[var(--paper-50)]" dir="rtl">
-      {/* Desktop Sidebar: 280px fixed */}
+      {/* Desktop Sidebar: 280px fixed (أو مخصص) */}
       {!hideSidebar && (
-        <aside className="hidden md:flex flex-col w-[280px] h-screen bg-white border-e border-[var(--color-border-subtle)] flex-none">
+        <aside className={`hidden md:flex flex-col ${sidebarWidth} h-screen bg-white border-e border-[var(--color-border-subtle)] flex-none`}>
           {sidebar}
         </aside>
       )}

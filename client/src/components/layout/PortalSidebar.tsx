@@ -29,6 +29,8 @@ export interface PortalSidebarProps {
   badgeTitle?: string;
   /** إخفاء اسم وبيانات المستخدم من التذييل */
   hideUserInfo?: boolean;
+  /** نمط القائمة الجانبية: 'default' | 'mint' */
+  variant?: 'default' | 'mint';
 }
 
 export function PortalSidebar({
@@ -40,12 +42,149 @@ export function PortalSidebar({
   onLinkClick,
   badgeTitle,
   hideUserInfo = false,
+  variant = 'default',
 }: PortalSidebarProps) {
   const { user } = useAuth();
   const { lang, setLang } = useI18n();
 
   const orgName = user?.organizationName || user?.displayName || user?.email || '';
   const initial = user?.displayName?.charAt(0) || user?.email?.charAt(0) || 'م';
+  const isMint = variant === 'mint';
+
+  if (isMint) {
+    return (
+      <div className="flex flex-col h-full bg-[#F2FBF7] select-none text-[#5B6472] border-l border-[#E7EAED] font-sans">
+        {/* 1. Header — منطقة العنوان */}
+        <div className="px-4 py-5 border-b border-[#E7EAED] flex items-center justify-between">
+          {badgeTitle ? (
+            <div className="flex items-center gap-2 text-[#1F6B54] font-bold text-sm tracking-wide">
+              <span className="size-2 rounded-full bg-[#3EB489] shrink-0 shadow-xs" />
+              <span>{badgeTitle.replace(/^[•\s]+/, '')}</span>
+            </div>
+          ) : (
+            <div className="flex items-center gap-3">
+              {brandInitial && (
+                <div className="size-10 rounded-xl bg-white text-[#1F6B54] border border-[#E7EAED] font-bold text-base flex items-center justify-center shadow-xs flex-none">
+                  {brandInitial}
+                </div>
+              )}
+              <div className="min-w-0">
+                <h2 className="text-base font-bold text-[#1F6B54] leading-tight truncate">
+                  {title}
+                </h2>
+                <p className="text-xs text-[#5B6472] mt-0.5 truncate">
+                  {subtitle}
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* 2. Nav — scrollable وسط */}
+        <nav className="flex-1 overflow-y-auto py-6 px-4 space-y-1">
+          {items.map((item) => {
+            const Icon = item.icon;
+            // فاصل رقيق بين مجموعات التنقل
+            const showDivider = item.href === '/operator/archive';
+
+            return (
+              <div key={item.href}>
+                {showDivider && (
+                  <div className="pt-2 pb-2" aria-hidden="true">
+                    <div className="h-px bg-[#E7EAED]" />
+                  </div>
+                )}
+                <Link href={item.href}>
+                  <a
+                    onClick={onLinkClick}
+                    className={`group flex items-center justify-between h-10 px-3 rounded-[10px] text-[14px] transition-all [transition-duration:180ms] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#3EB489] focus-visible:ring-offset-2 ${
+                      item.isActive
+                        ? 'bg-[#E6F7F0] text-[#1F6B54] font-bold border-r-[3px] border-[#3EB489]'
+                        : 'text-[#5B6472] font-semibold bg-transparent hover:bg-[#E9F6F1] hover:text-[#1F6B54] border-r-[3px] border-transparent'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <Icon
+                        className={`size-5 shrink-0 transition-colors [transition-duration:180ms] ${
+                          item.isActive
+                            ? 'text-[#1F6B54]'
+                            : 'text-[#5B6472] group-hover:text-[#1F6B54]'
+                        }`}
+                        strokeWidth={1.75}
+                      />
+                      <span className="truncate">{item.label}</span>
+                    </div>
+                  </a>
+                </Link>
+              </div>
+            );
+          })}
+        </nav>
+
+        {/* 3. Footer — إما تذييل المساعدة النظيف أو معلومات المستخدم */}
+        {hideUserInfo ? (
+          <div className="border-t border-[#E7EAED] p-3 bg-[#F2FBF7] flex flex-col gap-1">
+            <Link href="/operator/settings">
+              <a
+                onClick={onLinkClick}
+                className="group flex items-center gap-3 px-3 h-10 rounded-[10px] text-[#5B6472] hover:text-[#1F6B54] hover:bg-[#E9F6F1] transition-all [transition-duration:180ms] text-[14px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#3EB489] focus-visible:ring-offset-2"
+              >
+                <HelpCircle
+                  className="size-5 shrink-0 text-[#5B6472] group-hover:text-[#1F6B54] transition-colors [transition-duration:180ms]"
+                  strokeWidth={1.75}
+                />
+                <span>{lang === 'ar' ? 'المساعدة' : 'Aide'}</span>
+              </a>
+            </Link>
+          </div>
+        ) : (
+          <div className="border-t border-[#E7EAED] p-4 bg-[#F2FBF7] flex flex-col gap-3">
+            {/* User row */}
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="size-10 rounded-full bg-[#E6F7F0] text-[#1F6B54] border border-[#3EB489]/20 flex items-center justify-center font-bold text-sm flex-none shadow-xs">
+                  {initial}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-bold text-[#1F6B54] truncate">
+                    {user?.displayName || orgName}
+                  </p>
+                  <p className="text-xs text-[#5B6472] truncate">
+                    {user?.email || ''}
+                  </p>
+                </div>
+              </div>
+
+              {/* Lang toggle */}
+              <button
+                type="button"
+                onClick={() => setLang(lang === 'ar' ? 'fr' : 'ar')}
+                className="flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-lg bg-white text-[#1F6B54] border border-[#E7EAED] hover:bg-[#E9F6F1] transition-colors shadow-xs flex-none"
+                title="تبديل اللغة / Changer de langue"
+              >
+                <Languages className="w-3.5 h-3.5 text-[#5B6472]" />
+                <span>{lang === 'ar' ? 'FR' : 'عربي'}</span>
+              </button>
+            </div>
+
+            {/* Optional Desktop App Button */}
+            {showDesktopAppButton && (
+              <DesktopAppButton
+                variant="ghost"
+                className="w-full justify-center bg-white text-[#1F6B54] border border-[#E7EAED] hover:bg-[#E9F6F1] hover:text-[#1F6B54]"
+              />
+            )}
+
+            {/* Logout */}
+            <LogoutButton
+              variant="sidebar"
+              className="!text-[#5B6472] hover:!text-[#1F6B54] hover:!bg-[#E9F6F1]"
+            />
+          </div>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-full bg-[#0b4348] select-none text-white">

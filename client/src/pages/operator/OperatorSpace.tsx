@@ -108,13 +108,14 @@ export function OperatorSpace() {
     <PortalShell
       mobileTitle="صفقات ذكية · المتعامل الاقتصادي"
       topBar={<OperatorTopBar />}
+      sidebarWidth="w-[264px]"
       sidebar={
         <PortalSidebar
           title="صفقات ذكية"
           subtitle="فضاء المتعامل الاقتصادي"
           badgeTitle="• بوابة المتعامل الاقتصادي"
           items={navItems}
-          accentColor="#0b4348"
+          variant="mint"
           hideUserInfo
         />
       }
