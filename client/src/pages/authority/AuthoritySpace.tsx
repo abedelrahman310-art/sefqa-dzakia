@@ -1,15 +1,14 @@
 import { useI18n } from '@/i18n';
 import { Route, Switch, useRoute } from 'wouter';
 import { AuthorityOverview } from './AuthorityOverview';
-import { DraftsList } from './DraftsList';
-import { DraftForm } from './DraftForm';
+import { AuthorityDealsList } from './AuthorityDealsList';
+import { AuthorityDealWizard } from './AuthorityDealWizard';
+import { AuthorityDealWorkspace } from './AuthorityDealWorkspace';
 import { ReceivedOffers } from './ReceivedOffers';
 import { OpeningSessionView } from './OpeningSessionView';
 import { EvaluationWorkspace } from './EvaluationWorkspace';
 import { DealCommitteeManager } from './DealCommitteeManager';
 import { PortalNotFound } from '@/components/common/PortalNotFound';
-import { CahierSpecsEditor } from './CahierSpecsEditor';
-import { SpecsIndex } from './SpecsIndex';
 import { AuthoritySessionManager } from '@/features/opening/components/AuthoritySessionManager';
 import { AuthoritySessionControl } from '@/features/opening/components/AuthoritySessionControl';
 import { AuthorityObjectionsView } from '@/features/objections/components/AuthorityObjectionsView';
@@ -21,14 +20,12 @@ import { PortalSidebar } from '@/components/layout/PortalSidebar';
 import ServiceTopBar from '@/components/layout/ServiceTopBar';
 import {
   LayoutDashboard,
-  FileText,
-  BookOpen,
+  Briefcase,
   Radio,
   Gavel,
   Inbox,
   BarChart3,
   Shield,
-  Settings as SettingsIcon,
   Scale,
 } from 'lucide-react';
 
@@ -38,11 +35,17 @@ export function AuthoritySpace() {
   // Route matchers for active highlighting
   const [isOverviewActive] = useRoute('/authority');
   const [isOverviewAliasActive] = useRoute('/authority/overview');
+
+  // Unified Deals Hub routes & legacy aliases
+  const [isDealsActive] = useRoute('/authority/deals');
+  const [isDealsNewActive] = useRoute('/authority/deals/new');
+  const [isDealsDetailActive] = useRoute('/authority/deals/:id');
   const [isDraftsActive] = useRoute('/authority/drafts');
   const [isDraftsNewActive] = useRoute('/authority/drafts/new');
   const [isDraftsEditActive] = useRoute('/authority/drafts/:id/edit');
   const [isDraftsSpecsActive] = useRoute('/authority/drafts/:id/specs');
   const [isSpecsIndexActive] = useRoute('/authority/specs');
+
   const [isOpeningSessionsActive] = useRoute('/authority/opening-sessions');
   const [isOpeningSessionDetailActive] = useRoute('/authority/opening-sessions/:id');
   const [isCommitteeActive] = useRoute('/authority/committee');
@@ -52,8 +55,8 @@ export function AuthoritySpace() {
   const [isObjectionsActive] = useRoute('/authority/objections');
   const [isReportsActive] = useRoute('/authority/reports');
   const [isAuditActive] = useRoute('/authority/audit');
-  const [isSettingsActive] = useRoute('/authority/settings');
 
+  // Final Approved Unified Navigation: "الصفقات" is the unified entry point
   const navItems = [
     {
       label: t('authority.nav.overview'),
@@ -62,16 +65,18 @@ export function AuthoritySpace() {
       isActive: isOverviewActive || isOverviewAliasActive,
     },
     {
-      label: t('authority.nav.drafts'),
-      href: '/authority/drafts',
-      icon: FileText,
-      isActive: isDraftsActive || isDraftsNewActive || isDraftsEditActive || isDraftsSpecsActive,
-    },
-    {
-      label: t('authority.nav.specs'),
-      href: '/authority/specs',
-      icon: BookOpen,
-      isActive: isSpecsIndexActive,
+      label: 'الصفقات',
+      href: '/authority/deals',
+      icon: Briefcase,
+      isActive:
+        isDealsActive ||
+        isDealsNewActive ||
+        isDealsDetailActive ||
+        isDraftsActive ||
+        isDraftsNewActive ||
+        isDraftsEditActive ||
+        isDraftsSpecsActive ||
+        isSpecsIndexActive,
     },
     {
       label: t('authority.nav.opening'),
@@ -109,30 +114,42 @@ export function AuthoritySpace() {
       icon: Shield,
       isActive: isAuditActive,
     },
-    {
-      label: t('authority.nav.settings'),
-      href: '/authority/settings',
-      icon: SettingsIcon,
-      isActive: isSettingsActive,
-    },
   ];
 
   return (
     <PortalShell
       mobileTitle="صفقات ذكية · المصلحة المتعاقدة"
       topBar={<ServiceTopBar />}
+      showTopBarOnMobile
       sidebar={
         <PortalSidebar
           title="صفقات ذكية"
           subtitle="فضاء المصلحة المتعاقدة"
           items={navItems}
-          accentColor="var(--stamp-green-700)"
-          showDesktopAppButton
+          variant="authority"
         />
       }
     >
       <Switch>
-        <Route path="/authority/drafts" component={DraftsList} />
+        {/* ═══ Unified Deals Hub Routes ═══ */}
+        <Route path="/authority/deals/new" component={AuthorityDealWizard} />
+        <Route path="/authority/deals/:id">
+          {(params) => <AuthorityDealWorkspace key={params.id} />}
+        </Route>
+        <Route path="/authority/deals">{() => <AuthorityDealsList />}</Route>
+
+        {/* ═══ Backward Compatibility Routes (Absorbed Drafts & Specs) ═══ */}
+        <Route path="/authority/drafts/new" component={AuthorityDealWizard} />
+        <Route path="/authority/drafts/:id/specs">
+          {(params) => <AuthorityDealWorkspace key={params.id} initialTab="specs" />}
+        </Route>
+        <Route path="/authority/drafts/:id/edit">
+          {(params) => <AuthorityDealWorkspace key={params.id} initialTab="basics" />}
+        </Route>
+        <Route path="/authority/drafts">{() => <AuthorityDealsList />}</Route>
+        <Route path="/authority/specs">{() => <AuthorityDealsList initialView="specs" />}</Route>
+
+        {/* ═══ Rest of Authority Portal Sections (Preserved Untouched) ═══ */}
         <Route path="/authority/committee" component={DealCommitteeManager} />
         <Route path="/authority/offers" component={ReceivedOffers} />
         <Route path="/authority/objections" component={AuthorityObjectionsView} />
@@ -144,16 +161,8 @@ export function AuthoritySpace() {
         <Route path="/authority/opportunities/:id/committee" component={DealCommitteeManager} />
         <Route path="/authority/opportunities/:id/opening" component={OpeningSessionView} />
         <Route path="/authority/opportunities/:id/evaluation" component={EvaluationWorkspace} />
-        <Route path="/authority/drafts/new">{() => <DraftForm />}</Route>
-        <Route path="/authority/drafts/:id/edit">
-          {(params) => <DraftForm id={params.id} />}
-        </Route>
-        <Route path="/authority/drafts/:id/specs">
-          {(params) => <CahierSpecsEditor draftId={params.id} />}
-        </Route>
         <Route path="/authority/opening-sessions/:id" component={AuthoritySessionControl} />
         <Route path="/authority/opening-sessions" component={AuthoritySessionManager} />
-        <Route path="/authority/specs" component={SpecsIndex} />
         <Route path="/authority/overview" component={AuthorityOverview} />
         <Route path="/authority" component={AuthorityOverview} />
         <Route>

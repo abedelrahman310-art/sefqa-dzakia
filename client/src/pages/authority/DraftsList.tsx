@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useI18n } from '@/i18n';
 import { useLocation } from 'wouter';
+import { api } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { FileText, Plus, Search, Calendar, DollarSign } from 'lucide-react';
@@ -23,22 +24,32 @@ export function DraftsList() {
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<'all' | 'draft' | 'published'>('all');
 
+  const fetchDeals = async () => {
+    setLoading(true);
+    try {
+      const res = await api.get('/procurements/deals/');
+      const data = res.data;
+      const items = Array.isArray(data) ? data : (data?.results || data?.drafts || []);
+      const mapped: Draft[] = items.map((d: any) => ({
+        id: String(d.id),
+        title: d.title,
+        description: d.description || '',
+        estimatedBudget: d.estimated_budget ? String(d.estimated_budget) : null,
+        status: d.current_stage >= 3 ? 'published' : 'draft',
+        updatedAt: d.updated_at || d.created_at || new Date().toISOString(),
+      }));
+      setDrafts(mapped);
+      setError(false);
+    } catch (err) {
+      console.error('Error fetching deals/drafts:', err);
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    fetch('/api/drafts')
-      .then((res) => {
-        if (!res.ok) throw new Error('Failed to fetch drafts');
-        return res.json();
-      })
-      .then((data) => {
-        if (data.drafts) {
-          setDrafts(data.drafts);
-        }
-      })
-      .catch((err) => {
-        console.error('Error fetching drafts:', err);
-        setError(true);
-      })
-      .finally(() => setLoading(false));
+    fetchDeals();
   }, []);
 
   const filteredDrafts = useMemo(() => {

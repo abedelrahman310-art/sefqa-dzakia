@@ -27,11 +27,10 @@
   --neu-bg: #e0e5ec;
   --neu-dark-shadow: #bec3c9;
   --neu-light-shadow: #ffffff;
-  box-sizing: border-box;
 }
 
-*, *::before, *::after {
-  box-sizing: inherit;
+.landing-root *, .landing-root *::before, .landing-root *::after {
+  box-sizing: border-box;
 }
 
 /* Base Landing Page Root */
@@ -123,19 +122,28 @@ body, p {
   gap: clamp(2rem, 5vw, 6rem);
 }
 
-/* Institutional Headings & Spacing */
-section {
+/* Institutional Headings & Spacing — scoped to landing only (no global section leak) */
+.landing-root section {
   padding-block: clamp(3rem, 6vw, 8rem);
+  scroll-margin-top: 88px;
 }
 
-.section-padding {
+.landing-root .section-padding {
   padding-block: clamp(3.5rem, 6vw, 7rem);
 }
 
-.section-head {
+.landing-root .section-head {
   max-width: 680px;
   margin-inline: auto;
   text-align: center;
+}
+
+.landing-root .section-head h2 {
+  text-wrap: balance;
+}
+
+.landing-root .section-head p {
+  text-wrap: pretty;
 }
 
 .inst-badge {
@@ -251,10 +259,9 @@ section {
   align-items: center;
 }
 
-/* Header / Top Nav Fluid */
-.inst-navbar {
+/* Header / Top Nav Fluid — inner .wrap already provides inline padding */
+.landing-root .inst-navbar {
   min-height: clamp(64px, 5vh, 96px);
-  padding-inline: clamp(1rem, 3vw, 4rem);
 }
 
 .inst-navbar nav a,

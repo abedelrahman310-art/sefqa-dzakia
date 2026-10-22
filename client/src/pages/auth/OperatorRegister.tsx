@@ -253,29 +253,24 @@ export function OperatorRegister() {
 
       const data = await res.json();
       if (!res.ok) {
-        setServerError(data.error || 'فشل التسجيل. يرجى مراجعة البيانات والمحاولة مجدداً.');
+        let msg = data.error || data.detail;
+        if (!msg && typeof data === 'object') {
+          const firstKey = Object.keys(data)[0];
+          const val = data[firstKey];
+          msg = Array.isArray(val) ? val.join(' ') : String(val);
+        }
+        setServerError(msg || 'فشل التسجيل. يرجى مراجعة البيانات والمحاولة مجدداً.');
         setIsSubmitting(false);
         return;
       }
 
       setIsSuccess(true);
-      login(data.user);
+      login(data.user, { access: data.access, refresh: data.refresh });
       setTimeout(() => {
         setLocation('/operator');
       }, 1000);
-    } catch {
-      // In dev or offline backend scenario, simulate seamless success
-      setIsSuccess(true);
-      login({
-        id: 'op-' + Date.now(),
-        email: email.trim(),
-        displayName: fullName.trim(),
-        role: 'operator',
-        organizationName: payloadCompany,
-      });
-      setTimeout(() => {
-        setLocation('/operator');
-      }, 1000);
+    } catch (err: any) {
+      setServerError(err?.message || 'تعذر الاتصال بالخادم. يرجى التأكد من تشغيل الخدمة والمحاولة مجدداً.');
     } finally {
       setIsSubmitting(false);
     }

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { PageHeader, KpiCard, AICard } from '@/shared/components';
+import { api } from '@/lib/api';
 import {
   FileText,
   Download,
@@ -101,19 +102,13 @@ export function CentralReports() {
     setAiLoading(true);
     setAiInsight(null);
     try {
-      const res = await fetch('/api/ai/central/insights/');
-      if (res.ok) {
-        const data = await res.json();
-        const first = Array.isArray(data) ? data[0]?.description : data?.insight || data?.summary;
-        setAiInsight(
-          first ||
-            'التقرير الاستشاري الوطني الذكي: بلغ مؤشر النزاهة الوطني 98.4%، مع ارتفاع وتيرة الإسناد المؤقت بنسبة 14% في قطاع الموارد المائية والصحة. التوصية: تعزيز آليات الرقابة البعدية في الصفقات التي تتجاوز قيمتها 500 مليون دج.'
-        );
-      } else {
-        setAiInsight(
+      const res = await api.get('/ai/central/insights/');
+      const data = res.data;
+      const first = Array.isArray(data) ? data[0]?.description : data?.insight || data?.summary;
+      setAiInsight(
+        first ||
           'التقرير الاستشاري الوطني الذكي: بلغ مؤشر النزاهة الوطني 98.4%، مع ارتفاع وتيرة الإسناد المؤقت بنسبة 14% في قطاع الموارد المائية والصحة. التوصية: تعزيز آليات الرقابة البعدية في الصفقات التي تتجاوز قيمتها 500 مليون دج.'
-        );
-      }
+      );
     } catch {
       setAiInsight(
         'التقرير الاستشاري الوطني الذكي: بلغ مؤشر النزاهة الوطني 98.4%، مع ارتفاع وتيرة الإسناد المؤقت بنسبة 14% في قطاع الموارد المائية والصحة. التوصية: تعزيز آليات الرقابة البعدية في الصفقات التي تتجاوز قيمتها 500 مليون دج.'

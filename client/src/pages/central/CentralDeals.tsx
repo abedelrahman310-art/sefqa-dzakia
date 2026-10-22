@@ -177,19 +177,27 @@ export function CentralDeals() {
           const data = await res.json();
           const items = Array.isArray(data) ? data : data.results || [];
           if (items.length > 0) {
-            const mapped: DealItem[] = items.map((item: any, idx: number) => ({
-              id: item.id || String(idx),
-              reference: item.reference || `REF-${2026}-${idx + 10}`,
-              title: item.title || 'صفقة عمومية',
-              authority: item.authority?.organization_name || item.authority?.email || 'مصلحة متعاقدة',
-              wilaya: item.wilaya || 'الجزائر (16)',
-              sector: item.sector || 'عام',
-              budget: Number(item.estimated_budget) || 150000000,
-              status: (item.status as DealItem['status']) || 'published',
-              aiScore: 85 + (idx % 12),
-              aiNote: 'مطابقة للمعايير الوطنية',
-              deadline: item.submission_deadline || '2026-11-01',
-            }));
+            const mapped: DealItem[] = items.map((item: any, idx: number) => {
+              let st: DealItem['status'] = 'published';
+              if (item.current_stage <= 2) st = 'draft';
+              else if (item.current_stage === 6) st = 'opening';
+              else if (item.current_stage === 7) st = 'evaluating';
+              else if (item.current_stage >= 8) st = 'awarded';
+
+              return {
+                id: String(item.id || idx),
+                reference: item.reference_number || item.reference || `DZ-2026-${100 + idx}`,
+                title: item.title || 'صفقة عمومية',
+                authority: item.authority_entity || item.authority_name || item.authority?.organization_name || 'مصلحة متعاقدة',
+                wilaya: item.wilaya ? (item.wilaya.includes('(') ? item.wilaya : `${item.wilaya} (${item.wilaya})`) : 'الجزائر (16)',
+                sector: item.sector || 'صفقات عمومية',
+                budget: Number(item.estimated_budget) || 150000000,
+                status: (item.status as DealItem['status']) || st,
+                aiScore: 85 + (idx % 12),
+                aiNote: item.description || 'مطابقة للمعايير الوطنية وفق القانون 23-12',
+                deadline: item.submission_deadline ? item.submission_deadline.split('T')[0] : '2026-11-01',
+              };
+            });
             setDeals(mapped);
           }
         }

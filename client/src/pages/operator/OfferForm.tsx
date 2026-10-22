@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { useLocation, useParams } from 'wouter';
 import { useI18n } from '@/i18n';
+import { api } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
@@ -48,46 +49,38 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
 
   useEffect(() => {
     if (activeOfferId) {
-      // Fetch existing offer
-      fetch(`/api/offers/${activeOfferId}`)
+      api.get(`/bids/offers/${activeOfferId}/`)
         .then((res) => {
-          if (!res.ok) throw new Error('Not found');
-          return res.json();
-        })
-        .then((data) => {
-          const o: OfferDetail = data.offer;
+          const o = res.data;
           setId(o.id);
-          setOppId(o.opportunityId);
-          setOppTitle(o.opportunityTitle);
-          setAuthorityName(o.authorityName);
-          setTechnicalProposal(o.technicalProposal);
-          setFinancialOffer(o.financialOffer);
-          setDeliveryTimeDays(o.deliveryTimeDays || '');
-          setStatus(o.status);
-          setHasDocument(o.hasDocument);
+          setOppId(o.deal);
+          setOppTitle(o.deal_title || 'صفقة عمومية');
+          setAuthorityName(o.authority_name || 'المصلحة المتعاقدة');
+          setTechnicalProposal(typeof o.technical_offer === 'string' ? o.technical_offer : 'ملف العرض التقني مكتمل');
+          setFinancialOffer(o.financial_amount ? String(o.financial_amount) : '');
+          setStatus(o.status === 'submitted' ? 'submitted' : 'draft');
+          setHasDocument(!!o.encrypted_hash);
         })
         .catch(() => {
           setError(t('offers.empty'));
         })
         .finally(() => setLoading(false));
     } else if (activeOppId) {
-      // Check if offer already exists for this opportunity, or load opportunity details
-      fetch('/api/offers')
-        .then((res) => res.json())
-        .then((data) => {
-          const existing = data.offers?.find((o: any) => o.opportunityId === activeOppId);
+      api.get('/bids/offers/')
+        .then((res) => {
+          const items = Array.isArray(res.data) ? res.data : res.data?.results || [];
+          const existing = items.find((o: any) => String(o.deal) === String(activeOppId));
           if (existing) {
             setLocation(`/operator/offers/${existing.id}`);
             return;
           }
-          // Fetch opportunity details
-          return fetch(`/api/opportunities/${activeOppId}`)
-            .then((res) => res.json())
-            .then((oppData) => {
-              if (oppData.opportunity) {
-                setOppTitle(oppData.opportunity.title);
-                setAuthorityName(oppData.opportunity.authorityName);
-                setOppId(oppData.opportunity.id);
+          return api.get(`/procurements/deals/${activeOppId}/`)
+            .then((dealRes) => {
+              const deal = dealRes.data;
+              if (deal) {
+                setOppTitle(deal.title);
+                setAuthorityName(deal.authority_entity || deal.authority_name || 'المصلحة المتعاقدة');
+                setOppId(deal.id);
               }
             });
         })
@@ -115,34 +108,23 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
     }
 
     try {
-      const url = id ? `/api/offers/${id}` : '/api/offers';
-      const method = id ? 'PUT' : 'POST';
+      const payload: Record<string, any> = {
+        deal: oppId,
+        financial_amount: parseFloat(financialOffer),
+        status: 'draft',
+      };
 
-      const res = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-          'x-safaqat-csrf': '1',
-        },
-        body: JSON.stringify({
-          opportunityId: oppId,
-          technicalProposal,
-          financialOffer,
-          deliveryTimeDays: deliveryTimeDays || undefined,
-        }),
-      });
-
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || 'Failed to save offer');
+      if (id) {
+        const res = await api.patch(`/bids/offers/${id}/`, payload);
+        if (res.data?.id) setId(res.data.id);
+      } else {
+        const res = await api.post('/bids/offers/', payload);
+        if (res.data?.id) setId(res.data.id);
       }
 
-      if (!id && data.offer?.id) {
-        setId(data.offer.id);
-      }
       setSuccessMsg(t('offers.msg.saved'));
     } catch (err: any) {
-      setError(err.message || 'Error saving offer');
+      setError(err?.response?.data?.detail || err?.message || 'Error saving offer');
     }
   };
 
@@ -160,22 +142,14 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
     setSuccessMsg('');
 
     try {
-      const res = await fetch(`/api/offers/${id}/submit`, {
-        method: 'POST',
-        headers: {
-          'x-safaqat-csrf': '1',
-        },
+      await api.patch(`/bids/offers/${id}/`, {
+        status: 'submitted',
       });
-
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || 'Submission failed');
-      }
 
       setStatus('submitted');
       setSuccessMsg(t('offers.msg.submitted'));
     } catch (err: any) {
-      setError(err.message || 'Failed to submit offer');
+      setError(err?.response?.data?.detail || err?.message || 'Submission failed');
     } finally {
       setIsSubmitting(false);
     }

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useLocation, useParams } from "wouter";
 import { useOpeningSession } from "../hooks/useOpening";
 import { useI18n } from "@/i18n";
@@ -5,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { downloadPdfBlob } from "@/lib/pdfDownloader";
 import {
   ArrowRight,
   ArrowLeft,
@@ -12,6 +14,7 @@ import {
   Clock,
   ShieldAlert,
   Video,
+  FileText,
   XCircle,
   Clock4,
   Building2,
@@ -32,6 +35,20 @@ export function OperatorSessionLive({ sessionId, params }: OperatorSessionLivePr
   const { t, dir } = useI18n();
 
   const { data: session, isLoading, error } = useOpeningSession(id || null);
+  const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
+
+  const handleDownloadPdf = async () => {
+    if (!session?.id) return;
+    setIsDownloadingPdf(true);
+    try {
+      const filename = `PV_Opening_${session.tender_reference || session.id}.pdf`;
+      await downloadPdfBlob(`/procurements/sessions/${session.id}/pdf/`, filename);
+    } catch {
+      alert("تعذر تنزيل محضر الجلسة PDF. يرجى إعادة المحاولة لاحقاً.");
+    } finally {
+      setIsDownloadingPdf(false);
+    }
+  };
 
   const ArrowIcon = dir === "rtl" ? ArrowRight : ArrowLeft;
 
@@ -135,17 +152,30 @@ export function OperatorSessionLive({ sessionId, params }: OperatorSessionLivePr
               </span>
             </div>
 
-            {session.stream_url && (
-              <a
-                href={session.stream_url}
-                target="_blank"
-                rel="noreferrer"
-                className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-colors shadow-sm"
+            <div className="flex items-center gap-2 flex-wrap">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleDownloadPdf}
+                disabled={isDownloadingPdf}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold border border-white/20 shadow-sm"
               >
-                <Video className="w-4 h-4" />
-                <span>رابط البث المرئي المباشر</span>
-              </a>
-            )}
+                <FileText className="w-3.5 h-3.5" />
+                <span>{isDownloadingPdf ? "جاري التوليد..." : "تحميل المحضر (PDF)"}</span>
+              </Button>
+
+              {session.stream_url && (
+                <a
+                  href={session.stream_url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-colors shadow-sm"
+                >
+                  <Video className="w-4 h-4" />
+                  <span>رابط البث المرئي المباشر</span>
+                </a>
+              )}
+            </div>
           </div>
 
           <div className="space-y-1">

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useLocation, useParams } from 'wouter';
 import { useI18n } from '@/i18n';
+import { api } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Lock, FileCheck, ArrowRight, ArrowLeft, ShieldCheck, AlertCircle } from 'lucide-react';
 
@@ -35,21 +36,32 @@ export function ReceivedOffers() {
       return;
     }
 
-    fetch(`/api/authority/opportunities/${id}/received-offers`)
-      .then((res) => {
-        if (!res.ok) {
-          if (res.status === 403) throw new Error('غير مصرح لك بعرض عروض هذه الفرصة');
-          throw new Error('فشل جلب بيانات العروض المستلمة');
+    Promise.all([
+      api.get(`/procurements/deals/${id}/`),
+      api.get('/bids/offers/', { params: { deal: id } }),
+    ])
+      .then(([dealRes, offersRes]) => {
+        const deal = dealRes.data;
+        if (deal) {
+          setOpp({
+            id: deal.id,
+            title: deal.title,
+            status: deal.stage_display || 'مستمرة',
+          });
         }
-        return res.json();
-      })
-      .then((data) => {
-        setOpp(data.opportunity);
-        setOffers(data.offers || []);
-        setOffersCount(data.offersCount || 0);
+        const items = Array.isArray(offersRes.data) ? offersRes.data : offersRes.data?.results || [];
+        const mapped: ReceivedOfferItem[] = items.map((o: any) => ({
+          id: String(o.id),
+          opportunityId: String(o.deal || id),
+          status: 'submitted',
+          submittedAt: o.submission_timestamp || o.created_at || new Date().toISOString(),
+          hasDocument: true,
+        }));
+        setOffers(mapped);
+        setOffersCount(mapped.length);
       })
       .catch((err: any) => {
-        setError(err.message || 'حدث خطأ أثناء تحميل البيانات');
+        setError(err?.response?.data?.detail || err?.message || 'حدث خطأ أثناء تحميل البيانات');
       })
       .finally(() => setLoading(false));
   }, [id]);

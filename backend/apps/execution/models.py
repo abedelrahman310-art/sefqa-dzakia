@@ -63,7 +63,7 @@ class ReceptionProcess(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     contract = models.ForeignKey(Contract, on_delete=models.CASCADE, related_name='receptions', verbose_name='العقد')
     reception_type = models.CharField('نوع محضر الاستلام', max_length=20, choices=RECEPTION_TYPES, default='provisional')
-    reception_date = models.DateField('تاريخ المعاينة والاستلام', default=timezone.now)
+    reception_date = models.DateField('تاريخ المعاينة والاستلام', default=timezone.localdate)
     committee_members = models.TextField('أعضاء لجنة المعاينة والاستلام', blank=True)
     reservations = models.TextField('التحفظات والملاحظات المسجلة إن وجدت', blank=True)
     is_accepted_without_reservation = models.BooleanField('استلام بدون تحفظ', default=True)

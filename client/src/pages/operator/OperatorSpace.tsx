@@ -22,8 +22,6 @@ import {
   Megaphone,
   FileText,
   ClipboardCheck,
-  Building2,
-  MessageSquare,
   Scale,
   Users,
 } from 'lucide-react';
@@ -36,11 +34,8 @@ export function OperatorSpace() {
   const [isOverviewAliasActive] = useRoute('/operator/overview');
   const [isDealsActive] = useRoute('/operator/deals');
   const [isOppsActive] = useRoute('/operator/opportunities');
-  const [isProfileActive] = useRoute('/operator/profile');
   const [isOffersActive] = useRoute('/operator/offers');
   const [isOffersIdActive] = useRoute('/operator/offers/:id');
-  const [isSessionsActive] = useRoute('/operator/opening-sessions');
-  const [isSessionsIdActive] = useRoute('/operator/opening-sessions/:id');
   const [isObjectionsActive] = useRoute('/operator/objections');
   const [isSmartSpecsActive] = useRoute('/operator/smart-specs');
   const [isArchiveActive] = useRoute('/operator/archive');
@@ -72,18 +67,6 @@ export function OperatorSpace() {
       isActive: isOffersActive || isOffersIdActive,
     },
     {
-      label: 'ملف المؤسسة',
-      href: '/operator/profile',
-      icon: Building2,
-      isActive: isProfileActive,
-    },
-    {
-      label: 'المراسلات والاستفسارات',
-      href: '/operator/opening-sessions',
-      icon: MessageSquare,
-      isActive: isSessionsActive || isSessionsIdActive,
-    },
-    {
       label: 'الطعون والتظلمات',
       href: '/operator/objections',
       icon: Scale,
@@ -101,7 +84,8 @@ export function OperatorSpace() {
     <PortalShell
       mobileTitle="صفقات ذكية · المتعامل الاقتصادي"
       topBar={<OperatorTopBar />}
-      sidebarWidth="w-[250px]"
+      showTopBarOnMobile
+      sidebarWidth="w-[270px]"
       contentClassName="flex-1 min-h-0 flex flex-col p-4 md:px-7 md:py-4 bg-[#F4F7FB] overflow-y-auto text-[16px]"
       sidebar={
         <PortalSidebar

@@ -203,29 +203,24 @@ export function AuthorityRegister() {
 
       const data = await res.json();
       if (!res.ok) {
-        setServerError(data.error || 'فشل التسجيل. يرجى مراجعة البيانات والمحاولة مجدداً.');
+        let msg = data.error || data.detail;
+        if (!msg && typeof data === 'object') {
+          const firstKey = Object.keys(data)[0];
+          const val = data[firstKey];
+          msg = Array.isArray(val) ? val.join(' ') : String(val);
+        }
+        setServerError(msg || 'فشل التسجيل. يرجى مراجعة البيانات والمحاولة مجدداً.');
         setIsSubmitting(false);
         return;
       }
 
       setIsSuccess(true);
-      login(data.user);
+      login(data.user, { access: data.access, refresh: data.refresh });
       setTimeout(() => {
         setLocation('/authority');
       }, 1000);
-    } catch {
-      // In dev or offline backend scenario, simulate seamless success
-      setIsSuccess(true);
-      login({
-        id: 'auth-' + Date.now(),
-        email: email.trim(),
-        displayName: payloadName,
-        role: 'authority',
-        organizationName: payloadName,
-      });
-      setTimeout(() => {
-        setLocation('/authority');
-      }, 1000);
+    } catch (err: any) {
+      setServerError(err?.message || 'تعذر الاتصال بالخادم. يرجى التأكد من تشغيل الخدمة والمحاولة مجدداً.');
     } finally {
       setIsSubmitting(false);
     }

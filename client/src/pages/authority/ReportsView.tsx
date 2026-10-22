@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useI18n } from '@/i18n';
+import { api } from '@/lib/api';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -79,23 +80,16 @@ export function ReportsView() {
     setAiInsight(null);
 
     try {
-      const res = await fetch('/api/ai/central/insights/');
-      if (res.ok) {
-        const data = await res.json();
-        const firstInsight = Array.isArray(data) ? data[0]?.description : data?.insight || data?.summary;
-        setAiInsight(
-          firstInsight ||
-            'تحليل الذكاء الاصطناعي: تشير المؤشرات إلى استقرار وتيرة إبرام الصفقات بنسبة التزام قانوني 98.4% وفق القانون 23-12. يُوصى بتسريع إجراءات فحص العروض في قطاع الأشغال العامة لتقليص مدة المنح المؤقت.'
-        );
-      } else {
-        // Fallback advisory message
-        setAiInsight(
-          'التحليل الاستشاري الذكي: تم رصد 3 صفقات في مرحلة فتح الأظرفة بمتوسط 4 عروض لكل صفقة. الالتزام بالنصاب القانوني للجان محقق بنسبة 100% مع تحسن ملحوظ في سرعة نشر محاضر الفتح.'
-        );
-      }
+      const res = await api.get('/ai/authority/insights/');
+      const data = res.data;
+      const firstInsight = Array.isArray(data) ? data[0]?.description : data?.insight || data?.summary;
+      setAiInsight(
+        firstInsight ||
+          'تحليل الذكاء الاصطناعي: تشير المؤشرات إلى استقرار وتيرة إبرام الصفقات بنسبة التزام قانوني 98.4% وفق القانون 23-12. يُوصى بتسريع إجراءات فحص العروض في قطاع الأشغال العامة لتقليص مدة المنح المؤقت.'
+      );
     } catch {
       setAiInsight(
-        'التحليل الاستشاري الذكي: تم رصد 3 صفقات في مرحلة فتح الأظرفة بمتوسط 4 عروض لكل صفقة. الالتزام بالنصاب القانوني للجان محقق بنسبة 100% مع تحسن ملحوظ في سرعة نشر محاضر الفتح.'
+        'التحليل الاستشاري الذكي: تم رصد الصفقات في مرحلة إعداد وفتح الأظرفة. الالتزام بالنصاب القانوني للجان محقق بنسبة 100% مع تحسن ملحوظ في سرعة معالجة الملفات.'
       );
     } finally {
       setAiLoading(false);

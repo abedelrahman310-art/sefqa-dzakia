@@ -19,8 +19,11 @@ export function Login() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Quick fill buttons enabled strictly when VITE_ENABLE_DEMO_LOGIN is explicitly true
-  const isDemoLoginEnabled = import.meta.env.VITE_ENABLE_DEMO_LOGIN === 'true';
+  // Quick fill buttons enabled on localhost, dev, or when explicitly allowed
+  const isDemoLoginEnabled =
+    import.meta.env.VITE_ENABLE_DEMO_LOGIN === 'true' ||
+    import.meta.env.DEV ||
+    (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'));
 
   // 1. While loading session, show short loading state and do NOT show login form
   if (status === 'loading') {
@@ -61,6 +64,7 @@ export function Login() {
 
   const fillTestAccount = (testEmail: string) => {
     setEmail(testEmail);
+    setPassword('Safaqat@2026');
     setError('');
   };
 
@@ -81,7 +85,14 @@ export function Login() {
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.error || t('login.error'));
+        const errorMessage =
+          data.error ||
+          data.detail ||
+          (data.non_field_errors && data.non_field_errors[0]) ||
+          (data.email && Array.isArray(data.email) ? data.email[0] : null) ||
+          (data.password && Array.isArray(data.password) ? data.password[0] : null) ||
+          t('login.error');
+        throw new Error(errorMessage);
       }
 
       login(data.user, { access: data.access, refresh: data.refresh });
@@ -187,6 +198,9 @@ export function Login() {
                     الرقابة المركزية
                   </Button>
                 </div>
+                <p className="text-[11px] text-muted-foreground mt-2 text-center font-mono">
+                  كلمة المرور لجميع الحسابات التجريبية: <span className="font-bold text-primary select-all">Safaqat@2026</span>
+                </p>
               </div>
             )}
 

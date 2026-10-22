@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useI18n } from '@/i18n';
 import { useLocation } from 'wouter';
+import { api } from '@/lib/api';
 import { Button } from '@/components/ui/button';
-import { FileText, ArrowRight, Scale } from 'lucide-react';
+import { FileText, ArrowRight, Scale, Download } from 'lucide-react';
+import { downloadPdfBlob } from '@/lib/pdfDownloader';
 
 interface Draft {
   id: string;
@@ -19,13 +21,17 @@ export function SpecsIndex() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/drafts')
+    api.get('/procurements/deals/')
       .then((res) => {
-        if (!res.ok) throw new Error('Failed to fetch drafts');
-        return res.json();
-      })
-      .then((data) => {
-        if (data.drafts) setDrafts(data.drafts);
+        const items = Array.isArray(res.data) ? res.data : res.data?.results || [];
+        const mapped: Draft[] = items.map((d: any) => ({
+          id: String(d.id),
+          title: d.title,
+          description: d.description || '',
+          status: d.current_stage >= 3 ? 'published' : 'draft',
+          updatedAt: d.updated_at || d.created_at || new Date().toISOString(),
+        }));
+        setDrafts(mapped);
       })
       .catch((err) => console.error(err))
       .finally(() => setLoading(false));
@@ -91,13 +97,34 @@ export function SpecsIndex() {
                   </p>
                 </div>
 
-                <Button
-                  size="sm"
-                  className="bg-navy-900 hover:bg-navy-800 text-white text-xs rounded-xl px-4 py-1.5 shadow-sm flex items-center gap-1.5 self-end md:self-center shrink-0"
-                >
-                  <span>{t('specs.view_specs')}</span>
-                  <ArrowRight className="w-3.5 h-3.5 rtl:rotate-180" />
-                </Button>
+                <div className="flex items-center gap-2 self-end md:self-center shrink-0">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      downloadPdfBlob(
+                        `/procurements/deals/${draft.id}/specs-pdf/`,
+                        `Cahier_Specs_${draft.title || draft.id}.pdf`
+                      ).catch(() => {
+                        alert('تعذر تنزيل دفتر الشروط PDF. تأكد من أن الصفقة معتمدة ومتاحة.');
+                      });
+                    }}
+                    className="border-border hover:bg-muted text-xs font-semibold rounded-xl px-3 py-1.5 shadow-sm flex items-center gap-1.5"
+                    title="تصدير دفتر الشروط بصيغة PDF"
+                  >
+                    <Download className="w-3.5 h-3.5 text-primary" />
+                    <span>تصدير PDF</span>
+                  </Button>
+
+                  <Button
+                    size="sm"
+                    className="bg-navy-900 hover:bg-navy-800 text-white text-xs rounded-xl px-4 py-1.5 shadow-sm flex items-center gap-1.5"
+                  >
+                    <span>{t('specs.view_specs')}</span>
+                    <ArrowRight className="w-3.5 h-3.5 rtl:rotate-180" />
+                  </Button>
+                </div>
               </div>
             ))}
           </div>

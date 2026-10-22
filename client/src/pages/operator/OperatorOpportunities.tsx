@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useI18n } from '@/i18n';
 import { useLocation } from 'wouter';
+import { api } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Search, FileText, Lock, Sparkles, UserCheck } from 'lucide-react';
@@ -32,18 +33,39 @@ export function OperatorOpportunities() {
   const [selectedSuitabilityId, setSelectedSuitabilityId] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch('/api/operator/opportunities/matched')
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.opportunities) {
-          setOpportunities(data.opportunities);
+    async function loadOpportunities() {
+      try {
+        const res = await api.get('/procurements/deals/');
+        const data = res.data;
+        const items = Array.isArray(data) ? data : data?.results || [];
+        if (items.length > 0) {
+          const mapped: Opportunity[] = items
+            .filter((d: any) => d.current_stage >= 3)
+            .map((d: any) => ({
+              id: String(d.id),
+              title: d.title,
+              description: d.description || '',
+              estimatedBudget: d.estimated_budget ? `${Number(d.estimated_budget).toLocaleString('ar-DZ')} دج` : null,
+              authorityName: d.authority_entity || d.authority_name || 'مصلحة متعاقدة',
+              status: d.stage_display || 'طلب عروض مفتوح',
+              submissionDeadline: d.submission_deadline,
+              hasDocument: !!d.cahier_specs,
+              matching: {
+                isClassified: true,
+                overallSignal: 'relevant' as const,
+              },
+            }));
+          if (mapped.length > 0) {
+            setOpportunities(mapped);
+          }
         }
-        if (typeof data.operatorProfileConfigured === 'boolean') {
-          setProfileConfigured(data.operatorProfileConfigured);
-        }
-      })
-      .catch((err) => console.error(err))
-      .finally(() => setLoading(false));
+      } catch (err) {
+        console.error('Error fetching opportunities:', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadOpportunities();
   }, []);
 
   const filteredOpportunities = useMemo(() => {

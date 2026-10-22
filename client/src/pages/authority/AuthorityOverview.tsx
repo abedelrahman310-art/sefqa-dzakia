@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useI18n } from '@/i18n';
 import { Link, useLocation } from 'wouter';
+import { api } from '@/lib/api';
 import { PageHeader, KpiCard } from '@/shared/components';
 import { FileText, Send, Award, Plus, Radio, BookOpen, Gavel } from 'lucide-react';
 import { DraftsTable, DraftSummary } from './components/DraftsTable';
@@ -12,10 +13,20 @@ export function AuthorityOverview() {
   const [drafts, setDrafts] = useState<DraftSummary[]>([]);
 
   useEffect(() => {
-    fetch('/api/drafts', { headers: { Accept: 'application/json' } })
-      .then((r) => (r.ok ? r.json() : []))
-      .then((d) => setDrafts(Array.isArray(d) ? d : d.drafts || []))
-      .catch((err) => console.error('Failed to load drafts', err));
+    api.get('/procurements/deals/')
+      .then((res) => {
+        const items = Array.isArray(res.data) ? res.data : res.data?.results || [];
+        const mapped: DraftSummary[] = items.map((d: any) => ({
+          id: String(d.id),
+          title: d.title,
+          reference: d.reference_number || undefined,
+          status: d.current_stage >= 3 ? 'published' : 'draft',
+          updatedAt: d.updated_at || d.created_at || new Date().toISOString(),
+          estimatedBudget: d.estimated_budget ? `${Number(d.estimated_budget).toLocaleString('ar-DZ')} دج` : undefined,
+        }));
+        setDrafts(mapped);
+      })
+      .catch((err) => console.error('Failed to load deals', err));
   }, []);
 
   const preparationDrafts = drafts.filter((d) => d.status === 'draft');

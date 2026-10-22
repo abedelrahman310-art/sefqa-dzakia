@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useI18n } from '@/i18n';
+import { api } from '@/lib/api';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -94,13 +95,11 @@ export function AuditView() {
   const loadAuditLogs = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/audit/logs/');
-      if (res.ok) {
-        const data = await res.json();
-        const items = Array.isArray(data) ? data : data.results || [];
-        if (items.length > 0) {
-          setLogs(items);
-        }
+      const res = await api.get('/audit/logs/');
+      const data = res.data;
+      const items = Array.isArray(data) ? data : data.results || [];
+      if (items.length > 0) {
+        setLogs(items);
       }
     } catch {
       // Use fallback logs safely

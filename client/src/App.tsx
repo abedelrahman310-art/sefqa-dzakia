@@ -8,6 +8,7 @@ import { AuthoritySpace } from './pages/authority/AuthoritySpace';
 import { CentralSpace } from './pages/central/CentralSpace';
 import { RequireRole } from './components/auth/RequireRole';
 import { LandingPage } from './pages/landing/LandingPage';
+import { LandingV2Page } from './pages/landing-v2/LandingV2Page';
 import { PWAInstallPrompt } from '@/shared/components/PWAInstallPrompt';
 
 export function App() {
@@ -46,7 +47,9 @@ export function App() {
         </RequireRole>
       </Route>
 
-      <Route path="/" component={LandingPage} />
+      <Route path="/landing-v2" component={LandingV2Page} />
+      <Route path="/landing-old" component={LandingPage} />
+      <Route path="/" component={LandingV2Page} />
 
       <Route>
         <div className="flex items-center justify-center min-h-screen">

@@ -1,31 +1,31 @@
-FROM python:3.11-slim
+FROM python:3.14-slim
 
-# Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
 WORKDIR /app
 
-# Install system dependencies for psycopg/PostgreSQL
+# Install system dependencies & TrueType Arabic fonts for PDF generation (ReportLab)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     libpq-dev \
     curl \
+    netcat-traditional \
+    fonts-dejavu-core \
+    fonts-freefont-ttf \
     && rm -rf /var/lib/apt/lists/*
 
 # Install python dependencies
-ARG INSTALL_DEV=false
-COPY requirements*.txt /app/
+COPY requirements.txt /app/
 RUN pip install --no-cache-dir --upgrade pip && \
-    if [ "$INSTALL_DEV" = "true" ]; then \
-        pip install --no-cache-dir -r requirements-dev.txt; \
-    else \
-        pip install --no-cache-dir -r requirements.txt; \
-    fi
+    pip install --no-cache-dir -r requirements.txt
 
 # Copy backend source code
 COPY . /app/
 
+# Ensure entrypoint is executable
+RUN chmod +x /app/entrypoint.sh
+
 EXPOSE 8000
 
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+ENTRYPOINT ["/app/entrypoint.sh"]

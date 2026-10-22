@@ -42,7 +42,9 @@ import {
   AlertCircle,
   Layers,
   History,
+  Download,
 } from "lucide-react";
+import { downloadPdfBlob } from "@/lib/pdfDownloader";
 import type { DealOfferSummary } from "../types";
 
 export function AuthoritySessionControl() {
@@ -69,6 +71,20 @@ export function AuthoritySessionControl() {
 
   // Dialog state for ending the session
   const [isEndConfirmOpen, setIsEndConfirmOpen] = useState<boolean>(false);
+  const [isDownloadingPdf, setIsDownloadingPdf] = useState<boolean>(false);
+
+  const handleDownloadPdf = async () => {
+    if (!session?.id) return;
+    setIsDownloadingPdf(true);
+    try {
+      const filename = `PV_Opening_${session.tender_reference || session.id}.pdf`;
+      await downloadPdfBlob(`/procurements/sessions/${session.id}/pdf/`, filename);
+    } catch (err: any) {
+      alert("تعذر تصدير محضر الجلسة PDF. يرجى التأكد من استقرار الاتصال بالخادم.");
+    } finally {
+      setIsDownloadingPdf(false);
+    }
+  };
 
   const ArrowIcon = dir === "rtl" ? ArrowRight : ArrowLeft;
 
@@ -290,7 +306,18 @@ export function AuthoritySessionControl() {
             </div>
 
             {/* Quick Action Buttons */}
-            <div className="flex items-center gap-2.5">
+            <div className="flex items-center gap-2.5 flex-wrap">
+              <Button
+                variant="outline"
+                onClick={handleDownloadPdf}
+                disabled={isDownloadingPdf}
+                className="border-slate-300 hover:bg-slate-100 text-slate-800 font-bold text-xs gap-1.5 rounded-xl shadow-sm px-3.5 py-2"
+                title="تصدير وتحميل محضر وقائع جلسة فتح الأظرفة بصيغة PDF قابلة للطباعة والتوقيع"
+              >
+                <FileText className="w-4 h-4 text-blue-700" />
+                <span>{isDownloadingPdf ? "جاري التوليد..." : "تحميل المحضر (PDF)"}</span>
+              </Button>
+
               {isScheduled && (
                 <Button
                   onClick={handleStartSession}
@@ -478,9 +505,22 @@ export function AuthoritySessionControl() {
                   <History className="w-4 h-4 text-blue-600" />
                   <span>محضر وقائع الجلسة العلنية</span>
                 </CardTitle>
-                <Badge variant="outline" className="text-[11px] font-mono">
-                  {session.events.length} وقائع
-                </Badge>
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline" className="text-[11px] font-mono">
+                    {session.events.length} وقائع
+                  </Badge>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleDownloadPdf}
+                    disabled={isDownloadingPdf}
+                    className="h-7 text-xs text-blue-700 hover:text-blue-800 hover:bg-blue-50 px-2 rounded-lg gap-1 font-semibold"
+                    title="تصدير المحضر بصيغة PDF"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    <span>تصدير PDF</span>
+                  </Button>
+                </div>
               </div>
               <CardDescription className="text-xs">
                 تسجيل زمني لكافة العمليات والأظرفة المفتوحة

@@ -10,6 +10,7 @@ from .views_opening import (
     SessionEndView,
     SessionOffersView,
 )
+from .views_pdf import OpeningSessionPdfView, CahierSpecsPdfView
 
 router = DefaultRouter()
 router.register(r'deals', ProcurementDealViewSet, basename='procurement-deal')
@@ -23,5 +24,8 @@ urlpatterns = [
     path("sessions/<uuid:pk>/start/", SessionStartView.as_view(), name="session-start"),
     path("sessions/<uuid:pk>/open-offer/", SessionOpenOfferView.as_view(), name="session-open-offer"),
     path("sessions/<uuid:pk>/end/", SessionEndView.as_view(), name="session-end"),
+    path("sessions/<uuid:pk>/pdf/", OpeningSessionPdfView.as_view(), name="session-pdf"),
+    path("deals/<uuid:pk>/specs-pdf/", CahierSpecsPdfView.as_view(), name="deal-specs-pdf"),
+    path("specs/<uuid:pk>/pdf/", CahierSpecsPdfView.as_view(), name="cahier-specs-pdf"),
     path('', include(router.urls)),
 ]

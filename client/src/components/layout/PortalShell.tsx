@@ -20,6 +20,9 @@ export interface PortalShellProps {
   /** إخفاء TopBar على routes معينة */
   hideTopBar?: boolean;
 
+  /** إظهار TopBar على الشاشات الصغيرة (افتراضياً: مخفي على الموبايل ومرئي من md) */
+  showTopBarOnMobile?: boolean;
+
   /** Override لحشوة المحتوى — default "p-6 md:p-8" */
   contentClassName?: string;
 
@@ -36,6 +39,7 @@ export function PortalShell({
   mobileTitle,
   hideSidebar = false,
   hideTopBar = false,
+  showTopBarOnMobile = false,
   contentClassName = 'p-6 md:p-8',
   sidebarWidth = 'w-[280px]',
   children,
@@ -106,9 +110,9 @@ export function PortalShell({
           </div>
         )}
 
-        {/* Desktop TopBar (56px) */}
+        {/* TopBar */}
         {!hideTopBar && topBar && (
-          <div className="hidden md:block sticky top-0 z-20">
+          <div className={`${showTopBarOnMobile ? 'block relative md:sticky md:top-0' : 'hidden md:block sticky top-0'} z-20`}>
             {topBar}
           </div>
         )}

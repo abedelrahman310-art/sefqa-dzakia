@@ -28,9 +28,29 @@ class ProcurementDealViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(authority=self.request.user)
 
+class IsCahierAuthorityOwner(permissions.BasePermission):
+    """
+    المصلحة المتعاقدة المالكة للصفقة فقط مخولة بتعديل دفتر الشروط وحذفه.
+    التصفح متاح للمستخدمين المصادق عليهم.
+    """
+    def has_permission(self, request, view):
+        return bool(request.user and request.user.is_authenticated)
+
+    def has_object_permission(self, request, view, obj):
+        if request.user.is_staff:
+            return True
+        if request.method in permissions.SAFE_METHODS:
+            return True
+        return bool(
+            request.user
+            and request.user.is_authenticated
+            and getattr(request.user, 'role', None) == 'authority'
+            and getattr(obj.deal, 'authority_id', None) == request.user.id
+        )
+
 class CahierSpecsViewSet(viewsets.ModelViewSet):
-    """إدارة دفاتر الشروط والمواصفات"""
+    """إدارة دفاتر الشروط والمواصفات وفق الضوابط والصلاحيات المؤسسية"""
     queryset = CahierSpecs.objects.all().select_related('deal')
     serializer_class = CahierSpecsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated, IsCahierAuthorityOwner]
 

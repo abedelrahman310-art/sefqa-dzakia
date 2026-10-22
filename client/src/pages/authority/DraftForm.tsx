@@ -2,6 +2,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { useI18n } from '@/i18n';
 import { useLocation } from 'wouter';
 import { useAuth } from '@/components/auth/AuthProvider';
+import { api } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
@@ -48,20 +49,16 @@ export function DraftForm({ id }: { id?: string }) {
 
   useEffect(() => {
     if (id) {
-      fetch(`/api/drafts/${id}`)
+      api.get(`/procurements/deals/${id}/`)
         .then((res) => {
-          if (!res.ok) throw new Error('Not found');
-          return res.json();
-        })
-        .then((data) => {
-          if (data.draft) {
-            setTitle(data.draft.title);
-            setDescription(data.draft.description);
-            setBudget(data.draft.estimatedBudget || '');
-            if (data.draft.templateType) setTemplateType(data.draft.templateType);
-            if (data.draft.wilaya) setWilaya(data.draft.wilaya);
-            setStatus(data.draft.status);
-            setHasDoc(!!data.draft.documentPath);
+          const deal = res.data;
+          if (deal) {
+            setTitle(deal.title || '');
+            setDescription(deal.description || '');
+            setBudget(deal.estimated_budget ? String(deal.estimated_budget) : '');
+            if (deal.wilaya) setWilaya(deal.wilaya);
+            setStatus(deal.current_stage >= 3 ? 'published' : 'draft');
+            setHasDoc(!!deal.cahier_specs);
           }
         })
         .catch(() => {
@@ -92,33 +89,25 @@ export function DraftForm({ id }: { id?: string }) {
       return setError(t('drafts.msg.error'));
     }
 
-    const url = id ? `/api/drafts/${id}` : '/api/drafts';
-    const method = id ? 'PUT' : 'POST';
-
     try {
-      const res = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-          'x-safaqat-csrf': '1',
-        },
-        body: JSON.stringify({
-          title,
-          description,
-          templateType,
-          wilaya,
-          estimatedBudget: budget || undefined,
-        }),
-      });
+      const payload: Record<string, any> = {
+        title,
+        description,
+        wilaya,
+        estimated_budget: budget ? parseFloat(budget) : null,
+      };
 
-
-      if (!res.ok) {
-        throw new Error('Failed to save');
+      if (id) {
+        await api.patch(`/procurements/deals/${id}/`, payload);
+        toast.success('تم تحديث الصفقة بنجاح');
+      } else {
+        await api.post('/procurements/deals/', payload);
+        toast.success('تم إنشاء الصفقة وحفظها بنجاح');
       }
 
       setLocation('/authority/drafts');
-    } catch (err) {
-      setError(t('drafts.msg.error'));
+    } catch (err: any) {
+      setError(err?.response?.data?.detail || err?.message || t('drafts.msg.error'));
     } finally {
       setSubmitting(false);
     }
@@ -126,20 +115,18 @@ export function DraftForm({ id }: { id?: string }) {
 
   const handlePublish = async () => {
     if (!id) return;
-    if (!window.confirm('هل أنت متأكد من رغبتك في إتاحة هذه المسودة تجريبياً للمتعاملين؟ لن تتمكن من تعديلها لاحقاً.')) {
+    if (!window.confirm('هل أنت متأكد من رغبتك في إتاحة هذه الصفقة ونشرها رسمياً للمنافسة؟')) {
       return;
     }
     try {
-      const res = await fetch(`/api/drafts/${id}/publish`, {
-        method: 'POST',
-        headers: {
-          'x-safaqat-csrf': '1',
-        },
+      await api.patch(`/procurements/deals/${id}/`, {
+        current_stage: 3,
       });
-      if (!res.ok) throw new Error('Publish failed');
+      toast.success('تم نشر الصفقة بنجاح للمتعاملين');
+      setStatus('published');
       setLocation('/authority/drafts');
-    } catch (err) {
-      setError(t('drafts.msg.error'));
+    } catch (err: any) {
+      setError(err?.response?.data?.detail || err?.message || t('drafts.msg.error'));
     }
   };
 

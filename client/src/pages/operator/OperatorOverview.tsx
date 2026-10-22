@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useI18n } from '@/i18n';
 import { Link, useLocation } from 'wouter';
+import { api } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { PageHeader, KpiCard, EmptyState } from '@/shared/components';
 import {
@@ -45,12 +46,30 @@ export function OperatorOverview() {
 
   useEffect(() => {
     Promise.all([
-      fetch('/api/opportunities').then((res) => (res.ok ? res.json() : Promise.reject())),
-      fetch('/api/offers').then((res) => (res.ok ? res.json() : Promise.reject())),
+      api.get('/procurements/deals/'),
+      api.get('/bids/offers/'),
     ])
-      .then(([oppsData, offersData]) => {
-        if (oppsData.opportunities) setOpportunities(oppsData.opportunities);
-        if (offersData.offers) setOffers(offersData.offers);
+      .then(([dealsRes, offersRes]) => {
+        const deals = Array.isArray(dealsRes.data) ? dealsRes.data : dealsRes.data?.results || [];
+        const mappedDeals: Opportunity[] = deals
+          .filter((d: any) => d.current_stage >= 3)
+          .map((d: any) => ({
+            id: String(d.id),
+            title: d.title,
+            description: d.description || '',
+            estimatedBudget: d.estimated_budget ? `${Number(d.estimated_budget).toLocaleString('ar-DZ')} دج` : null,
+            authorityName: d.authority_entity || d.authority_name || 'مصلحة متعاقدة',
+            updatedAt: d.updated_at || d.created_at || new Date().toISOString(),
+            hasDocument: !!d.cahier_specs,
+          }));
+        setOpportunities(mappedDeals);
+
+        const offersList = Array.isArray(offersRes.data) ? offersRes.data : offersRes.data?.results || [];
+        const mappedOffers: OfferItem[] = offersList.map((o: any) => ({
+          id: String(o.id),
+          status: (o.status === 'submitted' ? 'submitted' : 'draft') as 'draft' | 'submitted',
+        }));
+        setOffers(mappedOffers);
       })
       .catch((err) => {
         console.error('Overview data fetch error:', err);

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useLocation, useParams } from 'wouter';
 import { useI18n } from '@/i18n';
+import { api } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, ArrowRight, Lock, AlertTriangle, Building, Calendar, DollarSign, FileText } from 'lucide-react';
 
@@ -25,22 +26,30 @@ export function OpportunityDetails() {
   const [existingOfferId, setExistingOfferId] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch(`/api/opportunities/${id}`)
+    if (!id) return;
+
+    api.get(`/procurements/deals/${id}/`)
       .then((res) => {
-        if (!res.ok) throw new Error('Not found');
-        return res.json();
-      })
-      .then((data) => {
-        if (data.opportunity) setOpp(data.opportunity);
+        const deal = res.data;
+        if (deal) {
+          setOpp({
+            id: String(deal.id),
+            title: deal.title,
+            description: deal.description || '',
+            estimatedBudget: deal.estimated_budget ? `${Number(deal.estimated_budget).toLocaleString('ar-DZ')} دج` : null,
+            authorityName: deal.authority_entity || deal.authority_name || 'مصلحة متعاقدة',
+            updatedAt: deal.updated_at || deal.created_at || new Date().toISOString(),
+            hasDocument: !!deal.cahier_specs,
+          });
+        }
       })
       .catch(() => setError(true))
       .finally(() => setLoading(false));
 
-    // Check if operator already submitted/drafted an offer for this opportunity
-    fetch('/api/offers')
-      .then((res) => res.json())
-      .then((data) => {
-        const found = data.offers?.find((o: any) => o.opportunityId === id);
+    api.get('/bids/offers/')
+      .then((res) => {
+        const items = Array.isArray(res.data) ? res.data : res.data?.results || [];
+        const found = items.find((o: any) => String(o.deal) === String(id));
         if (found) setExistingOfferId(found.id);
       })
       .catch(() => {});
