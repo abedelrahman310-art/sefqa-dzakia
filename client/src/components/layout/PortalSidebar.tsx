@@ -355,17 +355,19 @@ export function PortalSidebar({
 
       {/* 3. Footer — إما تذييل المساعدة النظيف أو معلومات المستخدم */}
       {hideUserInfo ? (
-        <div className="border-t border-white/10 p-3 bg-[#0b4348] flex flex-col gap-1">
-          <Link href="/operator/settings">
-            <a
-              onClick={onLinkClick}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/80 hover:text-white hover:bg-white/10 transition-colors text-sm font-medium"
-            >
-              <HelpCircle className="size-5 shrink-0 text-white/80" />
-              <span>{lang === 'ar' ? 'المساعدة' : 'Aide'}</span>
-            </a>
-          </Link>
-        </div>
+        variant === 'operator' ? (
+          <div className="border-t border-white/10 p-3 bg-[#0b4348] flex flex-col gap-1">
+            <Link href="/operator/settings">
+              <a
+                onClick={onLinkClick}
+                className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/80 hover:text-white hover:bg-white/10 transition-colors text-sm font-medium"
+              >
+                <HelpCircle className="size-5 shrink-0 text-white/80" />
+                <span>{lang === 'ar' ? 'المساعدة' : 'Aide'}</span>
+              </a>
+            </Link>
+          </div>
+        ) : null
       ) : (
         <div className="border-t border-white/10 p-4 bg-[#0b4348] flex flex-col gap-3">
           {/* User row */}

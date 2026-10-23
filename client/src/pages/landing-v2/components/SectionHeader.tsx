@@ -1,31 +1,25 @@
-import React from 'react';
-
 /* ============================================================
    SAFAQAT — فواصل الأقسام (Section Divider)
-   الخط العلوي أحمر (#C83A42)، الخط السفلي أخضر (#167354)
-   سماكة 2px لكل خط، المسافة 4px، مساحة ملائمة فوق وتحت الفاصل
+   خطان قصيران أخضر (#167354) وأحمر (#C83A42) في المنتصف
+   الفاصل زخرفي فقط، بمساحة تنفس واسعة فوقه وتحته
    زخرفي فقط (aria-hidden="true")
    ============================================================ */
 export function SectionDivider() {
   return (
-    <div className="w-full my-10 md:my-14 select-none" aria-hidden="true">
-      <div className="w-full max-w-[1280px] mx-auto px-4 md:px-8">
-        <div className="w-full flex flex-col gap-[4px]">
-          <div className="w-full h-[2px] bg-[#C83A42] rounded-full" />
-          <div className="w-full h-[2px] bg-[#167354] rounded-full" />
-        </div>
+    <div className="w-full my-8 md:my-12 flex justify-center select-none" aria-hidden="true">
+      <div className="flex items-center gap-1.5">
+        <span className="h-[2px] w-10 sm:w-14 rounded-full bg-[#C83A42]/85" />
+        <span className="h-[2px] w-10 sm:w-14 rounded-full bg-[#167354]" />
       </div>
     </div>
   );
 }
 
 /* ============================================================
-   SAFAQAT — بطاقة عنوان القسم (Section Header Card)
-   - داخل بطاقة بيضاء خفيفة
-   - حافة علوية خضراء (#167354) وسفلية حمراء (#C83A42) رفيعتان
-   - زوايا 10–12px
-   - العنوان ~26px في المنتصف
-   - الوصف خارج بطاقة العنوان
+   SAFAQAT — رأس تحريري للأقسام (Editorial Section Header)
+   - Eyebrow صغير بخطين مؤسسيين
+   - عنوان كبير بمساحة تنفس واسعة، بدون بطاقة
+   - خيط فاصل قصير بالأخضر والأحمر
    ============================================================ */
 interface SectionHeaderProps {
   badge?: string;
@@ -36,23 +30,26 @@ interface SectionHeaderProps {
 
 export function SectionHeader({ badge, title, subtitle, className = '' }: SectionHeaderProps) {
   return (
-    <header className={`text-center max-w-3xl mx-auto mb-10 md:mb-12 flex flex-col items-center gap-3 px-4 ${className}`}>
+    <header className={`text-center max-w-4xl mx-auto mb-10 md:mb-14 flex flex-col items-center px-2 sm:px-4 ${className}`}>
       {badge && (
-        <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#EDF4EE] text-[#167354] border border-[#CDE1D3] text-xs font-bold shadow-2xs">
-          <span className="size-2 rounded-full bg-[#167354] inline-block shrink-0" aria-hidden="true" />
-          <span>{badge}</span>
+        <div className="inline-flex items-center gap-3 text-[11px] sm:text-xs font-bold text-[#167354] mb-4 sm:mb-5">
+          <span className="h-px w-6 sm:w-8 bg-[#C83A42]/70" aria-hidden="true" />
+          <span className="tracking-[0.03em]">{badge}</span>
+          <span className="h-px w-6 sm:w-8 bg-[#167354]/70" aria-hidden="true" />
         </div>
       )}
 
-      {/* بطاقة العنوان البيضاء ذات الحافة العلوية الخضراء والحافة السفلية الحمراء */}
-      <div className="inline-block max-w-full bg-white border-t-[2.5px] border-t-[#167354] border-b-[2.5px] border-b-[#C83A42] border-x border-x-[#E3E7E2] rounded-[11px] px-4 sm:px-8 py-3.5 shadow-[0_2px_8px_-2px_rgba(36,53,46,0.04)]">
-        <h2 className="text-[19px] sm:text-[23px] md:text-[26px] font-extrabold text-[#24352E] leading-snug m-0 text-balance tracking-tight break-words">
-          {title}
-        </h2>
-      </div>
+      <h2 className="text-[26px] sm:text-[34px] md:text-[42px] font-extrabold text-[#24352E] leading-[1.3] sm:leading-[1.25] m-0 text-balance tracking-[-0.02em] break-words max-w-3xl">
+        {title}
+      </h2>
+
+      <span className="inline-flex items-center gap-1.5 mt-5" aria-hidden="true">
+        <span className="h-1 w-6 rounded-full bg-[#167354]" />
+        <span className="h-1 w-6 rounded-full bg-[#C83A42]" />
+      </span>
 
       {subtitle && (
-        <p className="text-[14px] sm:text-[15px] md:text-[16px] text-[#59665F] leading-relaxed m-0 max-w-2xl text-balance font-normal mt-1">
+        <p className="text-sm sm:text-base md:text-[17px] text-[#59665F] leading-[1.9] m-0 max-w-2xl text-balance font-normal mt-4">
           {subtitle}
         </p>
       )}

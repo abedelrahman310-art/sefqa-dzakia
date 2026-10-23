@@ -87,7 +87,7 @@ export function V2TrustStart() {
             return (
               <article
                 key={g.id}
-                className="bg-[#F8F9F7] rounded-xl border border-[#E3E7E2] p-6 flex flex-col justify-between gap-4 hover:border-[#CBD5E1] transition-all"
+                className="bg-white rounded-2xl border border-[#E3E7E2] p-6 flex flex-col justify-between gap-5 hover:border-[#C9D8D0] hover:shadow-[0_16px_36px_-26px_rgba(9,46,73,0.22)] transition-all"
               >
                 <div className="flex items-center justify-between gap-3">
                   <div className={`size-10 rounded-lg flex items-center justify-center border ${g.tint}`}>
@@ -115,7 +115,7 @@ export function V2TrustStart() {
         </div>
 
         {/* 2. قسم الأسئلة الشائعة القابلة للتوسيع (FAQ Accordion) */}
-        <div className="max-w-3xl mx-auto mb-14">
+        <div id="faq" className="max-w-3xl mx-auto mb-14 scroll-mt-28">
           <div className="flex items-center gap-2 mb-6 justify-center">
             <HelpCircle className="size-5 text-[#167354]" aria-hidden="true" />
             <h3 className="text-lg md:text-xl font-extrabold text-[#24352E] m-0">
@@ -129,13 +129,14 @@ export function V2TrustStart() {
               return (
                 <div
                   key={idx}
-                  className="bg-[#F8F9F7] rounded-xl border border-[#E3E7E2] overflow-hidden transition-all"
+                  className="bg-white rounded-xl border border-[#E3E7E2] overflow-hidden transition-all hover:border-[#C9D8D0]"
                 >
                   <button
                     type="button"
-                    className="w-full flex items-center justify-between p-4 sm:p-5 text-right font-bold text-sm md:text-base text-[#24352E] hover:bg-[#F3F4F1] transition-colors focus-visible:outline-2 focus-visible:outline-[#167354]"
+                    className="w-full flex items-center justify-between p-4 sm:p-5 text-right font-bold text-sm md:text-base text-[#24352E] hover:bg-[#F8FAF8] transition-colors focus-visible:outline-2 focus-visible:outline-[#167354]"
                     onClick={() => setOpenFaq(isOpen ? null : idx)}
                     aria-expanded={isOpen}
+                    aria-controls={`faq-answer-${idx}`}
                   >
                     <span className="leading-snug">{faq.q}</span>
                     <div className="size-7 rounded-lg bg-white border border-[#E3E7E2] flex items-center justify-center text-[#59665F] shrink-0 mr-3">
@@ -143,11 +144,12 @@ export function V2TrustStart() {
                     </div>
                   </button>
 
-                  {isOpen && (
-                    <div className="p-4 sm:p-5 pt-0 text-xs sm:text-sm text-[#59665F] leading-relaxed border-t border-[#E3E7E2] bg-white">
-                      {faq.a}
-                    </div>
-                  )}
+                  <div
+                    id={`faq-answer-${idx}`}
+                    className={`p-4 sm:p-5 pt-0 text-xs sm:text-sm text-[#59665F] leading-relaxed border-t border-[#E3E7E2] bg-[#FBFCFA] ${isOpen ? '' : 'hidden'}`}
+                  >
+                    {faq.a}
+                  </div>
                 </div>
               );
             })}
@@ -155,32 +157,37 @@ export function V2TrustStart() {
         </div>
 
         {/* 3. الدعوة الواحدة الحقيقية للبدء (Single Honest CTA) */}
-        <div className="bg-[#F8F9F7] rounded-2xl md:rounded-3xl border border-[#E3E7E2] p-8 sm:p-12 text-center max-w-3xl mx-auto shadow-[0_2px_12px_-4px_rgba(36,53,46,0.03)]">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#EDF4EE] text-[#167354] border border-[#CDE1D3] text-xs font-bold mb-4">
-            <Sparkles className="size-3.5" aria-hidden="true" />
-            <span>بيئة عمل رقمية موحدة</span>
+        <div id="final-cta" className="relative overflow-hidden rounded-[28px] bg-[#092E49] p-8 sm:p-12 md:p-14 text-center max-w-4xl mx-auto shadow-[0_30px_70px_-40px_rgba(9,46,73,0.65)] scroll-mt-28">
+          <div className="pointer-events-none absolute -top-24 -left-24 size-64 rounded-full bg-[#167354]/30 blur-3xl" aria-hidden="true" />
+          <div className="pointer-events-none absolute -bottom-28 -right-20 size-64 rounded-full bg-[#C83A42]/20 blur-3xl" aria-hidden="true" />
+
+          <div className="relative">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 text-[#BDE7D3] border border-white/15 text-xs font-bold mb-5">
+              <Sparkles className="size-3.5" aria-hidden="true" />
+              <span>بيئة عمل رقمية موحدة</span>
+            </div>
+
+            <h3 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white leading-snug m-0 mb-4 text-balance">
+              جاهز للانطلاق في بيئة صفقات منظمة؟
+            </h3>
+
+            <p className="text-sm md:text-base text-white/70 leading-relaxed m-0 mb-8 max-w-xl mx-auto font-normal">
+              سجّل الدخول بحسابك المؤسسي لبدء إدارة الصفقات، صياغة دفاتر الشروط، أو تنظيم ملفات المشاركة بمساعدة استشارية واضحة.
+            </p>
+
+            <button
+              type="button"
+              className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl bg-white text-[#092E49] font-bold text-sm md:text-base hover:bg-[#EDF4EE] transition-colors shadow-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              onClick={() => setLocation('/login')}
+            >
+              <span>ادخل إلى حسابك المؤسسي</span>
+              <ArrowLeft className="size-4 shrink-0" aria-hidden="true" />
+            </button>
+
+            <p className="text-[11px] text-white/50 mt-4 m-0">
+              الدخول مخصص للمصالح العمومية والمتعاملين الاقتصاديين المعتمدين.
+            </p>
           </div>
-
-          <h3 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-[#24352E] leading-snug m-0 mb-3 text-balance">
-            جاهز للانطلاق في بيئة صفقات منظمة؟
-          </h3>
-
-          <p className="text-xs sm:text-sm md:text-base text-[#59665F] leading-relaxed m-0 mb-6 max-w-xl mx-auto font-normal">
-            سجّل الدخول بحسابك المؤسسي لبدء إدارة الصفقات، صياغة دفاتر الشروط، أو تنظيم ملفات المشاركة بمساعدة استشارية واضحة.
-          </p>
-
-          <button
-            type="button"
-            className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl bg-[#167354] text-white font-bold text-sm md:text-base hover:bg-[#115840] transition-colors shadow-xs focus-visible:outline-2 focus-visible:outline-[#167354]"
-            onClick={() => setLocation('/login')}
-          >
-            <span>ادخل إلى حسابك المؤسسي</span>
-            <ArrowLeft className="size-4 shrink-0" aria-hidden="true" />
-          </button>
-
-          <p className="text-[11px] text-[#59665F] mt-3 m-0">
-            الدخول مخصص للمصالح العمومية والمتعاملين الاقتصاديين المعتمدين.
-          </p>
         </div>
       </div>
     </section>

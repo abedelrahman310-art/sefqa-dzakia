@@ -1,21 +1,20 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useI18n } from '@/i18n';
 import { useLocation } from 'wouter';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import {
-  CheckSquare,
   Search,
-  ArrowRight,
-  ShieldCheck,
   FileCheck,
   Building,
   Calendar,
   Sparkles,
+  ChevronLeft,
+  RefreshCw,
+  FileText,
 } from 'lucide-react';
 
 interface OpportunitySpecItem {
   id: string;
+  reference?: string;
   title: string;
   description: string;
   authorityName: string;
@@ -26,13 +25,17 @@ interface OpportunitySpecItem {
 }
 
 export function OperatorSmartSpecsView() {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const [, setLocation] = useLocation();
   const [opportunities, setOpportunities] = useState<OpportunitySpecItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
-  useEffect(() => {
+  const loadSpecs = (refresh = false) => {
+    if (refresh) setRefreshing(true);
+    else setLoading(true);
+
     fetch('/api/opportunities')
       .then((res) => (res.ok ? res.json() : Promise.reject()))
       .then((data) => {
@@ -41,7 +44,14 @@ export function OperatorSmartSpecsView() {
         }
       })
       .catch((err) => console.error('Failed to load opportunities:', err))
-      .finally(() => setLoading(false));
+      .finally(() => {
+        setLoading(false);
+        setRefreshing(false);
+      });
+  };
+
+  useEffect(() => {
+    loadSpecs();
   }, []);
 
   const filtered = useMemo(() => {
@@ -51,153 +61,174 @@ export function OperatorSmartSpecsView() {
       (opp) =>
         opp.title.toLowerCase().includes(q) ||
         opp.authorityName.toLowerCase().includes(q) ||
-        opp.description.toLowerCase().includes(q)
+        opp.description.toLowerCase().includes(q) ||
+        (opp.reference || '').toLowerCase().includes(q),
     );
   }, [opportunities, searchQuery]);
 
+  const formatDate = (value: string) => {
+    if (!value) return '—';
+    return new Date(value).toLocaleDateString(lang === 'ar' ? 'ar-DZ' : 'fr-FR');
+  };
+
   return (
-    <div className="space-y-6">
-      {/* Top Navigation Breadcrumb */}
-      <div className="flex items-center gap-2">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setLocation('/operator')}
-          className="flex items-center gap-1 text-xs text-muted-foreground hover:text-navy-900 ps-0"
-        >
-          <ArrowRight className="w-3.5 h-3.5 rtl:rotate-180" />
-          <span>{t('operator.req.back')}</span>
-        </Button>
-        <span className="text-muted-foreground">/</span>
-        <span className="text-xs font-semibold text-navy-900">
-          {t('operator.specs.title')}
-        </span>
+    <div className="op-page">
+      <div className="op-page-head">
+        <div>
+          <h1>{t('operator.specs.title')}</h1>
+          <p>{t('operator.specs.subtitle')}</p>
+        </div>
+        <div className="op-page-actions">
+          <button
+            type="button"
+            className="op-btn op-btn-outline"
+            onClick={() => loadSpecs(true)}
+            disabled={refreshing}
+          >
+            <RefreshCw className={refreshing ? 'animate-spin' : ''} aria-hidden="true" />
+            <span>{refreshing ? 'جاري التحديث...' : 'تحديث القائمة'}</span>
+          </button>
+        </div>
       </div>
 
-      {/* Header Banner */}
-      <section className="rounded-2xl p-6 md:p-8 text-white bg-gradient-to-r from-navy-900 to-navy-700 shadow-sm space-y-3">
-        <div className="flex items-center gap-2 text-xs">
-          <ShieldCheck className="w-4 h-4 text-emerald-400" />
-          <span className="font-bold text-emerald-300">
-            {t('specs.index.title')} — Sanad Provenance
-          </span>
+      <div className="op-info-banner">
+        <FileCheck aria-hidden="true" />
+        <div>
+          <strong>{t('specs.index.title')} — Sanad Provenance</strong>
+          <p>يمكنك الاطلاع على دفاتر الشروط والرد على متطلباتها ضمن مسار المشاركة.</p>
         </div>
-        <h1 className="text-2xl md:text-3xl font-extrabold text-white">
-          {t('operator.specs.title')}
-        </h1>
-        <p className="text-xs md:text-sm text-navy-100 max-w-2xl leading-relaxed">
-          {t('operator.specs.subtitle')}
-        </p>
-      </section>
+      </div>
 
-      {/* Content & List Section */}
-      <section className="bg-card border border-border rounded-2xl p-6 shadow-sm space-y-5">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-border">
+      <section className="op-card" aria-labelledby="specs-list-title">
+        <div className="op-card-head">
           <div>
-            <h2 className="text-lg font-bold text-navy-900 flex items-center gap-2">
-              <CheckSquare className="w-5 h-5 text-navy-800" />
-              <span>{t('operator.specs.deals_with_specs')}</span>
-            </h2>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              {t('operator.specs.desc')}
-            </p>
+            <h3 id="specs-list-title">{t('operator.specs.deals_with_specs')}</h3>
+            <p className="mt-0.5 text-xs text-[var(--op-muted)]">{t('operator.specs.desc')}</p>
           </div>
-
-          {/* Search Box */}
-          <div className="relative w-full sm:w-80">
-            <Search className="w-4 h-4 text-muted-foreground absolute start-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-            <Input
+          <div className="op-search-lg w-full sm:w-80">
+            <Search aria-hidden="true" />
+            <input
               type="search"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(event) => setSearchQuery(event.target.value)}
               placeholder={t('deals.search.placeholder')}
-              className="ps-9 text-xs h-10 rounded-xl border-border bg-background"
+              aria-label="بحث في دفاتر الشروط"
             />
           </div>
         </div>
 
-        {loading ? (
-          <div className="py-12 flex flex-col items-center justify-center text-muted-foreground gap-3">
-            <div className="w-7 h-7 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-            <span className="text-xs">{t('operator.req.loading')}</span>
-          </div>
-        ) : filtered.length === 0 ? (
-          <div className="border border-dashed border-border rounded-xl p-10 text-center space-y-3 bg-muted/20">
-            <FileCheck className="w-10 h-10 text-muted-foreground/40 mx-auto" />
-            <p className="text-sm font-bold text-navy-900">{t('operator.specs.empty')}</p>
-            {searchQuery && (
-              <Button
-                variant="outline"
-                size="sm"
-                className="text-xs rounded-xl"
-                onClick={() => setSearchQuery('')}
-              >
-                إلغاء التصفية
-              </Button>
-            )}
-          </div>
-        ) : (
-          <div className="grid gap-3">
-            {filtered.map((opp) => (
-              <article
-                key={opp.id}
-                className="bg-card border border-border rounded-xl p-5 shadow-sm hover:border-navy-500/30 transition-all flex flex-col md:flex-row md:items-center justify-between gap-4"
-              >
-                <div className="space-y-2 flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-100 flex items-center gap-1">
-                      <Building className="w-3 h-3" />
-                      <span>{opp.authorityName}</span>
-                    </span>
-                    <span className="text-xs text-muted-foreground flex items-center gap-1">
-                      <Calendar className="w-3 h-3" />
-                      <span>{new Date(opp.updatedAt).toLocaleDateString()}</span>
-                    </span>
-                  </div>
-
-                  <h3 className="text-base font-bold text-navy-900 line-clamp-1" title={opp.title}>
-                    {opp.title}
-                  </h3>
-
-                  <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
-                    {opp.description}
-                  </p>
-
-                  {opp.estimatedBudget && (
-                    <div className="text-xs text-muted-foreground">
-                      <strong className="text-navy-900 font-semibold">{t('opps.budget')}:</strong>{' '}
-                      <span className="font-mono font-semibold text-navy-900">
-                        {Number(opp.estimatedBudget).toLocaleString()} د.ج
-                      </span>
+        <div className="op-table-scroll">
+          <table className="op-table">
+            <thead>
+              <tr>
+                <th>الصفقة</th>
+                <th>المصلحة المتعاقدة</th>
+                <th>الميزانية</th>
+                <th>آخر تحديث</th>
+                <th>إجراء</th>
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (
+                <tr>
+                  <td colSpan={5}>
+                    <div className="space-y-3 p-5">
+                      {[1, 2, 3, 4].map((row) => (
+                        <div key={row} className="op-skeleton h-12" />
+                      ))}
                     </div>
-                  )}
-                </div>
-
-                <div className="flex items-center gap-2 flex-wrap justify-end self-stretch md:self-center shrink-0 pt-2 md:pt-0">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="text-xs font-bold gap-1.5 border-border hover:bg-muted rounded-xl"
-                    onClick={() => setLocation(`/operator/opportunities/${opp.id}`)}
-                  >
-                    <span>{t('opps.details')}</span>
-                  </Button>
-
-                  <Button
-                    size="sm"
-                    className="text-xs font-bold px-4 py-2 bg-navy-900 hover:bg-navy-800 text-white rounded-xl shadow-sm flex items-center gap-1.5"
-                    onClick={() => setLocation(`/operator/opportunities/${opp.id}/requirements`)}
-                  >
-                    <Sparkles className="w-3.5 h-3.5 text-gold-400" />
-                    <span>{t('operator.specs.respond_btn')}</span>
-                    <ArrowRight className="w-3 h-3 rtl:rotate-180" />
-                  </Button>
-                </div>
-              </article>
-            ))}
-          </div>
-        )}
+                  </td>
+                </tr>
+              ) : filtered.length === 0 ? (
+                <tr className="op-empty-row">
+                  <td colSpan={5}>
+                    <div className="op-empty-state">
+                      <FileText aria-hidden="true" />
+                      <h4>{searchQuery ? t('deals.search.empty_title') : t('operator.specs.empty')}</h4>
+                      <p>
+                        {searchQuery
+                          ? t('deals.search.empty_desc')
+                          : 'ستظهر دفاتر الشروط المرتبطة بالصفقات المنشورة هنا.'}
+                      </p>
+                      {searchQuery && (
+                        <button
+                          type="button"
+                          className="op-btn op-btn-outline op-btn-sm mt-2"
+                          onClick={() => setSearchQuery('')}
+                        >
+                          إلغاء التصفية
+                        </button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ) : (
+                filtered.map((opp) => (
+                  <tr key={opp.id}>
+                    <td>
+                      <div className="max-w-[360px]">
+                        <div className="mb-1 flex flex-wrap items-center gap-2">
+                          {opp.reference && (
+                            <span className="op-chip gold op-mono">{opp.reference}</span>
+                          )}
+                          <span className="op-chip">{opp.status || 'دفتر شروط'}</span>
+                        </div>
+                        <div className="line-clamp-1 font-bold text-[var(--op-ink)]" title={opp.title}>
+                          {opp.title}
+                        </div>
+                        <div className="mt-0.5 line-clamp-1 text-[11.5px] text-[var(--op-muted)]">
+                          {opp.description || '—'}
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <span className="flex items-center gap-1.5 text-xs">
+                        <Building className="size-3.5 flex-none text-[var(--op-muted)]" aria-hidden="true" />
+                        <span className="line-clamp-1">{opp.authorityName}</span>
+                      </span>
+                    </td>
+                    <td>
+                      <span className="font-mono text-xs font-bold text-[var(--op-ink)]">
+                        {opp.estimatedBudget
+                          ? `${Number(opp.estimatedBudget).toLocaleString('ar-DZ')} دج`
+                          : '—'}
+                      </span>
+                    </td>
+                    <td>
+                      <span className="flex items-center gap-1.5 text-xs">
+                        <Calendar className="size-3.5 flex-none text-[var(--op-muted)]" aria-hidden="true" />
+                        <span>{formatDate(opp.updatedAt)}</span>
+                      </span>
+                    </td>
+                    <td>
+                      <div className="flex flex-wrap items-center justify-end gap-2">
+                        <button
+                          type="button"
+                          className="op-btn op-btn-outline op-btn-sm"
+                          onClick={() => setLocation(`/operator/opportunities/${opp.id}`)}
+                        >
+                          {t('opps.details')}
+                        </button>
+                        <button
+                          type="button"
+                          className="op-btn op-btn-gold op-btn-sm"
+                          onClick={() => setLocation(`/operator/opportunities/${opp.id}/requirements`)}
+                        >
+                          <Sparkles aria-hidden="true" />
+                          <span>{t('operator.specs.respond_btn')}</span>
+                          <ChevronLeft aria-hidden="true" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </section>
     </div>
   );
 }
+
+export default OperatorSmartSpecsView;

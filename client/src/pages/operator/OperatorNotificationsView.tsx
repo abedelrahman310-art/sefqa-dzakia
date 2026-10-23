@@ -1,7 +1,16 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useI18n } from '@/i18n';
-import { Bell, CheckCircle2, Clock, Calendar, FileText, ArrowLeft, ArrowRight, ShieldAlert } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import {
+  Bell,
+  CheckCircle2,
+  Clock,
+  Calendar,
+  FileText,
+  ArrowLeft,
+  ArrowRight,
+  ShieldAlert,
+  CheckCheck,
+} from 'lucide-react';
 import { useLocation } from 'wouter';
 
 interface NotificationItem {
@@ -16,11 +25,17 @@ interface NotificationItem {
   isRead: boolean;
 }
 
+const TYPE_ICONS = {
+  opening: Calendar,
+  award: CheckCircle2,
+  matching: FileText,
+  update: ShieldAlert,
+};
+
 export function OperatorNotificationsView() {
   const { t, lang, dir } = useI18n();
   const [, setLocation] = useLocation();
 
-  // Procedural notifications grounded in system lifecycle
   const [notifications, setNotifications] = useState<NotificationItem[]>([
     {
       id: 'notif-1',
@@ -28,7 +43,8 @@ export function OperatorNotificationsView() {
       titleAr: 'تحديث مطابقة الفرص والصفقات',
       titleFr: 'Mise à jour des opportunités ciblées',
       descAr: 'تم تحديث قائمة الصفقات المنشورة المتطابقة مع قطاعك المصرح به ورموز أنشطتك.',
-      descFr: 'La liste des marchés publiés correspondant à votre secteur et codes d\'activités a été mise à jour.',
+      descFr:
+        "La liste des marchés publiés correspondant à votre secteur et codes d'activités a été mise à jour.",
       date: 'اليوم · 09:30',
       linkHref: '/operator/deals',
       isRead: false,
@@ -37,9 +53,11 @@ export function OperatorNotificationsView() {
       id: 'notif-2',
       type: 'opening',
       titleAr: 'تأكيد موعد جلسة فتح الأظرفة',
-      titleFr: 'Confirmation de la séance d\'ouverture des plis',
-      descAr: 'تذكير إجرائي: تنعقد جلسة فتح الأظرفة علنياً فور انقضاء أجل إيداع العروض المحدد في دفتر الشروط.',
-      descFr: 'Rappel de procédure : La séance d\'ouverture des plis se tiendra publiquement dès clôture des dépôts.',
+      titleFr: "Confirmation de la séance d'ouverture des plis",
+      descAr:
+        'تذكير إجرائي: تنعقد جلسة فتح الأظرفة علنياً فور انقضاء أجل إيداع العروض المحدد في دفتر الشروط.',
+      descFr:
+        "Rappel de procédure : La séance d'ouverture des plis se tiendra publiquement dès clôture des dépôts.",
       date: 'أمس · 14:15',
       linkHref: '/operator/offers',
       isRead: true,
@@ -49,111 +67,98 @@ export function OperatorNotificationsView() {
   const ArrowIcon = dir === 'rtl' ? ArrowLeft : ArrowRight;
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto">
-      {/* Workspace Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-4">
+    <div className="op-page">
+      <div className="op-page-head">
         <div>
-          <h1 className="text-xl sm:text-2xl font-extrabold text-navy-900 dark:text-slate-100 flex items-center gap-2">
-            <span>{t('operator.notifications.title')}</span>
-          </h1>
-          <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-            {t('operator.notifications.subtitle')}
-          </p>
+          <h1>{t('operator.notifications.title')}</h1>
+          <p>{t('operator.notifications.subtitle')}</p>
         </div>
-
         {notifications.length > 0 && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
-            }}
-            className="text-xs self-start sm:self-auto"
-          >
-            {lang === 'ar' ? 'تحديد الكل كمقروء' : 'Tout marquer comme lu'}
-          </Button>
+          <div className="op-page-actions">
+            <button
+              type="button"
+              className="op-btn op-btn-outline"
+              onClick={() => {
+                setNotifications((prev) => prev.map((notification) => ({ ...notification, isRead: true })));
+              }}
+            >
+              <CheckCheck aria-hidden="true" />
+              <span>{lang === 'ar' ? 'تحديد الكل كمقروء' : 'Tout marquer comme lu'}</span>
+            </button>
+          </div>
         )}
       </div>
 
-      {/* Notifications List */}
       {notifications.length === 0 ? (
-        <div className="bg-white dark:bg-slate-900 border border-border rounded-2xl p-12 text-center space-y-4 shadow-sm">
-          <div className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center mx-auto text-slate-400">
-            <Bell className="w-6 h-6" />
+        <div className="op-big-empty">
+          <div className="op-big-empty-icon">
+            <Bell aria-hidden="true" />
           </div>
-          <div className="max-w-md mx-auto space-y-1">
-            <h4 className="text-sm font-bold text-navy-900 dark:text-slate-100">
-              {t('operator.notifications.empty')}
-            </h4>
-            <p className="text-xs text-muted-foreground">
-              {lang === 'ar'
-                ? 'ستظهر هنا كافة الإشعارات الإجرائية فور صدورها من المصالح المتعاقدة أو جلسات التقييم.'
-                : 'Toutes les notifications procédurales des services contractants apparaîtront ici.'}
-            </p>
-          </div>
+          <h3>{t('operator.notifications.empty')}</h3>
+          <p>
+            {lang === 'ar'
+              ? 'ستظهر هنا كافة الإشعارات الإجرائية فور صدورها من المصالح المتعاقدة أو جلسات التقييم.'
+              : 'Toutes les notifications procédurales des services contractants apparaîtront ici.'}
+          </p>
         </div>
       ) : (
-        <div className="space-y-3">
-          {notifications.map((item) => {
-            const title = lang === 'ar' ? item.titleAr : item.titleFr;
-            const desc = lang === 'ar' ? item.descAr : item.descFr;
+        <div className="op-card">
+          <div className="op-card-head">
+            <h2>الإشعارات</h2>
+            <span className="op-card-tag">{notifications.filter((item) => !item.isRead).length} غير مقروء</span>
+          </div>
+          <div className="op-card-body py-1">
+            {notifications.map((item) => {
+              const title = lang === 'ar' ? item.titleAr : item.titleFr;
+              const desc = lang === 'ar' ? item.descAr : item.descFr;
+              const Icon = TYPE_ICONS[item.type] || Clock;
 
-            return (
-              <div
-                key={item.id}
-                className={`p-4 rounded-2xl border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
-                  !item.isRead
-                    ? 'bg-emerald-50/40 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-800/60'
-                    : 'bg-card border-border hover:border-slate-300 dark:hover:border-slate-700'
-                }`}
-              >
-                <div className="flex items-start gap-3.5 min-w-0">
-                  <div
-                    className={`w-9 h-9 rounded-xl flex items-center justify-center flex-none mt-0.5 ${
-                      !item.isRead
-                        ? 'bg-emerald-600 text-white'
-                        : 'bg-slate-100 dark:bg-slate-800 text-slate-500'
-                    }`}
-                  >
-                    <Bell className="w-4 h-4" />
-                  </div>
-
-                  <div className="space-y-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <h4 className="text-sm font-bold text-navy-900 dark:text-slate-100">
-                        {title}
-                      </h4>
-                      {!item.isRead && (
-                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-600 text-white">
-                          {lang === 'ar' ? 'جديد' : 'Nouveau'}
-                        </span>
-                      )}
+              return (
+                <article
+                  key={item.id}
+                  className="flex flex-col gap-3 border-b border-[var(--op-line-2)] py-4 last:border-b-0 sm:flex-row sm:items-start sm:justify-between"
+                >
+                  <div className="flex min-w-0 items-start gap-3">
+                    <div
+                      className={`flex size-10 flex-none items-center justify-center rounded-xl ${
+                        item.isRead
+                          ? 'bg-[var(--op-line-2)] text-[var(--op-muted)]'
+                          : 'bg-[var(--op-gold-soft)] text-[var(--op-gold-dark)]'
+                      }`}
+                    >
+                      <Icon className="size-5" aria-hidden="true" />
                     </div>
-                    <p className="text-xs text-muted-foreground leading-relaxed">
-                      {desc}
-                    </p>
-                    <span className="text-[11px] text-slate-400 block pt-0.5">
-                      {item.date}
-                    </span>
-                  </div>
-                </div>
 
-                {item.linkHref && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setLocation(item.linkHref!)}
-                    className="text-xs font-semibold text-navy-900 dark:text-slate-200 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 gap-1.5 self-end sm:self-auto flex-none"
-                  >
-                    <span>{lang === 'ar' ? 'معاينة' : 'Voir'}</span>
-                    <ArrowIcon className="w-3.5 h-3.5" />
-                  </Button>
-                )}
-              </div>
-            );
-          })}
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h3 className="m-0 text-sm font-bold text-[var(--op-ink)]">{title}</h3>
+                        {!item.isRead && (
+                          <span className="op-chip gold">{lang === 'ar' ? 'جديد' : 'Nouveau'}</span>
+                        )}
+                      </div>
+                      <p className="mt-1 text-xs leading-relaxed text-[var(--op-text)]">{desc}</p>
+                      <span className="mt-1 block text-[11px] text-[var(--op-muted)]">{item.date}</span>
+                    </div>
+                  </div>
+
+                  {item.linkHref && (
+                    <button
+                      type="button"
+                      className="op-btn op-btn-outline op-btn-sm flex-none self-end sm:self-center"
+                      onClick={() => setLocation(item.linkHref!)}
+                    >
+                      <span>{lang === 'ar' ? 'معاينة' : 'Voir'}</span>
+                      <ArrowIcon aria-hidden="true" />
+                    </button>
+                  )}
+                </article>
+              );
+            })}
+          </div>
         </div>
       )}
     </div>
   );
 }
+
+export default OperatorNotificationsView;

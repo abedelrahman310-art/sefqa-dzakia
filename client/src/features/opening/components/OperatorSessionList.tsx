@@ -1,10 +1,6 @@
-import { useLocation } from "wouter";
-import { useOpeningSessions } from "../hooks/useOpening";
-import { useI18n } from "@/i18n";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
+import { useLocation } from 'wouter';
+import { useOpeningSessions } from '../hooks/useOpening';
+import { useI18n } from '@/i18n';
 import {
   Radio,
   Calendar,
@@ -17,218 +13,204 @@ import {
   FileCheck,
   CheckCircle2,
   FolderOpen,
-} from "lucide-react";
-import type { SessionStatus } from "../types";
+  RefreshCw,
+} from 'lucide-react';
+import type { SessionStatus } from '../types';
 
 export function OperatorSessionList() {
   const [, setLocation] = useLocation();
   const { t, dir } = useI18n();
-  const { data: sessions, isLoading, error } = useOpeningSessions();
+  const { data: sessions, isLoading, error, refetch } = useOpeningSessions();
 
-  const ArrowIcon = dir === "rtl" ? ArrowLeft : ArrowRight;
+  const ArrowIcon = dir === 'rtl' ? ArrowLeft : ArrowRight;
+  const liveLabel = t('opening.live').replace('🔴', '').trim();
+  const privacyLabel = t('opening.privacy_notice').replace('⚠️', '').trim();
 
   const getStatusBadge = (status: SessionStatus) => {
     switch (status) {
-      case "live":
+      case 'live':
         return (
-          <Badge className="bg-red-600 hover:bg-red-700 text-white flex items-center gap-1.5 px-2.5 py-1 text-xs animate-pulse">
-            <span className="w-2 h-2 rounded-full bg-white inline-block animate-ping" />
-            {t("opening.live")}
-          </Badge>
+          <span className="op-chip red">
+            <span className="op-live-dot" aria-hidden="true" />
+            <span>{liveLabel}</span>
+          </span>
         );
-      case "scheduled":
-        return (
-          <Badge variant="outline" className="border-blue-300 bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300">
-            {t("opening.scheduled")}
-          </Badge>
-        );
-      case "ended":
-        return (
-          <Badge variant="outline" className="border-slate-300 bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300">
-            {t("opening.ended")}
-          </Badge>
-        );
-      case "cancelled":
-        return (
-          <Badge variant="destructive">
-            {t("opening.cancelled")}
-          </Badge>
-        );
+      case 'scheduled':
+        return <span className="op-chip blue">{t('opening.scheduled')}</span>;
+      case 'ended':
+        return <span className="op-chip">{t('opening.ended')}</span>;
+      case 'cancelled':
+        return <span className="op-chip red">{t('opening.cancelled')}</span>;
       default:
-        return <Badge variant="secondary">{status}</Badge>;
+        return <span className="op-chip">{status}</span>;
     }
   };
 
   return (
-    <div className="space-y-6">
-      {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-border">
+    <div className="op-page">
+      <div className="op-page-head">
         <div>
-          <div className="flex items-center gap-2.5">
-            <Radio className="w-6 h-6 text-emerald-600 animate-pulse" />
-            <h1 className="text-2xl font-black text-navy-900 tracking-tight">
-              {t("opening.title")}
-            </h1>
-          </div>
-          <p className="text-xs text-muted-foreground mt-1">
-            متابعة جلسات فتح الأظرفة العلنية الخاصة بالصفقات المشارك فيها وفق المرسوم الرئاسي 15-247 والقانون 23-12.
+          <span className="op-chip gold mb-2">
+            <Radio aria-hidden="true" />
+            <span>جلسات علنية</span>
+          </span>
+          <h1>{t('opening.title')}</h1>
+          <p>
+            متابعة جلسات فتح الأظرفة العلنية الخاصة بالصفقات المشارك فيها وفق المرسوم الرئاسي
+            15-247 والقانون 23-12.
           </p>
         </div>
-
-        {/* Data Privacy Badge (Law 18-07) */}
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/50 text-amber-800 dark:text-amber-200 text-xs font-semibold self-start sm:self-auto">
-          <ShieldAlert className="w-4 h-4 text-amber-600 shrink-0" />
-          <span>{t("opening.privacy_notice")}</span>
+        <div className="op-page-actions">
+          <span className="op-chip gold">
+            <ShieldAlert aria-hidden="true" />
+            <span>{privacyLabel}</span>
+          </span>
+          <button
+            type="button"
+            className="op-btn op-btn-outline"
+            onClick={() => refetch()}
+            disabled={isLoading}
+          >
+            <RefreshCw className={isLoading ? 'animate-spin' : undefined} aria-hidden="true" />
+            <span>{t('ai.refresh')}</span>
+          </button>
         </div>
       </div>
 
-      {/* Loading state */}
       {isLoading && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="op-grid-2" aria-label={t('operator.req.loading')}>
           {[1, 2, 3, 4].map((i) => (
-            <Card key={i} className="p-5 space-y-4">
-              <Skeleton className="h-6 w-3/4" />
-              <Skeleton className="h-4 w-1/2" />
+            <div key={i} className="op-card p-5">
+              <div className="op-skeleton mb-4 h-6 w-3/4" />
+              <div className="op-skeleton mb-4 h-4 w-1/2" />
               <div className="flex gap-2">
-                <Skeleton className="h-8 w-24" />
-                <Skeleton className="h-8 w-24" />
+                <div className="op-skeleton h-8 w-24" />
+                <div className="op-skeleton h-8 w-24" />
               </div>
-            </Card>
+            </div>
           ))}
         </div>
       )}
 
-      {/* Error state */}
       {error && (
-        <Card className="border-red-200 bg-red-50 text-red-900 p-6 text-center text-sm">
-          <p>تعذر تحميل قائمة جلسات فتح الأظرفة. يرجى إعادة المحاولة لاحقاً.</p>
-        </Card>
+        <div className="op-alert error">
+          <ShieldAlert aria-hidden="true" />
+          <span>تعذر تحميل قائمة جلسات فتح الأظرفة. يرجى إعادة المحاولة لاحقاً.</span>
+        </div>
       )}
 
-      {/* Empty State */}
       {!isLoading && !error && (!sessions || sessions.length === 0) && (
-        <Card className="p-12 text-center space-y-3 border-dashed">
-          <div className="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mx-auto text-muted-foreground">
-            <FolderOpen className="w-6 h-6" />
+        <div className="op-big-empty">
+          <div className="op-big-empty-icon">
+            <FolderOpen aria-hidden="true" />
           </div>
-          <h3 className="text-base font-bold text-navy-900">
-            {t("opening.no_sessions")}
-          </h3>
-          <p className="text-xs text-muted-foreground max-w-md mx-auto">
-            ستظهر هنا جلسات فتح الأظرفة المبرمجة والجارية حالياً للصفقات التي أودعت فيها عروضك رسمياً.
+          <h3>{t('opening.no_sessions')}</h3>
+          <p>
+            ستظهر هنا جلسات فتح الأظرفة المبرمجة والجارية حالياً للصفقات التي أودعت فيها
+            عروضك رسمياً.
           </p>
-        </Card>
+        </div>
       )}
 
-      {/* Sessions Grid */}
       {!isLoading && !error && sessions && sessions.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="op-grid-2">
           {sessions.map((session) => {
             const progress =
               session.total_offers > 0
                 ? Math.round((session.opened_count / session.total_offers) * 100)
                 : 0;
 
-            const isLive = session.status === "live";
-            const isEnded = session.status === "ended";
+            const isLive = session.status === 'live';
+            const isEnded = session.status === 'ended';
 
             return (
-              <Card
+              <article
                 key={session.id}
-                className={`transition-all hover:shadow-md border ${
-                  isLive
-                    ? "border-emerald-500/60 shadow-emerald-50 dark:border-emerald-700 bg-gradient-to-b from-emerald-50/20 to-transparent"
-                    : "border-border"
-                }`}
+                className={`op-card p-5${isLive ? ' ring-1 ring-[var(--op-green)]' : ''}`}
               >
-                <CardHeader className="pb-3">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-mono font-bold text-emerald-700 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded border border-emerald-200">
-                          {session.tender_reference}
-                        </span>
-                        {getStatusBadge(session.status)}
-                      </div>
-                      <CardTitle className="text-base font-bold text-navy-900 line-clamp-2 leading-snug">
-                        {session.tender_title}
-                      </CardTitle>
-                    </div>
-                  </div>
-                  {session.location && (
-                    <CardDescription className="flex items-center gap-1.5 text-xs text-muted-foreground pt-1">
-                      <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                      <span className="truncate">{session.location}</span>
-                    </CardDescription>
-                  )}
-                </CardHeader>
-
-                <CardContent className="space-y-4 pt-0">
-                  {/* Schedule Info */}
-                  <div className="flex flex-wrap items-center gap-4 text-xs text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-900/40 p-2.5 rounded-xl border border-slate-100 dark:border-slate-800">
-                    <div className="flex items-center gap-1.5">
-                      <Calendar className="w-3.5 h-3.5 text-slate-400" />
-                      <span>{new Date(session.scheduled_at).toLocaleDateString("ar-DZ")}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <Clock className="w-3.5 h-3.5 text-slate-400" />
-                      <span>{new Date(session.scheduled_at).toLocaleTimeString("ar-DZ", { hour: "2-digit", minute: "2-digit" })}</span>
-                    </div>
+                <div className="flex flex-col gap-4">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="op-mono rounded-md border border-[var(--op-gold-line)] bg-[var(--op-gold-soft)] px-2 py-0.5 text-[11px] font-bold text-[var(--op-gold-dark)]">
+                      {session.tender_reference}
+                    </span>
+                    {getStatusBadge(session.status)}
                   </div>
 
-                  {/* Progress Indicator */}
-                  <div className="space-y-1.5">
-                    <div className="flex items-center justify-between text-xs text-muted-foreground">
-                      <span className="font-medium">{t("opening.opened_count")}</span>
-                      <span className="font-bold text-navy-900 font-mono">
-                        {session.opened_count} / {session.total_offers} ({progress}%)
-                      </span>
-                    </div>
-                    <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2 overflow-hidden">
-                      <div
-                        className={`h-full transition-all duration-500 ${
-                          isLive ? "bg-emerald-600" : isEnded ? "bg-slate-600" : "bg-blue-600"
-                        }`}
-                        style={{ width: `${progress}%` }}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Action Button */}
-                  <div className="pt-2 flex items-center justify-end">
-                    {isLive ? (
-                      <Button
-                        onClick={() => setLocation(`/operator/opening-sessions/${session.id}`)}
-                        className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs gap-1.5 rounded-xl shadow-sm"
-                      >
-                        <PlayCircle className="w-4 h-4 text-emerald-200" />
-                        <span>متابعة البث المباشر</span>
-                        <ArrowIcon className="w-3.5 h-3.5" />
-                      </Button>
-                    ) : isEnded ? (
-                      <Button
-                        variant="outline"
-                        onClick={() => setLocation(`/operator/opening-sessions/${session.id}`)}
-                        className="text-xs font-bold gap-1.5 rounded-xl text-slate-700 dark:text-slate-200"
-                      >
-                        <FileCheck className="w-4 h-4 text-slate-500" />
-                        <span>عرض التسجيل والنتائج</span>
-                        <ArrowIcon className="w-3.5 h-3.5" />
-                      </Button>
-                    ) : (
-                      <Button
-                        variant="secondary"
-                        onClick={() => setLocation(`/operator/opening-sessions/${session.id}`)}
-                        className="text-xs font-semibold gap-1.5 rounded-xl"
-                      >
-                        <CheckCircle2 className="w-4 h-4 text-blue-500" />
-                        <span>تفاصيل الموعد</span>
-                        <ArrowIcon className="w-3.5 h-3.5" />
-                      </Button>
+                  <div>
+                    <h2 className="line-clamp-2 text-[15px] font-bold leading-7 text-[var(--op-ink)]">
+                      {session.tender_title}
+                    </h2>
+                    {session.location && (
+                      <p className="mt-1 flex items-center gap-1.5 text-xs text-[var(--op-muted)]">
+                        <MapPin className="size-3.5 flex-none" aria-hidden="true" />
+                        <span className="truncate">{session.location}</span>
+                      </p>
                     )}
                   </div>
-                </CardContent>
-              </Card>
+
+                  <div className="flex flex-wrap items-center gap-4 rounded-xl border border-[var(--op-line-2)] bg-[var(--op-surface-2)] p-3 text-xs text-[var(--op-text)]">
+                    <span className="flex items-center gap-1.5">
+                      <Calendar className="size-3.5 text-[var(--op-muted)]" aria-hidden="true" />
+                      <span>{new Date(session.scheduled_at).toLocaleDateString('ar-DZ')}</span>
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <Clock className="size-3.5 text-[var(--op-muted)]" aria-hidden="true" />
+                      <span>
+                        {new Date(session.scheduled_at).toLocaleTimeString('ar-DZ', {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
+                      </span>
+                    </span>
+                  </div>
+
+                  <div>
+                    <div className="mb-1.5 flex items-center justify-between text-xs text-[var(--op-muted)]">
+                      <span className="font-medium">{t('opening.opened_count')}</span>
+                      <span className="op-mono font-bold text-[var(--op-ink)]">
+                        {session.opened_count} من {session.total_offers} ({progress}%)
+                      </span>
+                    </div>
+                    <div className={`op-progress${isLive ? ' green' : isEnded ? ' slate' : ' blue'}`}>
+                      <span style={{ width: `${progress}%` }} />
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-end pt-1">
+                    {isLive ? (
+                      <button
+                        type="button"
+                        className="op-btn op-btn-green"
+                        onClick={() => setLocation(`/operator/opening-sessions/${session.id}`)}
+                      >
+                        <PlayCircle aria-hidden="true" />
+                        <span>متابعة البث المباشر</span>
+                        <ArrowIcon aria-hidden="true" />
+                      </button>
+                    ) : isEnded ? (
+                      <button
+                        type="button"
+                        className="op-btn op-btn-outline"
+                        onClick={() => setLocation(`/operator/opening-sessions/${session.id}`)}
+                      >
+                        <FileCheck aria-hidden="true" />
+                        <span>عرض التسجيل والنتائج</span>
+                        <ArrowIcon aria-hidden="true" />
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        className="op-btn op-btn-outline"
+                        onClick={() => setLocation(`/operator/opening-sessions/${session.id}`)}
+                      >
+                        <CheckCircle2 aria-hidden="true" />
+                        <span>تفاصيل الموعد</span>
+                        <ArrowIcon aria-hidden="true" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </article>
             );
           })}
         </div>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'wouter';
 import { useI18n } from '@/i18n';
 import {
@@ -6,12 +6,6 @@ import {
   Menu,
   X,
   ArrowLeft,
-  ShieldCheck,
-  Building2,
-  Briefcase,
-  FileCheck2,
-  Workflow,
-  Sparkles,
 } from 'lucide-react';
 
 /* ============================================================
@@ -67,7 +61,7 @@ export function LandingHeader() {
   };
 
   return (
-    <header className="w-full relative z-50 select-none" dir="rtl" ref={menuRef}>
+    <header className="w-full sticky top-0 z-50 select-none bg-white" dir="rtl" ref={menuRef}>
       {/* ─── 1. الخط العلوي الرفيع للهوية الوطنية (2px أخضر وأحمر) ─── */}
       <div className="w-full flex h-[2.5px]" aria-hidden="true">
         <div className="w-1/2 bg-[#167354]" />
@@ -85,7 +79,7 @@ export function LandingHeader() {
             </span>
             <span className="hidden sm:inline text-[#59665F]/80">·</span>
             <span className="hidden sm:inline text-[#59665F] font-medium">
-              القانون رقم 23-12 والمرسوم الرئاسي رقم 15-247
+              القانون رقم <span dir="ltr">23-12</span> والمرسوم الرئاسي رقم <span dir="ltr">15-247</span>
             </span>
           </div>
 

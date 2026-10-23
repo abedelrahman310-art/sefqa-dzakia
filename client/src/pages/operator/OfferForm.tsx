@@ -2,21 +2,17 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { useLocation, useParams } from 'wouter';
 import { useI18n } from '@/i18n';
 import { api } from '@/lib/api';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-
-interface OfferDetail {
-  id: string;
-  opportunityId: string;
-  opportunityTitle: string;
-  authorityName: string;
-  technicalProposal: string;
-  financialOffer: string;
-  deliveryTimeDays: string | null;
-  hasDocument: boolean;
-  status: 'draft' | 'submitted';
-  submittedAt: string | null;
-}
+import {
+  AlertCircle,
+  CheckCircle2,
+  Info,
+  Paperclip,
+  Save,
+  Send,
+  ShieldCheck,
+  Upload,
+  X,
+} from 'lucide-react';
 
 interface OfferFormProps {
   offerId?: string;
@@ -85,7 +81,7 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
             });
         })
         .catch(() => {
-          setError('Opportunity not found');
+          setError('لم يتم العثور على الصفقة المطلوبة.');
         })
         .finally(() => setLoading(false));
     } else {
@@ -98,12 +94,16 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
     setError('');
     setSuccessMsg('');
 
+    if (!oppId) {
+      setError('يرجى اختيار الصفقة أولاً قبل حفظ العرض.');
+      return;
+    }
     if (technicalProposal.length < 5) {
-      setError('المقترح الفني يجب أن لا يقل عن 5 أحرف');
+      setError('المقترح الفني يجب ألا يقل عن 5 أحرف.');
       return;
     }
     if (!financialOffer) {
-      setError('يرجى تحديد المبلغ المقترح');
+      setError('يرجى تحديد المبلغ المقترح.');
       return;
     }
 
@@ -124,13 +124,13 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
 
       setSuccessMsg(t('offers.msg.saved'));
     } catch (err: any) {
-      setError(err?.response?.data?.detail || err?.message || 'Error saving offer');
+      setError(err?.response?.data?.detail || err?.message || 'تعذر حفظ العرض.');
     }
   };
 
   const handleSubmitOffer = async () => {
     if (!id) {
-      setError('يرجى حفظ المسودة أولاً قبل الإيداع');
+      setError('يرجى حفظ المسودة أولاً قبل الإيداع.');
       return;
     }
 
@@ -149,185 +149,322 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
       setStatus('submitted');
       setSuccessMsg(t('offers.msg.submitted'));
     } catch (err: any) {
-      setError(err?.response?.data?.detail || err?.message || 'Submission failed');
+      setError(err?.response?.data?.detail || err?.message || 'تعذر إيداع العرض.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  if (loading) return <div className="p-6">...</div>;
+  if (loading) {
+    return (
+      <div className="op-page">
+        <div className="op-page-head">
+          <div>
+            <div className="op-skeleton h-7 w-52" />
+            <div className="op-skeleton mt-2 h-4 w-80 max-w-full" />
+          </div>
+        </div>
+        <div className="op-skeleton h-28 w-full" />
+        <div className="op-skeleton h-56 w-full" />
+        <div className="op-skeleton h-44 w-full" />
+      </div>
+    );
+  }
+
+  const isSubmitted = status === 'submitted';
 
   return (
-    <div className="p-6 max-w-3xl mx-auto">
-      <div className="flex justify-between items-center mb-6">
+    <div className="op-page">
+      <div className="op-page-head">
         <div>
-          <h1 className="text-2xl font-bold text-navy-900">
-            {id ? (status === 'draft' ? t('offers.edit') : t('offers.view')) : t('offers.new')}
+          <h1>
+            {id ? (isSubmitted ? t('offers.view') : t('offers.edit')) : t('offers.new')}
           </h1>
-          {oppTitle && (
-            <p className="text-sm text-gray-600 mt-1">
-              الفرصة: <span className="font-semibold text-navy-950">{oppTitle}</span> ({authorityName})
+          {oppTitle ? (
+            <p>
+              الفرصة: <strong className="text-[var(--op-ink)]">{oppTitle}</strong>
+              {authorityName ? ` — ${authorityName}` : ''}
             </p>
+          ) : (
+            <p>قدّم عرضك التقني والمالي مع الوثائق المطلوبة على إحدى الصفقات.</p>
           )}
         </div>
-        <Button variant="outline" onClick={() => setLocation('/operator/offers')}>
-          {t('offers.title')}
-        </Button>
+        <div className="op-page-actions">
+          <button
+            type="button"
+            className="op-btn op-btn-outline"
+            onClick={() => setLocation('/operator/offers')}
+          >
+            <X aria-hidden="true" />
+            <span>{t('offers.title')}</span>
+          </button>
+        </div>
       </div>
 
-      {status === 'submitted' && (
-        <div className="mb-4 p-4 bg-green-50 border border-green-200 text-green-800 rounded-md">
-          <p className="font-bold">{t('offers.status.submitted')}</p>
-          <p className="text-sm mt-1">{t('offers.msg.frozen')}</p>
+      <div className="op-info-banner">
+        <Info aria-hidden="true" />
+        <div>
+          <strong>{isSubmitted ? 'تم إيداع العرض رسمياً' : 'يمكنك الحفظ كمسودة'}</strong>
+          <p>
+            {isSubmitted
+              ? 'العرض مقفل بعد الإيداع ولا يمكن تعديل مضمونه. يمكنك مراجعة تفاصيله من قائمة العروض.'
+              : 'سيتم حفظ العرض كمسودة ولن يُرسل إلى المصلحة المتعاقدة حتى تضغط «تقديم العرض».'}
+          </p>
+        </div>
+      </div>
+
+      {isSubmitted && (
+        <div className="op-alert success">
+          <ShieldCheck aria-hidden="true" />
+          <div>
+            <strong className="block text-[13px]">{t('offers.status.submitted')}</strong>
+            <span>{t('offers.msg.frozen')}</span>
+          </div>
         </div>
       )}
 
       {error && (
-        <div className="mb-4 p-3 bg-red-100 border border-red-200 text-red-700 rounded-md">
-          {error}
+        <div className="op-alert error" role="alert">
+          <AlertCircle aria-hidden="true" />
+          <span>{error}</span>
         </div>
       )}
 
       {successMsg && (
-        <div className="mb-4 p-3 bg-emerald-100 border border-emerald-200 text-emerald-800 rounded-md">
-          {successMsg}
+        <div className="op-alert success" role="status">
+          <CheckCircle2 aria-hidden="true" />
+          <span>{successMsg}</span>
         </div>
       )}
 
-      <form onSubmit={handleSaveDraft} className="space-y-4 bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            {t('offers.field.technical')} *
-          </label>
-          <textarea
-            className="flex min-h-[120px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-            value={technicalProposal}
-            onChange={(e) => setTechnicalProposal(e.target.value)}
-            required
-            minLength={5}
-            rows={5}
-            disabled={status === 'submitted'}
-            placeholder="اذكر المنهجية، والمواصفات الفنية للحل المقترح..."
-          />
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              {t('offers.field.financial')} *
-            </label>
-            <Input
-              value={financialOffer}
-              onChange={(e) => setFinancialOffer(e.target.value)}
-              required
-              disabled={status === 'submitted'}
-              placeholder="مثال: 4500000 د.ج"
-            />
+      <form onSubmit={handleSaveDraft} className="flex flex-col gap-[18px]">
+        <section className="op-form-block">
+          <div className="op-form-block-head">
+            <span className="op-num">1</span>
+            <h2>الصفقة</h2>
           </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              {t('offers.field.delivery')}
-            </label>
-            <Input
-              type="number"
-              value={deliveryTimeDays}
-              onChange={(e) => setDeliveryTimeDays(e.target.value)}
-              disabled={status === 'submitted'}
-              placeholder="مثال: 45"
-            />
+          <div className="op-form-block-body">
+            <div className="op-form-grid">
+              <div className="op-field full">
+                <label htmlFor="offer-deal">الصفقة المراد التقديم عليها</label>
+                <input
+                  id="offer-deal"
+                  type="text"
+                  value={oppTitle || 'لم يتم اختيار صفقة'}
+                  readOnly
+                  disabled
+                />
+                <span className="op-hint">
+                  يمكنك بدء عرض جديد من صفحة تفاصيل الصفقة، أو متابعة مسودة موجودة من قائمة العروض.
+                </span>
+              </div>
+            </div>
           </div>
-        </div>
+        </section>
+
+        <section className="op-form-block">
+          <div className="op-form-block-head">
+            <span className="op-num">2</span>
+            <h2>العرض التقني</h2>
+          </div>
+          <div className="op-form-block-body">
+            <div className="op-form-grid">
+              <div className="op-field full">
+                <label htmlFor="technical-proposal">
+                  المنهجية المقترحة <span className="op-required">*</span>
+                </label>
+                <textarea
+                  id="technical-proposal"
+                  value={technicalProposal}
+                  onChange={(event) => setTechnicalProposal(event.target.value)}
+                  required
+                  minLength={5}
+                  rows={6}
+                  disabled={isSubmitted}
+                  placeholder="اشرح منهجيتك في تنفيذ الصفقة، والمواصفات الفنية للحل المقترح..."
+                />
+              </div>
+
+              <div className="op-field">
+                <label htmlFor="delivery-time">المدة المقترحة للتنفيذ</label>
+                <input
+                  id="delivery-time"
+                  type="number"
+                  min={1}
+                  value={deliveryTimeDays}
+                  onChange={(event) => setDeliveryTimeDays(event.target.value)}
+                  disabled={isSubmitted}
+                  placeholder="عدد الأيام"
+                />
+                <span className="op-hint">اختياري — يمكن تحديد المدة بالأيام.</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="op-form-block">
+          <div className="op-form-block-head">
+            <span className="op-num">3</span>
+            <h2>العرض المالي</h2>
+          </div>
+          <div className="op-form-block-body">
+            <div className="op-form-grid">
+              <div className="op-field">
+                <label htmlFor="financial-offer">
+                  المبلغ الإجمالي <span className="op-required">*</span>
+                </label>
+                <input
+                  id="financial-offer"
+                  type="number"
+                  min={0}
+                  step="0.01"
+                  value={financialOffer}
+                  onChange={(event) => setFinancialOffer(event.target.value)}
+                  required
+                  disabled={isSubmitted}
+                  placeholder="0.00"
+                />
+                <span className="op-hint">المبلغ بالدينار الجزائري (DZD).</span>
+              </div>
+
+              <div className="op-field">
+                <label htmlFor="financial-currency">العملة</label>
+                <input
+                  id="financial-currency"
+                  type="text"
+                  value="دينار جزائري (DZD)"
+                  readOnly
+                  disabled
+                />
+              </div>
+            </div>
+          </div>
+        </section>
 
         {id && (
-          <div className="pt-3 pb-3 border-t border-gray-100">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              {t('offers.field.doc')}
-            </label>
-            {status === 'submitted' ? (
-              <div className="flex items-center justify-between p-3 bg-gray-50 rounded border border-gray-200">
-                <span className="text-sm text-gray-600">
-                  {hasDocument ? 'تم إيداع الوثيقة وهي مجمّدة.' : 'لم يتم إرفاق وثيقة.'}
-                </span>
-                {hasDocument && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => window.open(`/api/offers/${id}/document`, '_blank')}
-                  >
-                    {t('drafts.doc.view')}
-                  </Button>
-                )}
-              </div>
-            ) : (
-              <div className="flex items-center gap-3">
-                <Input
-                  type="file"
-                  accept="application/pdf"
-                  onChange={async (e) => {
-                    const file = e.target.files?.[0];
-                    if (!file) return;
+          <section className="op-form-block">
+            <div className="op-form-block-head">
+              <span className="op-num">4</span>
+              <h2>الوثيقة المرفقة</h2>
+            </div>
+            <div className="op-form-block-body">
+              {isSubmitted ? (
+                <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[var(--op-line-2)] bg-[var(--op-surface-2)] p-4">
+                  <span className="flex items-center gap-2 text-xs text-[var(--op-text)]">
+                    <Paperclip className="size-4 text-[var(--op-muted)]" aria-hidden="true" />
+                    {hasDocument ? 'تم إيداع الوثيقة وهي مجمّدة.' : 'لم يتم إرفاق وثيقة.'}
+                  </span>
+                  {hasDocument && (
+                    <button
+                      type="button"
+                      className="op-btn op-btn-outline op-btn-sm"
+                      onClick={() => window.open(`/api/offers/${id}/document`, '_blank')}
+                    >
+                      {t('drafts.doc.view')}
+                    </button>
+                  )}
+                </div>
+              ) : (
+                <div className="op-field">
+                  <label htmlFor="offer-document">الوثيقة (PDF)</label>
+                  <input
+                    id="offer-document"
+                    type="file"
+                    accept="application/pdf"
+                    onChange={async (event) => {
+                      const file = event.target.files?.[0];
+                      if (!file) return;
 
-                    const formData = new FormData();
-                    formData.append('document', file);
+                      const formData = new FormData();
+                      formData.append('document', file);
 
-                    try {
-                      const res = await fetch(`/api/offers/${id}/document`, {
-                        method: 'POST',
-                        headers: {
-                          'x-safaqat-csrf': '1',
-                        },
-                        body: formData,
-                      });
-                      const data = await res.json();
-                      if (!res.ok) {
-                        throw new Error(data.error || 'Upload failed');
+                      try {
+                        const res = await fetch(`/api/offers/${id}/document`, {
+                          method: 'POST',
+                          headers: {
+                            'x-safaqat-csrf': '1',
+                          },
+                          body: formData,
+                        });
+                        const data = await res.json();
+                        if (!res.ok) {
+                          throw new Error(data.error || 'فشل رفع الوثيقة');
+                        }
+                        setHasDocument(true);
+                        alert(t('drafts.doc.success'));
+                      } catch (err: any) {
+                        alert(err.message || t('drafts.doc.error'));
                       }
-                      setHasDocument(true);
-                      alert(t('drafts.doc.success'));
-                    } catch (err: any) {
-                      alert(err.message || t('drafts.doc.error'));
-                    }
-                  }}
-                />
-                {hasDocument && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => window.open(`/api/offers/${id}/document`, '_blank')}
-                  >
-                    {t('drafts.doc.view')}
-                  </Button>
-                )}
-              </div>
-            )}
-          </div>
-        )}
-
-        <div className="pt-4 border-t border-gray-100 flex flex-wrap justify-between items-center gap-3">
-          <Button type="button" variant="outline" onClick={() => setLocation('/operator/offers')}>
-            {t('drafts.btn.cancel')}
-          </Button>
-
-          {status === 'draft' && (
-            <div className="flex gap-2">
-              <Button type="submit" variant="outline">
-                {t('offers.btn.save_draft')}
-              </Button>
-              {id && (
-                <Button
-                  type="button"
-                  onClick={handleSubmitOffer}
-                  disabled={isSubmitting}
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white"
-                >
-                  {isSubmitting ? '...' : t('offers.btn.submit')}
-                </Button>
+                    }}
+                  />
+                  <span className="op-hint">
+                    يمكنك إرفاق نسخة PDF واحدة. {hasDocument ? 'تم رفع وثيقة مسبقاً.' : 'لم يتم رفع وثيقة بعد.'}
+                  </span>
+                  {hasDocument && (
+                    <button
+                      type="button"
+                      className="op-btn op-btn-ghost op-btn-sm mt-1 self-start"
+                      onClick={() => window.open(`/api/offers/${id}/document`, '_blank')}
+                    >
+                      <Upload aria-hidden="true" />
+                      <span>{t('drafts.doc.view')}</span>
+                    </button>
+                  )}
+                </div>
               )}
             </div>
+          </section>
+        )}
+
+        <section className="op-form-block">
+          <div className="op-form-block-head">
+            <span className="op-num">{id ? 5 : 4}</span>
+            <h2>التصريح</h2>
+          </div>
+          <div className="op-form-block-body">
+            <div className="op-alert warning">
+              <ShieldCheck aria-hidden="true" />
+              <span>
+                أُقرّ بأن جميع البيانات والوثائق المرفقة صحيحة ومطابقة للواقع، وألتزم بشروط الصفقة
+                ودفتر الشروط. يتطلب الإيداع النهائي تأكيداً قبل الإرسال.
+              </span>
+            </div>
+          </div>
+        </section>
+
+        <div className="op-action-bar">
+          <button
+            type="button"
+            className="op-btn op-btn-outline"
+            onClick={() => setLocation('/operator/offers')}
+          >
+            {t('drafts.btn.cancel')}
+          </button>
+
+          {!isSubmitted && (
+            <>
+              <button type="submit" className="op-btn op-btn-ghost">
+                <Save aria-hidden="true" />
+                <span>{t('offers.btn.save_draft')}</span>
+              </button>
+
+              {id && (
+                <button
+                  type="button"
+                  className="op-btn op-btn-gold"
+                  onClick={handleSubmitOffer}
+                  disabled={isSubmitting}
+                >
+                  <Send aria-hidden="true" />
+                  <span>{isSubmitting ? 'جارٍ الإيداع...' : t('offers.btn.submit')}</span>
+                </button>
+              )}
+            </>
           )}
         </div>
       </form>
     </div>
   );
 }
+
+export default OfferForm;

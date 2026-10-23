@@ -9,8 +9,8 @@
   --page-bg: #ffffff;
   --surface: #ffffff;
   --surface-muted: #f8f9f7;
-  --navy: #0b3b5c;
-  --navy-dark: #082a42;
+  --navy: #092e49;
+  --navy-dark: #061f33;
   --primary: #167354;
   --primary-hover: #115840;
   --green: #167354;
@@ -29,7 +29,7 @@
   min-height: 100vh;
   width: 100%;
   max-width: 100%;
-  overflow-x: hidden;
+  overflow-x: clip;
   display: flex;
   flex-direction: column;
 }
@@ -40,6 +40,12 @@
   font-family: 'Readex Pro', 'IBM Plex Sans Arabic', sans-serif;
   letter-spacing: -0.01em;
   text-wrap: balance;
+}
+
+/* مساحة أمان للروابط الداخلية تحت الترويسة المثبتة */
+.landing-v2 section[id],
+.landing-v2 #faq {
+  scroll-margin-top: 7rem;
 }
 
 /* شريط رسمي رفيع */

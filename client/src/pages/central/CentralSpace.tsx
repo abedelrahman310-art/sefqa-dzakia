@@ -106,8 +106,8 @@ export function CentralSpace() {
     <PortalShell
       mobileTitle="صفقات ذكية · الإدارة المركزية"
       topBar={<CentralAdminTopBar title={currentTitle} />}
-      hideSidebar={isMapRoute}
-      hideTopBar={isMapRoute}
+      hideSidebar={false}
+      hideTopBar={false}
       contentClassName={isMapRoute ? 'p-0 h-full overflow-hidden' : 'p-6 md:p-8'}
       sidebar={
         <PortalSidebar
@@ -116,6 +116,7 @@ export function CentralSpace() {
           items={navItems}
           accentColor="var(--stamp-green-700)"
           brandInitial="ص"
+          hideUserInfo={true}
         />
       }
     >

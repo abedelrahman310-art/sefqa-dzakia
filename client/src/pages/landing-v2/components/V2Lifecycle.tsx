@@ -7,12 +7,9 @@ import {
   Scale,
   ShieldCheck,
   UserCheck,
-  Cpu,
   CheckCircle2,
   Clock,
   AlertCircle,
-  ArrowRight,
-  ArrowLeft,
   Sparkles,
   ShieldAlert,
   Layers,
@@ -341,44 +338,42 @@ export function V2Lifecycle() {
   };
 
   return (
-    <section className="bg-white py-10 md:py-16 text-[#24352E] select-none" id="lifecycle" dir="rtl">
+    <section className="bg-[#FBFCFA] py-10 md:py-16 text-[#24352E]" id="lifecycle" dir="rtl">
       <div className="w-full max-w-[1280px] mx-auto px-4 md:px-8">
-        {/* رأس القسم المعتمد */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
-          <div className="flex-1">
-            <SectionHeader
-              badge="المسار الإجرائي المتكامل"
-              title="مسار واحد، ومساعدة في مواضعها."
-              subtitle="تنتظم دورة الصفقة العمومية عبر 6 مراحل إجرائية متتالية واضحة المعالم. تميَّز كل مرحلة بطبيعتها وفاعلها القانوني، وتتدخل الأدوات الذكية للإسناد والتدقيق الحسابي والشكلي دون المساس بحصرية القرار البشري."
-            />
-          </div>
+        {/* رأس القسم: الذكاء الاصطناعي والتحليلات داخل دورة الصفقة */}
+        <SectionHeader
+          badge="الذكاء الاصطناعي والتحليلات في دورة الصفقة"
+          title="مسار واحد، ومساعدة في مواضعها."
+          subtitle="تنتظم دورة الصفقة العمومية عبر 6 مراحل إجرائية متتالية واضحة المعالم. تميَّز كل مرحلة بطبيعتها وفاعلها القانوني، وتتدخل الأدوات الذكية للإسناد والتدقيق الحسابي والشكلي دون المساس بحصرية القرار البشري."
+        />
 
-          {/* أزرار نمط العرض */}
-          <div className="flex items-center gap-1.5 bg-[#F8F9F7] p-1.5 rounded-xl border border-[#E3E7E2] self-start md:self-auto shrink-0 shadow-2xs">
+        {/* أزرار نمط العرض */}
+        <div className="flex justify-center -mt-3 mb-8">
+          <div className="flex items-center gap-1.5 bg-white p-1.5 rounded-xl border border-[#E3E7E2] shadow-sm">
             <button
               type="button"
               className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
                 viewMode === 'stepper'
-                  ? 'bg-white text-[#24352E] shadow-xs border border-[#E3E7E2]'
+                  ? 'bg-[#EDF4EE] text-[#167354] border border-[#CDE1D3]'
                   : 'text-[#59665F] hover:text-[#24352E]'
               }`}
               onClick={() => setViewMode('stepper')}
               aria-label="عرض المرحلة المركزة"
             >
-              <Compass className="size-3.5 text-[#167354]" aria-hidden="true" />
+              <Compass className="size-3.5" aria-hidden="true" />
               <span>المسار التفاعلي</span>
             </button>
             <button
               type="button"
               className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
                 viewMode === 'grid'
-                  ? 'bg-white text-[#24352E] shadow-xs border border-[#E3E7E2]'
+                  ? 'bg-[#EDF4EE] text-[#167354] border border-[#CDE1D3]'
                   : 'text-[#59665F] hover:text-[#24352E]'
               }`}
               onClick={() => setViewMode('grid')}
               aria-label="عرض جميع المراحل جنباً إلى جنب"
             >
-              <Layers className="size-3.5 text-[#2563EB]" aria-hidden="true" />
+              <Layers className="size-3.5" aria-hidden="true" />
               <span>نظرة شاملة للمراحل الست</span>
             </button>
           </div>
@@ -468,6 +463,7 @@ export function V2Lifecycle() {
                   <span
                     className="font-mono text-xs font-black px-2 py-0.5 rounded-md text-white shadow-2xs"
                     style={{ backgroundColor: current.color.primary }}
+                    dir="ltr"
                   >
                     {current.num} / 06
                   </span>

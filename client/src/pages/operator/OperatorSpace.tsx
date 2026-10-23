@@ -1,4 +1,3 @@
-import { useI18n } from '@/i18n';
 import { Route, Switch, useRoute } from 'wouter';
 import { OperatorOverview } from './OperatorOverview';
 import { OperatorOpportunities } from './OperatorOpportunities';
@@ -9,14 +8,13 @@ import { OperatorProfileView } from './OperatorProfileView';
 import { OperatorSmartSpecsView } from './OperatorSmartSpecsView';
 import { OperatorArchiveView } from './OperatorArchiveView';
 import { OperatorSettingsView } from './OperatorSettingsView';
+import { OperatorNotificationsView } from './OperatorNotificationsView';
 import { RequirementsResponse } from './RequirementsResponse';
 import { OperatorSessionList } from '@/features/opening/components/OperatorSessionList';
 import { OperatorSessionLive } from '@/features/opening/components/OperatorSessionLive';
 import { OperatorObjectionsView } from '@/features/objections/components/OperatorObjectionsView';
 import { PortalNotFound } from '@/components/common/PortalNotFound';
-import OperatorTopBar from '@/components/layout/OperatorTopBar';
-import { PortalShell } from '@/components/layout/PortalShell';
-import { PortalSidebar } from '@/components/layout/PortalSidebar';
+import { OperatorShell, type OperatorNavItem } from './OperatorShell';
 import {
   LayoutDashboard,
   Megaphone,
@@ -27,77 +25,65 @@ import {
 } from 'lucide-react';
 
 export function OperatorSpace() {
-  const { t } = useI18n();
-
   // Route matchers for active highlighting
   const [isOverviewActive] = useRoute('/operator');
   const [isOverviewAliasActive] = useRoute('/operator/overview');
   const [isDealsActive] = useRoute('/operator/deals');
   const [isOppsActive] = useRoute('/operator/opportunities');
+  const [isOppsDetailsActive] = useRoute('/operator/opportunities/:rest*');
   const [isOffersActive] = useRoute('/operator/offers');
   const [isOffersIdActive] = useRoute('/operator/offers/:id');
   const [isObjectionsActive] = useRoute('/operator/objections');
   const [isSmartSpecsActive] = useRoute('/operator/smart-specs');
-  const [isArchiveActive] = useRoute('/operator/archive');
   const [isSettingsActive] = useRoute('/operator/settings');
 
-  const navItems = [
+  const navItems: OperatorNavItem[] = [
     {
       label: 'مساحة العمل',
       href: '/operator',
       icon: LayoutDashboard,
       isActive: isOverviewActive || isOverviewAliasActive,
+      group: 'home',
     },
     {
       label: 'الإعلانات وفرص الصفقات',
       href: '/operator/deals',
       icon: Megaphone,
-      isActive: isDealsActive || isOppsActive,
+      isActive: isDealsActive || isOppsActive || isOppsDetailsActive,
+      group: 'opportunities',
     },
     {
       label: 'دفاتر الشروط',
       href: '/operator/smart-specs',
       icon: FileText,
       isActive: isSmartSpecsActive,
+      group: 'opportunities',
     },
     {
       label: 'إدارة العروض',
       href: '/operator/offers',
       icon: ClipboardCheck,
       isActive: isOffersActive || isOffersIdActive,
+      group: 'activity',
     },
     {
       label: 'الطعون والتظلمات',
       href: '/operator/objections',
       icon: Scale,
       isActive: isObjectionsActive,
+      group: 'activity',
     },
     {
       label: 'الفريق والصلاحيات',
       href: '/operator/settings',
       icon: Users,
       isActive: isSettingsActive,
+      group: 'system',
     },
   ];
 
   return (
-    <PortalShell
-      mobileTitle="صفقات ذكية · المتعامل الاقتصادي"
-      topBar={<OperatorTopBar />}
-      showTopBarOnMobile
-      sidebarWidth="w-[270px]"
-      contentClassName="flex-1 min-h-0 flex flex-col p-4 md:px-7 md:py-4 bg-[#F4F7FB] overflow-y-auto text-[16px]"
-      sidebar={
-        <PortalSidebar
-          title="صفقات ذكية"
-          subtitle="فضاء المتعامل الاقتصادي"
-          badgeTitle="• بوابة المتعامل الاقتصادي"
-          items={navItems}
-          variant="operator"
-          hideUserInfo
-        />
-      }
-    >
+    <OperatorShell navItems={navItems} mobileTitle="صفقات ذكية · المتعامل الاقتصادي">
       <Switch>
         <Route path="/operator/opening-sessions/:id" component={OperatorSessionLive} />
         <Route path="/operator/opening-sessions" component={OperatorSessionList} />
@@ -107,6 +93,7 @@ export function OperatorSpace() {
         <Route path="/operator/profile" component={OperatorProfileView} />
         <Route path="/operator/smart-specs" component={OperatorSmartSpecsView} />
         <Route path="/operator/archive" component={OperatorArchiveView} />
+        <Route path="/operator/notifications" component={OperatorNotificationsView} />
         <Route path="/operator/settings" component={OperatorSettingsView} />
         <Route path="/operator/opportunities/:oppId/requirements" component={RequirementsResponse} />
         <Route path="/operator/opportunities/:oppId/offer">
@@ -123,7 +110,6 @@ export function OperatorSpace() {
           <PortalNotFound basePath="/operator" baseTitle="الرئيسية للمتعامل" />
         </Route>
       </Switch>
-    </PortalShell>
+    </OperatorShell>
   );
 }
-

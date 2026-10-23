@@ -2,22 +2,20 @@ import { useEffect, useState } from 'react';
 import { useI18n } from '@/i18n';
 import { Link, useLocation } from 'wouter';
 import { api } from '@/lib/api';
-import { Button } from '@/components/ui/button';
-import { PageHeader, KpiCard, EmptyState } from '@/shared/components';
 import {
-  Briefcase,
-  CheckCircle2,
-  Clock,
   Search,
+  FileText,
+  Clock,
+  ClipboardCheck,
   Building2,
   Calendar,
-  FileText,
-  Radio,
+  ChevronLeft,
+  Megaphone,
   BookOpen,
   Scale,
   Archive,
-  ShieldCheck,
-  ChevronLeft,
+  Inbox,
+  ArrowUpRight,
 } from 'lucide-react';
 
 interface Opportunity {
@@ -27,12 +25,14 @@ interface Opportunity {
   estimatedBudget: string | null;
   authorityName: string;
   updatedAt: string;
-  hasDocument: boolean;
+  submissionDeadline?: string | null;
 }
 
 interface OfferItem {
   id: string;
+  title: string;
   status: 'draft' | 'submitted';
+  updatedAt: string;
 }
 
 export function OperatorOverview() {
@@ -57,17 +57,21 @@ export function OperatorOverview() {
             id: String(d.id),
             title: d.title,
             description: d.description || '',
-            estimatedBudget: d.estimated_budget ? `${Number(d.estimated_budget).toLocaleString('ar-DZ')} دج` : null,
+            estimatedBudget: d.estimated_budget
+              ? `${Number(d.estimated_budget).toLocaleString('ar-DZ')} دج`
+              : null,
             authorityName: d.authority_entity || d.authority_name || 'مصلحة متعاقدة',
             updatedAt: d.updated_at || d.created_at || new Date().toISOString(),
-            hasDocument: !!d.cahier_specs,
+            submissionDeadline: d.submission_deadline || null,
           }));
         setOpportunities(mappedDeals);
 
         const offersList = Array.isArray(offersRes.data) ? offersRes.data : offersRes.data?.results || [];
         const mappedOffers: OfferItem[] = offersList.map((o: any) => ({
           id: String(o.id),
+          title: o.deal_title || 'عرض على صفقة عمومية',
           status: (o.status === 'submitted' ? 'submitted' : 'draft') as 'draft' | 'submitted',
+          updatedAt: o.updated_at || o.created_at || new Date().toISOString(),
         }));
         setOffers(mappedOffers);
       })
@@ -78,245 +82,310 @@ export function OperatorOverview() {
       .finally(() => setLoading(false));
   }, []);
 
-  const submittedCount = offers.filter((o) => o.status === 'submitted').length;
-  const draftsCount = offers.filter((o) => o.status === 'draft').length;
+  const submittedCount = offers.filter((offer) => offer.status === 'submitted').length;
+  const draftsCount = offers.filter((offer) => offer.status === 'draft').length;
   const recentOpps = opportunities.slice(0, 4);
+  const recentOffers = offers.slice(0, 4);
+
+  const formatDate = (value: string) =>
+    new Date(value).toLocaleDateString(lang === 'ar' ? 'ar-DZ' : 'fr-FR');
+
+  const kpiValue = (value: number) => {
+    if (loading) return '…';
+    return value > 0 ? String(value) : '—';
+  };
 
   return (
-    <div className="font-sans flex flex-col gap-4">
-      {/* 1. Page Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex flex-col gap-0.5">
-          <div className="flex flex-wrap items-center gap-2.5">
-            <h1 className="text-[26px] font-extrabold text-[#0B1F3A] leading-tight m-0">مساحة العمل</h1>
-            <span className="inline-block px-2.5 py-0.5 rounded-full border border-[#EBDDB0] bg-[#FBF3DC] text-[#6B4F0E] text-[12px] font-bold">
-              بيانات تجريبية
-            </span>
-          </div>
-          <p className="text-[16px] leading-relaxed text-[#5B6B82] m-0">
-            نظرة سريعة على فرصك وجاهزية ملف مشاركتك.
-          </p>
+    <div className="op-page">
+      <div className="op-page-head">
+        <div>
+          <h1>مساحة العمل</h1>
+          <p>نظرة سريعة على الصفقات المتاحة، عروضك، وجاهزية مشاركتك.</p>
+        </div>
+        <div className="op-page-actions">
+          <button
+            type="button"
+            className="op-btn op-btn-gold"
+            onClick={() => setLocation('/operator/deals')}
+          >
+            <Search aria-hidden="true" />
+            <span>استكشف الصفقات</span>
+          </button>
+          <button
+            type="button"
+            className="op-btn op-btn-outline"
+            onClick={() => setLocation('/operator/offers')}
+          >
+            <ClipboardCheck aria-hidden="true" />
+            <span>إدارة العروض</span>
+          </button>
         </div>
       </div>
 
-      {/* 2. Large 4-Column KPIs Strip */}
-      <section className="grid grid-cols-2 md:grid-cols-4 gap-3" aria-label="مؤشرات الجاهزية">
-        <div className="bg-[#E8EFFA] text-[#14325C] border border-[#CFDCF0] rounded-[12px] p-4 flex flex-col justify-center items-center text-center gap-0.5 shadow-xs">
-          <span className="text-[32px] font-extrabold leading-tight">68%</span>
-          <span className="text-[13px] font-bold">نسبة الجاهزية</span>
-        </div>
-        <div className="bg-white text-[#0B1F3A] border border-[#D5DDEA] rounded-[12px] p-4 flex flex-col justify-center items-center text-center gap-0.5 shadow-xs">
-          <span className="text-[32px] font-extrabold leading-tight">12</span>
-          <span className="text-[13px] font-bold">الوثائق المطلوبة</span>
-        </div>
-        <div className="bg-[#FCEBEA] text-[#B42318] border border-[#F4C9C5] rounded-[12px] p-4 flex flex-col justify-center items-center text-center gap-0.5 shadow-xs">
-          <span className="text-[32px] font-extrabold leading-tight">1</span>
-          <span className="text-[13px] font-bold">وثائق ناقصة</span>
-        </div>
-        <div className="bg-[#FBF3DC] text-[#6B4F0E] border border-[#EBDDB0] rounded-[12px] p-4 flex flex-col justify-center items-center text-center gap-0.5 shadow-xs">
-          <span className="text-[32px] font-extrabold leading-tight">5</span>
-          <span className="text-[13px] font-bold">قيد الإنجاز</span>
-        </div>
+      <section className="op-kpi-grid" aria-label="مؤشرات سريعة">
+        <article className="op-kpi">
+          <div className="op-kpi-icon gold">
+            <Search aria-hidden="true" />
+          </div>
+          <div className="op-kpi-label">صفقات متاحة</div>
+          <div className={`op-kpi-value${loading || opportunities.length === 0 ? ' empty' : ''}`}>
+            {kpiValue(opportunities.length)}
+          </div>
+          <div className="op-kpi-sub">
+            {loading
+              ? 'جاري تحميل البيانات...'
+              : opportunities.length > 0
+                ? 'منشورة ومفتوحة للتقديم'
+                : 'لم تُنشر صفقات بعد'}
+          </div>
+        </article>
+
+        <article className="op-kpi">
+          <div className="op-kpi-icon blue">
+            <FileText aria-hidden="true" />
+          </div>
+          <div className="op-kpi-label">عروضي المقدمة</div>
+          <div className={`op-kpi-value${loading || submittedCount === 0 ? ' empty' : ''}`}>
+            {kpiValue(submittedCount)}
+          </div>
+          <div className="op-kpi-sub">
+            {loading
+              ? 'جاري تحميل البيانات...'
+              : submittedCount > 0
+                ? 'عروض مودعة رسمياً'
+                : 'لم تقدّم أي عرض بعد'}
+          </div>
+        </article>
+
+        <article className="op-kpi">
+          <div className="op-kpi-icon green">
+            <Clock aria-hidden="true" />
+          </div>
+          <div className="op-kpi-label">مسودات قيد الإعداد</div>
+          <div className={`op-kpi-value${loading || draftsCount === 0 ? ' empty' : ''}`}>
+            {kpiValue(draftsCount)}
+          </div>
+          <div className="op-kpi-sub">
+            {loading
+              ? 'جاري تحميل البيانات...'
+              : draftsCount > 0
+                ? 'يمكنك استكمالها في أي وقت'
+                : 'لا توجد مسودات محفوظة'}
+          </div>
+        </article>
+
+        <article className="op-kpi">
+          <div className="op-kpi-icon rose">
+            <ClipboardCheck aria-hidden="true" />
+          </div>
+          <div className="op-kpi-label">إجمالي مشاركاتي</div>
+          <div className={`op-kpi-value${loading || offers.length === 0 ? ' empty' : ''}`}>
+            {kpiValue(offers.length)}
+          </div>
+          <div className="op-kpi-sub">
+            {loading
+              ? 'جاري تحميل البيانات...'
+              : offers.length > 0
+                ? 'مسودات وعروض مودعة'
+                : 'لا توجد مشاركات مسجلة'}
+          </div>
+        </article>
       </section>
 
-      {/* 3. Split: Shortcuts Stack + Calendar Deadlines Empty State */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch">
-        <div className="flex flex-col gap-4">
-          <div className="flex flex-col items-start justify-center gap-2 p-5 border border-[#D5DDEA] rounded-[16px] bg-white shadow-xs">
-            <h2 className="text-[18px] font-extrabold text-[#0B1F3A] m-0">الإعلانات وفرص الصفقات</h2>
-            <p className="text-[16px] leading-relaxed text-[#5B6B82] m-0">
-              اعرض الإعلانات المنشورة حسب نوع الإجراء، وأنشئ تنبيهًا يناسب نشاط مؤسستك.
-            </p>
+      <div className="op-grid-2">
+        <section className="op-card" aria-labelledby="latest-opportunities-title">
+          <div className="op-card-head">
+            <h3 id="latest-opportunities-title">آخر الفرص المتاحة</h3>
             <button
               type="button"
+              className="op-btn op-btn-ghost op-btn-sm"
               onClick={() => setLocation('/operator/deals')}
-              className="inline-flex items-center justify-center gap-2 min-h-[44px] px-4 border-[1.5px] border-[#047857] rounded-[10px] bg-white text-[#065F46] hover:bg-[#ECFDF5] font-bold text-[16px] transition-colors cursor-pointer mt-1"
             >
-              فتح الإعلانات
+              عرض الكل
+              <ChevronLeft aria-hidden="true" />
             </button>
           </div>
-          <div className="flex flex-col items-start justify-center gap-2 p-5 border border-[#D5DDEA] rounded-[16px] bg-white shadow-xs">
-            <h2 className="text-[18px] font-extrabold text-[#0B1F3A] m-0">إدارة العروض</h2>
-            <p className="text-[16px] leading-relaxed text-[#5B6B82] m-0">
-              تابع جاهزية وثائق الصفقة المختارة، وحدّد ما ينقص ملف مشاركتك.
-            </p>
-            <button
-              type="button"
-              onClick={() => setLocation('/operator/offers')}
-              className="inline-flex items-center justify-center gap-2 min-h-[44px] px-4 border-[1.5px] border-[#047857] rounded-[10px] bg-white text-[#065F46] hover:bg-[#ECFDF5] font-bold text-[16px] transition-colors cursor-pointer mt-1"
-            >
-              فتح إعداد العرض
-            </button>
-          </div>
-        </div>
-
-        <div className="flex flex-col items-center justify-center text-center gap-2 p-6 border-[1.5px] border-dashed border-[#AEB9CB] rounded-[16px] bg-white shadow-xs min-h-[220px]">
-          <div className="size-[52px] rounded-full bg-[#E8EFFA] text-[#14325C] flex items-center justify-center shrink-0">
-            <Calendar className="size-[26px]" strokeWidth={1.8} />
-          </div>
-          <h3 className="text-[17px] font-extrabold text-[#0B1F3A] mt-1 m-0">لا توجد آجال إيداع قريبة</h3>
-          <p className="text-[16px] leading-relaxed text-[#5B6B82] max-w-[460px] m-0">
-            ستظهر هنا آجال إيداع العروض للصفقات التي اخترتها، لتُنبَّه قبل انتهائها.
-          </p>
-        </div>
-      </div>
-
-      {/* 4. Live Opportunities Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 pt-2">
-        <div className="lg:col-span-2 space-y-6">
-          <section className="bg-white border border-[var(--color-border-subtle)] rounded-xl p-5 shadow-sm space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[var(--color-border-subtle)]">
-              <div>
-                <h3 className="text-base font-bold text-[var(--ink-900)]">{t('overview.discovery.title')}</h3>
-                <p className="text-xs text-[var(--ink-500)]">{t('overview.discovery.desc')}</p>
-              </div>
-              <Button
-                variant="outline"
-                className="border-[var(--color-border-subtle)] hover:bg-[var(--paper-100)] text-xs font-bold self-start sm:self-center rounded-xl"
-                onClick={() => setLocation('/operator/deals')}
-              >
-                {t('overview.discovery.all')}
-              </Button>
-            </div>
-
+          <div className="op-card-body">
             {loading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
-                {[1, 2, 3, 4].map((i) => (
-                  <div key={i} className="h-40 rounded-xl bg-[var(--paper-100)] animate-pulse" />
+              <div className="space-y-3">
+                {[1, 2, 3].map((item) => (
+                  <div key={item} className="op-skeleton h-14" />
                 ))}
               </div>
-            ) : error || opportunities.length === 0 ? (
-              <EmptyState
-                icon={FileText}
-                title={t('overview.discovery.empty')}
-                description={t('overview.discovery.desc')}
-                action={
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="text-xs rounded-xl"
-                    onClick={() => setLocation('/operator/deals')}
-                  >
-                    <span>{t('overview.discovery.all')}</span>
-                  </Button>
-                }
-              />
+            ) : error || recentOpps.length === 0 ? (
+              <div className="op-empty-chart">
+                <Search aria-hidden="true" />
+                <h4>{t('overview.discovery.empty')}</h4>
+                <p>ستظهر الصفقات المنشورة هنا فور توفرها</p>
+                <button
+                  type="button"
+                  className="op-btn op-btn-ghost op-btn-sm mt-2"
+                  onClick={() => setLocation('/operator/deals')}
+                >
+                  تصفح الصفقات
+                </button>
+              </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="op-list">
                 {recentOpps.map((opp) => (
-                  <article
-                    key={opp.id}
-                    className="bg-white border border-[var(--color-border-subtle)] rounded-xl p-4 shadow-xs hover:border-[var(--stamp-green-700)] hover:shadow-md transition-all duration-200 flex flex-col justify-between space-y-3 group"
-                  >
-                    <div className="space-y-2 min-w-0">
-                      <div className="flex items-center justify-between gap-2">
-                        <span
-                          className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 truncate max-w-[200px]"
-                          title={opp.authorityName}
-                        >
-                          <Building2 className="w-3 h-3 shrink-0" />
-                          <span className="truncate">{opp.authorityName}</span>
+                  <Link key={opp.id} href={`/operator/opportunities/${opp.id}`}>
+                    <a href={`/operator/opportunities/${opp.id}`} className="op-list-item">
+                      <div className="op-list-main">
+                        <span className="op-list-title" title={opp.title}>
+                          {opp.title}
                         </span>
-                        <span className="inline-flex items-center gap-1 text-xs text-[var(--ink-500)] shrink-0">
-                          <Calendar className="w-3 h-3" />
-                          {new Date(opp.updatedAt).toLocaleDateString(lang === 'ar' ? 'ar-DZ' : 'fr-FR')}
+                        <span className="op-list-sub">
+                          <Building2 aria-hidden="true" className="size-3.5" />
+                          <span className="truncate">{opp.authorityName}</span>
+                          {opp.submissionDeadline && (
+                            <>
+                              <span aria-hidden="true">·</span>
+                              <Calendar aria-hidden="true" className="size-3.5" />
+                              <span>آخر أجل {formatDate(opp.submissionDeadline)}</span>
+                            </>
+                          )}
                         </span>
                       </div>
-                      <h4 className="text-sm font-bold text-[var(--ink-900)] line-clamp-1 group-hover:text-[var(--stamp-green-700)] transition-colors" title={opp.title}>
-                        {opp.title}
-                      </h4>
-                      <p className="text-xs text-[var(--ink-500)] line-clamp-2 leading-relaxed">
-                        {opp.description}
-                      </p>
-                    </div>
-
-                    <div className="pt-2.5 flex items-center justify-between border-t border-[var(--color-border-subtle)]">
-                      <span className="text-xs font-mono font-bold text-[var(--stamp-green-800)] bg-[var(--stamp-green-50)] px-2 py-0.5 rounded-md border border-[var(--stamp-green-200)]">
-                        {opp.estimatedBudget ? `${Number(opp.estimatedBudget).toLocaleString()} د.ج` : '—'}
-                      </span>
-                      <Button
-                        size="sm"
-                        className="text-xs font-bold px-3 py-1.5 h-auto bg-[var(--stamp-green-700)] hover:bg-[var(--stamp-green-800)] text-white rounded-lg shadow-xs"
-                        onClick={() => setLocation(`/operator/opportunities/${opp.id}`)}
-                      >
-                        {t('overview.discovery.view_detail')}
-                      </Button>
-                    </div>
-                  </article>
+                      <div className="op-list-meta">
+                        <strong>{opp.estimatedBudget || '—'}</strong>
+                        <span>{formatDate(opp.updatedAt)}</span>
+                      </div>
+                    </a>
+                  </Link>
                 ))}
               </div>
             )}
-          </section>
-        </div>
+          </div>
+        </section>
 
-        {/* Sidebar Column (1 col): Compliance status + Quick Actions */}
-        <div className="lg:col-span-1 space-y-6">
-          {/* Institutional Compliance Card */}
-          <article className="bg-white border border-[var(--color-border-subtle)] rounded-xl p-5 shadow-sm space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="inline-flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-50 text-[var(--stamp-green-800)] border border-emerald-200">
-                <ShieldCheck className="w-3.5 h-3.5" />
-                <span>حساب معتمد</span>
-              </span>
-              <span className="text-[11px] font-mono text-[var(--ink-500)]">القانون 23-12</span>
-            </div>
-            <h3 className="text-sm font-bold text-[var(--ink-900)]">
-              البوابة الوطنية للصفقات العمومية
-            </h3>
-            <p className="text-xs text-[var(--ink-500)] leading-relaxed">
-              ملفك مسجل ومؤهل للمشاركة في الإعلانات التنافسية وإيداع الأظرفة الإلكترونية المؤمنة.
-            </p>
-          </article>
+        <section className="op-card" aria-labelledby="offers-status-title">
+          <div className="op-card-head">
+            <h3 id="offers-status-title">حالة عروضي</h3>
+            <span className="op-card-tag">حسب الحالة</span>
+          </div>
+          <div className="op-card-body">
+            {loading ? (
+              <div className="op-skeleton h-[210px]" />
+            ) : offers.length === 0 ? (
+              <div className="op-empty-chart">
+                <FileText aria-hidden="true" />
+                <h4>لا توجد بيانات لعرضها</h4>
+                <p>سيظهر التوزيع بعد تقديم عروض</p>
+                <button
+                  type="button"
+                  className="op-btn op-btn-ghost op-btn-sm mt-2"
+                  onClick={() => setLocation('/operator/offers')}
+                >
+                  إعداد عرض
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-5">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-xs font-bold text-[var(--op-text)]">
+                    <span>عروض مقدمة</span>
+                    <span className="font-mono text-[var(--op-ink)]">{submittedCount}</span>
+                  </div>
+                  <div className="op-progress">
+                    <span style={{ width: `${offers.length ? (submittedCount / offers.length) * 100 : 0}%` }} />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-xs font-bold text-[var(--op-text)]">
+                    <span>مسودات قيد الإعداد</span>
+                    <span className="font-mono text-[var(--op-ink)]">{draftsCount}</span>
+                  </div>
+                  <div className="op-progress">
+                    <span style={{ width: `${offers.length ? (draftsCount / offers.length) * 100 : 0}%` }} />
+                  </div>
+                </div>
+                <div className="rounded-xl border border-[var(--op-line-2)] bg-[var(--op-surface-2)] p-4">
+                  <div className="flex items-center gap-2 text-xs font-bold text-[var(--op-ink)]">
+                    <Inbox className="size-4 text-[var(--op-gold)]" aria-hidden="true" />
+                    <span>إجمالي المشاركات: {offers.length}</span>
+                  </div>
+                  <p className="mt-1 text-[11.5px] text-[var(--op-muted)]">
+                    يمكنك متابعة كل عرض وتحديث مسوداتك من قسم إدارة العروض.
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+        </section>
+      </div>
 
-          {/* Quick Access Card */}
-          <article className="bg-white border border-[var(--color-border-subtle)] rounded-xl shadow-sm p-5 space-y-3">
-            <h3 className="m-0 text-sm font-bold text-[var(--ink-900)]">
-              {t('authority.preview.nav_title')}
-            </h3>
-            <div className="space-y-2">
-              <Link
-                href="/operator/opening-sessions"
-                className="flex items-center justify-between p-2.5 rounded-lg border border-[var(--color-border-subtle)] bg-[var(--paper-50)] hover:bg-[var(--paper-100)] text-xs font-semibold text-[var(--ink-800)] transition-colors"
-              >
-                <span className="flex items-center gap-2">
-                  <Radio className="w-4 h-4 text-[var(--stamp-green-700)]" />
-                  {t('nav.operator.opening_sessions')}
-                </span>
-                <ChevronLeft className="w-4 h-4 text-[var(--ink-400)]" />
-              </Link>
-              <Link
-                href="/operator/smart-specs"
-                className="flex items-center justify-between p-2.5 rounded-lg border border-[var(--color-border-subtle)] bg-[var(--paper-50)] hover:bg-[var(--paper-100)] text-xs font-semibold text-[var(--ink-800)] transition-colors"
-              >
-                <span className="flex items-center gap-2">
-                  <BookOpen className="w-4 h-4 text-[var(--official-700)]" />
-                  {t('nav.operator.smart_specs')}
-                </span>
-                <ChevronLeft className="w-4 h-4 text-[var(--ink-400)]" />
-              </Link>
-              <Link
-                href="/operator/objections"
-                className="flex items-center justify-between p-2.5 rounded-lg border border-[var(--color-border-subtle)] bg-[var(--paper-50)] hover:bg-[var(--paper-100)] text-xs font-semibold text-[var(--ink-800)] transition-colors"
-              >
-                <span className="flex items-center gap-2">
-                  <Scale className="w-4 h-4 text-[var(--stamp-gold-700)]" />
-                  {t('nav.operator.appeals')}
-                </span>
-                <ChevronLeft className="w-4 h-4 text-[var(--ink-400)]" />
-              </Link>
-              <Link
-                href="/operator/archive"
-                className="flex items-center justify-between p-2.5 rounded-lg border border-[var(--color-border-subtle)] bg-[var(--paper-50)] hover:bg-[var(--paper-100)] text-xs font-semibold text-[var(--ink-800)] transition-colors"
-              >
-                <span className="flex items-center gap-2">
-                  <Archive className="w-4 h-4 text-[var(--ink-600)]" />
-                  {t('nav.operator.archive')}
-                </span>
-                <ChevronLeft className="w-4 h-4 text-[var(--ink-400)]" />
-              </Link>
+      <div className="op-grid-2">
+        <section className="op-card" aria-labelledby="recent-activity-title">
+          <div className="op-card-head">
+            <h3 id="recent-activity-title">آخر النشاطات</h3>
+          </div>
+          <div className="op-card-body">
+            {loading ? (
+              <div className="space-y-3">
+                {[1, 2, 3].map((item) => (
+                  <div key={item} className="op-skeleton h-12" />
+                ))}
+              </div>
+            ) : recentOffers.length === 0 ? (
+              <div className="op-empty-chart min-h-[190px]">
+                <Clock aria-hidden="true" />
+                <h4>لا يوجد نشاط بعد</h4>
+                <p>ستظهر هنا آخر إجراءاتك على المنصة</p>
+              </div>
+            ) : (
+              <div className="op-list">
+                {recentOffers.map((offer) => (
+                  <Link key={offer.id} href={`/operator/offers/${offer.id}`}>
+                    <a href={`/operator/offers/${offer.id}`} className="op-list-item">
+                      <div className="op-list-main">
+                        <span className="op-list-title" title={offer.title}>
+                          {offer.title}
+                        </span>
+                        <span className="op-list-sub">{formatDate(offer.updatedAt)}</span>
+                      </div>
+                      <span className={`op-chip ${offer.status === 'submitted' ? 'green' : 'gold'}`}>
+                        {offer.status === 'submitted' ? 'مودع' : 'مسودة'}
+                      </span>
+                    </a>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
+
+        <section className="op-card" aria-labelledby="quick-links-title">
+          <div className="op-card-head">
+            <h3 id="quick-links-title">روابط سريعة</h3>
+          </div>
+          <div className="op-card-body">
+            <div className="op-list">
+              {[
+                { href: '/operator/deals', label: 'الإعلانات وفرص الصفقات', icon: Megaphone },
+                { href: '/operator/smart-specs', label: 'دفاتر الشروط', icon: BookOpen },
+                { href: '/operator/offers', label: 'إدارة العروض', icon: ClipboardCheck },
+                { href: '/operator/objections', label: 'الطعون والتظلمات', icon: Scale },
+                { href: '/operator/profile', label: 'ملف المؤسسة', icon: Building2 },
+                { href: '/operator/archive', label: 'الأرشيف', icon: Archive },
+              ].map((item) => {
+                const Icon = item.icon;
+                return (
+                  <Link key={item.href} href={item.href}>
+                    <a href={item.href} className="op-list-item">
+                      <span className="flex min-w-0 items-center gap-3">
+                        <span className="flex size-8 flex-none items-center justify-center rounded-lg bg-[var(--op-gold-soft)] text-[var(--op-gold-dark)]">
+                          <Icon className="size-4" aria-hidden="true" />
+                        </span>
+                        <span className="op-list-title">{item.label}</span>
+                      </span>
+                      <ArrowUpRight className="size-4 flex-none text-[var(--op-muted)]" aria-hidden="true" />
+                    </a>
+                  </Link>
+                );
+              })}
             </div>
-          </article>
-        </div>
+          </div>
+        </section>
       </div>
     </div>
   );

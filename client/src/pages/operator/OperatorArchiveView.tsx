@@ -1,8 +1,6 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useI18n } from '@/i18n';
 import { useLocation } from 'wouter';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import {
   Archive,
   Search,
@@ -39,7 +37,7 @@ interface ArchiveOffer {
 }
 
 export function OperatorArchiveView() {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const [, setLocation] = useLocation();
 
   const [activeTab, setActiveTab] = useState<'deals' | 'offers'>('deals');
@@ -65,10 +63,8 @@ export function OperatorArchiveView() {
       .finally(() => setLoading(false));
   }, []);
 
-  // Filter deals: closed, past, or all with search
   const filteredDeals = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
-    // In archive, prioritize deals that have submission closed or past statuses
     const target = opportunities.filter((opp) => {
       const isPastOrClosed =
         opp.status === 'submission_closed' ||
@@ -78,7 +74,7 @@ export function OperatorArchiveView() {
         opp.status === 'financial_evaluation' ||
         opp.status === 'provisional_award' ||
         opp.status === 'infructuous';
-      return isPastOrClosed || true; // Show all completed/archived list
+      return isPastOrClosed || true;
     });
 
     if (!q) return target;
@@ -86,11 +82,10 @@ export function OperatorArchiveView() {
       (opp) =>
         opp.title.toLowerCase().includes(q) ||
         opp.authorityName.toLowerCase().includes(q) ||
-        opp.description.toLowerCase().includes(q)
+        opp.description.toLowerCase().includes(q),
     );
   }, [opportunities, searchQuery]);
 
-  // Filter offers: submitted offers are historical archived offers
   const filteredOffers = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
     const target = offers;
@@ -98,90 +93,66 @@ export function OperatorArchiveView() {
     return target.filter(
       (o) =>
         o.opportunityTitle.toLowerCase().includes(q) ||
-        o.authorityName.toLowerCase().includes(q)
+        o.authorityName.toLowerCase().includes(q),
     );
   }, [offers, searchQuery]);
 
+  const activeCount = activeTab === 'deals' ? filteredDeals.length : filteredOffers.length;
+
   return (
-    <div className="space-y-6">
-      {/* Top Navigation Breadcrumb */}
-      <div className="flex items-center gap-2">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setLocation('/operator')}
-          className="flex items-center gap-1 text-xs text-muted-foreground hover:text-navy-900 ps-0"
-        >
-          <ArrowRight className="w-3.5 h-3.5 rtl:rotate-180" />
-          <span>{t('operator.req.back')}</span>
-        </Button>
-        <span className="text-muted-foreground">/</span>
-        <span className="text-xs font-semibold text-navy-900">
-          {t('operator.archive.title')}
-        </span>
+    <div className="op-page">
+      <div className="op-page-head">
+        <div>
+          <span className="op-chip gold mb-2">
+            <Archive aria-hidden="true" />
+            <span>{t('nav.operator.archive')} — السجل الرقمي الموثق</span>
+          </span>
+          <h1>{t('operator.archive.title')}</h1>
+          <p>{t('operator.archive.subtitle')}</p>
+        </div>
+        <div className="op-page-actions">
+          <button
+            type="button"
+            className="op-btn op-btn-outline"
+            onClick={() => setLocation('/operator')}
+          >
+            <ArrowRight aria-hidden="true" />
+            <span>{lang === 'ar' ? 'العودة إلى مساحة العمل' : "Retour à l'espace de travail"}</span>
+          </button>
+        </div>
       </div>
 
-      {/* Header Banner */}
-      <section className="rounded-2xl p-6 md:p-8 text-white bg-gradient-to-r from-navy-900 to-navy-700 shadow-sm space-y-3">
-        <div className="flex items-center gap-2 text-xs">
-          <Archive className="w-4 h-4 text-gold-400" />
-          <span className="font-bold text-gold-300">
-            {t('nav.operator.archive')} — السجل الرقمي الموثق
-          </span>
-        </div>
-        <h1 className="text-2xl md:text-3xl font-extrabold text-white">
-          {t('operator.archive.title')}
-        </h1>
-        <p className="text-xs md:text-sm text-navy-100 max-w-2xl leading-relaxed">
-          {t('operator.archive.subtitle')}
-        </p>
-      </section>
-
-      {/* Main Archive Workspace */}
-      <section className="bg-card border border-border rounded-2xl p-6 shadow-sm space-y-5">
-        {/* Tab Selection & Search */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-border">
-          {/* Tabs */}
-          <div className="flex items-center gap-2">
-            <Button
-              variant={activeTab === 'deals' ? 'default' : 'outline'}
-              size="sm"
+      <section className="op-card" aria-labelledby="archive-workspace-title">
+        <div className="op-card-head">
+          <div className="op-tabs" role="tablist" aria-label="أقسام الأرشيف">
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeTab === 'deals'}
               onClick={() => setActiveTab('deals')}
-              className={`rounded-xl text-xs font-bold gap-1.5 ${
-                activeTab === 'deals'
-                  ? 'bg-navy-900 text-white hover:bg-navy-800'
-                  : 'border-border text-muted-foreground hover:bg-muted'
-              }`}
+              className={`op-tab${activeTab === 'deals' ? ' active' : ''}`}
             >
-              <Briefcase className="w-3.5 h-3.5" />
+              <Briefcase aria-hidden="true" />
               <span>{t('operator.archive.tab_deals')}</span>
-              <span className="ms-1 px-1.5 py-0.2 rounded-full text-[10px] bg-white/20">
-                {filteredDeals.length}
-              </span>
-            </Button>
+              <span className="archive-count">{filteredDeals.length}</span>
+            </button>
 
-            <Button
-              variant={activeTab === 'offers' ? 'default' : 'outline'}
-              size="sm"
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeTab === 'offers'}
               onClick={() => setActiveTab('offers')}
-              className={`rounded-xl text-xs font-bold gap-1.5 ${
-                activeTab === 'offers'
-                  ? 'bg-navy-900 text-white hover:bg-navy-800'
-                  : 'border-border text-muted-foreground hover:bg-muted'
-              }`}
+              className={`op-tab${activeTab === 'offers' ? ' active' : ''}`}
             >
-              <Inbox className="w-3.5 h-3.5" />
+              <Inbox aria-hidden="true" />
               <span>{t('operator.archive.tab_offers')}</span>
-              <span className="ms-1 px-1.5 py-0.2 rounded-full text-[10px] bg-white/20">
-                {filteredOffers.length}
-              </span>
-            </Button>
+              <span className="archive-count">{filteredOffers.length}</span>
+            </button>
           </div>
 
-          {/* Search */}
-          <div className="relative w-full sm:w-80">
-            <Search className="w-4 h-4 text-muted-foreground absolute start-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-            <Input
+          <div className="op-search-lg w-full sm:w-80">
+            <Search aria-hidden="true" />
+            <input
               type="search"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -190,142 +161,150 @@ export function OperatorArchiveView() {
                   ? t('operator.archive.search_deals_ph')
                   : t('operator.archive.search_offers_ph')
               }
-              className="ps-9 text-xs h-10 rounded-xl border-border bg-background"
+              aria-label={activeTab === 'deals' ? 'بحث في الصفقات المؤرشفة' : 'بحث في العروض المؤرشفة'}
             />
           </div>
         </div>
 
-        {/* Tab Content */}
-        {loading ? (
-          <div className="py-12 flex flex-col items-center justify-center text-muted-foreground gap-3">
-            <div className="w-7 h-7 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-            <span className="text-xs">{t('operator.req.loading')}</span>
-          </div>
-        ) : activeTab === 'deals' ? (
-          filteredDeals.length === 0 ? (
-            <div className="border border-dashed border-border rounded-xl p-10 text-center space-y-3 bg-muted/20">
-              <FileText className="w-10 h-10 text-muted-foreground/40 mx-auto" />
-              <p className="text-sm font-bold text-navy-900">
-                {t('operator.archive.empty_deals')}
+        <div className="op-card-body">
+          {loading ? (
+            <div className="space-y-3" aria-label={t('operator.req.loading')}>
+              {[1, 2, 3].map((row) => (
+                <div key={row} className="op-skeleton h-24" />
+              ))}
+            </div>
+          ) : activeCount === 0 ? (
+            <div className="op-empty-chart min-h-[240px]">
+              {activeTab === 'deals' ? (
+                <FileText aria-hidden="true" />
+              ) : (
+                <Inbox aria-hidden="true" />
+              )}
+              <h4>
+                {activeTab === 'deals'
+                  ? t('operator.archive.empty_deals')
+                  : t('operator.archive.empty_offers')}
+              </h4>
+              <p>
+                {searchQuery
+                  ? 'جرّب تعديل كلمات البحث أو إلغاء التصفية للعودة إلى كافة السجلات.'
+                  : 'ستظهر هنا السجلات المؤرشفة فور توفرها في حساب مؤسستك.'}
               </p>
               {searchQuery && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="text-xs rounded-xl"
+                <button
+                  type="button"
+                  className="op-btn op-btn-outline op-btn-sm mt-2"
                   onClick={() => setSearchQuery('')}
                 >
                   إلغاء التصفية
-                </Button>
+                </button>
               )}
             </div>
-          ) : (
-            <div className="grid gap-3">
+          ) : activeTab === 'deals' ? (
+            <div className="flex flex-col gap-3">
               {filteredDeals.map((opp) => (
                 <article
                   key={opp.id}
-                  className="bg-card border border-border rounded-xl p-5 shadow-sm hover:border-navy-500/30 transition-all flex flex-col md:flex-row md:items-center justify-between gap-4"
+                  className="flex flex-col gap-4 rounded-xl border border-[var(--op-line)] bg-[var(--op-surface-2)] p-5 transition-colors hover:border-[var(--op-gold-line)] md:flex-row md:items-center md:justify-between"
                 >
-                  <div className="space-y-1.5 flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-100 flex items-center gap-1">
-                        <Building className="w-3 h-3" />
+                  <div className="min-w-0 flex-1 space-y-2">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="op-chip green">
+                        <Building aria-hidden="true" />
                         <span>{opp.authorityName}</span>
                       </span>
                       {opp.status === 'submission_closed' && (
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-900 border border-amber-200">
-                          {t('operator.archive.closed_status')}
-                        </span>
+                        <span className="op-chip gold">{t('operator.archive.closed_status')}</span>
                       )}
-                      <span className="text-xs text-muted-foreground flex items-center gap-1">
-                        <Calendar className="w-3 h-3" />
-                        <span>{new Date(opp.updatedAt).toLocaleDateString()}</span>
+                      <span className="inline-flex items-center gap-1 text-[11px] text-[var(--op-muted)]">
+                        <Calendar className="size-3.5" aria-hidden="true" />
+                        <span>{new Date(opp.updatedAt).toLocaleDateString('ar-DZ')}</span>
                       </span>
                     </div>
 
-                    <h3 className="text-base font-bold text-navy-900 line-clamp-1" title={opp.title}>
+                    <h3
+                      className="line-clamp-1 text-sm font-bold text-[var(--op-ink)]"
+                      title={opp.title}
+                    >
                       {opp.title}
                     </h3>
 
-                    <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
+                    <p className="line-clamp-2 text-xs leading-relaxed text-[var(--op-text)]">
                       {opp.description}
                     </p>
                   </div>
 
-                  <div className="flex items-center gap-2 self-stretch md:self-center shrink-0 pt-2 md:pt-0">
-                    <Button
-                      size="sm"
-                      className="text-xs font-bold px-4 py-2 bg-navy-900 hover:bg-navy-800 text-white rounded-xl shadow-sm"
+                  <div className="flex flex-none items-center gap-2">
+                    <button
+                      type="button"
+                      className="op-btn op-btn-outline op-btn-sm"
                       onClick={() => setLocation(`/operator/opportunities/${opp.id}`)}
                     >
-                      {t('operator.archive.view_deal')}
-                    </Button>
+                      <span>{t('operator.archive.view_deal')}</span>
+                      <ArrowRight className="rtl:rotate-180" aria-hidden="true" />
+                    </button>
                   </div>
                 </article>
               ))}
             </div>
-          )
-        ) : filteredOffers.length === 0 ? (
-          <div className="border border-dashed border-border rounded-xl p-10 text-center space-y-3 bg-muted/20">
-            <Inbox className="w-10 h-10 text-muted-foreground/40 mx-auto" />
-            <p className="text-sm font-bold text-navy-900">
-              {t('operator.archive.empty_offers')}
-            </p>
-          </div>
-        ) : (
-          <div className="grid gap-3">
-            {filteredOffers.map((offer) => (
-              <article
-                key={offer.id}
-                className="bg-card border border-border rounded-xl p-5 shadow-sm hover:border-navy-500/30 transition-all flex flex-col md:flex-row md:items-center justify-between gap-4"
-              >
-                <div className="space-y-2 flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <h3 className="text-base font-bold text-navy-900 line-clamp-1">
-                      {offer.opportunityTitle}
-                    </h3>
-                    {offer.status === 'submitted' ? (
-                      <span className="inline-flex items-center gap-1 text-[11px] bg-emerald-50 text-emerald-800 border border-emerald-100 font-bold px-2.5 py-0.5 rounded-full">
-                        <CheckCircle2 className="w-3 h-3" />
-                        <span>{t('offers.status.submitted')}</span>
+          ) : (
+            <div className="flex flex-col gap-3">
+              {filteredOffers.map((offer) => (
+                <article
+                  key={offer.id}
+                  className="flex flex-col gap-4 rounded-xl border border-[var(--op-line)] bg-[var(--op-surface-2)] p-5 transition-colors hover:border-[var(--op-gold-line)] md:flex-row md:items-center md:justify-between"
+                >
+                  <div className="min-w-0 flex-1 space-y-2">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h3 className="line-clamp-1 text-sm font-bold text-[var(--op-ink)]">
+                        {offer.opportunityTitle}
+                      </h3>
+                      {offer.status === 'submitted' ? (
+                        <span className="op-chip green">
+                          <CheckCircle2 aria-hidden="true" />
+                          <span>{t('offers.status.submitted')}</span>
+                        </span>
+                      ) : (
+                        <span className="op-chip gold">
+                          <Clock aria-hidden="true" />
+                          <span>{t('offers.status.draft')}</span>
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-2 text-[11px] text-[var(--op-muted)]">
+                      <span className="op-chip">{offer.authorityName}</span>
+                      <span>
+                        <strong className="font-bold text-[var(--op-ink)]">
+                          {t('offers.field.financial')}:
+                        </strong>{' '}
+                        <span className="op-mono font-bold text-[var(--op-ink)]">
+                          {offer.financialOffer} د.ج
+                        </span>
                       </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-1 text-[11px] bg-gold-50 text-gold-900 border border-gold-200 font-bold px-2.5 py-0.5 rounded-full">
-                        <Clock className="w-3 h-3" />
-                        <span>{t('offers.status.draft')}</span>
+                      <span>
+                        {offer.submittedAt
+                          ? `${t('offers.status.submitted')}: ${new Date(offer.submittedAt).toLocaleDateString('ar-DZ')}`
+                          : `آخر تعديل: ${new Date(offer.updatedAt).toLocaleDateString('ar-DZ')}`}
                       </span>
-                    )}
+                    </div>
                   </div>
 
-                  <div className="flex items-center gap-3 text-xs text-muted-foreground flex-wrap">
-                    <span className="font-semibold text-emerald-800 bg-emerald-50/70 border border-emerald-100 px-2.5 py-0.5 rounded-md text-[11px]">
-                      {offer.authorityName}
-                    </span>
-                    <span>
-                      <strong className="text-navy-900 font-semibold">{t('offers.field.financial')}:</strong>{' '}
-                      <span className="font-mono text-navy-900 font-bold">{offer.financialOffer} د.ج</span>
-                    </span>
-                    <span className="text-muted-foreground">
-                      {offer.submittedAt
-                        ? `${t('offers.status.submitted')}: ${new Date(offer.submittedAt).toLocaleDateString()}`
-                        : `آخر تعديل: ${new Date(offer.updatedAt).toLocaleDateString()}`}
-                    </span>
+                  <div className="flex flex-none items-center gap-2">
+                    <button
+                      type="button"
+                      className="op-btn op-btn-outline op-btn-sm"
+                      onClick={() => setLocation(`/operator/offers/${offer.id}`)}
+                    >
+                      <span>{t('operator.archive.view_offer')}</span>
+                      <ArrowRight className="rtl:rotate-180" aria-hidden="true" />
+                    </button>
                   </div>
-                </div>
-
-                <div className="flex items-center gap-2 self-stretch md:self-center shrink-0 pt-2 md:pt-0">
-                  <Button
-                    size="sm"
-                    className="text-xs font-bold px-4 py-2 bg-navy-900 hover:bg-navy-800 text-white rounded-xl shadow-sm"
-                    onClick={() => setLocation(`/operator/offers/${offer.id}`)}
-                  >
-                    {t('operator.archive.view_offer')}
-                  </Button>
-                </div>
-              </article>
-            ))}
-          </div>
-        )}
+                </article>
+              ))}
+            </div>
+          )}
+        </div>
       </section>
     </div>
   );

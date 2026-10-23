@@ -2,8 +2,7 @@ import { useEffect, useState } from 'react';
 import { useLocation, useParams } from 'wouter';
 import { useI18n } from '@/i18n';
 import { api } from '@/lib/api';
-import { Button } from '@/components/ui/button';
-import { ArrowLeft, ArrowRight, Lock, AlertTriangle, Building, Calendar, DollarSign, FileText } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Lock, AlertTriangle, Building, Calendar, Banknote, FileText } from 'lucide-react';
 
 interface Opportunity {
   id: string;
@@ -58,133 +57,141 @@ export function OpportunityDetails() {
   const ArrowIcon = dir === 'rtl' ? ArrowRight : ArrowLeft;
 
   if (loading) {
-    return <div className="p-8 text-center text-muted-foreground text-sm">...</div>;
+    return (
+      <div className="op-page" aria-label={t('operator.req.loading')}>
+        <div className="op-card p-8">
+          <div className="op-skeleton mb-4 h-8 w-2/3" />
+          <div className="op-skeleton mb-3 h-4 w-1/3" />
+          <div className="op-skeleton h-40 w-full" />
+        </div>
+      </div>
+    );
   }
 
   if (error || !opp) {
     return (
-      <div className="p-6 max-w-3xl mx-auto space-y-4">
-        <div className="bg-destructive/10 text-destructive border border-destructive/20 p-4 rounded-xl text-sm font-medium">
-          الفرصة غير متوفرة أو تم سحبها.
+      <div className="op-page">
+        <div className="op-alert error">
+          <AlertTriangle aria-hidden="true" />
+          <span>الفرصة غير متوفرة أو تم سحبها.</span>
         </div>
-        <Button variant="outline" onClick={() => setLocation('/operator/deals')}>
-          <ArrowIcon className="w-4 h-4 me-2" />
-          <span>العودة للصفقات</span>
-        </Button>
+        <div>
+          <button
+            type="button"
+            className="op-btn op-btn-outline"
+            onClick={() => setLocation('/operator/deals')}
+          >
+            <ArrowIcon aria-hidden="true" />
+            <span>العودة للصفقات</span>
+          </button>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      {/* Top back navigation */}
-      <div className="flex items-center gap-3">
-        <Button
-          variant="outline"
-          size="sm"
-          className="border-border hover:bg-muted text-xs font-bold gap-2"
-          onClick={() => setLocation('/operator/deals')}
-        >
-          <ArrowIcon className="w-4 h-4" />
-          <span>العودة لقائمة الصفقات</span>
-        </Button>
-      </div>
-
-      {/* Hero section for Opportunity Details */}
-      <section className="rounded-2xl p-6 md:p-8 text-white bg-gradient-to-r from-navy-900 to-navy-700 shadow-sm space-y-3">
-        <div className="inline-block bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 text-xs font-bold px-3 py-1 rounded-full">
-          {opp.authorityName}
-        </div>
-        <h2 className="text-xl md:text-2xl font-extrabold text-white leading-snug">
-          {opp.title}
-        </h2>
-        <p className="text-xs text-navy-100 flex items-center gap-2">
-          <Calendar className="w-3.5 h-3.5" />
-          <span>تاريخ التحديث: {new Date(opp.updatedAt).toLocaleDateString()}</span>
-        </p>
-      </section>
-
-      {/* Main Details Panel */}
-      <div className="bg-card border border-border rounded-2xl p-6 md:p-8 shadow-sm space-y-6">
-        {/* Description Section */}
-        <div className="space-y-2">
-          <h3 className="text-sm font-bold text-navy-900 flex items-center gap-2">
-            <FileText className="w-4 h-4 text-primary" />
-            <span>تفاصيل وموضوع الصفقة</span>
-          </h3>
-          <p className="text-sm text-foreground whitespace-pre-wrap bg-muted/30 p-4 rounded-xl border border-border leading-relaxed">
-            {opp.description}
+    <div className="op-page">
+      <div className="op-page-head">
+        <div>
+          <span className="op-chip gold mb-2">
+            <Building aria-hidden="true" />
+            <span>{opp.authorityName}</span>
+          </span>
+          <h1>{opp.title}</h1>
+          <p className="flex items-center gap-1.5">
+            <Calendar className="size-3.5" aria-hidden="true" />
+            <span>تاريخ التحديث: {new Date(opp.updatedAt).toLocaleDateString('ar-DZ')}</span>
           </p>
         </div>
+        <div className="op-page-actions">
+          <button
+            type="button"
+            className="op-btn op-btn-outline"
+            onClick={() => setLocation('/operator/deals')}
+          >
+            <ArrowIcon aria-hidden="true" />
+            <span>العودة لقائمة الصفقات</span>
+          </button>
+        </div>
+      </div>
 
-        {/* Specifications Grid */}
-        <dl className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="bg-muted/20 border border-border rounded-xl p-3.5 space-y-1">
-            <dt className="text-xs text-muted-foreground flex items-center gap-1.5">
-              <Building className="w-3.5 h-3.5" />
-              <span>المصلحة المتعاقدة</span>
-            </dt>
-            <dd className="text-sm font-bold text-navy-900">{opp.authorityName}</dd>
-          </div>
-
-          <div className="bg-muted/20 border border-border rounded-xl p-3.5 space-y-1">
-            <dt className="text-xs text-muted-foreground flex items-center gap-1.5">
-              <DollarSign className="w-3.5 h-3.5" />
-              <span>{t('opps.budget')}</span>
-            </dt>
-            <dd className="text-sm font-bold text-navy-900 font-mono">
-              {opp.estimatedBudget ? `${opp.estimatedBudget} د.ج` : 'غير محدد'}
-            </dd>
-          </div>
-        </dl>
-
-        {/* Mandatory Security Notice regarding Document Download */}
-        <div className="border border-amber-200 bg-amber-50 text-amber-900 rounded-xl p-4 flex items-start gap-3 text-xs leading-relaxed">
-          <AlertTriangle className="w-5 h-5 text-amber-600 flex-none mt-0.5" />
-          <div className="space-y-1">
-            <strong className="block text-sm font-bold text-amber-900">
-              تنبيه تنزيل وثائق دفتر الشروط:
-            </strong>
-            <p className="text-amber-800">
-              {t('doc.download_suspended')}. وفقاً للقواعد المعتمدة، لا يُتاح تنزيل دفتر الشروط للمتعاملين إلا بعد إتمام والتحقق من عملية الدفع خادمياً.
-            </p>
-          </div>
+      <section className="op-card" aria-labelledby="opportunity-details-title">
+        <div className="op-card-head">
+          <h2 id="opportunity-details-title" className="flex items-center gap-2">
+            <FileText className="size-4 text-[var(--op-gold)]" aria-hidden="true" />
+            <span>تفاصيل وموضوع الصفقة</span>
+          </h2>
         </div>
 
-        {/* Action Buttons */}
-        <div className="pt-6 border-t border-border flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
-          <div className="flex gap-3">
-            {/* Download Button: Explicitly Disabled with Security Notice */}
-            <Button
-              variant="outline"
-              disabled
-              title={t('doc.download_suspended')}
-              className="border-border bg-muted/50 text-muted-foreground text-xs font-semibold cursor-not-allowed opacity-80 flex items-center gap-2"
-            >
-              <Lock className="w-4 h-4" />
-              <span>{t('doc.download_suspended')}</span>
-            </Button>
+        <div className="op-card-body space-y-5">
+          <p className="whitespace-pre-wrap rounded-xl border border-[var(--op-line-2)] bg-[var(--op-surface-2)] p-4 text-sm leading-relaxed text-[var(--op-text)]">
+            {opp.description}
+          </p>
+
+          <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="rounded-xl border border-[var(--op-line)] bg-[var(--op-surface-2)] p-4">
+              <dt className="flex items-center gap-1.5 text-xs text-[var(--op-muted)]">
+                <Building className="size-3.5" aria-hidden="true" />
+                <span>المصلحة المتعاقدة</span>
+              </dt>
+              <dd className="mt-1 text-sm font-bold text-[var(--op-ink)]">{opp.authorityName}</dd>
+            </div>
+
+            <div className="rounded-xl border border-[var(--op-line)] bg-[var(--op-surface-2)] p-4">
+              <dt className="flex items-center gap-1.5 text-xs text-[var(--op-muted)]">
+                <Banknote className="size-3.5" aria-hidden="true" />
+                <span>{t('opps.budget')}</span>
+              </dt>
+              <dd className="op-mono mt-1 text-sm font-bold text-[var(--op-ink)]">
+                {opp.estimatedBudget || 'غير محدد'}
+              </dd>
+            </div>
+          </dl>
+
+          <div className="op-alert warning">
+            <AlertTriangle aria-hidden="true" />
+            <div>
+              <strong className="mb-1 block text-sm font-bold">
+                تنبيه تنزيل وثائق دفتر الشروط:
+              </strong>
+              <p>
+                {t('doc.download_suspended')}. وفقاً للقواعد المعتمدة، لا يُتاح تنزيل دفتر الشروط
+                للمتعاملين إلا بعد إتمام والتحقق من عملية الدفع خادمياً.
+              </p>
+            </div>
           </div>
 
-          <div>
+          <div className="op-action-bar">
+            <button
+              type="button"
+              disabled
+              title={t('doc.download_suspended')}
+              className="op-btn op-btn-outline"
+            >
+              <Lock aria-hidden="true" />
+              <span>{t('doc.download_suspended')}</span>
+            </button>
+
             {existingOfferId ? (
-              <Button
-                className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-6 py-2.5 rounded-xl shadow-sm"
+              <button
+                type="button"
+                className="op-btn op-btn-green"
                 onClick={() => setLocation(`/operator/offers/${existingOfferId}`)}
               >
-                {t('opps.btn.view_offer')}
-              </Button>
+                <span>{t('opps.btn.view_offer')}</span>
+              </button>
             ) : (
-              <Button
-                className="w-full sm:w-auto bg-navy-900 hover:bg-navy-700 text-white font-bold text-xs px-6 py-2.5 rounded-xl shadow-sm"
+              <button
+                type="button"
+                className="op-btn op-btn-gold"
                 onClick={() => setLocation(`/operator/opportunities/${id}/offer`)}
               >
-                {t('opps.btn.make_offer')}
-              </Button>
+                <span>{t('opps.btn.make_offer')}</span>
+              </button>
             )}
           </div>
         </div>
-      </div>
+      </section>
     </div>
   );
 }

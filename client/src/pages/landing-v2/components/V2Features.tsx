@@ -16,7 +16,7 @@ import {
   AlertCircle,
   Layers,
   ArrowLeft,
-  ExternalLink,
+  Lock,
 } from 'lucide-react';
 import { SectionHeader } from './SectionHeader';
 
@@ -24,10 +24,10 @@ import { SectionHeader } from './SectionHeader';
    القسم 6 — الميزات المتاحة (Available & Verified Features)
    العنوان: اكتشف ما يمكنك استخدامه الآن.
    مصدر موحد لحالات الميزات:
-   - متاحة: تعمل ومختبرة للمستخدم المخول.
-   - تجريبية: تعمل ضمن نطاق محدود معلن.
-   - قيد التطوير: بدأ التنفيذ البرمجي فعلًا.
-   - مخطط لها: تصور مستقبلي في مساحة ثانوية قابلة للتوسيع.
+   - متاحة: تعمل فعلياً للمستخدم المخول، مع دليل اختبار.
+   - تجريبية: تعمل جزئياً ضمن نطاق محدود معلن.
+   - قيد التطوير: غير متاحة للاستخدام العام بعد.
+   - مخطط لها: غير متاحة، وتُعرض كتصور مستقبلي فقط.
    كل بطاقة تتضمن: الاسم، الفائدة، الحالة، القيد، وإجراء حقيقي.
    ============================================================ */
 
@@ -54,7 +54,7 @@ const ACTIVE_FEATURES: FeatureItem[] = [
     benefit: 'حوكمة تسلسل مراحل الصفقة (تحديد الحاجة، الإعلان، الفتح، التقييم، المنح) مع التحقق الإجرائي قبل الانتقال.',
     status: 'متاحة',
     limitation: 'يتطلب توفر حساب مؤسسي مصرح به لكل مرحلة إجرائية.',
-    verificationEvidence: 'اختبارات دورة الحياة الكاملة (test_full_procurement_lifecycle.py) بنجاح 100%.',
+    verificationEvidence: 'تغطية اختبار آلي لدورة الحياة الكاملة (test_full_procurement_lifecycle.py).',
     actionText: 'تجربة الإجراءات في بوابة المصلحة',
     actionHref: '/login',
     icon: Workflow,
@@ -79,7 +79,7 @@ const ACTIVE_FEATURES: FeatureItem[] = [
     status: 'متاحة',
     limitation: 'يصدر بصيغة PDF قياسية قابلة للتحميل والطباعة للتوقيع اليدوي للجنة.',
     verificationEvidence: 'اختبارات خدمة توليد الـ PDF (test_pdf_export.py).',
-    actionText: 'معاينة محضر تجريبي',
+    actionText: 'الدخول إلى بوابة المصلحة',
     actionHref: '/login',
     icon: Printer,
     tint: 'bg-[#EDF4EE] text-[#167354] border-[#CDE1D3]',
@@ -105,7 +105,7 @@ const ACTIVE_FEATURES: FeatureItem[] = [
     status: 'تجريبية',
     limitation: 'تنظيم داخلي للمتعامل، ولا يمثل اعتماداً مسبقاً قبل الفحص القانوني للجنة.',
     verificationEvidence: 'فحص واجهات رفع وثائق العرض وتصنيفها في بوابة المتعامل.',
-    actionText: 'معاينة بوابة المتعامل',
+    actionText: 'الدخول إلى بوابة المتعامل',
     actionHref: '/login',
     icon: FileCheck,
     tint: 'bg-[#EFF4F8] text-[#1D6FA5] border-[#D0E2EF]',
@@ -117,7 +117,7 @@ const ACTIVE_FEATURES: FeatureItem[] = [
     status: 'تجريبية',
     limitation: 'مساعد استشاري مسبق القواعد؛ لا يصدر قرارات أو استشارات قانونية ملزمة.',
     verificationEvidence: 'محرك الاستعلامات الاستشارية المدمج في واجهات البوابة.',
-    actionText: 'طرح استفسار عبر المنصة',
+    actionText: 'الدخول لاستخدام المساعد',
     actionHref: '/login',
     icon: Bot,
     tint: 'bg-[#EFF4F8] text-[#1D6FA5] border-[#D0E2EF]',
@@ -131,8 +131,7 @@ const ACTIVE_FEATURES: FeatureItem[] = [
     status: 'قيد التطوير',
     limitation: 'يجري استكمال قواعد استثناءات الحالات الاستعجالية والصفقات المبسطة.',
     verificationEvidence: 'قيد البرمجة في خدمة الحسابات الإجرائية للـ Backend.',
-    actionText: 'قيد التطوير البرمجي',
-    actionHref: '/login',
+    actionText: 'غير متاح حالياً',
     icon: CalendarClock,
     tint: 'bg-[#FFFBEB] text-[#B45309] border-[#FDE68A]',
   },
@@ -143,8 +142,7 @@ const ACTIVE_FEATURES: FeatureItem[] = [
     status: 'قيد التطوير',
     limitation: 'يجري ربط محركات التجميع الإحصائي عبر قواعد البيانات اللامركزية.',
     verificationEvidence: 'نماذج بوابة الإدارة المركزية والتقارير الإحصائية قيد الاستكمال.',
-    actionText: 'قيد التطوير البرمجي',
-    actionHref: '/login',
+    actionText: 'غير متاح حالياً',
     icon: BarChart3,
     tint: 'bg-[#FFFBEB] text-[#B45309] border-[#FDE68A]',
   },
@@ -184,28 +182,28 @@ export function V2Features() {
         return (
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-[#EDF4EE] text-[#167354] border border-[#CDE1D3]">
             <CheckCircle2 className="size-3" aria-hidden="true" />
-            <span>متاحة ومختبرة</span>
+            <span>تعمل فعلياً</span>
           </span>
         );
       case 'تجريبية':
         return (
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-[#EFF4F8] text-[#1D6FA5] border border-[#D0E2EF]">
             <Clock className="size-3" aria-hidden="true" />
-            <span>تجريبية (نطاق محدود)</span>
+            <span>تعمل جزئياً</span>
           </span>
         );
       case 'قيد التطوير':
         return (
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-[#FFFBEB] text-[#B45309] border border-[#FDE68A]">
             <AlertCircle className="size-3" aria-hidden="true" />
-            <span>قيد التطوير النشط</span>
+            <span>قيد التطوير</span>
           </span>
         );
       case 'مخطط لها':
         return (
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-[#F3EFF8] text-[#7C3AED] border border-[#DDD6FE]">
             <Layers className="size-3" aria-hidden="true" />
-            <span>مخطط لها</span>
+            <span>غير متاحة — مخطط لها</span>
           </span>
         );
     }
@@ -217,21 +215,21 @@ export function V2Features() {
         <SectionHeader
           badge="الشفافية التشغيلية"
           title="اكتشف ما يمكنك استخدامه الآن."
-          subtitle="دليل صادق وموثّق لحالة كل قدرة في النظام؛ نعلن بوضوح ما هو جاهز ومختبر، وما هو تجريبي، وما يجري تطويره."
+          subtitle="دليل صادق وموثّق لحالة كل قدرة في النظام؛ نعلن بوضوح ما يعمل فعلياً، وما يعمل جزئياً، وما يجري تطويره، وما هو غير متاح."
         />
 
         {/* أزرار التصفية السريعة */}
-        <div className="flex flex-wrap items-center justify-center gap-2 mb-8">
+        <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center justify-center gap-2 mb-8 max-w-md sm:max-w-none mx-auto">
           {[
-            { id: 'all', label: 'كافة الميزات المنفذة' },
-            { id: 'متاحة', label: 'متاحة (مختبرة)' },
-            { id: 'تجريبية', label: 'تجريبية' },
+            { id: 'all', label: 'كل الحالات' },
+            { id: 'متاحة', label: 'تعمل فعلياً' },
+            { id: 'تجريبية', label: 'تعمل جزئياً' },
             { id: 'قيد التطوير', label: 'قيد التطوير' },
           ].map((tab) => (
             <button
               key={tab.id}
               type="button"
-              className={`px-4 py-1.5 rounded-lg text-xs md:text-sm font-bold transition-all border ${
+              className={`w-full sm:w-auto px-4 py-2 sm:py-1.5 rounded-lg text-xs md:text-sm font-bold transition-all border ${
                 filter === tab.id
                   ? 'bg-[#167354] text-white border-[#167354] shadow-2xs'
                   : 'bg-white text-[#59665F] border-[#E3E7E2] hover:bg-[#F8F9F7] hover:text-[#24352E]'
@@ -247,15 +245,24 @@ export function V2Features() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-5">
           {filteredFeatures.map((feat) => {
             const Icon = feat.icon;
+            const isUnderDevelopment = feat.status === 'قيد التطوير';
+            const availabilityLabel =
+              feat.status === 'متاحة'
+                ? 'متاح للحسابات المصرح لها'
+                : feat.status === 'تجريبية'
+                  ? 'نطاق تجريبي محدود'
+                  : 'غير متاح للاستخدام العام';
+            const evidenceLabel = isUnderDevelopment ? 'الحالة' : 'الدليل';
+
             return (
               <article
                 key={feat.id}
-                className="bg-[#F8F9F7] rounded-xl border border-[#E3E7E2] p-5 sm:p-6 flex flex-col justify-between gap-4 hover:border-[#CBD5E1] transition-all"
+                className="bg-white rounded-2xl border border-[#E3E7E2] p-5 sm:p-6 flex flex-col justify-between gap-4 transition-all hover:border-[#C9D8D0] hover:shadow-[0_16px_36px_-26px_rgba(9,46,73,0.22)]"
               >
                 <div className="flex flex-col gap-3">
                   {/* الرأس: الأيقونة وشارة الحالة */}
                   <div className="flex items-center justify-between gap-2">
-                    <div className={`size-10 rounded-lg flex items-center justify-center border ${feat.tint}`}>
+                    <div className={`size-11 rounded-xl flex items-center justify-center border ${feat.tint}`}>
                       <Icon className="size-5" aria-hidden="true" />
                     </div>
                     {getStatusBadge(feat.status)}
@@ -270,34 +277,41 @@ export function V2Features() {
                     </p>
                   </div>
 
-                  {/* القيد الصريح ودليل الفحص */}
-                  <div className="bg-white rounded-lg border border-[#E3E7E2] p-3 text-xs space-y-1.5 mt-1">
+                  {/* القيد الصريح والدليل المتاح */}
+                  <div className="bg-[#F8FAF8] rounded-xl border border-[#E7EDE8] p-3.5 text-xs space-y-2 mt-1">
                     <div className="flex items-start gap-1.5 text-[#59665F]">
                       <strong className="text-[#C83A42] shrink-0 font-bold">القيد:</strong>
-                      <span>{feat.limitation}</span>
+                      <span className="leading-relaxed">{feat.limitation}</span>
                     </div>
                     {feat.verificationEvidence && (
-                      <div className="flex items-start gap-1.5 text-[#59665F] pt-1.5 border-t border-[#E3E7E2]">
-                        <strong className="text-[#167354] shrink-0 font-bold">التحقق:</strong>
-                        <span className="font-mono text-[11px] text-[#24352E]">{feat.verificationEvidence}</span>
+                      <div className="flex items-start gap-1.5 text-[#59665F] pt-2 border-t border-[#E3E7E2]">
+                        <strong className="text-[#167354] shrink-0 font-bold">{evidenceLabel}:</strong>
+                        <span className="text-[11px] leading-relaxed text-[#31443B]">{feat.verificationEvidence}</span>
                       </div>
                     )}
                   </div>
                 </div>
 
-                {/* الإجراء الحقيقي */}
-                <div className="pt-3 border-t border-[#E3E7E2] flex items-center justify-between">
-                  <span className="text-[11px] font-mono text-[#59665F]">
-                    {feat.status === 'متاحة' ? 'جاهز للاستخدام' : 'متاح للتجربة والتقييم'}
+                {/* الإجراء الحقيقي أو حالة عدم الإتاحة */}
+                <div className="pt-3 border-t border-[#E3E7E2] flex items-center justify-between gap-3">
+                  <span className="text-[11px] font-medium text-[#59665F]">
+                    {availabilityLabel}
                   </span>
-                  <button
-                    type="button"
-                    className="inline-flex items-center gap-1 text-xs font-bold text-[#167354] hover:text-[#115840] transition-colors"
-                    onClick={() => setLocation(feat.actionHref || '/login')}
-                  >
-                    <span>{feat.actionText}</span>
-                    <ArrowLeft className="size-3.5" aria-hidden="true" />
-                  </button>
+                  {isUnderDevelopment ? (
+                    <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-[#8A6A20]">
+                      <Lock className="size-3.5" aria-hidden="true" />
+                      <span>غير متاح الآن</span>
+                    </span>
+                  ) : (
+                    <button
+                      type="button"
+                      className="inline-flex items-center gap-1 text-xs font-bold text-[#167354] hover:text-[#115840] transition-colors focus-visible:outline-2 focus-visible:outline-[#167354]"
+                      onClick={() => setLocation(feat.actionHref || '/login')}
+                    >
+                      <span>{feat.actionText}</span>
+                      <ArrowLeft className="size-3.5" aria-hidden="true" />
+                    </button>
+                  )}
                 </div>
               </article>
             );
@@ -313,10 +327,10 @@ export function V2Features() {
             aria-expanded={showPlanned}
           >
             <div className="flex items-center gap-2.5">
-              <Layers className="size-4.5 text-[#7C3AED]" aria-hidden="true" />
+              <Layers className="size-4.5 text-[#092E49]" aria-hidden="true" />
               <div>
                 <span className="text-sm font-extrabold text-[#24352E] block">
-                  ميزات مخطط لها (تصورات مستقبلية قيد الدراسة)
+                  غير متاحة حالياً — ميزات مخطط لها
                 </span>
                 <span className="text-xs text-[#59665F]">
                   انقر للاطلاع على القدرات المقررة ضمن مراحل التكامل اللاحقة
@@ -333,8 +347,8 @@ export function V2Features() {
               {PLANNED_FEATURES.map((item, i) => (
                 <div key={i} className="p-4 rounded-lg bg-[#F8F9F7] border border-[#E3E7E2] flex flex-col justify-between gap-3">
                   <div>
-                    <span className="inline-block text-[11px] font-bold text-[#7C3AED] bg-[#F3EFF8] px-2 py-0.5 rounded mb-2">
-                      مخطط مستقبلي
+                    <span className="inline-block text-[11px] font-bold text-[#092E49] bg-[#EEF3F6] border border-[#D5E2EA] px-2 py-0.5 rounded mb-2">
+                      غير متاحة — مخطط لها
                     </span>
                     <h4 className="text-sm font-extrabold text-[#24352E] m-0 mb-1 leading-snug">
                       {item.name}

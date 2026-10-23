@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, type ChangeEvent, type FormEvent } from 'react';
 import { useI18n } from '@/i18n';
 import { useLocation } from 'wouter';
 import { api } from '@/lib/api';
@@ -22,14 +22,12 @@ import {
   RefreshCw,
   Paperclip,
   Trash2,
-  Users,
   ShieldCheck,
   Building2,
   Calendar,
   AlertTriangle,
   ChevronDown,
   Info,
-  ExternalLink,
   Plus,
 } from 'lucide-react';
 
@@ -137,7 +135,7 @@ const DEFAULT_TEAM_MEMBERS: TeamMember[] = [
 ];
 
 export function OffersList() {
-  const { t, dir } = useI18n();
+  const { t } = useI18n();
   const [, setLocation] = useLocation();
 
   // Data states
@@ -330,7 +328,7 @@ export function OffersList() {
     }
   };
 
-  const handleFileSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelected = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !uploadTargetDocId) return;
 
@@ -382,7 +380,7 @@ export function OffersList() {
   };
 
   // Team member creation
-  const handleAddMember = (e: React.FormEvent) => {
+  const handleAddMember = (e: FormEvent) => {
     e.preventDefault();
     if (!newMemberName.trim()) return;
 
@@ -417,7 +415,7 @@ export function OffersList() {
   const readinessPercent = totalDocs > 0 ? Math.round((okCount / totalDocs) * 100) : 0;
 
   return (
-    <div className="font-sans flex flex-col gap-6 text-[#0B1F3A] max-w-full">
+    <div className="op-page">
       {/* Hidden File Input for Real Local Uploads */}
       <input
         type="file"
@@ -431,40 +429,38 @@ export function OffersList() {
       {/* ══════════════════════════════════════════════════════════════════════════
           1. رأس القسم (Header)
           ══════════════════════════════════════════════════════════════════════════ */}
-      <header className="bg-white border border-[#D5DDEA] rounded-2xl p-4 md:p-6 shadow-xs flex flex-col gap-4">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          <div className="flex flex-col gap-1 min-w-0">
+      <header className="flex flex-col gap-4">
+        <div className="op-page-head">
+          <div className="flex flex-col gap-2 min-w-0">
             <div className="flex items-center gap-2.5 flex-wrap">
-              <h1 className="text-2xl md:text-[26px] font-extrabold text-[#0B1F3A] leading-tight m-0">
-                إعداد العرض
-              </h1>
+              <h1>إدارة العروض</h1>
               {selectedDealId ? (
-                <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full border border-[#CFDCF0] bg-[#E8EFFA] text-[#14325C] text-xs font-bold">
+                <span className="op-chip gold">
                   <Building2 className="size-3.5" />
                   <span>صفقة نشطة</span>
                 </span>
               ) : (
-                <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full border border-[#EBDDB0] bg-[#FBF3DC] text-[#6B4F0E] text-xs font-bold">
+                <span className="op-chip gold">
                   <AlertCircle className="size-3.5" />
                   <span>في انتظار التحديد</span>
                 </span>
               )}
               {isOfferSubmitted && (
-                <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full border border-emerald-200 bg-emerald-50 text-emerald-800 text-xs font-bold">
+                <span className="op-chip green">
                   <ShieldCheck className="size-3.5" />
                   <span>مودَع رسمياً (مقفَل)</span>
                 </span>
               )}
             </div>
-            <p className="text-sm md:text-base leading-relaxed text-[#5B6B82] m-0">
+            <p>
               جهّز وثائق عرضك، تابع النواقص، ووزّع العمل على فريقك.
             </p>
           </div>
 
           {/* Deal Selector & Save Button */}
-          <div className="flex flex-wrap items-center gap-3 self-start lg:self-auto">
-            <div className="flex flex-col gap-1 min-w-[260px] max-w-full">
-              <label htmlFor="deal-selector" className="text-xs font-bold text-[#14325C]">
+          <div className="flex flex-wrap items-end gap-3 self-start lg:self-auto">
+            <div className="op-field min-w-[260px] max-w-full">
+              <label htmlFor="deal-selector" className="text-xs font-bold text-[#8a6e1c]">
                 الصفقة محل الإعداد
               </label>
               <div className="relative">
@@ -472,7 +468,7 @@ export function OffersList() {
                   id="deal-selector"
                   value={selectedDealId}
                   onChange={(e) => setSelectedDealId(e.target.value)}
-                  className="w-full h-11 pe-9 ps-3 rounded-xl border border-[#CBD5E1] bg-white text-[#0B1F3A] text-sm font-semibold hover:border-[#94A3B8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#14325C] transition-colors appearance-none cursor-pointer"
+                  className="op-select w-full h-11 pe-9 ps-3 appearance-none cursor-pointer"
                 >
                   <option value="">اختر صفقة لإعداد عرضك</option>
                   {deals.map((d) => (
@@ -481,7 +477,7 @@ export function OffersList() {
                     </option>
                   ))}
                 </select>
-                <ChevronDown className="size-4 text-[#5B6B82] absolute end-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <ChevronDown className="size-4 text-[#5d6b7e] absolute end-3 top-1/2 -translate-y-1/2 pointer-events-none" />
               </div>
             </div>
 
@@ -491,16 +487,13 @@ export function OffersList() {
                 onClick={handleSave}
                 disabled={saveStatus === 'saving' || !selectedDealId}
                 aria-label="حفظ التغييرات"
-                className={`inline-flex items-center justify-center gap-2 h-11 px-5 rounded-xl text-sm font-bold transition-all border-0 shadow-xs cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${
-                  saveStatus === 'saving'
-                    ? 'bg-[#14325C]/75 text-white cursor-wait'
-                    : saveStatus === 'success'
-                    ? 'bg-[#047857] hover:bg-[#065F46] text-white focus-visible:ring-[#047857]'
+                style={saveStatus === 'error' ? { color: 'var(--op-red)', borderColor: '#f6c9ce' } : undefined}
+                className={`op-btn ${
+                  saveStatus === 'success'
+                    ? 'op-btn-green'
                     : saveStatus === 'error'
-                    ? 'bg-[#B42318] hover:bg-[#912018] text-white focus-visible:ring-[#B42318]'
-                    : !selectedDealId
-                    ? 'bg-[#E2E8F0] text-[#94A3B8] cursor-not-allowed'
-                    : 'bg-[#14325C] hover:bg-[#0B1F3A] text-white focus-visible:ring-[#14325C]'
+                    ? 'op-btn-outline'
+                    : 'op-btn-gold'
                 }`}
               >
                 {saveStatus === 'saving' ? (
@@ -528,7 +521,7 @@ export function OffersList() {
 
               {/* Only shown AFTER successful server/local save response */}
               {lastSavedTime && saveStatus !== 'saving' && (
-                <span className="text-[11px] font-medium text-[#5B6B82] leading-none">
+                <span className="op-hint">
                   آخر حفظ: {lastSavedTime}
                 </span>
               )}
@@ -538,29 +531,29 @@ export function OffersList() {
 
         {/* Selected Deal Information Banner */}
         {activeDeal ? (
-          <div className="bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-3.5 flex flex-wrap items-center justify-between gap-3 text-xs md:text-sm">
+          <div className="bg-[#fffdf5] border border-[#f3efdf] rounded-xl p-3.5 flex flex-wrap items-center justify-between gap-3 text-xs md:text-sm">
             <div className="flex items-center gap-2.5 flex-wrap min-w-0">
-              <span className="px-2.5 py-1 rounded-md bg-[#EEF2F7] text-[#14325C] font-mono font-bold text-xs">
+              <span className="px-2.5 py-1 rounded-md bg-[#f3efdf] text-[#8a6e1c] font-mono font-bold text-xs">
                 {activeDeal.reference_number}
               </span>
-              <span className="font-bold text-[#0B1F3A] truncate max-w-[500px]">
+              <span className="font-bold text-[#3a4555] truncate max-w-[500px]">
                 {activeDeal.title}
               </span>
               {activeDeal.authority_name && (
-                <span className="text-[#5B6B82] hidden sm:inline">
+                <span className="text-[#5d6b7e] hidden sm:inline">
                   • {activeDeal.authority_name}
                 </span>
               )}
             </div>
             {activeDeal.submission_deadline && (
-              <div className="flex items-center gap-1.5 text-xs font-semibold text-[#B42318] bg-[#FCEBEA] px-2.5 py-1 rounded-md border border-[#F4C9C5]">
+              <div className="flex items-center gap-1.5 text-xs font-semibold text-[#e63946] bg-[#fde8e9] px-2.5 py-1 rounded-md border border-[#f6c9ce]">
                 <Calendar className="size-3.5" />
                 <span>آخر أجل: {new Date(activeDeal.submission_deadline).toLocaleDateString('ar-DZ')}</span>
               </div>
             )}
           </div>
         ) : (
-          <div className="bg-[#FFFBEB] border border-[#FDE68A] text-[#92400E] rounded-xl p-3.5 flex items-center gap-2 text-xs md:text-sm font-semibold">
+          <div className="bg-[#fdf6df] border border-[#eedfb0] text-[#8a6e1c] rounded-xl p-3.5 flex items-center gap-2 text-xs md:text-sm font-semibold">
             <Info className="size-4 shrink-0" />
             <span>اختر صفقة لإعداد عرضك من القائمة أعلاه لبدء تنظيم وثائق العطاء وتوزيع المهام.</span>
           </div>
@@ -570,24 +563,24 @@ export function OffersList() {
       {/* ══════════════════════════════════════════════════════════════════════════
           2. مؤشرات الجاهزية واكتمال الوثائق (Readiness Indicators)
           ══════════════════════════════════════════════════════════════════════════ */}
-      <section className="bg-white border border-[#D5DDEA] rounded-2xl p-4 md:p-6 shadow-xs flex flex-col gap-4" aria-label="مؤشرات اكتمال الوثائق">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#EEF2F7] pb-3">
+      <section className="op-card p-4 md:p-6 flex flex-col gap-4" aria-label="مؤشرات اكتمال الوثائق">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#f3efdf] pb-3">
           <div className="flex items-center gap-2.5">
-            <div className="size-8 rounded-lg bg-[#E8EFFA] text-[#14325C] flex items-center justify-center shrink-0">
+            <div className="size-8 rounded-lg bg-[#fdf6df] text-[#8a6e1c] flex items-center justify-center shrink-0">
               <FileText className="size-4.5" />
             </div>
             <div>
-              <h2 className="text-base md:text-lg font-extrabold text-[#0B1F3A] m-0">اكتمال الوثائق</h2>
-              <p className="text-xs text-[#5B6B82] m-0">
+              <h2 className="text-base md:text-lg font-extrabold text-[#3a4555] m-0">اكتمال الوثائق</h2>
+              <p className="text-xs text-[#5d6b7e] m-0">
                 تُحسب نسبة الجاهزية بعدد الوثائق المكتملة ({okCount}) مقارنة بإجمالي الوثائق المطلوبة ({totalDocs}).
               </p>
             </div>
           </div>
           <div className="flex items-baseline gap-1.5 self-end sm:self-auto">
-            <span className="text-3xl font-extrabold text-[#14325C] leading-none">
+            <span className="text-3xl font-extrabold text-[#8a6e1c] leading-none">
               {readinessPercent}%
             </span>
-            <span className="text-xs font-bold text-[#5B6B82]">نسبة الجاهزية</span>
+            <span className="text-xs font-bold text-[#5d6b7e]">نسبة الجاهزية</span>
           </div>
         </div>
 
@@ -598,10 +591,10 @@ export function OffersList() {
           aria-valuemin={0}
           aria-valuemax={100}
           aria-label="نسبة اكتمال وثائق العرض"
-          className="w-full h-3 bg-[#E2E8F0] rounded-full overflow-hidden"
+          className="w-full h-3 bg-[#f3efdf] rounded-full overflow-hidden"
         >
           <div
-            className="h-full bg-gradient-to-r from-[#14325C] to-[#047857] transition-all duration-500 rounded-full"
+            className="h-full bg-gradient-to-r from-[#8a6e1c] to-[#0ea968] transition-all duration-500 rounded-full"
             style={{ width: `${readinessPercent}%` }}
           />
         </div>
@@ -609,55 +602,55 @@ export function OffersList() {
         {/* KPI Counter Cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {/* 1. Maktamila */}
-          <div className="flex items-center gap-3 p-3 rounded-xl bg-white border border-[#CBD5E1] shadow-2xs">
+          <div className="flex items-center gap-3 p-3 rounded-xl bg-white border border-[#ece7d6] shadow-2xs">
             <div className="size-10 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center justify-center shrink-0">
               <CheckCircle2 className="size-5" />
             </div>
             <div>
-              <div className="text-xl font-extrabold text-[#0B1F3A] leading-tight">{okCount}</div>
-              <div className="text-xs font-bold text-[#5B6B82]">مكتملة</div>
+              <div className="text-xl font-extrabold text-[#3a4555] leading-tight">{okCount}</div>
+              <div className="text-xs font-bold text-[#5d6b7e]">مكتملة</div>
             </div>
           </div>
 
           {/* 2. Qayd Al-Injaz */}
-          <div className="flex items-center gap-3 p-3 rounded-xl bg-white border border-[#CBD5E1] shadow-2xs">
+          <div className="flex items-center gap-3 p-3 rounded-xl bg-white border border-[#ece7d6] shadow-2xs">
             <div className="size-10 rounded-lg bg-amber-50 text-amber-900 border border-amber-200 flex items-center justify-center shrink-0">
               <Clock className="size-5" />
             </div>
             <div>
-              <div className="text-xl font-extrabold text-[#0B1F3A] leading-tight">{todoCount}</div>
-              <div className="text-xs font-bold text-[#5B6B82]">قيد الإنجاز</div>
+              <div className="text-xl font-extrabold text-[#3a4555] leading-tight">{todoCount}</div>
+              <div className="text-xs font-bold text-[#5d6b7e]">قيد الإنجاز</div>
             </div>
           </div>
 
           {/* 3. Naqisa */}
-          <div className="flex items-center gap-3 p-3 rounded-xl bg-white border border-[#CBD5E1] shadow-2xs">
+          <div className="flex items-center gap-3 p-3 rounded-xl bg-white border border-[#ece7d6] shadow-2xs">
             <div className="size-10 rounded-lg bg-rose-50 text-rose-800 border border-rose-200 flex items-center justify-center shrink-0">
               <AlertCircle className="size-5" />
             </div>
             <div>
-              <div className="text-xl font-extrabold text-[#0B1F3A] leading-tight">{ncCount}</div>
-              <div className="text-xs font-bold text-[#5B6B82]">ناقصة</div>
+              <div className="text-xl font-extrabold text-[#3a4555] leading-tight">{ncCount}</div>
+              <div className="text-xs font-bold text-[#5d6b7e]">ناقصة</div>
             </div>
           </div>
 
           {/* 4. Total */}
-          <div className="flex items-center gap-3 p-3 rounded-xl bg-white border border-[#CBD5E1] shadow-2xs">
+          <div className="flex items-center gap-3 p-3 rounded-xl bg-white border border-[#ece7d6] shadow-2xs">
             <div className="size-10 rounded-lg bg-slate-100 text-slate-700 border border-slate-200 flex items-center justify-center shrink-0">
               <FileText className="size-5" />
             </div>
             <div>
-              <div className="text-xl font-extrabold text-[#0B1F3A] leading-tight">{totalDocs}</div>
-              <div className="text-xs font-bold text-[#5B6B82]">إجمالي الوثائق</div>
+              <div className="text-xl font-extrabold text-[#3a4555] leading-tight">{totalDocs}</div>
+              <div className="text-xs font-bold text-[#5d6b7e]">إجمالي الوثائق</div>
             </div>
           </div>
         </div>
 
         {/* Legal Disclaimer Box */}
-        <div className="bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-3 text-xs text-[#5B6B82] flex items-start gap-2">
-          <AlertTriangle className="size-4 text-[#D97706] shrink-0 mt-0.5" />
+        <div className="bg-[#fffdf5] border border-[#f3efdf] rounded-xl p-3 text-xs text-[#5d6b7e] flex items-start gap-2">
+          <AlertTriangle className="size-4 text-[#c9a227] shrink-0 mt-0.5" />
           <p className="m-0 leading-relaxed">
-            <strong className="text-[#0B1F3A]">تنبيه نظامي:</strong> اكتمال تجهيز الوثائق بنسبة 100% هو تنظيم داخلي ولا يعني قبول العرض أو إيداعه الرسمي في المنصة؛ يتطلب الإيداع تشفير العرض المالي والتقني وتقديمه قبل انقضاء الأجل القانوني وفقاً للمادة 70 من القانون 23-12.
+            <strong className="text-[#3a4555]">تنبيه نظامي:</strong> اكتمال تجهيز الوثائق بنسبة 100% هو تنظيم داخلي ولا يعني قبول العرض أو إيداعه الرسمي في المنصة؛ يتطلب الإيداع تشفير العرض المالي والتقني وتقديمه قبل انقضاء الأجل القانوني وفقاً للمادة 70 من القانون 23-12.
           </p>
         </div>
       </section>
@@ -665,18 +658,14 @@ export function OffersList() {
       {/* ══════════════════════════════════════════════════════════════════════════
           3. أشرطة التبويب (Tab Navigation)
           ══════════════════════════════════════════════════════════════════════════ */}
-      <div className="flex items-center justify-between border-b border-[#CBD5E1] pb-px">
-        <div className="inline-flex gap-1 p-1 rounded-xl bg-[#E2E8F0]" role="tablist" aria-label="أقسام إعداد العرض">
+      <div className="flex items-center justify-between pb-px">
+        <div className="op-tabs" role="tablist" aria-label="أقسام إعداد العرض">
           <button
             type="button"
             role="tab"
             aria-selected={tab === 'list'}
             onClick={() => setTab('list')}
-            className={`min-h-[42px] px-4 md:px-5 rounded-lg text-sm md:text-base font-bold transition-all cursor-pointer border-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#14325C] ${
-              tab === 'list'
-                ? 'bg-white text-[#0B1F3A] shadow-xs'
-                : 'bg-transparent text-[#475569] hover:bg-white/50'
-            }`}
+            className={`op-tab${tab === 'list' ? ' active' : ''}`}
           >
             قائمة الوثائق ({totalDocs})
           </button>
@@ -685,11 +674,7 @@ export function OffersList() {
             role="tab"
             aria-selected={tab === 'report'}
             onClick={() => setTab('report')}
-            className={`min-h-[42px] px-4 md:px-5 rounded-lg text-sm md:text-base font-bold transition-all cursor-pointer border-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#14325C] ${
-              tab === 'report'
-                ? 'bg-white text-[#0B1F3A] shadow-xs'
-                : 'bg-transparent text-[#475569] hover:bg-white/50'
-            }`}
+            className={`op-tab${tab === 'report' ? ' active' : ''}`}
           >
             التحليل والتقرير
           </button>
@@ -698,11 +683,7 @@ export function OffersList() {
             role="tab"
             aria-selected={tab === 'team'}
             onClick={() => setTab('team')}
-            className={`min-h-[42px] px-4 md:px-5 rounded-lg text-sm md:text-base font-bold transition-all cursor-pointer border-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#14325C] ${
-              tab === 'team'
-                ? 'bg-white text-[#0B1F3A] shadow-xs'
-                : 'bg-transparent text-[#475569] hover:bg-white/50'
-            }`}
+            className={`op-tab${tab === 'team' ? ' active' : ''}`}
           >
             إدارة الفريق ({teamMembers.length})
           </button>
@@ -717,7 +698,7 @@ export function OffersList() {
       {tab === 'list' && (
         <div className="space-y-4">
           {!selectedDealId && (
-            <div className="bg-[#FFFBEB] border border-[#FDE68A] text-[#92400E] rounded-xl p-4 flex items-center justify-between gap-4">
+            <div className="bg-[#fdf6df] border border-[#eedfb0] text-[#8a6e1c] rounded-xl p-4 flex items-center justify-between gap-4">
               <div className="flex items-center gap-2.5">
                 <Info className="size-5 shrink-0" />
                 <span className="text-sm font-bold">يرجى اختيار صفقة من القائمة بالأعلى لحفظ وتخصيص وثائق العرض الخاصة بها.</span>
@@ -726,7 +707,7 @@ export function OffersList() {
                 <Button
                   size="sm"
                   variant="outline"
-                  className="bg-white border-[#FCD34D] text-[#92400E] hover:bg-[#FEF3C7] text-xs font-bold"
+                  className="bg-white border-[#e2bf4b] text-[#8a6e1c] hover:bg-[#fdf6df] text-xs font-bold"
                   onClick={() => setSelectedDealId(deals[0].id)}
                 >
                   اختيار أول صفقة متاحة
@@ -744,25 +725,25 @@ export function OffersList() {
               return (
                 <section
                   key={group.id}
-                  className="bg-white border border-[#D5DDEA] rounded-2xl shadow-xs overflow-hidden flex flex-col"
+                  className="op-card flex flex-col"
                   aria-label={group.title}
                 >
                   {/* Group Header */}
-                  <div className="p-4 bg-[#F8FAFC] border-b border-[#E2E8F0] flex flex-col gap-2">
+                  <div className="p-4 bg-[#fffdf5] border-b border-[#f3efdf] flex flex-col gap-2">
                     <div className="flex items-center justify-between gap-2">
-                      <h3 className="text-base font-extrabold text-[#0B1F3A] m-0">
+                      <h3 className="text-base font-extrabold text-[#3a4555] m-0">
                         {group.title}
                       </h3>
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#E8EFFA] text-[#14325C] border border-[#CFDCF0]">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#fdf6df] text-[#8a6e1c] border border-[#eedfb0]">
                         {groupOk} من {groupItems.length} مكتملة
                       </span>
                     </div>
-                    <p className="text-xs text-[#5B6B82] m-0 leading-relaxed">
+                    <p className="text-xs text-[#5d6b7e] m-0 leading-relaxed">
                       {group.description}
                     </p>
-                    <div className="w-full h-1.5 bg-[#E2E8F0] rounded-full overflow-hidden mt-1">
+                    <div className="w-full h-1.5 bg-[#f3efdf] rounded-full overflow-hidden mt-1">
                       <div
-                        className="h-full bg-[#14325C] transition-all duration-300 rounded-full"
+                        className="h-full bg-[#8a6e1c] transition-all duration-300 rounded-full"
                         style={{ width: `${groupPercent}%` }}
                       />
                     </div>
@@ -780,19 +761,19 @@ export function OffersList() {
                       return (
                         <article
                           key={item.id}
-                          className="bg-white rounded-xl border border-[#E2E8F0] hover:border-[#CBD5E1] p-3.5 transition-all flex flex-col gap-2.5 shadow-2xs"
+                          className="bg-white rounded-xl border border-[#f3efdf] hover:border-[#ece7d6] p-3.5 transition-all flex flex-col gap-2.5 shadow-2xs"
                         >
                           {/* Card Top: Ref, Title, and Single Status Badge */}
                           <div className="flex items-start justify-between gap-2">
                             <div className="flex items-start gap-2 min-w-0">
-                              <span className="shrink-0 px-2 py-0.5 rounded-md bg-[#F1F5F9] text-[#14325C] font-mono text-xs font-bold mt-0.5">
+                              <span className="shrink-0 px-2 py-0.5 rounded-md bg-[#f3efdf] text-[#8a6e1c] font-mono text-xs font-bold mt-0.5">
                                 {itemNumber}
                               </span>
                               <div className="flex flex-col min-w-0">
-                                <h4 className="text-sm font-bold text-[#0B1F3A] m-0 leading-snug">
+                                <h4 className="text-sm font-bold text-[#3a4555] m-0 leading-snug">
                                   {item.title}
                                 </h4>
-                                <span className="text-[11px] text-[#5B6B82] leading-tight mt-0.5">
+                                <span className="text-[11px] text-[#5d6b7e] leading-tight mt-0.5">
                                   {item.legalRef}
                                 </span>
                               </div>
@@ -823,18 +804,18 @@ export function OffersList() {
 
                           {/* Uploaded File Info If Present */}
                           {doc.fileName && (
-                            <div className="flex items-center justify-between gap-2 p-2 rounded-lg bg-[#F8FAFC] border border-[#E2E8F0] text-xs">
+                            <div className="flex items-center justify-between gap-2 p-2 rounded-lg bg-[#fffdf5] border border-[#f3efdf] text-xs">
                               <div className="flex items-center gap-1.5 min-w-0">
-                                <Paperclip className="size-3.5 text-[#14325C] shrink-0" />
-                                <span className="font-mono text-[#0B1F3A] font-semibold truncate max-w-[180px]">
+                                <Paperclip className="size-3.5 text-[#8a6e1c] shrink-0" />
+                                <span className="font-mono text-[#3a4555] font-semibold truncate max-w-[180px]">
                                   {doc.fileName}
                                 </span>
                                 {doc.fileSize && (
-                                  <span className="text-[10px] text-[#64748B]">({doc.fileSize})</span>
+                                  <span className="text-[10px] text-[#98a4b3]">({doc.fileSize})</span>
                                 )}
                               </div>
                               {doc.updatedAt && (
-                                <span className="text-[10px] text-[#64748B] shrink-0">
+                                <span className="text-[10px] text-[#98a4b3] shrink-0">
                                   تحديث: {doc.updatedAt}
                                 </span>
                               )}
@@ -842,7 +823,7 @@ export function OffersList() {
                           )}
 
                           {/* Card Actions Bar */}
-                          <div className="flex items-center justify-between gap-2 pt-2 border-t border-[#F1F5F9]">
+                          <div className="flex items-center justify-between gap-2 pt-2 border-t border-[#f3efdf]">
                             {/* Primary Action Button */}
                             <div className="flex items-center gap-2">
                               {isMissing ? (
@@ -850,7 +831,7 @@ export function OffersList() {
                                   size="sm"
                                   onClick={() => triggerUpload(item.id)}
                                   disabled={isOfferSubmitted}
-                                  className="h-8 px-3 rounded-lg bg-[#14325C] hover:bg-[#0B1F3A] text-white text-xs font-bold focus-visible:ring-2 focus-visible:ring-[#14325C]"
+                                  className="h-8 px-3 rounded-lg bg-[#8a6e1c] hover:bg-[#3a4555] text-white text-xs font-bold focus-visible:ring-2 focus-visible:ring-[#8a6e1c]"
                                 >
                                   <Upload className="size-3.5 ml-1" />
                                   <span>رفع وثيقة</span>
@@ -860,7 +841,7 @@ export function OffersList() {
                                   size="sm"
                                   onClick={() => triggerUpload(item.id)}
                                   disabled={isOfferSubmitted}
-                                  className="h-8 px-3 rounded-lg bg-[#14325C] hover:bg-[#0B1F3A] text-white text-xs font-bold focus-visible:ring-2 focus-visible:ring-[#14325C]"
+                                  className="h-8 px-3 rounded-lg bg-[#8a6e1c] hover:bg-[#3a4555] text-white text-xs font-bold focus-visible:ring-2 focus-visible:ring-[#8a6e1c]"
                                 >
                                   <Upload className="size-3.5 ml-1" />
                                   <span>استكمال الملف</span>
@@ -870,7 +851,7 @@ export function OffersList() {
                                   size="sm"
                                   variant="outline"
                                   onClick={() => handleOpenPreview(item, group.title)}
-                                  className="h-8 px-3 rounded-lg border-[#CBD5E1] bg-white text-[#14325C] hover:bg-[#F8FAFC] text-xs font-bold focus-visible:ring-2 focus-visible:ring-[#14325C]"
+                                  className="h-8 px-3 rounded-lg border-[#ece7d6] bg-white text-[#8a6e1c] hover:bg-[#fffdf5] text-xs font-bold focus-visible:ring-2 focus-visible:ring-[#8a6e1c]"
                                 >
                                   <Eye className="size-3.5 ml-1" />
                                   <span>استعراض</span>
@@ -883,7 +864,7 @@ export function OffersList() {
                                   type="button"
                                   onClick={() => triggerUpload(item.id)}
                                   aria-label="استبدال الملف"
-                                  className="text-xs text-[#5B6B82] hover:text-[#0B1F3A] font-semibold underline cursor-pointer bg-transparent border-0 p-1"
+                                  className="text-xs text-[#5d6b7e] hover:text-[#3a4555] font-semibold underline cursor-pointer bg-transparent border-0 p-1"
                                 >
                                   استبدال
                                 </button>
@@ -900,7 +881,7 @@ export function OffersList() {
                                 value={doc.status}
                                 disabled={isOfferSubmitted}
                                 onChange={(e) => setDocStatus(item.id, e.target.value as 'ok' | 'todo' | 'nc')}
-                                className="h-8 px-2 text-xs font-semibold rounded-lg border border-[#CBD5E1] bg-white text-[#0B1F3A] hover:border-[#94A3B8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#14325C] cursor-pointer"
+                                className="h-8 px-2 text-xs font-semibold rounded-lg border border-[#ece7d6] bg-white text-[#3a4555] hover:border-[#98a4b3] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8a6e1c] cursor-pointer"
                               >
                                 <option value="ok">مكتمل</option>
                                 <option value="todo">قيد الإنجاز</option>
@@ -913,7 +894,7 @@ export function OffersList() {
                                   onClick={() => handleRemoveFile(item.id)}
                                   title="حذف المرفق"
                                   aria-label="حذف المرفق"
-                                  className="size-8 rounded-lg text-[#B42318] hover:bg-rose-50 flex items-center justify-center border-0 cursor-pointer transition-colors"
+                                  className="size-8 rounded-lg text-[#e63946] hover:bg-rose-50 flex items-center justify-center border-0 cursor-pointer transition-colors"
                                 >
                                   <Trash2 className="size-3.5" />
                                 </button>
@@ -930,11 +911,11 @@ export function OffersList() {
           </div>
 
           {/* Section Footer Legal Note */}
-          <div className="p-4 rounded-xl bg-white border border-[#D5DDEA] text-xs text-[#5B6B82] flex items-center justify-between flex-wrap gap-2">
+          <div className="p-4 rounded-xl bg-white border border-[#ece7d6] text-xs text-[#5d6b7e] flex items-center justify-between flex-wrap gap-2">
             <span>
               <strong>ملاحظة للمتعامل:</strong> إعداد الوثائق يتم حفظه محلياً ومزامنته مع خادم المنصة عند الضغط على زر «حفظ التغييرات».
             </span>
-            <span className="font-mono text-[11px] text-[#14325C]">
+            <span className="font-mono text-[11px] text-[#8a6e1c]">
               المرسوم الرئاسي 15-247 · القانون 23-12
             </span>
           </div>
@@ -943,18 +924,18 @@ export function OffersList() {
 
       {/* ─── تبويب 2: التحليل والتقرير (Report Tab) ─── */}
       {tab === 'report' && (
-        <div className="bg-white border border-[#D5DDEA] rounded-2xl p-6 shadow-xs flex flex-col gap-6">
-          <div className="border-b border-[#EEF2F7] pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="op-card p-6 flex flex-col gap-6">
+          <div className="border-b border-[#f3efdf] pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <h3 className="text-lg font-extrabold text-[#0B1F3A] m-0">
+              <h3 className="text-lg font-extrabold text-[#3a4555] m-0">
                 تقرير جاهزية ملف المشاركة
               </h3>
-              <p className="text-sm text-[#5B6B82] m-0 mt-0.5">
+              <p className="text-sm text-[#5d6b7e] m-0 mt-0.5">
                 تحليل تدقيق الوثائق المطلوبة وتحديد الثغرات الإدارية والفنية قبل الإيداع الرسمي.
               </p>
             </div>
             {activeDeal && (
-              <div className="px-3 py-1.5 rounded-lg bg-[#F8FAFC] border border-[#CBD5E1] text-xs font-bold text-[#14325C]">
+              <div className="px-3 py-1.5 rounded-lg bg-[#fffdf5] border border-[#ece7d6] text-xs font-bold text-[#8a6e1c]">
                 {activeDeal.reference_number}
               </div>
             )}
@@ -969,15 +950,15 @@ export function OffersList() {
               const percent = Math.round((groupOk / group.items.length) * 100);
 
               return (
-                <div key={group.id} className="p-4 rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] flex flex-col gap-3">
+                <div key={group.id} className="p-4 rounded-xl border border-[#f3efdf] bg-[#fffdf5] flex flex-col gap-3">
                   <div className="flex items-center justify-between">
-                    <h4 className="font-bold text-sm text-[#0B1F3A] m-0">{group.title}</h4>
-                    <span className="text-xs font-bold text-[#14325C]">{percent}%</span>
+                    <h4 className="font-bold text-sm text-[#3a4555] m-0">{group.title}</h4>
+                    <span className="text-xs font-bold text-[#8a6e1c]">{percent}%</span>
                   </div>
-                  <div className="w-full h-2 bg-[#E2E8F0] rounded-full overflow-hidden">
-                    <div className="h-full bg-[#14325C] rounded-full" style={{ width: `${percent}%` }} />
+                  <div className="w-full h-2 bg-[#f3efdf] rounded-full overflow-hidden">
+                    <div className="h-full bg-[#8a6e1c] rounded-full" style={{ width: `${percent}%` }} />
                   </div>
-                  <div className="flex items-center justify-between text-xs text-[#5B6B82] pt-1">
+                  <div className="flex items-center justify-between text-xs text-[#5d6b7e] pt-1">
                     <span className="text-emerald-700 font-semibold">{groupOk} مكتمل</span>
                     <span className="text-amber-700 font-semibold">{groupTodo} قيد الإنجاز</span>
                     <span className="text-rose-700 font-semibold">{groupNc} ناقص</span>
@@ -989,28 +970,28 @@ export function OffersList() {
 
           {/* Missing items checklist */}
           <div className="flex flex-col gap-3">
-            <h4 className="text-sm font-extrabold text-[#0B1F3A] m-0 flex items-center gap-2">
-              <AlertCircle className="size-4 text-[#B42318]" />
+            <h4 className="text-sm font-extrabold text-[#3a4555] m-0 flex items-center gap-2">
+              <AlertCircle className="size-4 text-[#e63946]" />
               <span>الوثائق الناقصة والتي تتطلب استكمالاً فورياً ({ncCount + todoCount})</span>
             </h4>
 
             {ncCount + todoCount === 0 ? (
               <div className="p-6 rounded-xl bg-emerald-50 border border-emerald-200 text-center flex flex-col items-center gap-2">
-                <CheckCircle2 className="size-8 text-[#047857]" />
+                <CheckCircle2 className="size-8 text-[#0ea968]" />
                 <h5 className="font-bold text-base text-emerald-900 m-0">ملف العرض جاهز بنسبة 100%!</h5>
                 <p className="text-xs text-emerald-800 m-0 max-w-md">
                   تم استكمال كافة وثائق ملف الترشح والعرضين التقني والمالي. يمكنك الآن التوجه إلى شاشة إيداع العرض لتشفير الملفات وتقديم العطاء رسمياً.
                 </p>
                 <Button
                   size="sm"
-                  className="bg-[#047857] hover:bg-[#065F46] text-white text-xs font-bold mt-2"
+                  className="bg-[#0ea968] hover:bg-[#0b8a55] text-white text-xs font-bold mt-2"
                   onClick={() => setLocation('/operator/offers')}
                 >
                   الاطلاع على تفاصيل العرض
                 </Button>
               </div>
             ) : (
-              <div className="divide-y divide-[#EEF2F7] border border-[#E2E8F0] rounded-xl overflow-hidden">
+              <div className="divide-y divide-[#f3efdf] border border-[#f3efdf] rounded-xl overflow-hidden">
                 {allDocItems
                   .filter((it) => (docsState[it.id]?.status || 'todo') !== 'ok')
                   .map((it) => {
@@ -1019,12 +1000,12 @@ export function OffersList() {
                       <div key={it.id} className="p-3.5 bg-white flex items-center justify-between gap-3 text-xs md:text-sm">
                         <div className="flex items-center gap-2.5">
                           {status === 'nc' ? (
-                            <span className="size-2 rounded-full bg-[#B42318]" />
+                            <span className="size-2 rounded-full bg-[#e63946]" />
                           ) : (
-                            <span className="size-2 rounded-full bg-[#D97706]" />
+                            <span className="size-2 rounded-full bg-[#c9a227]" />
                           )}
-                          <span className="font-bold text-[#0B1F3A]">{it.title}</span>
-                          <span className="text-xs text-[#5B6B82] hidden sm:inline">({it.legalRef})</span>
+                          <span className="font-bold text-[#3a4555]">{it.title}</span>
+                          <span className="text-xs text-[#5d6b7e] hidden sm:inline">({it.legalRef})</span>
                         </div>
                         <Button
                           size="sm"
@@ -1033,7 +1014,7 @@ export function OffersList() {
                             setTab('list');
                             triggerUpload(it.id);
                           }}
-                          className="h-7 px-2.5 rounded-lg text-xs font-bold text-[#14325C] border-[#CBD5E1]"
+                          className="h-7 px-2.5 rounded-lg text-xs font-bold text-[#8a6e1c] border-[#ece7d6]"
                         >
                           استكمال الآن
                         </Button>
@@ -1048,20 +1029,20 @@ export function OffersList() {
 
       {/* ─── تبويب 3: إدارة الفريق (Team Tab) ─── */}
       {tab === 'team' && (
-        <div className="bg-white border border-[#D5DDEA] rounded-2xl p-6 shadow-xs flex flex-col gap-6">
-          <div className="border-b border-[#EEF2F7] pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="op-card p-6 flex flex-col gap-6">
+          <div className="border-b border-[#f3efdf] pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <h3 className="text-lg font-extrabold text-[#0B1F3A] m-0">
+              <h3 className="text-lg font-extrabold text-[#3a4555] m-0">
                 فريق تحضير وتدقيق العطاء
               </h3>
-              <p className="text-sm text-[#5B6B82] m-0 mt-0.5">
+              <p className="text-sm text-[#5d6b7e] m-0 mt-0.5">
                 توزيع مسؤولية جمع الوثائق ومراجعتها القانونية والمالية بين أعضاء المؤسسة.
               </p>
             </div>
             <Button
               size="sm"
               onClick={() => setIsAddMemberOpen(true)}
-              className="bg-[#14325C] hover:bg-[#0B1F3A] text-white text-xs font-bold self-start sm:self-auto"
+              className="bg-[#8a6e1c] hover:bg-[#3a4555] text-white text-xs font-bold self-start sm:self-auto"
             >
               <Plus className="size-4 ml-1.5" />
               <span>إضافة عضو للفريق</span>
@@ -1072,21 +1053,21 @@ export function OffersList() {
             {teamMembers.map((member) => (
               <div
                 key={member.id}
-                className="p-4 rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] flex flex-col gap-2.5 hover:border-[#CBD5E1] transition-all shadow-2xs"
+                className="p-4 rounded-xl border border-[#f3efdf] bg-[#fffdf5] flex flex-col gap-2.5 hover:border-[#ece7d6] transition-all shadow-2xs"
               >
                 <div className="flex items-center gap-3">
-                  <div className="size-10 rounded-full bg-[#E8EFFA] text-[#14325C] font-bold flex items-center justify-center shrink-0">
+                  <div className="size-10 rounded-full bg-[#fdf6df] text-[#8a6e1c] font-bold flex items-center justify-center shrink-0">
                     {member.name.charAt(0)}
                   </div>
                   <div className="min-w-0">
-                    <h4 className="font-bold text-sm text-[#0B1F3A] m-0 truncate">{member.name}</h4>
-                    <p className="text-xs text-[#5B6B82] m-0 truncate">{member.role}</p>
+                    <h4 className="font-bold text-sm text-[#3a4555] m-0 truncate">{member.name}</h4>
+                    <p className="text-xs text-[#5d6b7e] m-0 truncate">{member.role}</p>
                   </div>
                 </div>
 
-                <div className="pt-2 border-t border-[#EEF2F7] flex items-center justify-between text-xs">
-                  <span className="text-[#64748B] font-mono truncate">{member.email}</span>
-                  <span className="px-2 py-0.5 rounded-md font-bold text-[11px] bg-white border border-[#CBD5E1] text-[#14325C]">
+                <div className="pt-2 border-t border-[#f3efdf] flex items-center justify-between text-xs">
+                  <span className="text-[#98a4b3] font-mono truncate">{member.email}</span>
+                  <span className="px-2 py-0.5 rounded-md font-bold text-[11px] bg-white border border-[#ece7d6] text-[#8a6e1c]">
                     {member.assignedEnvelope === 'candidacy'
                       ? 'ملف الترشح'
                       : member.assignedEnvelope === 'technical'
@@ -1103,27 +1084,27 @@ export function OffersList() {
       {/* ══════════════════════════════════════════════════════════════════════════
           5. قائمة العروض الفعلية الحية في المنصة (Live Offers Listing)
           ══════════════════════════════════════════════════════════════════════════ */}
-      <section className="bg-white border border-[#D5DDEA] rounded-2xl p-6 shadow-xs flex flex-col gap-4">
-        <div className="pb-3 border-b border-[#EEF2F7] flex items-center justify-between flex-wrap gap-2">
+      <section className="op-card p-6 flex flex-col gap-4">
+        <div className="pb-3 border-b border-[#f3efdf] flex items-center justify-between flex-wrap gap-2">
           <div>
-            <h3 className="text-lg font-bold text-[#0B1F3A] m-0">{t('offers.title')}</h3>
-            <p className="text-xs text-[#5B6B82] m-0 mt-0.5">
+            <h3 className="text-lg font-bold text-[#3a4555] m-0">{t('offers.title')}</h3>
+            <p className="text-xs text-[#5d6b7e] m-0 mt-0.5">
               العروض المسجلة والمودعة الخاصة بمؤسستك في بوابة الصفقات العمومية.
             </p>
           </div>
-          <span className="text-xs font-bold text-[#14325C] bg-[#E8EFFA] px-2.5 py-1 rounded-full">
+          <span className="text-xs font-bold text-[#8a6e1c] bg-[#fdf6df] px-2.5 py-1 rounded-full">
             {offers.length} عروض
           </span>
         </div>
 
         {loading ? (
-          <div className="py-12 text-center text-[#5B6B82] text-sm flex flex-col items-center justify-center gap-2">
-            <RefreshCw className="size-6 animate-spin text-[#14325C]" />
+          <div className="py-12 text-center text-[#5d6b7e] text-sm flex flex-col items-center justify-center gap-2">
+            <RefreshCw className="size-6 animate-spin text-[#8a6e1c]" />
             <span>جاري تحميل بيانات العروض...</span>
           </div>
         ) : fetchError ? (
           <div className="border border-rose-200 bg-rose-50 rounded-xl p-6 text-center space-y-3">
-            <AlertCircle className="size-6 text-[#B42318] mx-auto" />
+            <AlertCircle className="size-6 text-[#e63946] mx-auto" />
             <p className="text-sm font-bold text-rose-900 m-0">{fetchError}</p>
             <Button
               variant="outline"
@@ -1135,13 +1116,13 @@ export function OffersList() {
             </Button>
           </div>
         ) : offers.length === 0 ? (
-          <div className="border border-dashed border-[#CBD5E1] rounded-xl p-8 text-center bg-[#F8FAFC] space-y-3">
-            <FileText className="size-8 text-[#94A3B8] mx-auto" />
-            <p className="text-sm font-bold text-[#0B1F3A] m-0">{t('offers.empty')}</p>
+          <div className="border border-dashed border-[#ece7d6] rounded-xl p-8 text-center bg-[#fffdf5] space-y-3">
+            <FileText className="size-8 text-[#98a4b3] mx-auto" />
+            <p className="text-sm font-bold text-[#3a4555] m-0">{t('offers.empty')}</p>
             <Button
               variant="outline"
               size="sm"
-              className="text-xs font-bold text-[#14325C] border-[#CBD5E1]"
+              className="text-xs font-bold text-[#8a6e1c] border-[#ece7d6]"
               onClick={() => setLocation('/operator/deals')}
             >
               {t('opps.title')}
@@ -1152,11 +1133,11 @@ export function OffersList() {
             {offers.map((offer) => (
               <article
                 key={offer.id}
-                className="bg-white border border-[#E2E8F0] rounded-xl p-4 shadow-2xs hover:border-[#CBD5E1] transition-all flex flex-col md:flex-row md:items-center justify-between gap-4"
+                className="bg-white border border-[#f3efdf] rounded-xl p-4 shadow-2xs hover:border-[#ece7d6] transition-all flex flex-col md:flex-row md:items-center justify-between gap-4"
               >
                 <div className="space-y-1.5 flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <h4 className="text-sm md:text-base font-bold text-[#0B1F3A] m-0 truncate">
+                    <h4 className="text-sm md:text-base font-bold text-[#3a4555] m-0 truncate">
                       {offer.opportunityTitle}
                     </h4>
                     {offer.status === 'submitted' ? (
@@ -1172,13 +1153,13 @@ export function OffersList() {
                     )}
                   </div>
 
-                  <div className="flex items-center gap-3 text-xs text-[#5B6B82] flex-wrap">
-                    <span className="font-semibold text-[#14325C] bg-[#EEF2F7] px-2 py-0.5 rounded-md text-[11px]">
+                  <div className="flex items-center gap-3 text-xs text-[#5d6b7e] flex-wrap">
+                    <span className="font-semibold text-[#8a6e1c] bg-[#f3efdf] px-2 py-0.5 rounded-md text-[11px]">
                       {offer.authorityName}
                     </span>
                     <span>
-                      <strong className="text-[#0B1F3A] font-semibold">{t('offers.field.financial')}:</strong>{' '}
-                      <span className="font-mono text-[#0B1F3A]">{offer.financialOffer}</span>
+                      <strong className="text-[#3a4555] font-semibold">{t('offers.field.financial')}:</strong>{' '}
+                      <span className="font-mono text-[#3a4555]">{offer.financialOffer}</span>
                     </span>
                     {offer.deliveryTimeDays && (
                       <span>
@@ -1187,7 +1168,7 @@ export function OffersList() {
                     )}
                   </div>
 
-                  <p className="text-[11px] text-[#64748B] m-0">
+                  <p className="text-[11px] text-[#98a4b3] m-0">
                     {offer.status === 'submitted' && offer.submittedAt
                       ? `${t('offers.status.submitted')}: ${new Date(offer.submittedAt).toLocaleDateString('ar-DZ')}`
                       : `آخر تعديل: ${new Date(offer.updatedAt).toLocaleDateString('ar-DZ')}`}
@@ -1197,10 +1178,10 @@ export function OffersList() {
                 <div className="flex items-center gap-2 self-end md:self-center shrink-0">
                   <Button
                     size="sm"
-                    className={`text-xs font-bold px-4 py-2 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#14325C] ${
+                    className={`text-xs font-bold px-4 py-2 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8a6e1c] ${
                       offer.status === 'draft'
-                        ? 'bg-[#14325C] hover:bg-[#0B1F3A] text-white'
-                        : 'border border-[#CBD5E1] bg-white hover:bg-slate-50 text-[#0B1F3A]'
+                        ? 'bg-[#8a6e1c] hover:bg-[#3a4555] text-white'
+                        : 'border border-[#ece7d6] bg-white hover:bg-slate-50 text-[#3a4555]'
                     }`}
                     onClick={() => setLocation(`/operator/offers/${offer.id}`)}
                   >
@@ -1219,21 +1200,21 @@ export function OffersList() {
       <Dialog open={!!previewDoc} onOpenChange={(open) => !open && setPreviewDoc(null)}>
         <DialogContent className="max-w-md font-sans text-right" dir="rtl">
           <DialogHeader>
-            <div className="flex items-center gap-2 text-xs font-bold text-[#14325C] bg-[#E8EFFA] px-2.5 py-1 rounded-md w-fit mb-1">
+            <div className="flex items-center gap-2 text-xs font-bold text-[#8a6e1c] bg-[#fdf6df] px-2.5 py-1 rounded-md w-fit mb-1">
               <span>{previewDoc?.groupTitle}</span>
             </div>
-            <DialogTitle className="text-lg font-extrabold text-[#0B1F3A]">
+            <DialogTitle className="text-lg font-extrabold text-[#3a4555]">
               {previewDoc?.title}
             </DialogTitle>
-            <DialogDescription className="text-xs text-[#5B6B82] leading-relaxed">
+            <DialogDescription className="text-xs text-[#5d6b7e] leading-relaxed">
               {previewDoc?.legalRef}
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-3 py-2 text-sm">
-            <div className="p-3 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] space-y-2">
+            <div className="p-3 rounded-xl bg-[#fffdf5] border border-[#f3efdf] space-y-2">
               <div className="flex items-center justify-between text-xs">
-                <span className="text-[#5B6B82]">حالة الوثيقة:</span>
+                <span className="text-[#5d6b7e]">حالة الوثيقة:</span>
                 {previewDoc?.status === 'ok' ? (
                   <span className="font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
                     مكتمل
@@ -1252,31 +1233,31 @@ export function OffersList() {
               {previewDoc?.fileName ? (
                 <>
                   <div className="flex items-center justify-between text-xs">
-                    <span className="text-[#5B6B82]">الملف المرفق:</span>
-                    <span className="font-mono font-bold text-[#0B1F3A]">{previewDoc.fileName}</span>
+                    <span className="text-[#5d6b7e]">الملف المرفق:</span>
+                    <span className="font-mono font-bold text-[#3a4555]">{previewDoc.fileName}</span>
                   </div>
                   {previewDoc.fileSize && (
                     <div className="flex items-center justify-between text-xs">
-                      <span className="text-[#5B6B82]">الحجم:</span>
-                      <span className="text-[#0B1F3A]">{previewDoc.fileSize}</span>
+                      <span className="text-[#5d6b7e]">الحجم:</span>
+                      <span className="text-[#3a4555]">{previewDoc.fileSize}</span>
                     </div>
                   )}
                   {previewDoc.updatedAt && (
                     <div className="flex items-center justify-between text-xs">
-                      <span className="text-[#5B6B82]">تاريخ الرفع:</span>
-                      <span className="text-[#0B1F3A]">{previewDoc.updatedAt}</span>
+                      <span className="text-[#5d6b7e]">تاريخ الرفع:</span>
+                      <span className="text-[#3a4555]">{previewDoc.updatedAt}</span>
                     </div>
                   )}
                 </>
               ) : (
-                <div className="text-xs text-[#64748B] text-center py-2">
+                <div className="text-xs text-[#98a4b3] text-center py-2">
                   لم يتم إرفاق ملف بعد لهذه الوثيقة.
                 </div>
               )}
             </div>
 
-            <div className="text-xs text-[#5B6B82] bg-amber-50/70 border border-amber-200 p-2.5 rounded-lg flex items-start gap-1.5">
-              <AlertTriangle className="size-4 text-[#D97706] shrink-0 mt-0.5" />
+            <div className="text-xs text-[#5d6b7e] bg-amber-50/70 border border-amber-200 p-2.5 rounded-lg flex items-start gap-1.5">
+              <AlertTriangle className="size-4 text-[#c9a227] shrink-0 mt-0.5" />
               <span>
                 رفع الملف أو استعراضه لا يعني القبول النهائي؛ تخضع الوثائق للتدقيق الفعلي من قبل لجنة تقييم العروض بعد انتهاء أجل الإيداع.
               </span>
@@ -1300,7 +1281,7 @@ export function OffersList() {
                   setPreviewDoc(null);
                   triggerUpload(id);
                 }}
-                className="bg-[#14325C] hover:bg-[#0B1F3A] text-white text-xs font-bold"
+                className="bg-[#8a6e1c] hover:bg-[#3a4555] text-white text-xs font-bold"
               >
                 <Upload className="size-3.5 ml-1" />
                 <span>{previewDoc.fileName ? 'استبدال الملف' : 'رفع ملف'}</span>
@@ -1316,17 +1297,17 @@ export function OffersList() {
       <Dialog open={isAddMemberOpen} onOpenChange={setIsAddMemberOpen}>
         <DialogContent className="max-w-md font-sans text-right" dir="rtl">
           <DialogHeader>
-            <DialogTitle className="text-lg font-extrabold text-[#0B1F3A]">
+            <DialogTitle className="text-lg font-extrabold text-[#3a4555]">
               إضافة عضو لفريق إعداد العرض
             </DialogTitle>
-            <DialogDescription className="text-xs text-[#5B6B82]">
+            <DialogDescription className="text-xs text-[#5d6b7e]">
               عيّن زميلاً في المؤسسة وتكليفه بظرف أو ملف محدد لمتابعة استكماله وتدقيقه.
             </DialogDescription>
           </DialogHeader>
 
           <form onSubmit={handleAddMember} className="space-y-3.5 py-2">
             <div className="space-y-1">
-              <label htmlFor="member-name" className="text-xs font-bold text-[#0B1F3A]">
+              <label htmlFor="member-name" className="text-xs font-bold text-[#3a4555]">
                 الاسم واللقب *
               </label>
               <input
@@ -1336,12 +1317,12 @@ export function OffersList() {
                 value={newMemberName}
                 onChange={(e) => setNewMemberName(e.target.value)}
                 placeholder="مثال: د. سمير شريفي"
-                className="w-full h-10 px-3 rounded-lg border border-[#CBD5E1] text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#14325C]"
+                className="w-full h-10 px-3 rounded-lg border border-[#ece7d6] text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8a6e1c]"
               />
             </div>
 
             <div className="space-y-1">
-              <label htmlFor="member-role" className="text-xs font-bold text-[#0B1F3A]">
+              <label htmlFor="member-role" className="text-xs font-bold text-[#3a4555]">
                 الوظيفة / الدور
               </label>
               <input
@@ -1350,12 +1331,12 @@ export function OffersList() {
                 value={newMemberRole}
                 onChange={(e) => setNewMemberRole(e.target.value)}
                 placeholder="مثال: مهندس معماري / محاسب"
-                className="w-full h-10 px-3 rounded-lg border border-[#CBD5E1] text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#14325C]"
+                className="w-full h-10 px-3 rounded-lg border border-[#ece7d6] text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8a6e1c]"
               />
             </div>
 
             <div className="space-y-1">
-              <label htmlFor="member-email" className="text-xs font-bold text-[#0B1F3A]">
+              <label htmlFor="member-email" className="text-xs font-bold text-[#3a4555]">
                 البريد الإلكتروني المهني
               </label>
               <input
@@ -1364,19 +1345,19 @@ export function OffersList() {
                 value={newMemberEmail}
                 onChange={(e) => setNewMemberEmail(e.target.value)}
                 placeholder="name@company.dz"
-                className="w-full h-10 px-3 rounded-lg border border-[#CBD5E1] text-sm font-mono focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#14325C]"
+                className="w-full h-10 px-3 rounded-lg border border-[#ece7d6] text-sm font-mono focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8a6e1c]"
               />
             </div>
 
             <div className="space-y-1">
-              <label htmlFor="member-envelope" className="text-xs font-bold text-[#0B1F3A]">
+              <label htmlFor="member-envelope" className="text-xs font-bold text-[#3a4555]">
                 الملف أو الظرف المكلف به
               </label>
               <select
                 id="member-envelope"
                 value={newMemberEnvelope}
                 onChange={(e) => setNewMemberEnvelope(e.target.value as 'candidacy' | 'technical' | 'financial')}
-                className="w-full h-10 px-3 rounded-lg border border-[#CBD5E1] text-sm font-semibold bg-white cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#14325C]"
+                className="w-full h-10 px-3 rounded-lg border border-[#ece7d6] text-sm font-semibold bg-white cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8a6e1c]"
               >
                 <option value="candidacy">ملف الترشح (القانوني والإداري)</option>
                 <option value="technical">العرض التقني (المواصفات والمنهجية)</option>
@@ -1397,7 +1378,7 @@ export function OffersList() {
               <Button
                 type="submit"
                 size="sm"
-                className="bg-[#14325C] hover:bg-[#0B1F3A] text-white text-xs font-bold"
+                className="bg-[#8a6e1c] hover:bg-[#3a4555] text-white text-xs font-bold"
               >
                 حفظ وإسناد
               </Button>

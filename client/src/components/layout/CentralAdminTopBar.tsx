@@ -31,7 +31,6 @@ export function CentralAdminTopBar({
       navItems={CENTRAL_NAV_ITEMS}
       defaultTitle={t('central.workspace.title')}
       routePrefix="/central"
-      hiddenOnRoutes={['/central/map']}
       notificationCount={notificationsCount}
       logoutRedirect="/login"
       pulseColor="var(--stamp-green-500)"

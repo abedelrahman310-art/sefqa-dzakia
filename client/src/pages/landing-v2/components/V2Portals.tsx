@@ -112,17 +112,16 @@ export function V2Portals() {
   };
 
   return (
-    <section className="bg-white py-8 md:py-14 text-[#243B36]" id="portals" dir="rtl">
+    <section className="bg-[#FBFCFA] py-10 md:py-16 text-[#24352E]" id="portals" dir="rtl">
       <div className="w-full max-w-[1280px] mx-auto px-4 md:px-8">
-        {/* 1. عنوان القسم والوصف المعتمد */}
         <SectionHeader
+          badge="البوابات الثلاث"
           title="ثلاث بوابات. مسؤوليات واضحة."
           subtitle="اختر مساحة العمل المناسبة لدورك، واكتشف كيف تساعدك المنصة على إنجاز مهامك."
         />
 
-        {/* 2. شبكة البطاقات الثلاث بنمط Notion */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
-          {PORTALS_DATA.map((portal) => {
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 lg:gap-6 items-stretch">
+          {PORTALS_DATA.map((portal, idx) => {
             const Icon = portal.icon;
             const isExpanded = !!expanded[portal.id];
             const detailsId = `portal-details-${portal.id}`;
@@ -130,108 +129,97 @@ export function V2Portals() {
             return (
               <article
                 key={portal.id}
-                className="group relative bg-white rounded-[15px] border border-[#DFE7E3] p-5 md:p-6 flex flex-col justify-between transition-colors transition-shadow duration-200 motion-reduce:transition-none hover:border-[#167354] focus-within:border-[#167354] hover:shadow-[0_4px_16px_-2px_rgba(22,115,84,0.08)]"
+                className="group relative overflow-hidden bg-white rounded-[22px] border border-[#E3E7E2] p-6 md:p-7 flex flex-col justify-between transition-all duration-200 hover:-translate-y-0.5 hover:border-[#C9D8D0] hover:shadow-[0_18px_40px_-24px_rgba(9,46,73,0.28)] focus-within:border-[#167354]"
               >
-                {/* الجزء العلوي: رأس البطاقة والمساحة الملونة الخفيفة */}
-                <div className="flex flex-col gap-4">
-                  {/* مساحة لون خفيفة قرب الأيقونة والعنوان */}
-                  <div className={`p-4 rounded-xl border ${portal.tintBg} ${portal.tintBorder} flex items-center justify-between gap-3`}>
-                    <div className="flex items-center gap-3">
-                      <div className="size-11 rounded-lg bg-white border border-[#DFE7E3] flex items-center justify-center shrink-0 shadow-2xs">
-                        <Icon className={`size-6 ${portal.iconColor}`} aria-hidden="true" />
-                      </div>
-                      <div>
-                        <span className="text-[11px] font-bold text-[#52665F] block">البوابة الرسمية</span>
-                        <h3 className="text-base font-extrabold text-[#243B36] m-0 leading-snug">
-                          {portal.name}
-                        </h3>
-                      </div>
+                {/* رقم البوابة كعنصر تحريري خافت في الخلفية */}
+                <span
+                  className="pointer-events-none absolute -top-4 left-4 text-[76px] font-black leading-none text-[#F1F5F2] select-none"
+                  aria-hidden="true"
+                >
+                  {String(idx + 1).padStart(2, '0')}
+                </span>
+
+                <div className="relative">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className={`size-12 rounded-2xl border ${portal.tintBg} ${portal.tintBorder} flex items-center justify-center shrink-0`}>
+                      <Icon className={`size-6 ${portal.iconColor}`} aria-hidden="true" />
                     </div>
-                    <span className="text-[10px] font-bold px-2.5 py-1 rounded-md bg-white/90 text-[#52665F] border border-[#DFE7E3] shrink-0">
+                    <span className="max-w-[62%] text-left text-[10px] sm:text-[11px] font-bold text-[#59665F] leading-snug">
                       {portal.badgeText}
                     </span>
                   </div>
 
-                  {/* عنوان البطاقة المعتمد */}
-                  <div>
-                    <h4 className="text-base md:text-lg font-bold text-[#243B36] m-0 leading-snug">
-                      «{portal.headline}»
-                    </h4>
+                  <div className="mt-6">
+                    <span className="text-[11px] font-bold text-[#167354]">البوابة {idx + 1}</span>
+                    <h3 className="mt-1 text-xl sm:text-[22px] font-extrabold text-[#24352E] m-0 leading-snug">
+                      {portal.name}
+                    </h3>
+                    <p className="mt-2 text-sm text-[#59665F] leading-relaxed m-0">
+                      {portal.headline}
+                    </p>
                   </div>
 
-                  {/* المهام المختصرة الأساسية */}
-                  <div className="bg-[#F8F9F7] rounded-xl border border-[#DFE7E3] p-3.5 flex flex-col gap-2">
-                    <span className="text-[11px] font-bold text-[#52665F] uppercase tracking-wider block border-b border-[#DFE7E3] pb-1.5">
-                      المهام الأساسية:
-                    </span>
-                    <ul className="space-y-1.5 m-0 p-0 list-none">
+                  <div className="mt-5 pt-4 border-t border-[#EDF1ED]">
+                    <span className="text-[10px] font-bold text-[#59665F] tracking-[0.06em]">المهام الأساسية</span>
+                    <ul className="mt-3 space-y-2.5 m-0 p-0 list-none">
                       {portal.primaryTasks.map((task, i) => (
-                        <li key={i} className="flex items-center gap-2 text-xs md:text-sm font-semibold text-[#243B36]">
-                          <CheckCircle2 className="size-3.5 text-[#167354] shrink-0" aria-hidden="true" />
-                          <span>{task}</span>
+                        <li key={i} className="flex items-start gap-2.5 text-sm font-semibold text-[#24352E]">
+                          <CheckCircle2 className="size-4 text-[#167354] shrink-0 mt-0.5" aria-hidden="true" />
+                          <span className="leading-relaxed">{task}</span>
                         </li>
                       ))}
                     </ul>
                   </div>
 
-                  {/* التفاصيل الموسعة عند النقر على زر «مهام البوابة» */}
-                  {isExpanded && (
-                    <div
-                      id={detailsId}
-                      className="bg-white rounded-xl border border-[#DFE7E3] p-3.5 flex flex-col gap-2 text-xs text-[#52665F] leading-relaxed transition-all motion-reduce:transition-none"
-                    >
-                      <span className="text-[11px] font-bold text-[#167354] block border-b border-[#DFE7E3] pb-1">
-                        تفاصيل المهام الإجرائية المنفذة:
-                      </span>
-                      <ul className="space-y-1.5 m-0 p-0 list-none">
-                        {portal.expandedTasks.map((extTask, idx) => (
-                          <li key={idx} className="flex items-start gap-1.5 text-xs text-[#243B36]">
-                            <span className="text-[#167354] font-bold text-xs" aria-hidden="true">•</span>
-                            <span className="leading-relaxed">{extTask}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
+                  <div
+                    id={detailsId}
+                    className={`mt-4 rounded-xl border border-[#DCE8E1] bg-[#F7FAF8] p-4 ${isExpanded ? 'flex' : 'hidden'} flex-col gap-2 text-xs text-[#59665F] leading-relaxed`}
+                  >
+                    <span className="text-[11px] font-bold text-[#167354] block border-b border-[#DCE8E1] pb-2">
+                      تفاصيل المهام الإجرائية
+                    </span>
+                    <ul className="space-y-2 m-0 p-0 list-none">
+                      {portal.expandedTasks.map((extTask, extIdx) => (
+                        <li key={extIdx} className="flex items-start gap-2 text-xs text-[#31443B]">
+                          <span className="text-[#167354] font-bold text-sm leading-none mt-0.5" aria-hidden="true">•</span>
+                          <span className="leading-relaxed">{extTask}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 </div>
 
-                {/* أزرار الإجراءات المتساوية في المحاذاة على الحاسوب */}
-                <div className="pt-4 mt-5 border-t border-[#DFE7E3] flex flex-col gap-2.5">
-                  <div className="flex items-center gap-2">
-                    {/* زر التوسيع: مهام البوابة */}
-                    <button
-                      type="button"
-                      className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-[#F8F9F7] border border-[#DFE7E3] text-[#243B36] font-bold text-xs hover:bg-[#EDF4EE] hover:text-[#167354] hover:border-[#CDE1D3] transition-colors focus-visible:outline-2 focus-visible:outline-[#167354]"
-                      onClick={() => toggleExpand(portal.id)}
-                      aria-expanded={isExpanded}
-                      aria-controls={detailsId}
-                    >
-                      <span>مهام البوابة</span>
-                      {isExpanded ? (
-                        <ChevronUp className="size-3.5 shrink-0" aria-hidden="true" />
-                      ) : (
-                        <ChevronDown className="size-3.5 shrink-0" aria-hidden="true" />
-                      )}
-                    </button>
+                <div className="relative pt-5 mt-6 border-t border-[#EDF1ED] flex items-center gap-2">
+                  <button
+                    type="button"
+                    className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-white border border-[#DDE6E0] text-[#24352E] font-bold text-[11px] sm:text-xs hover:bg-[#EDF4EE] hover:text-[#167354] hover:border-[#CDE1D3] transition-colors focus-visible:outline-2 focus-visible:outline-[#167354]"
+                    onClick={() => toggleExpand(portal.id)}
+                    aria-expanded={isExpanded}
+                    aria-controls={detailsId}
+                  >
+                    <span>مهام البوابة</span>
+                    {isExpanded ? (
+                      <ChevronUp className="size-3.5 shrink-0" aria-hidden="true" />
+                    ) : (
+                      <ChevronDown className="size-3.5 shrink-0" aria-hidden="true" />
+                    )}
+                  </button>
 
-                    {/* رابط مستقل: تسجيل الدخول */}
-                    <button
-                      type="button"
-                      className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-[#167354] text-white font-bold text-xs hover:bg-[#115840] transition-colors shadow-2xs focus-visible:outline-2 focus-visible:outline-[#167354]"
-                      onClick={() => setLocation('/login')}
-                    >
-                      <span>تسجيل الدخول</span>
-                      <ArrowLeft className="size-3.5 shrink-0" aria-hidden="true" />
-                    </button>
-                  </div>
+                  <button
+                    type="button"
+                    className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-[#167354] text-white font-bold text-[11px] sm:text-xs hover:bg-[#115840] transition-colors shadow-2xs focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#167354]"
+                    onClick={() => setLocation('/login')}
+                  >
+                    <span>تسجيل الدخول</span>
+                    <ArrowLeft className="size-3.5 shrink-0" aria-hidden="true" />
+                  </button>
                 </div>
               </article>
             );
           })}
         </div>
 
-        {/* 3. ملاحظة أسفل القسم مطابقة للتعليمات */}
-        <div className="mt-8 p-4 rounded-xl bg-[#F8F9F7] border border-[#DFE7E3] flex items-center justify-center gap-2 text-xs md:text-sm text-[#52665F] text-center max-w-2xl mx-auto">
+        <div className="mt-8 rounded-2xl bg-[#F5F8F5] border border-[#E3E7E2] px-5 py-4 flex items-center justify-center gap-2.5 text-xs md:text-sm text-[#59665F] text-center max-w-2xl mx-auto">
           <Lock className="size-4 text-[#167354] shrink-0" aria-hidden="true" />
           <p className="m-0 leading-relaxed font-medium">
             الدخول حسب صلاحيات الحساب، ولا يؤدي اختيار البوابة إلى تغيير دور المستخدم.
