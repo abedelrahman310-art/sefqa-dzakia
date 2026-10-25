@@ -1,6 +1,17 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import ProcurementDealViewSet, CahierSpecsViewSet
+from .views import (
+    ProcurementDealViewSet,
+    CahierSpecsViewSet,
+    OpportunityViewSet,
+    EvaluationDataView,
+    EvaluateOfferView,
+    ConcludeEvaluationView,
+    MilestoneViewSet,
+    DealMilestonesView,
+    ContractViewSet,
+)
+from apps.bids.views import OfferViewSet
 from .views_opening import (
     SessionListView,
     SessionScheduleView,
@@ -15,8 +26,17 @@ from .views_pdf import OpeningSessionPdfView, CahierSpecsPdfView
 router = DefaultRouter()
 router.register(r'deals', ProcurementDealViewSet, basename='procurement-deal')
 router.register(r'specs', CahierSpecsViewSet, basename='cahier-specs')
+router.register(r'opportunities', OpportunityViewSet, basename='opportunity')
+router.register(r'milestones', MilestoneViewSet, basename='milestone')
+router.register(r'contracts', ContractViewSet, basename='procurement-contract')
 
 urlpatterns = [
+    path("authority/opportunities/<str:pk>/evaluation-data/", EvaluationDataView.as_view(), name="authority-evaluation-data"),
+    path("authority/opportunities/<str:pk>/evaluation-data", EvaluationDataView.as_view(), name="authority-evaluation-data-no-slash"),
+    path("authority/opportunities/<str:pk>/conclude-evaluation/", ConcludeEvaluationView.as_view(), name="authority-conclude-evaluation"),
+    path("authority/opportunities/<str:pk>/conclude-evaluation", ConcludeEvaluationView.as_view(), name="authority-conclude-evaluation-no-slash"),
+    path("authority/offers/<str:pk>/evaluate/", OfferViewSet.as_view({'post': 'evaluate'}), name="authority-evaluate-offer"),
+    path("authority/offers/<str:pk>/evaluate", OfferViewSet.as_view({'post': 'evaluate'}), name="authority-evaluate-offer-no-slash"),
     path("sessions/", SessionListView.as_view(), name="session-list"),
     path("sessions/schedule/", SessionScheduleView.as_view(), name="session-schedule"),
     path("sessions/<uuid:pk>/", SessionDetailView.as_view(), name="session-detail"),
@@ -27,5 +47,11 @@ urlpatterns = [
     path("sessions/<uuid:pk>/pdf/", OpeningSessionPdfView.as_view(), name="session-pdf"),
     path("deals/<uuid:pk>/specs-pdf/", CahierSpecsPdfView.as_view(), name="deal-specs-pdf"),
     path("specs/<uuid:pk>/pdf/", CahierSpecsPdfView.as_view(), name="cahier-specs-pdf"),
+    path("deals/<str:pk>/publish/", ProcurementDealViewSet.as_view({'post': 'publish'}), name="deal-publish"),
+    path("deals/<str:pk>/publish", ProcurementDealViewSet.as_view({'post': 'publish'}), name="deal-publish-no-slash"),
+    path("deals/<str:pk>/generate-contract/", ProcurementDealViewSet.as_view({'post': 'generate_contract'}), name="deal-generate-contract"),
+    path("deals/<str:pk>/generate-contract", ProcurementDealViewSet.as_view({'post': 'generate_contract'}), name="deal-generate-contract-no-slash"),
+    path("deals/<str:deal_id>/milestones/", DealMilestonesView.as_view(), name="deal-milestones"),
+    path("deals/<str:deal_id>/milestones", DealMilestonesView.as_view(), name="deal-milestones-no-slash"),
     path('', include(router.urls)),
 ]

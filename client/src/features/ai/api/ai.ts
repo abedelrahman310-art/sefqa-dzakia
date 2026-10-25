@@ -10,6 +10,7 @@ import type {
   PriceEstimateRequest,
   PriceEstimateResponse,
   RecommendationsResponse,
+  TenderAnalysisResponse,
 } from '../types';
 
 export const priceEstimate = (payload: PriceEstimateRequest): Promise<PriceEstimateResponse> =>
@@ -19,6 +20,32 @@ export const operatorRecommendations = (limit = 10): Promise<RecommendationsResp
   api
     .get<RecommendationsResponse>(`/ai/operator/recommendations/?limit=${limit}`)
     .then((r) => r.data);
+
+export const operatorLegalChat = (
+  conversationId: string | null | undefined,
+  message: string,
+): Promise<ChatResponse> =>
+  api
+    .post<ChatResponse>('/ai/legal-chat/', {
+      conversation_id: conversationId || undefined,
+      message,
+    })
+    .then((r) => r.data);
+
+export const analyzeTender = (dealId: string): Promise<TenderAnalysisResponse> =>
+  api
+    .post<TenderAnalysisResponse>('/ai/analyze-tender/', { deal_id: dealId })
+    .then((r) => r.data);
+
+export const uploadAndAnalyzeTenderPdf = (file: File): Promise<TenderAnalysisResponse> => {
+  const formData = new FormData();
+  formData.append('file', file);
+  return api
+    .post<TenderAnalysisResponse>('/ai/analyze-tender/', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
+    .then((r) => r.data);
+};
 
 export const aiApi = {
   // Insights
@@ -59,5 +86,10 @@ export const aiApi = {
 
   // Operator Matching Recommendations (التوصيات الذكية للفرص)
   operatorRecommendations,
+
+  // Operator legal assistant & tender analysis
+  operatorLegalChat,
+  analyzeTender,
+  uploadAndAnalyzeTenderPdf,
 };
 

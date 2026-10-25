@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Link, useRoute } from 'wouter';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { useI18n } from '@/i18n';

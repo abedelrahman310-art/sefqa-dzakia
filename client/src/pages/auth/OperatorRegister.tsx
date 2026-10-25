@@ -1,4 +1,5 @@
-import React, { useState, useMemo, useRef, useEffect } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
+import type { FormEvent } from 'react';
 import { useLocation, Link } from 'wouter';
 import { useI18n } from '@/i18n';
 import { useAuth } from '@/components/auth/AuthProvider';
@@ -19,7 +20,6 @@ import {
   AlertCircle,
   Loader2,
   Search,
-  ShieldCheck,
   X,
 } from 'lucide-react';
 import { RegisterHero } from '@/components/auth/RegisterHero';
@@ -111,12 +111,12 @@ export function OperatorRegister() {
   const [termsAccepted, setTermsAccepted] = useState(false);
 
   // Preserved state for backend payload integrity
-  const [company, setCompany] = useState('');
-  const [legalForm, setLegalForm] = useState('sarl');
-  const [nif, setNif] = useState('');
-  const [nis, setNis] = useState('');
-  const [address, setAddress] = useState('');
-  const [repRole, setRepRole] = useState('المسير');
+  const [company] = useState('');
+  const [legalForm] = useState('sarl');
+  const [nif] = useState('');
+  const [nis] = useState('');
+  const [address] = useState('');
+  const [repRole] = useState('المسير');
 
   // UI State
   const [showPassword, setShowPassword] = useState(false);
@@ -218,7 +218,7 @@ export function OperatorRegister() {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setServerError(null);
 

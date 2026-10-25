@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { PageHeader, KpiCard, AICard } from '@/shared/components';
 import {
   AlertTriangle,
@@ -10,12 +10,9 @@ import {
   Eye,
   FileCheck,
   FileX,
-  ShieldAlert,
   ChevronRight,
   ChevronLeft,
   Lock,
-  Copy,
-  Check,
 } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import {
@@ -158,7 +155,7 @@ function getStatusBadge(status: AppealItem['status']) {
 
 export function CentralAppeals() {
   const [appeals, setAppeals] = useState<AppealItem[]>(INITIAL_APPEALS);
-  const [loading, setLoading] = useState(false);
+  const [, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [selectedAppeal, setSelectedAppeal] = useState<AppealItem | null>(null);

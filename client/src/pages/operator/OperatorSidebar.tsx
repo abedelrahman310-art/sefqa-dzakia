@@ -1,6 +1,7 @@
 import { useI18n } from '@/i18n';
 import { TranslationKey } from '@/i18n/ar';
 import { useLocation } from 'wouter';
+import type { ComponentType } from 'react';
 import {
   Home,
   LayoutDashboard,
@@ -19,7 +20,7 @@ export interface OperatorNavItem {
   id: string;
   labelKey: TranslationKey;
   href: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: ComponentType<{ className?: string }>;
   badge?: string | number;
 }
 
@@ -117,13 +118,13 @@ export function OperatorSidebar({ onCloseMobile, className }: OperatorSidebarPro
   return (
     <aside
       className={cn(
-        'w-64 flex-none flex flex-col border-e border-border bg-slate-50/80 dark:bg-slate-950/80 select-none h-full',
+        'w-64 flex-none flex flex-col border-e border-white/20 bg-gradient-to-b from-[#0284c7] via-[#0ea5e9] to-[#38bdf8] text-white select-none h-full',
         className
       )}
     >
       {/* Navigation Group Header */}
       <div className="px-4 pt-4 pb-2">
-        <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground/80">
+        <span className="text-[11px] font-bold uppercase tracking-wider text-white/80">
           {t('topbar.account_label')}
         </span>
       </div>
@@ -139,19 +140,17 @@ export function OperatorSidebar({ onCloseMobile, className }: OperatorSidebarPro
               key={item.id}
               onClick={() => handleNavigate(item.href)}
               className={cn(
-                'w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-all group text-start',
+                'w-full flex items-center justify-between px-3.5 py-2.5 rounded-lg text-xs font-semibold transition-all group text-start',
                 active
-                  ? 'bg-navy-900 text-white shadow-sm dark:bg-emerald-600 dark:text-white'
-                  : 'text-slate-600 dark:text-slate-300 hover:text-navy-900 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-slate-900'
+                  ? 'bg-white text-[#0284c7] shadow-sm font-bold'
+                  : 'text-white hover:text-white hover:bg-white/15'
               )}
             >
               <div className="flex items-center gap-3 min-w-0">
                 <Icon
                   className={cn(
                     'w-4 h-4 flex-none transition-colors',
-                    active
-                      ? 'text-gold-400 dark:text-white'
-                      : 'text-slate-400 group-hover:text-navy-900 dark:group-hover:text-white'
+                    active ? 'text-[#0284c7]' : 'text-white'
                   )}
                 />
                 <span className="truncate">{t(item.labelKey)}</span>
@@ -162,8 +161,8 @@ export function OperatorSidebar({ onCloseMobile, className }: OperatorSidebarPro
                   className={cn(
                     'text-[10px] font-bold px-1.5 py-0.5 rounded-full flex-none',
                     active
-                      ? 'bg-white/20 text-white'
-                      : 'bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
+                      ? 'bg-[#0284c7]/15 text-[#0284c7]'
+                      : 'bg-white/20 text-white'
                   )}
                 >
                   {item.badge}
@@ -175,7 +174,7 @@ export function OperatorSidebar({ onCloseMobile, className }: OperatorSidebarPro
 
         {/* Separator for secondary workspaces */}
         <div className="pt-3 pb-1">
-          <div className="h-px bg-slate-200 dark:bg-slate-800" />
+          <div className="h-px bg-white/20" />
         </div>
 
         {secondaryNavItems.map((item) => {
@@ -187,17 +186,17 @@ export function OperatorSidebar({ onCloseMobile, className }: OperatorSidebarPro
               key={item.id}
               onClick={() => handleNavigate(item.href)}
               className={cn(
-                'w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-all group text-start',
+                'w-full flex items-center justify-between px-3.5 py-2 rounded-lg text-xs font-medium transition-all group text-start',
                 active
-                  ? 'bg-slate-200 text-navy-900 font-bold dark:bg-slate-800 dark:text-white'
-                  : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-200/40 dark:hover:bg-slate-900'
+                  ? 'bg-white text-[#0284c7] font-bold shadow-sm'
+                  : 'text-white/85 hover:text-white hover:bg-white/15'
               )}
             >
               <div className="flex items-center gap-3 min-w-0">
                 <Icon
                   className={cn(
                     'w-3.5 h-3.5 flex-none transition-colors',
-                    active ? 'text-navy-900 dark:text-white' : 'text-slate-400'
+                    active ? 'text-[#0284c7]' : 'text-white'
                   )}
                 />
                 <span className="truncate">{t(item.labelKey)}</span>
@@ -208,10 +207,10 @@ export function OperatorSidebar({ onCloseMobile, className }: OperatorSidebarPro
       </nav>
 
       {/* Institutional Legal Footprint */}
-      <div className="p-3 border-t border-border bg-slate-100/50 dark:bg-slate-900/50 flex-none">
-        <div className="text-[10px] text-muted-foreground flex items-center justify-between px-1">
+      <div className="p-3 border-t border-white/20 bg-black/10 flex-none">
+        <div className="text-[10px] text-white/80 flex items-center justify-between px-1">
           <span>المرسوم الرئاسي 15-247</span>
-          <span className="font-mono text-[9px] text-emerald-600 dark:text-emerald-400">RTL · 100dvh</span>
+          <span className="font-mono text-[9px] text-white/90">RTL · 100dvh</span>
         </div>
       </div>
     </aside>

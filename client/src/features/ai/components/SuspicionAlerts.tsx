@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import type { ElementType } from 'react';
 import {
   ShieldAlert,
   Target,
@@ -7,7 +8,6 @@ import {
   Scale,
   AlertTriangle,
   ChevronLeft,
-  Eye,
   CheckCircle2,
 } from 'lucide-react';
 import { useSuspicions } from '../hooks/useAI';
@@ -28,7 +28,7 @@ interface SuspicionAlertsProps {
 
 const TYPE_CONFIG: Record<
   string,
-  { label: string; icon: React.ElementType; colorClass: string; badgeClass: string }
+  { label: string; icon: ElementType; colorClass: string; badgeClass: string }
 > = {
   bid_rigging: {
     label: 'مؤشرات التواطؤ (Bid Rigging)',

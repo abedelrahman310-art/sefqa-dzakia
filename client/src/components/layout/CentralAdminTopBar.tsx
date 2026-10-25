@@ -1,4 +1,3 @@
-import React from 'react';
 import { PortalTopBar, PortalNavItem } from './PortalTopBar';
 import { useI18n } from '@/i18n';
 

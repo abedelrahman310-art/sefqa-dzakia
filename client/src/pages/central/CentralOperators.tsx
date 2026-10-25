@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { PageHeader, KpiCard, AICard } from '@/shared/components';
 import {
   Users,
@@ -7,7 +7,6 @@ import {
   Ban,
   AlertOctagon,
   Search,
-  Building2,
   Calendar,
   AlertTriangle,
   ChevronRight,

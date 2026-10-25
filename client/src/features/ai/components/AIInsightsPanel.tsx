@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import {
   Brain,
   Sparkles,
@@ -6,7 +6,6 @@ import {
   AlertTriangle,
   ChevronDown,
   ChevronUp,
-  Inbox,
   CheckCircle2,
 } from 'lucide-react';
 import {

@@ -1,17 +1,15 @@
-import React, { useState } from 'react';
-import { PageHeader, KpiCard, AICard } from '@/shared/components';
+import { useState } from 'react';
+import { PageHeader, KpiCard } from '@/shared/components';
 import {
   Shield,
   Users,
   Building,
   UserCheck,
   Search,
-  Key,
   Lock,
   Unlock,
   History,
   CheckCircle2,
-  AlertCircle,
   Hash,
 } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';

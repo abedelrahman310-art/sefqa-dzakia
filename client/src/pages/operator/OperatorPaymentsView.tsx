@@ -1,6 +1,5 @@
 import { useI18n } from '@/i18n';
-import { CreditCard, AlertCircle, FileCheck2, ArrowUpRight, Shield } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { CreditCard, Shield } from 'lucide-react';
 
 export function OperatorPaymentsView() {
   const { t, lang } = useI18n();

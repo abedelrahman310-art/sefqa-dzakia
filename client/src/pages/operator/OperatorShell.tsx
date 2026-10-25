@@ -3,7 +3,8 @@ import { Link, useLocation } from 'wouter';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
 import OperatorTopBar from '@/components/layout/OperatorTopBar';
-import { FileCheck2, LucideIcon } from 'lucide-react';
+import { LucideIcon } from 'lucide-react';
+import { SafaqatLogo } from '@/components/brand/SafaqatLogo';
 import './operator.css';
 
 export type OperatorNavGroup = 'home' | 'opportunities' | 'activity' | 'system';
@@ -79,8 +80,8 @@ export function OperatorShell({
   const sidebarContent = (onNavigate?: () => void) => (
     <>
       <div className="op-brand">
-        <div className="op-brand-logo" aria-hidden="true">
-          <FileCheck2 strokeWidth={2} />
+        <div className="op-brand-logo">
+          <SafaqatLogo size={44} title="" />
         </div>
         <div className="op-brand-text">
           <h1>صفقات ذكية</h1>

@@ -63,7 +63,7 @@ export default defineConfig({
             },
           },
           {
-            urlPattern: /^http:\/\/localhost:8000\/api\/.*/i,
+            urlPattern: /^(?:https?:\/\/[^/]+)?\/api\/.*/i,
             handler: "NetworkFirst",
             options: {
               cacheName: "api-cache",
@@ -90,7 +90,7 @@ export default defineConfig({
     port: 5173,
     proxy: {
       "/api": {
-        target: "http://localhost:8000",
+        target: process.env.VITE_BACKEND_TARGET || "http://localhost:8001",
         changeOrigin: true,
         secure: false,
       },

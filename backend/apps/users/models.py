@@ -112,6 +112,9 @@ class OperatorProfile(models.Model):
     years_of_experience = models.PositiveIntegerField(default=0)
     employee_count = models.PositiveIntegerField(default=0)
     
+    # بيانات إضافية (الرمز والنشاط والتأهيل)
+    extra_data = models.JSONField('بيانات إضافية للمتعامل', default=dict, blank=True)
+    
     # Metadata
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -122,4 +125,32 @@ class OperatorProfile(models.Model):
     
     def __str__(self):
         return f"{self.user.email} - {self.get_sector_display()}"
+
+
+class Notification(models.Model):
+    """
+    إشعارات وتنبيهات المستخدمين داخل المنصة (جلسات الفتح، قرارات المنح، تطابق الفرص).
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name='notifications',
+        verbose_name='المستخدم',
+    )
+    title = models.CharField('العنوان', max_length=255)
+    text = models.TextField('نص الإشعار')
+    is_read = models.BooleanField('هل تمت قراءته', default=False)
+    link_href = models.CharField('رابط الإشعار', max_length=255, blank=True, default='')
+    notification_type = models.CharField('نوع الإشعار', max_length=50, blank=True, default='update')
+    created_at = models.DateTimeField('التاريخ', default=timezone.now)
+
+    class Meta:
+        verbose_name = 'إشعار'
+        verbose_name_plural = 'الإشعارات'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"إشعار لـ {self.user.email}: {self.title}"
+
 

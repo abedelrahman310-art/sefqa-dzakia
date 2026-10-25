@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useState, ReactNode } from 'react';
 
 export type UserRole = 'operator' | 'authority' | 'central_admin';
 
@@ -10,34 +10,67 @@ export interface User {
   organizationName: string;
 }
 
+/**
+ * البيانات التي يُرجعها الخادم فقط (تسجيل الدخول أو /api/auth/me/).
+ * لا تُقبل أي نسخة محلية بديلة لتحديد الدور.
+ */
+export interface UserPayload {
+  id?: string;
+  email?: string;
+  role?: UserRole;
+  displayName?: string;
+  display_name?: string;
+  full_name?: string;
+  organizationName?: string;
+  organization_name?: string;
+  company_name?: string;
+  entity_name?: string;
+}
+
 interface AuthContextProps {
   user: User | null;
   status: 'loading' | 'authenticated' | 'unauthenticated';
-  login: (userData: any, tokens?: { access: string; refresh?: string }) => void;
+  login: (userData: UserPayload, tokens?: { access: string; refresh?: string }) => void;
   logout: () => Promise<void>;
   token: string | null;
   refreshToken: () => Promise<string | null>;
 }
 
+const ACCESS_TOKEN_KEY = 'safaqat_access_token';
+const REFRESH_TOKEN_KEY = 'safaqat_refresh_token';
+/**
+ * مفتاح قديم كان يخزّن ملف المستخدم ودوره في المتصفح. أُلغي لأنه كان يُستخدم
+ * كبديل عند فشل التحقق من الخادم، ما يسمح بانتحال دور غير مُتحقَّق منه.
+ * يبقى هنا فقط لحذف أي قيمة متبقية في أجهزة المستخدمين.
+ */
+const LEGACY_USER_KEY = 'safaqat_user';
+
 const AuthContext = createContext<AuthContextProps | undefined>(undefined);
 
-function normalizeUser(u: any): User {
+function normalizeUser(u: UserPayload): User {
   return {
-    id: u.id,
-    email: u.email,
-    role: u.role,
+    id: u.id ?? '',
+    email: u.email ?? '',
+    role: u.role as UserRole,
     displayName: u.displayName || u.display_name || u.full_name || '',
-    organizationName: u.organizationName || u.organization_name || u.company_name || u.entity_name || '',
+    organizationName:
+      u.organizationName || u.organization_name || u.company_name || u.entity_name || '',
   };
+}
+
+function clearStoredSession() {
+  localStorage.removeItem(ACCESS_TOKEN_KEY);
+  localStorage.removeItem(REFRESH_TOKEN_KEY);
+  localStorage.removeItem(LEGACY_USER_KEY);
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(() => localStorage.getItem('safaqat_access_token'));
+  const [token, setToken] = useState<string | null>(() => localStorage.getItem(ACCESS_TOKEN_KEY));
   const [status, setStatus] = useState<'loading' | 'authenticated' | 'unauthenticated'>('loading');
 
-  const refreshAccessToken = async (): Promise<string | null> => {
-    const refresh = localStorage.getItem('safaqat_refresh_token');
+  const refreshAccessToken = useCallback(async (): Promise<string | null> => {
+    const refresh = localStorage.getItem(REFRESH_TOKEN_KEY);
     if (!refresh) return null;
 
     try {
@@ -48,111 +81,103 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
       if (!res.ok) throw new Error('Token refresh failed');
       const data = await res.json();
-      if (data.access) {
-        localStorage.setItem('safaqat_access_token', data.access);
-        setToken(data.access);
-        return data.access;
+      if (!data.access) throw new Error('Token refresh response missing access token');
+
+      localStorage.setItem(ACCESS_TOKEN_KEY, data.access);
+      if (data.refresh) {
+        localStorage.setItem(REFRESH_TOKEN_KEY, data.refresh);
       }
+      setToken(data.access);
+      return data.access;
     } catch {
-      localStorage.removeItem('safaqat_access_token');
-      localStorage.removeItem('safaqat_refresh_token');
+      clearStoredSession();
       setToken(null);
       setUser(null);
+      return null;
     }
-    return null;
-  };
+  }, []);
 
   useEffect(() => {
-    let activeToken = localStorage.getItem('safaqat_access_token');
+    let cancelled = false;
 
-    async function verifySession() {
+    async function authenticate() {
+      // لا يُعتمد أي دور محفوظ محلياً: يُحذف المفتاح القديم فوراً،
+      // ثم يُطلب الدور من الخادم وحده.
+      localStorage.removeItem(LEGACY_USER_KEY);
+
+      let activeToken = localStorage.getItem(ACCESS_TOKEN_KEY);
       if (!activeToken) {
-        // Try refresh token if available
         activeToken = await refreshAccessToken();
+        if (cancelled) return;
       }
 
-      if (!activeToken) {
-        const storedUser = localStorage.getItem('safaqat_user');
-        if (storedUser) {
-          try {
-            setUser(normalizeUser(JSON.parse(storedUser)));
-            setStatus('authenticated');
-            return;
-          } catch {}
-        }
-        setUser(null);
-        setStatus('unauthenticated');
-        return;
-      }
-
-      try {
+      if (activeToken) {
         let res = await fetch('/api/auth/me/', {
           headers: { Authorization: `Bearer ${activeToken}` },
         });
 
         if (res.status === 401) {
-          // Token expired, attempt refresh
-          const newToken = await refreshAccessToken();
-          if (newToken) {
+          const renewedToken = await refreshAccessToken();
+          if (cancelled) return;
+          if (renewedToken) {
             res = await fetch('/api/auth/me/', {
-              headers: { Authorization: `Bearer ${newToken}` },
+              headers: { Authorization: `Bearer ${renewedToken}` },
             });
           }
         }
 
         if (res.ok) {
           const data = await res.json();
-          if (data.user) {
+          if (cancelled) return;
+          if (data?.user?.role) {
             setUser(normalizeUser(data.user));
+            setToken(activeToken);
             setStatus('authenticated');
             return;
           }
         }
-        throw new Error('Unauthorized session');
-      } catch {
-        const storedUser = localStorage.getItem('safaqat_user');
-        if (storedUser) {
-          try {
-            setUser(normalizeUser(JSON.parse(storedUser)));
-            setStatus('authenticated');
-            return;
-          } catch {}
-        }
-        setUser(null);
-        setStatus('unauthenticated');
       }
+
+      if (cancelled) return;
+      // رفض الخادم الجلسة أو لم يُرجع دوراً صالحاً → جلسة غير صالحة.
+      clearStoredSession();
+      setToken(null);
+      setUser(null);
+      setStatus('unauthenticated');
     }
 
-    verifySession();
-  }, []);
+    authenticate();
 
-  const login = (userData: any, tokens?: { access: string; refresh?: string }) => {
+    return () => {
+      cancelled = true;
+    };
+  }, [refreshAccessToken]);
+
+  const login = (userData: UserPayload, tokens?: { access: string; refresh?: string }) => {
     if (tokens?.access) {
-      localStorage.setItem('safaqat_access_token', tokens.access);
+      localStorage.setItem(ACCESS_TOKEN_KEY, tokens.access);
       setToken(tokens.access);
     }
     if (tokens?.refresh) {
-      localStorage.setItem('safaqat_refresh_token', tokens.refresh);
+      localStorage.setItem(REFRESH_TOKEN_KEY, tokens.refresh);
     }
-    localStorage.setItem('safaqat_user', JSON.stringify(userData));
+    localStorage.removeItem(LEGACY_USER_KEY);
     setUser(normalizeUser(userData));
     setStatus('authenticated');
   };
 
   const logout = async () => {
-    const currentToken = localStorage.getItem('safaqat_access_token');
+    const currentToken = localStorage.getItem(ACCESS_TOKEN_KEY);
     try {
-      await fetch('/api/auth/logout/', { 
+      await fetch('/api/auth/logout/', {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
-          ...(currentToken ? { Authorization: `Bearer ${currentToken}` } : {})
-        }
+          ...(currentToken ? { Authorization: `Bearer ${currentToken}` } : {}),
+        },
       });
     } finally {
-      localStorage.removeItem('safaqat_access_token');
-      localStorage.removeItem('safaqat_refresh_token');
-      localStorage.removeItem('safaqat_user');
+      clearStoredSession();
       setToken(null);
       setUser(null);
       setStatus('unauthenticated');

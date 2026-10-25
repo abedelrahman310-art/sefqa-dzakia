@@ -1,6 +1,18 @@
 import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import { useLocation, useParams } from 'wouter';
 import { useI18n } from '@/i18n';
+import { api } from '@/lib/api';
+import type {
+  ConcludeEvaluationPayloadApi,
+  ConcludeEvaluationResponseApi,
+  EvaluationDataApi,
+  EvaluationOfferApi,
+  EvaluationOpportunityApi,
+  OfferEvaluationPayloadApi,
+  OfferEvaluationResponseApi,
+  OfferEvaluationStatusApi,
+} from '@/lib/procurementApiTypes';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -16,21 +28,32 @@ import {
   ArrowLeft,
   BadgeCheck,
   CheckSquare,
+  Loader2,
 } from 'lucide-react';
 
-interface EvaluationOffer {
-  id: string;
-  bidderId: string;
-  bidderName: string;
-  financialAmount: string | null;
-  durationDays: number | null;
-  hasDocument: boolean;
-  evaluationStatus: 'pending' | 'admitted' | 'rejected';
-  rejectionReason: string | null;
-  technicalScore: string | null;
-  evaluatorNotes: string | null;
-  submittedAt: string;
+interface EvaluationFormState {
+  evaluationStatus: OfferEvaluationStatusApi;
+  technicalScore: string;
+  financialScore: string;
+  rejectionReason: string;
+  evaluatorNotes: string;
+  saving?: boolean;
 }
+
+const EVALUATION_STATUS_LABELS: Record<OfferEvaluationStatusApi, string> = {
+  pending: 'قيد الانتظار',
+  admitted: 'مقبول',
+  evaluated: 'مُقيّم',
+  rejected: 'مرفوض',
+};
+
+const getApiErrorMessage = (err: unknown, fallback: string) => {
+  if (axios.isAxiosError(err)) {
+    const data = err.response?.data as { error?: string; detail?: string } | undefined;
+    return data?.error || data?.detail || fallback;
+  }
+  return err instanceof Error ? err.message : fallback;
+};
 
 export function EvaluationWorkspace() {
   const params = useParams<{ id?: string; tenderId?: string }>();
@@ -41,24 +64,18 @@ export function EvaluationWorkspace() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [deal, setDeal] = useState<any>(null);
-  const [offers, setOffers] = useState<EvaluationOffer[]>([]);
+  const [deal, setDeal] = useState<EvaluationOpportunityApi | null>(null);
+  const [offers, setOffers] = useState<EvaluationOfferApi[]>([]);
 
   // Per-offer form edits
-  const [evalForms, setEvalForms] = useState<Record<string, {
-    evaluationStatus: 'admitted' | 'rejected' | 'pending';
-    technicalScore: string;
-    rejectionReason: string;
-    evaluatorNotes: string;
-    saving?: boolean;
-  }>>({});
+  const [evalForms, setEvalForms] = useState<Record<string, EvaluationFormState>>({});
 
   // Provisional award form
   const [winningOfferId, setWinningOfferId] = useState('');
   const [awardMethod, setAwardMethod] = useState<'least_cost' | 'best_value'>('least_cost');
   const [awardNotes, setAwardNotes] = useState('');
   const [awarding, setAwarding] = useState(false);
-  const [awardSuccess, setAwardSuccess] = useState<any>(null);
+  const [awardSuccess, setAwardSuccess] = useState<ConcludeEvaluationResponseApi | null>(null);
 
   const ArrowIcon = dir === 'rtl' ? ArrowRight : ArrowLeft;
 
@@ -69,36 +86,39 @@ export function EvaluationWorkspace() {
     }
     setLoading(true);
     setError('');
+    setSuccess('');
+    setWinningOfferId('');
+    setAwardSuccess(null);
 
     try {
-      const res = await fetch(`/api/authority/opportunities/${id}/evaluation-data`);
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.error || 'فشل جلب بيانات التقييم');
-      }
-      const data = await res.json();
+      const { data } = await api.get<EvaluationDataApi>(
+        `/authority/opportunities/${id}/evaluation-data/`
+      );
       setDeal(data.opportunity);
       setOffers(data.offers || []);
 
       // Initialize form states
-      const initialForms: any = {};
-      (data.offers || []).forEach((o: EvaluationOffer) => {
+      const initialForms: Record<string, EvaluationFormState> = {};
+      (data.offers || []).forEach((o) => {
         initialForms[o.id] = {
           evaluationStatus: o.evaluationStatus || 'pending',
           technicalScore: o.technicalScore || '',
+          financialScore: o.financialScore || '',
           rejectionReason: o.rejectionReason || '',
           evaluatorNotes: o.evaluatorNotes || '',
         };
       });
       setEvalForms(initialForms);
 
-      // Default winner to first admitted offer if not set
-      const firstAdmitted = (data.offers || []).find((o: EvaluationOffer) => o.evaluationStatus === 'admitted');
-      if (firstAdmitted) {
-        setWinningOfferId(firstAdmitted.id);
+      // Default winner to the first offer eligible for award.
+      const firstEligible = (data.offers || []).find(
+        (o) => o.evaluationStatus === 'admitted' || o.evaluationStatus === 'evaluated'
+      );
+      if (firstEligible) {
+        setWinningOfferId(firstEligible.id);
       }
-    } catch (err: any) {
-      setError(err.message || 'حدث خطأ أثناء تحميل فضاء التقييم');
+    } catch (err: unknown) {
+      setError(getApiErrorMessage(err, 'حدث خطأ أثناء تحميل فضاء التقييم'));
     } finally {
       setLoading(false);
     }
@@ -125,29 +145,57 @@ export function EvaluationWorkspace() {
     setSuccess('');
 
     try {
-      const res = await fetch(`/api/authority/offers/${offerId}/evaluate`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-safaqat-csrf': '1',
+      const payload: OfferEvaluationPayloadApi = {
+        evaluationStatus: form.evaluationStatus,
+        technicalScore: form.technicalScore.trim() || undefined,
+        financialScore: form.financialScore.trim() || undefined,
+        rejectionReason:
+          form.evaluationStatus === 'rejected' ? form.rejectionReason.trim() : '',
+        evaluatorNotes: form.evaluatorNotes.trim() || undefined,
+      };
+
+      const { data } = await api.post<OfferEvaluationResponseApi>(
+        `/authority/offers/${offerId}/evaluate/`,
+        payload
+      );
+
+      const nextStatus: OfferEvaluationStatusApi =
+        data.status || (form.evaluationStatus === 'rejected' ? 'rejected' : 'evaluated');
+
+      setOffers((prev) =>
+        prev.map((offer) =>
+          offer.id === offerId
+            ? {
+                ...offer,
+                evaluationStatus: nextStatus,
+                technicalScore: data.technical_score ?? (form.technicalScore.trim() || null),
+                financialScore: data.financial_score ?? (form.financialScore.trim() || null),
+                rejectionReason: nextStatus === 'rejected' ? form.rejectionReason.trim() : '',
+                evaluatorNotes: data.evaluator_notes ?? form.evaluatorNotes.trim(),
+              }
+            : offer
+        )
+      );
+
+      setEvalForms((prev) => ({
+        ...prev,
+        [offerId]: {
+          ...prev[offerId],
+          evaluationStatus: nextStatus,
+          technicalScore: data.technical_score ?? form.technicalScore,
+          financialScore: data.financial_score ?? form.financialScore,
+          rejectionReason: nextStatus === 'rejected' ? form.rejectionReason : '',
+          evaluatorNotes: data.evaluator_notes ?? form.evaluatorNotes,
         },
-        body: JSON.stringify({
-          evaluationStatus: form.evaluationStatus,
-          technicalScore: form.technicalScore.trim() || undefined,
-          rejectionReason: form.rejectionReason.trim() || undefined,
-          evaluatorNotes: form.evaluatorNotes.trim() || undefined,
-        }),
-      });
+      }));
 
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || 'فشل حفظ تقييم العرض');
-      }
-
-      setSuccess('تم حفظ تقييم العرض بنجاح.');
-      await loadData();
-    } catch (err: any) {
-      setError(err.message || 'حدث خطأ أثناء حفظ التقييم');
+      setSuccess(
+        `${data.message || 'تم حفظ تقييم العرض بنجاح.'} حالة العرض الآن: ${
+          EVALUATION_STATUS_LABELS[nextStatus]
+        }.`
+      );
+    } catch (err: unknown) {
+      setError(getApiErrorMessage(err, 'حدث خطأ أثناء حفظ التقييم'));
     } finally {
       setEvalForms((prev) => ({
         ...prev,
@@ -157,6 +205,7 @@ export function EvaluationWorkspace() {
   };
 
   const handleConcludeAward = async () => {
+    if (!id) return;
     if (!winningOfferId) {
       setError('يرجى اختيار العرض الفائز المقترح للمنح المؤقت.');
       return;
@@ -167,29 +216,29 @@ export function EvaluationWorkspace() {
     setSuccess('');
 
     try {
-      const res = await fetch(`/api/authority/opportunities/${id}/conclude-evaluation`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-safaqat-csrf': '1',
-        },
-        body: JSON.stringify({
-          winningOfferId,
-          method: awardMethod,
-          observations: awardNotes,
-        }),
-      });
+      const payload: ConcludeEvaluationPayloadApi = {
+        winningOfferId,
+        method: awardMethod,
+        observations: awardNotes.trim() || undefined,
+      };
 
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || 'فشل اعتماد المنح المؤقت');
-      }
+      const { data } = await api.post<ConcludeEvaluationResponseApi>(
+        `/authority/opportunities/${id}/conclude-evaluation/`,
+        payload
+      );
 
-      const awardResult = await res.json();
-      setAwardSuccess(awardResult);
-      await loadData();
-    } catch (err: any) {
-      setError(err.message || 'حدث خطأ أثناء اعتماد المنح المؤقت');
+      setAwardSuccess(data);
+      setDeal((prev) => (prev ? { ...prev, current_stage: 8 } : prev));
+      setOffers((prev) =>
+        prev.map((offer) =>
+          offer.id === winningOfferId
+            ? { ...offer, evaluationStatus: 'admitted' }
+            : offer
+        )
+      );
+      setSuccess(data.message || 'تم اعتماد التقييم النهائي للجنة والمنح المؤقت بنجاح.');
+    } catch (err: unknown) {
+      setError(getApiErrorMessage(err, 'حدث خطأ أثناء اعتماد المنح المؤقت'));
     } finally {
       setAwarding(false);
     }
@@ -227,8 +276,15 @@ export function EvaluationWorkspace() {
     );
   }
 
-  const isAwardConcluded = deal?.status === 'provisional_award';
-  const admittedOffers = offers.filter((o) => o.evaluationStatus === 'admitted');
+  const isAwardConcluded = Boolean(
+    deal && (deal.current_stage >= 8 || deal.status === 'provisional_award')
+  );
+  const admittedOffers = offers.filter(
+    (o) => o.evaluationStatus === 'admitted' || o.evaluationStatus === 'evaluated'
+  );
+  const winningOffer = awardSuccess
+    ? offers.find((offer) => offer.id === awardSuccess.winningOfferId)
+    : null;
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
@@ -291,14 +347,19 @@ export function EvaluationWorkspace() {
             <span>{t('lifecycle.eval.award_notice')}</span>
           </div>
           <p className="text-xs text-emerald-900 leading-relaxed font-medium">
-            تم اعتماد محضر تقييم العروض والمنح المؤقت للصفقة رسمياً. تم تأمين المحضر ببصمة رقمية معتمدة قابلة للتحقق.
+            تم اعتماد التقييم النهائي للجنة والمنح المؤقت للصفقة رسمياً، وتمت ترقية الصفقة إلى مرحلة الإسناد والطعون.
           </p>
           <div className="text-xs font-mono bg-white/80 p-3 rounded-xl border border-emerald-200 space-y-1">
-            {awardSuccess?.pvNumber && (
-              <div>رقم محضر التقييم: <strong className="text-emerald-900">{awardSuccess.pvNumber}</strong></div>
+            {awardSuccess?.message && (
+              <div className="text-emerald-900">{awardSuccess.message}</div>
             )}
-            {awardSuccess?.digest && (
-              <div className="break-all text-slate-700">البصمة الرقمية: {awardSuccess.digest}</div>
+            {awardSuccess?.winningOfferId && (
+              <div className="break-all text-slate-700">
+                العرض الفائز:{' '}
+                <strong className="text-emerald-900">
+                  {winningOffer?.bidderName || awardSuccess.winningOfferId}
+                </strong>
+              </div>
             )}
           </div>
         </div>
@@ -321,9 +382,18 @@ export function EvaluationWorkspace() {
             const form = evalForms[offer.id] || {
               evaluationStatus: offer.evaluationStatus,
               technicalScore: offer.technicalScore || '',
+              financialScore: offer.financialScore || '',
               rejectionReason: offer.rejectionReason || '',
               evaluatorNotes: offer.evaluatorNotes || '',
             };
+            const statusBadgeClass =
+              offer.evaluationStatus === 'rejected'
+                ? 'bg-red-50 text-red-700 border-red-200'
+                : offer.evaluationStatus === 'evaluated'
+                ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                : offer.evaluationStatus === 'admitted'
+                ? 'bg-blue-50 text-blue-700 border-blue-200'
+                : 'bg-amber-50 text-amber-800 border-amber-200';
 
             return (
               <div
@@ -337,7 +407,14 @@ export function EvaluationWorkspace() {
                       {idx + 1}
                     </span>
                     <div>
-                      <h4 className="text-sm font-bold text-navy-900">{offer.bidderName}</h4>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h4 className="text-sm font-bold text-navy-900">{offer.bidderName}</h4>
+                        <span
+                          className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${statusBadgeClass}`}
+                        >
+                          {EVALUATION_STATUS_LABELS[offer.evaluationStatus]}
+                        </span>
+                      </div>
                       <div className="text-xs text-muted-foreground flex items-center gap-2 mt-0.5">
                         <span>مبلغ العرض: <strong className="text-navy-900 font-mono">{offer.financialAmount ? Number(offer.financialAmount).toLocaleString() + ' دج' : '—'}</strong></span>
                         <span>· مدة الإنجاز: {offer.durationDays ? `${offer.durationDays} يوم` : '—'}</span>
@@ -363,7 +440,7 @@ export function EvaluationWorkspace() {
                 </div>
 
                 {/* Evaluation Form for this Offer */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-1">
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 pt-1">
                   <div className="space-y-1.5">
                     <Label className="text-xs font-semibold">قرار المطابقة والقبول</Label>
                     <div className="flex items-center gap-2">
@@ -372,6 +449,7 @@ export function EvaluationWorkspace() {
                         size="sm"
                         variant={form.evaluationStatus === 'admitted' ? 'default' : 'outline'}
                         className={`text-xs rounded-xl flex-1 gap-1.5 ${form.evaluationStatus === 'admitted' ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : ''}`}
+                        disabled={form.saving || isAwardConcluded}
                         onClick={() =>
                           setEvalForms((prev) => ({
                             ...prev,
@@ -387,6 +465,7 @@ export function EvaluationWorkspace() {
                         size="sm"
                         variant={form.evaluationStatus === 'rejected' ? 'destructive' : 'outline'}
                         className="text-xs rounded-xl flex-1 gap-1.5"
+                        disabled={form.saving || isAwardConcluded}
                         onClick={() =>
                           setEvalForms((prev) => ({
                             ...prev,
@@ -406,7 +485,9 @@ export function EvaluationWorkspace() {
                       type="number"
                       min="0"
                       max="100"
+                      step="0.01"
                       value={form.technicalScore}
+                      disabled={form.saving || isAwardConcluded}
                       onChange={(e) =>
                         setEvalForms((prev) => ({
                           ...prev,
@@ -414,6 +495,26 @@ export function EvaluationWorkspace() {
                         }))
                       }
                       placeholder="مثال: 85 (وفق شبكة التنقيط)"
+                      className="text-xs rounded-xl"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-semibold">العلامة المالية</Label>
+                    <Input
+                      type="number"
+                      min="0"
+                      max="100"
+                      step="0.01"
+                      value={form.financialScore}
+                      disabled={form.saving || isAwardConcluded}
+                      onChange={(e) =>
+                        setEvalForms((prev) => ({
+                          ...prev,
+                          [offer.id]: { ...prev[offer.id], financialScore: e.target.value },
+                        }))
+                      }
+                      placeholder="مثال: 90 (وفق معايير التقييم المالي)"
                       className="text-xs rounded-xl"
                     />
                   </div>
@@ -430,11 +531,15 @@ export function EvaluationWorkspace() {
                       }
                       placeholder="إلزامي في حال الإقصاء أو عدم المطابقة"
                       className="text-xs rounded-xl"
-                      disabled={form.evaluationStatus !== 'rejected'}
+                      disabled={
+                        form.saving ||
+                        isAwardConcluded ||
+                        form.evaluationStatus !== 'rejected'
+                      }
                     />
                   </div>
 
-                  <div className="md:col-span-3 space-y-1.5">
+                  <div className="md:col-span-2 xl:col-span-4 space-y-1.5">
                     <Label className="text-xs font-semibold">{t('lifecycle.eval.notes')}</Label>
                     <Textarea
                       value={form.evaluatorNotes}
@@ -447,18 +552,24 @@ export function EvaluationWorkspace() {
                       placeholder="تفاصيل التقييم التقني والمالي، المؤهلات، التحفظات..."
                       className="text-xs rounded-xl"
                       rows={2}
+                      disabled={form.saving || isAwardConcluded}
                     />
                   </div>
 
-                  <div className="md:col-span-3 flex justify-end">
+                  <div className="md:col-span-2 xl:col-span-4 flex justify-end">
                     <Button
                       size="sm"
                       onClick={() => handleSaveOfferEval(offer.id)}
                       disabled={form.saving || isAwardConcluded}
+                      aria-busy={form.saving}
                       className="text-xs rounded-xl font-bold gap-2"
                     >
-                      <FileCheck className="w-4 h-4" />
-                      {form.saving ? 'جاري الحفظ...' : t('lifecycle.eval.save_eval')}
+                      {form.saving ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <FileCheck className="w-4 h-4" />
+                      )}
+                      {form.saving ? 'جاري حفظ التقييم...' : t('lifecycle.eval.save_eval')}
                     </Button>
                   </div>
                 </div>
@@ -493,6 +604,7 @@ export function EvaluationWorkspace() {
                     <th className="p-3 font-bold">الترتيب</th>
                     <th className="p-3 font-bold">المتعامل الاقتصادي</th>
                     <th className="p-3 font-bold">العلامة التقنية</th>
+                    <th className="p-3 font-bold">العلامة المالية</th>
                     <th className="p-3 font-bold">المبلغ المقترح (دج)</th>
                     <th className="p-3 font-bold">مدة الإنجاز</th>
                     <th className="p-3 font-bold">الحالة</th>
@@ -507,6 +619,7 @@ export function EvaluationWorkspace() {
                         <td className="p-3 font-mono font-black text-amber-700">#{idx + 1}</td>
                         <td className="p-3 font-bold text-navy-900">{item.bidderName}</td>
                         <td className="p-3 font-mono">{item.technicalScore || '—'} / 100</td>
+                        <td className="p-3 font-mono">{item.financialScore || '—'} / 100</td>
                         <td className="p-3 font-mono font-bold text-emerald-800">
                           {item.financialAmount
                             ? Number(item.financialAmount).toLocaleString() + ' دج'
@@ -514,8 +627,14 @@ export function EvaluationWorkspace() {
                         </td>
                         <td className="p-3 text-muted-foreground">{item.durationDays ? `${item.durationDays} يوم` : '—'}</td>
                         <td className="p-3">
-                          <span className="px-2 py-0.5 rounded bg-emerald-50 text-emerald-900 text-[10px] font-bold border border-emerald-200">
-                            مقبول ومطابق
+                          <span
+                            className={`px-2 py-0.5 rounded text-[10px] font-bold border ${
+                              item.evaluationStatus === 'evaluated'
+                                ? 'bg-emerald-50 text-emerald-900 border-emerald-200'
+                                : 'bg-blue-50 text-blue-800 border-blue-200'
+                            }`}
+                          >
+                            {EVALUATION_STATUS_LABELS[item.evaluationStatus]}
                           </span>
                         </td>
                       </tr>
@@ -538,6 +657,7 @@ export function EvaluationWorkspace() {
                     <select
                       value={winningOfferId}
                       onChange={(e) => setWinningOfferId(e.target.value)}
+                      disabled={awarding}
                       className="w-full text-xs rounded-xl border border-input bg-background px-3 py-2"
                     >
                       <option value="">-- اختر العارض الفائز المقترح --</option>
@@ -553,7 +673,10 @@ export function EvaluationWorkspace() {
                     <Label className="text-xs font-semibold">طريقة اختيار العرض *</Label>
                     <select
                       value={awardMethod}
-                      onChange={(e) => setAwardMethod(e.target.value as any)}
+                      onChange={(e) =>
+                        setAwardMethod(e.target.value as 'least_cost' | 'best_value')
+                      }
+                      disabled={awarding}
                       className="w-full text-xs rounded-xl border border-input bg-background px-3 py-2"
                     >
                       <option value="least_cost">{t('lifecycle.eval.method_least_cost')}</option>
@@ -569,6 +692,7 @@ export function EvaluationWorkspace() {
                       placeholder="مبررات الاختيار وفق دفتر الشروط والنتائج التقنية والمالية..."
                       className="text-xs rounded-xl"
                       rows={2}
+                      disabled={awarding}
                     />
                   </div>
                 </div>
@@ -576,10 +700,15 @@ export function EvaluationWorkspace() {
                 <Button
                   onClick={handleConcludeAward}
                   disabled={awarding || !winningOfferId}
+                  aria-busy={awarding}
                   className="rounded-xl text-xs font-bold gap-2 bg-emerald-700 hover:bg-emerald-800 text-white"
                 >
-                  <Trophy className="w-4 h-4" />
-                  {awarding ? 'جاري الاعتماد...' : t('lifecycle.eval.conclude_btn')}
+                  {awarding ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Trophy className="w-4 h-4" />
+                  )}
+                  {awarding ? 'جاري اعتماد التقييم النهائي...' : t('lifecycle.eval.conclude_btn')}
                 </Button>
               </div>
             )}

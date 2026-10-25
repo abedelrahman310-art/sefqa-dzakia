@@ -1,4 +1,3 @@
-import React from 'react';
 import { Link } from 'wouter';
 import { TranslationKey } from '@/i18n';
 import { EmptyState } from '@/shared/components';

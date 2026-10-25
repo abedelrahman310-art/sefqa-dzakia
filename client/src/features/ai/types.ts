@@ -114,6 +114,43 @@ export interface ChatResponse {
   human_verification_required: boolean;
 }
 
+export interface TenderAnalysisRequirement {
+  category: string;
+  title: string;
+  detail: string;
+}
+
+export type TenderAnalysisSeverity = 'high' | 'medium' | 'low';
+
+export interface TenderAnalysisPoint {
+  severity: TenderAnalysisSeverity;
+  title: string;
+  detail: string;
+}
+
+export interface TenderAnalysisDeal {
+  id: string;
+  reference: string;
+  title: string;
+  authority: string;
+  wilaya: string;
+  estimated_budget: string | null;
+  submission_deadline: string | null;
+  current_stage: number | null;
+}
+
+export interface TenderAnalysisResponse {
+  deal: TenderAnalysisDeal;
+  summary: string;
+  key_requirements: TenderAnalysisRequirement[];
+  points_of_attention: TenderAnalysisPoint[];
+  recommendations: string[];
+  legal_references: string[];
+  is_advisory: boolean;
+  human_verification_required: boolean;
+  statutory_reference: string;
+}
+
 export interface PriceEstimateRequest {
   template_type: "works" | "supplies" | "services" | "studies";
   category?: string;

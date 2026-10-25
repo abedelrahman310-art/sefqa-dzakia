@@ -9,6 +9,7 @@ import {
   Filter,
   CheckCircle2,
   XCircle,
+  Timer,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { objectionsApi } from '../api/objections';
@@ -17,11 +18,56 @@ import { GROUND_LABELS, TYPE_LABELS } from '../types';
 import { ObjectionSubmissionModal } from './ObjectionSubmissionModal';
 import { ObjectionDetailModal } from './ObjectionDetailModal';
 
+const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000;
+
+const getRemainingMs = (deadlineAt: string, now: number): number => {
+  const deadline = new Date(deadlineAt).getTime();
+  return Number.isFinite(deadline) ? deadline - now : 0;
+};
+
+const formatRemaining = (remainingMs: number): string => {
+  if (remainingMs <= 0) return 'انقضى الأجل';
+
+  const totalMinutes = Math.floor(remainingMs / 60_000);
+  const days = Math.floor(totalMinutes / 1_440);
+  const hours = Math.floor((totalMinutes % 1_440) / 60);
+  const minutes = totalMinutes % 60;
+
+  if (days > 0) return `${days} يوم${hours > 0 ? ` و${hours} ساعة` : ''}`;
+  if (hours > 0) return `${hours} ساعة${minutes > 0 ? ` و${minutes} دقيقة` : ''}`;
+  return `${Math.max(minutes, 1)} دقيقة`;
+};
+
+const formatDeadline = (deadlineAt: string): string =>
+  new Date(deadlineAt).toLocaleString('ar-DZ', {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  });
+
+function ObjectionCountdown({ deadlineAt, now }: { deadlineAt: string; now: number }) {
+  const remaining = getRemainingMs(deadlineAt, now);
+  const isExpired = remaining <= 0;
+  const isUrgent = !isExpired && remaining < THREE_DAYS_MS;
+
+  return (
+    <span
+      className={`flex items-center gap-1.5 text-xs font-bold ${
+        isExpired || isUrgent ? 'text-rose-700' : 'text-[var(--op-gold-dark)]'
+      }`}
+      title={`آخر أجل: ${formatDeadline(deadlineAt)}`}
+    >
+      <Clock className="size-3.5" aria-hidden="true" />
+      <span>{formatRemaining(remaining)}</span>
+    </span>
+  );
+}
+
 export function OperatorObjectionsView() {
   const [objections, setObjections] = useState<ObjectionListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [now, setNow] = useState(() => Date.now());
 
   const [submitModalOpen, setSubmitModalOpen] = useState(false);
   const [detailModalOpen, setDetailModalOpen] = useState(false);
@@ -42,6 +88,11 @@ export function OperatorObjectionsView() {
 
   useEffect(() => {
     fetchObjections();
+  }, []);
+
+  useEffect(() => {
+    const interval = window.setInterval(() => setNow(Date.now()), 30_000);
+    return () => window.clearInterval(interval);
   }, []);
 
   const handleViewDetail = async (id: string) => {
@@ -101,6 +152,20 @@ export function OperatorObjectionsView() {
   const acceptedCount = objections.filter((o) => o.status === 'accepted').length;
   const rejectedCount = objections.filter((o) => o.status === 'rejected').length;
 
+  const nextObjection = objections
+    .filter(
+      (item) =>
+        (item.status === 'submitted' || item.status === 'under_review') &&
+        getRemainingMs(item.deadline_at, now) > 0,
+    )
+    .sort(
+      (left, right) =>
+        new Date(left.deadline_at).getTime() - new Date(right.deadline_at).getTime(),
+    )[0];
+
+  const nextRemaining = nextObjection ? getRemainingMs(nextObjection.deadline_at, now) : null;
+  const isNextUrgent = nextRemaining !== null && nextRemaining > 0 && nextRemaining < THREE_DAYS_MS;
+
   const kpiValue = (value: number) => (value > 0 ? value : '—');
 
   return (
@@ -125,6 +190,73 @@ export function OperatorObjectionsView() {
           </button>
         </div>
       </div>
+
+      <section
+        className={`op-card overflow-hidden ${isNextUrgent ? 'border-rose-300' : ''}`}
+        aria-labelledby="objection-countdown-title"
+      >
+        <div className={`h-1 ${isNextUrgent ? 'bg-rose-500' : 'bg-[var(--op-gold)]'}`} />
+        <div className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-start gap-3">
+            <span
+              className={`flex size-11 shrink-0 items-center justify-center rounded-xl ${
+                isNextUrgent
+                  ? 'bg-rose-100 text-rose-700'
+                  : 'bg-[#1B4332]/10 text-[#1B4332]'
+              }`}
+              aria-hidden="true"
+            >
+              <Timer className="size-5" />
+            </span>
+            <div>
+              <div className="flex flex-wrap items-center gap-2">
+                <h2
+                  id="objection-countdown-title"
+                  className="text-sm font-extrabold text-[var(--op-ink)]"
+                >
+                  العد التنازلي لأقرب أجل طعن
+                </h2>
+                {isNextUrgent ? <span className="op-chip red">أقل من 3 أيام</span> : null}
+              </div>
+              <p className="mt-1 text-xs leading-relaxed text-[var(--op-muted)]">
+                {nextObjection ? (
+                  <>
+                    الطعن <span className="op-mono font-bold">{nextObjection.reference}</span> —
+                    آخر أجل: {formatDeadline(nextObjection.deadline_at)}
+                  </>
+                ) : (
+                  'لا توجد آجال طعن مفتوحة حالياً. تُحسب المهلة من تاريخ نشر الإسناد المؤقت.'
+                )}
+              </p>
+            </div>
+          </div>
+
+          <div
+            className={`rounded-xl border px-4 py-3 text-center sm:min-w-44 ${
+              isNextUrgent
+                ? 'border-rose-200 bg-rose-50'
+                : 'border-[var(--op-line)] bg-[var(--op-surface-2)]'
+            }`}
+          >
+            <span className="block text-[10px] font-bold text-[var(--op-muted)]">المتبقي</span>
+            <div
+              role="timer"
+              aria-live="polite"
+              className={`mt-1 text-base font-extrabold ${
+                isNextUrgent ? 'text-rose-700' : 'text-[var(--op-ink)]'
+              }`}
+            >
+              {nextRemaining !== null ? formatRemaining(nextRemaining) : '—'}
+            </div>
+          </div>
+        </div>
+        {isNextUrgent ? (
+          <p className="border-t border-rose-100 bg-rose-50/70 px-5 py-2.5 text-[11px] font-semibold text-rose-800">
+            تنبيه: بقي أقل من 3 أيام على انقضاء الأجل. بادر باستكمال الإجراء أو مراجعة ملف
+            الطعن قبل انتهاء المهلة.
+          </p>
+        ) : null}
+      </section>
 
       <section className="op-kpi-grid" aria-label="مؤشرات الطعون">
         <article className="op-kpi">
@@ -282,10 +414,7 @@ export function OperatorObjectionsView() {
                     <td>{getStatusBadge(item.status)}</td>
                     <td>
                       {item.status === 'submitted' || item.status === 'under_review' ? (
-                        <span className="flex items-center gap-1.5 text-xs font-bold text-[var(--op-gold-dark)]">
-                          <Clock className="size-3.5" aria-hidden="true" />
-                          <span>{item.days_remaining} يوم</span>
-                        </span>
+                        <ObjectionCountdown deadlineAt={item.deadline_at} now={now} />
                       ) : (
                         <span className="text-xs text-[var(--op-muted)]">—</span>
                       )}

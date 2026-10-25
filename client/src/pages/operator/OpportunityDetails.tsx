@@ -2,7 +2,35 @@ import { useEffect, useState } from 'react';
 import { useLocation, useParams } from 'wouter';
 import { useI18n } from '@/i18n';
 import { api } from '@/lib/api';
-import { ArrowLeft, ArrowRight, Lock, AlertTriangle, Building, Calendar, Banknote, FileText } from 'lucide-react';
+import { analyzeTender } from '@/features/ai/api/ai';
+import type { TenderAnalysisResponse, TenderAnalysisSeverity } from '@/features/ai/types';
+import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { toast } from 'sonner';
+import {
+  AlertTriangle,
+  ArrowLeft,
+  ArrowRight,
+  Banknote,
+  BookOpen,
+  Building,
+  Calendar,
+  CheckCircle2,
+  FileSearch,
+  FileText,
+  Loader2,
+  Lock,
+  RefreshCw,
+  ShieldCheck,
+  Sparkles,
+} from 'lucide-react';
 
 interface Opportunity {
   id: string;
@@ -14,6 +42,27 @@ interface Opportunity {
   hasDocument: boolean;
 }
 
+const SEVERITY_STYLES: Record<TenderAnalysisSeverity, string> = {
+  high: 'border-rose-200 bg-rose-50 text-rose-950',
+  medium: 'border-amber-200 bg-amber-50 text-amber-950',
+  low: 'border-sky-200 bg-sky-50 text-sky-950',
+};
+
+const SEVERITY_LABELS: Record<TenderAnalysisSeverity, string> = {
+  high: 'أولوية عالية',
+  medium: 'انتباه',
+  low: 'ملاحظة',
+};
+
+const getAnalysisErrorMessage = (err: unknown): string => {
+  if (typeof err === 'object' && err !== null) {
+    const detail = (err as { response?: { data?: { detail?: unknown } } }).response?.data?.detail;
+    if (typeof detail === 'string' && detail.trim()) return detail;
+  }
+  if (err instanceof Error && err.message) return err.message;
+  return 'تعذر إتمام تحليل دفتر الشروط. يرجى المحاولة مجدداً.';
+};
+
 export function OpportunityDetails() {
   const { id } = useParams<{ id: string }>();
   const [, setLocation] = useLocation();
@@ -23,6 +72,10 @@ export function OpportunityDetails() {
   const [error, setError] = useState(false);
 
   const [existingOfferId, setExistingOfferId] = useState<string | null>(null);
+  const [analysisOpen, setAnalysisOpen] = useState(false);
+  const [analysisLoading, setAnalysisLoading] = useState(false);
+  const [analysis, setAnalysis] = useState<TenderAnalysisResponse | null>(null);
+  const [analysisError, setAnalysisError] = useState('');
 
   useEffect(() => {
     if (!id) return;
@@ -55,6 +108,25 @@ export function OpportunityDetails() {
   }, [id]);
 
   const ArrowIcon = dir === 'rtl' ? ArrowRight : ArrowLeft;
+
+  const handleAnalyzeTender = async () => {
+    if (!id || analysisLoading) return;
+
+    setAnalysisOpen(true);
+    setAnalysisLoading(true);
+    setAnalysisError('');
+
+    try {
+      const result = await analyzeTender(id);
+      setAnalysis(result);
+    } catch (err) {
+      const message = getAnalysisErrorMessage(err);
+      setAnalysisError(message);
+      toast.error(message);
+    } finally {
+      setAnalysisLoading(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -104,6 +176,19 @@ export function OpportunityDetails() {
           </p>
         </div>
         <div className="op-page-actions">
+          <button
+            type="button"
+            className="op-btn op-btn-gold"
+            onClick={() => void handleAnalyzeTender()}
+            disabled={analysisLoading}
+          >
+            {analysisLoading ? (
+              <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+            ) : (
+              <Sparkles aria-hidden="true" />
+            )}
+            <span>{analysisLoading ? 'جارٍ تحليل دفتر الشروط...' : 'تحليل ذكي لدفتر الشروط'}</span>
+          </button>
           <button
             type="button"
             className="op-btn op-btn-outline"
@@ -192,6 +277,227 @@ export function OpportunityDetails() {
           </div>
         </div>
       </section>
+
+      <Dialog open={analysisOpen} onOpenChange={setAnalysisOpen}>
+        <DialogContent
+          dir="rtl"
+          className="max-h-[90vh] max-w-3xl overflow-y-auto border-[var(--op-line)] bg-white p-0 font-sans text-start"
+        >
+          <div className="sticky top-0 z-10 border-b border-[var(--op-line-2)] bg-white px-6 py-5 pe-12">
+            <DialogHeader>
+              <span className="op-chip gold mb-2 w-fit">
+                <Sparkles aria-hidden="true" />
+                <span>تحليل استشاري آلي</span>
+              </span>
+              <DialogTitle className="text-lg font-extrabold text-[var(--op-ink)]">
+                تحليل ذكي لدفتر الشروط
+              </DialogTitle>
+              <DialogDescription className="text-xs leading-relaxed text-[var(--op-muted)]">
+                قراءة منظمة للشروط الإدارية والتقنية والمالية، مع إبراز المتطلبات ونقاط الانتباه.
+              </DialogDescription>
+            </DialogHeader>
+          </div>
+
+          <div className="space-y-5 px-6 py-5">
+            {analysisLoading ? (
+              <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
+                <span className="flex size-14 items-center justify-center rounded-2xl bg-[#1B4332] text-[#F6E7B4]">
+                  <Loader2 className="size-6 animate-spin" aria-hidden="true" />
+                </span>
+                <div>
+                  <p className="text-sm font-bold text-[var(--op-ink)]">جارٍ تحليل دفتر الشروط...</p>
+                  <p className="mt-1 text-xs text-[var(--op-muted)]">
+                    نراجع البيانات الإدارية والفنية والمالية المتاحة للصفقة.
+                  </p>
+                </div>
+              </div>
+            ) : analysisError ? (
+              <div className="op-alert error">
+                <AlertTriangle aria-hidden="true" />
+                <div>
+                  <strong className="mb-1 block text-sm font-bold">تعذر إتمام التحليل</strong>
+                  <p>{analysisError}</p>
+                  <button
+                    type="button"
+                    className="op-btn op-btn-outline op-btn-sm mt-3"
+                    onClick={() => void handleAnalyzeTender()}
+                  >
+                    <RefreshCw aria-hidden="true" />
+                    <span>إعادة المحاولة</span>
+                  </button>
+                </div>
+              </div>
+            ) : analysis ? (
+              <>
+                <div className="rounded-xl border border-[var(--op-line)] bg-[var(--op-surface-2)] p-4">
+                  <div className="flex items-start gap-3">
+                    <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[#1B4332] text-[#F6E7B4]">
+                      <FileSearch className="size-5" aria-hidden="true" />
+                    </span>
+                    <div className="min-w-0">
+                      <h3 className="text-sm font-extrabold text-[var(--op-ink)]">
+                        {analysis.deal.title}
+                      </h3>
+                      <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-[var(--op-muted)]">
+                        <span className="op-mono">{analysis.deal.reference}</span>
+                        <span aria-hidden="true">·</span>
+                        <span>{analysis.deal.authority}</span>
+                        {analysis.deal.wilaya ? (
+                          <>
+                            <span aria-hidden="true">·</span>
+                            <span>{analysis.deal.wilaya}</span>
+                          </>
+                        ) : null}
+                      </p>
+                    </div>
+                  </div>
+                  <p className="mt-3 text-xs leading-relaxed text-[var(--op-text)]">
+                    {analysis.summary}
+                  </p>
+                  <div className="mt-3 flex flex-wrap gap-1.5">
+                    <span className="op-chip green">تحليل استشاري</span>
+                    <span className="op-chip gold">{analysis.statutory_reference}</span>
+                    <span className="op-chip">يتطلب مراجعة بشرية</span>
+                  </div>
+                </div>
+
+                <section aria-labelledby="analysis-requirements-title">
+                  <h3
+                    id="analysis-requirements-title"
+                    className="mb-3 flex items-center gap-2 text-sm font-extrabold text-[var(--op-ink)]"
+                  >
+                    <CheckCircle2 className="size-4 text-emerald-600" aria-hidden="true" />
+                    <span>المتطلبات الرئيسية</span>
+                  </h3>
+                  <div className="space-y-2.5">
+                    {analysis.key_requirements.map((requirement, index) => (
+                      <article
+                        key={`${requirement.category}-${index}`}
+                        className="rounded-xl border border-[var(--op-line)] bg-white p-3"
+                      >
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="op-chip text-[10px]">{requirement.category}</span>
+                          <h4 className="text-xs font-bold text-[var(--op-ink)]">
+                            {requirement.title}
+                          </h4>
+                        </div>
+                        <p className="mt-2 text-xs leading-relaxed text-[var(--op-muted)]">
+                          {requirement.detail}
+                        </p>
+                      </article>
+                    ))}
+                  </div>
+                </section>
+
+                <section aria-labelledby="analysis-attention-title">
+                  <h3
+                    id="analysis-attention-title"
+                    className="mb-3 flex items-center gap-2 text-sm font-extrabold text-[var(--op-ink)]"
+                  >
+                    <AlertTriangle className="size-4 text-amber-600" aria-hidden="true" />
+                    <span>نقاط الانتباه</span>
+                  </h3>
+                  {analysis.points_of_attention.length === 0 ? (
+                    <p className="rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-xs text-emerald-900">
+                      لم تُرصد نقاط انتباه جوهرية في البيانات المتاحة. تبقى مراجعة دفتر الشروط
+                      والإعلان ضرورية.
+                    </p>
+                  ) : (
+                    <div className="space-y-2.5">
+                      {analysis.points_of_attention.map((point, index) => (
+                        <article
+                          key={`${point.title}-${index}`}
+                          className={`rounded-xl border p-3 ${
+                            SEVERITY_STYLES[point.severity] || SEVERITY_STYLES.low
+                          }`}
+                        >
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className="rounded-full border border-black/10 bg-white/60 px-2 py-0.5 text-[10px] font-bold">
+                              {SEVERITY_LABELS[point.severity] || 'ملاحظة'}
+                            </span>
+                            <h4 className="text-xs font-bold">{point.title}</h4>
+                          </div>
+                          <p className="mt-2 text-xs leading-relaxed opacity-90">{point.detail}</p>
+                        </article>
+                      ))}
+                    </div>
+                  )}
+                </section>
+
+                <section aria-labelledby="analysis-recommendations-title">
+                  <h3
+                    id="analysis-recommendations-title"
+                    className="mb-3 flex items-center gap-2 text-sm font-extrabold text-[var(--op-ink)]"
+                  >
+                    <Sparkles className="size-4 text-[var(--op-gold)]" aria-hidden="true" />
+                    <span>توصيات عملية</span>
+                  </h3>
+                  <ul className="space-y-2 rounded-xl border border-[var(--op-line)] bg-[var(--op-surface-2)] p-4">
+                    {analysis.recommendations.map((recommendation, index) => (
+                      <li
+                        key={`${recommendation}-${index}`}
+                        className="flex items-start gap-2 text-xs leading-relaxed text-[var(--op-text)]"
+                      >
+                        <CheckCircle2
+                          className="mt-0.5 size-3.5 shrink-0 text-emerald-600"
+                          aria-hidden="true"
+                        />
+                        <span>{recommendation}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+
+                <section className="rounded-xl border border-[var(--op-line)] bg-white p-4">
+                  <h3 className="mb-2 flex items-center gap-2 text-sm font-extrabold text-[var(--op-ink)]">
+                    <BookOpen className="size-4 text-[var(--op-gold)]" aria-hidden="true" />
+                    <span>مراجع قانونية</span>
+                  </h3>
+                  <ul className="space-y-1.5 text-[11px] leading-relaxed text-[var(--op-muted)]">
+                    {analysis.legal_references.map((reference) => (
+                      <li key={reference} className="flex items-start gap-2">
+                        <span
+                          className="mt-1.5 size-1.5 shrink-0 rounded-full bg-[var(--op-gold)]"
+                          aria-hidden="true"
+                        />
+                        <span>{reference}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+
+                <div className="op-alert warning">
+                  <ShieldCheck aria-hidden="true" />
+                  <div>
+                    <strong className="mb-1 block text-xs font-bold">إخلاء مسؤولية</strong>
+                    <p className="text-[11px] leading-relaxed">
+                      هذا التحليل استشاري آلي ولا يُعد قراراً إدارياً أو تقييماً رسمياً للعرض.
+                      المرجع الملزم هو دفتر الشروط والإعلان والقرارات الصادرة عن الجهة المختصة.
+                    </p>
+                  </div>
+                </div>
+              </>
+            ) : null}
+          </div>
+
+          <DialogFooter className="border-t border-[var(--op-line-2)] bg-white px-6 py-4">
+            {analysis ? (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => void handleAnalyzeTender()}
+                disabled={analysisLoading}
+              >
+                <RefreshCw aria-hidden="true" />
+                <span>إعادة التحليل</span>
+              </Button>
+            ) : null}
+            <Button type="button" onClick={() => setAnalysisOpen(false)}>
+              إغلاق
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

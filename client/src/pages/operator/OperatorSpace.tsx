@@ -4,11 +4,13 @@ import { OperatorOpportunities } from './OperatorOpportunities';
 import { OpportunityDetails } from './OpportunityDetails';
 import { OffersList } from './OffersList';
 import { OfferForm } from './OfferForm';
+import { OperatorContractsView } from './OperatorContractsView';
 import { OperatorProfileView } from './OperatorProfileView';
 import { OperatorSmartSpecsView } from './OperatorSmartSpecsView';
 import { OperatorArchiveView } from './OperatorArchiveView';
 import { OperatorSettingsView } from './OperatorSettingsView';
 import { OperatorNotificationsView } from './OperatorNotificationsView';
+import { OperatorAssistantView } from './OperatorAssistantView';
 import { RequirementsResponse } from './RequirementsResponse';
 import { OperatorSessionList } from '@/features/opening/components/OperatorSessionList';
 import { OperatorSessionLive } from '@/features/opening/components/OperatorSessionLive';
@@ -22,6 +24,8 @@ import {
   ClipboardCheck,
   Scale,
   Users,
+  FileSignature,
+  Sparkles,
 } from 'lucide-react';
 
 export function OperatorSpace() {
@@ -33,7 +37,10 @@ export function OperatorSpace() {
   const [isOppsDetailsActive] = useRoute('/operator/opportunities/:rest*');
   const [isOffersActive] = useRoute('/operator/offers');
   const [isOffersIdActive] = useRoute('/operator/offers/:id');
+  const [isContractsActive] = useRoute('/operator/contracts');
+  const [isContractDealActive] = useRoute('/operator/contracts/:dealId');
   const [isObjectionsActive] = useRoute('/operator/objections');
+  const [isAssistantActive] = useRoute('/operator/assistant');
   const [isSmartSpecsActive] = useRoute('/operator/smart-specs');
   const [isSettingsActive] = useRoute('/operator/settings');
 
@@ -67,10 +74,24 @@ export function OperatorSpace() {
       group: 'activity',
     },
     {
+      label: 'العقود والتنفيذ',
+      href: '/operator/contracts',
+      icon: FileSignature,
+      isActive: isContractsActive || isContractDealActive,
+      group: 'activity',
+    },
+    {
       label: 'الطعون والتظلمات',
       href: '/operator/objections',
       icon: Scale,
       isActive: isObjectionsActive,
+      group: 'activity',
+    },
+    {
+      label: 'المساعد القانوني',
+      href: '/operator/assistant',
+      icon: Sparkles,
+      isActive: isAssistantActive,
       group: 'activity',
     },
     {
@@ -88,6 +109,7 @@ export function OperatorSpace() {
         <Route path="/operator/opening-sessions/:id" component={OperatorSessionLive} />
         <Route path="/operator/opening-sessions" component={OperatorSessionList} />
         <Route path="/operator/objections" component={OperatorObjectionsView} />
+        <Route path="/operator/assistant" component={OperatorAssistantView} />
         <Route path="/operator/deals" component={OperatorOpportunities} />
         <Route path="/operator/opportunities" component={OperatorOpportunities} />
         <Route path="/operator/profile" component={OperatorProfileView} />
@@ -103,6 +125,12 @@ export function OperatorSpace() {
         <Route path="/operator/offers" component={OffersList} />
         <Route path="/operator/offers/:id">
           {(params) => <OfferForm offerId={params.id} />}
+        </Route>
+        <Route path="/operator/contracts/:dealId">
+          {(params) => <OperatorContractsView dealId={params.dealId} />}
+        </Route>
+        <Route path="/operator/contracts">
+          {() => <OperatorContractsView />}
         </Route>
         <Route path="/operator/overview" component={OperatorOverview} />
         <Route path="/operator" component={OperatorOverview} />

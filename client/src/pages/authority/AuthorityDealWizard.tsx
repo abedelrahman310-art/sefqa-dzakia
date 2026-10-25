@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useLocation, useRoute } from 'wouter';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { api } from '@/lib/api';
@@ -6,32 +6,23 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import {
-  Briefcase,
   ArrowRight,
-  ArrowLeft,
   CheckCircle2,
   AlertCircle,
   FileText,
-  Sparkles,
   Scale,
   ShieldCheck,
   Download,
   Plus,
   Trash2,
-  HelpCircle,
-  Clock,
-  Layers,
   Building2,
   Check,
   X,
-  ExternalLink,
   ChevronLeft,
-  ChevronRight,
   Send,
   Save,
   BookOpen,
   Eye,
-  FileCheck2,
   AlertTriangle,
   Lock,
 } from 'lucide-react';
@@ -55,6 +46,7 @@ import {
   TEMPLATE_STATUS_LABELS,
   CAHIER_TEMPLATES_LIBRARY,
 } from '@/lib/procurementTemplates';
+import type { ProcurementDealApi } from '@/lib/procurementApiTypes';
 
 interface BoqItem {
   id: string;
@@ -213,6 +205,7 @@ export function AuthorityDealWizard() {
         name: 'التصريح بالترشح (الاستمارة الموحدة)',
         category: 'candidacy',
         isMandatory: true,
+        isStatutory: true,
         statutoryBasis: 'المادة 67 من القانون 23-12',
       },
       {
@@ -220,6 +213,7 @@ export function AuthorityDealWizard() {
         name: 'التصريح بالنزاهة (الاستمارة الموحدة)',
         category: 'candidacy',
         isMandatory: true,
+        isStatutory: true,
         statutoryBasis: 'المادة 67 من القانون 23-12',
       },
       {
@@ -227,6 +221,7 @@ export function AuthorityDealWizard() {
         name: 'رسالة التعهد والعرض المالي',
         category: 'financial',
         isMandatory: true,
+        isStatutory: true,
         statutoryBasis: 'المادة 67 من القانون 23-12',
       },
     ]);
@@ -241,7 +236,7 @@ export function AuthorityDealWizard() {
       api
         .get(`/procurements/deals/${dealId}/`)
         .then((res) => {
-          const d = res.data;
+          const d = res.data as ProcurementDealApi;
           if (d) {
             setTitle(d.title || '');
             setDescription(d.description || '');

@@ -121,17 +121,14 @@ export function WilayaDetailCard({
                     <li key={idx}>{detail}</li>
                   ))
                 ) : (
-                  <>
-                    <li>شبهة تجزئة نفقات دون تبرير تقني (المادة 27 من ق. 23-12).</li>
-                    <li>معدل تنافسية منخفض في صفقات الأشغال العمومية الكبرى.</li>
-                  </>
+                  <li>شبهة مسجلة تستدعي المراجعة الرقابية.</li>
                 )}
               </ul>
             </>
           ) : (
             <p className="flex items-center gap-1.5 text-emerald-800 font-medium">
               <ShieldCheck className="w-4 h-4 text-emerald-600 flex-none" />
-              المؤشرات التنظيمية سليمة — معدل إسناد طبيعي وتنافسية بنسبة 94% عبر 4 قطاعات نشطة.
+              لم تُرصد شبهات مرتبطة بهذه الولاية في التحليل الاستشاري الحالي.
             </p>
           )}
         </div>
@@ -147,14 +144,16 @@ export function WilayaDetailCard({
           <ArrowUpRight className="w-3.5 h-3.5" />
         </Button>
 
-        <Button
-          variant="outline"
-          className="border-[var(--color-border-subtle)] text-xs h-9 gap-1.5 hover:bg-[var(--paper-100)]"
-          onClick={() => onNotifyAuthority?.(wilaya.code)}
-        >
-          <BellRing className="w-3.5 h-3.5 text-[var(--stamp-gold-700)]" />
-          <span>إخطار المصلحة</span>
-        </Button>
+        {onNotifyAuthority && (
+          <Button
+            variant="outline"
+            className="border-[var(--color-border-subtle)] text-xs h-9 gap-1.5 hover:bg-[var(--paper-100)]"
+            onClick={() => onNotifyAuthority(wilaya.code)}
+          >
+            <BellRing className="w-3.5 h-3.5 text-[var(--stamp-gold-700)]" />
+            <span>إخطار المصلحة</span>
+          </Button>
+        )}
       </div>
     </div>
   );

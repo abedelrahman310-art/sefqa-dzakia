@@ -7,6 +7,10 @@ from .models import (
     OpeningSession,
     SessionAccess,
     OpeningEvent,
+    OfferDocument,
+    Contract,
+    Milestone,
+    MilestoneProgressReport,
 )
 from apps.bids.models import BidOffer
 
@@ -318,4 +322,448 @@ class DealOfferSummarySerializer(serializers.ModelSerializer):
             or op.display_name
             or op.email
         )
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        request = self.context.get('request')
+        user = getattr(request, 'user', None) if request else None
+        if user and getattr(user, 'role', None) == 'authority':
+            deal = getattr(instance, 'deal', None)
+            stage = getattr(deal, 'current_stage', 1) if deal else 1
+            if stage < 4:
+                ret['financial_amount'] = None
+        return ret
+
+
+STAGE_STATUS_MAP = {
+    1: 'planning',
+    2: 'specs_draft',
+    3: 'published',
+    4: 'clarifications',
+    5: 'submission_open',
+    6: 'opening_in_progress',
+    7: 'technical_evaluation',
+    8: 'provisional_award',
+    9: 'contract_signed',
+    10: 'in_execution',
+    11: 'delivered',
+    12: 'closed',
+}
+
+
+class OpportunitySerializer(serializers.ModelSerializer):
+    """محدد بيانات الفرص/الصفقات الموجه للمتعاملين مع مطابقة تسميات الواجهة"""
+    reference = serializers.CharField(source='reference_number', read_only=True)
+    authorityName = serializers.SerializerMethodField()
+    authority_name = serializers.SerializerMethodField()
+    hasDocument = serializers.SerializerMethodField()
+    has_document = serializers.SerializerMethodField()
+    estimatedBudget = serializers.SerializerMethodField()
+    status = serializers.SerializerMethodField()
+    submissionDeadline = serializers.DateTimeField(source='submission_deadline', format='%Y-%m-%dT%H:%M:%S%z', read_only=True)
+    createdAt = serializers.DateTimeField(source='created_at', format='%Y-%m-%dT%H:%M:%S%z', read_only=True)
+    updatedAt = serializers.DateTimeField(source='updated_at', format='%Y-%m-%dT%H:%M:%S%z', read_only=True)
+
+    class Meta:
+        model = ProcurementDeal
+        fields = [
+            'id',
+            'reference',
+            'reference_number',
+            'title',
+            'description',
+            'authorityName',
+            'authority_name',
+            'hasDocument',
+            'has_document',
+            'estimatedBudget',
+            'estimated_budget',
+            'status',
+            'current_stage',
+            'wilaya',
+            'submissionDeadline',
+            'submission_deadline',
+            'createdAt',
+            'created_at',
+            'updatedAt',
+            'updated_at',
+        ]
+
+    def get_authorityName(self, obj):
+        if obj.authority:
+            return obj.authority.organization_name or obj.authority.display_name or obj.authority.email
+        return 'المصلحة المتعاقدة'
+
+    def get_authority_name(self, obj):
+        return self.get_authorityName(obj)
+
+    def get_hasDocument(self, obj):
+        return hasattr(obj, 'cahier_specs') and obj.cahier_specs is not None
+
+    def get_has_document(self, obj):
+        return self.get_hasDocument(obj)
+
+    def get_estimatedBudget(self, obj):
+        return str(obj.estimated_budget) if obj.estimated_budget is not None else None
+
+    def get_status(self, obj):
+        return STAGE_STATUS_MAP.get(obj.current_stage, 'published')
+
+
+class OfferDocumentSerializer(serializers.ModelSerializer):
+    """محدد بيانات وثائق العروض المرفوعة"""
+    file_url = serializers.SerializerMethodField()
+    file_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = OfferDocument
+        fields = [
+            'id',
+            'offer',
+            'file',
+            'file_url',
+            'file_name',
+            'uploaded_at',
+        ]
+        read_only_fields = ['id', 'uploaded_at']
+
+    def get_file_url(self, obj):
+        if obj.file:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.file.url)
+            return obj.file.url
+        return None
+
+    def get_file_name(self, obj):
+        if obj.file:
+            return obj.file.name.split('/')[-1]
+        return None
+
+
+class OfferSerializer(serializers.ModelSerializer):
+    """
+    محدد بيانات العروض الموجه للواجهة الأمامية متوافق مع Multipart Form Data ورفع الوثائق
+    وفق أحكام القانون 23-12.
+    """
+    opportunityId = serializers.CharField(source='deal.id', read_only=True)
+    opportunity_id = serializers.CharField(source='deal.id', read_only=True)
+    opportunityTitle = serializers.CharField(source='deal.title', read_only=True)
+    opportunity_title = serializers.CharField(source='deal.title', read_only=True)
+    authorityName = serializers.SerializerMethodField()
+    authority_name = serializers.SerializerMethodField()
+    financialOffer = serializers.SerializerMethodField()
+    financial_amount = serializers.SerializerMethodField()
+    deliveryTimeDays = serializers.SerializerMethodField()
+    hasDocument = serializers.SerializerMethodField()
+    has_document = serializers.SerializerMethodField()
+    submittedAt = serializers.DateTimeField(source='submission_timestamp', format='%Y-%m-%dT%H:%M:%S%z', read_only=True)
+    updatedAt = serializers.DateTimeField(source='created_at', format='%Y-%m-%dT%H:%M:%S%z', read_only=True)
+    operatorName = serializers.SerializerMethodField()
+    technicalScore = serializers.DecimalField(source='technical_score', max_digits=5, decimal_places=2, read_only=True)
+    financialScore = serializers.DecimalField(source='financial_score', max_digits=5, decimal_places=2, read_only=True)
+
+    # حقول رفع الوثائق عبر Multipart Form Data
+    document = serializers.FileField(required=False, write_only=True)
+    file = serializers.FileField(required=False, write_only=True)
+
+    # حقول استعراض وتحميل الوثيقة
+    document_url = serializers.SerializerMethodField()
+    document_file = serializers.SerializerMethodField()
+    document_name = serializers.SerializerMethodField()
+    documents = serializers.SerializerMethodField()
+
+    # حقول إضافية قد تمررها الواجهة عند الحفظ والإيداع
+    technical_offer = serializers.CharField(required=False, allow_blank=True, write_only=True)
+    delivery_time_days = serializers.CharField(required=False, allow_blank=True, write_only=True)
+
+    class Meta:
+        model = BidOffer
+        fields = [
+            'id',
+            'deal',
+            'opportunityId',
+            'opportunity_id',
+            'opportunityTitle',
+            'opportunity_title',
+            'authorityName',
+            'authority_name',
+            'financialOffer',
+            'financial_amount',
+            'deliveryTimeDays',
+            'delivery_time_days',
+            'status',
+            'technical_score',
+            'technicalScore',
+            'financial_score',
+            'financialScore',
+            'rejection_reason',
+            'evaluator_notes',
+            'hasDocument',
+            'has_document',
+            'submittedAt',
+            'submission_timestamp',
+            'updatedAt',
+            'created_at',
+            'operator',
+            'operatorName',
+            'document',
+            'file',
+            'document_url',
+            'document_file',
+            'document_name',
+            'documents',
+            'technical_offer',
+        ]
+        read_only_fields = ['operator', 'submission_timestamp']
+
+    def get_authorityName(self, obj):
+        if obj.deal and obj.deal.authority:
+            return obj.deal.authority.organization_name or obj.deal.authority.display_name or obj.deal.authority.email
+        return 'المصلحة المتعاقدة'
+
+    def get_authority_name(self, obj):
+        return self.get_authorityName(obj)
+
+    def get_financialOffer(self, obj):
+        request = self.context.get('request')
+        user = getattr(request, 'user', None) if request else None
+        # حجب المبلغ المالي عن المصلحة المتعاقدة قبل مرحلة فتح الأظرفة (المراحل 1، 2، 3)
+        if user and getattr(user, 'role', None) == 'authority':
+            stage = getattr(obj.deal, 'current_stage', 1) if obj.deal else 1
+            if stage < 4:
+                return None
+        return str(obj.financial_amount) if obj.financial_amount is not None else ""
+
+    def get_financial_amount(self, obj):
+        request = self.context.get('request')
+        user = getattr(request, 'user', None) if request else None
+        # حجب المبلغ المالي عن المصلحة المتعاقدة قبل مرحلة فتح الأظرفة (المراحل 1، 2، 3)
+        if user and getattr(user, 'role', None) == 'authority':
+            stage = getattr(obj.deal, 'current_stage', 1) if obj.deal else 1
+            if stage < 4:
+                return None
+        return obj.financial_amount
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        request = self.context.get('request')
+        user = getattr(request, 'user', None) if request else None
+        # حجب المبالغ المالية نهائياً عن المصلحة المتعاقدة في المراحل 1، 2، 3
+        if user and getattr(user, 'role', None) == 'authority':
+            deal = getattr(instance, 'deal', None)
+            stage = getattr(deal, 'current_stage', 1) if deal else 1
+            if stage < 4:
+                ret['financial_amount'] = None
+                ret['financialOffer'] = None
+        return ret
+
+    def to_internal_value(self, data):
+        ret = super().to_internal_value(data)
+        # استخراج المبلغ المالي عند إيداع العرض من قبل المتعامل
+        amount_val = data.get('financial_amount')
+        if amount_val is None or amount_val == '':
+            amount_val = data.get('financialOffer')
+        if amount_val is not None and amount_val != '':
+            try:
+                ret['financial_amount'] = Decimal(str(amount_val))
+            except Exception:
+                pass
+
+        # ربط الصفقة إذا مرر المعرف بأسماء بديلة
+        if 'deal' not in ret:
+            deal_id = data.get('opportunityId') or data.get('opportunity_id') or data.get('deal_id')
+            if deal_id:
+                from apps.procurements.models import ProcurementDeal
+                try:
+                    ret['deal'] = ProcurementDeal.objects.get(id=deal_id)
+                except Exception:
+                    pass
+        return ret
+
+    def get_deliveryTimeDays(self, obj):
+        return None
+
+    def _get_latest_document(self, obj):
+        if hasattr(obj, 'documents'):
+            return obj.documents.order_by('-uploaded_at').first()
+        return None
+
+    def get_document_url(self, obj):
+        latest = self._get_latest_document(obj)
+        if latest and latest.file:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(latest.file.url)
+            return latest.file.url
+        return None
+
+    def get_document_file(self, obj):
+        return self.get_document_url(obj)
+
+    def get_document_name(self, obj):
+        latest = self._get_latest_document(obj)
+        if latest and latest.file:
+            return latest.file.name.split('/')[-1]
+        return None
+
+    def get_documents(self, obj):
+        if not hasattr(obj, 'documents'):
+            return []
+        request = self.context.get('request')
+        result = []
+        for doc in obj.documents.order_by('-uploaded_at'):
+            if not doc.file:
+                continue
+            url = request.build_absolute_uri(doc.file.url) if request else doc.file.url
+            result.append({
+                'id': str(doc.id),
+                'name': doc.file.name.split('/')[-1],
+                'url': url,
+                'uploaded_at': doc.uploaded_at.isoformat() if doc.uploaded_at else None,
+            })
+        return result
+
+    def get_hasDocument(self, obj):
+        return bool(self._get_latest_document(obj))
+
+    def get_has_document(self, obj):
+        return self.get_hasDocument(obj)
+
+    def get_operatorName(self, obj):
+        if obj.operator:
+            return obj.operator.organization_name or obj.operator.display_name or obj.operator.email
+        return ''
+
+    def create(self, validated_data):
+        doc_file = validated_data.pop('document', None) or validated_data.pop('file', None)
+        validated_data.pop('technical_offer', None)
+        validated_data.pop('delivery_time_days', None)
+
+        request = self.context.get('request')
+        if not doc_file and request and hasattr(request, 'FILES'):
+            doc_file = request.FILES.get('document') or request.FILES.get('file')
+
+        offer = super().create(validated_data)
+        if doc_file:
+            OfferDocument.objects.create(offer=offer, file=doc_file)
+        return offer
+
+    def update(self, instance, validated_data):
+        doc_file = validated_data.pop('document', None) or validated_data.pop('file', None)
+        validated_data.pop('technical_offer', None)
+        validated_data.pop('delivery_time_days', None)
+
+        request = self.context.get('request')
+        if not doc_file and request and hasattr(request, 'FILES'):
+            doc_file = request.FILES.get('document') or request.FILES.get('file')
+
+        offer = super().update(instance, validated_data)
+        if doc_file:
+            OfferDocument.objects.create(offer=offer, file=doc_file)
+        return offer
+
+
+class MilestoneProgressReportSerializer(serializers.ModelSerializer):
+    operator_name = serializers.SerializerMethodField()
+    report_file_url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = MilestoneProgressReport
+        fields = [
+            'id',
+            'milestone',
+            'operator',
+            'operator_name',
+            'progress_percentage',
+            'report_text',
+            'report_file',
+            'report_file_url',
+            'submitted_at',
+        ]
+        read_only_fields = ['id', 'operator', 'submitted_at']
+
+    def get_operator_name(self, obj):
+        if obj.operator:
+            return obj.operator.organization_name or obj.operator.display_name or obj.operator.email
+        return ''
+
+    def get_report_file_url(self, obj):
+        if obj.report_file:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.report_file.url)
+            return obj.report_file.url
+        return None
+
+
+class MilestoneSerializer(serializers.ModelSerializer):
+    deal_reference = serializers.CharField(source='deal.reference_number', read_only=True)
+    status_display = serializers.CharField(source='get_status_display', read_only=True)
+    progress_reports = MilestoneProgressReportSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Milestone
+        fields = [
+            'id',
+            'deal',
+            'deal_reference',
+            'title',
+            'description',
+            'amount',
+            'due_date',
+            'status',
+            'status_display',
+            'completion_date',
+            'progress_percentage',
+            'progress_reports',
+            'created_at',
+            'updated_at',
+        ]
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+
+class ContractSerializer(serializers.ModelSerializer):
+    deal_reference = serializers.CharField(source='deal.reference_number', read_only=True)
+    deal_title = serializers.CharField(source='deal.title', read_only=True)
+    operator_name = serializers.SerializerMethodField()
+    operator_email = serializers.CharField(source='operator.email', read_only=True)
+    contract_pdf_url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Contract
+        fields = [
+            'id',
+            'deal',
+            'deal_reference',
+            'deal_title',
+            'operator',
+            'operator_name',
+            'operator_email',
+            'contract_number',
+            'contract_pdf',
+            'contract_pdf_url',
+            'signed_at',
+            'status',
+            'amount',
+            'created_at',
+            'updated_at',
+        ]
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+    def get_operator_name(self, obj):
+        if obj.operator:
+            return obj.operator.organization_name or obj.operator.display_name or obj.operator.email
+        return ''
+
+    def get_contract_pdf_url(self, obj):
+        if obj.contract_pdf:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.contract_pdf.url)
+            return obj.contract_pdf.url
+        return None
+
+
+
 

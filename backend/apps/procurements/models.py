@@ -27,6 +27,7 @@ class ProcurementDeal(models.Model):
     authority = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='created_deals', verbose_name='المصلحة المتعاقدة')
     
     current_stage = models.IntegerField('المرحلة الحالية', choices=STAGE_CHOICES, default=1)
+    status = models.CharField('حالة الصفقة', max_length=50, default='DRAFT', blank=True)
     estimated_budget = models.DecimalField('المبلغ التقديري (دج)', max_digits=15, decimal_places=2, null=True, blank=True)
     wilaya = models.CharField('الولاية', max_length=100, blank=True)
     
@@ -210,3 +211,138 @@ class OpeningEvent(models.Model):
 
     def __str__(self):
         return f"حدث {self.get_event_type_display()} - جلسة {self.session_id}"
+
+
+class OfferDocument(models.Model):
+    """
+    وثيقة العرض المقدمة من المتعامل الاقتصادي وفق متطلبات الصفقات العمومية.
+    تحتفظ بملف العرض المرفوع وتاريخ الرفع وارتباطه بالعرض المودع.
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    offer = models.ForeignKey(
+        'bids.BidOffer',
+        on_delete=models.CASCADE,
+        related_name='documents',
+        verbose_name='العرض المعني',
+    )
+    file = models.FileField(
+        'ملف الوثيقة',
+        upload_to='offer_documents/%Y/%m/',
+    )
+    uploaded_at = models.DateTimeField(
+        'تاريخ الرفع',
+        auto_now_add=True,
+    )
+
+    class Meta:
+        verbose_name = 'وثيقة العرض'
+        verbose_name_plural = 'وثائق العروض'
+        ordering = ['-uploaded_at']
+
+    def __str__(self):
+        return f"وثيقة العرض ({self.offer_id}) - {self.file.name}"
+
+
+class Contract(models.Model):
+    """
+    نموذج العقد الإداري والالتزام القانوني وفق أحكام القانون 23-12.
+    يربط الصفقة بالمتعامل الفائز والوثيقة الموقعة.
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    deal = models.ForeignKey(
+        ProcurementDeal,
+        on_delete=models.CASCADE,
+        related_name='procurement_contracts',
+        verbose_name='الصفقة المعنية'
+    )
+    operator = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name='procurement_contracts',
+        verbose_name='المتعامل الاقتصادي المتعاقد'
+    )
+    contract_number = models.CharField('رقم العقد الرسمي', max_length=100, blank=True)
+    contract_pdf = models.FileField('وثيقة العقد الرسمية (PDF)', upload_to='contracts/%Y/%m/', null=True, blank=True)
+    signed_at = models.DateTimeField('تاريخ توقيع وإبرام العقد', null=True, blank=True)
+    status = models.CharField('وضعية العقد', max_length=50, default='signed')
+    amount = models.DecimalField('مبلغ العقد الإجمالي (دج)', max_digits=15, decimal_places=2, null=True, blank=True)
+    created_at = models.DateTimeField('تاريخ الإنشاء', auto_now_add=True)
+    updated_at = models.DateTimeField('تاريخ التحديث', auto_now=True)
+
+    class Meta:
+        verbose_name = 'عقد صفقة'
+        verbose_name_plural = 'عقود الصفقات'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"عقد {self.contract_number or self.id} - {self.deal.reference_number}"
+
+
+class Milestone(models.Model):
+    """
+    مراحل ومحطات تنفيذ الصفقة العمومية وفق الجدول الزمني التعاقدي (القانون 23-12).
+    """
+    STATUS_CHOICES = (
+        ('pending', 'قيد الانتظار'),
+        ('in_progress', 'قيد التنفيذ'),
+        ('completed', 'مكتملة ومستلمة'),
+        ('delayed', 'متأخرة عن الأجل'),
+    )
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    deal = models.ForeignKey(
+        ProcurementDeal,
+        on_delete=models.CASCADE,
+        related_name='milestones',
+        verbose_name='الصفقة المعنية'
+    )
+    title = models.CharField('عنوان المرحلة أو الورشة', max_length=255)
+    description = models.TextField('تفاصيل الأعمال المطلوبة', blank=True)
+    amount = models.DecimalField('المبلغ المالي المخصص للمرحلة (دج)', max_digits=15, decimal_places=2, default=0)
+    due_date = models.DateField('تاريخ الاستحقاق التعاقدي', null=True, blank=True)
+    status = models.CharField('حالة المرحلة', max_length=50, choices=STATUS_CHOICES, default='pending')
+    completion_date = models.DateField('تاريخ الإنجاز الفعلي', null=True, blank=True)
+    progress_percentage = models.PositiveIntegerField('نسبة التقدم المادي (%)', default=0)
+    created_at = models.DateTimeField('تاريخ التسجيل', auto_now_add=True)
+    updated_at = models.DateTimeField('آخر تحديث', auto_now=True)
+
+    class Meta:
+        verbose_name = 'مرحلة تنفيذ'
+        verbose_name_plural = 'مراحل التنفيذ'
+        ordering = ['due_date', 'created_at']
+
+    def __str__(self):
+        return f"{self.title} - {self.deal.reference_number} ({self.get_status_display()})"
+
+
+class MilestoneProgressReport(models.Model):
+    """
+    تقرير إنجاز مرحلة التنفيذ المرفوع من المتعامل الاقتصادي.
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    milestone = models.ForeignKey(
+        Milestone,
+        on_delete=models.CASCADE,
+        related_name='progress_reports',
+        verbose_name='مرحلة التنفيذ'
+    )
+    operator = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name='progress_reports',
+        verbose_name='المتعامل الاقتصادي'
+    )
+    progress_percentage = models.PositiveIntegerField('نسبة الإنجاز المصرح بها (%)', default=0)
+    report_text = models.TextField('بيان الأعمال المنجزة والملاحظات الميدانية')
+    report_file = models.FileField('ملف أو محضر المعاينة (PDF/صور)', upload_to='progress_reports/%Y/%m/', null=True, blank=True)
+    submitted_at = models.DateTimeField('تاريخ تقديم التقرير', auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'تقرير إنجاز مرحلة'
+        verbose_name_plural = 'تقارير إنجاز المراحل'
+        ordering = ['-submitted_at']
+
+    def __str__(self):
+        return f"تقرير {self.milestone.title} ({self.progress_percentage}%) - {self.operator.email}"
+
+

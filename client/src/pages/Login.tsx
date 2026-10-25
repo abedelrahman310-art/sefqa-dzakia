@@ -5,7 +5,7 @@ import { useI18n } from '@/i18n';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardDescription, CardTitle } from '@/components/ui/card';
 import { ArrowRight } from 'lucide-react';
 import { LanguageSwitcher } from '@/components/layout/LanguageSwitcher';
 
@@ -82,7 +82,15 @@ export function Login() {
         body: JSON.stringify({ email, password }),
       });
 
-      const data = await res.json();
+      let data: any = {};
+      const responseText = await res.text();
+      if (responseText) {
+        try {
+          data = JSON.parse(responseText);
+        } catch {
+          data = { error: responseText };
+        }
+      }
 
       if (!res.ok) {
         const errorMessage =
@@ -91,7 +99,9 @@ export function Login() {
           (data.non_field_errors && data.non_field_errors[0]) ||
           (data.email && Array.isArray(data.email) ? data.email[0] : null) ||
           (data.password && Array.isArray(data.password) ? data.password[0] : null) ||
-          t('login.error');
+          (res.status === 502 || res.status === 504
+            ? 'تعذر الاتصال بخادم الواجهة الخلفية، يرجى التأكد من تشغيل الخادم.'
+            : t('login.error'));
         throw new Error(errorMessage);
       }
 

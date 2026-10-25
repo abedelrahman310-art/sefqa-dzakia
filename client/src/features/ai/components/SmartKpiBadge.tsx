@@ -1,6 +1,4 @@
-import React from 'react';
-import { Sparkles, AlertTriangle } from 'lucide-react';
-import type { SmartAlertItem } from '../types';
+import { Sparkles } from 'lucide-react';
 
 interface SmartKpiBadgeProps {
   alert?: 'critical' | 'high' | 'medium' | 'low';

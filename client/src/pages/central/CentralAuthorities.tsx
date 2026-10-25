@@ -1,11 +1,10 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { PageHeader, KpiCard, AICard } from '@/shared/components';
 import {
   Building,
   CheckCircle2,
   HelpCircle,
   AlertTriangle,
-  Sparkles,
   Search,
   Eye,
   Trophy,

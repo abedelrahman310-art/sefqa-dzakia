@@ -1,10 +1,9 @@
-import React from 'react';
 import { Eye, FileText, ShieldCheck } from 'lucide-react';
 import { useI18n } from '@/i18n';
 
 
 export function RegisterHero() {
-  const { t, dir } = useI18n();
+  const { dir } = useI18n();
 
   return (
     <aside

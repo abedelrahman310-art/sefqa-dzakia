@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useI18n } from '@/i18n';
 import { api } from '@/lib/api';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
@@ -9,7 +9,6 @@ import {
   Lock,
   Copy,
   CheckCircle,
-  AlertTriangle,
   Filter,
   Check,
   ChevronRight,

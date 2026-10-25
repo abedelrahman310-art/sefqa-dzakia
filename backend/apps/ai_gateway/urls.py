@@ -1,5 +1,10 @@
 from django.urls import path
-from .views import AICheckComplianceView, AISummarizeTenderView
+from .views import (
+    AICheckComplianceView,
+    AISummarizeTenderView,
+    AnalyzeTenderView,
+    OperatorLegalChatView,
+)
 from .views_admin import (
     CentralInsightsView,
     GenerateInsightsView,
@@ -17,6 +22,10 @@ urlpatterns = [
     # ─── الموجود — AI عام ─────────────────────────────────────────────────
     path("compliance-check/", AICheckComplianceView.as_view(), name="ai-compliance-check"),
     path("summarize/", AISummarizeTenderView.as_view(), name="ai-summarize-tender"),
+    path("legal-chat/", OperatorLegalChatView.as_view(), name="ai-operator-legal-chat"),
+    path("legal-chat", OperatorLegalChatView.as_view(), name="ai-operator-legal-chat-no-slash"),
+    path("analyze-tender/", AnalyzeTenderView.as_view(), name="ai-operator-analyze-tender"),
+    path("analyze-tender", AnalyzeTenderView.as_view(), name="ai-operator-analyze-tender-no-slash"),
     path("price-estimate/", PriceEstimateView.as_view(), name="ai-price-estimate"),
 
     # ─── Central Admin (الرقابة الوطنية) ──────────────────────────────────

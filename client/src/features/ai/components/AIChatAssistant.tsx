@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import {
   Bot,
   Send,
@@ -6,7 +6,6 @@ import {
   AlertTriangle,
   RotateCcw,
   User,
-  ExternalLink,
   BookOpen,
 } from 'lucide-react';
 import { useChat } from '../hooks/useAI';

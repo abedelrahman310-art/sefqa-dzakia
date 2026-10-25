@@ -2,7 +2,6 @@ import { useI18n } from '@/i18n';
 import { Route, Switch, useRoute, useLocation } from 'wouter';
 import { CentralOverview } from './CentralOverview';
 import { CentralMapView } from './CentralMapView';
-import { CentralSectionView } from './CentralSectionView';
 import { CentralDeals } from './CentralDeals';
 import { CentralAuthorities } from './CentralAuthorities';
 import { CentralOperators } from './CentralOperators';

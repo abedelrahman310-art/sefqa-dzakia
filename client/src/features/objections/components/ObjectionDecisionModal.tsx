@@ -15,7 +15,6 @@ import {
   CheckCircle2,
   XCircle,
   Loader2,
-  AlertTriangle,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { objectionsApi } from '../api/objections';

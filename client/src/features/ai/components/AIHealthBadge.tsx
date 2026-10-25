@@ -1,6 +1,5 @@
-import React from 'react';
 import { useAIHealth } from '../hooks/useAI';
-import { Bot, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Bot } from 'lucide-react';
 
 interface AIHealthBadgeProps {
   className?: string;

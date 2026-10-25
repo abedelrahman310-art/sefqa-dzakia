@@ -1,16 +1,13 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { PageHeader, KpiCard, AICard } from '@/shared/components';
 import { api } from '@/lib/api';
 import {
   FileText,
   Download,
   Sparkles,
-  Calendar,
-  Filter,
   CheckCircle2,
   TrendingUp,
   BarChart3,
-  Layers,
   PieChart,
 } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';

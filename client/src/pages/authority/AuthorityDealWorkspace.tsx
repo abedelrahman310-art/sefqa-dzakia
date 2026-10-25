@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useLocation, useRoute } from 'wouter';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { api } from '@/lib/api';
@@ -18,31 +18,21 @@ import {
   Plus,
   Trash2,
   HelpCircle,
-  Clock,
   Layers,
-  Building2,
   Check,
   X,
-  ExternalLink,
-  ChevronLeft,
-  ChevronRight,
   Lock,
   History,
   AlertTriangle,
-  FileCheck2,
   Save,
   PanelRightClose,
-  PanelRightOpen,
-  RefreshCw,
-  TrendingUp,
-  MapPin,
   BookOpen,
   Paperclip,
-  FolderOpen,
-  Info,
   CheckSquare,
   FileCode2,
   Award,
+  FileSignature,
+  Loader2,
 } from 'lucide-react';
 import { ALGERIA_69_WILAYAS } from '@/lib/wilayas';
 import { downloadPdfBlob } from '@/lib/pdfDownloader';
@@ -53,7 +43,6 @@ import {
   ProcurementForm,
   CompetitionScope,
   OperatorDocumentRequirement,
-  CahierTemplate,
   NATURE_LABELS,
   METHOD_LABELS,
   FORM_LABELS,
@@ -66,6 +55,53 @@ import {
   getDynamicOperatorRequirements,
   CAHIER_TEMPLATES_LIBRARY,
 } from '@/lib/procurementTemplates';
+import type {
+  CahierSpecsApi,
+  GenerateContractResponseApi,
+  ProcurementContractApi,
+  ProcurementDealApi,
+} from '@/lib/procurementApiTypes';
+import { ExecutionTracker } from '@/features/execution/components/ExecutionTracker';
+
+const CONTRACT_STATUS_LABELS: Record<string, string> = {
+  CONTRACT_SIGNED: 'موقع ومبرم',
+  signed: 'موقع',
+  active: 'قيد التنفيذ',
+  completed: 'منجز ومستلم',
+  terminated: 'مفسوخ تعاقدياً',
+};
+
+const getApiErrorMessage = (err: unknown, fallback: string): string => {
+  const response = (err as { response?: { data?: unknown } })?.response;
+  const data = response?.data;
+  if (typeof data === 'string' && data.trim()) return data;
+  if (data && typeof data === 'object') {
+    const record = data as Record<string, unknown>;
+    const detail = record.error ?? record.detail ?? record.message;
+    if (typeof detail === 'string' && detail.trim()) return detail;
+    const firstValue = Object.values(record)[0];
+    if (Array.isArray(firstValue) && typeof firstValue[0] === 'string') {
+      return firstValue[0];
+    }
+    if (typeof firstValue === 'string' && firstValue.trim()) return firstValue;
+  }
+  if (err instanceof Error && err.message) return err.message;
+  return fallback;
+};
+
+const formatContractDate = (value: string | null | undefined): string => {
+  if (!value) return '—';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleDateString('ar-DZ', { dateStyle: 'medium' });
+};
+
+const formatContractAmount = (value: string | null | undefined): string => {
+  if (value === null || value === undefined || value === '') return '—';
+  const amount = Number(value);
+  if (!Number.isFinite(amount)) return '—';
+  return `${amount.toLocaleString('ar-DZ', { maximumFractionDigits: 2 })} دج`;
+};
 
 // ─── Interfaces ─────────────────────────────────────────────────────────────
 
@@ -150,13 +186,6 @@ const SECTION_TITLES: Record<string, string> = {
   technical_specs: 'المواصفات التقنية وجدول الأسعار',
   financial_terms: 'الشروط المالية والضمانات',
   evaluation_criteria: 'معايير التقييم ومنهجية الاختيار',
-};
-
-const TEMPLATE_TYPE_LABELS: Record<TemplateType, string> = {
-  works: 'أشغال (بناء، ترميم، هندسة مدنية)',
-  supplies: 'لوازم (اقتناء مواد، معدات، وتجهيزات)',
-  services: 'خدمات (صيانة، نظافة، أمن، نقل)',
-  studies: 'دراسات (استشارات، هندسة معمارية ومتابعة)',
 };
 
 // Regulatory Standard Presets (Local Templates - Clearly designated as "اقتراح من قالب")
@@ -263,8 +292,16 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
 
   // Deal loading & data state
   const [loading, setLoading] = useState(true);
-  const [deal, setDeal] = useState<any>(null);
+  const [deal, setDeal] = useState<ProcurementDealApi | null>(null);
   const [savingBasics, setSavingBasics] = useState(false);
+
+  // Contract & execution state
+  const [contract, setContract] = useState<ProcurementContractApi | null>(null);
+  const [contractLoading, setContractLoading] = useState(true);
+  const [contractError, setContractError] = useState('');
+  const [contractSuccess, setContractSuccess] = useState('');
+  const [generatingContract, setGeneratingContract] = useState(false);
+  const [downloadingContract, setDownloadingContract] = useState(false);
 
   // Tab 1 (Basics) state
   const [title, setTitle] = useState('');
@@ -354,7 +391,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
     try {
       setLoading(true);
       const res = await api.get(`/procurements/deals/${dealId}/`);
-      const d = res.data;
+      const d = res.data as ProcurementDealApi;
       setDeal(d);
       setTitle(d.title || '');
       setDescription(d.description || '');
@@ -362,11 +399,13 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
       if (d.wilaya) setWilaya(d.wilaya);
 
       // Load Cahier Specs
-      let specs = d.cahier_specs;
+      let specs: CahierSpecsApi | null | undefined = d.cahier_specs;
       if (!specs) {
         const specsRes = await api.get('/procurements/specs/', { params: { deal: dealId } });
-        const list = Array.isArray(specsRes.data) ? specsRes.data : specsRes.data?.results || [];
-        specs = list.find((s: any) => String(s.deal) === String(dealId));
+        const list: CahierSpecsApi[] = Array.isArray(specsRes.data)
+          ? specsRes.data
+          : specsRes.data?.results || [];
+        specs = list.find((s) => String(s.deal) === String(dealId));
       }
 
       if (specs) {
@@ -566,6 +605,115 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
     fetchDealData();
   }, [dealId]);
 
+  // ─── Contract & execution data ────────────────────────────────────────────
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadContract = async () => {
+      if (!dealId) {
+        if (!cancelled) setContractLoading(false);
+        return;
+      }
+
+      setContractLoading(true);
+      setContractError('');
+      setContract(null);
+
+      try {
+        const res = await api.get<
+          ProcurementContractApi[] | { results?: ProcurementContractApi[] }
+        >('/procurements/contracts/', { params: { deal: dealId } });
+
+        if (cancelled) return;
+        const list = Array.isArray(res.data) ? res.data : res.data?.results || [];
+        setContract(list[0] || null);
+      } catch (err: unknown) {
+        if (cancelled) return;
+        setContractError(
+          getApiErrorMessage(err, 'تعذر تحميل بيانات العقد المبرم لهذه الصفقة.'),
+        );
+      } finally {
+        if (!cancelled) setContractLoading(false);
+      }
+    };
+
+    void loadContract();
+    return () => {
+      cancelled = true;
+    };
+  }, [dealId]);
+
+  const handleGenerateContract = async () => {
+    if (!dealId) return;
+
+    setGeneratingContract(true);
+    setContractError('');
+    setContractSuccess('');
+
+    try {
+      const { data } = await api.post<GenerateContractResponseApi>(
+        `/procurements/deals/${dealId}/generate-contract/`,
+      );
+
+      setContract(data.contract);
+      setDeal((previous) =>
+        previous
+          ? {
+              ...previous,
+              current_stage: data.current_stage,
+              stage_display:
+                data.current_stage === 9
+                  ? '09 - إبرام العقد'
+                  : previous.stage_display,
+            }
+          : previous,
+      );
+      setContractSuccess('تم توليد العقد بنجاح');
+      toast.success('تم توليد العقد بنجاح');
+    } catch (err: unknown) {
+      const message = getApiErrorMessage(
+        err,
+        'تعذر توليد العقد. يرجى التأكد من وجود عرض فائز أو مقيم ومعتمد.',
+      );
+      setContractError(message);
+      toast.error(message);
+    } finally {
+      setGeneratingContract(false);
+    }
+  };
+
+  const handleDownloadContract = async () => {
+    const currentContract = contract;
+    const hasPdf = Boolean(
+      currentContract?.contract_pdf_url || currentContract?.contract_pdf,
+    );
+
+    if (!currentContract || !hasPdf) {
+      setContractError('نسخة PDF من العقد غير متاحة حالياً.');
+      return;
+    }
+
+    setDownloadingContract(true);
+    setContractError('');
+    setContractSuccess('');
+
+    try {
+      const filename = `contract-${
+        currentContract.contract_number || deal?.reference_number || dealId
+      }.pdf`;
+      await downloadPdfBlob(
+        `/procurements/contracts/${currentContract.id}/download/`,
+        filename,
+      );
+    } catch (err: unknown) {
+      const message = getApiErrorMessage(err, 'تعذر تحميل نسخة العقد. يرجى المحاولة مجدداً.');
+      setContractError(message);
+      toast.error(message);
+    } finally {
+      setDownloadingContract(false);
+    }
+  };
+
   // ─── Actions for Tab 1: Deal Basics ───────────────────────────────────────
   const handleSaveBasics = async () => {
     if (!title.trim()) {
@@ -666,7 +814,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
     const wilayaName = wilayaObj ? `${wilayaObj.code} - ${wilayaObj.ar}` : wilaya;
     const formattedBudget = budget ? `${parseFloat(budget).toLocaleString('ar-DZ')} دج` : 'حسب الميزانية المعتمدة';
 
-    const enrichedGeneral = `تحدد هذه الصفقة العمومية شروط وكيفيات تنفيذ العملية المعنونة: "${title.trim() || 'مشروع الصفقة'}" على مستوى ولاية: ${wilayaName}، لمدة إنجاز مقدرة بـ ${duration} وبغلاف مالي تقديري قدره ${formattedBudget} (TTC)، وذلك طبقاً لأحكام القانون رقم 23-12 المؤرخ في 5 أوت 2023 المحدد للقواعد العامة للصفقات العمومية والمرسوم الرئاسي رقم 15-247.\n\nطريقة الإبرام المعتمدة: ${METHOD_LABELS[procurementMethod]} (${FORM_LABELS[procurementForm]}).`;
+    const enrichedGeneral = `تحدد هذه الصفقة العمومية شروط وكيفيات تنفيذ العملية المعنونة: "${title.trim() || 'مشروع الصفقة'}" على مستوى ولاية: ${wilayaName}، لمدة إنجاز مقدرة بـ ${duration} وبغلاف مالي تقديري قدره ${formattedBudget} (TTC)، وذلك طبقاً لأحكام القانون رقم 23-12 المؤرخ في 5 أوت 2023 المحدد للقواعد العامة للصفقات العمومية والمرسوم الرئاسي رقم 15-247.\n\nطريقة الإبرام المعتمدة: ${METHOD_LABELS[procurementMethod].ar} (${FORM_LABELS[procurementForm].ar}).`;
 
     setAiProposalPreview({
       type: 'specs_template',
@@ -707,7 +855,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
         id: 'method',
         name: 'طريقة وشكل الإبرام',
         status: procurementMethod && procurementForm ? 'complete' : 'missing',
-        message: `${METHOD_LABELS[procurementMethod]} — ${FORM_LABELS[procurementForm]}`,
+        message: `${METHOD_LABELS[procurementMethod].ar} — ${FORM_LABELS[procurementForm].ar}`,
         tab: 'basics',
       },
       {
@@ -726,7 +874,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
         name: 'قالب دفتر الشروط المعتمد',
         status: templateId || isManualDraft ? 'complete' : 'warning',
         message: templateId
-          ? `قالب: ${CAHIER_TEMPLATES_LIBRARY.find((t) => t.id === templateId)?.titleAr || templateId}`
+          ? `قالب: ${CAHIER_TEMPLATES_LIBRARY.find((t) => t.id === templateId)?.title || templateId}`
           : isManualDraft
           ? 'مسودة يدوية مخصصة'
           : 'لم يتم ربط قالب نموذجي مراجع.',
@@ -1068,6 +1216,37 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
 
         {/* Top Controls */}
         <div className="flex items-center gap-2.5 flex-wrap self-stretch md:self-auto justify-end">
+          {!contract && !contractLoading && deal && deal.current_stage >= 8 && (
+            <Button
+              onClick={() => void handleGenerateContract()}
+              disabled={generatingContract}
+              className="bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-bold flex items-center gap-1.5"
+            >
+              {generatingContract ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <FileSignature className="w-4 h-4" />
+              )}
+              <span>{generatingContract ? 'جاري توليد العقد...' : 'توليد العقد'}</span>
+            </Button>
+          )}
+
+          {contract && (
+            <Button
+              variant="outline"
+              onClick={() => void handleDownloadContract()}
+              disabled={downloadingContract}
+              className="border-[#D5DDEA] text-emerald-800 hover:bg-emerald-50 rounded-xl text-xs font-bold flex items-center gap-1.5"
+            >
+              {downloadingContract ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Download className="w-4 h-4 text-emerald-600" />
+              )}
+              <span>{downloadingContract ? 'جاري التحميل...' : 'تحميل العقد'}</span>
+            </Button>
+          )}
+
           <Button
             variant="outline"
             onClick={handleExportPdf}
@@ -1093,6 +1272,127 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
           </Button>
         </div>
       </section>
+
+      {/* ─── Contract & Execution ─────────────────────────────────────────── */}
+      {dealId && ((deal && deal.current_stage >= 8) || contract) && (
+        <section className="bg-white border border-[#D5DDEA] rounded-2xl p-5 shadow-sm space-y-4">
+          <div className="flex flex-col gap-2 border-b border-[#E5EBF4] pb-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 className="flex items-center gap-2 text-base font-extrabold text-navy-900">
+                <FileSignature className="w-5 h-5 text-emerald-700" />
+                العقد والتنفيذ
+              </h2>
+              <p className="mt-1 text-xs text-gray-500">
+                متابعة العقد المبرم ومراحل تنفيذ الصفقة وتقارير الإنجاز المرفوعة.
+              </p>
+            </div>
+            {contract && (
+              <span className="inline-flex w-fit items-center rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[11px] font-bold text-emerald-800">
+                {CONTRACT_STATUS_LABELS[contract.status] || contract.status || 'موقع'}
+              </span>
+            )}
+          </div>
+
+          {contractSuccess && (
+            <div className="flex items-start gap-2 rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-xs font-semibold text-emerald-800">
+              <CheckCircle2 className="mt-0.5 w-4 h-4 shrink-0" />
+              <span>{contractSuccess}</span>
+            </div>
+          )}
+
+          {contractError && (
+            <div className="flex items-start gap-2 rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs text-rose-800" role="alert">
+              <AlertCircle className="mt-0.5 w-4 h-4 shrink-0" />
+              <span>{contractError}</span>
+            </div>
+          )}
+
+          {contractLoading ? (
+            <div className="space-y-3" aria-busy="true" aria-label="جارٍ تحميل بيانات العقد">
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
+                {[0, 1, 2, 3].map((item) => (
+                  <div key={item} className="h-16 animate-pulse rounded-xl bg-slate-100" />
+                ))}
+              </div>
+              <div className="h-24 animate-pulse rounded-xl bg-slate-100" />
+            </div>
+          ) : contract ? (
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 gap-3 rounded-xl border border-[#E5EBF4] bg-slate-50/50 p-4 text-xs md:grid-cols-4">
+                <div>
+                  <span className="block text-[10px] font-bold text-gray-500">رقم العقد</span>
+                  <span className="mt-0.5 block font-mono font-extrabold text-navy-900">
+                    {contract.contract_number || '—'}
+                  </span>
+                </div>
+                <div>
+                  <span className="block text-[10px] font-bold text-gray-500">تاريخ التوقيع</span>
+                  <span className="mt-0.5 block font-bold text-navy-900">
+                    {formatContractDate(contract.signed_at)}
+                  </span>
+                </div>
+                <div>
+                  <span className="block text-[10px] font-bold text-gray-500">مبلغ العقد</span>
+                  <span className="mt-0.5 block font-bold text-emerald-800">
+                    {formatContractAmount(contract.amount)}
+                  </span>
+                </div>
+                <div>
+                  <span className="block text-[10px] font-bold text-gray-500">المتعامل المتعاقد</span>
+                  <span className="mt-0.5 block font-bold text-navy-900">
+                    {contract.operator_name || '—'}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <p className="m-0 text-[11px] text-gray-500">
+                  الصفقة: <span className="font-mono font-bold text-navy-900">{contract.deal_reference || deal?.reference_number || '—'}</span>
+                </p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => void handleDownloadContract()}
+                  disabled={downloadingContract}
+                  className="rounded-xl border-[#D5DDEA] text-emerald-800 hover:bg-emerald-50 text-xs font-bold flex items-center gap-1.5"
+                >
+                  {downloadingContract ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  ) : (
+                    <Download className="w-3.5 h-3.5" />
+                  )}
+                  <span>{downloadingContract ? 'جاري التحميل...' : 'تحميل العقد PDF'}</span>
+                </Button>
+              </div>
+
+              <ExecutionTracker dealId={dealId} role="authority" />
+            </div>
+          ) : (
+            <div className="rounded-xl border border-dashed border-[#D5DDEA] bg-slate-50/50 p-6 text-center">
+              <FileSignature className="mx-auto h-8 w-8 text-slate-300" />
+              <h3 className="mt-2 text-sm font-extrabold text-navy-900">
+                لم يتم توليد العقد بعد
+              </h3>
+              <p className="mx-auto mt-1 max-w-xl text-xs leading-relaxed text-gray-500">
+                يتاح توليد العقد بعد اعتماد الإسناد وتحديد المتعامل الفائز. سيتم إنشاء
+                نسخة PDF رسمية وربطها بمراحل التنفيذ.
+              </p>
+              <Button
+                onClick={() => void handleGenerateContract()}
+                disabled={generatingContract}
+                className="mt-3 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 mx-auto"
+              >
+                {generatingContract ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <FileSignature className="w-4 h-4" />
+                )}
+                <span>{generatingContract ? 'جاري توليد العقد...' : 'توليد العقد'}</span>
+              </Button>
+            </div>
+          )}
+        </section>
+      )}
 
       {/* ─── 2. Unified 3-Tab Bar ─────────────────────────────────────────── */}
       <div className="flex items-center gap-2 border-b border-[#D5DDEA] pb-2 text-xs font-bold">
@@ -1288,7 +1588,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                       </p>
                     </div>
                     <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-navy-50 text-navy-800 border border-navy-100">
-                      {METHOD_LABELS[procurementMethod]} — {FORM_LABELS[procurementForm]}
+                      {METHOD_LABELS[procurementMethod].ar} — {FORM_LABELS[procurementForm].ar}
                     </span>
                   </div>
 
@@ -1304,7 +1604,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                         }}
                         className="w-full text-xs rounded-xl border border-[#D5DDEA] p-2.5 bg-white text-gray-800"
                       >
-                        <option value="open_tender">طلب العروض (Appel d'offres)</option>
+                        <option value="open_tender">طلب العروض (Appel d&apos;offres)</option>
                         <option value="negotiated_procedure">الإجراء التفاوضي (Procédure négociée)</option>
                       </select>
                     </div>
@@ -1322,7 +1622,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                       >
                         {getCompatibleForms(procurementMethod).map((f) => (
                           <option key={f} value={f}>
-                            {FORM_LABELS[f]}
+                            {FORM_LABELS[f].ar}
                           </option>
                         ))}
                       </select>
@@ -1554,7 +1854,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-bold text-navy-900 text-sm">
                         {templateId
-                          ? CAHIER_TEMPLATES_LIBRARY.find((t) => t.id === templateId)?.titleAr || templateId
+                          ? CAHIER_TEMPLATES_LIBRARY.find((t) => t.id === templateId)?.title || templateId
                           : isManualDraft
                           ? 'مسودة حرة محررة يدوياً'
                           : 'دفتر شروط نموذجي معتمد'}
@@ -1578,7 +1878,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                       )}
                     </div>
                     <p className="text-[11px] text-gray-500 mt-0.5">
-                      السند الإجرائي: {METHOD_LABELS[procurementMethod]} — {FORM_LABELS[procurementForm]} ({NATURE_LABELS[procurementNature]})
+                      السند الإجرائي: {METHOD_LABELS[procurementMethod].ar} — {FORM_LABELS[procurementForm].ar} ({NATURE_LABELS[procurementNature].ar})
                     </p>
                   </div>
                 </div>
@@ -2292,7 +2592,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
 
                 <div className="space-y-1.5 text-gray-700 text-[11px] leading-relaxed">
                   <p>
-                    <strong>الإجراء المعتمد:</strong> {METHOD_LABELS[procurementMethod]} — {FORM_LABELS[procurementForm]}
+                    <strong>الإجراء المعتمد:</strong> {METHOD_LABELS[procurementMethod].ar} — {FORM_LABELS[procurementForm].ar}
                   </p>
                   <p>
                     <strong>السند التشريعي:</strong> القانون رقم 23-12 (المواد 29، 39، 40-49) والمرسوم الرئاسي رقم 15-247.
@@ -2368,19 +2668,21 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
 
                 <div className="space-y-1.5 text-gray-700 text-[11px]">
                   <p>
-                    <strong>طبيعة الحاجة:</strong> {NATURE_LABELS[procurementNature]}
+                    <strong>طبيعة الحاجة:</strong> {NATURE_LABELS[procurementNature].ar}
                   </p>
                   {getCompatibleTemplates(procurementNature).length > 0 ? (
                     getCompatibleTemplates(procurementNature).slice(0, 1).map((t) => (
                       <div key={t.id} className="bg-white p-3 rounded-lg border border-emerald-200 space-y-1.5">
                         <div className="flex items-center justify-between">
-                          <p className="font-bold text-navy-900">{t.titleAr}</p>
+                          <p className="font-bold text-navy-900">{t.title}</p>
                           <span className="text-[10px] font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded">
-                            {t.reviewStatus === 'approved_official' ? 'معتمد رسمياً' : 'قيد المراجعة'}
+                            {t.status === 'approved_official' ? 'معتمد رسمياً' : 'قيد المراجعة'}
                           </span>
                         </div>
-                        <p className="text-gray-600 text-[11px]">{t.descriptionAr}</p>
-                        <p className="text-gray-500 font-mono text-[10px]">{t.regulatoryCitation}</p>
+                        <p className="text-gray-600 text-[11px]">
+                          {t.usageLimits || t.sourceReference}
+                        </p>
+                        <p className="text-gray-500 font-mono text-[10px]">{t.sourceReference}</p>
                         <Button
                           size="sm"
                           onClick={() => {
@@ -2396,7 +2698,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                             );
                             setOperatorDocuments(dynamicDocs);
                             setActiveAssistantTool(null);
-                            toast.success(`تم تطبيق القالب النموذجي: ${t.titleAr}`);
+                            toast.success(`تم تطبيق القالب النموذجي: ${t.title}`);
                           }}
                           className="w-full text-xs font-bold bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg mt-1"
                         >

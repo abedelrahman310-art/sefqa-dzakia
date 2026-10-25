@@ -178,13 +178,21 @@ class AwardObjection(models.Model):
         super().save(*args, **kwargs)
 
     def is_within_deadline(self):
-        return timezone.now() <= self.deadline_at
+        return self.days_remaining() > 0 or (self.deadline_at and timezone.now() <= self.deadline_at)
 
     def days_remaining(self):
-        if not self.deadline_at:
-            return 0
-        delta = self.deadline_at - timezone.now()
-        return max(0, delta.days)
+        """
+        حقل محسوب يعيد عدد الأيام المتبقية من أصل 10 بناءً على تاريخ تقديم الطعن.
+        وفقاً لأحكام المادة 72 والمادة 82 من القانون رقم 23-12.
+        """
+        submission_date = self.submitted_at or getattr(self, "created_at", None)
+        if submission_date:
+            elapsed_days = (timezone.now() - submission_date).days
+            return max(0, min(10, 10 - elapsed_days))
+        if self.deadline_at:
+            delta = self.deadline_at - timezone.now()
+            return max(0, delta.days)
+        return 0
 
     def __str__(self):
         return f"{self.reference} - {self.tender.reference_number}"

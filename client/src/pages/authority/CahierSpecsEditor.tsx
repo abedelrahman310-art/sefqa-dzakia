@@ -243,7 +243,7 @@ export function CahierSpecsEditor({ draftId }: CahierSpecsEditorProps) {
     setEditReason('');
   };
 
-  const handleSaveClause = async (clauseId: string) => {
+  const handleSaveClause = async (_clauseId: string) => {
     try {
       setSavingClause(true);
       if (cahier?.id) {

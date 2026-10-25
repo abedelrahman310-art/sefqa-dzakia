@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useI18n } from '@/i18n';
 import { api } from '@/lib/api';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { FileText, Download, Sparkles, Calendar, Filter, CheckCircle2, AlertCircle } from 'lucide-react';
+import { FileText, Download, Sparkles, Calendar, Filter, CheckCircle2 } from 'lucide-react';
 
 import { PageHeader } from '@/shared/components';
 

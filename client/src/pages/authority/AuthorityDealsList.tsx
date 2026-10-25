@@ -7,49 +7,26 @@ import {
   Briefcase,
   Plus,
   Search,
-  Calendar,
-  Layers,
-  ArrowRight,
   FileText,
   AlertCircle,
   FileCheck2,
   Clock,
   Sparkles,
   Download,
-  Filter,
   CheckCircle2,
   ChevronRight,
-  ExternalLink,
   BookOpen,
-  Lock,
-  Scale,
   Paperclip,
-  FolderOpen,
 } from 'lucide-react';
 import { downloadPdfBlob } from '@/lib/pdfDownloader';
 import {
-  ProcurementNature,
-  ProcurementMethod,
-  ProcurementForm,
   NATURE_LABELS,
   METHOD_LABELS,
   FORM_LABELS,
 } from '@/lib/procurementTemplates';
+import type { ProcurementDealApi } from '@/lib/procurementApiTypes';
 
-interface DealItem {
-  id: string;
-  reference_number: string;
-  title: string;
-  description: string;
-  current_stage: number;
-  stage_display?: string;
-  estimated_budget: string | number | null;
-  wilaya?: string;
-  submission_deadline?: string | null;
-  cahier_specs?: any;
-  created_at: string;
-  updated_at: string;
-}
+type DealItem = ProcurementDealApi;
 
 const STAGE_LABELS: Record<number, string> = {
   1: '01 - التخطيط والاحتياج',
@@ -86,7 +63,7 @@ export function AuthorityDealsList({ initialView = 'deals' }: AuthorityDealsList
     try {
       const res = await api.get('/procurements/deals/');
       const data = res.data;
-      const list = Array.isArray(data) ? data : data?.results || [];
+      const list: DealItem[] = Array.isArray(data) ? data : data?.results || [];
       setDeals(list);
     } catch (err: any) {
       console.error('Failed to fetch deals:', err);
@@ -391,6 +368,7 @@ export function AuthorityDealsList({ initialView = 'deals' }: AuthorityDealsList
                   </thead>
                   <tbody className="divide-y divide-[#E5EBF4]">
                     {filteredDeals.map((deal) => {
+                      const clauses = deal.cahier_specs?.administrative_clauses;
                       return (
                         <tr
                           key={deal.id}
@@ -403,17 +381,20 @@ export function AuthorityDealsList({ initialView = 'deals' }: AuthorityDealsList
                                 <span className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-gray-100 text-gray-700 border border-gray-200">
                                   {deal.reference_number || 'مسودة قيد الترقيم'}
                                 </span>
-                                {deal.cahier_specs?.administrative_clauses?.procurement_nature && (
+                                {clauses?.procurement_nature && (
                                   <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
-                                    {NATURE_LABELS[deal.cahier_specs.administrative_clauses.procurement_nature as ProcurementNature] ||
-                                      deal.cahier_specs.administrative_clauses.procurement_nature}
+                                    {NATURE_LABELS[clauses.procurement_nature]?.ar ||
+                                      clauses.procurement_nature}
                                   </span>
                                 )}
-                                {deal.cahier_specs?.administrative_clauses?.procurement_method && (
+                                {clauses?.procurement_method && (
                                   <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-navy-50 text-navy-800 border border-navy-100">
-                                    {METHOD_LABELS[deal.cahier_specs.administrative_clauses.procurement_method as ProcurementMethod] || 'طلب العروض'}
-                                    {deal.cahier_specs.administrative_clauses.procurement_form
-                                      ? ` (${FORM_LABELS[deal.cahier_specs.administrative_clauses.procurement_form as ProcurementForm] || deal.cahier_specs.administrative_clauses.procurement_form})`
+                                    {METHOD_LABELS[clauses.procurement_method]?.ar || 'طلب العروض'}
+                                    {clauses.procurement_form
+                                      ? ` (${
+                                          FORM_LABELS[clauses.procurement_form]?.ar ||
+                                          clauses.procurement_form
+                                        })`
                                       : ''}
                                   </span>
                                 )}

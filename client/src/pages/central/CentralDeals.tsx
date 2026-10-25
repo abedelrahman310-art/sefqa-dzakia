@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { PageHeader, KpiCard, AICard } from '@/shared/components';
 import {
   ListChecks,
@@ -7,11 +7,9 @@ import {
   AlertOctagon,
   Sparkles,
   Search,
-  Filter,
   Eye,
   ChevronLeft,
   ChevronRight,
-  ExternalLink,
 } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import {

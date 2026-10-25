@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -11,13 +11,10 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
   ShieldAlert,
-  Clock,
   CheckCircle2,
   XCircle,
-  FileText,
   Copy,
   Check,
-  AlertTriangle,
   History,
   Lock,
 } from 'lucide-react';

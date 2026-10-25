@@ -3,6 +3,7 @@ import { useI18n } from '@/i18n';
 import { Link } from 'wouter';
 import { Languages, LucideIcon, HelpCircle, X, Check } from 'lucide-react';
 import { LogoutButton, DesktopAppButton } from '@/shared/components';
+import { SafaqatLogo } from '@/components/brand/SafaqatLogo';
 
 export interface PortalSidebarItem {
   label: string;
@@ -44,7 +45,7 @@ export function PortalSidebar({
   hideUserInfo = false,
   variant = 'default',
 }: PortalSidebarProps) {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const { lang, setLang } = useI18n();
 
   const orgName = user?.organizationName || user?.displayName || user?.email || '';
@@ -54,22 +55,20 @@ export function PortalSidebar({
 
   if (isOperator) {
     return (
-      <div className="flex flex-col h-full bg-gradient-to-b from-[#0B1F3A] to-[#0B6B57] select-none text-[#E6EEF7] font-sans w-full">
-        {/* 1. Logo area — 72px white header */}
-        <div className="h-[72px] flex-none bg-white flex items-center justify-between gap-2.5 px-4 border-b border-[#D5DDEA]">
+      <div className="flex flex-col h-full bg-gradient-to-b from-[#0284c7] via-[#0ea5e9] to-[#38bdf8] select-none text-white font-sans w-full">
+        {/* 1. Logo area — crisp header */}
+        <div className="h-[72px] flex-none bg-white/10 backdrop-blur-xs flex items-center justify-between gap-2.5 px-4 border-b border-white/20">
           <div className="flex items-center gap-2.5">
-            <svg width="40" height="40" viewBox="0 0 44 44" aria-hidden="true" className="shrink-0">
-              <rect width="44" height="44" rx="12" fill="#14325C" />
-              <rect x="1" y="1" width="42" height="42" rx="11" fill="none" stroke="#D9B45B" strokeWidth="1.5" />
-              <path d="M13 23l6 6 12-13" fill="none" stroke="#34D399" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-            <span className="text-[20px] font-extrabold text-[#0B1F3A]">صفقات ذكية</span>
+            <div className="bg-white p-1 rounded-xl shadow-xs">
+              <SafaqatLogo size={36} title="" className="shrink-0" />
+            </div>
+            <span className="text-[20px] font-extrabold text-white">صفقات ذكية</span>
           </div>
           {onLinkClick && (
             <button
               type="button"
               onClick={onLinkClick}
-              className="md:hidden size-11 rounded-[10px] bg-[#EEF3FA] text-[#14325C] flex items-center justify-center cursor-pointer border-0"
+              className="md:hidden size-11 rounded-[10px] bg-white/20 hover:bg-white/30 text-white flex items-center justify-center cursor-pointer border-0"
               aria-label="إغلاق القائمة"
             >
               <X className="w-5 h-5" />
@@ -78,8 +77,8 @@ export function PortalSidebar({
         </div>
 
         {/* 2. Role header badge */}
-        <div className="flex items-center gap-2 mx-4 mt-4 mb-2 text-[13px] font-bold text-[#E9D49A]">
-          <span className="size-2 rounded-full bg-[#D9B45B] inline-block shrink-0" />
+        <div className="flex items-center gap-2 mx-4 mt-4 mb-2 text-[13px] font-bold text-white/90">
+          <span className="size-2 rounded-full bg-white inline-block shrink-0 shadow-xs" />
           <span>بوابة المتعامل الاقتصادي</span>
         </div>
 
@@ -91,15 +90,15 @@ export function PortalSidebar({
               <Link key={item.href} href={item.href}>
                 <a
                   onClick={onLinkClick}
-                  className={`flex items-center gap-3 min-h-[46px] px-3.5 py-1.5 rounded-[12px] text-[15px] font-semibold transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D9B45B] ${
+                  className={`flex items-center gap-3 min-h-[46px] px-3.5 py-1.5 rounded-lg text-[15px] font-semibold transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white ${
                     item.isActive
-                      ? 'bg-white text-[#0B1F3A] hover:bg-white hover:text-[#0B1F3A] shadow-xs'
-                      : 'text-[#E6EEF7] hover:bg-white/10 hover:text-white'
+                      ? 'bg-white text-[#0284c7] hover:bg-white hover:text-[#0284c7] shadow-sm font-bold'
+                      : 'text-white hover:bg-white/15 hover:text-white'
                   }`}
                 >
                   <Icon
                     className={`size-[22px] shrink-0 ${
-                      item.isActive ? 'text-[#0B1F3A]' : 'text-[#E6EEF7]'
+                      item.isActive ? 'text-[#0284c7]' : 'text-white'
                     }`}
                     strokeWidth={1.8}
                   />
@@ -354,21 +353,7 @@ export function PortalSidebar({
       </nav>
 
       {/* 3. Footer — إما تذييل المساعدة النظيف أو معلومات المستخدم */}
-      {hideUserInfo ? (
-        variant === 'operator' ? (
-          <div className="border-t border-white/10 p-3 bg-[#0b4348] flex flex-col gap-1">
-            <Link href="/operator/settings">
-              <a
-                onClick={onLinkClick}
-                className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/80 hover:text-white hover:bg-white/10 transition-colors text-sm font-medium"
-              >
-                <HelpCircle className="size-5 shrink-0 text-white/80" />
-                <span>{lang === 'ar' ? 'المساعدة' : 'Aide'}</span>
-              </a>
-            </Link>
-          </div>
-        ) : null
-      ) : (
+      {hideUserInfo ? null : (
         <div className="border-t border-white/10 p-4 bg-[#0b4348] flex flex-col gap-3">
           {/* User row */}
           <div className="flex items-center justify-between gap-2">

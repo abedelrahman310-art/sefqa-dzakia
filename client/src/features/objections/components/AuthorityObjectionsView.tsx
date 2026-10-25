@@ -1,11 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Gavel,
   Clock,
   Eye,
   AlertTriangle,
-  CheckCircle2,
-  XCircle,
   FileText,
   Search,
   Filter,
@@ -13,7 +11,6 @@ import {
   PlayCircle,
   Scale,
   RefreshCw,
-  Calendar,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';

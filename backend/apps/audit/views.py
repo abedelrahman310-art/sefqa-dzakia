@@ -10,6 +10,9 @@ class AuditLogViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets
 
     def get_queryset(self):
         user = self.request.user
-        if user.role == 'central_admin':
-            return self.queryset
-        return self.queryset.filter(user=user)
+        if not user.is_authenticated:
+            return AuditLog.objects.none()
+        qs = AuditLog.objects.all().select_related('user')
+        if getattr(user, 'role', None) == 'central_admin' or user.is_staff:
+            return qs
+        return qs.filter(user=user)

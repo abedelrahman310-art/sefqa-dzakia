@@ -10,6 +10,7 @@ class BidOffer(models.Model):
         ('draft', 'مسودة عرض'),
         ('submitted', 'تم الإيداع'),
         ('admitted', 'مقبول إدارياً وتقنياً'),
+        ('evaluated', 'تم التقييم'),
         ('rejected', 'مرفوض لعدم المطابقة'),
         ('awarded', 'حائز على الصفقة'),
     )
@@ -21,6 +22,9 @@ class BidOffer(models.Model):
     
     financial_amount = models.DecimalField('مبلغ العرض المالي (دج)', max_digits=15, decimal_places=2, null=True, blank=True)
     technical_score = models.DecimalField('العلامة التقنية الممنوحة', max_digits=5, decimal_places=2, null=True, blank=True)
+    financial_score = models.DecimalField('العلامة المالية الممنوحة', max_digits=5, decimal_places=2, null=True, blank=True)
+    rejection_reason = models.TextField('سبب الرفض أو عدم المطابقة', blank=True, default='')
+    evaluator_notes = models.TextField('ملاحظات لجنة التقييم', blank=True, default='')
     submission_timestamp = models.DateTimeField('ختم وقت الإيداع الرقمي', null=True, blank=True)
     created_at = models.DateTimeField('تاريخ الإنشاء', default=timezone.now)
 
