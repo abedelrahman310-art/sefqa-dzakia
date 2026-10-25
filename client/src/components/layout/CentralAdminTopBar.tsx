@@ -33,6 +33,7 @@ export function CentralAdminTopBar({
       notificationCount={notificationsCount}
       logoutRedirect="/login"
       pulseColor="var(--stamp-green-500)"
+      showLogout
     />
   );
 }

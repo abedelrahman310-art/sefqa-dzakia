@@ -107,6 +107,7 @@ export function CentralSpace() {
       topBar={<CentralAdminTopBar title={currentTitle} />}
       hideSidebar={false}
       hideTopBar={false}
+      workspaceClassName="bg-white"
       contentClassName={isMapRoute ? 'p-0 h-full overflow-hidden' : 'p-6 md:p-8'}
       sidebar={
         <PortalSidebar
@@ -116,6 +117,7 @@ export function CentralSpace() {
           accentColor="var(--stamp-green-700)"
           brandInitial="ص"
           hideUserInfo={true}
+          variant="sovereign"
         />
       }
     >

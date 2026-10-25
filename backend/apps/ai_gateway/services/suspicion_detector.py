@@ -190,7 +190,7 @@ def detect_phantom_competition() -> list[dict]:
                     if delta <= 60 and b1.operator_id != b2.operator_id:
                         suspicions.append({
                             "type": "simultaneous_submission",
-                            "severity": "high",
+                            "severity": "medium",
                             "confidence": 0.75,
                             "title": "شبهة منافسة صورية (إيداع متزامن للعروض)",
                             "description": (
@@ -268,72 +268,74 @@ def detect_tender_splitting() -> list[dict]:
         THRESHOLD_SERVICES = Decimal("6000000")
 
         for auth in authorities:
-            deals = list(
-                ProcurementDeal.objects.filter(authority=auth)
-                .order_by("created_at")
-            )
-            if len(deals) < 2:
-                continue
+            # تجميع صفقات المصلحة حسب الولاية لتفادي التداخل الجغرافي
+            deals_by_wilaya = {}
+            for d in ProcurementDeal.objects.filter(authority=auth).order_by("created_at"):
+                w_key = (d.wilaya or "").strip().replace("ولاية", "").strip() or "الجزائر"
+                deals_by_wilaya.setdefault(w_key, []).append(d)
 
-            # فحص الصفقات المتقاربة زمنياً
-            processed_pairs = set()
-            for i in range(len(deals)):
-                cluster = [deals[i]]
-                t_i = deals[i].created_at
+            for w_name, deals in deals_by_wilaya.items():
+                if len(deals) < 2:
+                    continue
 
-                for j in range(i + 1, len(deals)):
-                    t_j = deals[j].created_at
-                    delta_days = abs((t_j - t_i).total_seconds()) / 86400.0
+                processed_clusters = []
+                for i in range(len(deals)):
+                    cluster = [deals[i]]
+                    t_i = deals[i].created_at
 
-                    # نافذة زمنية: حتى 30 يوماً
-                    if delta_days <= 30:
-                        cluster.append(deals[j])
+                    for j in range(i + 1, len(deals)):
+                        t_j = deals[j].created_at
+                        delta_days = abs((t_j - t_i).total_seconds()) / 86400.0
 
-                if len(cluster) >= 2:
-                    cluster_ids = tuple(sorted(str(d.id) for d in cluster))
-                    if cluster_ids in processed_pairs:
-                        continue
-                    processed_pairs.add(cluster_ids)
+                        # نافذة زمنية: حتى 30 يوماً
+                        if delta_days <= 30:
+                            cluster.append(deals[j])
 
-                    total_budget = sum((d.estimated_budget or Decimal(0)) for d in cluster)
-                    has_sub_threshold = any(
-                        (d.estimated_budget or Decimal(0)) < THRESHOLD_WORKS and (d.estimated_budget or Decimal(0)) > 0
-                        for d in cluster
-                    )
+                    if len(cluster) >= 2:
+                        cluster_ids = set(str(d.id) for d in cluster)
+                        # تجنب التكرار إذا كان التجمع مشمولاً بالفعل في تجمع أكبر معالج سابقاً
+                        if any(cluster_ids.issubset(existing) for existing in processed_clusters):
+                            continue
 
-                    # شروط رصد التجزئة:
-                    # 1. ثلاث صفقات أو أكثر خلال أسبوعين إلى شهر
-                    # 2. أو صفقتان بمبالغ فردية دون العتبة ومجموعهما يتجاوز العتبة
-                    # 3. أو تشابه في الكلمات المفتاحية
-                    is_suspicious = False
-                    reason = ""
+                        total_budget = sum((d.estimated_budget or Decimal(0)) for d in cluster)
+                        has_sub_threshold = any(
+                            (d.estimated_budget or Decimal(0)) < THRESHOLD_WORKS and (d.estimated_budget or Decimal(0)) > 0
+                            for d in cluster
+                        )
 
-                    if len(cluster) >= 3:
-                        is_suspicious = True
-                        reason = f"طرح {len(cluster)} صفقات متتالية من نفس المصلحة خلال فترة زمنية متقاربة بمجموع {total_budget:,.2f} دج"
-                    elif len(cluster) >= 2 and total_budget >= THRESHOLD_WORKS and has_sub_threshold:
-                        is_suspicious = True
-                        reason = f"طرح صفقات دون عتبة 12 مليون دج تتجاوز مجتمعة العتبة القانونية بإجمالي {total_budget:,.2f} دج"
+                        # شروط رصد التجزئة:
+                        # 1. ثلاث صفقات أو أكثر خلال شهر لنفس المصلحة في نفس الولاية بمبالغ تحت العتبة
+                        # 2. أو صفقتان بمبالغ فردية دون العتبة ومجموعهما يتجاوز العتبة
+                        is_suspicious = False
+                        reason = ""
 
-                    if is_suspicious:
-                        deal_titles = " / ".join([d.title for d in cluster[:3]])
-                        suspicions.append({
-                            "type": "tender_splitting",
-                            "severity": "critical",
-                            "confidence": 0.88,
-                            "title": "شبهة تجزئة الصفقات لتفادي العتبات والرقابة المسبقة (Tender Splitting)",
-                            "description": (
-                                f"المصلحة '{auth.organization_name or auth.email}' سجلت {reason}. "
-                                f"العناوين المرصودة: [{deal_titles}]. "
-                                f"يُشتبه في تقسيم الحاجات عمداً للتهرب من الرقابة المسبقة وتأشيرة لجنة الصفقات."
-                            ),
-                            "authority_id": str(auth.id),
-                            "authority_name": auth.organization_name or auth.display_name or auth.email,
-                            "deal_ids": list(cluster_ids),
-                            "wilaya": cluster[0].wilaya or "غير محددة",
-                            "statutory_violation": "مخالفة أحكام المادة 13 و27 من القانون 23-12 التي تحظر تجزئة الحاجات للتهرب من الصفقات العمومية",
-                            "recommendation": "إخطار المفتشية العامة وتجميد إجراءات الترسية للتحقق من وحدة الاحتياج وإلزام المصلحة بدمجها في صفقة موحدة.",
-                        })
+                        if len(cluster) >= 3 and has_sub_threshold:
+                            is_suspicious = True
+                            reason = f"طرح {len(cluster)} صفقات متتالية من نفس المصلحة خلال فترة زمنية متقاربة بمجموع {total_budget:,.2f} دج"
+                        elif len(cluster) >= 2 and total_budget >= THRESHOLD_WORKS and has_sub_threshold:
+                            is_suspicious = True
+                            reason = f"طرح صفقات دون عتبة 12 مليون دج تتجاوز مجتمعة العتبة القانونية بإجمالي {total_budget:,.2f} دج"
+
+                        if is_suspicious:
+                            processed_clusters.append(cluster_ids)
+                            deal_titles = " / ".join([d.title for d in cluster[:3]])
+                            suspicions.append({
+                                "type": "tender_splitting",
+                                "severity": "critical",
+                                "confidence": 0.88,
+                                "title": "شبهة تجزئة الصفقات لتفادي العتبات والرقابة المسبقة (Tender Splitting)",
+                                "description": (
+                                    f"المصلحة '{auth.organization_name or auth.email}' سجلت {reason}. "
+                                    f"العناوين المرصودة: [{deal_titles}]. "
+                                    f"يُشتبه في تقسيم الحاجات عمداً للتهرب من الرقابة المسبقة وتأشيرة لجنة الصفقات."
+                                ),
+                                "authority_id": str(auth.id),
+                                "authority_name": auth.organization_name or auth.display_name or auth.email,
+                                "deal_ids": list(cluster_ids),
+                                "wilaya": cluster[0].wilaya or "الجزائر",
+                                "statutory_violation": "مخالفة أحكام المادة 13 و27 من القانون 23-12 التي تحظر تجزئة الحاجات للتهرب من الصفقات العمومية",
+                                "recommendation": "إخطار المفتشية العامة وتجميد إجراءات الترسية للتحقق من وحدة الاحتياج وإلزام المصلحة بدمجها في صفقة موحدة.",
+                            })
     except Exception as e:
         logger.error(f"خطأ أثناء كشف تجزئة الصفقات: {e}")
 

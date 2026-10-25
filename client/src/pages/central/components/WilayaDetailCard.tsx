@@ -10,6 +10,8 @@ export interface WilayaDetail {
   warnings: number;
   warningDetails?: string[];
   activeSectors?: string[];
+  risk_level?: 'critical' | 'high' | 'medium' | 'low' | string;
+  risk_color?: string;
 }
 
 interface Props {
@@ -45,6 +47,47 @@ export function WilayaDetailCard({
           <h3 className="heading-h3 text-xl font-bold text-[var(--ink-900)] mt-1">
             {wilaya.name}
           </h3>
+          {wilaya.risk_level && (
+            <span
+              className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold mt-2"
+              style={{
+                backgroundColor:
+                  wilaya.risk_level === 'critical'
+                    ? '#FEE2E2'
+                    : wilaya.risk_level === 'high'
+                    ? '#FFEDD5'
+                    : wilaya.risk_level === 'medium'
+                    ? '#FEF9C3'
+                    : '#DCFCE7',
+                color:
+                  wilaya.risk_level === 'critical'
+                    ? '#991B1B'
+                    : wilaya.risk_level === 'high'
+                    ? '#9A3412'
+                    : wilaya.risk_level === 'medium'
+                    ? '#854D0E'
+                    : '#166534',
+                border: `1px solid ${
+                  wilaya.risk_level === 'critical'
+                    ? '#F87171'
+                    : wilaya.risk_level === 'high'
+                    ? '#FB923C'
+                    : wilaya.risk_level === 'medium'
+                    ? '#FACC15'
+                    : '#86EFAC'
+                }`,
+              }}
+            >
+              <span
+                className="w-2 h-2 rounded-full animate-pulse"
+                style={{ backgroundColor: wilaya.risk_color || '#DC2626' }}
+              />
+              {wilaya.risk_level === 'critical' && 'شبهات رقابية حرجة (Critical)'}
+              {wilaya.risk_level === 'high' && 'شبهات رقابية عالية (High)'}
+              {wilaya.risk_level === 'medium' && 'شبهات رقابية متوسطة (Medium)'}
+              {wilaya.risk_level === 'low' && 'نشاط نظامي متوافق (Low)'}
+            </span>
+          )}
         </div>
         <button
           onClick={onClose}

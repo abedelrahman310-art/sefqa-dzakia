@@ -8,6 +8,7 @@ import {
   Bell,
   User,
   Languages,
+  LogOut,
 } from 'lucide-react';
 import { useI18n } from '@/i18n';
 import { useAuth } from '@/components/auth/AuthProvider';
@@ -30,6 +31,8 @@ export interface PortalTopBarProps {
   notificationCount?: number;   // default 0
   logoutRedirect?: string;      // default '/login' (retained for compatibility)
   pulseColor?: string;          // CSS var, default 'var(--color-success-500)'
+  /** إظهار زر تسجيل الخروج في نهاية الشريط (بوابة الرقابة المركزية) */
+  showLogout?: boolean;
 }
 
 const TOPBAR_TRANSLATIONS: Record<string, Record<string, string>> = {
@@ -63,9 +66,10 @@ export function PortalTopBar({
   hiddenOnRoutes = [],
   notificationCount = 0,
   pulseColor = 'var(--color-success-500, var(--stamp-green-500))',
+  showLogout = false,
 }: PortalTopBarProps) {
   const { lang, setLang } = useI18n();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const loc = useLocation();
 
   const orgName = user?.organizationName || user?.displayName || TOPBAR_TRANSLATIONS[lang]?.['portal.default_org'] || 'المؤسسة';
@@ -190,6 +194,22 @@ export function PortalTopBar({
         >
           <User className="w-4 h-4" />
         </div>
+
+        {/* تسجيل الخروج — يظهر في بوابة الرقابة المركزية فقط */}
+        {showLogout && (
+          <button
+            type="button"
+            onClick={() => {
+              void logout();
+            }}
+            className="portal-topbar__icon-btn text-[var(--stamp-red-700)] hover:bg-red-50"
+            aria-label={t('common.logout')}
+            title={t('common.logout')}
+          >
+            <LogOut className="w-4 h-4 shrink-0" aria-hidden="true" />
+            <span className="text-sm font-bold">{t('common.logout')}</span>
+          </button>
+        )}
       </div>
     </header>
   );

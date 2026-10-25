@@ -30,8 +30,8 @@ export interface PortalSidebarProps {
   badgeTitle?: string;
   /** إخفاء اسم وبيانات المستخدم من التذييل */
   hideUserInfo?: boolean;
-  /** نمط القائمة الجانبية: 'default' | 'mint' | 'operator' | 'authority' */
-  variant?: 'default' | 'mint' | 'operator' | 'authority';
+  /** نمط القائمة الجانبية: 'default' | 'mint' | 'operator' | 'authority' | 'sovereign' */
+  variant?: 'default' | 'mint' | 'operator' | 'authority' | 'sovereign';
 }
 
 export function PortalSidebar({
@@ -52,6 +52,71 @@ export function PortalSidebar({
   const initial = user?.displayName?.charAt(0) || user?.email?.charAt(0) || 'م';
   const isOperator = variant === 'operator';
   const isMint = variant === 'mint';
+
+  /**
+   * النمط السيادي (الإدارة المركزية): أزرق رسمي عميق، نصوص وأيقونات بيضاء،
+   * والعنصر النشط بخلفية بيضاء ونص أزرق داكن.
+   */
+  if (variant === 'sovereign') {
+    return (
+      <div className="flex h-full w-full select-none flex-col bg-[#0f3154] font-sans text-white">
+        {/* 1. منطقة الهوية */}
+        <div className="flex flex-none items-center justify-between gap-3 border-b border-white/10 px-5 py-[18px]">
+          <div className="flex min-w-0 items-center gap-3">
+            <div className="flex size-10 flex-none items-center justify-center rounded-xl bg-white text-base font-bold text-[#0f3154] shadow-sm">
+              {brandInitial || 'ص'}
+            </div>
+            <div className="min-w-0">
+              <h2 className="truncate text-lg font-bold leading-tight text-white">{title}</h2>
+              <p className="mt-0.5 truncate text-sm text-white/70">{subtitle}</p>
+            </div>
+          </div>
+          {onLinkClick && (
+            <button
+              type="button"
+              onClick={onLinkClick}
+              className="flex size-9 cursor-pointer items-center justify-center rounded-lg border-0 bg-white/10 text-white hover:bg-white/20 md:hidden"
+              aria-label="إغلاق القائمة"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          )}
+        </div>
+
+        {/* 2. عناصر التنقل */}
+        <nav
+          className="min-h-0 flex-1 space-y-1.5 overflow-y-auto p-4 pb-6"
+          aria-label="التنقل الرئيسي"
+        >
+          {items.map((item) => {
+            const Icon = item.icon;
+            return (
+              <Link key={item.href} href={item.href}>
+                <a
+                  onClick={onLinkClick}
+                  aria-current={item.isActive ? 'page' : undefined}
+                  className={`flex items-center gap-3 rounded-xl px-4 py-3 text-base font-medium transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 ${
+                    item.isActive
+                      ? 'bg-white font-bold text-[#0f3154] shadow-sm'
+                      : 'text-white hover:bg-white/10 hover:text-white'
+                  }`}
+                >
+                  <Icon
+                    className={`size-5 shrink-0 ${
+                      item.isActive ? 'text-[#0f3154]' : 'text-white'
+                    }`}
+                    strokeWidth={2}
+                    aria-hidden="true"
+                  />
+                  <span className="truncate">{item.label}</span>
+                </a>
+              </Link>
+            );
+          })}
+        </nav>
+      </div>
+    );
+  }
 
   if (isOperator) {
     return (

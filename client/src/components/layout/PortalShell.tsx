@@ -26,6 +26,9 @@ export interface PortalShellProps {
   /** Override لحشوة المحتوى — default "p-6 md:p-8" */
   contentClassName?: string;
 
+  /** خلفية مساحة العمل (main) — default شفافة ترث خلفية الهيكل */
+  workspaceClassName?: string;
+
   /** عرض القائمة الجانبية لسطح المكتب — default "w-[280px]" */
   sidebarWidth?: string;
 
@@ -41,6 +44,7 @@ export function PortalShell({
   hideTopBar = false,
   showTopBarOnMobile = false,
   contentClassName = 'p-6 md:p-8',
+  workspaceClassName = '',
   sidebarWidth = 'w-[280px]',
   children,
 }: PortalShellProps) {
@@ -69,7 +73,7 @@ export function PortalShell({
       {/* Main Content Area */}
       <main
         ref={mainRef}
-        className="flex-1 h-screen overflow-y-auto flex flex-col min-w-0"
+        className={`flex-1 h-screen overflow-y-auto flex flex-col min-w-0 ${workspaceClassName}`}
       >
         {/* Mobile Header Bar with Sheet (side="start") */}
         {!hideSidebar && (
@@ -103,7 +107,7 @@ export function PortalShell({
             <button
               type="button"
               onClick={() => setLang(lang === 'ar' ? 'fr' : 'ar')}
-              className="text-xs font-bold px-2.5 py-1 rounded-lg bg-[var(--paper-100)] text-[var(--ink-700)] border border-[var(--color-border-subtle)]"
+              className="text-base font-bold px-2.5 py-1 rounded-lg bg-[var(--paper-100)] text-[var(--ink-700)] border border-[var(--color-border-subtle)]"
             >
               {lang === 'ar' ? 'FR' : 'عربي'}
             </button>

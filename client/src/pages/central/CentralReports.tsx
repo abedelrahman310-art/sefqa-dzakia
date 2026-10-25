@@ -1,16 +1,21 @@
-import { useState } from 'react';
-import { PageHeader, KpiCard, AICard } from '@/shared/components';
-import { api } from '@/lib/api';
+import { useMemo, useState } from 'react';
+import { PageHeader, KpiCard } from '@/shared/components';
 import {
   FileText,
-  Download,
-  Sparkles,
-  CheckCircle2,
+  Wallet,
+  ShieldCheck,
   TrendingUp,
-  BarChart3,
-  PieChart,
+  RefreshCw,
+  Printer,
+  Search,
 } from 'lucide-react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from '@/components/ui/card';
 import {
   Table,
   TableHeader,
@@ -21,217 +26,198 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import {
+  fetchCentralReports,
+  useCentralResource,
+  type CentralReportCatalogItem,
+} from './centralApi';
+import { TableState, formatDZD, formatDate, formatNumber, formatPercent } from './centralUi';
 
-interface NationalReportItem {
-  id: string;
-  title: string;
-  type: 'monthly' | 'quarterly' | 'annual' | 'sector';
-  period: string;
-  wilayaScope: string;
-  generatedDate: string;
-  totalDeals: number;
-  totalVolume: string;
-  status: 'ready' | 'archived';
+/**
+ * التقارير الوطنية الموحدة — كتالوج التقارير المولّد من الخادم
+ * (GET /api/central/reports/) مع مؤشرات الحصيلة الوطنية.
+ *
+ * التصدير: يفتح حوار الطباعة في المتصفح لحفظ الصفحة كملف PDF.
+ * لا توجد نقطة تصدير PDF على الخادم، لذلك لا يُدّعى إنجاز تصدير غير حقيقي.
+ */
+
+const TYPE_LABELS: Record<string, string> = {
+  monthly: 'تقرير شهري',
+  quarterly: 'حصيلة ثلاثية',
+  annual: 'تقرير سنوي',
+  sector: 'تقرير قطاعي',
+};
+
+const STATUS_META: Record<string, { label: string; className: string }> = {
+  ready: {
+    label: 'جاهز',
+    className: 'bg-emerald-50 text-emerald-800 border-emerald-300',
+  },
+  archived: {
+    label: 'مؤرشف',
+    className: 'bg-slate-50 text-slate-700 border-slate-300',
+  },
+  draft: {
+    label: 'مسودة',
+    className: 'bg-amber-50 text-amber-800 border-amber-300',
+  },
+};
+
+function typeLabel(type: string): string {
+  return TYPE_LABELS[type] ?? type;
 }
 
-const NATIONAL_REPORTS: NationalReportItem[] = [
-  {
-    id: 'NAT-REP-2026-M09',
-    title: 'التقرير الوطني لحركة الصفقات - سبتمبر 2026',
-    type: 'monthly',
-    period: 'سبتمبر 2026',
-    wilayaScope: 'كل الولايات (58)',
-    generatedDate: '2026-09-30',
-    totalDeals: 142,
-    totalVolume: '28,450,000,000 دج',
-    status: 'ready',
-  },
-  {
-    id: 'NAT-REP-2026-Q3',
-    title: 'الحصيلة الوطنية الثلاثية للرقابة على الصفقات - Q3 2026',
-    type: 'quarterly',
-    period: 'جويلية - سبتمبر 2026',
-    wilayaScope: 'كل الولايات (58)',
-    generatedDate: '2026-10-01',
-    totalDeals: 418,
-    totalVolume: '92,100,000,000 دج',
-    status: 'ready',
-  },
-  {
-    id: 'NAT-REP-2026-INFRA',
-    title: 'تقرير التدقيق في قطاع المنشآت الكبرى والأشغال العمومية',
-    type: 'sector',
-    period: 'السداسي الأول 2026',
-    wilayaScope: 'الولايات الشمالية والسهوب',
-    generatedDate: '2026-07-15',
-    totalDeals: 85,
-    totalVolume: '45,800,000,000 دج',
-    status: 'ready',
-  },
-  {
-    id: 'NAT-REP-2026-M08',
-    title: 'التقرير الوطني لحركة الصفقات - أوت 2026',
-    type: 'monthly',
-    period: 'أوت 2026',
-    wilayaScope: 'كل الولايات (58)',
-    generatedDate: '2026-08-31',
-    totalDeals: 98,
-    totalVolume: '19,300,000,000 دج',
-    status: 'archived',
-  },
-];
+function statusMeta(status: string) {
+  return (
+    STATUS_META[status] ?? {
+      label: status || 'غير محدّد',
+      className: 'bg-slate-50 text-slate-700 border-slate-300',
+    }
+  );
+}
 
 export function CentralReports() {
-  const [reports] = useState<NationalReportItem[]>(NATIONAL_REPORTS);
-  const [filterPeriod, setFilterPeriod] = useState<string>('all');
-  const [filterWilaya, setFilterWilaya] = useState<string>('all');
-  const [aiLoading, setAiLoading] = useState(false);
-  const [aiInsight, setAiInsight] = useState<string | null>(null);
-  const [downloadSuccess, setDownloadSuccess] = useState<string | null>(null);
+  const { data, loading, error, reload } = useCentralResource(fetchCentralReports);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterType, setFilterType] = useState('all');
+  const [exporting, setExporting] = useState(false);
 
-  const filtered = reports.filter((r) => {
-    if (filterPeriod !== 'all' && r.type !== filterPeriod) return false;
-    if (filterWilaya !== 'all' && !r.wilayaScope.includes(filterWilaya)) return false;
-    return true;
-  });
+  const summary = data?.national_summary;
+  const reports = useMemo(() => data?.reports ?? [], [data]);
 
-  const handleGenerateAiReport = async () => {
-    setAiLoading(true);
-    setAiInsight(null);
-    try {
-      const res = await api.get('/ai/central/insights/');
-      const data = res.data;
-      const first = Array.isArray(data) ? data[0]?.description : data?.insight || data?.summary;
-      setAiInsight(
-        first ||
-          'التقرير الاستشاري الوطني الذكي: بلغ مؤشر النزاهة الوطني 98.4%، مع ارتفاع وتيرة الإسناد المؤقت بنسبة 14% في قطاع الموارد المائية والصحة. التوصية: تعزيز آليات الرقابة البعدية في الصفقات التي تتجاوز قيمتها 500 مليون دج.'
+  const reportTypes = useMemo(
+    () => Array.from(new Set(reports.map((item) => item.type).filter(Boolean))),
+    [reports],
+  );
+
+  const filtered = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+    return reports.filter((item) => {
+      if (filterType !== 'all' && item.type !== filterType) return false;
+      if (!query) return true;
+      return (
+        (item.title ?? '').toLowerCase().includes(query) ||
+        (item.id ?? '').toLowerCase().includes(query) ||
+        (item.period ?? '').toLowerCase().includes(query) ||
+        (item.wilaya_scope ?? '').toLowerCase().includes(query)
       );
-    } catch {
-      setAiInsight(
-        'التقرير الاستشاري الوطني الذكي: بلغ مؤشر النزاهة الوطني 98.4%، مع ارتفاع وتيرة الإسناد المؤقت بنسبة 14% في قطاع الموارد المائية والصحة. التوصية: تعزيز آليات الرقابة البعدية في الصفقات التي تتجاوز قيمتها 500 مليون دج.'
-      );
-    } finally {
-      setAiLoading(false);
-    }
-  };
+    });
+  }, [reports, searchQuery, filterType]);
 
-  const handleExportPdf = (title: string) => {
-    setDownloadSuccess(`تم بدء تصدير "${title}" كملف PDF رسمي مختوم بنجاح.`);
-    setTimeout(() => setDownloadSuccess(null), 4000);
+  /**
+   * تصدير حقيقي: يفتح حوار الطباعة/الحفظ كـ PDF في المتصفح.
+   * الأزرار وعناصر التصفية مخفية في نسخة الطباعة عبر print:hidden.
+   */
+  const handleExportPdf = () => {
+    if (exporting) return;
+    setExporting(true);
+    window.setTimeout(() => {
+      window.print();
+      setExporting(false);
+    }, 120);
   };
 
   return (
-    <div className="space-y-6 page-container py-4">
+    <div className="space-y-6" dir="rtl">
       <PageHeader
-        eyebrow="المراقبة الوطنية"
         title="التقارير الوطنية الموحدة"
-        description="تقارير شهرية وربعية مع توليد AI"
+        titleClassName="text-2xl font-bold"
+        description="كتالوج التقارير الوطنية المولّدة من الخادم مع مؤشرات الحصيلة الوطنية للصفقات والشفافية."
         actions={
-          <Button
-            onClick={handleGenerateAiReport}
-            disabled={aiLoading}
-            className="bg-purple-600 hover:bg-purple-700 text-white font-bold gap-2 text-xs shadow-sm h-10 px-4"
-          >
-            <Sparkles className={`w-4 h-4 ${aiLoading ? 'animate-spin' : ''}`} />
-            <span>{aiLoading ? 'جاري التحليل...' : 'توليد تقرير AI'}</span>
-          </Button>
+          <div className="flex items-center gap-2 print:hidden">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={reload}
+              disabled={loading}
+              className="text-base"
+            >
+              <RefreshCw className="size-4" aria-hidden="true" />
+              تحديث
+            </Button>
+            <Button
+              size="sm"
+              onClick={handleExportPdf}
+              disabled={exporting || filtered.length === 0}
+              className="gap-2 bg-[#0f3154] text-base font-bold text-white hover:bg-[#0b2743]"
+            >
+              <Printer className="size-4" aria-hidden="true" />
+              {exporting ? 'جاري التصدير…' : 'تصدير PDF'}
+            </Button>
+          </div>
         }
       />
 
-      {/* 4 KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <KpiCard
-          eyebrow="تقارير شهرية منجزة"
-          value="12"
-          trend={10}
-          trendLabel="مقارنة بالعام الماضي"
-          sparkline={[8, 9, 10, 10, 11, 11, 12]}
+          eyebrow="إجمالي الصفقات"
+          value={formatNumber(summary?.total_deals ?? 0)}
           icon={FileText}
           accent="navy"
+          description={`${formatNumber(summary?.total_authorities ?? 0)} مصلحة متعاقدة مشمولة`}
         />
         <KpiCard
-          eyebrow="تقارير ربعية معتمدة"
-          value="3"
-          trend={0}
-          trendLabel="سارية المفعول"
-          sparkline={[1, 1, 2, 2, 3, 3, 3]}
-          icon={BarChart3}
+          eyebrow="الحجم المالي الوطني"
+          value={formatDZD(summary?.total_volume_dzd ?? 0)}
+          icon={Wallet}
           accent="emerald"
+          description="مجموع الميزانيات التقديرية المسجّلة"
         />
         <KpiCard
-          eyebrow="مؤشر الشفافية الوطني"
-          value="98.4%"
-          trend={2.1}
-          trendLabel="التزام بالمراسيم التنفيذية"
-          sparkline={[94, 95, 96, 97, 97, 98, 98]}
+          eyebrow="متوسط الالتزام بالآجال"
+          value={formatPercent(summary?.average_compliance_rate ?? 0)}
           icon={TrendingUp}
           accent="gold"
+          description="متوسط وطني على كل المصالح"
         />
         <KpiCard
-          eyebrow="إجمالي الحجم المالي الوطني"
-          value="185 Mld"
-          trend={14}
-          trendLabel="دينار جزائري مسجل"
-          sparkline={[120, 135, 145, 160, 170, 180, 185]}
-          icon={PieChart}
+          eyebrow="متوسط مؤشر الشفافية"
+          value={formatPercent(summary?.average_transparency_rate ?? 0)}
+          icon={ShieldCheck}
           accent="red"
+          description="دفاتر شروط مؤشّرة وجلسات فتح علنية"
         />
       </div>
 
-      {/* Alert */}
-      {downloadSuccess && (
-        <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-900 text-xs font-semibold flex items-center gap-2 animate-in fade-in">
-          <CheckCircle2 className="size-4 text-emerald-600 shrink-0" />
-          <span>{downloadSuccess}</span>
-        </div>
-      )}
-
-      {/* AICard */}
-      {aiInsight && (
-        <AICard
-          title="تقرير الذكاء الاصطناعي الاستشاري الموحد"
-          subtitle="توليد آلي مدعوم بنموذج الذكاء الاصطناعي المرجعي للصفقات العمومية"
-        >
-          <p className="text-sm text-purple-950 leading-relaxed bg-white/70 p-4 rounded-xl border border-purple-200">
-            {aiInsight}
-          </p>
-        </AICard>
-      )}
-
-      {/* Reports Table Card */}
-      <Card className="shadow-sm border border-[var(--color-border-subtle)] bg-[var(--card-bg)]">
-        <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[var(--color-border-subtle)]">
+      <Card className="bg-white shadow-sm border-gray-200">
+        <CardHeader className="flex flex-col gap-4 border-b border-gray-200 pb-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <CardTitle className="text-xl font-bold text-[var(--color-text-primary)]">
-              قائمة التقارير الوطنية الجاهزة
+            <CardTitle className="text-xl font-bold text-[var(--ink-900)]">
+              كتالوج التقارير الوطنية
             </CardTitle>
-            <p className="text-xs text-[var(--color-text-muted)] mt-1">
-              تقارير معتمدة رسمياً ومصادق عليها من المرصد الوطني
-            </p>
+            <CardDescription className="mt-1 text-base text-gray-500">
+              تقارير دورية مولّدة آلياً من بيانات الصفقات والرقابة
+            </CardDescription>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2.5">
-            <select
-              value={filterPeriod}
-              onChange={(e) => setFilterPeriod(e.target.value)}
-              className="px-2.5 py-1.5 text-xs rounded-lg border border-[var(--color-border-subtle)] bg-[var(--card-bg)] text-[var(--color-text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--portal-primary)]"
-              aria-label="تصفية حسب نوع التقرير"
-            >
-              <option value="all">كل الأنواع</option>
-              <option value="monthly">تقارير شهرية</option>
-              <option value="quarterly">تقارير ربعية</option>
-              <option value="sector">تقارير قطاعية</option>
-            </select>
+          <div className="flex flex-wrap items-center gap-2.5 print:hidden">
+            <div className="relative">
+              <Search
+                className="size-4 absolute start-2.5 top-1/2 -translate-y-1/2 text-muted-foreground"
+                aria-hidden="true"
+              />
+              <input
+                type="text"
+                placeholder="بحث في التقارير…"
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                aria-label="بحث في التقارير الوطنية"
+                className="ps-9 pe-3 py-1.5 text-base rounded-lg border border-gray-200 bg-white text-[var(--ink-900)] focus:outline-none focus:ring-1 focus:ring-[#0f3154]"
+              />
+            </div>
 
             <select
-              value={filterWilaya}
-              onChange={(e) => setFilterWilaya(e.target.value)}
-              className="px-2.5 py-1.5 text-xs rounded-lg border border-[var(--color-border-subtle)] bg-[var(--card-bg)] text-[var(--color-text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--portal-primary)]"
-              aria-label="تصفية حسب النطاق الجغرافي"
+              value={filterType}
+              onChange={(event) => setFilterType(event.target.value)}
+              aria-label="تصفية حسب نوع التقرير"
+              className="px-2.5 py-1.5 text-base rounded-lg border border-gray-200 bg-white text-[var(--ink-900)] focus:outline-none focus:ring-1 focus:ring-[#0f3154]"
             >
-              <option value="all">كل النطاقات الجغرافية</option>
-              <option value="58">كل الولايات (58)</option>
-              <option value="الشمالية">الولايات الشمالية</option>
+              <option value="all">كل الأنواع</option>
+              {reportTypes.map((type) => (
+                <option key={type} value={type}>
+                  {typeLabel(type)}
+                </option>
+              ))}
             </select>
           </div>
         </CardHeader>
@@ -240,63 +226,83 @@ export function CentralReports() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[160px]">معرف التقرير</TableHead>
-                <TableHead className="min-w-[260px]">عنوان التقرير</TableHead>
-                <TableHead>الفترة المشمولة</TableHead>
-                <TableHead>النطاق الإقليمي</TableHead>
-                <TableHead className="text-center">عدد الصفقات</TableHead>
-                <TableHead className="text-end">الحجم المالي الكلي</TableHead>
-                <TableHead className="text-center">الحالة</TableHead>
-                <TableHead className="w-[120px] text-center">التصدير</TableHead>
+                <TableHead className="min-w-[140px]">معرّف التقرير</TableHead>
+                <TableHead className="min-w-[280px]">عنوان التقرير</TableHead>
+                <TableHead>النوع</TableHead>
+                <TableHead>الفترة</TableHead>
+                <TableHead>النطاق</TableHead>
+                <TableHead className="text-center">تاريخ التوليد</TableHead>
+                <TableHead className="text-center">الصفقات</TableHead>
+                <TableHead className="text-end">الحجم المالي</TableHead>
+                <TableHead className="text-center">الالتزام</TableHead>
+                <TableHead className="text-center">الشفافية</TableHead>
+                <TableHead>الحالة</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filtered.map((rep) => (
-                <TableRow key={rep.id} className="hover:bg-slate-50/70 transition-colors">
-                  <TableCell className="font-mono text-xs font-bold text-[var(--official-900)]">
-                    {rep.id}
-                  </TableCell>
-                  <TableCell>
-                    <div className="font-semibold text-sm text-[var(--color-text-primary)]">
-                      {rep.title}
-                    </div>
-                  </TableCell>
-                  <TableCell className="font-mono text-xs text-[var(--color-text-secondary)]">
-                    {rep.period}
-                  </TableCell>
-                  <TableCell className="text-xs text-[var(--color-text-secondary)]">
-                    {rep.wilayaScope}
-                  </TableCell>
-                  <TableCell className="font-mono text-center font-bold text-xs">
-                    {rep.totalDeals}
-                  </TableCell>
-                  <TableCell className="font-mono tabular-nums text-end font-semibold text-xs text-[var(--color-text-primary)]">
-                    {rep.totalVolume}
-                  </TableCell>
-                  <TableCell className="text-center">
-                    {rep.status === 'ready' ? (
-                      <Badge className="bg-emerald-50 text-emerald-800 border-emerald-300">
-                        معتمد وجاهز
-                      </Badge>
-                    ) : (
-                      <Badge variant="outline">مؤرشف</Badge>
-                    )}
-                  </TableCell>
-                  <TableCell className="text-center">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleExportPdf(rep.title)}
-                      className="h-8 px-2.5 text-xs gap-1 border-[var(--color-border-subtle)] hover:bg-slate-100"
+              <TableState
+                colSpan={11}
+                loading={loading && !data}
+                error={error}
+                empty={!loading && filtered.length === 0}
+                emptyLabel="لا توجد تقارير مطابقة للبحث أو التصفية الحالية."
+                onRetry={reload}
+              >
+                {filtered.map((report: CentralReportCatalogItem) => {
+                  const meta = statusMeta(report.status);
+                  return (
+                    <TableRow
+                      key={report.id}
+                      className="transition-colors hover:bg-slate-50/70"
                     >
-                      <Download className="size-3.5" />
-                      <span>PDF</span>
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
+                      <TableCell className="font-mono text-base font-bold text-[var(--ink-900)]">
+                        {report.id}
+                      </TableCell>
+                      <TableCell className="max-w-[320px] text-base font-semibold text-[var(--ink-900)]">
+                        <span className="line-clamp-2">{report.title}</span>
+                      </TableCell>
+                      <TableCell className="text-base text-[var(--ink-700)]">
+                        {typeLabel(report.type)}
+                      </TableCell>
+                      <TableCell className="font-mono text-base text-[var(--ink-700)]">
+                        {report.period || '—'}
+                      </TableCell>
+                      <TableCell className="text-base text-[var(--ink-700)]">
+                        {report.wilaya_scope || '—'}
+                      </TableCell>
+                      <TableCell className="text-center font-mono text-base text-[var(--ink-700)]">
+                        {formatDate(report.generated_date)}
+                      </TableCell>
+                      <TableCell className="text-center font-mono text-base font-bold text-[var(--ink-900)]">
+                        {formatNumber(report.total_deals)}
+                      </TableCell>
+                      <TableCell className="text-end font-mono text-base font-semibold tabular-nums text-[var(--ink-900)]">
+                        {formatDZD(report.total_volume_dzd)}
+                      </TableCell>
+                      <TableCell className="text-center font-mono text-base text-[var(--ink-700)]">
+                        {formatPercent(report.average_compliance_rate)}
+                      </TableCell>
+                      <TableCell className="text-center font-mono text-base text-[var(--ink-700)]">
+                        {formatPercent(report.average_transparency_rate)}
+                      </TableCell>
+                      <TableCell>
+                        <Badge className={meta.className}>{meta.label}</Badge>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableState>
             </TableBody>
           </Table>
+
+          <div className="flex flex-wrap items-center justify-between gap-2 border-t border-gray-200 px-6 py-4 text-base text-gray-500">
+            <span>
+              عرض {formatNumber(filtered.length)} من أصل {formatNumber(reports.length)} تقريراً
+            </span>
+            <span className="print:hidden">
+              يحتوي التصدير على الكتالوج المعروض حالياً بعد التصفية
+            </span>
+          </div>
         </CardContent>
       </Card>
     </div>

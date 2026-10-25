@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { PageHeader, KpiCard, AICard } from '@/shared/components';
 import {
   Building,
@@ -9,10 +9,15 @@ import {
   Eye,
   Trophy,
   ShieldCheck,
-  ChevronRight,
-  ChevronLeft,
+  RefreshCw,
 } from 'lucide-react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from '@/components/ui/card';
 import {
   Table,
   TableHeader,
@@ -30,253 +35,210 @@ import {
   SheetTitle,
   SheetDescription,
 } from '@/components/ui/sheet';
+import {
+  fetchCentralReports,
+  useCentralResource,
+  type CentralAuthorityReport,
+} from './centralApi';
+import { Meter, TableState, formatDZD, formatNumber } from './centralUi';
 
-interface AuthorityItem {
-  id: string;
-  rank: number;
-  name: string;
-  type: string;
-  wilaya: string;
-  dealsCount: number;
-  totalVolume: number;
-  complianceRate: number; // percentage
-  status: 'excellent' | 'needs_support' | 'infractions' | 'normal';
-  aiTrainingNeeded: boolean;
-  notes?: string;
+/**
+ * حوكمة المصالح المتعاقدة — ترتيب المصالح حسب مؤشر الالتزام بالآجال
+ * ومؤشر الشفافية المحسوبين في الخادم (GET /api/central/reports/).
+ */
+
+const STATUS_META: Record<string, { label: string; className: string }> = {
+  excellent: {
+    label: 'أداء ممتاز',
+    className: 'bg-emerald-50 text-emerald-800 border-emerald-300',
+  },
+  normal: {
+    label: 'أداء عادي',
+    className: 'bg-slate-50 text-slate-700 border-slate-300',
+  },
+  needs_support: {
+    label: 'تحتاج دعماً وتدريباً',
+    className: 'bg-amber-50 text-amber-800 border-amber-300',
+  },
+  infractions: {
+    label: 'بمخالفات مسجلة',
+    className: 'bg-red-50 text-red-800 border-red-300',
+  },
+};
+
+function statusMeta(status: string) {
+  return (
+    STATUS_META[status] ?? {
+      label: status || 'غير محدّد',
+      className: 'bg-slate-50 text-slate-700 border-slate-300',
+    }
+  );
 }
 
-const AUTHORITIES_DATA: AuthorityItem[] = [
-  {
-    id: 'auth-1',
-    rank: 1,
-    name: 'مديرية الأشغال العمومية - ولاية الجزائر',
-    type: 'مديرية ولائية',
-    wilaya: 'الجزائر (16)',
-    dealsCount: 42,
-    totalVolume: 8500000000,
-    complianceRate: 98,
-    status: 'excellent',
-    aiTrainingNeeded: false,
-    notes: 'التزام تام بالمواعيد الرقمية ومحاضر جلسات الفتح خالية من التحفظات',
-  },
-  {
-    id: 'auth-2',
-    rank: 2,
-    name: 'المركز الاستشفائي الجامعي مصطفى باشا',
-    type: 'مؤسسة استشفائية جامعية',
-    wilaya: 'الجزائر (16)',
-    dealsCount: 28,
-    totalVolume: 4200000000,
-    complianceRate: 95,
-    status: 'excellent',
-    aiTrainingNeeded: false,
-    notes: 'إجراءات طلب العروض سريعة وشفافة ومطابقة للمرسوم 15-247',
-  },
-  {
-    id: 'auth-3',
-    rank: 3,
-    name: 'مديرية الموارد المائية - ولاية وهران',
-    type: 'مديرية ولائية',
-    wilaya: 'وهران (31)',
-    dealsCount: 19,
-    totalVolume: 3100000000,
-    complianceRate: 92,
-    status: 'excellent',
-    aiTrainingNeeded: false,
-    notes: 'أداء منتظم مع استخدام متقدم لمنظومة دفاتر الشروط النموذجية',
-  },
-  {
-    id: 'auth-4',
-    rank: 12,
-    name: 'بلدية عين البيضاء - ولاية أم البواقي',
-    type: 'جماعة محلية (بلدية)',
-    wilaya: 'أم البواقي (04)',
-    dealsCount: 14,
-    totalVolume: 650000000,
-    complianceRate: 74,
-    status: 'needs_support',
-    aiTrainingNeeded: true,
-    notes: 'تأخر في رقمنة محاضر لجان الصفقات البلدية ونقص في إتقان تقييم العروض',
-  },
-  {
-    id: 'auth-5',
-    rank: 15,
-    name: 'مديرية التجهيزات العمومية - ولاية تندوف',
-    type: 'مديرية ولائية',
-    wilaya: 'تندوف (37)',
-    dealsCount: 8,
-    totalVolume: 890000000,
-    complianceRate: 71,
-    status: 'needs_support',
-    aiTrainingNeeded: true,
-    notes: 'صعوبات في تشفير العروض عن بُعد وتطبيق المعايير التقنية الجديدة',
-  },
-  {
-    id: 'auth-6',
-    rank: 24,
-    name: 'بلدية بريكة - ولاية باتنة',
-    type: 'جماعة محلية (بلدية)',
-    wilaya: 'باتنة (05)',
-    dealsCount: 11,
-    totalVolume: 480000000,
-    complianceRate: 58,
-    status: 'infractions',
-    aiTrainingNeeded: true,
-    notes: 'تسجيل مخالفتين تتعلقان بتجاوز آجال البت القانونية وشبهة عدم تكافؤ الفرص',
-  },
-];
-
-function formatDZD(amount: number): string {
-  return new Intl.NumberFormat('ar-DZ', {
-    style: 'currency',
-    currency: 'DZD',
-    maximumFractionDigits: 0,
-  }).format(amount);
-}
-
-function getStatusBadge(status: AuthorityItem['status']) {
-  switch (status) {
-    case 'excellent':
-      return <Badge className="bg-emerald-50 text-emerald-800 border-emerald-300">أداء ممتاز</Badge>;
-    case 'needs_support':
-      return <Badge className="bg-amber-50 text-amber-800 border-amber-300 font-medium">تحتاج دعم وتدريب</Badge>;
-    case 'infractions':
-      return <Badge className="bg-red-50 text-red-800 border-red-300 font-bold">بمخالفات مسجلة</Badge>;
-    default:
-      return <Badge variant="outline">عادي</Badge>;
-  }
-}
+type RankedAuthority = CentralAuthorityReport & { rank: number };
 
 export function CentralAuthorities() {
-  const [authorities] = useState<AuthorityItem[]>(AUTHORITIES_DATA);
+  const { data, loading, error, reload } = useCentralResource(fetchCentralReports);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
-  const [selectedAuth, setSelectedAuth] = useState<AuthorityItem | null>(null);
+  const [selectedAuth, setSelectedAuth] = useState<RankedAuthority | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
 
-  const filtered = authorities.filter((a) => {
-    if (filterStatus !== 'all' && a.status !== filterStatus) return false;
-    if (searchQuery) {
-      const q = searchQuery.toLowerCase();
-      return a.name.toLowerCase().includes(q) || a.wilaya.toLowerCase().includes(q);
-    }
-    return true;
-  });
+  const summary = data?.national_summary;
+  const authorities = useMemo(() => data?.authorities ?? [], [data]);
+
+  /** الترتيب الوطني: الالتزام بالآجال أولاً ثم الشفافية ثم حجم النشاط. */
+  const ranked = useMemo(() => {
+    return [...authorities]
+      .sort(
+        (a, b) =>
+          b.compliance_rate - a.compliance_rate ||
+          b.transparency_rate - a.transparency_rate ||
+          b.deals_count - a.deals_count,
+      )
+      .map((item, index) => ({ ...item, rank: index + 1 }));
+  }, [authorities]);
+
+  const filtered = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+    return ranked.filter((item) => {
+      if (filterStatus !== 'all' && item.status !== filterStatus) return false;
+      if (!query) return true;
+      return (
+        item.name.toLowerCase().includes(query) ||
+        item.wilaya.toLowerCase().includes(query) ||
+        item.email.toLowerCase().includes(query)
+      );
+    });
+  }, [ranked, searchQuery, filterStatus]);
+
+  const infractionsCount = authorities.filter((item) => item.status === 'infractions').length;
+  const trainingNeeded = authorities.filter((item) => item.ai_training_needed);
 
   return (
-    <div className="space-y-6 page-container py-4">
+    <div className="space-y-6" dir="rtl">
       <PageHeader
-        eyebrow="المراقبة الوطنية"
-        title="مراقبة المصالح المتعاقدة"
-        description="متابعة وتقييم أداء المصالح والهيئات الإدارية المتعاقدة وترتيبها حسب معايير الامتثال والحوكمة"
+        title="حوكمة المصالح المتعاقدة"
+        titleClassName="text-2xl font-bold"
+        description="ترتيب المصالح والهيئات المتعاقدة وفق مؤشر الالتزام بالآجال القانونية ومؤشر الشفافية المركب المحسوبين من بيانات الصفقات والجلسات والإنذارات."
+        actions={
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={reload}
+            disabled={loading}
+            className="text-base"
+          >
+            <RefreshCw className="size-3.5" aria-hidden="true" />
+            تحديث البيانات
+          </Button>
+        }
       />
 
-      {/* 4 KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <KpiCard
-          eyebrow="إجمالي المصالح المتعاقدة"
-          value="87"
-          trend={4}
-          trendLabel="هيئات مسجلة رسمياً"
-          sparkline={[75, 78, 80, 82, 85, 86, 87]}
+          eyebrow="المصالح المتعاقدة"
+          value={formatNumber(summary?.total_authorities ?? authorities.length)}
           icon={Building}
           accent="navy"
+          description={`الحجم الوطني المسجّل: ${formatDZD(summary?.total_volume_dzd ?? 0)}`}
         />
         <KpiCard
-          eyebrow="مصالح ممتازة"
-          value="45"
-          trend={10}
-          trendLabel="امتثال أعلى من 90%"
-          sparkline={[30, 32, 35, 38, 40, 42, 45]}
+          eyebrow="متوسط الالتزام بالآجال"
+          value={`${formatNumber(summary?.average_compliance_rate ?? 0)}%`}
           icon={CheckCircle2}
           accent="emerald"
+          description={`على ${formatNumber(summary?.total_deals ?? 0)} صفقة مسجّلة`}
         />
         <KpiCard
-          eyebrow="تحتاج دعم وتدريب"
-          value="12"
-          trend={-3}
-          trendLabel="معدل امتثال أقل من 75%"
-          sparkline={[18, 16, 15, 14, 13, 12, 12]}
-          icon={HelpCircle}
+          eyebrow="متوسط مؤشر الشفافية"
+          value={`${formatNumber(summary?.average_transparency_rate ?? 0)}%`}
+          icon={ShieldCheck}
           accent="gold"
+          description="دفاتر شروط مؤشّرة وجلسات فتح علنية"
         />
         <KpiCard
-          eyebrow="بمخالفات وإخطارات"
-          value="3"
-          trend={0}
-          trendLabel="مخالفات قيد التحقيق"
-          sparkline={[3, 4, 3, 2, 3, 3, 3]}
+          eyebrow="مصالح بمخالفات"
+          value={formatNumber(infractionsCount)}
           icon={AlertTriangle}
           accent="red"
+          description="تحتاج متابعة رقابية فورية"
         />
       </div>
 
-      {/* AICard */}
       <AICard
-        title="تحليل التدريب والدعم الذكي"
-        subtitle="3 مصالح متعاقدة تم تشخيص حاجتها الملحة إلى دورة تكوينية استعجالية"
+        title="توصيات الدعم والتدريب (استشارية)"
+        subtitle={
+          trainingNeeded.length > 0
+            ? `${formatNumber(trainingNeeded.length)} مصلحة مصنّفة بحاجة إلى دعم تقني أو تكويني`
+            : 'لا توجد حالياً مصالح مصنّفة بحاجة إلى تدريب وفق المؤشرات الحالية'
+        }
       >
-        <div className="space-y-2.5 text-sm text-[var(--color-text-secondary)]">
-          <div className="flex items-start gap-3 p-3 rounded-xl bg-purple-500/10 border border-purple-200">
-            <span className="text-xl shrink-0">🏛️</span>
-            <div>
-              <div className="font-bold text-purple-950">
-                بلدية عين البيضاء (أم البواقي) & بلدية بريكة (باتنة)
-              </div>
-              <p className="text-xs text-purple-900 mt-1">
-                التوصية الاستشارية: تنظيم ورشة عمل ميدانية حول إجراءات الرقابة القبلية للجان
-                الصفقات البلدية، ومطابقة دفاتر الشروط الإلكترونية تفادياً لإلغاء المناقصات.
-              </p>
-            </div>
-          </div>
-          <div className="flex items-start gap-3 p-3 rounded-xl bg-purple-500/10 border border-purple-200">
-            <span className="text-xl shrink-0">📡</span>
-            <div>
-              <div className="font-bold text-purple-950">
-                مديرية التجهيزات العمومية - ولاية تندوف
-              </div>
-              <p className="text-xs text-purple-900 mt-1">
-                التوصية الاستشارية: تقديم دعم تقني حول التوقيع الإلكتروني وتشفير الأظرفة لتفادي
-                تأخير مواعيد الجلسات العلنية لفتح العروض.
-              </p>
-            </div>
-          </div>
-        </div>
+        {trainingNeeded.length === 0 ? (
+          <p className="flex items-center gap-2 text-base text-[var(--color-text-secondary)]">
+            <HelpCircle className="size-4" aria-hidden="true" />
+            جميع المصالح داخل العتبات المقبولة لمؤشرَي الالتزام والشفافية.
+          </p>
+        ) : (
+          <ul className="space-y-2.5">
+            {trainingNeeded.slice(0, 4).map((item) => (
+              <li
+                key={item.id}
+                className="flex items-start gap-3 rounded-xl border border-purple-200 bg-purple-500/10 p-3"
+              >
+                <span className="shrink-0 text-xl">🏛️</span>
+                <div>
+                  <div className="text-base font-bold text-purple-950">{item.name}</div>
+                  <p className="mt-1 text-base text-purple-900">
+                    الالتزام بالآجال {formatNumber(item.compliance_rate)}% · الشفافية{' '}
+                    {formatNumber(item.transparency_rate)}% · شبهات مسجّلة{' '}
+                    {formatNumber(item.suspicions_count)} — التوصية: مراجعة إجراءات الإعداد وفتح
+                    الأظرفة مع هذه المصلحة.
+                  </p>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
       </AICard>
 
-      {/* Table Card */}
-      <Card className="shadow-sm border border-[var(--color-border-subtle)] bg-[var(--card-bg)]">
-        <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[var(--color-border-subtle)]">
+      <Card className="bg-white shadow-sm border-gray-200">
+        <CardHeader className="flex flex-col gap-4 border-b border-gray-200 pb-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <CardTitle className="text-xl font-bold text-[var(--color-text-primary)]">
+            <CardTitle className="text-xl font-bold text-[var(--ink-900)]">
               الترتيب الوطني لأداء المصالح المتعاقدة
             </CardTitle>
-            <p className="text-xs text-[var(--color-text-muted)] mt-1">
-              مبني على مؤشرات الشفافية، احترام الآجال، وتطبيق القانون 23-12
-            </p>
+            <CardDescription className="mt-1 text-base text-gray-500">
+              ترتيب تنازلي حسب مؤشر الالتزام بالآجال ثم مؤشر الشفافية
+            </CardDescription>
           </div>
 
           <div className="flex flex-wrap items-center gap-2.5">
             <div className="relative">
-              <Search className="size-4 absolute start-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              <Search
+                className="size-4 absolute start-2.5 top-1/2 -translate-y-1/2 text-muted-foreground"
+                aria-hidden="true"
+              />
               <input
                 type="text"
-                placeholder="بحث باسم المصلحة أو الولاية..."
+                placeholder="بحث باسم المصلحة أو الولاية…"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="ps-9 pe-3 py-1.5 text-xs rounded-lg border border-[var(--color-border-subtle)] bg-[var(--card-bg)] text-[var(--color-text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--portal-primary)]"
+                onChange={(event) => setSearchQuery(event.target.value)}
+                aria-label="بحث في المصالح المتعاقدة"
+                className="ps-9 pe-3 py-1.5 text-base rounded-lg border border-gray-200 bg-white text-[var(--ink-900)] focus:outline-none focus:ring-1 focus:ring-[var(--stamp-green-700)]"
               />
             </div>
 
             <select
               value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
-              className="px-2.5 py-1.5 text-xs rounded-lg border border-[var(--color-border-subtle)] bg-[var(--card-bg)] text-[var(--color-text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--portal-primary)]"
-              aria-label="تصفية التقييم"
+              onChange={(event) => setFilterStatus(event.target.value)}
+              aria-label="تصفية حسب التقييم"
+              className="px-2.5 py-1.5 text-base rounded-lg border border-gray-200 bg-white text-[var(--ink-900)] focus:outline-none focus:ring-1 focus:ring-[var(--stamp-green-700)]"
             >
               <option value="all">كل التقييمات</option>
               <option value="excellent">ممتازة</option>
-              <option value="needs_support">تحتاج دعم</option>
+              <option value="normal">عادية</option>
+              <option value="needs_support">تحتاج دعماً</option>
               <option value="infractions">بمخالفات</option>
             </select>
           </div>
@@ -286,152 +248,216 @@ export function CentralAuthorities() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[80px] text-center">الرتبة</TableHead>
-                <TableHead className="min-w-[260px]">المصلحة المتعاقدة</TableHead>
-                <TableHead>النوع / الهيئة</TableHead>
+                <TableHead className="w-[70px] text-center">الرتبة</TableHead>
+                <TableHead className="min-w-[240px]">المصلحة المتعاقدة</TableHead>
                 <TableHead>الولاية</TableHead>
-                <TableHead className="text-center">عدد الصفقات</TableHead>
-                <TableHead className="text-end">حجم الصفقات الإجمالي</TableHead>
-                <TableHead className="text-center">نسبة الامتثال</TableHead>
+                <TableHead className="text-center">الصفقات</TableHead>
+                <TableHead className="text-center">المتأخرة</TableHead>
+                <TableHead className="text-end">حجم الصفقات</TableHead>
+                <TableHead className="text-center">الالتزام بالآجال</TableHead>
+                <TableHead className="text-center">الشفافية</TableHead>
+                <TableHead className="text-center">شبهات</TableHead>
                 <TableHead>التقييم</TableHead>
-                <TableHead className="w-[70px]"></TableHead>
+                <TableHead className="w-[70px]" />
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filtered.map((item) => (
-                <TableRow key={item.id} className="hover:bg-slate-50/70 transition-colors">
-                  <TableCell className="text-center">
-                    <span
-                      className={`inline-flex items-center justify-center size-7 rounded-full text-xs font-mono font-bold ${
-                        item.rank <= 3
-                          ? 'bg-amber-100 text-amber-900 border border-amber-300'
-                          : 'bg-slate-100 text-slate-700'
-                      }`}
-                    >
-                      {item.rank <= 3 && <Trophy className="size-3 me-0.5 text-amber-600" />}
-                      {item.rank}
-                    </span>
-                  </TableCell>
-                  <TableCell className="font-semibold text-sm text-[var(--color-text-primary)]">
-                    {item.name}
-                  </TableCell>
-                  <TableCell className="text-xs text-[var(--color-text-secondary)]">
-                    {item.type}
-                  </TableCell>
-                  <TableCell className="text-xs text-[var(--color-text-secondary)]">
-                    {item.wilaya}
-                  </TableCell>
-                  <TableCell className="font-mono text-center font-bold text-sm">
-                    {item.dealsCount}
-                  </TableCell>
-                  <TableCell className="font-mono tabular-nums text-end text-xs font-semibold text-[var(--color-text-primary)]">
-                    {formatDZD(item.totalVolume)}
-                  </TableCell>
-                  <TableCell className="text-center">
-                    <div className="flex items-center justify-center gap-1.5 font-mono font-bold text-xs">
-                      <div className="w-16 bg-slate-100 h-2 rounded-full overflow-hidden">
-                        <div
-                          className={`h-full ${
-                            item.complianceRate >= 90
-                              ? 'bg-emerald-500'
-                              : item.complianceRate >= 70
-                              ? 'bg-amber-500'
-                              : 'bg-red-500'
+              <TableState
+                colSpan={11}
+                loading={loading && !data}
+                error={error}
+                empty={!loading && filtered.length === 0}
+                emptyLabel="لا توجد مصالح متعاقدة مطابقة للبحث أو التصفية الحالية."
+                onRetry={reload}
+              >
+                {filtered.map((item) => {
+                  const meta = statusMeta(item.status);
+                  return (
+                    <TableRow key={item.id} className="transition-colors hover:bg-slate-50/70">
+                      <TableCell className="text-center">
+                        <span
+                          className={`inline-flex size-7 items-center justify-center gap-0.5 rounded-full text-base font-bold ${
+                            item.rank <= 3
+                              ? 'border border-amber-300 bg-amber-100 text-amber-900'
+                              : 'bg-slate-100 text-slate-700'
                           }`}
-                          style={{ width: `${item.complianceRate}%` }}
-                        />
-                      </div>
-                      <span>{item.complianceRate}%</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>{getStatusBadge(item.status)}</TableCell>
-                  <TableCell className="text-end">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => {
-                        setSelectedAuth(item);
-                        setIsSheetOpen(true);
-                      }}
-                      className="h-8 px-2.5 text-xs text-[var(--portal-primary)] hover:bg-slate-100"
-                    >
-                      <Eye className="size-3.5 me-1" />
-                      عرض
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
+                        >
+                          {item.rank <= 3 && (
+                            <Trophy className="size-3 text-amber-600" aria-hidden="true" />
+                          )}
+                          <span className="font-mono">{item.rank}</span>
+                        </span>
+                      </TableCell>
+                      <TableCell className="text-base font-semibold text-[var(--ink-900)]">
+                        <div className="truncate">{item.name || '—'}</div>
+                        <div className="font-mono text-base font-normal text-[var(--ink-500)]">
+                          {item.email}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-base text-[var(--ink-700)]">
+                        {item.wilaya || '—'}
+                      </TableCell>
+                      <TableCell className="text-center font-mono text-base font-bold text-[var(--ink-900)]">
+                        {formatNumber(item.deals_count)}
+                      </TableCell>
+                      <TableCell className="text-center font-mono text-base font-bold">
+                        <span
+                          className={
+                            item.delayed_deals_count > 0
+                              ? 'text-[var(--stamp-red-700)]'
+                              : 'text-[var(--ink-500)]'
+                          }
+                        >
+                          {formatNumber(item.delayed_deals_count)}
+                        </span>
+                      </TableCell>
+                      <TableCell className="text-end font-mono text-base font-semibold tabular-nums text-[var(--ink-900)]">
+                        {formatDZD(item.total_volume_dzd)}
+                      </TableCell>
+                      <TableCell>
+                        <Meter value={item.compliance_rate} />
+                      </TableCell>
+                      <TableCell>
+                        <Meter value={item.transparency_rate} tone="navy" />
+                      </TableCell>
+                      <TableCell className="text-center font-mono text-base font-bold">
+                        <span
+                          className={
+                            item.suspicions_count > 0
+                              ? 'text-[var(--stamp-red-700)]'
+                              : 'text-[var(--ink-500)]'
+                          }
+                        >
+                          {formatNumber(item.suspicions_count)}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        <Badge className={meta.className}>{meta.label}</Badge>
+                      </TableCell>
+                      <TableCell className="text-end">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setSelectedAuth(item);
+                            setIsSheetOpen(true);
+                          }}
+                          className="h-8 px-2.5 text-base text-[var(--stamp-green-700)] hover:bg-slate-100"
+                        >
+                          <Eye className="size-3.5" aria-hidden="true" />
+                          عرض
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableState>
             </TableBody>
           </Table>
 
-          <div className="flex items-center justify-between px-6 py-4 border-t border-[var(--color-border-subtle)] text-xs text-[var(--color-text-muted)]">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-t border-gray-200 px-6 py-4 text-base text-[var(--ink-500)]">
             <span>
-              عرض {filtered.length} من أصل {authorities.length} مصلحة متعاقدة
+              عرض {formatNumber(filtered.length)} من أصل {formatNumber(authorities.length)} مصلحة
+              متعاقدة
             </span>
-            <div className="flex items-center gap-1">
-              <Button variant="outline" size="sm" disabled className="h-7 px-2 text-xs">
-                <ChevronRight className="size-3" /> السابق
-              </Button>
-              <Button variant="outline" size="sm" disabled className="h-7 px-2 text-xs">
-                التالي <ChevronLeft className="size-3" />
-              </Button>
-            </div>
+            <span className="font-mono">
+              متوسط الشفافية الوطني: {formatNumber(summary?.average_transparency_rate ?? 0)}%
+            </span>
           </div>
         </CardContent>
       </Card>
 
-      {/* Drill-down Sheet */}
       <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-        <SheetContent side="end" className="sm:max-w-md p-6 bg-[var(--paper-50)] overflow-y-auto">
+        <SheetContent side="end" className="overflow-y-auto bg-white p-6 sm:max-w-md">
           {selectedAuth && (
             <div className="space-y-6">
-              <SheetHeader className="text-start border-b border-[var(--color-border-subtle)] pb-4">
+              <SheetHeader className="space-y-1 border-b border-gray-200 pb-4 text-start">
                 <span className="eyebrow">بطاقة الرقابة الإدارية</span>
-                <SheetTitle className="text-xl font-bold text-[var(--color-text-primary)]">
-                  {selectedAuth.name}
+                <SheetTitle className="text-xl font-bold text-[var(--ink-900)]">
+                  {selectedAuth.name || '—'}
                 </SheetTitle>
-                <SheetDescription className="text-xs text-[var(--color-text-secondary)] mt-1">
-                  الرتبة الوطنية: #{selectedAuth.rank} | الولاية: {selectedAuth.wilaya}
+                <SheetDescription className="mt-1 text-base text-[var(--ink-500)]">
+                  الرتبة الوطنية #{selectedAuth.rank} · الولاية: {selectedAuth.wilaya || '—'} ·{' '}
+                  {selectedAuth.email}
                 </SheetDescription>
               </SheetHeader>
 
-              <div className="space-y-4 text-sm">
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="p-3 rounded-lg bg-[var(--card-bg)] border border-[var(--color-border-subtle)]">
-                    <div className="text-xs text-[var(--color-text-muted)] mb-1">الصفقات المدارة</div>
-                    <div className="font-mono font-bold text-lg text-[var(--color-text-primary)]">
-                      {selectedAuth.dealsCount}
-                    </div>
-                  </div>
-                  <div className="p-3 rounded-lg bg-[var(--card-bg)] border border-[var(--color-border-subtle)]">
-                    <div className="text-xs text-[var(--color-text-muted)] mb-1">معدل الامتثال</div>
-                    <div className="font-mono font-bold text-lg text-emerald-600">
-                      {selectedAuth.complianceRate}%
-                    </div>
-                  </div>
-                </div>
+              <div className="grid grid-cols-2 gap-3 text-base">
+                <DetailTile label="الصفقات المدارة" value={formatNumber(selectedAuth.deals_count)} />
+                <DetailTile
+                  label="الصفقات النشطة"
+                  value={formatNumber(selectedAuth.active_deals_count)}
+                />
+                <DetailTile
+                  label="المكتملة"
+                  value={formatNumber(selectedAuth.completed_deals_count)}
+                />
+                <DetailTile
+                  label="المتأخرة"
+                  value={formatNumber(selectedAuth.delayed_deals_count)}
+                  tone="red"
+                />
+              </div>
 
-                <div className="p-3 rounded-lg bg-[var(--card-bg)] border border-[var(--color-border-subtle)]">
-                  <div className="text-xs text-[var(--color-text-muted)] mb-1">الحجم المالي الكلي</div>
-                  <div className="font-mono font-bold text-sm text-[var(--color-text-primary)]">
-                    {formatDZD(selectedAuth.totalVolume)}
-                  </div>
-                </div>
+              <div className="grid grid-cols-2 gap-3 text-base">
+                <DetailTile label="الالتزام بالآجال" value={`${formatNumber(selectedAuth.compliance_rate)}%`} />
+                <DetailTile
+                  label="مؤشر الشفافية"
+                  value={`${formatNumber(selectedAuth.transparency_rate)}%`}
+                />
+              </div>
 
-                <div className="p-4 rounded-xl bg-slate-50 border border-[var(--color-border-subtle)]">
-                  <div className="flex items-center gap-2 mb-2 font-bold text-xs text-[var(--color-text-primary)]">
-                    <ShieldCheck className="size-4 text-[var(--portal-primary)]" />
-                    <span>سجل التدقيق والملاحظات الرقابية</span>
-                  </div>
-                  <p className="text-xs text-[var(--color-text-secondary)] leading-relaxed">
-                    {selectedAuth.notes}
-                  </p>
+              <div className="rounded-lg border border-gray-200 bg-white p-3">
+                <div className="mb-1 text-base text-[var(--ink-500)]">الحجم المالي الكلي</div>
+                <div className="font-mono text-base font-bold text-[var(--ink-900)]">
+                  {formatDZD(selectedAuth.total_volume_dzd)}
                 </div>
+              </div>
+
+              <div className="rounded-xl border border-gray-200 bg-slate-50 p-4">
+                <div className="mb-2 flex items-center gap-2 text-base font-bold text-[var(--ink-900)]">
+                  <ShieldCheck className="size-4 text-[var(--stamp-green-700)]" aria-hidden="true" />
+                  <span>الملاحظات الرقابية</span>
+                </div>
+                <p className="text-base leading-relaxed text-[var(--ink-700)]">
+                  شبهات مسجّلة: {formatNumber(selectedAuth.suspicions_count)} · التقييم:{' '}
+                  {statusMeta(selectedAuth.status).label} ·{' '}
+                  {selectedAuth.ai_training_needed
+                    ? 'مصنّفة ضمن المصالح التي تحتاج دعماً وتدريباً.'
+                    : 'لا توجد حاجة تدريبية مسجّلة حالياً.'}
+                </p>
+                <p className="mt-2 text-base leading-relaxed text-[var(--ink-500)]">
+                  المؤشرات محسوبة آلياً من الصفقات ودفاتر الشروط وجلسات فتح الأظرفة؛ وهي استشارية
+                  ولا تُغني عن المراجعة البشرية المختصة.
+                </p>
               </div>
             </div>
           )}
         </SheetContent>
       </Sheet>
+    </div>
+  );
+}
+
+function DetailTile({
+  label,
+  value,
+  tone,
+}: {
+  label: string;
+  value: string;
+  tone?: 'red';
+}) {
+  return (
+    <div className="rounded-lg border border-gray-200 bg-white p-3">
+      <div className="mb-1 text-base text-[var(--ink-500)]">{label}</div>
+      <div
+        className={`font-mono text-lg font-bold ${
+          tone === 'red' ? 'text-[var(--stamp-red-700)]' : 'text-[var(--ink-900)]'
+        }`}
+      >
+        {value}
+      </div>
     </div>
   );
 }

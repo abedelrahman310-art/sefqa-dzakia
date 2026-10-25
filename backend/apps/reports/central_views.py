@@ -235,6 +235,14 @@ class CentralHeatmapView(APIView):
             total_national_budget += budget
             total_national_deals += data["deals_count"]
 
+            risk_color_map = {
+                "critical": "#DC2626",  # أحمر قاني (شبهات حرجة / تجزئة صفقات)
+                "high": "#EA580C",      # برتقالي (شبهات عالية / تواطؤ وأسعار شاذة)
+                "medium": "#EAB308",    # أصفر (شبهات متوسطة / منافسة صورية)
+                "low": "#16A34A",       # أخضر (نشاط طبيعي متوافق)
+            }
+            color_hex = risk_color_map.get(risk_level, "#16A34A")
+
             wilayas_result.append({
                 "code": data["code"],
                 "wilaya_code": data["wilaya_code"],
@@ -250,6 +258,8 @@ class CentralHeatmapView(APIView):
                 "ai_alarms_count": alarms_count,
                 "warnings": alarms_count,
                 "risk_level": risk_level,
+                "risk_color": color_hex,
+                "color": color_hex,
                 "active_deals_count": data["active_deals_count"],
                 "delayed_deals_count": data["delayed_deals_count"],
                 "warning_details": warning_details,

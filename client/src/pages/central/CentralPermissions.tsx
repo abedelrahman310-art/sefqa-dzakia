@@ -1,18 +1,24 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { PageHeader, KpiCard } from '@/shared/components';
 import {
   Shield,
   Users,
-  Building,
-  UserCheck,
-  Search,
-  Lock,
-  Unlock,
   History,
-  CheckCircle2,
-  Hash,
+  Activity,
+  Search,
+  RefreshCw,
+  Lock,
+  ChevronRight,
+  ChevronLeft,
+  Fingerprint,
 } from 'lucide-react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from '@/components/ui/card';
 import {
   Table,
   TableHeader,
@@ -24,414 +30,390 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
-} from '@/components/ui/sheet';
+  fetchCentralAuditLogs,
+  useCentralResource,
+  type CentralAuditLogRow,
+} from './centralApi';
+import { TableState, formatDateTime, formatNumber } from './centralUi';
 
-interface UserAccount {
-  id: string;
-  email: string;
+/**
+ * صلاحيات المراقبة وسجل التدقيق القانوني.
+ *
+ * سجل التدقيق يُقرأ من GET /api/audit/logs/ (غير قابل للتعديل أو الحذف في الخادم).
+ * إدارة حسابات المراقبين ومنح دور central_admin تتم من لوحة الإدارة المحمية
+ * `/admin/` لأنها عملية إدارية حساسة لا تُنجَز من واجهة API عامة.
+ */
+
+const PAGE_SIZE = 15;
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+interface ReviewerActivity {
+  key: string;
   name: string;
-  role: 'central_admin' | 'authority' | 'operator' | 'auditor';
-  organization: string;
-  status: 'active' | 'suspended';
-  lastLogin: string;
+  email: string;
+  actionsCount: number;
+  actionTypes: number;
+  lastActivity: number;
+  firstActivity: number;
 }
 
-interface AuditRecord {
-  id: string;
-  action: string;
-  targetUser: string;
-  timestamp: string;
-  hash: string;
+function buildReviewers(logs: CentralAuditLogRow[]): ReviewerActivity[] {
+  const buckets = new Map<
+    string,
+    {
+      name: string;
+      email: string;
+      count: number;
+      actions: Set<string>;
+      last: number;
+      first: number;
+    }
+  >();
+
+  for (const log of logs) {
+    const email = (log.user_email ?? '').trim();
+    const name = (log.user_name ?? '').trim();
+    const key = email || log.user || 'system';
+    const timestamp = new Date(log.timestamp).getTime();
+    const safeTimestamp = Number.isNaN(timestamp) ? 0 : timestamp;
+
+    const current = buckets.get(key) ?? {
+      name: name || 'حساب غير معروف',
+      email: email || '—',
+      count: 0,
+      actions: new Set<string>(),
+      last: safeTimestamp,
+      first: safeTimestamp,
+    };
+
+    current.count += 1;
+    if (log.action) current.actions.add(log.action);
+    current.last = Math.max(current.last, safeTimestamp);
+    current.first =
+      current.first === 0 ? safeTimestamp : Math.min(current.first, safeTimestamp);
+    if (!current.name && name) current.name = name;
+    buckets.set(key, current);
+  }
+
+  return Array.from(buckets.entries())
+    .map(([key, value]) => ({
+      key,
+      name: value.name,
+      email: value.email,
+      actionsCount: value.count,
+      actionTypes: value.actions.size,
+      lastActivity: value.last,
+      firstActivity: value.first,
+    }))
+    .sort((a, b) => b.actionsCount - a.actionsCount);
 }
-
-const INITIAL_USERS: UserAccount[] = [
-  {
-    id: 'usr-1',
-    email: 'admin@safaqat.dz',
-    name: 'أحمد بن علي',
-    role: 'central_admin',
-    organization: 'المرصد الوطني للصفقات العمومية',
-    status: 'active',
-    lastLogin: '2026-10-14 00:24',
-  },
-  {
-    id: 'usr-2',
-    email: 'authority@safaqat.dz',
-    name: 'كريم مرواني',
-    role: 'authority',
-    organization: 'مديرية الأشغال العمومية - الجزائر',
-    status: 'active',
-    lastLogin: '2026-10-13 23:40',
-  },
-  {
-    id: 'usr-3',
-    email: 'operator@safaqat.dz',
-    name: 'سفيان دراجي',
-    role: 'operator',
-    organization: 'شركة كوزيدار للأشغال والمنشآت',
-    status: 'active',
-    lastLogin: '2026-10-13 23:15',
-  },
-  {
-    id: 'usr-4',
-    email: 'auditor.oran@safaqat.dz',
-    name: 'فاطمة زهرة بلحاج',
-    role: 'auditor',
-    organization: 'المفتشية العامة للمالية (IGF)',
-    status: 'active',
-    lastLogin: '2026-10-12 16:30',
-  },
-  {
-    id: 'usr-5',
-    email: 'contact@banned-rafidain.dz',
-    name: 'رشيد قادري',
-    role: 'operator',
-    organization: 'شركة الرافدين للأشغال (مقصاة)',
-    status: 'suspended',
-    lastLogin: '2026-08-10 11:20',
-  },
-];
-
-const INITIAL_AUDIT_TRAIL: AuditRecord[] = [
-  {
-    id: 'aud-101',
-    action: 'تعليق حساب المتعامل إثر صدور قرار إقصاء وزاري',
-    targetUser: 'contact@banned-rafidain.dz',
-    timestamp: '2026-08-11 09:15:00',
-    hash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
-  },
-  {
-    id: 'aud-102',
-    action: 'ترقية الصلاحيات إلى مفتش عام معتمد',
-    targetUser: 'auditor.oran@safaqat.dz',
-    timestamp: '2026-09-01 10:00:22',
-    hash: '8f434346648f6b96df89dda901c5176b10a6d83961dd3c1ac88b59b2dc327aa4',
-  },
-];
 
 export function CentralPermissions() {
-  const [users, setUsers] = useState<UserAccount[]>(INITIAL_USERS);
-  const [auditTrail, setAuditTrail] = useState<AuditRecord[]>(INITIAL_AUDIT_TRAIL);
-  const [filterRole, setFilterRole] = useState<string>('all');
+  const { data, loading, error, reload } = useCentralResource(fetchCentralAuditLogs);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedUser, setSelectedUser] = useState<UserAccount | null>(null);
-  const [isSheetOpen, setIsSheetOpen] = useState(false);
-  const [notification, setNotification] = useState<string | null>(null);
+  const [filterResource, setFilterResource] = useState('all');
+  const [page, setPage] = useState(1);
 
-  const filteredUsers = users.filter((u) => {
-    if (filterRole !== 'all' && u.role !== filterRole) return false;
-    if (searchQuery) {
-      const q = searchQuery.toLowerCase();
-      return u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q) || u.organization.toLowerCase().includes(q);
-    }
-    return true;
-  });
+  const logs = useMemo(() => data ?? [], [data]);
+  const reviewers = useMemo(() => buildReviewers(logs), [logs]);
 
-  const toggleUserStatus = (userId: string) => {
-    setUsers((prev) =>
-      prev.map((u) => {
-        if (u.id === userId) {
-          const newStatus = u.status === 'active' ? 'suspended' : 'active';
-          const newAudit: AuditRecord = {
-            id: `aud-${Date.now()}`,
-            action: newStatus === 'active' ? 'تفعيل الحساب وإلغاء التعليق' : 'تعليق الحساب ومنع الوصول للمنصة',
-            targetUser: u.email,
-            timestamp: new Date().toISOString().replace('T', ' ').slice(0, 19),
-            hash: Array.from(crypto.getRandomValues(new Uint8Array(16)))
-              .map((b) => b.toString(16).padStart(2, '0'))
-              .join('') + '9f88c',
-          };
-          setAuditTrail((aud) => [newAudit, ...aud]);
-          setNotification(`تم تحديث حالة المستخدم ${u.email} إلى ${newStatus === 'active' ? 'نشط' : 'معلّق'} وتوثيق البصمة بالسجل.`);
-          setTimeout(() => setNotification(null), 4000);
-          return { ...u, status: newStatus };
-        }
-        return u;
-      })
-    );
-  };
+  const stats = useMemo(() => {
+    const now = Date.now();
+    const last24h = logs.filter((log) => {
+      const timestamp = new Date(log.timestamp).getTime();
+      return !Number.isNaN(timestamp) && now - timestamp <= DAY_MS;
+    }).length;
+    const actionTypes = new Set(logs.map((log) => log.action).filter(Boolean)).size;
+    return { total: logs.length, last24h, actionTypes, reviewers: reviewers.length };
+  }, [logs, reviewers]);
 
-  const getRoleBadge = (role: UserAccount['role']) => {
-    switch (role) {
-      case 'central_admin':
-        return <Badge className="bg-purple-100 text-purple-900 border-purple-300 font-bold">مسؤول وطني مركزي</Badge>;
-      case 'authority':
-        return <Badge className="bg-emerald-50 text-emerald-800 border-emerald-300">مصلحة متعاقدة</Badge>;
-      case 'operator':
-        return <Badge className="bg-sky-50 text-sky-800 border-sky-300">متعامل اقتصادي</Badge>;
-      case 'auditor':
-        return <Badge className="bg-amber-50 text-amber-800 border-amber-300">هيئة تدقيق ورقابة</Badge>;
-    }
-  };
+  const resourceTypes = useMemo(() => {
+    return Array.from(new Set(logs.map((log) => log.resource_type).filter(Boolean))).sort();
+  }, [logs]);
+
+  const filtered = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+    return logs.filter((log) => {
+      if (filterResource !== 'all' && log.resource_type !== filterResource) return false;
+      if (!query) return true;
+      return (
+        (log.action ?? '').toLowerCase().includes(query) ||
+        (log.description ?? '').toLowerCase().includes(query) ||
+        (log.user_email ?? '').toLowerCase().includes(query) ||
+        (log.user_name ?? '').toLowerCase().includes(query) ||
+        (log.resource_id ?? '').toLowerCase().includes(query)
+      );
+    });
+  }, [logs, searchQuery, filterResource]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+  const pageRows = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
   return (
-    <div className="space-y-6 page-container py-4">
+    <div className="space-y-6" dir="rtl">
       <PageHeader
-        eyebrow="المراقبة الوطنية"
-        title="إدارة الصلاحيات والأدوار"
-        description="التحكم في وصول المستخدمين والمصالح والمتعاملين وتأمين العمليات بسجل تدقيق مشفر (SHA-256)"
+        title="الصلاحيات وسجل التدقيق"
+        titleClassName="text-2xl font-bold"
+        description="إدارة حسابات المراقبين ومتابعة سجل التدقيق القانوني غير القابل للتعديل: كل عملية حساسة في المنصة تُختم ببصمة رقمية ولا يمكن تعديلها أو حذفها."
+        actions={
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={reload}
+            disabled={loading}
+            className="text-base"
+          >
+            <RefreshCw className="size-3.5" aria-hidden="true" />
+            تحديث السجل
+          </Button>
+        }
       />
 
-      {/* 4 KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <KpiCard
-          eyebrow="مستخدمون نشطون"
-          value="2,410"
-          trend={8}
-          trendLabel="حسابات محينة"
-          sparkline={[1800, 1950, 2100, 2200, 2300, 2380, 2410]}
-          icon={UserCheck}
+          eyebrow="سجلات التدقيق"
+          value={formatNumber(stats.total)}
+          icon={History}
           accent="navy"
+          description="سجلات محفوظة وغير قابلة للتعديل"
         />
         <KpiCard
-          eyebrow="مسؤولون مركزيون"
-          value="18"
-          trend={0}
-          trendLabel="صلاحيات إدارة عليا"
-          sparkline={[15, 16, 17, 18, 18, 18, 18]}
-          icon={Shield}
-          accent="red"
-        />
-        <KpiCard
-          eyebrow="مصالح متعاقدة"
-          value="87"
-          trend={4}
-          trendLabel="هيئات مفوضة"
-          sparkline={[75, 78, 80, 82, 85, 86, 87]}
-          icon={Building}
-          accent="emerald"
-        />
-        <KpiCard
-          eyebrow="متعاملون اقتصاديون"
-          value="45K"
-          trend={6}
-          trendLabel="شركات مؤهلة"
-          sparkline={[38, 40, 41, 42, 43, 44, 45]}
+          eyebrow="حسابات نشطة في السجل"
+          value={formatNumber(stats.reviewers)}
           icon={Users}
+          accent="emerald"
+          description="حسابات نفّذت عمليات مسجّلة"
+        />
+        <KpiCard
+          eyebrow="عمليات آخر 24 ساعة"
+          value={formatNumber(stats.last24h)}
+          icon={Activity}
           accent="gold"
+          description="نشاط رقابي حديث"
+        />
+        <KpiCard
+          eyebrow="أنواع العمليات"
+          value={formatNumber(stats.actionTypes)}
+          icon={Fingerprint}
+          accent="red"
+          description="تصنيفات عمليات مختلفة مسجّلة"
         />
       </div>
 
-      {notification && (
-        <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-900 text-xs font-semibold flex items-center gap-2 animate-in fade-in">
-          <CheckCircle2 className="size-4 text-emerald-600 shrink-0" />
-          <span>{notification}</span>
-        </div>
-      )}
+      <div className="flex items-start gap-2 rounded-lg border border-gray-200 bg-white p-3 text-base leading-relaxed text-[var(--ink-700)] shadow-sm">
+        <Lock className="mt-0.5 size-4 shrink-0 text-[var(--stamp-green-700)]" aria-hidden="true" />
+        <p>
+          إنشاء حسابات المراقبين ومنح دور <span className="font-mono">central_admin</span> عملية
+          إدارية حساسة تُنجَز من لوحة الإدارة المحمية <span className="font-mono">/admin/</span>{' '}
+          عبر مسؤول النظام، ولا توجد نقطة API عامة للتحكم في الحسابات — وهذا قيد أمني مقصود. هذا
+          الفضاء يعرض الحسابات التي نفّذت عمليات فعلية في سجل التدقيق.
+        </p>
+      </div>
 
-      {/* Main Grid: Users Table + Audit Trail */}
-      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_340px] gap-6 items-start">
-        {/* Table Card */}
-        <Card className="shadow-sm border border-[var(--color-border-subtle)] bg-[var(--card-bg)]">
-          <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[var(--color-border-subtle)]">
-            <div>
-              <CardTitle className="text-xl font-bold text-[var(--color-text-primary)]">
-                جدول المستخدمين والصلاحيات
-              </CardTitle>
-              <p className="text-xs text-[var(--color-text-muted)] mt-1">
-                التحكم في أدوار الحسابات وتوزيع الصلاحيات الإجرائية
-              </p>
-            </div>
+      <Card className="bg-white shadow-sm border-gray-200">
+        <CardHeader className="border-b border-gray-200 pb-4">
+          <CardTitle className="text-xl font-bold text-[var(--ink-900)]">
+            حسابات المراقبة النشطة
+          </CardTitle>
+          <CardDescription className="mt-1 text-base text-[var(--ink-500)]">
+            مستخرجة من سجل التدقيق الفعلي — عدد العمليات وآخر نشاط لكل حساب
+          </CardDescription>
+        </CardHeader>
 
-            <div className="flex flex-wrap items-center gap-2.5">
-              <div className="relative">
-                <Search className="size-4 absolute start-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                <input
-                  type="text"
-                  placeholder="بحث بالاسم أو البريد..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="ps-9 pe-3 py-1.5 text-xs rounded-lg border border-[var(--color-border-subtle)] bg-[var(--card-bg)] text-[var(--color-text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--portal-primary)]"
-                />
-              </div>
-
-              <select
-                value={filterRole}
-                onChange={(e) => setFilterRole(e.target.value)}
-                className="px-2.5 py-1.5 text-xs rounded-lg border border-[var(--color-border-subtle)] bg-[var(--card-bg)] text-[var(--color-text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--portal-primary)]"
-                aria-label="تصفية حسب الدور"
+        <CardContent className="p-0">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="min-w-[200px]">الحساب</TableHead>
+                <TableHead className="min-w-[200px]">البريد الإلكتروني</TableHead>
+                <TableHead className="text-center">العمليات المسجّلة</TableHead>
+                <TableHead className="text-center">أنواع العمليات</TableHead>
+                <TableHead className="text-center">أول نشاط</TableHead>
+                <TableHead className="text-center">آخر نشاط</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              <TableState
+                colSpan={6}
+                loading={loading && !data}
+                error={error}
+                empty={!loading && reviewers.length === 0}
+                emptyLabel="لا توجد عمليات مسجّلة بعد، وبالتالي لا توجد حسابات مراقبة نشطة."
+                onRetry={reload}
               >
-                <option value="all">كل الأدوار</option>
-                <option value="central_admin">مسؤول وطني</option>
-                <option value="authority">مصلحة متعاقدة</option>
-                <option value="operator">متعامل اقتصادي</option>
-                <option value="auditor">هيئة تدقيق</option>
-              </select>
-            </div>
-          </CardHeader>
-
-          <CardContent className="p-0">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="min-w-[200px]">المستخدم والبريد</TableHead>
-                  <TableHead>الدور الوظيفي</TableHead>
-                  <TableHead>الهيئة / المؤسسة</TableHead>
-                  <TableHead>الحالة</TableHead>
-                  <TableHead>آخر دخول</TableHead>
-                  <TableHead className="w-[120px] text-center">الإجراءات</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredUsers.map((user) => (
-                  <TableRow key={user.id} className="hover:bg-slate-50/70 transition-colors">
-                    <TableCell>
-                      <div className="font-semibold text-sm text-[var(--color-text-primary)]">
-                        {user.name}
-                      </div>
-                      <div className="font-mono text-xs text-[var(--color-text-muted)]">
-                        {user.email}
+                {reviewers.map((reviewer) => (
+                  <TableRow key={reviewer.key} className="transition-colors hover:bg-slate-50/70">
+                    <TableCell className="text-base font-semibold text-[var(--ink-900)]">
+                      <div className="flex items-center gap-2">
+                        <Shield
+                          className="size-3.5 text-[var(--stamp-green-700)]"
+                          aria-hidden="true"
+                        />
+                        {reviewer.name}
                       </div>
                     </TableCell>
-                    <TableCell>{getRoleBadge(user.role)}</TableCell>
-                    <TableCell className="text-xs text-[var(--color-text-secondary)]">
-                      {user.organization}
+                    <TableCell className="font-mono text-base text-[var(--ink-700)]">
+                      {reviewer.email}
                     </TableCell>
-                    <TableCell>
-                      {user.status === 'active' ? (
-                        <Badge className="bg-emerald-50 text-emerald-800 border-emerald-300">
-                          نشط ومفعل
-                        </Badge>
-                      ) : (
-                        <Badge className="bg-red-50 text-red-800 border-red-300">معلّق</Badge>
+                    <TableCell className="text-center font-mono text-base font-bold text-[var(--ink-900)]">
+                      {formatNumber(reviewer.actionsCount)}
+                    </TableCell>
+                    <TableCell className="text-center font-mono text-base text-[var(--ink-700)]">
+                      {formatNumber(reviewer.actionTypes)}
+                    </TableCell>
+                    <TableCell className="text-center font-mono text-base text-[var(--ink-500)]">
+                      {formatDateTime(
+                        reviewer.firstActivity ? new Date(reviewer.firstActivity).toISOString() : null,
                       )}
                     </TableCell>
-                    <TableCell className="font-mono text-xs text-[var(--color-text-muted)]">
-                      {user.lastLogin}
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <div className="flex items-center justify-center gap-1.5">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => toggleUserStatus(user.id)}
-                          className={`h-7 px-2 text-xs ${
-                            user.status === 'active'
-                              ? 'text-red-600 hover:bg-red-50'
-                              : 'text-emerald-600 hover:bg-emerald-50'
-                          }`}
-                          title={user.status === 'active' ? 'تعطيل الحساب' : 'تفعيل الحساب'}
-                        >
-                          {user.status === 'active' ? (
-                            <Lock className="size-3.5" />
-                          ) : (
-                            <Unlock className="size-3.5" />
-                          )}
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            setSelectedUser(user);
-                            setIsSheetOpen(true);
-                          }}
-                          className="h-7 px-2 text-xs text-[var(--portal-primary)] hover:bg-slate-100"
-                        >
-                          تفاصيل
-                        </Button>
-                      </div>
+                    <TableCell className="text-center font-mono text-base text-[var(--ink-700)]">
+                      {formatDateTime(
+                        reviewer.lastActivity ? new Date(reviewer.lastActivity).toISOString() : null,
+                      )}
                     </TableCell>
                   </TableRow>
                 ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+              </TableState>
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
 
-        {/* Audit Trail Sidebar */}
-        <aside className="space-y-4">
-          <Card className="border border-[var(--color-border-subtle)] bg-[var(--card-bg)] shadow-sm">
-            <CardHeader className="pb-3 border-b border-[var(--color-border-subtle)]">
-              <div className="flex items-center gap-2">
-                <History className="size-4 text-[var(--portal-primary)]" />
-                <CardTitle className="text-base font-bold text-[var(--color-text-primary)]">
-                  سجل التغييرات المشفر
-                </CardTitle>
-              </div>
-              <p className="text-xs text-[var(--color-text-muted)] mt-0.5">
-                بصمة رقمية لكل عملية تعديل صلاحية (SHA-256)
-              </p>
-            </CardHeader>
-            <CardContent className="pt-4 space-y-3">
-              {auditTrail.map((record) => (
-                <div
-                  key={record.id}
-                  className="p-3 rounded-lg bg-slate-50 border border-[var(--color-border-subtle)] space-y-1.5 text-xs"
-                >
-                  <div className="font-semibold text-[var(--color-text-primary)]">
-                    {record.action}
-                  </div>
-                  <div className="font-mono text-[11px] text-[var(--color-text-muted)] truncate">
-                    المستهدف: {record.targetUser}
-                  </div>
-                  <div className="flex items-center gap-1 font-mono text-[10px] text-purple-700 bg-purple-50 p-1 rounded overflow-hidden">
-                    <Hash className="size-3 shrink-0" />
-                    <span className="truncate">{record.hash}</span>
-                  </div>
-                  <div className="font-mono text-[10px] text-muted-foreground text-end">
-                    {record.timestamp}
-                  </div>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-        </aside>
-      </div>
+      <Card className="bg-white shadow-sm border-gray-200">
+        <CardHeader className="flex flex-col gap-4 border-b border-gray-200 pb-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <CardTitle className="text-xl font-bold text-[var(--ink-900)]">
+              سجل التدقيق القانوني (AuditLog)
+            </CardTitle>
+            <CardDescription className="mt-1 text-base text-gray-500">
+              السجلات مختومة ببصمة SHA-256 وغير قابلة للتعديل أو الحذف
+            </CardDescription>
+          </div>
 
-      {/* User Details Sheet */}
-      <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-        <SheetContent side="end" className="sm:max-w-md p-6 bg-[var(--paper-50)] overflow-y-auto">
-          {selectedUser && (
-            <div className="space-y-6">
-              <SheetHeader className="text-start border-b border-[var(--color-border-subtle)] pb-4">
-                <span className="eyebrow">بطاقة المستخدم والصلاحيات</span>
-                <SheetTitle className="text-xl font-bold text-[var(--color-text-primary)]">
-                  {selectedUser.name}
-                </SheetTitle>
-                <SheetDescription className="font-mono text-xs text-[var(--color-text-secondary)] mt-0.5">
-                  {selectedUser.email}
-                </SheetDescription>
-              </SheetHeader>
-
-              <div className="space-y-4 text-sm">
-                <div className="p-3.5 rounded-lg bg-[var(--card-bg)] border border-[var(--color-border-subtle)] space-y-1">
-                  <div className="text-xs text-[var(--color-text-muted)]">الدور المعتمد</div>
-                  <div>{getRoleBadge(selectedUser.role)}</div>
-                </div>
-
-                <div className="p-3.5 rounded-lg bg-[var(--card-bg)] border border-[var(--color-border-subtle)] space-y-1">
-                  <div className="text-xs text-[var(--color-text-muted)]">الهيئة / المنظمة</div>
-                  <div className="font-semibold text-xs text-[var(--color-text-primary)]">
-                    {selectedUser.organization}
-                  </div>
-                </div>
-
-                <div className="p-3.5 rounded-lg bg-[var(--card-bg)] border border-[var(--color-border-subtle)] space-y-1">
-                  <div className="text-xs text-[var(--color-text-muted)]">حالة الدخول إلى النظام</div>
-                  <div className="font-bold text-xs">
-                    {selectedUser.status === 'active' ? 'مصرّح بالوصول الكامل' : 'موقوف مؤقتاً'}
-                  </div>
-                </div>
-
-                <div className="pt-2">
-                  <Button
-                    onClick={() => toggleUserStatus(selectedUser.id)}
-                    variant={selectedUser.status === 'active' ? 'destructive' : 'default'}
-                    className="w-full text-xs h-9"
-                  >
-                    {selectedUser.status === 'active' ? 'تعليق حساب المستخدم' : 'إعادة تفعيل الحساب'}
-                  </Button>
-                </div>
-              </div>
+          <div className="flex flex-wrap items-center gap-2.5">
+            <div className="relative">
+              <Search
+                className="size-4 absolute start-2.5 top-1/2 -translate-y-1/2 text-muted-foreground"
+                aria-hidden="true"
+              />
+              <input
+                type="text"
+                placeholder="بحث في العمليات أو المستخدمين…"
+                value={searchQuery}
+                onChange={(event) => {
+                  setSearchQuery(event.target.value);
+                  setPage(1);
+                }}
+                aria-label="بحث في سجل التدقيق"
+                className="ps-9 pe-3 py-1.5 text-base rounded-lg border border-gray-200 bg-white text-[var(--ink-900)] focus:outline-none focus:ring-1 focus:ring-[var(--stamp-green-700)]"
+              />
             </div>
-          )}
-        </SheetContent>
-      </Sheet>
+
+            <select
+              value={filterResource}
+              onChange={(event) => {
+                setFilterResource(event.target.value);
+                setPage(1);
+              }}
+              aria-label="تصفية حسب نوع الكيان"
+              className="px-2.5 py-1.5 text-base rounded-lg border border-gray-200 bg-white text-[var(--ink-900)] focus:outline-none focus:ring-1 focus:ring-[var(--stamp-green-700)]"
+            >
+              <option value="all">كل الكيانات</option>
+              {resourceTypes.map((resource) => (
+                <option key={resource} value={resource}>
+                  {resource}
+                </option>
+              ))}
+            </select>
+          </div>
+        </CardHeader>
+
+        <CardContent className="p-0">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="min-w-[140px]">ختم الوقت</TableHead>
+                <TableHead className="min-w-[170px]">المستخدم</TableHead>
+                <TableHead className="min-w-[150px]">العملية</TableHead>
+                <TableHead className="min-w-[130px]">الكيان</TableHead>
+                <TableHead className="min-w-[280px]">البيان</TableHead>
+                <TableHead className="min-w-[110px]">البصمة</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              <TableState
+                colSpan={6}
+                loading={loading && !data}
+                error={error}
+                empty={!loading && pageRows.length === 0}
+                emptyLabel="لا توجد سجلات تدقيق مطابقة للبحث أو التصفية الحالية."
+                onRetry={reload}
+              >
+                {pageRows.map((log) => (
+                  <TableRow key={log.id} className="transition-colors hover:bg-slate-50/70">
+                    <TableCell className="font-mono text-base text-[var(--ink-700)]">
+                      {formatDateTime(log.timestamp)}
+                    </TableCell>
+                    <TableCell className="text-base font-semibold text-[var(--ink-900)]">
+                      <div className="truncate">{log.user_name || log.user_email || 'حساب محذوف'}</div>
+                      <div className="font-mono text-base font-normal text-[var(--ink-500)]">
+                        {log.user_email || '—'}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge className="border-gray-200 bg-[var(--paper-100)] font-mono text-base text-[var(--ink-900)]">
+                        {log.action || '—'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-base text-[var(--ink-700)]">
+                      <div className="truncate">{log.resource_type || '—'}</div>
+                      <div className="truncate font-mono text-base text-[var(--ink-500)]">
+                        {log.resource_id || '—'}
+                      </div>
+                    </TableCell>
+                    <TableCell className="max-w-[340px] text-base leading-relaxed text-[var(--ink-700)]">
+                      <span className="line-clamp-2">{log.description || '—'}</span>
+                    </TableCell>
+                    <TableCell className="font-mono text-base text-[var(--ink-500)]">
+                      {log.checksum ? `${log.checksum.slice(0, 12)}…` : '—'}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableState>
+            </TableBody>
+          </Table>
+
+          <div className="flex flex-wrap items-center justify-between gap-2 border-t border-gray-200 px-6 py-4 text-base text-[var(--ink-500)]">
+            <span>
+              عرض {formatNumber(pageRows.length)} من أصل {formatNumber(filtered.length)} سجلاً — صفحة{' '}
+              {formatNumber(currentPage)} من {formatNumber(totalPages)}
+            </span>
+            <div className="flex items-center gap-1">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage((current) => Math.max(1, current - 1))}
+                disabled={currentPage <= 1}
+                className="h-7 px-2 text-base"
+              >
+                <ChevronRight className="size-3" aria-hidden="true" />
+                السابق
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
+                disabled={currentPage >= totalPages}
+                className="h-7 px-2 text-base"
+              >
+                التالي
+                <ChevronLeft className="size-3" aria-hidden="true" />
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

@@ -1,20 +1,21 @@
-import { useState, useEffect } from 'react';
-import { PageHeader, KpiCard, AICard } from '@/shared/components';
+import { useMemo, useState } from 'react';
+import { PageHeader, KpiCard } from '@/shared/components';
 import {
-  AlertTriangle,
-  CheckCircle2,
-  XCircle,
+  Gavel,
+  FileWarning,
   Clock,
-  Sparkles,
+  CalendarX,
   Search,
-  Eye,
-  FileCheck,
-  FileX,
-  ChevronRight,
-  ChevronLeft,
-  Lock,
+  RefreshCw,
+  Scale,
 } from 'lucide-react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from '@/components/ui/card';
 import {
   Table,
   TableHeader,
@@ -26,355 +27,239 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
-} from '@/components/ui/sheet';
-import { toast } from 'sonner';
-import { objectionsApi } from '@/features/objections/api/objections';
-import { GROUND_LABELS } from '@/features/objections/types';
+  fetchCentralObjections,
+  useCentralResource,
+  type CentralObjectionRow,
+} from './centralApi';
+import {
+  TableState,
+  formatCountdown,
+  formatDateTime,
+  formatNumber,
+  useNow,
+} from './centralUi';
 
-interface AppealItem {
-  id: string;
-  reference: string;
-  appellant: string;
-  dealRef: string;
-  dealTitle: string;
-  reason: string;
-  submittedDate: string;
-  daysRemaining: number;
-  status: 'active' | 'accepted' | 'rejected' | 'expired';
-  aiLegitimacy: 'high' | 'investigate' | 'suspicious' | 'low';
-  aiAnalysis: string;
-  isLive?: boolean;
-  checksum?: string;
+/**
+ * الطعون على قرارات الإسناد — متابعة المهل القانونية (10 أيام من الإعلان)
+ * مع عدّاد تنازلي حيّ لكل طعن.
+ *
+ * المصدر: GET /api/objections/ — حساب الإدارة المركزية يرى كل الطعون،
+ * ويُعيد الخادم deadline_at و days_remaining و is_within_deadline.
+ */
+
+const LEGAL_WINDOW_DAYS = 10;
+const LEGAL_WINDOW_MS = LEGAL_WINDOW_DAYS * 24 * 60 * 60 * 1000;
+
+const TYPE_LABELS: Record<string, string> = {
+  administrative: 'طعن إداري',
+  judicial: 'طعن قضائي',
+};
+
+const GROUND_LABELS: Record<string, string> = {
+  procedural: 'مخالفة إجرائية',
+  evaluation: 'خطأ في التقييم',
+  price: 'سعر غير منطقي',
+  capacity: 'عدم استيفاء القدرات',
+  conflict: 'تنازع مصالح',
+  discrimination: 'تمييز غير قانوني',
+  other: 'أسباب أخرى',
+};
+
+const STATUS_META: Record<string, { label: string; className: string }> = {
+  draft: { label: 'مسودة', className: 'bg-slate-50 text-slate-700 border-slate-300' },
+  submitted: { label: 'مُودع', className: 'bg-sky-50 text-sky-800 border-sky-300' },
+  under_review: {
+    label: 'قيد الدراسة',
+    className: 'bg-amber-50 text-amber-800 border-amber-300',
+  },
+  accepted: {
+    label: 'مقبول',
+    className: 'bg-emerald-50 text-emerald-800 border-emerald-300',
+  },
+  rejected: { label: 'مرفوض', className: 'bg-red-50 text-red-800 border-red-300' },
+  withdrawn: {
+    label: 'مسحوب',
+    className: 'bg-slate-50 text-slate-700 border-slate-300',
+  },
+  escalated: {
+    label: 'مُحال للقضاء',
+    className: 'bg-purple-50 text-purple-800 border-purple-300',
+  },
+};
+
+const OPEN_STATUSES = new Set(['submitted', 'under_review']);
+
+function statusMeta(status: string) {
+  return (
+    STATUS_META[status] ?? {
+      label: status || 'غير محدّد',
+      className: 'bg-slate-50 text-slate-700 border-slate-300',
+    }
+  );
 }
 
-const INITIAL_APPEALS: AppealItem[] = [
-  {
-    id: 'app-001',
-    reference: 'REC-2026-0042',
-    appellant: 'شركة الهدى للأشغال الكبرى (SARL EL HOUDA)',
-    dealRef: 'DTP-DZ-2026-042',
-    dealTitle: 'صيانة وتأهيل الطريق الوطني رقم 01',
-    reason: 'إقصاء غير مبرر للعرض التقني رغم تقديم شهادات الكفاءة المطلوبة',
-    submittedDate: '2026-10-08',
-    daysRemaining: 4,
-    status: 'active',
-    aiLegitimacy: 'high',
-    aiAnalysis:
-      'تحليل AI: نسبة مشروعية الطعن 92%. شهادات الكفاءة مطابقة لدفتر الشروط، وتوجد قرينة قوية لخطأ في تنقيط معيار الخبرة من طرف لجنة التقييم.',
-  },
-  {
-    id: 'app-002',
-    reference: 'REC-2026-0038',
-    appellant: 'مؤسسة البيئة لحلول الطاقة المستدامة',
-    dealRef: 'DWH-DZ-2026-012',
-    dealTitle: 'تجهيز المجمعات المدرسية بالطاقة الشمسية',
-    reason: 'شبهة تجزئة الصفقة وتغيير معايير الاختيار بعد الإعلان',
-    submittedDate: '2026-10-05',
-    daysRemaining: 1,
-    status: 'active',
-    aiLegitimacy: 'investigate',
-    aiAnalysis:
-      'تحليل AI: يحتاج تحقيقاً استعجالياً. تعديل ملحق دفتر الشروط تم خارج الآجال القانونية المحددة في المادة 68 من القانون 23-12.',
-  },
-  {
-    id: 'app-003',
-    reference: 'REC-2026-0031',
-    appellant: 'مجمع الأطلس للتجهيزات الطبية والجراحية',
-    dealRef: 'MSP-DZ-2026-088',
-    dealTitle: 'اقتناء معدات التصوير بالرنين المغناطيسي',
-    reason: 'عدم مراعاة معيار بلد المنشأ والضمان الممتد لخمس سنوات',
-    submittedDate: '2026-09-28',
-    daysRemaining: 0,
-    status: 'accepted',
-    aiLegitimacy: 'high',
-    aiAnalysis:
-      'تحليل AI: طعن مشروع ومقبول بقرار لجنة الصفقات المركزية، وأمر بإعادة تقييم العروض التقنية.',
-  },
-  {
-    id: 'app-004',
-    reference: 'REC-2026-0029',
-    appellant: 'سارل النور للتوريدات الإلكترونية',
-    dealRef: 'EDU-DZ-2026-104',
-    dealTitle: 'تطوير منصة رقمية لإدارة الأطروحات',
-    reason: 'الطعن في السعر المنخفض غير العادي للعرض الفائز',
-    submittedDate: '2026-09-20',
-    daysRemaining: 0,
-    status: 'rejected',
-    aiLegitimacy: 'low',
-    aiAnalysis:
-      'تحليل AI: الطعن غير مبرر، قدم المتعامل الفائز تبريرات اقتصادية وقوائم أسعار رسمية مقبولة قانوناً.',
-  },
-  {
-    id: 'app-005',
-    reference: 'REC-2026-0022',
-    appellant: 'مؤسسة الري الحديث والتهيئة السطحية',
-    dealRef: 'HYD-DZ-2026-009',
-    dealTitle: 'بناء خزان مائي سعة 5000 متر مكعب',
-    reason: 'تجاوز أجل إيداع الطعن القانوني (10 أيام بعد النشر)',
-    submittedDate: '2026-09-12',
-    daysRemaining: 0,
-    status: 'expired',
-    aiLegitimacy: 'low',
-    aiAnalysis: 'تحليل AI: الطعن منقضي الأجل الشكلي بقوة المادة 72 من القانون 23-12.',
-  },
-  {
-    id: 'app-006',
-    reference: 'REC-2026-0019',
-    appellant: 'الشركة المغاربية للأشغال العامة',
-    dealRef: 'AGR-DZ-2026-031',
-    dealTitle: 'تهيئة المسالك الفلاحية بالجلفة',
-    reason: 'ادعاء وجود تواطؤ وتضارب مصالح لأحد أعضاء لجنة الصفقات',
-    submittedDate: '2026-10-09',
-    daysRemaining: 5,
-    status: 'active',
-    aiLegitimacy: 'suspicious',
-    aiAnalysis:
-      'تحليل AI: رصد احتمال تواطؤ بنسبة 78%. عضو اللجنة يمتلك قرابة عائلية مع شريك في المؤسسة الحائزة على الإسناد المؤقت.',
-  },
-];
-
-function getStatusBadge(status: AppealItem['status']) {
-  switch (status) {
-    case 'active':
-      return <Badge className="bg-amber-50 text-amber-800 border-amber-300 font-bold">نشط قيد الدراسة</Badge>;
-    case 'accepted':
-      return <Badge className="bg-emerald-50 text-emerald-800 border-emerald-300">مقبول</Badge>;
-    case 'rejected':
-      return <Badge className="bg-red-50 text-red-800 border-red-300">مرفوض</Badge>;
-    case 'expired':
-      return <Badge className="bg-slate-100 text-slate-700 border-slate-300">منتهي الأجل</Badge>;
-    default:
-      return <Badge variant="outline">غير محدد</Badge>;
-  }
+function groundsLabel(row: CentralObjectionRow): string {
+  if (!Array.isArray(row.grounds) || row.grounds.length === 0) return '—';
+  return row.grounds.map((ground) => GROUND_LABELS[ground] ?? ground).join(' · ');
 }
 
 export function CentralAppeals() {
-  const [appeals, setAppeals] = useState<AppealItem[]>(INITIAL_APPEALS);
-  const [, setLoading] = useState(false);
+  const { data, loading, error, reload } = useCentralResource(fetchCentralObjections);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
-  const [selectedAppeal, setSelectedAppeal] = useState<AppealItem | null>(null);
-  const [isSheetOpen, setIsSheetOpen] = useState(false);
-  const [actionMessage, setActionMessage] = useState<string | null>(null);
+  const [onlyOpen, setOnlyOpen] = useState(false);
+  const now = useNow(30000);
 
-  useEffect(() => {
-    const fetchRealObjections = async () => {
-      try {
-        setLoading(true);
-        const live = await objectionsApi.list();
-        if (live && live.length > 0) {
-          const mapped: AppealItem[] = live.map((item) => {
-            let status: AppealItem['status'] = 'active';
-            if (item.status === 'accepted') status = 'accepted';
-            else if (item.status === 'rejected') status = 'rejected';
-            else if (item.status === 'withdrawn') status = 'expired';
-            else status = 'active';
+  const objections = useMemo(() => data ?? [], [data]);
 
-            return {
-              id: item.id,
-              reference: item.reference,
-              appellant: item.objector_name || 'متعامل اقتصادي مسجل',
-              dealRef: item.tender_reference || 'REF-N/A',
-              dealTitle: item.tender_title || 'صفقة عمومية',
-              reason:
-                item.grounds?.map((g) => GROUND_LABELS[g] || g).join('، ') || 'طعن موضوعي',
-              submittedDate: item.submitted_at?.split('T')[0] || new Date().toISOString().split('T')[0],
-              daysRemaining: item.days_remaining ?? 10,
-              status,
-              aiLegitimacy: item.is_within_deadline ? 'high' : 'low',
-              aiAnalysis: `تحليل الذكاء الاصطناعي: طعن موثق ببصمة SHA-256 مشفرة (${item.checksum?.slice(0, 16)}...). المهلة القانونية: ${item.is_within_deadline ? 'مستوفاة ضمن 10 أيام من الإسناد' : 'منقضية الأجل'}.`,
-              isLive: true,
-              checksum: item.checksum,
-            };
-          });
-          setAppeals([...mapped, ...INITIAL_APPEALS]);
-        }
-      } catch (err) {
-        console.warn('Could not fetch live central objections, falling back to initial data');
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchRealObjections();
-  }, []);
+  const stats = useMemo(() => {
+    const total = objections.length;
+    const open = objections.filter((item) => OPEN_STATUSES.has(item.status)).length;
+    const expired = objections.filter((item) => {
+      if (!item.deadline_at) return false;
+      const deadline = new Date(item.deadline_at).getTime();
+      return !Number.isNaN(deadline) && deadline < now;
+    }).length;
+    const withinDeadline = objections.filter((item) => {
+      if (!item.deadline_at) return false;
+      const deadline = new Date(item.deadline_at).getTime();
+      return !Number.isNaN(deadline) && deadline >= now;
+    }).length;
+    return { total, open, expired, withinDeadline };
+  }, [objections, now]);
 
-  const filtered = appeals.filter((a) => {
-    if (filterStatus !== 'all' && a.status !== filterStatus) return false;
-    if (searchQuery) {
-      const q = searchQuery.toLowerCase();
-      return (
-        a.reference.toLowerCase().includes(q) ||
-        a.appellant.toLowerCase().includes(q) ||
-        a.dealRef.toLowerCase().includes(q)
-      );
-    }
-    return true;
-  });
-
-  const handleDecision = async (id: string, decision: 'accepted' | 'rejected') => {
-    const target = appeals.find((a) => a.id === id);
-    if (target?.isLive) {
-      try {
-        await objectionsApi.decide(id, {
-          decision,
-          reason:
-            decision === 'accepted'
-              ? 'قبول الطعن بقرار سلطة الرقابة المركزية وإلغاء الإسناد المؤقت.'
-              : 'رفض الطعن لعدم ثبوت المخالفة وتثبيت الإسناد المؤقت.',
-        });
-        toast.success(
-          decision === 'accepted'
-            ? 'تم قبول الطعن وتوثيق إلغاء الإسناد في سجل التدقيق.'
-            : 'تم رفض الطعن وتثبيت الإسناد في سجل التدقيق.'
+  const filtered = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+    return objections
+      .filter((item) => {
+        if (filterStatus !== 'all' && item.status !== filterStatus) return false;
+        if (onlyOpen && !OPEN_STATUSES.has(item.status)) return false;
+        if (!query) return true;
+        return (
+          (item.reference ?? '').toLowerCase().includes(query) ||
+          (item.tender_reference ?? '').toLowerCase().includes(query) ||
+          (item.tender_title ?? '').toLowerCase().includes(query) ||
+          (item.objector_name ?? '').toLowerCase().includes(query)
         );
-      } catch (err: any) {
-        toast.error(err.response?.data?.detail || 'فشل تسجيل القرار في النظام المركزي.');
-        return;
-      }
-    }
-
-    setAppeals((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, status: decision, daysRemaining: 0 } : item))
-    );
-    if (selectedAppeal && selectedAppeal.id === id) {
-      setSelectedAppeal((prev) => (prev ? { ...prev, status: decision, daysRemaining: 0 } : null));
-    }
-    setActionMessage(
-      decision === 'accepted'
-        ? 'تم قبول الطعن رسمياً وإخطار المصلحة المتعاقدة بإلغاء الإسناد المؤقت وتوثيقه بسجل التدقيق.'
-        : 'تم رفض الطعن رسمياً لعدم التأسيس القانوني وفق المادة 72 وتوثيقه بسجل التدقيق.'
-    );
-    setTimeout(() => setActionMessage(null), 4000);
-  };
-
-  const activeCount = appeals.filter((a) => a.status === 'active').length;
-  const acceptedCount = appeals.filter((a) => a.status === 'accepted').length;
-  const rejectedCount = appeals.filter((a) => a.status === 'rejected').length;
-  const expiredCount = appeals.filter((a) => a.status === 'expired').length;
+      })
+      .sort((a, b) => {
+        const aDeadline = a.deadline_at ? new Date(a.deadline_at).getTime() : 0;
+        const bDeadline = b.deadline_at ? new Date(b.deadline_at).getTime() : 0;
+        return aDeadline - bDeadline;
+      });
+  }, [objections, searchQuery, filterStatus, onlyOpen]);
 
   return (
-    <div className="space-y-6 page-container py-4">
+    <div className="space-y-6" dir="rtl">
       <PageHeader
-        eyebrow="المراقبة الوطنية"
-        title="الطعون على الإسناد"
-        description="إدارة ومتابعة طعون المتعاملين الاقتصاديين في الإسناد المؤقت وفقاً لأحكام المادة 72 من القانون 23-12"
+        title="الطعون على قرارات الإسناد"
+        titleClassName="text-2xl font-bold"
+        description="متابعة الطعون الإدارية والقضائية ومهلها القانونية: عشرة أيام من تاريخ الإعلان عن الإسناد المؤقت، مع عدّاد تنازلي حيّ لكل طعن."
+        actions={
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={reload}
+            disabled={loading}
+            className="text-base"
+          >
+            <RefreshCw className="size-3.5" aria-hidden="true" />
+            تحديث البيانات
+          </Button>
+        }
       />
 
-      {/* 4 KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="flex items-start gap-2 rounded-lg border border-gray-200 bg-white p-3 text-base leading-relaxed text-[var(--ink-700)] shadow-sm">
+        <Scale className="mt-0.5 size-4 shrink-0 text-[var(--stamp-green-700)]" aria-hidden="true" />
+        <p>
+          الأساس القانوني: المادة 72 من القانون 23-12 — أجل الطعن عشرة أيام من تاريخ الإعلان عن
+          الإسناد. العدّاد أدناه محسوب من <span className="font-mono">deadline_at</span> الذي
+          يُرجعه الخادم، ويُحدَّث تلقائياً كل 30 ثانية.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <KpiCard
-          eyebrow="طعون نشطة قيد البت"
-          value={String(activeCount)}
-          trend={2}
-          trendLabel="خلال الآجال القانونية (10 أيام)"
-          sparkline={[4, 5, 5, 6, 7, 7, activeCount]}
-          icon={AlertTriangle}
+          eyebrow="إجمالي الطعون"
+          value={formatNumber(stats.total)}
+          icon={Gavel}
           accent="navy"
+          description="طعون مسجّلة في السجل الوطني"
         />
         <KpiCard
-          eyebrow="طعون مقبولة"
-          value={String(acceptedCount)}
-          trend={5}
-          trendLabel="أُعيد فيها التقييم"
-          sparkline={[8, 9, 10, 11, 12, 13, acceptedCount]}
-          icon={CheckCircle2}
+          eyebrow="طعون مفتوحة"
+          value={formatNumber(stats.open)}
+          icon={FileWarning}
           accent="emerald"
+          description="مُودعة أو قيد الدراسة"
         />
         <KpiCard
-          eyebrow="طعون مرفوضة"
-          value={String(rejectedCount)}
-          trend={-3}
-          trendLabel="لعدم التأسيس الموضوعي"
-          sparkline={[35, 33, 31, 30, 29, 29, rejectedCount]}
-          icon={XCircle}
-          accent="red"
-        />
-        <KpiCard
-          eyebrow="طعون منتهية الأجل"
-          value={String(expiredCount)}
-          trend={0}
-          trendLabel="سقطت لمرور الآجال"
-          sparkline={[2, 3, 3, 3, 3, 3, 3]}
+          eyebrow="داخل الأجل القانوني"
+          value={formatNumber(stats.withinDeadline)}
           icon={Clock}
           accent="gold"
+          description={`مهلة ${LEGAL_WINDOW_DAYS} أيام من الإعلان`}
+        />
+        <KpiCard
+          eyebrow="انقضى أجلها"
+          value={formatNumber(stats.expired)}
+          icon={CalendarX}
+          accent="red"
+          description="تجاوزت المهلة القانونية للطعن"
         />
       </div>
 
-      {/* AICard */}
-      <AICard
-        title="🤖 تحليل الذكاء الاصطناعي للطعون الوطنية"
-        subtitle="تقييم استشاري أوتوماتيكي لمطابقة أسباب الطعون مع نصوص المادة 72 وشروط المنافسة"
-      >
-        <ul className="space-y-2.5 text-sm text-[var(--color-text-secondary)]">
-          <li className="flex items-center gap-2 p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-200 text-emerald-950 font-medium">
-            <span>✅</span>
-            <span>
-              <strong>5 طعون بناءً على أسباب مشروعة:</strong> توافر أدلة كتابية تثبت استيفاء المعايير التقنية التي تم إقصاؤها بشكل غير معلل.
-            </span>
-          </li>
-          <li className="flex items-center gap-2 p-2.5 rounded-lg bg-amber-500/10 border border-amber-200 text-amber-950 font-medium">
-            <span>⚠️</span>
-            <span>
-              <strong>2 طعون تحتاج تحقيقاً فورياً:</strong> ادعاءات بتعديل الشروط في مرحلة التقييم ومخالفة مبدأ المساواة.
-            </span>
-          </li>
-          <li className="flex items-center gap-2 p-2.5 rounded-lg bg-red-500/10 border border-red-200 text-red-950 font-medium">
-            <span>🚨</span>
-            <span>
-              <strong>احتمال تواطؤ في 1 طعن (REC-2026-0019):</strong> تقاطع مصالح موثق بين أحد أعضاء لجنة الصفقات وصاحب العرض الفائز.
-            </span>
-          </li>
-        </ul>
-      </AICard>
-
-      {/* Action Notification */}
-      {actionMessage && (
-        <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-900 text-xs font-semibold animate-in fade-in">
-          {actionMessage}
-        </div>
-      )}
-
-      {/* Appeals Table Card */}
-      <Card className="shadow-sm border border-[var(--color-border-subtle)] bg-[var(--card-bg)]">
-        <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[var(--color-border-subtle)]">
+      <Card className="bg-white shadow-sm border-gray-200">
+        <CardHeader className="flex flex-col gap-4 border-b border-gray-200 pb-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <CardTitle className="text-xl font-bold text-[var(--color-text-primary)]">
-              سجل الطعون على الإسناد المؤقت
+            <CardTitle className="text-xl font-bold text-[var(--ink-900)]">
+              سجل الطعون والعدّادات التنازلية
             </CardTitle>
-            <p className="text-xs text-[var(--color-text-muted)] mt-1">
-              الطعون المودعة أمام لجنة الصفقات العمومية المختصة إقليمياً
-            </p>
+            <CardDescription className="mt-1 text-base text-gray-500">
+              مرتّب تصاعدياً حسب أقرب أجل قانوني
+            </CardDescription>
           </div>
 
           <div className="flex flex-wrap items-center gap-2.5">
             <div className="relative">
-              <Search className="size-4 absolute start-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              <Search
+                className="size-4 absolute start-2.5 top-1/2 -translate-y-1/2 text-muted-foreground"
+                aria-hidden="true"
+              />
               <input
                 type="text"
-                placeholder="بحث برقم الطعن أو المتعامل..."
+                placeholder="بحث بالمرجع أو الصفقة أو المُطعِن…"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="ps-9 pe-3 py-1.5 text-xs rounded-lg border border-[var(--color-border-subtle)] bg-[var(--card-bg)] text-[var(--color-text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--portal-primary)]"
+                onChange={(event) => setSearchQuery(event.target.value)}
+                aria-label="بحث في الطعون"
+                className="ps-9 pe-3 py-1.5 text-base rounded-lg border border-gray-200 bg-white text-[var(--ink-900)] focus:outline-none focus:ring-1 focus:ring-[var(--stamp-green-700)]"
               />
             </div>
 
             <select
               value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
-              className="px-2.5 py-1.5 text-xs rounded-lg border border-[var(--color-border-subtle)] bg-[var(--card-bg)] text-[var(--color-text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--portal-primary)]"
-              aria-label="تصفية حالة الطعن"
+              onChange={(event) => setFilterStatus(event.target.value)}
+              aria-label="تصفية حسب حالة الطعن"
+              className="px-2.5 py-1.5 text-base rounded-lg border border-gray-200 bg-white text-[var(--ink-900)] focus:outline-none focus:ring-1 focus:ring-[var(--stamp-green-700)]"
             >
               <option value="all">كل الحالات</option>
-              <option value="active">نشطة</option>
-              <option value="accepted">مقبولة</option>
-              <option value="rejected">مرفوضة</option>
-              <option value="expired">منتهية الأجل</option>
+              <option value="submitted">مُودع</option>
+              <option value="under_review">قيد الدراسة</option>
+              <option value="accepted">مقبول</option>
+              <option value="rejected">مرفوض</option>
+              <option value="escalated">مُحال للقضاء</option>
+              <option value="withdrawn">مسحوب</option>
             </select>
+
+            <label className="flex items-center gap-1.5 text-base font-semibold text-[var(--ink-700)]">
+              <input
+                type="checkbox"
+                checked={onlyOpen}
+                onChange={(event) => setOnlyOpen(event.target.checked)}
+                className="size-3.5 accent-[var(--stamp-green-700)]"
+              />
+              المفتوحة فقط
+            </label>
           </div>
         </CardHeader>
 
@@ -382,167 +267,135 @@ export function CentralAppeals() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[140px]">رقم الطعن</TableHead>
-                <TableHead className="min-w-[200px]">المتعامل الطاعن</TableHead>
-                <TableHead>الصفقة محل الطعن</TableHead>
-                <TableHead className="min-w-[220px]">سبب الطعن</TableHead>
-                <TableHead>تاريخ الإيداع</TableHead>
-                <TableHead className="text-center">الأجل المتبقي</TableHead>
+                <TableHead className="min-w-[110px]">مرجع الطعن</TableHead>
+                <TableHead className="min-w-[200px]">الصفقة</TableHead>
+                <TableHead className="min-w-[150px]">مُقدّم الطعن</TableHead>
+                <TableHead>النوع</TableHead>
+                <TableHead className="min-w-[170px]">أسباب الطعن</TableHead>
                 <TableHead>الحالة</TableHead>
-                <TableHead className="w-[80px]"></TableHead>
+                <TableHead className="text-center">تاريخ الإيداع</TableHead>
+                <TableHead className="text-center">آخر أجل</TableHead>
+                <TableHead className="min-w-[150px] text-center">العدّاد التنازلي</TableHead>
+                <TableHead className="text-center">وضع الأجل</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filtered.map((appeal) => (
-                <TableRow key={appeal.id} className="hover:bg-slate-50/70 transition-colors">
-                  <TableCell className="font-mono text-xs font-bold text-[var(--official-900)]">
-                    {appeal.reference}
-                  </TableCell>
-                  <TableCell className="font-semibold text-sm text-[var(--color-text-primary)]">
-                    {appeal.appellant}
-                  </TableCell>
-                  <TableCell>
-                    <div className="font-mono text-xs font-semibold text-[var(--portal-primary)]">
-                      {appeal.dealRef}
-                    </div>
-                    <div className="text-xs text-[var(--color-text-muted)] line-clamp-1">
-                      {appeal.dealTitle}
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-xs text-[var(--color-text-secondary)] line-clamp-2">
-                    {appeal.reason}
-                  </TableCell>
-                  <TableCell className="font-mono text-xs text-[var(--color-text-muted)]">
-                    {appeal.submittedDate}
-                  </TableCell>
-                  <TableCell className="text-center">
-                    {appeal.daysRemaining > 0 ? (
-                      <span className="font-mono font-bold text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-900">
-                        {appeal.daysRemaining} أيام
-                      </span>
-                    ) : (
-                      <span className="font-mono text-xs text-muted-foreground">—</span>
-                    )}
-                  </TableCell>
-                  <TableCell>{getStatusBadge(appeal.status)}</TableCell>
-                  <TableCell className="text-end">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => {
-                        setSelectedAppeal(appeal);
-                        setIsSheetOpen(true);
-                      }}
-                      className="h-8 px-2.5 text-xs text-[var(--portal-primary)] hover:bg-slate-100"
+              <TableState
+                colSpan={10}
+                loading={loading && !data}
+                error={error}
+                empty={!loading && filtered.length === 0}
+                emptyLabel="لا توجد طعون مطابقة للبحث أو التصفية الحالية."
+                onRetry={reload}
+              >
+                {filtered.map((item) => {
+                  const meta = statusMeta(item.status);
+                  const countdown = formatCountdown(item.deadline_at, now);
+                  const deadlineMs = item.deadline_at
+                    ? new Date(item.deadline_at).getTime()
+                    : Number.NaN;
+                  const hasDeadline = !Number.isNaN(deadlineMs);
+                  const remainingShare = hasDeadline
+                    ? Math.max(
+                        0,
+                        Math.min(100, ((deadlineMs - now) / LEGAL_WINDOW_MS) * 100),
+                      )
+                    : 0;
+                  const withinDeadline = hasDeadline && deadlineMs >= now;
+
+                  return (
+                    <TableRow
+                      key={item.id}
+                      className="transition-colors hover:bg-slate-50/70"
                     >
-                      <Eye className="size-3.5 me-1" />
-                      عرض
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
+                      <TableCell className="font-mono text-base font-bold text-[var(--ink-900)]">
+                        {item.reference || '—'}
+                      </TableCell>
+                      <TableCell className="max-w-[240px]">
+                        <div className="font-mono text-base font-bold text-[var(--ink-700)]">
+                          {item.tender_reference || '—'}
+                        </div>
+                        <div className="truncate text-base text-[var(--ink-500)]">
+                          {item.tender_title || '—'}
+                        </div>
+                      </TableCell>
+                      <TableCell className="max-w-[180px] truncate text-base font-semibold text-[var(--ink-900)]">
+                        {item.objector_name || '—'}
+                      </TableCell>
+                      <TableCell className="text-base text-[var(--ink-700)]">
+                        {TYPE_LABELS[item.objection_type] ?? item.objection_type ?? '—'}
+                      </TableCell>
+                      <TableCell className="max-w-[200px] truncate text-base text-[var(--ink-700)]">
+                        {groundsLabel(item)}
+                      </TableCell>
+                      <TableCell>
+                        <Badge className={meta.className}>{meta.label}</Badge>
+                      </TableCell>
+                      <TableCell className="text-center font-mono text-base text-[var(--ink-700)]">
+                        {formatDateTime(item.submitted_at)}
+                      </TableCell>
+                      <TableCell className="text-center font-mono text-base text-[var(--ink-700)]">
+                        {formatDateTime(item.deadline_at)}
+                      </TableCell>
+                      <TableCell>
+                        <div className="space-y-1">
+                          <span
+                            className={`block font-mono text-base font-bold ${
+                              countdown.expired
+                                ? 'text-[var(--stamp-red-700)]'
+                                : 'text-[var(--ink-900)]'
+                            }`}
+                          >
+                            {countdown.label}
+                          </span>
+                          {!countdown.empty && !countdown.expired && (
+                            <div className="h-1.5 w-24 overflow-hidden rounded-full bg-[var(--paper-200)]">
+                              <div
+                                className="h-full rounded-full"
+                                style={{
+                                  width: `${remainingShare}%`,
+                                  backgroundColor:
+                                    remainingShare <= 20
+                                      ? 'var(--stamp-red-700)'
+                                      : remainingShare <= 50
+                                        ? 'var(--stamp-gold-500)'
+                                        : 'var(--stamp-green-700)',
+                                }}
+                              />
+                            </div>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        {!hasDeadline ? (
+                          <span className="text-base text-[var(--ink-500)]">—</span>
+                        ) : withinDeadline ? (
+                          <Badge className="bg-emerald-50 text-emerald-800 border-emerald-300">
+                            داخل الأجل
+                          </Badge>
+                        ) : (
+                          <Badge className="bg-red-50 text-red-800 border-red-300">
+                            خارج الأجل
+                          </Badge>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableState>
             </TableBody>
           </Table>
 
-          <div className="flex items-center justify-between px-6 py-4 border-t border-[var(--color-border-subtle)] text-xs text-[var(--color-text-muted)]">
-            <span>عرض {filtered.length} من أصل {appeals.length} طعون مسجلة</span>
-            <div className="flex items-center gap-1">
-              <Button variant="outline" size="sm" disabled className="h-7 px-2 text-xs">
-                <ChevronRight className="size-3" /> السابق
-              </Button>
-              <Button variant="outline" size="sm" disabled className="h-7 px-2 text-xs">
-                التالي <ChevronLeft className="size-3" />
-              </Button>
-            </div>
+          <div className="flex flex-wrap items-center justify-between gap-2 border-t border-gray-200 px-6 py-4 text-base text-[var(--ink-500)]">
+            <span>
+              عرض {formatNumber(filtered.length)} من أصل {formatNumber(stats.total)} طعناً
+            </span>
+            <span className="font-mono">
+              المهلة القانونية: {LEGAL_WINDOW_DAYS} أيام من الإعلان
+            </span>
           </div>
         </CardContent>
       </Card>
-
-      {/* Drill-down Appeal Sheet */}
-      <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-        <SheetContent side="end" className="sm:max-w-md p-6 bg-[var(--paper-50)] overflow-y-auto">
-          {selectedAppeal && (
-            <div className="space-y-6">
-              <SheetHeader className="text-start border-b border-[var(--color-border-subtle)] pb-4">
-                <span className="eyebrow">تفاصيل الطعن الإداري</span>
-                <SheetTitle className="text-xl font-bold font-mono text-[var(--color-text-primary)]">
-                  {selectedAppeal.reference}
-                </SheetTitle>
-                <SheetDescription className="text-xs text-[var(--color-text-secondary)] mt-1">
-                  المتعامل الطاعن: {selectedAppeal.appellant}
-                </SheetDescription>
-              </SheetHeader>
-
-              <div className="space-y-4 text-sm">
-                <div className="p-3.5 rounded-lg bg-[var(--card-bg)] border border-[var(--color-border-subtle)] space-y-1">
-                  <div className="text-xs text-[var(--color-text-muted)]">الصفقة المعنية</div>
-                  <div className="font-mono font-bold text-xs text-[var(--portal-primary)]">
-                    {selectedAppeal.dealRef}
-                  </div>
-                  <div className="text-xs text-[var(--color-text-primary)]">{selectedAppeal.dealTitle}</div>
-                </div>
-
-                <div className="p-3.5 rounded-lg bg-[var(--card-bg)] border border-[var(--color-border-subtle)] space-y-1">
-                  <div className="text-xs text-[var(--color-text-muted)]">سبب وتأسيس الطعن</div>
-                  <p className="text-xs text-[var(--color-text-secondary)] leading-relaxed">
-                    {selectedAppeal.reason}
-                  </p>
-                </div>
-
-                {/* AI Insights on Appeal */}
-                <div className="p-4 rounded-xl bg-purple-500/10 border border-purple-200 space-y-2">
-                  <div className="flex items-center gap-2 font-bold text-xs text-purple-900">
-                    <Sparkles className="size-4 text-purple-700" />
-                    <span>تحليل الذكاء الاصطناعي للمشروعية (سند AI)</span>
-                  </div>
-                  <p className="text-xs text-purple-950 leading-relaxed">
-                    {selectedAppeal.aiAnalysis}
-                  </p>
-                </div>
-
-                {/* Audit Checksum if available */}
-                {selectedAppeal.checksum && (
-                  <div className="p-3.5 rounded-lg bg-[var(--card-bg)] border border-[var(--color-border-subtle)] space-y-1.5">
-                    <div className="text-xs text-[var(--color-text-muted)] flex items-center gap-1.5 font-medium">
-                      <Lock className="size-3.5 text-primary" />
-                      بصمة التدقيق المشفرة (SHA-256):
-                    </div>
-                    <code className="text-[11px] font-mono break-all text-slate-800 dark:text-slate-200 block bg-slate-50 dark:bg-slate-900/60 p-2 rounded border border-border/40">
-                      {selectedAppeal.checksum}
-                    </code>
-                  </div>
-                )}
-
-                {/* Decision Actions */}
-                {selectedAppeal.status === 'active' && (
-                  <div className="pt-3 border-t border-[var(--color-border-subtle)] space-y-2.5">
-                    <div className="text-xs font-bold text-[var(--color-text-primary)]">
-                      اتخاذ القرار الرقابي (المادة 72):
-                    </div>
-                    <div className="grid grid-cols-2 gap-2.5">
-                      <Button
-                        onClick={() => handleDecision(selectedAppeal.id, 'accepted')}
-                        className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs h-9 gap-1.5"
-                      >
-                        <FileCheck className="size-3.5" />
-                        قبول الطعن
-                      </Button>
-                      <Button
-                        onClick={() => handleDecision(selectedAppeal.id, 'rejected')}
-                        variant="destructive"
-                        className="text-xs h-9 gap-1.5"
-                      >
-                        <FileX className="size-3.5" />
-                        رفض الطعن
-                      </Button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-        </SheetContent>
-      </Sheet>
     </div>
   );
 }

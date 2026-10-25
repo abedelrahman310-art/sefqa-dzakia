@@ -78,6 +78,18 @@ class TestCentralHawkEyeEndpoints:
             submission_deadline=now - timezone.timedelta(days=5),  # delayed
         )
 
+        self.deal_algiers_3 = ProcurementDeal.objects.create(
+            reference_number="DZ-16-2026-TEST-004",
+            title="أشغال صيانة الإنارة العمومية التكميلية",
+            description="مشروع تكميلي تحت العتبة",
+            authority=self.authority,
+            wilaya="الجزائر",
+            current_stage=2,
+            status="PUBLISHED",
+            estimated_budget=Decimal("9000000.00"),
+            submission_deadline=now + timezone.timedelta(days=10),
+        )
+
     def test_unauthenticated_requests_are_denied(self):
         """التحقق من أن الطلبات غير المصادق عليها ترفض (401)"""
         endpoints = [
