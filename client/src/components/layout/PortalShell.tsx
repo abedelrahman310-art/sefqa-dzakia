@@ -65,7 +65,7 @@ export function PortalShell({
     <div className="flex h-screen overflow-hidden bg-[var(--paper-50)]" dir="rtl">
       {/* Desktop Sidebar: 280px fixed (أو مخصص) */}
       {!hideSidebar && (
-        <aside className={`hidden md:flex flex-col ${sidebarWidth} h-screen bg-white border-e border-[var(--color-border-subtle)] flex-none`}>
+        <aside className={`hidden md:flex flex-col ${sidebarWidth} h-screen bg-white border-e border-[var(--color-border-subtle)] flex-none print:hidden`}>
           {sidebar}
         </aside>
       )}
@@ -77,7 +77,7 @@ export function PortalShell({
       >
         {/* Mobile Header Bar with Sheet (side="start") */}
         {!hideSidebar && (
-          <div className="md:hidden flex items-center justify-between p-4 bg-white border-b border-[var(--color-border-subtle)] sticky top-0 z-30">
+          <div className="md:hidden flex items-center justify-between p-4 bg-white border-b border-[var(--color-border-subtle)] sticky top-0 z-30 print:hidden">
             <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
               <SheetTrigger asChild>
                 <button
@@ -116,7 +116,7 @@ export function PortalShell({
 
         {/* TopBar */}
         {!hideTopBar && topBar && (
-          <div className={`${showTopBarOnMobile ? 'block relative md:sticky md:top-0' : 'hidden md:block sticky top-0'} z-20`}>
+          <div className={`${showTopBarOnMobile ? 'block relative md:sticky md:top-0' : 'hidden md:block sticky top-0'} z-20 print:hidden`}>
             {topBar}
           </div>
         )}
