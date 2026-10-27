@@ -23,7 +23,6 @@ import {
   FileText,
   Hash,
   Landmark,
-  ShieldCheck,
 } from 'lucide-react';
 import { RegisterHero } from '@/components/auth/RegisterHero';
 import { RegisterRoleTabs, RegisterRole } from '@/components/auth/RegisterRoleTabs';
@@ -308,21 +307,6 @@ export function AuthorityRegister() {
               <BackArrow className="w-4 h-4 transition-transform group-hover:-translate-x-0.5" />
               <span>{t('register.redesign.back_home')}</span>
             </Link>
-          </div>
-
-          {/* Official Compliance Header Badge */}
-          <div className="bg-gradient-to-r from-blue-50 to-indigo-50/80 border border-blue-200/90 rounded-xl p-3 flex items-center gap-2.5 shadow-xs">
-            <div className="w-8 h-8 rounded-lg bg-[#0A2540] text-white flex items-center justify-center shrink-0 shadow-xs">
-              <ShieldCheck className="w-4 h-4 text-emerald-400" />
-            </div>
-            <div className="leading-tight">
-              <span className="block text-xs font-bold text-[#0A2540]">
-                استمارة تسجيل المصلحة المتعاقدة — الملحق رقم 01
-              </span>
-              <span className="text-[11px] text-slate-500">
-                مطابقة تماماً لقرار وزارة المالية المؤرخ في 4 فبراير 2026
-              </span>
-            </div>
           </div>
 
           {/* Header Title & Subtitle */}
