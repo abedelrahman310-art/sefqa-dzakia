@@ -8,6 +8,7 @@ from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from django.utils import timezone
 from apps.audit.models import AuditLog
 from apps.procurements.models import OpeningSession, OfferDocument
+from apps.bids.validators import validate_document_upload
 from .models import BidOffer
 from .serializers import BidOfferSerializer, OfferSerializer
 
@@ -209,6 +210,14 @@ class OfferViewSet(BidOfferViewSet):
         if request.method == 'POST':
             doc_file = request.FILES.get('document') or request.FILES.get('file')
             if doc_file:
+                try:
+                    validate_document_upload(doc_file)
+                except Exception as e:
+                    msg = getattr(e, 'messages', [str(e)])
+                    return Response({
+                        'error': 'فشل التحقق من أمان وصحة الوثيقة.',
+                        'detail': msg,
+                    }, status=status.HTTP_400_BAD_REQUEST)
                 OfferDocument.objects.create(offer=offer, file=doc_file)
             return Response({
                 'message': 'تم استلام وتشفير وثيقة العرض بنجاح.',

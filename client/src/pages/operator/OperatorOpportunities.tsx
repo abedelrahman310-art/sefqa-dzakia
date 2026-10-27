@@ -12,9 +12,19 @@ import {
   Building2,
   Calendar,
   ChevronLeft,
+  ChevronDown,
+  Filter,
 } from 'lucide-react';
 import { SuitabilityModal } from './SuitabilityModal';
+import { ProcedureTypeCollapsible } from './ProcedureTypeCollapsible';
 import { OperatorRecommendationsCard } from '@/features/ai/components/OperatorRecommendationsCard';
+
+interface OpportunityProcedure {
+  form?: string | null;
+  method?: string | null;
+  nature?: string | null;
+  scope?: string | null;
+}
 
 interface Opportunity {
   id: string;
@@ -26,6 +36,7 @@ interface Opportunity {
   status: string;
   submissionDeadline?: string | null;
   hasDocument: boolean;
+  procedure: OpportunityProcedure;
   matching?: {
     isClassified: boolean;
     overallSignal: 'relevant' | 'partial' | 'neutral' | 'unclassified';
@@ -41,6 +52,16 @@ const PROC_DEFS = [
   { id: 'direct', title: 'التراضي', desc: 'إبرام الصفقة مع متعامل واحد في الحالات التي يحددها التنظيم.' },
 ];
 
+/** ربط معرّفات التصفية بقيم `procurement_form` القادمة من دفتر الشروط. */
+const PROC_FILTER_VALUES: Record<string, string> = {
+  open: 'open',
+  openMin: 'open_with_min_capacity',
+  limited: 'restricted',
+  contest: 'competition',
+  consult: 'after_consultation',
+  direct: 'direct',
+};
+
 export function OperatorOpportunities() {
   const { t, lang } = useI18n();
   const [, setLocation] = useLocation();
@@ -52,7 +73,8 @@ export function OperatorOpportunities() {
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSuitabilityId, setSelectedSuitabilityId] = useState<string | null>(null);
-  const [selectedProc, setSelectedProc] = useState('open');
+  const [selectedProc, setSelectedProc] = useState('all');
+  const [isProcOpen, setIsProcOpen] = useState(false);
 
   useEffect(() => {
     const q = new URLSearchParams(search).get('q') || '';
@@ -69,23 +91,32 @@ export function OperatorOpportunities() {
       const items = Array.isArray(data) ? data : data?.results || [];
       const mapped: Opportunity[] = items
         .filter((d: any) => d.current_stage >= 3)
-        .map((d: any) => ({
-          id: String(d.id),
-          reference: d.reference_number || `DZ-${String(d.id).slice(0, 6)}`,
-          title: d.title,
-          description: d.description || '',
-          estimatedBudget: d.estimated_budget
-            ? `${Number(d.estimated_budget).toLocaleString('ar-DZ')} دج`
-            : null,
-          authorityName: d.authority_entity || d.authority_name || 'مصلحة متعاقدة',
-          status: d.stage_display || 'طلب عروض مفتوح',
-          submissionDeadline: d.submission_deadline || null,
-          hasDocument: !!d.cahier_specs,
-          matching: {
-            isClassified: true,
-            overallSignal: 'relevant' as const,
-          },
-        }));
+        .map((d: any) => {
+          const admin = d.cahier_specs?.administrative_clauses ?? null;
+          return {
+            id: String(d.id),
+            reference: d.reference_number || `DZ-${String(d.id).slice(0, 6)}`,
+            title: d.title,
+            description: d.description || '',
+            estimatedBudget: d.estimated_budget
+              ? `${Number(d.estimated_budget).toLocaleString('ar-DZ')} دج`
+              : null,
+            authorityName: d.authority_entity || d.authority_name || 'مصلحة متعاقدة',
+            status: d.stage_display || 'طلب عروض مفتوح',
+            submissionDeadline: d.submission_deadline || null,
+            hasDocument: !!d.cahier_specs,
+            procedure: {
+              form: admin?.procurement_form ?? null,
+              method: admin?.procurement_method ?? null,
+              nature: admin?.procurement_nature ?? null,
+              scope: admin?.competition_scope ?? null,
+            },
+            matching: {
+              isClassified: true,
+              overallSignal: 'relevant' as const,
+            },
+          };
+        });
       setOpportunities(mapped);
     } catch (err) {
       console.error('Error fetching opportunities:', err);
@@ -101,15 +132,26 @@ export function OperatorOpportunities() {
 
   const filteredOpportunities = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
-    if (!q) return opportunities;
-    return opportunities.filter(
-      (opp) =>
+    const procValue = selectedProc === 'all' ? null : PROC_FILTER_VALUES[selectedProc];
+
+    return opportunities.filter((opp) => {
+      if (procValue && opp.procedure.form !== procValue) return false;
+      if (!q) return true;
+      return (
         opp.title.toLowerCase().includes(q) ||
         opp.authorityName.toLowerCase().includes(q) ||
         opp.description.toLowerCase().includes(q) ||
-        opp.reference.toLowerCase().includes(q),
-    );
-  }, [opportunities, searchQuery]);
+        opp.reference.toLowerCase().includes(q)
+      );
+    });
+  }, [opportunities, searchQuery, selectedProc]);
+
+  const hasActiveFilters = Boolean(searchQuery.trim()) || selectedProc !== 'all';
+
+  const currentProcLabel =
+    selectedProc === 'all'
+      ? 'الكل'
+      : (PROC_DEFS.find((proc) => proc.id === selectedProc)?.title ?? 'الكل');
 
   const formatDate = (value?: string | null) => {
     if (!value) return '—';
@@ -149,32 +191,82 @@ export function OperatorOpportunities() {
         </div>
       </div>
 
-      <section aria-labelledby="procedure-type-title">
-        <div className="mb-3 flex items-center justify-between gap-3">
-          <h2 id="procedure-type-title" className="op-section-title">
-            نوع الإجراء
-          </h2>
-          <span className="op-muted text-xs">اختر نوع الإجراء لعرض الإعلانات المناسبة</span>
-        </div>
-        <div className="op-choice-grid" role="group" aria-label="نوع الإجراء">
-          {PROC_DEFS.map((proc) => {
-            const isSelected = selectedProc === proc.id;
-            return (
-              <button
-                key={proc.id}
-                type="button"
-                aria-pressed={isSelected}
-                onClick={() => setSelectedProc(proc.id)}
-                className={`op-choice${isSelected ? ' active' : ''}`}
-              >
-                <span className="flex items-start justify-between gap-2">
-                  <span className="op-choice-title">{proc.title}</span>
-                  {isSelected && <Sparkles className="size-4 flex-none text-[var(--op-gold)]" aria-hidden="true" />}
-                </span>
-                <span className="op-choice-desc">{proc.desc}</span>
-              </button>
-            );
-          })}
+      <section aria-label="تصفية حسب نوع الإجراء">
+        <div className={`op-proc-filter${isProcOpen ? ' is-open' : ''}`}>
+          <button
+            type="button"
+            className="op-proc-filter-toggle"
+            onClick={() => setIsProcOpen((current) => !current)}
+            aria-expanded={isProcOpen}
+            aria-controls="procedure-filter-panel"
+          >
+            <span className="op-proc-filter-icon" aria-hidden="true">
+              <Filter />
+            </span>
+            <span className="op-proc-filter-text">
+              <span className="op-proc-filter-label">نوع الإجراء:</span>
+              <strong className="op-proc-filter-value">{currentProcLabel}</strong>
+            </span>
+            <span className="op-proc-filter-meta">
+              {filteredOpportunities.length} إعلان
+            </span>
+            <ChevronDown className="op-proc-filter-chevron" aria-hidden="true" />
+          </button>
+
+          <div
+            className="op-proc-filter-panel"
+            id="procedure-filter-panel"
+            role="region"
+            aria-label="خيارات نوع الإجراء"
+            aria-hidden={!isProcOpen}
+          >
+            <div className="op-proc-filter-panel-inner">
+              <div className="op-choice-grid" role="group" aria-label="نوع الإجراء">
+                <button
+                  type="button"
+                  aria-pressed={selectedProc === 'all'}
+                  tabIndex={isProcOpen ? 0 : -1}
+                  onClick={() => {
+                    setSelectedProc('all');
+                    setIsProcOpen(false);
+                  }}
+                  className={`op-choice${selectedProc === 'all' ? ' active' : ''}`}
+                >
+                  <span className="flex items-start justify-between gap-2">
+                    <span className="op-choice-title">كل الإجراءات</span>
+                    {selectedProc === 'all' && (
+                      <Sparkles className="size-4 flex-none text-[var(--op-gold)]" aria-hidden="true" />
+                    )}
+                  </span>
+                  <span className="op-choice-desc">عرض جميع الإعلانات بغض النظر عن نوع الإجراء.</span>
+                </button>
+                {PROC_DEFS.map((proc) => {
+                  const isSelected = selectedProc === proc.id;
+                  return (
+                    <button
+                      key={proc.id}
+                      type="button"
+                      aria-pressed={isSelected}
+                      tabIndex={isProcOpen ? 0 : -1}
+                      onClick={() => {
+                        setSelectedProc(proc.id);
+                        setIsProcOpen(false);
+                      }}
+                      className={`op-choice${isSelected ? ' active' : ''}`}
+                    >
+                      <span className="flex items-start justify-between gap-2">
+                        <span className="op-choice-title">{proc.title}</span>
+                        {isSelected && (
+                          <Sparkles className="size-4 flex-none text-[var(--op-gold)]" aria-hidden="true" />
+                        )}
+                      </span>
+                      <span className="op-choice-desc">{proc.desc}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -228,6 +320,7 @@ export function OperatorOpportunities() {
                 <th>رقم الصفقة</th>
                 <th>الموضوع</th>
                 <th>المصلحة المتعاقدة</th>
+                <th>نوع الإجراء</th>
                 <th>الميزانية</th>
                 <th>آخر أجل</th>
                 <th>المطابقة</th>
@@ -237,7 +330,7 @@ export function OperatorOpportunities() {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={7}>
+                  <td colSpan={8}>
                     <div className="space-y-3 p-5">
                       {[1, 2, 3, 4].map((row) => (
                         <div key={row} className="op-skeleton h-12" />
@@ -247,20 +340,25 @@ export function OperatorOpportunities() {
                 </tr>
               ) : filteredOpportunities.length === 0 ? (
                 <tr className="op-empty-row">
-                  <td colSpan={7}>
+                  <td colSpan={8}>
                     <div className="op-empty-state">
                       <Search aria-hidden="true" />
-                      <h4>{searchQuery ? t('deals.search.empty_title') : t('opps.empty')}</h4>
+                      <h4>{hasActiveFilters ? t('deals.search.empty_title') : t('opps.empty')}</h4>
                       <p>
-                        {searchQuery
-                          ? t('deals.search.empty_desc')
+                        {hasActiveFilters
+                          ? searchQuery
+                            ? t('deals.search.empty_desc')
+                            : 'لا توجد إعلانات مسجّلة بهذا النوع من الإجراء حالياً.'
                           : 'ستظهر الصفقات المنشورة هنا فور توفرها'}
                       </p>
-                      {searchQuery && (
+                      {hasActiveFilters && (
                         <button
                           type="button"
                           className="op-btn op-btn-outline op-btn-sm mt-2"
-                          onClick={() => setSearchQuery('')}
+                          onClick={() => {
+                            setSearchQuery('');
+                            setSelectedProc('all');
+                          }}
                         >
                           إلغاء التصفية
                         </button>
@@ -289,6 +387,9 @@ export function OperatorOpportunities() {
                         <Building2 className="size-3.5 flex-none text-[var(--op-muted)]" aria-hidden="true" />
                         <span className="line-clamp-1">{opp.authorityName}</span>
                       </span>
+                    </td>
+                    <td>
+                      <ProcedureTypeCollapsible info={opp.procedure} />
                     </td>
                     <td>
                       <span className="font-mono text-xs font-bold text-[var(--op-ink)]">

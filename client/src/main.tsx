@@ -23,6 +23,13 @@ const queryClient = new QueryClient({
   },
 });
 
+// Security: purge API responses cached by older service-worker versions.
+// API traffic is network-only now; this removes stale authenticated or
+// financial data that may still exist in the browser's Cache Storage.
+if (typeof window !== 'undefined' && 'caches' in window) {
+  void window.caches.delete('api-cache').catch(() => undefined);
+}
+
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>

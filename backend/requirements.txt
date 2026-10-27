@@ -1,4 +1,8 @@
 Django==6.0.3
+channels==4.3.2
+channels-redis==4.3.0
+daphne==4.2.3
+redis>=5.0.0
 djangorestframework==3.16.1
 djangorestframework-simplejwt==5.5.1
 django-cors-headers==4.9.0
@@ -12,3 +16,7 @@ arabic-reshaper==3.0.1
 python-bidi==0.6.12
 pypdf>=5.0.0
 openai>=1.50.0
+pgvector>=0.3.6
+langchain>=0.3.0
+langchain-text-splitters>=0.3.0
+sentence-transformers>=3.0.0

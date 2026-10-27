@@ -1,6 +1,9 @@
 import { useLayoutEffect, useRef } from 'react';
+import { createRoot, type Root } from 'react-dom/client';
+import Logo from '@/components/ui/Logo';
 import landingCss from './landing-v2.css?inline';
 import landingHtml from './landing-page.html?raw';
+import logoCss from '@/components/ui/logo.css?inline';
 
 const LANDING_TITLE = 'صفقات ذكية | المنصة الوطنية الذكية للصفقات العمومية';
 
@@ -29,7 +32,8 @@ export function LandingV2Page() {
       'https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=Amiri:wght@700;900&display=swap';
 
     const style = document.createElement('style');
-    style.textContent = landingCss;
+    // أنماط صفحة الهبوط + أنماط الشعار: الأنماط العالمية لا تعبر حدود الظل
+    style.textContent = `${landingCss}\n${logoCss}`;
 
     const root = document.createElement('div');
     root.className = 'landing-root';
@@ -38,6 +42,21 @@ export function LandingV2Page() {
     root.innerHTML = landingHtml;
 
     shadow.replaceChildren(fontLink, style, root);
+
+    /**
+     * تركيب الشعار الرسمي (<Logo />) داخل مواضع `[data-logo-slot]` في الهيدر
+     * والبطولة والفاصل بين كل قسمين. صفحة الهبوط مستند HTML خام داخل Shadow DOM،
+     * فتُركَّب الشعارات في جذور React مستقلة لكل موضع.
+     */
+    const logoRoots: Root[] = Array.from(
+      root.querySelectorAll<HTMLElement>('[data-logo-slot]'),
+    ).map((slot) => {
+      const rawSize = slot.dataset.logoSize ?? '48';
+      const size: number | string = rawSize.endsWith('%') ? rawSize : Number(rawSize) || 48;
+      const slotRoot = createRoot(slot);
+      slotRoot.render(<Logo size={size} />);
+      return slotRoot;
+    });
 
     const scrollToHash = (hash: string, behavior: 'auto' | 'smooth') => {
       const id = hash.replace(/^#/, '');
@@ -83,6 +102,10 @@ export function LandingV2Page() {
       if (initialScrollTimer !== undefined) window.clearTimeout(initialScrollTimer);
       window.removeEventListener('hashchange', handleHashChange);
       shadow.removeEventListener('click', handleClick);
+      // إلغاء تركيب الشعارات خارج دورة تصيير React لتفادي تحذير الإلغاء المتزامن
+      queueMicrotask(() => {
+        logoRoots.forEach((logoRoot) => logoRoot.unmount());
+      });
       shadow.replaceChildren();
       document.title = previousTitle;
     };

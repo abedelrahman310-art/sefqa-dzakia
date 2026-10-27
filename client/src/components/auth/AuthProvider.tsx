@@ -1,4 +1,13 @@
 import { createContext, useCallback, useContext, useEffect, useState, ReactNode } from 'react';
+import {
+  ACCESS_TOKEN_KEY,
+  AUTH_EXPIRED_EVENT,
+  LEGACY_USER_KEY,
+  REFRESH_TOKEN_KEY,
+  TOKEN_REFRESHED_EVENT,
+  clearAuthSession,
+  refreshAccessToken as requestTokenRefresh,
+} from '@/lib/api';
 
 export type UserRole = 'operator' | 'authority' | 'central_admin';
 
@@ -36,15 +45,6 @@ interface AuthContextProps {
   refreshToken: () => Promise<string | null>;
 }
 
-const ACCESS_TOKEN_KEY = 'safaqat_access_token';
-const REFRESH_TOKEN_KEY = 'safaqat_refresh_token';
-/**
- * مفتاح قديم كان يخزّن ملف المستخدم ودوره في المتصفح. أُلغي لأنه كان يُستخدم
- * كبديل عند فشل التحقق من الخادم، ما يسمح بانتحال دور غير مُتحقَّق منه.
- * يبقى هنا فقط لحذف أي قيمة متبقية في أجهزة المستخدمين.
- */
-const LEGACY_USER_KEY = 'safaqat_user';
-
 const AuthContext = createContext<AuthContextProps | undefined>(undefined);
 
 function normalizeUser(u: UserPayload): User {
@@ -58,43 +58,39 @@ function normalizeUser(u: UserPayload): User {
   };
 }
 
-function clearStoredSession() {
-  localStorage.removeItem(ACCESS_TOKEN_KEY);
-  localStorage.removeItem(REFRESH_TOKEN_KEY);
-  localStorage.removeItem(LEGACY_USER_KEY);
-}
-
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(() => localStorage.getItem(ACCESS_TOKEN_KEY));
   const [status, setStatus] = useState<'loading' | 'authenticated' | 'unauthenticated'>('loading');
 
   const refreshAccessToken = useCallback(async (): Promise<string | null> => {
-    const refresh = localStorage.getItem(REFRESH_TOKEN_KEY);
-    if (!refresh) return null;
+    const renewed = await requestTokenRefresh();
+    if (renewed) {
+      setToken(renewed);
+    }
+    return renewed;
+  }, []);
 
-    try {
-      const res = await fetch('/api/auth/token/refresh/', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ refresh }),
-      });
-      if (!res.ok) throw new Error('Token refresh failed');
-      const data = await res.json();
-      if (!data.access) throw new Error('Token refresh response missing access token');
-
-      localStorage.setItem(ACCESS_TOKEN_KEY, data.access);
-      if (data.refresh) {
-        localStorage.setItem(REFRESH_TOKEN_KEY, data.refresh);
-      }
-      setToken(data.access);
-      return data.access;
-    } catch {
-      clearStoredSession();
+  useEffect(() => {
+    const handleExpired = () => {
       setToken(null);
       setUser(null);
-      return null;
-    }
+      setStatus('unauthenticated');
+    };
+    const handleRefreshed = (event: Event) => {
+      const access = (event as CustomEvent<{ access?: string }>).detail?.access;
+      if (access) {
+        setToken(access);
+      }
+    };
+
+    window.addEventListener(AUTH_EXPIRED_EVENT, handleExpired);
+    window.addEventListener(TOKEN_REFRESHED_EVENT, handleRefreshed);
+
+    return () => {
+      window.removeEventListener(AUTH_EXPIRED_EVENT, handleExpired);
+      window.removeEventListener(TOKEN_REFRESHED_EVENT, handleRefreshed);
+    };
   }, []);
 
   useEffect(() => {
@@ -120,6 +116,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           const renewedToken = await refreshAccessToken();
           if (cancelled) return;
           if (renewedToken) {
+            activeToken = renewedToken;
             res = await fetch('/api/auth/me/', {
               headers: { Authorization: `Bearer ${renewedToken}` },
             });
@@ -140,7 +137,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (cancelled) return;
       // رفض الخادم الجلسة أو لم يُرجع دوراً صالحاً → جلسة غير صالحة.
-      clearStoredSession();
+      clearAuthSession();
       setToken(null);
       setUser(null);
       setStatus('unauthenticated');
@@ -177,7 +174,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         },
       });
     } finally {
-      clearStoredSession();
+      clearAuthSession();
       setToken(null);
       setUser(null);
       setStatus('unauthenticated');

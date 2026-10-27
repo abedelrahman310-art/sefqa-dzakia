@@ -114,14 +114,14 @@ export function HeroSection({ onStartClick }: HeroSectionProps) {
               
               {/* Map Header with Dynamic Tooltip Pill */}
               <div className="w-full flex items-center justify-between pb-3 mb-2 border-b border-[var(--ink-100)] text-xs">
-                <span className="text-[var(--ink-500)] font-medium font-['Readex_Pro',sans-serif]">
+                <span className="text-[var(--ink-500)] font-medium font-sans">
                   {lang === 'ar' ? 'التغطية الجغرافية للصفقات' : 'Couverture territoriale des marchés'}
                 </span>
                 
                 {/* Active / Hovered Wilaya Tooltip Pill */}
                 <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[4px] bg-[var(--paper-50)] border border-[var(--ink-100)] text-[var(--ink-900)] font-semibold shadow-xs">
                   <span className="w-2 h-2 rounded-full bg-[var(--stamp-gold-500)]" aria-hidden="true" />
-                  <span className="font-['Readex_Pro',sans-serif]">
+                  <span className="font-sans">
                     {lang === 'ar' ? activeWilaya.nameAr : activeWilaya.nameFr}
                   </span>
                   <span className="text-[var(--ink-500)] font-mono tabular-nums">

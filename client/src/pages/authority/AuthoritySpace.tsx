@@ -5,7 +5,6 @@ import { AuthorityDealsList } from './AuthorityDealsList';
 import { AuthorityDealWizard } from './AuthorityDealWizard';
 import { AuthorityDealWorkspace } from './AuthorityDealWorkspace';
 import { ReceivedOffers } from './ReceivedOffers';
-import { OpeningSessionView } from './OpeningSessionView';
 import { EvaluationWorkspace } from './EvaluationWorkspace';
 import { DealCommitteeManager } from './DealCommitteeManager';
 import { PortalNotFound } from '@/components/common/PortalNotFound';
@@ -159,7 +158,6 @@ export function AuthoritySpace() {
         <Route path="/authority/settings" component={SettingsView} />
         <Route path="/authority/opportunities/:id/received-offers" component={ReceivedOffers} />
         <Route path="/authority/opportunities/:id/committee" component={DealCommitteeManager} />
-        <Route path="/authority/opportunities/:id/opening" component={OpeningSessionView} />
         <Route path="/authority/opportunities/:id/evaluation" component={EvaluationWorkspace} />
         <Route path="/authority/opening-sessions/:id" component={AuthoritySessionControl} />
         <Route path="/authority/opening-sessions" component={AuthoritySessionManager} />

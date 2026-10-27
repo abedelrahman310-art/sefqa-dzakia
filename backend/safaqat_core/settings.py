@@ -44,6 +44,7 @@ else:
 
 # Application definition
 INSTALLED_APPS = [
+    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -52,8 +53,11 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     # Third party apps
+    'channels',
+    'pgvector.django',
     'rest_framework',
     'rest_framework_simplejwt',
+    'rest_framework_simplejwt.token_blacklist',
     'corsheaders',
     'drf_spectacular',
 
@@ -66,6 +70,7 @@ INSTALLED_APPS = [
     'apps.reports',
     'apps.audit',
     'apps.ai_gateway',
+    'apps.legal_rag',
 ]
 
 MIDDLEWARE = [
@@ -98,6 +103,29 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'safaqat_core.wsgi.application'
+ASGI_APPLICATION = 'safaqat_core.asgi.application'
+
+REDIS_HOST = os.environ.get('REDIS_HOST', 'redis')
+REDIS_PORT = os.environ.get('REDIS_PORT', '6379')
+REDIS_URL = os.environ.get('REDIS_URL', f"redis://{REDIS_HOST}:{REDIS_PORT}/0")
+
+# قنوات Channels باستخدام محرك Redis الإنتاجي (channels_redis)
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            'hosts': [REDIS_URL],
+        },
+    },
+}
+
+if IS_TESTING:
+    # بيئة الاختبارات الآلية (CI/CD) بدون حاجة لخادم Redis حقيقي
+    CHANNEL_LAYERS = {
+        'default': {
+            'BACKEND': 'channels.layers.InMemoryChannelLayer',
+        },
+    }
 
 # Database
 # Default to PostgreSQL, with fallback to SQLite for quick local test runs
@@ -177,9 +205,18 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
     ),
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    'DEFAULT_THROTTLE_CLASSES': (
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle',
+    ),
     'DEFAULT_THROTTLE_RATES': {
+        'anon': '5/minute',
+        'user': '60/minute',
+        'login': '5/minute',
+        'deals_search': '60/minute',
         'ai_chat': '20/hour',
-        'ai_insights': '10/hour',
+        'ai_insights': '50/hour',
+        'ai_analyze_tender': '50/hour',
     },
 }
 
@@ -234,12 +271,20 @@ LLM_PROVIDER = os.getenv("LLM_PROVIDER", "rule_based")
 LLM_MODEL = os.getenv("LLM_MODEL", "gemini-1.5-flash")
 
 # Cache Configuration (LocMemCache for dev/testing, Redis for prod)
-CACHES = {
-    "default": {
-        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
-        "LOCATION": "safaqat-cache",
+if REDIS_URL and not IS_TESTING:
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.redis.RedisCache",
+            "LOCATION": REDIS_URL,
+        }
     }
-}
+else:
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+            "LOCATION": "safaqat-cache",
+        }
+    }
 
 # ═══ Production Security Hardening (Priority 1) ═══
 if not DEBUG and not IS_TESTING:

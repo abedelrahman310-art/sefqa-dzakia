@@ -109,3 +109,39 @@ export const useSessionOffers = (sessionId?: string) =>
     enabled: !!sessionId,
   });
 
+export const useOpenEnvelope = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      id,
+      payload,
+    }: {
+      id: string;
+      payload: { offer_id: string; envelope_type: string; notes?: string };
+    }) => openingApi.openEnvelope(id, payload),
+    onSuccess: (data, vars) => {
+      const typeLabel =
+        vars.payload.envelope_type.includes("financial")
+          ? "الظرف المالي"
+          : "الظرف التقني";
+      toast.success(`تم فتح ${typeLabel} بنجاح وبث الوقائع`);
+      qc.invalidateQueries({ queryKey: ["opening-session", vars.id] });
+      qc.invalidateQueries({ queryKey: ["opening-events", vars.id] });
+      qc.invalidateQueries({ queryKey: ["opening-sessions"] });
+    },
+    onError: (err: any) => {
+      const msg = err.response?.data?.detail || "فشل فتح الظرف المحدد";
+      toast.error(msg);
+    },
+  });
+};
+
+export const useSessionEvents = (sessionId?: string) =>
+  useQuery({
+    queryKey: ["opening-events", sessionId],
+    queryFn: () => openingApi.getEvents(sessionId!),
+    enabled: !!sessionId,
+    refetchInterval: 4000,
+  });
+
+

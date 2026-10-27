@@ -196,7 +196,7 @@ export function OperatorSettingsView() {
             />
             <SwitchRow
               title={t('operator.settings.notif_opening')}
-              description="إشعار عند انعقاد جلسة فتح أظرفة العروض وتوقيع محضر الفتح الخاص بالصفقات المشارك فيها."
+              description="إشعار عند انعقاد جلسة فتح أظرفة العروض واعتماد محضر الفتح الخاص بالصفقات المشارك فيها."
               checked={prefs.openingSessions}
               onChange={() => handleToggle('openingSessions')}
             />

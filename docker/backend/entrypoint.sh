@@ -27,11 +27,5 @@ python manage.py migrate --noinput
 echo "Collecting static files..."
 python manage.py collectstatic --noinput --clear || true
 
-echo "=== Starting Gunicorn WSGI Server ==="
-exec gunicorn safaqat_core.wsgi:application \
-    --bind 0.0.0.0:8000 \
-    --workers "${GUNICORN_WORKERS:-3}" \
-    --threads "${GUNICORN_THREADS:-2}" \
-    --timeout "${GUNICORN_TIMEOUT:-120}" \
-    --access-logfile - \
-    --error-logfile -
+echo "=== Starting Daphne ASGI Server ==="
+exec daphne -b 0.0.0.0 -p 8000 safaqat_core.asgi:application

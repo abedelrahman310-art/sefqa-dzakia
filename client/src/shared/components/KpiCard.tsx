@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import type { LucideIcon } from 'lucide-react';
 
 export interface KpiCardProps {
@@ -9,6 +10,12 @@ export interface KpiCardProps {
   accent?: 'emerald' | 'gold' | 'navy' | 'red' | 'ai';
   sparkline?: number[];
   description?: string;
+  /** أصناف الرقم الرئيسي — الافتراضي 'font-mono text-4xl' */
+  valueClassName?: string;
+  /** أصناف سطر الوصف — الافتراضي 'text-xs text-[var(--ink-500)]' */
+  descriptionClassName?: string;
+  /** عنصر مخصص بدل الرقم (مثل رقم + عملة على سطر واحد) */
+  valueContent?: ReactNode;
 }
 
 export function KpiCard({
@@ -20,6 +27,9 @@ export function KpiCard({
   accent = 'emerald',
   sparkline,
   description,
+  valueClassName,
+  descriptionClassName,
+  valueContent,
 }: KpiCardProps) {
   const getStrokeColor = () => {
     switch (accent) {
@@ -51,8 +61,10 @@ export function KpiCard({
       </div>
 
       {/* Hero Number */}
-      <div className="font-mono text-4xl font-bold tracking-tight leading-none text-[var(--ink-900)] mb-2">
-        {value}
+      <div
+        className={`${valueClassName ?? 'font-mono text-4xl'} font-bold tracking-tight leading-none text-[var(--ink-900)] mb-2`}
+      >
+        {valueContent ?? value}
       </div>
 
       {/* Trend */}
@@ -73,7 +85,9 @@ export function KpiCard({
 
       {/* Description fallback if no trend */}
       {description && trend === undefined && (
-        <p className="text-xs text-[var(--ink-500)] mb-3">{description}</p>
+        <p className={`${descriptionClassName ?? 'text-xs text-[var(--ink-500)]'} mb-3`}>
+          {description}
+        </p>
       )}
 
       {/* Sparkline — Color accent strictly on stroke */}

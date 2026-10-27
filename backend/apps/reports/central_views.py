@@ -2,6 +2,7 @@ import logging
 from decimal import Decimal
 from django.db.models import Count, Sum, Q
 from django.utils import timezone
+from django.http import HttpResponse
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import BasePermission
@@ -14,6 +15,7 @@ from apps.users.models import CustomUser
 from apps.audit.models import AuditLog
 from apps.ai_gateway.models import AIInsight
 from apps.ai_gateway.services.suspicion_detector import get_all_suspicions
+from .pdf_generator import generate_central_report_pdf
 
 logger = logging.getLogger(__name__)
 
@@ -665,3 +667,98 @@ class CentralReportsView(APIView):
             "authorities": authorities_report,
             "reports": reports_catalog,
         })
+
+
+class CentralReportPdfView(APIView):
+    """
+    GET /api/central/reports/{report_id}/pdf/
+    توليد وتحميل التقرير الوطني بصيغة PDF قابلة للأرشفة مع رمز QR وبصمة تحقق (SHA-256).
+    مقتصر حصرياً على حسابات الإدارة المركزية (central_admin).
+    """
+    permission_classes = [IsCentralAdminUser]
+
+    def get(self, request, report_id):
+        # 1. جلب البيانات الوطنية المجمعة
+        authorities = CustomUser.objects.filter(role="authority").order_by("organization_name")
+        now = timezone.now()
+
+        total_national_volume = Decimal("0")
+        total_national_deals = 0
+        total_compliance_sum = 0.0
+        total_transparency_sum = 0.0
+        authorities_report = []
+
+        for auth in authorities:
+            deals = ProcurementDeal.objects.filter(authority=auth)
+            deals_count = deals.count()
+            total_national_deals += deals_count
+            budget_sum = deals.aggregate(Sum("estimated_budget"))["estimated_budget__sum"] or Decimal("0")
+            total_national_volume += budget_sum
+
+            delayed_deals = deals.filter(
+                submission_deadline__lt=now,
+                current_stage__gte=3,
+                current_stage__lte=8,
+            ).count()
+            on_time_ratio = round(((deals_count - delayed_deals) / deals_count) * 100, 1) if deals_count > 0 else 100.0
+
+            has_validated_specs = CahierSpecs.objects.filter(deal__in=deals, is_validated=True).exists()
+            has_open_sessions = OpeningSession.objects.filter(tender__in=deals).exists()
+            transparency_score = 65.0 + (15.0 if has_validated_specs else 0) + (15.0 if has_open_sessions else 0) + 5.0
+            transparency_score = max(40.0, min(99.0, round(transparency_score, 1)))
+
+            total_compliance_sum += on_time_ratio
+            total_transparency_sum += transparency_score
+
+            first_deal = deals.first()
+            wilaya_code, wilaya_ar, _ = normalize_wilaya(first_deal.wilaya if first_deal else "")
+
+            authorities_report.append({
+                "name": auth.organization_name or auth.display_name or auth.email,
+                "email": auth.email,
+                "wilaya": wilaya_ar,
+                "deals_count": deals_count,
+                "total_volume_dzd": float(budget_sum),
+                "compliance_rate": on_time_ratio,
+                "transparency_rate": transparency_score,
+                "status": "excellent" if on_time_ratio >= 90 else "normal",
+            })
+
+        auth_count = len(authorities_report) or 1
+        avg_compliance = round(total_compliance_sum / auth_count, 1)
+        avg_transparency = round(total_transparency_sum / auth_count, 1)
+
+        national_summary = {
+            "total_authorities": len(authorities_report),
+            "total_deals": total_national_deals,
+            "total_volume_dzd": float(total_national_volume),
+            "average_compliance_rate": avg_compliance,
+            "average_transparency_rate": avg_transparency,
+        }
+
+        # تحديد العنوان المناسب للتقرير
+        quarter = (now.month - 1) // 3 + 1
+        if "Q" in report_id.upper():
+            report_title = f"الحصيلة الوطنية الدورية للرقابة والصفقات — الثلاثي {quarter} / {now.year}"
+        elif "M" in report_id.upper():
+            report_title = f"التقرير الشهري لمؤشرات النزاهة والصفقات العمومية — {now.strftime('%B %Y')}"
+        else:
+            report_title = f"التقرير الوطني الاستراتيجي للصفقات العمومية — {report_id}"
+
+        # 2. توليد مستند الـ PDF المشفر
+        pdf_bytes, sha256_hash = generate_central_report_pdf(
+            report_id=report_id,
+            title=report_title,
+            period=now.strftime("%Y-%m"),
+            national_summary=national_summary,
+            authorities=authorities_report,
+            generated_by=f"{request.user.display_name or request.user.email} (الإدارة المركزية)",
+        )
+
+        # 3. إرجاع استجابة PDF رسمية
+        filename = f"safaqat_report_{report_id.lower().replace('-', '_')}.pdf"
+        response = HttpResponse(pdf_bytes, content_type="application/pdf")
+        response["Content-Disposition"] = f'attachment; filename="{filename}"'
+        response["X-Report-Id"] = report_id
+        response["X-Report-Checksum"] = sha256_hash
+        return response

@@ -14,7 +14,7 @@ from apps.procurements.models import CahierSpecs, ProcurementDeal
 from apps.ai_gateway.models import AIConversation, AIMessage
 from apps.ai_gateway.services.admin_assistant import sanitize_pii
 from apps.ai_gateway.services.operator_assistant import analyze_tender_for_operator
-from apps.ai_gateway.throttles import AIChatThrottle, AIInsightsThrottle
+from apps.ai_gateway.throttles import AIChatThrottle, AIInsightsThrottle, AIAnalyzeTenderThrottle
 
 logger = logging.getLogger(__name__)
 
@@ -33,19 +33,29 @@ LEGAL_SYSTEM_PROMPT = """
 
 def call_openai_chat(messages, model=None, temperature=0.2, max_tokens=2000, json_mode=False):
     """
-    استدعاء نموذج OpenAI عبر المتغيرات البيئية في .env
+    استدعاء نموذج OpenAI أو DeepSeek عبر المتغيرات البيئية في .env
     """
     openai_key = os.getenv("OPENAI_API_KEY", "").strip()
-    if not openai_key:
+    deepseek_key = os.getenv("DEEPSEEK_API_KEY", "").strip()
+
+    api_key = openai_key or deepseek_key
+    if not api_key:
         return None
 
-    openai_model = model or os.getenv("OPENAI_MODEL") or os.getenv("LLM_MODEL") or "gpt-4o-mini"
+    base_url = None
+    if deepseek_key and not openai_key:
+        base_url = os.getenv("DEEPSEEK_BASE_URL", "https://api.deepseek.com")
+        openai_model = model or os.getenv("DEEPSEEK_MODEL") or "deepseek-chat"
+    else:
+        base_url = os.getenv("OPENAI_BASE_URL", None)
+        openai_model = model or os.getenv("OPENAI_MODEL") or os.getenv("LLM_MODEL") or "gpt-4o-mini"
+
     if openai_model.startswith("gemini"):
         openai_model = "gpt-4o-mini"
 
     try:
         import openai
-        client = openai.OpenAI(api_key=openai_key)
+        client = openai.OpenAI(api_key=api_key, base_url=base_url) if base_url else openai.OpenAI(api_key=api_key)
         kwargs = {
             "model": openai_model,
             "messages": messages,
@@ -53,14 +63,14 @@ def call_openai_chat(messages, model=None, temperature=0.2, max_tokens=2000, jso
             "max_tokens": max_tokens,
             "timeout": 45.0,
         }
-        if json_mode and ("gpt-4" in openai_model or "gpt-3.5" in openai_model):
+        if json_mode and ("gpt-4" in openai_model or "gpt-3.5" in openai_model or "deepseek" in openai_model):
             kwargs["response_format"] = {"type": "json_object"}
 
         completion = client.chat.completions.create(**kwargs)
         if completion and completion.choices:
             return completion.choices[0].message.content.strip()
     except Exception as e:
-        logger.warning("فشل استدعاء OpenAI API: %s. سيتم التراجع للمحرك القانوني الداخلي.", e)
+        logger.warning("فشل استدعاء LLM API: %s. سيتم التراجع للمحرك القانوني الداخلي.", e)
 
     return None
 
@@ -233,9 +243,11 @@ class AISummarizeTenderView(APIView):
 class AILegalChatView(APIView):
     """
     POST /api/ai/legal-chat/
-    استشارة قانونية ذكية في الصفقات العمومية الجزائرية.
-    يستقبل سؤال المتعامل، ويرسله إلى نموذج OpenAI (عبر المتغيرات البيئية في .env)،
-    ويعيد الرد مع ذكر المادة القانونية (القانون 23-12 والمرسوم الرئاسي 15-247) إن أمكن.
+    استشارة قانونية ذكية في الصفقات العمومية الجزائرية بتقنية RAG (Retrieval-Augmented Generation).
+    1. يحول سؤال المستخدم إلى Vector (Embedding).
+    2. يبحث في قاعدة البيانات عن أقرب 3 مواد قانونية (Top-3 Similarity من القانون 23-12 والمرسوم 15-247).
+    3. يرسل المواد مع السؤال للـ LLM (OpenAI/DeepSeek) مع أمر صارم: "أجب باستخدام النصوص المسترجعة فقط، واذكر رقم المادة".
+    4. يعيد للمستخدم الإجابة + المواد القانونية التي استند إليها.
     """
     permission_classes = [permissions.IsAuthenticated]
     throttle_classes = [AIChatThrottle]
@@ -262,6 +274,17 @@ class AILegalChatView(APIView):
 
         clean_question = sanitize_pii(user_question)
 
+        # 1. RAG Step: البحث الدلالي الشعاعي عن أقرب 3 مواد قانونية (Top 3 Similarity)
+        from apps.legal_rag.services.rag_service import (
+            search_top_articles,
+            build_rag_system_prompt,
+            build_rag_user_prompt,
+            synthesize_local_rag_fallback,
+            extract_mentioned_articles,
+        )
+
+        top_articles = search_top_articles(clean_question, top_k=3)
+
         # إدارة المحادثة والسياق
         conversation = None
         conversation_id = request.data.get('conversation_id')
@@ -274,7 +297,7 @@ class AILegalChatView(APIView):
         if not conversation:
             conversation = AIConversation.objects.create(
                 user=request.user,
-                title=clean_question[:80] or "استشارة قانونية",
+                title=clean_question[:80] or "استشارة قانونية RAG",
             )
 
         AIMessage.objects.create(
@@ -284,48 +307,71 @@ class AILegalChatView(APIView):
             is_advisory=True,
         )
 
-        # بناء الرسائل مع السجل السابق
+        # 2. بناء رسائل LLM مع الأمر الصارم والمواد المسترجعة
+        rag_system_prompt = build_rag_system_prompt()
+        rag_user_prompt = build_rag_user_prompt(clean_question, top_articles)
+
         history_msgs = list(
             conversation.messages.order_by("created_at").values("role", "content")
-        )[-8:]
+        )[-6:]
 
-        messages = [{"role": "system", "content": LEGAL_SYSTEM_PROMPT}]
-        for item in history_msgs:
+        messages = [{"role": "system", "content": rag_system_prompt}]
+        for item in history_msgs[:-1]:
             if item.get("content"):
                 messages.append({"role": item["role"], "content": item["content"]})
+        messages.append({"role": "user", "content": rag_user_prompt})
 
-        # محاولة الاستدعاء عبر OpenAI أولاً إذا تم ضبط المفتاح في .env
+        # 3. الاستدعاء عبر LLM (OpenAI / DeepSeek)
         openai_key = os.getenv("OPENAI_API_KEY", "").strip()
-        openai_model = os.getenv("OPENAI_MODEL", os.getenv("LLM_MODEL", "gpt-4o-mini"))
+        deepseek_key = os.getenv("DEEPSEEK_API_KEY", "").strip()
+        openai_model = os.getenv("OPENAI_MODEL") or os.getenv("LLM_MODEL", "gpt-4o-mini")
         reply = None
-        model_used = f"OpenAI ({openai_model})"
+        model_used = f"DeepSeek ({os.getenv('DEEPSEEK_MODEL', 'deepseek-chat')})" if (deepseek_key and not openai_key) else f"OpenAI ({openai_model})"
 
-        if openai_key:
+        if openai_key or deepseek_key:
             reply = call_openai_chat(messages, model=openai_model)
 
-        # التراجع للمحرك القانوني المحلي عند غياب المفتاح أو فشل الاتصال
+        # التراجع للمولد المحلي الذكي المستند حصراً للنصوص المسترجعة عند غياب المفاتيح أو فشل الاتصال
         if not reply:
-            reply = get_legal_fallback_response(clean_question)
-            model_used = "safaqat-legal-knowledge-base (Law 23-12 & Decree 15-247)"
+            reply = synthesize_local_rag_fallback(clean_question, top_articles)
+            model_used = "safaqat-legal-rag (pgvector + Law 23-12 & Decree 15-247)"
 
         final_reply = sanitize_pii(reply).strip()
 
-        # استخراج أرقام المواد القانونية المذكورة في الرد
-        pattern = r'(?:المادة|مادة)\s+\d+(?:\s+من\s+(?:القانون|المرسوم|الأمر)\s*[\w\s\d-]+)?'
-        matches = re.findall(pattern, final_reply)
-        legal_articles = list(dict.fromkeys(matches))
+        # 4. تجميع المواد القانونية المستند إليها
+        retrieved_data = []
+        referenced_articles_set = set()
+
+        for art, score in top_articles:
+            retrieved_data.append({
+                'id': art.id,
+                'law_source': art.law_source,
+                'article_number': art.article_number,
+                'title': art.title,
+                'content': art.content if len(art.content) <= 500 else art.content[:500] + "...",
+                'similarity_score': score,
+            })
+            referenced_articles_set.add(f"{art.law_source} - {art.article_number}")
+
+        for match in extract_mentioned_articles(final_reply):
+            referenced_articles_set.add(match)
+
+        legal_articles = list(referenced_articles_set)
 
         sources = [
             "القانون رقم 23-12 المؤرخ في 5 أوت 2023 المحدد للقواعد العامة للصفقات العمومية",
-            "المرسوم الرئاسي رقم 15-247 المتعلق بتنظيم الصفقات العمومية",
-            "القانون رقم 18-07 المتعلق بحماية المعطيات الشخصية",
+            "المرسوم الرئاسي رقم 15-247 المتعلق بتنظيم الصفقات العمومية وتفويضات المرفق العام",
         ]
 
         AIMessage.objects.create(
             conversation=conversation,
             role=AIMessage.Role.ASSISTANT,
             content=final_reply,
-            context_used={"model": model_used, "legal_articles": legal_articles},
+            context_used={
+                "model": model_used,
+                "legal_articles": legal_articles,
+                "retrieved_articles": retrieved_data,
+            },
             sources=sources,
             tokens_used=len(final_reply.split()),
             is_advisory=True,
@@ -338,11 +384,14 @@ class AILegalChatView(APIView):
             'conversation_id': str(conversation.id),
             'sources': sources,
             'legal_articles': legal_articles,
+            'retrieved_articles': retrieved_data,
             'model_used': model_used,
+            'rag_enabled': True,
+            'top_k': len(retrieved_data),
             'is_advisory': True,
             'human_verification_required': True,
             'statutory_reference': 'القانون 23-12 والمرسوم الرئاسي 15-247',
-            'disclaimer': 'هذه الاستشارة آلية استرشادية، وتخضع لسلطة لجان الصفقات ولجنة مراجعة الصفقات العمومية وفق القانون 23-12.'
+            'disclaimer': 'هذه الاستشارة آلية مستندة حصراً إلى نصوص القانون 23-12 والمرسوم الرئاسي 15-247، وتخضع لسلطة لجان الصفقات المختصة ولجنة مراجعة الصفقات العمومية وفق القانون 23-12.'
         }, status=status.HTTP_200_OK)
 
 
@@ -354,7 +403,7 @@ class AIAnalyzeTenderView(APIView):
     ثم يرسله إلى OpenAI لتلخيص أهم الشروط والمواعيد والضمانات.
     """
     permission_classes = [permissions.IsAuthenticated]
-    throttle_classes = [AIInsightsThrottle]
+    throttle_classes = [AIAnalyzeTenderThrottle]
 
     def post(self, request):
         if getattr(request.user, 'role', None) != 'operator':

@@ -30,26 +30,26 @@ export function WilayaDetailCard({
   const hasWarnings = wilaya.warnings > 0;
 
   return (
-    <div className="bg-white/95 backdrop-blur-md rounded-2xl border border-[var(--color-border-subtle)] shadow-2xl p-6 transition-all duration-300 animate-in fade-in slide-in-from-bottom-4">
+    <div className="bg-white/95 backdrop-blur-md rounded-2xl border border-gray-200 shadow-lg p-5 transition-all duration-300 animate-in fade-in slide-in-from-bottom-4">
       {/* Header */}
-      <div className="flex items-start justify-between gap-4 mb-5 pb-4 border-b border-[var(--color-border-subtle)]">
+      <div className="flex items-start justify-between gap-4 mb-4 pb-4 border-b border-gray-200">
         <div>
           <div className="flex items-center gap-2">
-            <span className="inline-flex items-center justify-center px-2 py-0.5 rounded text-xs font-mono font-bold bg-[var(--paper-100)] text-[var(--ink-700)] border border-[var(--color-border-subtle)]">
+            <span className="inline-flex items-center justify-center px-2 py-0.5 rounded text-xs font-mono font-bold bg-gray-50 text-gray-600 border border-gray-200">
               ولاية {wilaya.code}
             </span>
             {wilaya.nameFr && (
-              <span className="text-xs text-[var(--ink-500)] font-sans">
+              <span className="text-xs text-gray-500 font-sans">
                 {wilaya.nameFr}
               </span>
             )}
           </div>
-          <h3 className="heading-h3 text-xl font-bold text-[var(--ink-900)] mt-1">
+          <h3 className="heading-h3 text-lg font-bold text-[var(--ink-900)] mt-1">
             {wilaya.name}
           </h3>
           {wilaya.risk_level && (
             <span
-              className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold mt-2"
+              className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold mt-2"
               style={{
                 backgroundColor:
                   wilaya.risk_level === 'critical'
@@ -100,16 +100,16 @@ export function WilayaDetailCard({
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-3 gap-3 mb-5">
-        <div className="bg-[var(--paper-50)] border border-[var(--color-border-subtle)] rounded-xl p-3 text-center">
-          <span className="block text-xs text-[var(--ink-500)] mb-1">الصفقات</span>
+      <div className="grid grid-cols-3 gap-3 mb-4">
+        <div className="bg-gray-50 border border-gray-200 rounded-xl p-3 text-center">
+          <span className="block text-sm text-gray-500 mb-1">الصفقات</span>
           <span className="block text-xl font-bold text-[var(--ink-900)] font-mono">
             {wilaya.tenders_count}
           </span>
         </div>
 
-        <div className="bg-[var(--paper-50)] border border-[var(--color-border-subtle)] rounded-xl p-3 text-center">
-          <span className="block text-xs text-[var(--ink-500)] mb-1">مليار دج</span>
+        <div className="bg-gray-50 border border-gray-200 rounded-xl p-3 text-center">
+          <span className="block text-sm text-gray-500 mb-1">مليار دج</span>
           <span className="block text-xl font-bold text-[var(--stamp-green-700)] font-mono">
             {wilaya.budget}
           </span>
@@ -119,12 +119,12 @@ export function WilayaDetailCard({
           className={`border rounded-xl p-3 text-center ${
             hasWarnings
               ? 'bg-rose-50 border-rose-200 text-rose-700'
-              : 'bg-[var(--paper-50)] border-[var(--color-border-subtle)] text-[var(--ink-900)]'
+              : 'bg-gray-50 border-gray-200 text-[var(--ink-900)]'
           }`}
         >
-          <span className="block text-xs opacity-80 mb-1">الشبهات</span>
+          <span className="block text-sm opacity-80 mb-1">الشبهات</span>
           <div className="flex items-center justify-center gap-1">
-            {hasWarnings && <AlertTriangle className="w-3.5 h-3.5 text-rose-600 animate-pulse" />}
+            {hasWarnings && <AlertTriangle className="w-4 h-4 text-rose-600 animate-pulse" />}
             <span
               className={`block text-xl font-bold font-mono ${
                 hasWarnings ? 'text-rose-700' : 'text-[var(--ink-900)]'
@@ -137,28 +137,28 @@ export function WilayaDetailCard({
       </div>
 
       {/* AI Insights Card */}
-      <div className="ai-card mb-5">
+      <div className="ai-card mb-4">
         <div className="flex items-center justify-between mb-2 relative z-10">
           <div className="flex items-center gap-1.5">
             <Sparkles className="w-4 h-4 text-[var(--ai-text)] ai-sparkle" />
-            <h4 className="text-xs font-bold text-[var(--ai-text-strong)]">
+            <h4 className="text-sm font-bold text-[var(--ai-text-strong)]">
               تحليل الذكاء الاصطناعي
             </h4>
             <span className="ai-badge">AI</span>
           </div>
-          <span className="text-[10px] text-[var(--ai-text)]/80 font-medium">
+          <span className="text-xs text-[var(--ai-text)]/80 font-medium">
             استشاري فقط
           </span>
         </div>
 
-        <div className="text-xs leading-relaxed text-[var(--ink-700)] relative z-10 space-y-1.5">
+        <div className="text-sm leading-relaxed text-[var(--ink-700)] relative z-10 space-y-1.5">
           {hasWarnings ? (
             <>
               <p className="font-semibold text-rose-800 flex items-center gap-1.5">
-                <AlertTriangle className="w-3.5 h-3.5 text-rose-600 flex-none" />
+                <AlertTriangle className="w-4 h-4 text-rose-600 flex-none" />
                 رصد {wilaya.warnings} حالات اشتباه إجرائي تستدعي الفحص الرقابي.
               </p>
-              <ul className="list-disc list-inside space-y-1 text-[11px] text-[var(--ink-700)] ps-1">
+              <ul className="list-disc list-inside space-y-1 text-sm text-[var(--ink-700)] ps-1">
                 {wilaya.warningDetails && wilaya.warningDetails.length > 0 ? (
                   wilaya.warningDetails.map((detail, idx) => (
                     <li key={idx}>{detail}</li>
@@ -180,20 +180,20 @@ export function WilayaDetailCard({
       {/* Actions */}
       <div className="flex items-center gap-2">
         <Button
-          className="flex-1 bg-[var(--stamp-green-700)] hover:bg-[var(--stamp-green-900)] text-white text-xs h-9 gap-1.5"
+          className="flex-1 bg-[var(--stamp-green-700)] hover:bg-[var(--stamp-green-900)] text-white text-sm h-10 gap-1.5"
           onClick={() => onViewTenders?.(wilaya.code)}
         >
           <span>عرض كل الصفقات</span>
-          <ArrowUpRight className="w-3.5 h-3.5" />
+          <ArrowUpRight className="w-4 h-4" />
         </Button>
 
         {onNotifyAuthority && (
           <Button
             variant="outline"
-            className="border-[var(--color-border-subtle)] text-xs h-9 gap-1.5 hover:bg-[var(--paper-100)]"
+            className="border-gray-200 text-sm h-10 gap-1.5 hover:bg-gray-50"
             onClick={() => onNotifyAuthority(wilaya.code)}
           >
-            <BellRing className="w-3.5 h-3.5 text-[var(--stamp-gold-700)]" />
+            <BellRing className="w-4 h-4 text-[var(--stamp-gold-700)]" />
             <span>إخطار المصلحة</span>
           </Button>
         )}

@@ -312,7 +312,7 @@ export function AuthoritySessionControl() {
                 onClick={handleDownloadPdf}
                 disabled={isDownloadingPdf}
                 className="border-slate-300 hover:bg-slate-100 text-slate-800 font-bold text-xs gap-1.5 rounded-xl shadow-sm px-3.5 py-2"
-                title="تصدير وتحميل محضر وقائع جلسة فتح الأظرفة بصيغة PDF قابلة للطباعة والتوقيع"
+                title="تصدير وتحميل محضر وقائع جلسة فتح الأظرفة بصيغة PDF قابلة للطباعة والأرشفة"
               >
                 <FileText className="w-4 h-4 text-blue-700" />
                 <span>{isDownloadingPdf ? "جاري التوليد..." : "تحميل المحضر (PDF)"}</span>

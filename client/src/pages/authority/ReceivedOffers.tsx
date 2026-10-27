@@ -171,7 +171,7 @@ export function ReceivedOffers() {
               {opp.status === 'published' && 'الصفقة مفتوحة لاستقبال عروض المتعاملين الاقتصاديين.'}
               {opp.status === 'submission_closed' && 'تم إغلاق أجل الإيداع. الصفقة جاهزة لانعقاد جلسة فتح الأظرفة.'}
               {opp.status === 'opening_in_progress' && 'جلسة فتح الأظرفة جارية حالياً (المادتان 71 و72 من المرسوم 15-247).'}
-              {['opened_pv_signed', 'technical_evaluation', 'financial_evaluation'].includes(opp.status) && 'تم توقيع محضر الفتح. العروض قيد الفحص والتقييم.'}
+              {['opened_pv_signed', 'technical_evaluation', 'financial_evaluation'].includes(opp.status) && 'تم اعتماد محضر الفتح وأرشفته. العروض قيد الفحص والتقييم.'}
               {opp.status === 'provisional_award' && 'تم المنح المؤقت للصفقة واعتماد محضر التقييم النهائي.'}
             </p>
           </div>
@@ -212,7 +212,7 @@ export function ReceivedOffers() {
               <Button
                 size="sm"
                 className="text-xs rounded-xl gap-1.5 bg-navy-900 text-white hover:bg-navy-800"
-                onClick={() => setLocation(`/authority/opportunities/${id}/opening`)}
+                onClick={() => setLocation('/authority/opening-sessions')}
               >
                 {t('lifecycle.opening.convene_btn')}
               </Button>
@@ -222,7 +222,7 @@ export function ReceivedOffers() {
               <Button
                 size="sm"
                 className="text-xs rounded-xl gap-1.5 bg-blue-700 hover:bg-blue-800 text-white"
-                onClick={() => setLocation(`/authority/opportunities/${id}/opening`)}
+                onClick={() => setLocation('/authority/opening-sessions')}
               >
                 الدخول لجلسة الفتح
               </Button>

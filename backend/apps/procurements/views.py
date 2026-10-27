@@ -7,6 +7,7 @@ from django.http import FileResponse
 from rest_framework import viewsets, permissions, views, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.throttling import UserRateThrottle, AnonRateThrottle
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from django.shortcuts import get_object_or_404
 from apps.bids.models import BidOffer
@@ -58,6 +59,7 @@ class ProcurementDealViewSet(viewsets.ModelViewSet):
     queryset = ProcurementDeal.objects.all().select_related('authority')
     serializer_class = ProcurementDealSerializer
     permission_classes = [IsContractingAuthorityOrReadOnly]
+    throttle_classes = [UserRateThrottle, AnonRateThrottle]
 
     def perform_create(self, serializer):
         serializer.save(authority=self.request.user)

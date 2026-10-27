@@ -33,6 +33,9 @@ module.exports = {
       },
       fontFamily: {
         sans: ['Cairo', 'sans-serif'],
+        display: ['Cairo', 'sans-serif'],
+        body: ['Cairo', 'sans-serif'],
+        cairo: ['Cairo', 'sans-serif'],
       },
       fontWeight: {
         normal: '400',

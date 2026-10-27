@@ -53,8 +53,11 @@ export default defineConfig({
       workbox: {
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
+        // Never serve the SPA shell for API routes.
+        navigateFallbackDenylist: [/^\/api\//],
         runtimeCaching: [
           {
+            // Static third-party assets only.
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
             handler: "CacheFirst",
             options: {
@@ -63,13 +66,10 @@ export default defineConfig({
             },
           },
           {
+            // API responses must never be written to Cache Storage.
+            // Authenticated, financial, and personal data stay network-only.
             urlPattern: /^(?:https?:\/\/[^/]+)?\/api\/.*/i,
-            handler: "NetworkFirst",
-            options: {
-              cacheName: "api-cache",
-              networkTimeoutSeconds: 10,
-              expiration: { maxEntries: 100, maxAgeSeconds: 60 * 60 * 24 },
-            },
+            handler: "NetworkOnly",
           },
         ],
       },

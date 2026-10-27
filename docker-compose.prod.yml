@@ -5,7 +5,7 @@ version: '3.8'
 
 services:
   db:
-    image: postgres:16-alpine
+    image: pgvector/pgvector:pg16
     container_name: safaqat_postgres_prod
     restart: always
     environment:
@@ -16,6 +16,21 @@ services:
       - postgres_data_prod:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-safaqat_user} -d ${POSTGRES_DB:-safaqat_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - safaqat_prod_network
+
+  redis:
+    image: redis:7-alpine
+    container_name: safaqat_redis_prod
+    restart: always
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data_prod:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -37,16 +52,19 @@ services:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_HOST=db
       - POSTGRES_PORT=5432
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_URL=redis://redis:6379/0
       - DJANGO_ALLOWED_HOSTS=${DJANGO_ALLOWED_HOSTS:-localhost,127.0.0.1,backend,web,nginx,safaqat.dz,www.safaqat.dz}
       - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS:-http://localhost,http://127.0.0.1,http://localhost:80,http://safaqat.dz,https://safaqat.dz}
       - CSRF_TRUSTED_ORIGINS=${CSRF_TRUSTED_ORIGINS:-http://localhost,http://127.0.0.1,http://localhost:80,http://safaqat.dz,https://safaqat.dz}
-      - GUNICORN_WORKERS=${GUNICORN_WORKERS:-4}
-      - GUNICORN_TIMEOUT=${GUNICORN_TIMEOUT:-120}
     volumes:
       - django_static_prod:/app/staticfiles
       - django_media_prod:/app/media
     depends_on:
       db:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     networks:
       - safaqat_prod_network
@@ -62,7 +80,8 @@ services:
       - "${SSL_PORT:-443}:443"
     volumes:
       - django_static_prod:/app/staticfiles:ro
-      - django_media_prod:/app/media:ro
+      - ./docker/nginx/ssl/safaqat.crt:/etc/ssl/certs/safaqat.crt:ro
+      - ./docker/nginx/ssl/safaqat.key:/etc/ssl/private/safaqat.key:ro
     depends_on:
       - backend
     networks:
@@ -71,6 +90,8 @@ services:
 volumes:
   postgres_data_prod:
     name: safaqat_postgres_data_prod
+  redis_data_prod:
+    name: safaqat_redis_data_prod
   django_static_prod:
     name: safaqat_django_static_prod
   django_media_prod:

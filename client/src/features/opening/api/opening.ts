@@ -34,6 +34,19 @@ export const openingApi = {
       .post<OpeningEvent>(`/procurements/sessions/${id}/open-offer/`, payload)
       .then((r) => r.data),
 
+  openEnvelope: (
+    id: string,
+    payload: { offer_id: string; envelope_type: string; notes?: string }
+  ) =>
+    api
+      .post<OpeningEvent>(`/api/opening/sessions/${id}/open-envelope/`, payload)
+      .then((r) => r.data),
+
+  getEvents: (id: string) =>
+    api
+      .get<OpeningEvent[]>(`/api/opening/sessions/${id}/events/`)
+      .then((r) => r.data),
+
   end: (id: string) =>
     api
       .post<OpeningSessionDetail>(`/procurements/sessions/${id}/end/`)

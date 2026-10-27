@@ -1,9 +1,9 @@
 import { useAuth } from '@/components/auth/AuthProvider';
 import { useI18n } from '@/i18n';
 import { Link } from 'wouter';
-import { Languages, LucideIcon, HelpCircle, X, Check } from 'lucide-react';
+import { Languages, LucideIcon, HelpCircle, X } from 'lucide-react';
 import { LogoutButton, DesktopAppButton } from '@/shared/components';
-import { SafaqatLogo } from '@/components/brand/SafaqatLogo';
+import { Logo } from '@/components/ui/Logo';
 
 export interface PortalSidebarItem {
   label: string;
@@ -20,8 +20,6 @@ export interface PortalSidebarProps {
   items: PortalSidebarItem[];
   /** CSS var name — default 'var(--stamp-green-700)' */
   accentColor?: string;
-  /** حرف واحد — إذا وُجد، نعرض دائرة gradient (Central فقط) */
-  brandInitial?: string;
   /** show DesktopAppButton in footer */
   showDesktopAppButton?: boolean;
   /** يُستدعى عند النقر على رابط — لإغلاق Sheet الموبايل */
@@ -38,7 +36,6 @@ export function PortalSidebar({
   title,
   subtitle,
   items,
-  brandInitial,
   showDesktopAppButton = false,
   onLinkClick,
   badgeTitle,
@@ -63,8 +60,8 @@ export function PortalSidebar({
         {/* 1. منطقة الهوية */}
         <div className="flex flex-none items-center justify-between gap-3 border-b border-white/10 px-5 py-[18px]">
           <div className="flex min-w-0 items-center gap-3">
-            <div className="flex size-10 flex-none items-center justify-center rounded-xl bg-white text-base font-bold text-[#0f3154] shadow-sm">
-              {brandInitial || 'ص'}
+            <div className="flex size-10 flex-none items-center justify-center rounded-xl bg-white shadow-sm">
+              <Logo size={36} />
             </div>
             <div className="min-w-0">
               <h2 className="truncate text-lg font-bold leading-tight text-white">{title}</h2>
@@ -125,7 +122,7 @@ export function PortalSidebar({
         <div className="h-[72px] flex-none bg-white/10 backdrop-blur-xs flex items-center justify-between gap-2.5 px-4 border-b border-white/20">
           <div className="flex items-center gap-2.5">
             <div className="bg-white p-1 rounded-xl shadow-xs">
-              <SafaqatLogo size={36} title="" className="shrink-0" />
+              <Logo size={36} className="shrink-0" />
             </div>
             <span className="text-[20px] font-extrabold text-white">صفقات ذكية</span>
           </div>
@@ -183,8 +180,8 @@ export function PortalSidebar({
         {/* 1. Header — منطقة العنوان */}
         <div className="p-5 border-b border-white/10 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="size-10 rounded-xl bg-white text-[#0b4348] font-bold text-base flex items-center justify-center shadow-sm flex-none">
-              <Check className="size-6 stroke-[3]" />
+            <div className="size-10 rounded-xl bg-white flex items-center justify-center shadow-sm flex-none">
+              <Logo size={36} />
             </div>
             <div className="min-w-0">
               <h2 className="text-lg font-bold text-white leading-tight truncate">
@@ -244,11 +241,9 @@ export function PortalSidebar({
             </div>
           ) : (
             <div className="flex items-center gap-3">
-              {brandInitial && (
-                <div className="size-10 rounded-xl bg-white text-[#1F6B54] border border-[#E7EAED] font-bold text-base flex items-center justify-center shadow-xs flex-none">
-                  {brandInitial}
-                </div>
-              )}
+              <div className="size-10 rounded-xl bg-white border border-[#E7EAED] flex items-center justify-center shadow-xs flex-none">
+                <Logo size={36} />
+              </div>
               <div className="min-w-0">
                 <h2 className="text-base font-bold text-[#1F6B54] leading-tight truncate">
                   {title}
@@ -378,11 +373,9 @@ export function PortalSidebar({
           </div>
         ) : (
           <div className="flex items-center gap-3">
-            {brandInitial && (
-              <div className="size-10 rounded-xl bg-white text-[#0b4348] font-bold text-base flex items-center justify-center shadow-sm flex-none">
-                {brandInitial}
-              </div>
-            )}
+            <div className="size-10 rounded-xl bg-white flex items-center justify-center shadow-sm flex-none">
+              <Logo size={36} />
+            </div>
             <div className="min-w-0">
               <h2 className="text-lg font-bold text-white leading-tight truncate">
                 {title}

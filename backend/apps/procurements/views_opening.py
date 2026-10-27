@@ -1,5 +1,7 @@
+import json
 import logging
 from django.db import models
+from django.http import StreamingHttpResponse
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework import permissions, status
@@ -10,6 +12,7 @@ from apps.audit.models import AuditLog
 from apps.bids.models import BidOffer
 from apps.users.models import CustomUser
 
+from .broadcasting import broadcast_session_event
 from .models import OpeningEvent, OpeningSession, ProcurementDeal, SessionAccess
 from .serializers import (
     DealOfferSummarySerializer,
@@ -51,7 +54,7 @@ class HasSessionAccess(permissions.BasePermission):
         if role == "operator":
             if obj.access_policy == "public":
                 return True
-            return obj.accesses.filter(operator=user, revoked_at__isnull=True).exists()
+            return obj.accesses.filter(operator=user, has_access=True, revoked_at__isnull=True).exists()
 
         return False
 
@@ -245,7 +248,7 @@ class SessionStartView(APIView):
                 status=status.HTTP_403_FORBIDDEN,
             )
 
-        if session.status != "scheduled":
+        if session.status not in ["scheduled", "pending"]:
             return Response(
                 {"detail": f"لا يمكن بدء الجلسة، حالتها الحالية: ({session.get_status_display()})."},
                 status=status.HTTP_400_BAD_REQUEST,
@@ -262,8 +265,13 @@ class SessionStartView(APIView):
         session.started_at = timezone.now()
         session.save(update_fields=["status", "started_at"])
 
+        # نقل الصفقة تلقائياً إلى مرحلة فتح الأظرفة (المرحلة 4) لفك حجب المبالغ المالية نظامياً
+        if session.tender.current_stage < 4:
+            session.tender.current_stage = 4
+            session.tender.save(update_fields=["current_stage"])
+
         # إنشاء حدث بدء الجلسة
-        OpeningEvent.objects.create(
+        start_event = OpeningEvent.objects.create(
             session=session,
             event_type="session_started",
             order=0,
@@ -286,11 +294,164 @@ class SessionStartView(APIView):
             },
         )
 
+        # بث بدء الجلسة لجميع المتعاملين المتصلين عبر WebSockets
+        broadcast_session_event(str(session.id), {
+            "type": "session_started",
+            "event_type": "session_started",
+            "session_id": str(session.id),
+            "status": "live",
+            "started_at": session.started_at.isoformat(),
+            "message": "تم افتتاح وبدء جلسة فتح الأظرفة العلنية رسمياً",
+            "timestamp": timezone.now().isoformat(),
+        })
+
         logger.info("تم بدء جلسة فتح الأظرفة %s بنجاح", session.id)
         return Response(
             OpeningSessionDetailSerializer(session, context={"request": request}).data,
             status=status.HTTP_200_OK,
         )
+
+
+class SessionOpenEnvelopeView(APIView):
+    """
+    POST /api/opening/sessions/{id}/open-envelope/
+    (وأيضاً /api/procurements/sessions/{id}/open-envelope/)
+    فتح ظرف عرض متعامل اقتصادي (تقني أو مالي)، فك تشفير المبلغ، وبث الحدث للمتعاملين عبر WebSocket.
+    """
+
+    permission_classes = [IsAuthority]
+
+    def post(self, request, pk):
+        session = get_object_or_404(OpeningSession.objects.select_related("tender"), pk=pk)
+
+        if session.tender.authority_id != request.user.id and not request.user.is_staff and getattr(request.user, "role", None) != "central_admin":
+            return Response(
+                {"detail": "المصلحة المتعاقدة صاحبة الصفقة فقط مخولة بفتح الأظرفة."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        if session.status != "live":
+            return Response(
+                {"detail": f"جلسة الفتح ليست جارية حالياً (الحالة الحالية: {session.get_status_display()})."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        offer_id = request.data.get("offer_id")
+        envelope_type = str(request.data.get("envelope_type", "financial")).lower().strip()
+        notes = request.data.get("notes", "")
+
+        if not offer_id:
+            return Response(
+                {"detail": "حقل offer_id مطلوب."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        offer = get_object_or_404(BidOffer.objects.select_related("deal", "operator"), pk=offer_id)
+
+        if offer.deal_id != session.tender_id:
+            return Response(
+                {"detail": "العرض المحدد لا ينتمي إلى صفقة هذه الجلسة."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # العروض المفتوحة في الجلسة هي المودَعة داخل الأجل حصراً — المسودات والمتأخرة مستبعدة
+        if offer.status == "draft":
+            return Response(
+                {"detail": "العرض المحدد مسودة غير مودعة رسمياً؛ لا يُفتح في الجلسة إلا العرض المودَع."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        deadline = session.tender.submission_deadline
+        if deadline and offer.submission_timestamp and offer.submission_timestamp > deadline:
+            return Response(
+                {"detail": "العرض المحدد أُودع بعد انقضاء الأجل القانوني؛ يُستبعد من الجلسة."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # فك التشفير وتحديد نوع الواقعة والمبلغ المالي
+        if envelope_type in ["financial", "opened_financial", "fin"]:
+            norm_event_type = "opened_financial"
+            # فك تشفير وقراءة المبلغ المالي المودع
+            announced_amount = offer.financial_amount
+        elif envelope_type in ["technical", "opened_technical", "tech"]:
+            norm_event_type = "opened_technical"
+            announced_amount = None
+        else:
+            norm_event_type = "offer_opened"
+            announced_amount = offer.financial_amount
+
+        # منع فتح نفس الظرف مرتين لنفس العرض (سلامة المحضر)
+        if OpeningEvent.objects.filter(session=session, offer=offer, event_type=norm_event_type).exists():
+            return Response(
+                {"detail": f"تم فتح هذا الظرف ({norm_event_type}) مسبقاً لهذا العرض في محضر الجلسة."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        session.opened_count += 1
+        session.save(update_fields=["opened_count"])
+
+        event = OpeningEvent.objects.create(
+            session=session,
+            offer=offer,
+            event_type=norm_event_type,
+            order=session.opened_count,
+            announced_price=announced_amount,
+            announced_amount=announced_amount,
+            is_accepted=True,
+            notes=notes or f"فتح {norm_event_type} للعرض {offer.id}",
+            created_by=request.user,
+        )
+
+        # توثيق في سجل التدقيق غير القابل للتعديل
+        AuditLog.objects.create(
+            user=request.user,
+            action=f"envelope_opened_{norm_event_type}",
+            resource_type="OpeningEvent",
+            resource_id=str(event.id),
+            description=f"فتح ظرف {norm_event_type} للعرض {offer.id} في جلسة الصفقة {session.tender.reference_number}",
+            changes={
+                "session_id": str(session.id),
+                "offer_id": str(offer.id),
+                "envelope_type": envelope_type,
+                "event_type": norm_event_type,
+                "announced_amount": str(announced_amount) if announced_amount is not None else None,
+                "order": event.order,
+            },
+        )
+
+        op_name = (
+            getattr(offer.operator, "display_name", None)
+            or getattr(offer.operator, "organization_name", None)
+            or getattr(offer.operator, "company_name", None)
+            or offer.operator.email
+        )
+
+        broadcast_data = {
+            "type": "envelope_opened",
+            "event_type": norm_event_type,
+            "session_id": str(session.id),
+            "event_id": str(event.id),
+            "offer_id": str(offer.id),
+            "operator_id": str(offer.operator_id),
+            "operator_name": op_name,
+            "announced_amount": float(announced_amount) if announced_amount is not None else None,
+            "announced_price": float(announced_amount) if announced_amount is not None else None,
+            "envelope_type": envelope_type,
+            "order": event.order,
+            "is_accepted": event.is_accepted,
+            "timestamp": event.created_at.isoformat(),
+            "notes": event.notes,
+        }
+
+        # بث الحدث عبر WebSocket لجميع المتعاملين المتصلين
+        broadcast_session_event(str(session.id), broadcast_data)
+
+        logger.info(
+            "تم فتح ظرف %s للعرض %s في الجلسة %s وبثه عبر WebSockets",
+            norm_event_type,
+            offer.id,
+            session.id,
+        )
+        return Response(broadcast_data, status=status.HTTP_201_CREATED)
 
 
 class SessionOpenOfferView(APIView):
@@ -381,6 +542,22 @@ class SessionOpenOfferView(APIView):
             },
         )
 
+        # بث الحدث للمتعاملين المتصلين عبر WebSockets
+        broadcast_session_event(str(session.id), {
+            "type": "offer_opened",
+            "event_type": event.event_type,
+            "session_id": str(session.id),
+            "event_id": str(event.id),
+            "offer_id": str(offer.id),
+            "operator_id": str(offer.operator_id),
+            "announced_amount": float(event.announced_price) if event.announced_price else None,
+            "announced_price": float(event.announced_price) if event.announced_price else None,
+            "order": event.order,
+            "is_accepted": event.is_accepted,
+            "timestamp": event.created_at.isoformat(),
+            "notes": event.notes,
+        })
+
         logger.info(
             "تم فتح العرض %s في الجلسة %s بالترتيب %s",
             offer.id,
@@ -445,6 +622,18 @@ class SessionEndView(APIView):
             },
         )
 
+        # بث اختتام الجلسة لجميع المتصلين عبر WebSockets
+        broadcast_session_event(str(session.id), {
+            "type": "session_ended",
+            "event_type": "session_ended",
+            "session_id": str(session.id),
+            "status": "ended",
+            "ended_at": session.ended_at.isoformat(),
+            "opened_count": session.opened_count,
+            "message": "تم اختتام جلسة فتح الأظرفة العلنية رسمياً",
+            "timestamp": timezone.now().isoformat(),
+        })
+
         logger.info("تم اختتام جلسة فتح الأظرفة %s بنجاح", session.id)
         return Response(
             OpeningSessionDetailSerializer(session, context={"request": request}).data,
@@ -485,4 +674,81 @@ class SessionOffersView(APIView):
 
         serializer = DealOfferSummarySerializer(offers, many=True, context={"request": request})
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class SessionEventsView(APIView):
+    """
+    GET /api/opening/sessions/{id}/events/
+    (وأيضاً /api/procurements/sessions/{id}/events/)
+    استرجاع سجل وقائع وأحداث جلسة الفتح (لمن دخل متأخراً أو لإعادة المزامنة).
+    """
+
+    permission_classes = [permissions.IsAuthenticated, HasSessionAccess]
+
+    def get(self, request, pk):
+        session = get_object_or_404(OpeningSession.objects.select_related("tender"), pk=pk)
+        self.check_object_permissions(request, session)
+
+        events = session.events.select_related("offer", "offer__operator").order_by("order", "created_at")
+
+        results = []
+        for ev in events:
+            op_name = None
+            if ev.offer and ev.offer.operator:
+                op = ev.offer.operator
+                op_name = (
+                    getattr(op, "display_name", None)
+                    or getattr(op, "organization_name", None)
+                    or getattr(op, "company_name", None)
+                    or op.email
+                )
+
+            amount = ev.announced_amount if ev.announced_amount is not None else ev.announced_price
+
+            results.append({
+                "id": str(ev.id),
+                "session_id": str(session.id),
+                "event_type": ev.event_type,
+                "event_type_display": ev.get_event_type_display(),
+                "offer_id": str(ev.offer_id) if ev.offer_id else None,
+                "operator_id": str(ev.offer.operator_id) if ev.offer else None,
+                "operator_name": op_name,
+                "announced_amount": float(amount) if amount is not None else None,
+                "announced_price": float(amount) if amount is not None else None,
+                "order": ev.order,
+                "is_accepted": ev.is_accepted,
+                "notes": ev.notes,
+                "timestamp": ev.created_at.isoformat(),
+            })
+
+        return Response(results, status=status.HTTP_200_OK)
+
+
+class SessionSSEStreamView(APIView):
+    """
+    GET /api/opening/sessions/{id}/stream/
+    بث وقائع الجلسة عبر تقنية Server-Sent Events (SSE).
+    """
+
+    permission_classes = [permissions.IsAuthenticated, HasSessionAccess]
+
+    def get(self, request, pk):
+        session = get_object_or_404(OpeningSession.objects.select_related("tender"), pk=pk)
+        self.check_object_permissions(request, session)
+
+        def event_stream():
+            init_payload = {
+                "type": "init",
+                "session_id": str(session.id),
+                "status": session.status,
+                "opened_count": session.opened_count,
+                "total_offers": session.total_offers,
+                "timestamp": timezone.now().isoformat(),
+            }
+            yield f"data: {json.dumps(init_payload, ensure_ascii=False)}\n\n"
+
+        response = StreamingHttpResponse(event_stream(), content_type="text/event-stream")
+        response["Cache-Control"] = "no-cache"
+        response["X-Accel-Buffering"] = "no"
+        return response
 

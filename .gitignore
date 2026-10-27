@@ -77,9 +77,6 @@ CLAUDE.md
 # ─── Git backups ───
 git-*.txt
 
-# Node server (architectural cleanup pending)
-server/
-
 
 # User-specific desktop shortcuts
 Run_Safaqat_Desktop.bat

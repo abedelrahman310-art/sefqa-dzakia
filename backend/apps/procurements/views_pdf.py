@@ -3,8 +3,10 @@
 PDF Views for Opening Session Minutes (PV) and Cahier des Charges Specifications.
 """
 
+import os
+import mimetypes
 import logging
-from django.http import HttpResponse
+from django.http import HttpResponse, FileResponse
 from django.shortcuts import get_object_or_404
 from rest_framework import permissions, status
 from rest_framework.response import Response
@@ -110,6 +112,42 @@ class CahierSpecsPdfView(APIView):
                 status=status.HTTP_403_FORBIDDEN,
             )
 
+        safe_ref = (deal.reference_number or str(deal.id)).replace("/", "_")
+        filename = f"Cahier_Specs_{safe_ref}.pdf"
+
+        # 1. إذا كان ملف دفتر الشروط مرفوعاً فعلياً في النموذج cahier_specs.file
+        cahier_specs = getattr(deal, "cahier_specs", None)
+        if cahier_specs and cahier_specs.file:
+            try:
+                file_obj = cahier_specs.file.open("rb")
+                upload_filename = os.path.basename(cahier_specs.file.name) or filename
+                content_type, _ = mimetypes.guess_type(upload_filename)
+
+                try:
+                    AuditLog.objects.create(
+                        user=request.user,
+                        action="cahier_specs_pdf_exported",
+                        resource_type="ProcurementDeal",
+                        resource_id=str(deal.id),
+                        description=f"تصدير وتحميل ملف دفتر الشروط المرفوع للصفقة {deal.reference_number}",
+                        changes={
+                            "deal_id": str(deal.id),
+                            "reference_number": deal.reference_number,
+                            "source": "uploaded_file",
+                            "filename": upload_filename,
+                        },
+                    )
+                except Exception as audit_err:
+                    logger.warning("تعذر توثيق حدث تصدير دفتر الشروط في AuditLog: %s", audit_err)
+
+                response = FileResponse(file_obj, content_type=content_type or "application/pdf")
+                response["Content-Disposition"] = f'inline; filename="{upload_filename}"'
+                response["X-Content-Type-Options"] = "nosniff"
+                return response
+            except Exception as e:
+                logger.warning("تعذر فتح ملف دفتر الشروط المرفوع، الانتقال للمولد الآلي كحل بديل: %s", str(e))
+
+        # 2. وإذا لم يكن موجوداً، نستخدم المولد الآلي (fallback) كحل مؤقت
         try:
             pdf_bytes = generate_cahier_specs_pdf(deal, request.user)
         except Exception as e:
@@ -119,25 +157,24 @@ class CahierSpecsPdfView(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
-        safe_ref = deal.reference_number.replace("/", "_")
         try:
             AuditLog.objects.create(
                 user=request.user,
                 action="cahier_specs_pdf_exported",
                 resource_type="ProcurementDeal",
                 resource_id=str(deal.id),
-                description=f"تصدير دفتر الشروط والمواصفات للصفقة {deal.reference_number} بصيغة PDF",
+                description=f"تصدير دفتر الشروط والمواصفات للصفقة {deal.reference_number} بصيغة PDF (توليد آلي)",
                 changes={
                     "deal_id": str(deal.id),
                     "reference_number": deal.reference_number,
                     "current_stage": deal.current_stage,
+                    "source": "generated_fallback",
                     "format": "application/pdf",
                 },
             )
         except Exception as audit_err:
             logger.warning("تعذر توثيق حدث تصدير دفتر الشروط في AuditLog: %s", audit_err)
 
-        filename = f"Cahier_Specs_{safe_ref}.pdf"
         response = HttpResponse(pdf_bytes, content_type="application/pdf")
         response["Content-Disposition"] = f'inline; filename="{filename}"'
         response["X-Content-Type-Options"] = "nosniff"

@@ -1,0 +1,67 @@
+/*
+ * شعار صفقات ذكية — حركة الطبقات الثلاث (أخضر / أبيض / أحمر).
+ *
+ * كل الأسماء مسبوقة بـ logo- لتفادي أي تعارض مع أنماط المنصة.
+ * يُستورد عالمياً عبر client/src/index.css لشعارات بوابات المنصة،
+ * ويُحقن نصياً داخل Shadow DOM في صفحة الهبوط لأن الأنماط العالمية
+ * لا تعبر حدود الـ Shadow DOM.
+ */
+
+.logo-anim {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  filter: drop-shadow(0 10px 10px rgba(23, 61, 48, 0.15));
+}
+
+/* طبقات الشعار الثلاث */
+.logo-anim .logo-layer {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: logo-float 3s ease-in-out infinite;
+}
+
+.logo-anim .logo-green {
+  animation-delay: 0s;
+}
+
+.logo-anim .logo-white {
+  animation-delay: 0.18s;
+}
+
+.logo-anim .logo-red {
+  animation-delay: 0.36s;
+}
+
+/* لمعان الأسطح */
+.logo-anim .logo-face {
+  animation: logo-shine 4s ease-in-out infinite;
+}
+
+@keyframes logo-float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-6px) rotate(1deg);
+  }
+}
+
+@keyframes logo-shine {
+  0%,
+  100% {
+    filter: brightness(1);
+  }
+  50% {
+    filter: brightness(1.15);
+  }
+}
+
+/* احترام تفضيل تقليل الحركة */
+@media (prefers-reduced-motion: reduce) {
+  .logo-anim .logo-layer,
+  .logo-anim .logo-face {
+    animation: none;
+  }
+}

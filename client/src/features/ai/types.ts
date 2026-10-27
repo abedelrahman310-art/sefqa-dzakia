@@ -96,12 +96,34 @@ export interface AIHealthResponse {
   human_verification_required: boolean;
 }
 
+/**
+ * A legal reference returned by the RAG assistant.
+ *
+ * `label` is always present after client-side normalization, even when the
+ * backend only returns a plain string (the legacy contract).
+ */
+export interface LegalArticle {
+  id?: string;
+  label: string;
+  article_number?: string;
+  law?: string;
+  legal_text?: string;
+}
+
+/**
+ * Raw `legal_articles` entry. The RAG backend returns objects containing the
+ * full article text, while older backend versions returned plain strings.
+ */
+export type LegalArticleSource = LegalArticle | string | Record<string, unknown>;
+
 export interface ChatMessage {
   id?: string;
   role: 'user' | 'assistant' | 'system';
   role_display?: string;
   content: string;
   sources?: string[];
+  legal_articles?: LegalArticle[];
+  no_legal_answer?: boolean;
   is_advisory?: boolean;
   created_at?: string;
 }
@@ -110,6 +132,12 @@ export interface ChatResponse {
   conversation_id: string;
   answer: string;
   sources: string[];
+  legal_articles?: LegalArticleSource[];
+  /** Optional top-level full text when the backend returns a single article. */
+  legal_text?: string;
+  /** Explicit RAG signals used by newer backend versions. */
+  found_in_law?: boolean;
+  no_answer?: boolean;
   is_advisory: boolean;
   human_verification_required: boolean;
 }

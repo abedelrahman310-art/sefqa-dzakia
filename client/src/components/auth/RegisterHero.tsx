@@ -1,3 +1,4 @@
+import { Logo } from '@/components/ui/Logo';
 import { Eye, FileText, ShieldCheck } from 'lucide-react';
 import { useI18n } from '@/i18n';
 
@@ -60,25 +61,9 @@ export function RegisterHero() {
 
       {/* ═══ Top: Brand & Logo ═══ */}
       <div className="relative z-10 flex items-center gap-3">
-        {/* Isometric Diamond Logo Mark */}
+        {/* Unified isometric logo mark */}
         <div className="relative w-9 h-9 lg:w-10 lg:h-10 flex items-center justify-center shrink-0">
-          <svg className="w-9 h-9 lg:w-10 lg:h-10" viewBox="0 0 44 44" fill="none">
-            <path
-              d="M22 4L38 12L22 20L6 12L22 4Z"
-              fill="#38BDF8"
-              fillOpacity="0.95"
-            />
-            <path
-              d="M22 13L38 21L22 29L6 21L22 13Z"
-              fill="#0EA5E9"
-              fillOpacity="0.85"
-            />
-            <path
-              d="M22 22L38 30L22 38L6 30L22 22Z"
-              fill="#0284C7"
-              fillOpacity="0.95"
-            />
-          </svg>
+          <Logo size="100%" className="w-full h-full" />
         </div>
 
         <div className="flex flex-col">

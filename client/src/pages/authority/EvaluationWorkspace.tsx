@@ -18,6 +18,13 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
   FileCheck,
   CheckCircle2,
   XCircle,
@@ -29,6 +36,10 @@ import {
   BadgeCheck,
   CheckSquare,
   Loader2,
+  Sparkles,
+  TrendingDown,
+  TrendingUp,
+  ShieldAlert,
 } from 'lucide-react';
 
 interface EvaluationFormState {
@@ -39,6 +50,40 @@ interface EvaluationFormState {
   evaluatorNotes: string;
   saving?: boolean;
 }
+
+/** استجابة /api/authority/analyze-prices/ — تحليل مالي استشاري للعروض. */
+interface PriceOfferAnalysisApi {
+  offer_id: string;
+  operator_name: string;
+  amount: number | null;
+  deviation_percent: number | null;
+  status: 'normal' | 'outlier' | 'unknown';
+  recommendation: string;
+}
+
+interface PriceAnalysisApi {
+  deal_id: string;
+  deal_reference: string;
+  deal_title: string;
+  baseline: { amount: number | null; source: string | null; source_label: string };
+  threshold_percent: number;
+  offers: PriceOfferAnalysisApi[];
+  summary: {
+    offers_count: number;
+    outliers_count: number;
+    normal_count: number;
+    average_amount: number | null;
+    min_amount: number | null;
+    max_amount: number | null;
+  };
+  is_advisory: boolean;
+  disclaimer: string;
+}
+
+const priceFormatter = new Intl.NumberFormat('ar-DZ-u-nu-latn', { maximumFractionDigits: 0 });
+
+const formatPrice = (value: number | null | undefined) =>
+  value === null || value === undefined ? '—' : `${priceFormatter.format(Math.round(value))} دج`;
 
 const EVALUATION_STATUS_LABELS: Record<OfferEvaluationStatusApi, string> = {
   pending: 'قيد الانتظار',
@@ -66,6 +111,12 @@ export function EvaluationWorkspace() {
   const [success, setSuccess] = useState('');
   const [deal, setDeal] = useState<EvaluationOpportunityApi | null>(null);
   const [offers, setOffers] = useState<EvaluationOfferApi[]>([]);
+
+  // التحليل المالي الذكي (استشاري)
+  const [priceModalOpen, setPriceModalOpen] = useState(false);
+  const [priceLoading, setPriceLoading] = useState(false);
+  const [priceError, setPriceError] = useState('');
+  const [priceData, setPriceData] = useState<PriceAnalysisApi | null>(null);
 
   // Per-offer form edits
   const [evalForms, setEvalForms] = useState<Record<string, EvaluationFormState>>({});
@@ -127,6 +178,25 @@ export function EvaluationWorkspace() {
   useEffect(() => {
     loadData();
   }, [id]);
+
+  const runPriceAnalysis = async () => {
+    if (!id) return;
+    setPriceModalOpen(true);
+    setPriceLoading(true);
+    setPriceError('');
+    setPriceData(null);
+
+    try {
+      const { data } = await api.post<PriceAnalysisApi>('/authority/analyze-prices/', {
+        deal_id: id,
+      });
+      setPriceData(data);
+    } catch (err: unknown) {
+      setPriceError(getApiErrorMessage(err, 'تعذر إجراء التحليل المالي للعروض.'));
+    } finally {
+      setPriceLoading(false);
+    }
+  };
 
   const handleSaveOfferEval = async (offerId: string) => {
     const form = evalForms[offerId];
@@ -296,7 +366,7 @@ export function EvaluationWorkspace() {
               variant="ghost"
               size="sm"
               className="text-white hover:bg-white/10 p-1.5 h-auto rounded-lg"
-              onClick={() => setLocation(`/authority/opportunities/${id}/opening`)}
+              onClick={() => setLocation('/authority/opening-sessions')}
             >
               <ArrowIcon className="w-4 h-4" />
             </Button>
@@ -367,14 +437,26 @@ export function EvaluationWorkspace() {
 
       {/* Offers Evaluation Section */}
       <section className="space-y-4">
-        <div className="flex items-center justify-between pb-2 border-b border-border">
+        <div className="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-border">
           <h3 className="text-base font-bold text-navy-900 flex items-center gap-2">
             <CheckSquare className="w-5 h-5 text-primary" />
             {t('lifecycle.eval.candidature_tech')}
           </h3>
-          <span className="text-xs text-muted-foreground">
-            {offers.length} عروض قيد الدراسة
-          </span>
+          <div className="flex items-center gap-3">
+            <span className="text-xs text-muted-foreground">
+              {offers.length} عروض قيد الدراسة
+            </span>
+            <Button
+              type="button"
+              size="sm"
+              onClick={() => void runPriceAnalysis()}
+              disabled={offers.length === 0}
+              className="gap-1.5 rounded-xl bg-indigo-600 text-xs font-bold text-white hover:bg-indigo-700"
+            >
+              <Sparkles className="w-4 h-4" aria-hidden="true" />
+              التحليل المالي الذكي
+            </Button>
+          </div>
         </div>
 
         <div className="grid gap-4">
@@ -715,6 +797,142 @@ export function EvaluationWorkspace() {
           </div>
         )}
       </section>
+
+      {/* التحليل المالي الذكي — نافذة استشارية */}
+      <Dialog open={priceModalOpen} onOpenChange={setPriceModalOpen}>
+        <DialogContent className="max-h-[88vh] max-w-2xl overflow-y-auto" dir={dir}>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-lg font-bold">
+              <Sparkles className="h-5 w-5 text-indigo-600" aria-hidden="true" />
+              التحليل المالي الذكي
+            </DialogTitle>
+            <DialogDescription className="text-xs text-muted-foreground">
+              {priceData
+                ? `${priceData.deal_reference} — ${priceData.deal_title}`
+                : deal
+                  ? `${deal.reference} — ${deal.title}`
+                  : 'مقارنة أسعار العروض بالمرجع السعري للصفقة.'}
+            </DialogDescription>
+          </DialogHeader>
+
+          {priceLoading ? (
+            <div className="flex flex-col items-center justify-center gap-3 py-12 text-xs text-muted-foreground">
+              <Loader2 className="h-8 w-8 animate-spin text-indigo-600" aria-hidden="true" />
+              جاري تحليل أسعار العروض…
+            </div>
+          ) : priceError ? (
+            <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-xs font-semibold leading-relaxed text-red-700">
+              {priceError}
+            </div>
+          ) : priceData ? (
+            <div className="space-y-4 py-1">
+              <div className="grid grid-cols-3 gap-2">
+                <div className="rounded-xl border border-border bg-muted/30 p-3 text-center">
+                  <span className="block text-[10px] font-bold text-muted-foreground">
+                    {priceData.baseline.source_label}
+                  </span>
+                  <span className="mt-1 block text-sm font-extrabold text-navy-900">
+                    {formatPrice(priceData.baseline.amount)}
+                  </span>
+                </div>
+                <div className="rounded-xl border border-border bg-muted/30 p-3 text-center">
+                  <span className="block text-[10px] font-bold text-muted-foreground">
+                    متوسط العروض
+                  </span>
+                  <span className="mt-1 block text-sm font-extrabold text-navy-900">
+                    {formatPrice(priceData.summary.average_amount)}
+                  </span>
+                </div>
+                <div className="rounded-xl border border-border bg-muted/30 p-3 text-center">
+                  <span className="block text-[10px] font-bold text-muted-foreground">
+                    عروض شاذة
+                  </span>
+                  <span
+                    className={`mt-1 block text-sm font-extrabold ${
+                      priceData.summary.outliers_count > 0 ? 'text-red-600' : 'text-emerald-600'
+                    }`}
+                  >
+                    {priceData.summary.outliers_count}
+                  </span>
+                </div>
+              </div>
+
+              <p className="text-[11px] text-muted-foreground">
+                عتبة الانحراف المعتمدة للتصنيف: ±{priceData.threshold_percent}% عن المرجع.
+              </p>
+
+              {priceData.offers.length === 0 ? (
+                <p className="py-6 text-center text-xs text-muted-foreground">
+                  لا توجد عروض مالية مودعة في هذه الصفقة بعد.
+                </p>
+              ) : (
+                <div className="space-y-3">
+                  {priceData.offers.map((offer) => {
+                    const isOutlier = offer.status === 'outlier';
+                    const deviation = offer.deviation_percent;
+                    const badgeClass = isOutlier
+                      ? 'border-red-200 bg-red-50 text-red-700'
+                      : offer.status === 'normal'
+                        ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+                        : 'border-slate-200 bg-slate-50 text-slate-600';
+
+                    return (
+                      <div
+                        key={offer.offer_id}
+                        className="rounded-xl border border-border bg-card p-3"
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-sm font-bold text-navy-900">
+                            {offer.operator_name}
+                          </span>
+                          <span
+                            className={`rounded-full border px-2 py-1 text-[10px] font-bold ${badgeClass}`}
+                          >
+                            {isOutlier
+                              ? 'سعر شاذ'
+                              : offer.status === 'normal'
+                                ? 'سعر طبيعي'
+                                : 'غير محدد'}
+                          </span>
+                        </div>
+
+                        <div className="mt-1.5 flex items-center justify-between gap-2 text-xs">
+                          <span className="font-mono font-bold text-navy-900">
+                            {formatPrice(offer.amount)}
+                          </span>
+                          <span
+                            className={`inline-flex items-center gap-1 font-bold ${
+                              isOutlier ? 'text-red-600' : 'text-emerald-600'
+                            }`}
+                          >
+                            {deviation !== null && deviation < 0 ? (
+                              <TrendingDown className="h-3.5 w-3.5" aria-hidden="true" />
+                            ) : (
+                              <TrendingUp className="h-3.5 w-3.5" aria-hidden="true" />
+                            )}
+                            {deviation === null
+                              ? '—'
+                              : `${deviation > 0 ? '+' : ''}${deviation.toFixed(1)}%`}
+                          </span>
+                        </div>
+
+                        <p className="mt-2 rounded-lg border border-amber-200 bg-amber-50 p-2 text-[11px] leading-relaxed text-amber-900">
+                          {offer.recommendation}
+                        </p>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              <div className="flex items-start gap-2 rounded-xl border border-blue-200 bg-blue-50 p-3 text-[11px] font-semibold leading-relaxed text-blue-800">
+                <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+                <span>هذا التحليل استشاري فقط، والقرار النهائي يعود للجنة التقييم.</span>
+              </div>
+            </div>
+          ) : null}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

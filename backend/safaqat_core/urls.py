@@ -19,6 +19,8 @@ from apps.users.views import (
     OperatorRecommendedDealsView,
     OperatorCheckComplianceView,
 )
+from apps.procurements.views_secure_media import SecureDocumentDownloadView
+from apps.procurements.views_pricing import AuthorityPriceAnalysisView
 
 # Routers for direct top-level endpoints
 opportunities_router = DefaultRouter()
@@ -76,6 +78,10 @@ urlpatterns = [
     path('api/authority/offers/<str:pk>/evaluate/', OfferViewSet.as_view({'post': 'evaluate'}), name='direct_authority_eval_offer'),
     path('api/authority/offers/<str:pk>/evaluate', OfferViewSet.as_view({'post': 'evaluate'}), name='direct_authority_eval_offer_no_slash'),
 
+    # 5.1 التحليل المالي الذكي لعروض الصفقة (استشاري)
+    path('api/authority/analyze-prices/', AuthorityPriceAnalysisView.as_view(), name='direct_authority_analyze_prices'),
+    path('api/authority/analyze-prices', AuthorityPriceAnalysisView.as_view(), name='direct_authority_analyze_prices_no_slash'),
+
     # 6. AI Intelligence: Legal Chat & Tender Document Analysis
     path('api/ai/legal-chat/', AILegalChatView.as_view(), name='direct_ai_legal_chat'),
     path('api/ai/legal-chat', AILegalChatView.as_view(), name='direct_ai_legal_chat_no_slash'),
@@ -85,8 +91,16 @@ urlpatterns = [
     # 7. Central Hawk Eye (عين الصقر - الرقابة والإدارة المركزية)
     path('api/central/', include('apps.reports.central_urls')),
 
+    # 8. Remote Opening Sessions (WebSockets / SSE / Events API)
+    path('api/opening/', include('apps.procurements.urls_opening')),
+
+    # 9. Secure Media & Document Download (RBAC Protected according to Law 23-12)
+    path('media/<path:relative_path>', SecureDocumentDownloadView.as_view(), name='secure_media_download'),
+    path('api/documents/<str:document_id>/download/', SecureDocumentDownloadView.as_view(), name='secure_document_download'),
+
     # Modular Domain APIs
     path('api/auth/', include('apps.users.urls')),
+    path('api/users/', include('apps.users.urls')),
     path('api/procurements/', include('apps.procurements.urls')),
     path('api/bids/', include('apps.bids.urls')),
     path('api/contracts/', include('apps.contracts.urls')),
@@ -95,7 +109,4 @@ urlpatterns = [
     path('api/audit/', include('apps.audit.urls')),
     path('api/ai/', include('apps.ai_gateway.urls')),
 ]
-
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

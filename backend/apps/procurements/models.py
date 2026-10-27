@@ -1,7 +1,14 @@
 import uuid
+from decimal import Decimal
+
+from django.core.exceptions import ValidationError
+from django.core.validators import MinValueValidator
 from django.db import models
 from django.utils import timezone
+
 from apps.users.models import CustomUser
+
+from .reference_prices import normalize_item_name, normalize_wilaya
 
 class ProcurementDeal(models.Model):
     """نموذج الصفقة العمومية وفق القانون 23-12"""
@@ -47,6 +54,7 @@ class CahierSpecs(models.Model):
     """دفتر الشروط الذكي"""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     deal = models.OneToOneField(ProcurementDeal, on_delete=models.CASCADE, related_name='cahier_specs', verbose_name='الصفقة')
+    file = models.FileField(upload_to='cahier_specs/', null=True, blank=True, verbose_name='ملف دفتر الشروط الرسمي (PDF)')
     administrative_clauses = models.JSONField('البنود الإدارية والتعاقدية', default=dict)
     technical_requirements = models.JSONField('المتطلبات التقنية والمواصفات', default=dict)
     financial_criteria = models.JSONField('معايير التقييم المالي والتنقيط', default=dict)
@@ -64,8 +72,10 @@ class OpeningSession(models.Model):
     تحدد سياسة الحضور والبث المباشر ومجريات فتح العروض.
     """
     STATUS_CHOICES = (
+        ('pending', 'قيد الانتظار'),
         ('scheduled', 'مبرمجة'),
         ('live', 'جارية'),
+        ('closed', 'مغلقة'),
         ('ended', 'منتهية'),
         ('cancelled', 'ملغاة'),
     )
@@ -116,6 +126,14 @@ class OpeningSession(models.Model):
         verbose_name_plural = 'جلسات فتح الأظرفة'
         ordering = ['-scheduled_at']
 
+    @property
+    def deal(self):
+        return self.tender
+
+    @deal.setter
+    def deal(self, value):
+        self.tender = value
+
     def __str__(self):
         return f"جلسة فتح: {self.tender.reference_number} ({self.get_status_display()})"
 
@@ -138,6 +156,8 @@ class SessionAccess(models.Model):
         related_name="session_accesses",
         verbose_name="المتعامل الاقتصادي",
     )
+    has_access = models.BooleanField('صلاحية الدخول للجلسة', default=True)
+    joined_at = models.DateTimeField('تاريخ الانضمام للجلسة', null=True, blank=True)
     can_view_live = models.BooleanField('متابعة البث المباشر', default=True)
     can_view_recording = models.BooleanField('مشاهدة التسجيل المؤرشف', default=True)
     can_download_minutes = models.BooleanField('تحميل محضر جلسة الفتح', default=True)
@@ -160,6 +180,8 @@ class OpeningEvent(models.Model):
     EVENT_TYPE_CHOICES = (
         ('session_started', 'افتتاح وبدء الجلسة'),
         ('offer_opened', 'فتح عرض وإعلان السعر'),
+        ('opened_technical', 'فتح الظرف التقني'),
+        ('opened_financial', 'فتح الظرف المالي وإعلان السعر'),
         ('offer_rejected', 'إقصاء أو رفض عرض'),
         ('session_paused', 'تعليق مؤقت للجلسة'),
         ('session_resumed', 'استئناف الجلسة'),
@@ -194,6 +216,13 @@ class OpeningEvent(models.Model):
         null=True,
         blank=True,
     )
+    announced_amount = models.DecimalField(
+        'المبلغ المالي المعلن (دج)',
+        max_digits=15,
+        decimal_places=2,
+        null=True,
+        blank=True,
+    )
     is_accepted = models.BooleanField('مقبول مبدئياً لطور التقييم', default=True)
     notes = models.TextField('ملاحظات وتحفظات اللجنة', blank=True)
     created_at = models.DateTimeField('وقت توثيق الحدث', auto_now_add=True)
@@ -208,6 +237,17 @@ class OpeningEvent(models.Model):
         verbose_name = 'واقعة جلسة الفتح'
         verbose_name_plural = 'وقائع جلسات الفتح'
         ordering = ['created_at']
+
+    @property
+    def timestamp(self):
+        return self.created_at
+
+    def save(self, *args, **kwargs):
+        if self.announced_amount is not None and self.announced_price is None:
+            self.announced_price = self.announced_amount
+        elif self.announced_price is not None and self.announced_amount is None:
+            self.announced_amount = self.announced_price
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"حدث {self.get_event_type_display()} - جلسة {self.session_id}"
@@ -344,5 +384,85 @@ class MilestoneProgressReport(models.Model):
 
     def __str__(self):
         return f"تقرير {self.milestone.title} ({self.progress_percentage}%) - {self.operator.email}"
+
+
+class ReferencePrice(models.Model):
+    """سعر مرجعي استشاري لمادة أو خدمة داخل ولاية معيّنة.
+
+    يُستخدم لمساعدة المتعامل أثناء ملء الجداول المالية (BPU/DQE)،
+    وليس قاعدة قانونية ملزمة. تتم المطابقة على الاسم والولاية بعد تطبيعهما.
+    """
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField('اسم المادة أو الخدمة', max_length=255)
+    normalized_name = models.CharField(
+        'اسم المادة المطبّع للبحث',
+        max_length=255,
+        editable=False,
+    )
+    unit = models.CharField('وحدة القياس', max_length=50)
+    reference_price = models.DecimalField(
+        'السعر المرجعي (دج)',
+        max_digits=15,
+        decimal_places=2,
+        validators=[MinValueValidator(Decimal('0.01'))],
+    )
+    wilaya = models.CharField('الولاية', max_length=100, db_index=True)
+    normalized_wilaya = models.CharField(
+        'الولاية المطبّعة للبحث',
+        max_length=100,
+        editable=False,
+    )
+    created_at = models.DateTimeField('تاريخ الإنشاء', auto_now_add=True)
+    updated_at = models.DateTimeField('تاريخ آخر تحديث', auto_now=True)
+
+    class Meta:
+        verbose_name = 'سعر مرجعي'
+        verbose_name_plural = 'الأسعار المرجعية'
+        ordering = ['wilaya', 'name']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['normalized_name', 'normalized_wilaya'],
+                name='uniq_reference_price_name_wilaya',
+            ),
+            models.CheckConstraint(
+                condition=models.Q(reference_price__gt=0),
+                name='reference_price_positive',
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.name} ({self.unit}) - {self.wilaya}: {self.reference_price} دج"
+
+    def clean(self):
+        super().clean()
+        if not (self.name or '').strip():
+            raise ValidationError({'name': 'اسم المادة أو الخدمة مطلوب.'})
+        if not (self.unit or '').strip():
+            raise ValidationError({'unit': 'وحدة القياس مطلوبة.'})
+        if not (self.wilaya or '').strip():
+            raise ValidationError({'wilaya': 'الولاية مطلوبة.'})
+        if self.reference_price is not None and self.reference_price <= 0:
+            raise ValidationError({'reference_price': 'السعر المرجعي يجب أن يكون أكبر من صفر.'})
+
+    def save(self, *args, **kwargs):
+        self.name = (self.name or '').strip()
+        self.unit = (self.unit or '').strip()
+        self.wilaya = (self.wilaya or '').strip()
+        self.normalized_name = normalize_item_name(self.name)
+        self.normalized_wilaya = normalize_wilaya(self.wilaya)
+
+        update_fields = kwargs.get('update_fields')
+        if update_fields is not None:
+            kwargs['update_fields'] = set(update_fields) | {
+                'name',
+                'unit',
+                'wilaya',
+                'normalized_name',
+                'normalized_wilaya',
+                'updated_at',
+            }
+
+        super().save(*args, **kwargs)
 
 

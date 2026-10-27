@@ -8,16 +8,12 @@
   },
   "packageManager": "pnpm@8.15.5",
   "scripts": {
-    "dev": "concurrently \"pnpm --filter server dev\" \"pnpm --filter client dev\"",
-    "build": "pnpm --filter @safaqat/shared build && pnpm --filter client build && pnpm --filter server build",
-    "start": "pnpm --filter server start",
+    "dev": "pnpm --filter client dev",
+    "build": "pnpm --filter @safaqat/shared build && pnpm --filter client build",
+    "start": "cd backend && python manage.py runserver 8001",
     "typecheck": "pnpm -r typecheck",
     "lint": "pnpm -r lint",
-    "test": "pnpm --filter server test",
-    "db:generate": "pnpm --filter server db:generate"
+    "test": "cd backend && python -m pytest -q"
   },
-  "devDependencies": {
-    "concurrently": "^9.0.0"
-  },
-  "workspaces": ["client", "server", "shared"]
+  "workspaces": ["client", "shared"]
 }

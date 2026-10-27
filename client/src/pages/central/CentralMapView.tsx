@@ -344,48 +344,47 @@ export function CentralMapView() {
   const handleZoomReset = () => setZoom(1);
 
   return (
-    <div className="flex h-full w-full flex-col overflow-hidden bg-[#F8F9F7] text-[#24352E]" dir="rtl">
-      <header className="z-20 flex-none border-b border-[#E3E7E2] bg-white px-4 py-2.5 shadow-2xs sm:px-6">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <div className="flex size-9 shrink-0 items-center justify-center rounded-xl border border-[#CDE1D3] bg-[#EDF4EE] text-[#167354] shadow-2xs">
-              <MapPin className="size-4.5" />
+    <div className="flex h-full w-full flex-col overflow-hidden bg-[#F8F9F7] text-sm text-[#24352E]" dir="rtl">
+      <header className="z-20 flex-none border-b border-gray-200 bg-white px-4 py-3 sm:px-6">
+        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
+          <div className="flex min-w-0 items-center gap-3">
+            <div className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-emerald-100 bg-emerald-50 text-emerald-700 shadow-sm">
+              <MapPin className="size-5" />
             </div>
-            <div>
-              <div className="flex items-center gap-2">
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
                 <h1 className="m-0 text-2xl font-bold leading-tight text-[#24352E]">
                   المرصد الجغرافي والرقابي
                 </h1>
-                <span className="inline-flex items-center gap-1 rounded-full border border-[#CDE1D3] bg-[#EDF4EE] px-2 py-0.5 text-base font-bold text-[#167354]">
+                <span className="inline-flex items-center gap-1 rounded-full border border-emerald-100 bg-emerald-50 px-2.5 py-1 text-sm font-bold text-emerald-700">
                   تغطية 69 ولاية
                 </span>
               </div>
-              <p className="mt-0.5 hidden text-base font-medium leading-none text-[#59665F] sm:block">
+              <p className="mt-1 hidden text-sm font-medium leading-relaxed text-gray-500 sm:block">
                 رصد تدفقات الصفقات العمومية والإنذار المبكر وفق القانون 23-12
               </p>
             </div>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
-            <div className="w-48 sm:w-60">
+            <div className="w-48 sm:w-52">
               <SearchBox
-                compact
                 value={searchQuery}
                 onChange={setSearchQuery}
                 results={searchResults}
                 onSelect={(wilaya) => setSelectedWilaya(wilaya)}
-                placeholder="ابحث باسم أو رقم الولاية..."
+                placeholder="ابحث عن ولاية..."
               />
             </div>
 
-            <div className="hidden items-center gap-1 rounded-xl border border-[#E3E7E2] bg-[#F8F9F7] p-1 md:flex">
+            <div className="hidden items-center gap-1 rounded-full border border-gray-200 bg-gray-50 p-1 md:flex">
               <button
                 type="button"
                 onClick={() => setFilterMode('all')}
-                className={`rounded-lg px-2.5 py-1 text-base font-bold transition-all ${
+                className={`inline-flex h-8 items-center justify-center gap-1.5 rounded-full px-2.5 text-sm font-bold transition-colors ${
                   filterMode === 'all'
-                    ? 'border border-[#E3E7E2] bg-white text-[#24352E] shadow-2xs'
-                    : 'text-[#59665F] hover:text-[#24352E]'
+                    ? 'bg-white text-[#24352E] shadow-sm ring-1 ring-gray-200'
+                    : 'text-gray-500 hover:bg-white/70 hover:text-gray-900'
                 }`}
               >
                 الكل (69)
@@ -393,22 +392,22 @@ export function CentralMapView() {
               <button
                 type="button"
                 onClick={() => setFilterMode('warnings')}
-                className={`flex items-center gap-1 rounded-lg px-2.5 py-1 text-base font-bold transition-all ${
+                className={`inline-flex h-8 items-center justify-center gap-1.5 rounded-full px-2.5 text-sm font-bold transition-colors ${
                   filterMode === 'warnings'
-                    ? 'border border-[#FECDD3] bg-[#FFF1F2] text-[#E11D48] shadow-2xs'
-                    : 'text-[#59665F] hover:text-[#E11D48]'
+                    ? 'bg-rose-50 text-rose-700 shadow-sm ring-1 ring-rose-200'
+                    : 'text-gray-500 hover:bg-rose-50/70 hover:text-rose-700'
                 }`}
               >
-                <AlertTriangle className="size-3" />
+                <AlertTriangle className="size-3.5" />
                 <span>شبهات ({totalWarnings})</span>
               </button>
               <button
                 type="button"
                 onClick={() => setFilterMode('high')}
-                className={`rounded-lg px-2.5 py-1 text-base font-bold transition-all ${
+                className={`inline-flex h-8 items-center justify-center gap-1.5 rounded-full px-2.5 text-sm font-bold transition-colors ${
                   filterMode === 'high'
-                    ? 'border border-[#CDE1D3] bg-[#EDF4EE] text-[#167354] shadow-2xs'
-                    : 'text-[#59665F] hover:text-[#167354]'
+                    ? 'bg-emerald-50 text-emerald-700 shadow-sm ring-1 ring-emerald-200'
+                    : 'text-gray-500 hover:bg-emerald-50/70 hover:text-emerald-700'
                 }`}
               >
                 نشاط عالٍ
@@ -416,10 +415,10 @@ export function CentralMapView() {
               <button
                 type="button"
                 onClick={() => setFilterMode('medium')}
-                className={`rounded-lg px-2.5 py-1 text-base font-bold transition-all ${
+                className={`inline-flex h-8 items-center justify-center gap-1.5 rounded-full px-2.5 text-sm font-bold transition-colors ${
                   filterMode === 'medium'
-                    ? 'border border-[#CDE1D3] bg-[#EDF4EE] text-[#167354] shadow-2xs'
-                    : 'text-[#59665F] hover:text-[#167354]'
+                    ? 'bg-emerald-50 text-emerald-700 shadow-sm ring-1 ring-emerald-200'
+                    : 'text-gray-500 hover:bg-emerald-50/70 hover:text-emerald-700'
                 }`}
               >
                 نشاط متوسط
@@ -429,18 +428,19 @@ export function CentralMapView() {
             <button
               type="button"
               onClick={() => setIsSidePanelOpen((value) => !value)}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-[#E3E7E2] bg-white px-3 py-1.5 text-base font-bold text-[#24352E] shadow-2xs transition-colors hover:bg-[#F8F9F7]"
+              className="inline-flex h-10 items-center justify-center gap-1.5 rounded-full border border-gray-200 bg-white px-3.5 text-sm font-bold text-[#24352E] shadow-sm transition-colors hover:bg-gray-50"
               title={isSidePanelOpen ? 'تصغير لوحة التحليل' : 'فتح لوحة التحليل'}
+              aria-label={isSidePanelOpen ? 'تصغير لوحة التحليل' : 'فتح لوحة التحليل'}
             >
               {isSidePanelOpen ? (
                 <>
-                  <PanelRightClose className="size-3.5 text-[#59665F]" />
-                  <span className="hidden xl:inline">طي اللوحة</span>
+                  <PanelRightClose className="size-4 text-gray-500" />
+                  <span className="hidden 2xl:inline">طي اللوحة</span>
                 </>
               ) : (
                 <>
-                  <PanelRightOpen className="size-3.5 text-[#167354]" />
-                  <span>فتح لوحة التحليل</span>
+                  <PanelRightOpen className="size-4 text-emerald-700" />
+                  <span className="hidden 2xl:inline">فتح لوحة التحليل</span>
                 </>
               )}
             </button>
@@ -448,18 +448,19 @@ export function CentralMapView() {
         </div>
       </header>
 
-      <div className="relative flex flex-1 flex-col overflow-hidden lg:flex-row">
-        <main className="relative flex min-h-[350px] flex-1 items-center justify-center overflow-hidden bg-gradient-to-br from-[#FAFBFA] via-[#F4F6F5] to-[#E9ECE9]">
+      <div className="relative flex min-h-0 flex-1 flex-col gap-4 overflow-hidden p-4 xl:flex-row">
+        <main className="relative flex min-h-[420px] flex-1 items-center justify-center overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-[#FAFBFA] via-[#F4F6F5] to-[#E9ECE9]" />
           {hoveredWilayaName && (
-            <div className="absolute start-4 top-4 z-20 flex animate-in items-center gap-2 rounded-xl border border-[#E3E7E2] bg-white/95 px-3.5 py-1.5 text-base shadow-md backdrop-blur-md duration-150 fade-in">
+            <div className="absolute start-4 top-4 z-20 flex animate-in items-center gap-2 rounded-xl border border-gray-200 bg-white/95 px-3.5 py-2 text-sm shadow-sm backdrop-blur-md duration-150 fade-in">
               <span className="size-2 animate-pulse rounded-full bg-[#167354]" />
-              <span className="font-medium text-[#59665F]">الولاية المحددة:</span>
+              <span className="font-medium text-gray-500">الولاية المحددة:</span>
               <strong className="font-black text-[#24352E]">{hoveredWilayaName}</strong>
             </div>
           )}
 
           <div
-            className="flex h-full w-full select-none items-center justify-center p-4 transition-transform duration-300 ease-out sm:p-8 md:p-12"
+            className="relative z-10 flex h-full w-full select-none items-center justify-center p-4 transition-transform duration-300 ease-out sm:p-6 md:p-8"
             style={{ transform: `scale(${zoom})`, transformOrigin: 'center center' }}
           >
             <AlgeriaMap
@@ -474,7 +475,7 @@ export function CentralMapView() {
 
           {loading && (
             <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/55 backdrop-blur-[1px]">
-              <div className="flex items-center gap-2 rounded-xl border border-[#E3E7E2] bg-white px-4 py-2.5 text-base font-bold text-[#24352E] shadow-lg">
+              <div className="flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-bold text-[#24352E] shadow-sm">
                 <RefreshCw className="size-4 animate-spin text-[#167354]" />
                 <span>جارٍ تحميل الصفقات من السجل الوطني...</span>
               </div>
@@ -482,14 +483,14 @@ export function CentralMapView() {
           )}
 
           {!loading && error && (
-            <div className="absolute start-1/2 top-4 z-20 flex w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 flex-wrap items-center justify-between gap-3 rounded-xl border border-rose-200 bg-white/95 px-3.5 py-2.5 text-base text-rose-800 shadow-lg backdrop-blur-md">
+            <div className="absolute left-1/2 top-4 z-20 flex w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 flex-wrap items-center justify-between gap-3 rounded-xl border border-rose-200 bg-white/95 px-3.5 py-2.5 text-sm text-rose-800 shadow-sm backdrop-blur-md">
               <span className="flex items-center gap-2 font-semibold">
                 <AlertTriangle className="size-4 shrink-0" />
                 {error}
               </span>
               <button
                 type="button"
-                className="inline-flex items-center gap-1 rounded-lg border border-rose-200 bg-white px-2.5 py-1 font-bold text-rose-800 hover:bg-rose-50"
+                className="inline-flex items-center gap-1 rounded-full border border-rose-200 bg-white px-2.5 py-1 font-bold text-rose-800 hover:bg-rose-50"
                 onClick={() => void loadDeals()}
               >
                 <RefreshCw className="size-3.5" />
@@ -499,19 +500,19 @@ export function CentralMapView() {
           )}
 
           {!loading && !error && deals.length === 0 && (
-            <div className="absolute start-1/2 top-1/2 z-20 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-[#E3E7E2] bg-white/95 p-5 text-center shadow-xl backdrop-blur-md">
-              <FileText className="mx-auto mb-2 size-7 text-[#59665F]" />
+            <div className="absolute left-1/2 top-1/2 z-20 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-gray-200 bg-white/95 p-5 text-center shadow-sm backdrop-blur-md">
+              <FileText className="mx-auto mb-2 size-7 text-gray-500" />
               <h3 className="m-0 text-lg font-bold text-[#24352E]">
                 لا توجد صفقات مسجلة حالياً
               </h3>
-              <p className="mb-0 mt-1 text-base leading-relaxed text-[#59665F]">
+              <p className="mb-0 mt-1 text-sm leading-relaxed text-gray-500">
                 ستظهر الولايات على الخريطة فور تسجيل صفقات حقيقية في السجل الوطني.
               </p>
             </div>
           )}
 
           {selectedWilaya && (
-            <div className="absolute bottom-4 start-4 z-30 w-[410px] max-w-[calc(100vw-2rem)]">
+            <div className="absolute bottom-4 start-4 z-30 w-[380px] max-w-[calc(100vw-2rem)]">
               <WilayaDetailCard
                 wilaya={selectedWilaya}
                 onClose={() => setSelectedWilaya(null)}
@@ -520,13 +521,13 @@ export function CentralMapView() {
             </div>
           )}
 
-          <div className="absolute bottom-4 end-4 z-20 flex flex-col gap-1.5 rounded-2xl border border-[#E3E7E2] bg-white/90 p-1 shadow-md backdrop-blur-md">
+          <div className="absolute end-4 top-4 z-30 flex flex-col items-center gap-0.5 rounded-2xl border border-gray-200 bg-white/95 p-1.5 shadow-sm backdrop-blur-md">
             <button
               type="button"
               onClick={handleZoomIn}
               title="تكبير الخريطة"
               aria-label="تكبير"
-              className="flex size-8 items-center justify-center rounded-xl text-[#24352E] transition-colors hover:bg-[#EDF4EE] hover:text-[#167354]"
+              className="flex size-9 items-center justify-center rounded-xl text-[#24352E] transition-colors hover:bg-emerald-50 hover:text-emerald-700"
             >
               <Plus className="size-4" />
             </button>
@@ -535,7 +536,7 @@ export function CentralMapView() {
               onClick={handleZoomOut}
               title="تصغير الخريطة"
               aria-label="تصغير"
-              className="flex size-8 items-center justify-center rounded-xl text-[#24352E] transition-colors hover:bg-[#EDF4EE] hover:text-[#167354]"
+              className="flex size-9 items-center justify-center rounded-xl text-[#24352E] transition-colors hover:bg-emerald-50 hover:text-emerald-700"
             >
               <Minus className="size-4" />
             </button>
@@ -544,124 +545,141 @@ export function CentralMapView() {
               onClick={handleZoomReset}
               title="إعادة ضبط الحجم الأصلي"
               aria-label="إعادة ضبط"
-              className="flex size-8 items-center justify-center rounded-xl border-t border-[#E3E7E2]/60 pt-1 text-[#24352E] transition-colors hover:bg-[#EDF4EE] hover:text-[#167354]"
+              className="flex size-9 items-center justify-center rounded-xl text-[#24352E] transition-colors hover:bg-emerald-50 hover:text-emerald-700"
             >
-              <RotateCcw className="size-3.5" />
+              <RotateCcw className="size-4" />
+            </button>
+            <span className="my-0.5 h-px w-6 bg-gray-200" aria-hidden="true" />
+            <button
+              type="button"
+              onClick={() => void loadDeals()}
+              disabled={loading}
+              title="تحديث بيانات السجل الوطني"
+              aria-label="تحديث بيانات السجل الوطني"
+              className="flex size-9 items-center justify-center rounded-xl text-[#24352E] transition-colors hover:bg-emerald-50 hover:text-emerald-700 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              <RefreshCw className={`size-4 ${loading ? 'animate-spin' : ''}`} />
             </button>
           </div>
 
-          <div className="absolute bottom-4 start-1/2 z-10 hidden -translate-x-1/2 items-center gap-2 rounded-full border border-[#E3E7E2] bg-white/80 px-3 py-1 text-base font-medium text-[#59665F] shadow-2xs backdrop-blur-md sm:flex">
-            <span className="size-2 rounded-full bg-[#167354]" />
-            <span>
-              {lastUpdated
-                ? `آخر تحديث من السجل الوطني: ${lastUpdated.toLocaleTimeString('ar-DZ', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  })}`
-                : 'بانتظار بيانات السجل الوطني'}
-            </span>
-          </div>
+          {!selectedWilaya && (
+            <div className="absolute bottom-4 left-1/2 z-10 hidden w-max max-w-[calc(100%-2rem)] -translate-x-1/2 items-center gap-2 whitespace-nowrap rounded-full border border-gray-200 bg-white/90 px-3 py-1.5 text-sm font-medium text-gray-500 shadow-sm backdrop-blur-md sm:flex">
+              <span className="size-2 rounded-full bg-[#167354]" />
+              <span>
+                {lastUpdated
+                  ? `آخر تحديث من السجل الوطني: ${lastUpdated.toLocaleTimeString('ar-DZ', {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}`
+                  : 'بانتظار بيانات السجل الوطني'}
+              </span>
+            </div>
+          )}
         </main>
 
         {isSidePanelOpen && (
-          <aside className="z-10 flex h-auto w-full flex-none flex-col overflow-y-auto border-t border-[#E3E7E2] bg-white shadow-xs lg:h-full lg:w-[380px] lg:border-s lg:border-t-0 xl:w-[410px]">
-            <div className="border-b border-[#E3E7E2] p-4 sm:p-5">
-              <div className="mb-3 flex items-center justify-between">
-                <span className="flex items-center gap-1.5 text-base font-bold uppercase tracking-wider text-[#59665F]">
-                  <TrendingUp className="size-3.5 text-[#167354]" />
-                  <span>المؤشرات الوطنية التراكمية</span>
+          <aside className="z-10 flex h-auto w-full flex-none flex-col gap-4 overflow-y-auto pb-1 xl:h-full xl:w-[410px]">
+            <section className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+              <div className="mb-3 flex items-center justify-between gap-2">
+                <span className="flex min-w-0 items-center gap-2 text-sm font-bold text-gray-600">
+                  <TrendingUp className="size-4 shrink-0 text-[#167354]" />
+                  <span className="truncate">المؤشرات الوطنية التراكمية</span>
                 </span>
-                <span className="rounded-md bg-[#EDF4EE] px-2 py-0.5 font-mono text-base font-bold text-[#167354]">
+                <span
+                  className={`shrink-0 rounded-full px-2 py-1 text-xs font-bold ${
+                    loading ? 'bg-amber-50 text-amber-700' : 'bg-emerald-50 text-emerald-700'
+                  }`}
+                >
                   {loading ? 'جارٍ التحديث' : 'محدّث'}
                 </span>
               </div>
 
-              <div className="grid grid-cols-2 gap-2.5">
-                <div className="rounded-xl border border-[#E3E7E2] bg-[#F8F9F7] p-3 shadow-2xs">
-                  <div className="mb-1 flex items-center justify-between text-[#59665F]">
-                    <span className="text-base font-bold">إجمالي الصفقات</span>
-                    <FileText className="size-3.5 text-[#167354]" />
+              <div className="grid grid-cols-2 gap-3">
+                <div className="rounded-xl border border-gray-200 bg-gray-50 p-3">
+                  <div className="mb-1.5 flex items-center justify-between gap-2 text-gray-500">
+                    <span className="text-sm font-bold">إجمالي الصفقات</span>
+                    <FileText className="size-4 shrink-0 text-[#167354]" />
                   </div>
-                  <div className="font-mono text-xl font-black text-[#24352E]">
+                  <div className="font-mono text-xl font-black leading-tight text-[#24352E]">
                     {deals.length.toLocaleString('ar-DZ')}
                   </div>
-                  <span className="text-base font-bold text-[#167354]">
+                  <span className="mt-1 block text-sm font-semibold text-[#167354]">
                     من السجل الوطني
                   </span>
                 </div>
 
-                <div className="rounded-xl border border-[#E3E7E2] bg-[#F8F9F7] p-3 shadow-2xs">
-                  <div className="mb-1 flex items-center justify-between text-[#59665F]">
-                    <span className="text-base font-bold">الحجم المالي</span>
-                    <Coins className="size-3.5 text-[#2563EB]" />
+                <div className="rounded-xl border border-gray-200 bg-gray-50 p-3">
+                  <div className="mb-1.5 flex items-center justify-between gap-2 text-gray-500">
+                    <span className="text-sm font-bold">الحجم المالي</span>
+                    <Coins className="size-4 shrink-0 text-[#2563EB]" />
                   </div>
                   <div
-                    className="truncate font-mono text-lg font-black text-[#24352E]"
+                    className="truncate font-mono text-lg font-black leading-tight text-[#24352E]"
                     title={formatCompactDzd(totalBudgetDzd)}
                   >
                     {formatCompactDzd(totalBudgetDzd)}
                   </div>
-                  <span className="text-base font-bold text-[#2563EB]">
+                  <span className="mt-1 block text-sm font-semibold text-[#2563EB]">
                     الميزانيات التقديرية
                   </span>
                 </div>
 
-                <div className="rounded-xl border border-[#E3E7E2] bg-[#F8F9F7] p-3 shadow-2xs">
-                  <div className="mb-1 flex items-center justify-between text-[#59665F]">
-                    <span className="text-base font-bold">الولايات النشطة</span>
-                    <MapPin className="size-3.5 text-[#167354]" />
+                <div className="rounded-xl border border-gray-200 bg-gray-50 p-3">
+                  <div className="mb-1.5 flex items-center justify-between gap-2 text-gray-500">
+                    <span className="text-sm font-bold">الولايات النشطة</span>
+                    <MapPin className="size-4 shrink-0 text-[#167354]" />
                   </div>
-                  <div className="font-mono text-xl font-black text-[#24352E]">
+                  <div className="font-mono text-xl font-black leading-tight text-[#24352E]">
                     {activeWilayas.toLocaleString('ar-DZ')}{' '}
-                    <span className="text-base font-bold text-[#59665F]">ولاية</span>
+                    <span className="text-sm font-bold text-gray-500">ولاية</span>
                   </div>
-                  <span className="text-base font-bold text-[#59665F]">
+                  <span className="mt-1 block text-sm font-semibold text-gray-500">
                     ذات صفقات مسجلة
                   </span>
                 </div>
 
-                <div className="rounded-xl border border-[#FECDD3] bg-[#FFF1F2] p-3 shadow-2xs">
-                  <div className="mb-1 flex items-center justify-between text-[#E11D48]">
-                    <span className="text-base font-bold">شبهات مرصودة</span>
-                    <AlertTriangle className="size-3.5 text-[#E11D48]" />
+                <div className="rounded-xl border border-rose-100 bg-rose-50 p-3">
+                  <div className="mb-1.5 flex items-center justify-between gap-2 text-rose-700">
+                    <span className="text-sm font-bold">شبهات مرصودة</span>
+                    <AlertTriangle className="size-4 shrink-0 text-rose-600" />
                   </div>
-                  <div className="font-mono text-xl font-black text-[#E11D48]">
+                  <div className="font-mono text-xl font-black leading-tight text-rose-700">
                     {totalWarnings.toLocaleString('ar-DZ')}{' '}
-                    <span className="text-base font-bold text-[#BE123C]">حالة</span>
+                    <span className="text-sm font-bold text-rose-600">حالة</span>
                   </div>
-                  <span className="text-base font-bold text-[#E11D48]">
+                  <span className="mt-1 block text-sm font-semibold text-rose-600">
                     تحليل استشاري
                   </span>
                 </div>
               </div>
-            </div>
+            </section>
 
-            <div className="border-b border-[#E3E7E2] bg-[#FDFEFC] p-4 sm:p-5">
-              <div className="mb-2.5 flex items-center justify-between">
-                <div className="flex items-center gap-1.5">
-                  <Sparkles className="size-3.5 text-[#167354]" />
-                  <span className="text-base font-extrabold text-[#24352E]">
+            <section className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+              <div className="mb-3 flex items-center justify-between gap-2">
+                <div className="flex min-w-0 items-center gap-2">
+                  <Sparkles className="size-4 shrink-0 text-[#167354]" />
+                  <span className="truncate text-sm font-extrabold text-[#24352E]">
                     رادار الذكاء الاصطناعي الاستباقي
                   </span>
                 </div>
-                <span className="rounded bg-[#EDF4EE] px-1.5 py-0.5 font-mono text-base font-bold text-[#167354]">
+                <span className="shrink-0 rounded-full bg-emerald-50 px-2 py-0.5 font-mono text-xs font-bold text-emerald-700">
                   AI Monitor
                 </span>
               </div>
 
-              <div className="space-y-2 text-base">
+              <div className="space-y-2.5 text-sm">
                 {suspicionsLoading ? (
-                  <div className="space-y-2">
-                    <div className="h-16 w-full animate-pulse rounded-lg bg-[#E3E7E2]" />
-                    <div className="h-16 w-full animate-pulse rounded-lg bg-[#E3E7E2]" />
+                  <div className="space-y-2.5">
+                    <div className="h-20 w-full animate-pulse rounded-xl bg-gray-100" />
+                    <div className="h-20 w-full animate-pulse rounded-xl bg-gray-100" />
                   </div>
                 ) : suspicionsError ? (
-                  <div className="rounded-lg border border-rose-200 bg-rose-50 p-2.5 text-base font-semibold text-rose-800">
+                  <div className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm font-semibold leading-relaxed text-rose-800">
                     تعذر تحميل نتائج التحليل الاستشاري حالياً.
                   </div>
                 ) : flaggedWilayas.length === 0 ? (
-                  <div className="flex items-start gap-2 rounded-lg border border-emerald-200 bg-emerald-50 p-2.5 text-base font-semibold text-emerald-900">
-                    <Sparkles className="mt-0.5 size-3.5 shrink-0" />
+                  <div className="flex items-start gap-2 rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm font-semibold leading-relaxed text-emerald-900">
+                    <Sparkles className="mt-0.5 size-4 shrink-0" />
                     <span>لا توجد شبهات مرتبطة بصفقات الولايات في التحليل الحالي.</span>
                   </div>
                 ) : (
@@ -669,43 +687,45 @@ export function CentralMapView() {
                     <button
                       key={wilaya.code}
                       type="button"
-                      className="w-full cursor-pointer rounded-lg border border-[#E3E7E2] bg-white p-2.5 text-right transition-colors hover:border-[#167354]"
+                      className="w-full cursor-pointer rounded-xl border border-gray-200 bg-white p-3 text-right transition-colors hover:border-[#167354] hover:bg-emerald-50/30"
                       onClick={() => handleWilayaClick(wilaya.code)}
                     >
-                      <div className="mb-1 flex items-center justify-between font-bold text-[#24352E]">
-                        <span className="flex items-center gap-1.5">
-                          <span className="size-2 rounded-full bg-[#E11D48]" />
-                          <span>
+                      <div className="mb-1.5 flex items-center justify-between gap-2 text-sm font-bold text-[#24352E]">
+                        <span className="flex min-w-0 items-center gap-2">
+                          <span className="size-2 shrink-0 rounded-full bg-rose-500" />
+                          <span className="truncate">
                             {wilaya.name} ({wilaya.code})
                           </span>
                         </span>
-                        <span className="rounded bg-rose-50 px-1.5 py-0.2 font-mono text-base text-[#E11D48]">
+                        <span className="shrink-0 rounded-full bg-rose-50 px-2 py-0.5 font-mono text-xs font-bold text-rose-700">
                           {wilaya.warnings} تنبيهات
                         </span>
                       </div>
-                      <p className="m-0 line-clamp-2 text-base font-medium leading-relaxed text-[#59665F]">
+                      <p className="m-0 line-clamp-2 text-sm font-medium leading-relaxed text-gray-500">
                         {wilaya.warningDetails?.[0] || 'شبهة مسجلة تستدعي المراجعة الرقابية.'}
                       </p>
                     </button>
                   ))
                 )}
               </div>
-            </div>
+            </section>
 
-            <div className="border-b border-[#E3E7E2] p-4 sm:p-5">
-              <div className="mb-3 flex items-center justify-between">
-                <span className="text-base font-bold text-[#59665F]">
+            <section className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+              <div className="mb-3 flex items-center justify-between gap-2">
+                <span className="text-sm font-bold text-gray-600">
                   أعلى الولايات نشاطاً في الصفقات
                 </span>
-                <span className="text-base font-bold text-[#167354]">ترتيب وطني</span>
+                <span className="shrink-0 rounded-full bg-emerald-50 px-2 py-1 text-xs font-bold text-emerald-700">
+                  ترتيب وطني
+                </span>
               </div>
 
               {topWilayas.length === 0 ? (
-                <p className="m-0 rounded-lg border border-dashed border-[#E3E7E2] p-3 text-center text-base font-semibold text-[#59665F]">
+                <p className="m-0 rounded-xl border border-dashed border-gray-200 p-3 text-center text-sm font-semibold leading-relaxed text-gray-500">
                   لا توجد ولايات ذات صفقات مسجلة بعد.
                 </p>
               ) : (
-                <div className="space-y-1.5">
+                <div className="space-y-2">
                   {topWilayas.map((wilaya, index) => {
                     const isSelected = selectedWilaya?.code === wilaya.code;
                     return (
@@ -713,21 +733,21 @@ export function CentralMapView() {
                         key={wilaya.code}
                         type="button"
                         onClick={() => handleWilayaClick(wilaya.code, wilaya)}
-                        className={`flex w-full items-center justify-between rounded-xl border p-2.5 text-right transition-all ${
+                        className={`flex w-full items-center justify-between gap-2 rounded-xl border p-3 text-right transition-all ${
                           isSelected
-                            ? 'border-[#167354] bg-[#EDF4EE] shadow-xs'
-                            : 'border-[#E3E7E2] bg-white hover:bg-[#F8F9F7]'
+                            ? 'border-emerald-300 bg-emerald-50/60 shadow-sm'
+                            : 'border-gray-200 bg-white hover:bg-gray-50'
                         }`}
                       >
                         <div className="flex min-w-0 items-center gap-2.5">
-                          <span className="flex size-6 shrink-0 items-center justify-center rounded-lg border border-[#E3E7E2] bg-[#F8F9F7] font-mono text-base font-black text-[#59665F]">
+                          <span className="flex size-7 shrink-0 items-center justify-center rounded-lg border border-gray-200 bg-gray-50 font-mono text-xs font-black text-gray-500">
                             {index + 1}
                           </span>
-                          <div className="truncate">
-                            <span className="block truncate text-base font-bold text-[#24352E]">
+                          <div className="min-w-0 truncate">
+                            <span className="block truncate text-sm font-bold leading-relaxed text-[#24352E]">
                               {wilaya.name}
                             </span>
-                            <span className="font-mono text-base text-[#59665F]">
+                            <span className="block truncate font-mono text-sm leading-relaxed text-gray-500">
                               {wilaya.budget.toLocaleString('ar-DZ', {
                                 maximumFractionDigits: 1,
                               })}{' '}
@@ -736,47 +756,47 @@ export function CentralMapView() {
                           </div>
                         </div>
 
-                        <div className="flex shrink-0 items-center gap-2">
+                        <div className="flex shrink-0 items-center gap-1.5">
                           {wilaya.warnings > 0 && (
-                            <span className="rounded-full border border-rose-200 bg-rose-50 px-1.5 py-0.5 font-mono text-base font-bold text-rose-700">
+                            <span className="rounded-full border border-rose-200 bg-rose-50 px-2 py-0.5 font-mono text-xs font-bold text-rose-700">
                               {wilaya.warnings} شبهة
                             </span>
                           )}
-                          <span className="rounded-md border border-[#CDE1D3] bg-white px-2 py-0.5 font-mono text-base font-black text-[#167354]">
+                          <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 font-mono text-xs font-black text-emerald-700">
                             {wilaya.tenders_count} صفقة
                           </span>
-                          <ChevronRight className="size-3.5 text-[#59665F] rtl:rotate-180" />
+                          <ChevronRight className="size-4 text-gray-400 rtl:rotate-180" />
                         </div>
                       </button>
                     );
                   })}
                 </div>
               )}
-            </div>
+            </section>
 
-            <div className="mt-auto bg-[#F8F9F7] p-4 text-base sm:p-5">
-              <span className="mb-2 block text-base font-bold text-[#59665F]">
-                دليل التدرج الحراري للخريطة:
+            <section className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+              <span className="mb-3 block text-sm font-bold text-gray-600">
+                دليل التدرج الحراري للخريطة
               </span>
-              <div className="grid grid-cols-2 gap-2 text-base">
-                <div className="flex items-center gap-2">
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div className="flex items-center gap-2 leading-relaxed">
                   <span className="size-3 shrink-0 rounded bg-[#1B4332]" />
                   <span className="font-medium text-[#24352E]">نشاط عالٍ</span>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 leading-relaxed">
                   <span className="size-3 shrink-0 rounded bg-[#2D6A4F]" />
                   <span className="font-medium text-[#24352E]">نشاط متوسط</span>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 leading-relaxed">
                   <span className="size-3 shrink-0 rounded bg-[#74C69D]" />
                   <span className="font-medium text-[#24352E]">نشاط منخفض</span>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 leading-relaxed">
                   <span className="size-3 shrink-0 animate-pulse rounded bg-[#B02A2A]" />
-                  <span className="font-bold text-[#E11D48]">شبهات مرصودة</span>
+                  <span className="font-bold text-rose-700">شبهات مرصودة</span>
                 </div>
               </div>
-            </div>
+            </section>
           </aside>
         )}
       </div>

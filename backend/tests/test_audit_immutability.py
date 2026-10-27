@@ -79,3 +79,33 @@ class TestAuditLogImmutability:
 
         res_delete = client.delete(f'/api/audit/logs/{log.id}/')
         assert res_delete.status_code == 405
+
+    def test_audit_log_bulk_deletion_prohibited(self, admin_user):
+        """منع الحذف الجماعي لسجلات التدقيق عبر QuerySet.delete() وفق القانون 23-12"""
+        AuditLog.objects.create(
+            user=admin_user,
+            action='BULK_DEL_TEST',
+            resource_type='ProcurementDeal',
+            resource_id='B1',
+            description='سجل اختبار الحذف الجماعي'
+        )
+        with pytest.raises(PermissionDenied):
+            AuditLog.objects.filter(action='BULK_DEL_TEST').delete()
+
+        with pytest.raises(PermissionDenied):
+            AuditLog.objects.all().delete()
+
+    def test_audit_log_bulk_update_prohibited(self, admin_user):
+        """منع التعديل الجماعي لسجلات التدقيق عبر QuerySet.update() وفق القانون 23-12"""
+        AuditLog.objects.create(
+            user=admin_user,
+            action='BULK_UPD_TEST',
+            resource_type='ProcurementDeal',
+            resource_id='B2',
+            description='سجل اختبار التحديث الجماعي'
+        )
+        with pytest.raises(PermissionDenied):
+            AuditLog.objects.filter(action='BULK_UPD_TEST').update(description='محاولة اختراق')
+
+        with pytest.raises(PermissionDenied):
+            AuditLog.objects.all().update(description='محاولة اختراق جماعية')

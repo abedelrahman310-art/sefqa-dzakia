@@ -12,6 +12,7 @@ from .models import (
     Milestone,
     MilestoneProgressReport,
 )
+from .reference_prices import normalize_item_name, normalize_wilaya
 from apps.bids.models import BidOffer
 
 
@@ -646,6 +647,12 @@ class OfferSerializer(serializers.ModelSerializer):
 
         offer = super().create(validated_data)
         if doc_file:
+            from apps.bids.validators import validate_document_upload
+            from django.core.exceptions import ValidationError as DjangoValidationError
+            try:
+                validate_document_upload(doc_file)
+            except DjangoValidationError as e:
+                raise serializers.ValidationError({'document': list(e.messages) if hasattr(e, 'messages') else str(e)})
             OfferDocument.objects.create(offer=offer, file=doc_file)
         return offer
 
@@ -660,6 +667,12 @@ class OfferSerializer(serializers.ModelSerializer):
 
         offer = super().update(instance, validated_data)
         if doc_file:
+            from apps.bids.validators import validate_document_upload
+            from django.core.exceptions import ValidationError as DjangoValidationError
+            try:
+                validate_document_upload(doc_file)
+            except DjangoValidationError as e:
+                raise serializers.ValidationError({'document': list(e.messages) if hasattr(e, 'messages') else str(e)})
             OfferDocument.objects.create(offer=offer, file=doc_file)
         return offer
 
@@ -763,6 +776,100 @@ class ContractSerializer(serializers.ModelSerializer):
                 return request.build_absolute_uri(obj.contract_pdf.url)
             return obj.contract_pdf.url
         return None
+
+
+class PriceCheckItemSerializer(serializers.Serializer):
+    """بند مالي واحد مرسل إلى /api/procurements/check-prices/.
+
+    يقبل الأسماء القانونية (name / proposed_price / unit / wilaya)
+    مع مرادفات شائعة من الواجهة (item_name / price / unit_price...).
+    """
+
+    name = serializers.CharField(max_length=255, trim_whitespace=True)
+    proposed_price = serializers.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+        min_value=Decimal('0.01'),
+    )
+    unit = serializers.CharField(max_length=50, required=False, allow_blank=True, default='')
+    wilaya = serializers.CharField(max_length=100, required=False, allow_blank=True, default='')
+
+    _FIELD_ALIASES = {
+        'name': ('item_name', 'itemName', 'designation', 'label', 'item', 'name_ar'),
+        'proposed_price': ('price', 'unit_price', 'unitPrice', 'amount', 'proposedPrice'),
+        'unit': ('measure_unit', 'unite', 'unit_name'),
+        'wilaya': ('province', 'wilaya_name', 'state'),
+    }
+
+    def to_internal_value(self, data):
+        if isinstance(data, dict):
+            data = data.copy()
+            for canonical, aliases in self._FIELD_ALIASES.items():
+                current = data.get(canonical)
+                if current not in (None, ''):
+                    continue
+                for alias in aliases:
+                    value = data.get(alias)
+                    if value not in (None, ''):
+                        data[canonical] = value
+                        break
+        return super().to_internal_value(data)
+
+    def validate_name(self, value):
+        value = value.strip()
+        if not normalize_item_name(value):
+            raise serializers.ValidationError(
+                'اسم المادة أو الخدمة يجب أن يحتوي على حروف أو أرقام.'
+            )
+        return value
+
+    def validate_unit(self, value):
+        return (value or '').strip()
+
+    def validate_wilaya(self, value):
+        value = (value or '').strip()
+        if value and not normalize_wilaya(value):
+            raise serializers.ValidationError('الولاية يجب أن تحتوي على حروف أو أرقام.')
+        return value
+
+    def validate_proposed_price(self, value):
+        if not value.is_finite():
+            raise serializers.ValidationError('السعر المقترح يجب أن يكون رقماً صحيحاً.')
+        return value
+
+
+class CheckPricesRequestSerializer(serializers.Serializer):
+    """غلاف طلب فحص الأسعار: ولاية افتراضية + قائمة البنود المالية."""
+
+    wilaya = serializers.CharField(
+        max_length=100,
+        required=False,
+        allow_blank=True,
+        default='',
+    )
+    items = PriceCheckItemSerializer(many=True, allow_empty=False, max_length=200)
+
+    def to_internal_value(self, data):
+        if isinstance(data, dict):
+            data = data.copy()
+            if 'items' not in data:
+                for alias in ('financial_items', 'lines', 'prices', 'entries'):
+                    if alias in data:
+                        data['items'] = data[alias]
+                        break
+            if data.get('wilaya') in (None, ''):
+                for alias in ('province', 'wilaya_name', 'state'):
+                    value = data.get(alias)
+                    if value not in (None, ''):
+                        data['wilaya'] = value
+                        break
+        return super().to_internal_value(data)
+
+    def validate_wilaya(self, value):
+        value = (value or '').strip()
+        if value and not normalize_wilaya(value):
+            raise serializers.ValidationError('الولاية يجب أن تحتوي على حروف أو أرقام.')
+        return value
 
 
 

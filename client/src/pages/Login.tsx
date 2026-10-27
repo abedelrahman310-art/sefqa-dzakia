@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardDescription, CardTitle } from '@/components/ui/card';
 import { ArrowRight } from 'lucide-react';
 import { LanguageSwitcher } from '@/components/layout/LanguageSwitcher';
+import { Logo } from '@/components/ui/Logo';
 
 export function Login() {
   const { login, logout, user, status } = useAuth();
@@ -139,6 +140,9 @@ export function Login() {
       <main className="flex-1 flex items-center justify-center p-4 pt-20">
         <div className="w-full max-w-md bg-white rounded-2xl shadow-sm border border-[var(--color-border-subtle)] p-6 sm:p-8">
           <div className="text-center mb-6">
+            <div className="flex justify-center mb-3">
+              <Logo size={52} />
+            </div>
             <h1 className="text-2xl font-bold text-primary">صفقات ذكية</h1>
             <p className="text-sm text-muted-foreground mt-1">{t('login.title')}</p>
           </div>

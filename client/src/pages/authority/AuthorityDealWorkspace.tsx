@@ -1252,7 +1252,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
             onClick={handleExportPdf}
             disabled={exportingPdf}
             className="border-[#D5DDEA] text-emerald-800 hover:bg-emerald-50 rounded-xl text-xs font-bold flex items-center gap-1.5"
-            title="تصدير دفتر الشروط بصيغة PDF قابلة للطباعة والتوقيع"
+            title="تصدير دفتر الشروط بصيغة PDF قابلة للطباعة والأرشفة"
           >
             <Download className="w-4 h-4 text-emerald-600" />
             <span>{exportingPdf ? 'جاري التصدير...' : 'تصدير دفتر الشروط (PDF)'}</span>
@@ -1326,7 +1326,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                   </span>
                 </div>
                 <div>
-                  <span className="block text-[10px] font-bold text-gray-500">تاريخ التوقيع</span>
+                  <span className="block text-[10px] font-bold text-gray-500">تاريخ الأرشفة</span>
                   <span className="mt-0.5 block font-bold text-navy-900">
                     {formatContractDate(contract.signed_at)}
                   </span>
@@ -2385,7 +2385,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                       <div className="space-y-1">
                         <p className="font-bold text-gray-900">دفتر الشروط والمواصفات (PDF)</p>
                         <p className="text-gray-500 text-[11px]">
-                          النسخة الرسمية القابلة للطباعة والتوقيع الإلكتروني
+                          النسخة الرسمية القابلة للطباعة والأرشفة
                         </p>
                         <span className="inline-block text-[10px] font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded">
                           {isFrozen ? 'نسخة مجمّدة معتمدة' : 'مسودة قيد الإعداد'}

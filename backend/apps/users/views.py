@@ -1,6 +1,7 @@
 from rest_framework import status, views, permissions, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.throttling import AnonRateThrottle
 from django.contrib.auth import authenticate, login as django_login, logout as django_logout
 from rest_framework_simplejwt.tokens import RefreshToken
 import logging
@@ -27,6 +28,7 @@ logger = logging.getLogger(__name__)
 class RegisterView(views.APIView):
     permission_classes = [permissions.AllowAny]
     authentication_classes = []
+    throttle_classes = []
 
     def post(self, request):
         serializer = RegisterSerializer(data=request.data)
@@ -90,6 +92,7 @@ class RegisterView(views.APIView):
 class LoginView(views.APIView):
     permission_classes = [permissions.AllowAny]
     authentication_classes = []
+    throttle_classes = [AnonRateThrottle]
 
     def post(self, request):
         serializer = LoginSerializer(data=request.data)
@@ -117,8 +120,21 @@ class LogoutView(views.APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):
+        token_str = request.data.get('refresh')
+        if token_str:
+            try:
+                token = RefreshToken(token_str)
+                token.blacklist()
+            except Exception as e:
+                return Response(
+                    {'error': 'رمز التحديث غير صالح أو تم إبطاله مسبقاً', 'detail': str(e)},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
         django_logout(request)
-        return Response({'message': 'تم تسجيل الخروج بنجاح'}, status=status.HTTP_200_OK)
+        return Response({
+            'message': 'تم تسجيل الخروج وإبطال الرمز بنجاح',
+            'blacklisted': bool(token_str),
+        }, status=status.HTTP_200_OK)
 
 class CurrentUserView(views.APIView):
     permission_classes = [permissions.IsAuthenticated]

@@ -17,11 +17,14 @@ from .views_opening import (
     SessionScheduleView,
     SessionDetailView,
     SessionStartView,
+    SessionOpenEnvelopeView,
     SessionOpenOfferView,
     SessionEndView,
+    SessionEventsView,
     SessionOffersView,
 )
 from .views_pdf import OpeningSessionPdfView, CahierSpecsPdfView
+from .views_reference_prices import CheckPricesView
 
 router = DefaultRouter()
 router.register(r'deals', ProcurementDealViewSet, basename='procurement-deal')
@@ -31,6 +34,8 @@ router.register(r'milestones', MilestoneViewSet, basename='milestone')
 router.register(r'contracts', ContractViewSet, basename='procurement-contract')
 
 urlpatterns = [
+    path("check-prices/", CheckPricesView.as_view(), name="check-prices"),
+    path("check-prices", CheckPricesView.as_view(), name="check-prices-no-slash"),
     path("authority/opportunities/<str:pk>/evaluation-data/", EvaluationDataView.as_view(), name="authority-evaluation-data"),
     path("authority/opportunities/<str:pk>/evaluation-data", EvaluationDataView.as_view(), name="authority-evaluation-data-no-slash"),
     path("authority/opportunities/<str:pk>/conclude-evaluation/", ConcludeEvaluationView.as_view(), name="authority-conclude-evaluation"),
@@ -42,8 +47,10 @@ urlpatterns = [
     path("sessions/<uuid:pk>/", SessionDetailView.as_view(), name="session-detail"),
     path("sessions/<uuid:pk>/offers/", SessionOffersView.as_view(), name="session-offers"),
     path("sessions/<uuid:pk>/start/", SessionStartView.as_view(), name="session-start"),
+    path("sessions/<uuid:pk>/open-envelope/", SessionOpenEnvelopeView.as_view(), name="session-open-envelope"),
     path("sessions/<uuid:pk>/open-offer/", SessionOpenOfferView.as_view(), name="session-open-offer"),
     path("sessions/<uuid:pk>/end/", SessionEndView.as_view(), name="session-end"),
+    path("sessions/<uuid:pk>/events/", SessionEventsView.as_view(), name="session-events"),
     path("sessions/<uuid:pk>/pdf/", OpeningSessionPdfView.as_view(), name="session-pdf"),
     path("deals/<uuid:pk>/specs-pdf/", CahierSpecsPdfView.as_view(), name="deal-specs-pdf"),
     path("specs/<uuid:pk>/pdf/", CahierSpecsPdfView.as_view(), name="cahier-specs-pdf"),

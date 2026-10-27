@@ -9,6 +9,7 @@ from .models import (
     Contract,
     Milestone,
     MilestoneProgressReport,
+    ReferencePrice,
 )
 
 
@@ -94,5 +95,14 @@ class MilestoneProgressReportAdmin(admin.ModelAdmin):
     list_filter = ('submitted_at',)
     search_fields = ('milestone__title', 'operator__email')
     ordering = ('-submitted_at',)
+
+
+@admin.register(ReferencePrice)
+class ReferencePriceAdmin(admin.ModelAdmin):
+    list_display = ('name', 'unit', 'reference_price', 'wilaya', 'updated_at')
+    list_filter = ('wilaya',)
+    search_fields = ('name', 'normalized_name', 'wilaya', 'normalized_wilaya')
+    ordering = ('wilaya', 'name')
+    readonly_fields = ('normalized_name', 'normalized_wilaya', 'created_at', 'updated_at')
 
 

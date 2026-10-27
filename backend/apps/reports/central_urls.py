@@ -4,6 +4,7 @@ from .central_views import (
     CentralDashboardView,
     CentralSuspicionsView,
     CentralReportsView,
+    CentralReportPdfView,
 )
 
 urlpatterns = [
@@ -22,4 +23,8 @@ urlpatterns = [
     # 4. التقارير الوطنية (Reports API)
     path('reports/', CentralReportsView.as_view(), name='central-reports'),
     path('reports', CentralReportsView.as_view(), name='central-reports-no-slash'),
+
+    # 5. تصدير التقرير الوطني بصيغة PDF قابلة للأرشفة (Server-side PDF)
+    path('reports/<str:report_id>/pdf/', CentralReportPdfView.as_view(), name='central-report-pdf'),
+    path('reports/<str:report_id>/pdf', CentralReportPdfView.as_view(), name='central-report-pdf-no-slash'),
 ]

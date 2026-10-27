@@ -7,19 +7,22 @@
 ```bash
 cp .env.example .env   # أضف بيانات قاعدة البيانات
 pnpm install
-pnpm dev               # client: http://localhost:5173 | server: http://localhost:4000
+pnpm dev               # client: http://localhost:5173 (يوجّه /api إلى المنفذ 8001)
 ```
+
+> خادم Node/Drizzle القديم (`server/`) أُزيل نهائياً. الواجهة الخلفية الرسمية هي
+> Django في `backend/`، و`shared/` مكتبة TypeScript مشتركة (السجل الجغرافي للولايات).
 
 ## Commands
 
 | Command | Description |
 |---------|-------------|
-| `pnpm dev` | يشغّل الخادم والعميل معًا |
-| `pnpm build` | يبني الخادم والعميل للإنتاج |
-| `pnpm start` | يشغّل الخادم المبني (بعد `pnpm build`) |
-| `pnpm typecheck` | تحقق من أنواع TypeScript |
+| `pnpm dev` | يشغّل واجهة React (Vite) على المنفذ 5173 |
+| `pnpm build` | يبني `shared` ثم واجهة العميل للإنتاج |
+| `pnpm start` | يشغّل خادم Django على المنفذ 8001 (يتطلب Python 3.14) |
+| `pnpm typecheck` | تحقق من أنواع TypeScript لكل حزم مساحة العمل |
 | `pnpm lint` | تشغيل ESLint |
-| `pnpm db:generate` | توليد migrations بـ Drizzle Kit |
+| `pnpm test` | اختبارات الواجهة الخلفية بـ pytest (SQLite) |
 
 ## Backend (Django) — Python 3.14 / PostgreSQL 16
 

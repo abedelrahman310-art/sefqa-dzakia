@@ -7,7 +7,6 @@ export interface SearchBoxProps {
   onChange: (val: string) => void;
   results?: WilayaDetail[];
   onSelect?: (wilaya: WilayaDetail) => void;
-  compact?: boolean;
   placeholder?: string;
 }
 
@@ -16,7 +15,6 @@ export function SearchBox({
   onChange,
   results = [],
   onSelect,
-  compact = true,
   placeholder = 'ابحث عن ولاية...',
 }: SearchBoxProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -48,11 +46,11 @@ export function SearchBox({
           }}
           onFocus={() => setIsOpen(true)}
           className={`
-            ${compact ? 'w-[240px] sm:w-[280px]' : 'w-full'}
-            h-11 ps-10 pe-9
-            bg-white/95 backdrop-blur-md
-            border border-[var(--color-border-subtle)]
-            rounded-xl shadow-lg
+            w-full
+            h-10 ps-10 pe-9
+            bg-white
+            border border-gray-200
+            rounded-full shadow-sm
             text-sm text-[var(--ink-900)] placeholder:text-[var(--ink-400)]
             focus:outline-none focus:ring-2 focus:ring-[var(--stamp-green-700)]/20
             focus:border-[var(--stamp-green-700)]
@@ -85,18 +83,18 @@ export function SearchBox({
                 setIsOpen(false);
                 onChange('');
               }}
-              className="w-full text-start px-3.5 py-2.5 text-xs hover:bg-[var(--paper-100)] flex items-center justify-between transition-colors border-b last:border-b-0 border-[var(--color-border-subtle)]/50"
+              className="w-full text-start px-3.5 py-2.5 text-sm hover:bg-gray-50 flex items-center justify-between gap-2 transition-colors border-b last:border-b-0 border-gray-100"
             >
-              <div className="flex items-center gap-2">
-                <span className="font-mono font-bold text-[var(--stamp-green-700)] text-[11px] bg-[var(--paper-100)] px-1.5 py-0.5 rounded">
+              <div className="flex min-w-0 items-center gap-2">
+                <span className="font-mono font-bold text-[var(--stamp-green-700)] text-xs bg-gray-50 px-1.5 py-0.5 rounded">
                   {w.code}
                 </span>
-                <span className="font-bold text-[var(--ink-900)]">{w.name}</span>
+                <span className="truncate font-bold text-[var(--ink-900)]">{w.name}</span>
                 {w.nameFr && (
-                  <span className="text-[10px] text-[var(--ink-500)]">({w.nameFr})</span>
+                  <span className="truncate text-xs text-[var(--ink-500)]">({w.nameFr})</span>
                 )}
               </div>
-              <span className="font-mono text-[11px] font-semibold text-[var(--ink-700)]">
+              <span className="shrink-0 font-mono text-xs font-semibold text-[var(--ink-700)]">
                 {w.tenders_count} صفقة
               </span>
             </button>

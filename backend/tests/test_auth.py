@@ -1,7 +1,14 @@
 import pytest
 from django.urls import reverse
 from rest_framework.test import APIClient
+from django.core.cache import cache
 from apps.users.models import CustomUser
+
+@pytest.fixture(autouse=True)
+def clear_throttle_cache():
+    cache.clear()
+    yield
+    cache.clear()
 
 @pytest.fixture
 def api_client():

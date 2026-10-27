@@ -13,7 +13,16 @@ class AIChatThrottle(UserRateThrottle):
 class AIInsightsThrottle(UserRateThrottle):
     """
     تحديد معدل استهلاك خدمة توليد التوصيات الذكية.
-    10 طلبات / ساعة لتجنب استنزاف موارد الحوسبة.
+    50 طلب / ساعة لتجنب أخطاء 429 أثناء العروض التقديمية.
     """
     scope = "ai_insights"
-    rate = "10/hour"
+    rate = "50/hour"
+
+
+class AIAnalyzeTenderThrottle(UserRateThrottle):
+    """
+    تحديد معدل استهلاك خدمة تحليل دفتر الشروط للمتعامل (Analyze Tender).
+    50 طلب / ساعة لتجنب أخطاء 429 أثناء العروض التقديمية والعمليات المكثفة.
+    """
+    scope = "ai_analyze_tender"
+    rate = "50/hour"

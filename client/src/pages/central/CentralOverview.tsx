@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { api } from '@/lib/api';
+import { AlertTriangle, FileText } from 'lucide-react';
 
 export function CentralOverview() {
   const [data, setData] = useState<any>(null);
@@ -21,88 +22,124 @@ export function CentralOverview() {
   }, []);
 
   if (loading) return (
-    <div className="p-8 text-center text-slate-500 font-medium">
+    <div className="p-8 text-center text-sm font-medium text-slate-500">
       جاري تحميل المؤشرات السيادية للرقابة المركزية...
     </div>
   );
 
   if (error || !data) return (
-    <div className="p-8 text-center text-rose-600 font-semibold">
+    <div className="p-8 text-center text-sm font-semibold text-rose-600">
       {error || 'فشل تحميل بيانات لوحة القيادة'}
     </div>
   );
 
+  const recentDeals: any[] = data.recent_deals || [];
+  const topAlarms: any[] = data.top_alarms || [];
+
   return (
-    <div className="p-6 space-y-8" dir="rtl">
+    <div className="p-4 md:p-6 space-y-6" dir="rtl">
       <div>
         <h2 className="text-2xl font-bold text-slate-900">لوحة القيادة السيادية (عين الصقر)</h2>
-        <p className="text-base text-slate-500 mt-1">مؤشرات الرقابة والامتثال الميداني على الصفقات العمومية وفق القانون 23-12</p>
+        <p className="mt-1 text-sm leading-relaxed text-slate-500">
+          مؤشرات الرقابة والامتثال الميداني على الصفقات العمومية وفق القانون 23-12
+        </p>
       </div>
-      
+
       {/* بطاقات المؤشرات الأساسية */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 hover:border-sky-300 transition-colors">
-          <h3 className="text-base font-bold text-slate-600">إجمالي الصفقات الجارية</h3>
-          <p className="text-3xl font-black text-sky-600 mt-2">{data.active_deals_count ?? 0}</p>
-          <span className="text-base text-slate-400 mt-1 block">من أصل {data.total_deals ?? 0} صفقة مسجلة</span>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 hover:border-sky-300 transition-colors">
+          <h3 className="text-sm font-semibold text-slate-600">إجمالي الصفقات الجارية</h3>
+          <p className="text-2xl font-bold text-sky-600 mt-1.5 tabular-nums">{data.active_deals_count ?? 0}</p>
+          <span className="text-xs text-slate-500 mt-1 block">من أصل {data.total_deals ?? 0} صفقة مسجلة</span>
         </div>
 
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 hover:border-amber-300 transition-colors">
-          <h3 className="text-base font-bold text-slate-600">صفقات بانتظار التأشيرة</h3>
-          <p className="text-3xl font-black text-amber-500 mt-2">{data.pending_visa_count ?? 0}</p>
-          <span className="text-base text-slate-400 mt-1 block">لدى لجان الصفقات المختصة</span>
+        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 hover:border-amber-300 transition-colors">
+          <h3 className="text-sm font-semibold text-slate-600">صفقات بانتظار التأشيرة</h3>
+          <p className="text-2xl font-bold text-amber-500 mt-1.5 tabular-nums">{data.pending_visa_count ?? 0}</p>
+          <span className="text-xs text-slate-500 mt-1 block">لدى لجان الصفقات المختصة</span>
         </div>
 
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 hover:border-rose-300 transition-colors">
-          <h3 className="text-base font-bold text-slate-600">إنذارات الذكاء الاصطناعي</h3>
-          <p className="text-3xl font-black text-rose-600 mt-2">{data.total_ai_alarms ?? 0}</p>
-          <span className="text-base text-rose-500/80 mt-1 block">{data.total_suspicions_count ?? 0} شبهة تجزئة وتواطؤ</span>
+        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 hover:border-rose-300 transition-colors">
+          <h3 className="text-sm font-semibold text-slate-600">إنذارات الذكاء الاصطناعي</h3>
+          <p className="text-2xl font-bold text-rose-600 mt-1.5 tabular-nums">{data.total_ai_alarms ?? 0}</p>
+          <span className="text-xs text-slate-500 mt-1 block">{data.total_suspicions_count ?? 0} شبهة تجزئة وتواطؤ</span>
         </div>
 
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 hover:border-emerald-300 transition-colors">
-          <h3 className="text-base font-bold text-slate-600">المصالح النشطة</h3>
-          <p className="text-3xl font-black text-emerald-600 mt-2">{data.active_authorities_count ?? 0}</p>
-          <span className="text-base text-slate-400 mt-1 block">من أصل {data.total_authorities_count ?? 0} مصلحة متعاقدة</span>
+        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 hover:border-emerald-300 transition-colors">
+          <h3 className="text-sm font-semibold text-slate-600">المصالح النشطة</h3>
+          <p className="text-2xl font-bold text-emerald-600 mt-1.5 tabular-nums">{data.active_authorities_count ?? 0}</p>
+          <span className="text-xs text-slate-500 mt-1 block">من أصل {data.total_authorities_count ?? 0} مصلحة متعاقدة</span>
         </div>
       </div>
 
       {/* الإنذارات العاجلة وأحدث الصفقات */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         {/* أحدث الصفقات */}
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
-          <h3 className="text-base font-bold text-slate-800 mb-4">أحدث الصفقات المسجلة</h3>
-          <div className="divide-y divide-slate-100">
-            {(data.recent_deals || []).map((deal: any) => (
-              <div key={deal.id} className="py-3 flex items-center justify-between text-base">
-                <div className="min-w-0 flex-1 pe-4">
-                  <p className="font-bold text-slate-800 truncate">{deal.title}</p>
-                  <p className="text-base text-slate-500 mt-0.5">{deal.authority_name} · {deal.wilaya}</p>
+        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
+          <h3 className="text-sm font-bold text-slate-800 mb-2.5">أحدث الصفقات المسجلة</h3>
+
+          {recentDeals.length === 0 ? (
+            <p className="flex items-center gap-2 py-4 text-xs text-slate-500">
+              <FileText className="size-3.5 shrink-0" aria-hidden="true" />
+              لا توجد صفقات مسجّلة بعد.
+            </p>
+          ) : (
+            <div className="divide-y divide-slate-100">
+              {recentDeals.map((deal: any) => (
+                <div key={deal.id} className="flex items-start justify-between gap-3 py-2.5">
+                  <div className="min-w-0 flex-1">
+                    <p className="line-clamp-2 text-sm font-semibold leading-snug text-slate-800" title={deal.title}>
+                      {deal.title}
+                    </p>
+                    <p className="mt-0.5 line-clamp-1 text-xs leading-relaxed text-slate-500">
+                      {deal.authority_name}
+                      {deal.wilaya ? ` · ${deal.wilaya}` : ''}
+                    </p>
+                  </div>
+                  <div className="shrink-0 text-end">
+                    <span className="block text-sm font-bold tabular-nums text-slate-700">
+                      {typeof deal.estimated_budget === 'number'
+                        ? `${deal.estimated_budget.toLocaleString('ar-DZ')} دج`
+                        : '—'}
+                    </span>
+                    <span className="mt-0.5 block text-xs font-semibold text-sky-600">
+                      {deal.stage_display}
+                    </span>
+                  </div>
                 </div>
-                <div className="text-end shrink-0">
-                  <span className="font-mono font-bold text-slate-700 block">{deal.estimated_budget?.toLocaleString('ar-DZ')} دج</span>
-                  <span className="text-base text-sky-600 font-semibold">{deal.stage_display}</span>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* أهم إنذارات الشبهات */}
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
-          <h3 className="text-base font-bold text-slate-800 mb-4">أبرز الشبهات الرقابية النشطة</h3>
-          <div className="space-y-3">
-            {(data.top_alarms || []).map((alarm: any, idx: number) => (
-              <div key={idx} className="p-3.5 rounded-xl bg-rose-50/60 border border-rose-200/60 text-base">
-                <div className="flex items-center justify-between gap-2">
-                  <span className="font-bold text-rose-800">{alarm.title}</span>
-                  <span className="text-base font-black uppercase px-2 py-0.5 rounded-full bg-rose-200/60 text-rose-900">
-                    {alarm.severity}
-                  </span>
+        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
+          <h3 className="text-sm font-bold text-slate-800 mb-2.5">أبرز الشبهات الرقابية النشطة</h3>
+
+          {topAlarms.length === 0 ? (
+            <p className="flex items-center gap-2 py-4 text-xs text-slate-500">
+              <AlertTriangle className="size-3.5 shrink-0" aria-hidden="true" />
+              لا توجد شبهات رقابية نشطة حالياً.
+            </p>
+          ) : (
+            <div className="space-y-2">
+              {topAlarms.map((alarm: any, idx: number) => (
+                <div key={idx} className="rounded-lg border border-rose-200/70 bg-rose-50/60 p-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <span className="text-sm font-semibold leading-snug text-rose-900">
+                      {alarm.title}
+                    </span>
+                    <span className="shrink-0 rounded-full bg-rose-200/70 px-2 py-1 text-[10px] font-bold uppercase text-rose-900">
+                      {alarm.severity}
+                    </span>
+                  </div>
+                  <p className="mt-1 line-clamp-3 text-xs leading-relaxed text-slate-600">
+                    {alarm.description}
+                  </p>
                 </div>
-                <p className="text-base text-rose-700/90 mt-1 leading-relaxed">{alarm.description}</p>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>

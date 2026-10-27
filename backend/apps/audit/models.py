@@ -5,6 +5,18 @@ from django.utils import timezone
 from django.core.exceptions import PermissionDenied
 from apps.users.models import CustomUser
 
+class AuditLogQuerySet(models.QuerySet):
+    """
+    مجموعة استعلام محصنة تمنع التعديل أو الحذف الجماعي لسجلات التدقيق
+    سواء عبر ORM البرمجي أو لوحة التحكم Django Admin وفق القانون 23-12.
+    """
+    def update(self, **kwargs):
+        raise PermissionDenied('سجلات التدقيق القانوني غير قابلة للتعديل أو التحديث الجماعي وفق أحكام القانون 23-12.')
+
+    def delete(self):
+        raise PermissionDenied('سجلات التدقيق القانوني غير قابلة للحذف الجماعي وفق أحكام القانون 23-12.')
+
+
 class AuditLog(models.Model):
     """سجل التدقيق غير القابل للتعديل أو الحذف وفق متطلبات القانون 23-12"""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -17,6 +29,8 @@ class AuditLog(models.Model):
     ip_address = models.GenericIPAddressField('عنوان IP', null=True, blank=True)
     timestamp = models.DateTimeField('ختم الوقت الرسمي', default=timezone.now, db_index=True)
     checksum = models.CharField('بصمة السلامة الرقمية (SHA-256)', max_length=64, blank=True)
+
+    objects = AuditLogQuerySet.as_manager()
 
     class Meta:
         verbose_name = 'سجل تدقيق قانوني'

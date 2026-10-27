@@ -110,7 +110,7 @@ export function OperatorContractsView({ dealId }: OperatorContractsViewProps) {
       setError(
         getApiErrorMessage(
           err,
-          'تعذر تحميل العقود الموقعة. يرجى التحقق من الاتصال والمحاولة مجدداً.',
+          'تعذر تحميل العقود المؤرشفة. يرجى التحقق من الاتصال والمحاولة مجدداً.',
         ),
       );
     } finally {
@@ -149,7 +149,7 @@ export function OperatorContractsView({ dealId }: OperatorContractsViewProps) {
         <div>
           <h1>العقود والتنفيذ</h1>
           <p>
-            راجع العقود الموقعة، حمّل نسخة PDF، وتابع مراحل تنفيذ الصفقات وارفع تقارير
+            راجع العقود المؤرشفة، حمّل نسخة PDF، وتابع مراحل تنفيذ الصفقات وارفع تقارير
             الإنجاز.
           </p>
         </div>
@@ -223,11 +223,11 @@ export function OperatorContractsView({ dealId }: OperatorContractsViewProps) {
           <h3>
             {dealId
               ? 'لم يتم توليد العقد لهذه الصفقة بعد'
-              : 'لا توجد عقود موقعة بعد'}
+              : 'لا توجد عقود مؤرشفة بعد'}
           </h3>
           <p>
             {dealId
-              ? 'ستظهر هنا تفاصيل العقد الموقّع ومراحل التنفيذ فور إبرامه من المصلحة المتعاقدة.'
+              ? 'ستظهر هنا تفاصيل العقد المؤرشف ومراحل التنفيذ فور توليده من المصلحة المتعاقدة.'
               : 'ستظهر هنا العقود التي تبرمها المصلحة المتعاقدة مع مؤسستكم بعد اعتماد الإسناد النهائي.'}
           </p>
           <button
@@ -304,7 +304,7 @@ export function OperatorContractsView({ dealId }: OperatorContractsViewProps) {
                 <div className="grid grid-cols-1 gap-3 rounded-xl border border-[#f3efdf] bg-[#fffdf5] p-3 text-xs sm:grid-cols-3">
                   <div>
                     <span className="block text-[10px] font-bold text-[#8a6e1c]">
-                      تاريخ التوقيع
+                      تاريخ الأرشفة
                     </span>
                     <span className="mt-0.5 inline-flex items-center gap-1 font-bold text-[#3a4555]">
                       <Calendar className="size-3.5" />

@@ -6,9 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
   Shield,
-  Lock,
+  Archive,
   Copy,
-  CheckCircle,
   Filter,
   Check,
   ChevronRight,
@@ -25,83 +24,29 @@ interface AuditItem {
   checksum: string;
   description?: string;
   resource_type?: string;
-  verified?: boolean;
 }
-
-const FALLBACK_LOGS: AuditItem[] = [
-  {
-    id: 'aud-001',
-    timestamp: '2026-04-12T14:32:00Z',
-    action: 'SESSION_OPENED',
-    user_name: 'مديرية الصفقات العمومية',
-    user_email: 'authority@safaqat.dz',
-    checksum: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
-    description: 'افتتاح جلسة فتح الأظرفة للصفقة DTP-DZ-2026-042',
-    resource_type: 'OpeningSession',
-  },
-  {
-    id: 'aud-002',
-    timestamp: '2026-04-12T14:45:10Z',
-    action: 'BID_ENVELOPE_UNSEALED',
-    user_name: 'أمين لجنة الفتح',
-    user_email: 'secretary@safaqat.dz',
-    checksum: 'a591a6d40bf420404a011733cfb7b190d62c65bf0bcda32b57b277d9ad9f146e',
-    description: 'فك تشفير العرض الفني للمتعامل SARL BATIMENT PLUS',
-    resource_type: 'BidOffer',
-  },
-  {
-    id: 'aud-003',
-    timestamp: '2026-04-12T15:10:22Z',
-    action: 'PV_GENERATED_AND_SIGNED',
-    user_name: 'رئيس لجنة الصفقات',
-    user_email: 'president@safaqat.dz',
-    checksum: '2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824',
-    description: 'توليد وتوقيع محضر جلسة فتح الأظرفة رقم PV-2026-042',
-    resource_type: 'ProcurementPV',
-  },
-  {
-    id: 'aud-004',
-    timestamp: '2026-04-11T10:15:40Z',
-    action: 'COMMITTEE_APPOINTED',
-    user_name: 'المصلحة المتعاقدة',
-    user_email: 'authority@safaqat.dz',
-    checksum: '4b227777d4dd1fc61c6f884f48641d02b4d121d3fd328cb08b5531fcacdabf8a',
-    description: 'تعيين أعضاء لجنة فتح الأظرفة وتقييم العروض',
-    resource_type: 'DealCommittee',
-  },
-  {
-    id: 'aud-005',
-    timestamp: '2026-04-10T09:00:00Z',
-    action: 'TENDER_PUBLISHED',
-    user_name: 'المسؤول الإداري',
-    user_email: 'admin@safaqat.dz',
-    checksum: 'ef2d127de37b942baad06145e54b0c619a1f22327b2ebbcfbec78f5564afe39d',
-    description: 'نشر إعلان طلب العروض الوطني المفتوح عبر المنصة',
-    resource_type: 'ProcurementDeal',
-  },
-];
 
 export function AuditView() {
   const { t } = useI18n();
-  const [logs, setLogs] = useState<AuditItem[]>(FALLBACK_LOGS);
+  const [logs, setLogs] = useState<AuditItem[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
-  const [verifiedMap, setVerifiedMap] = useState<Record<string, boolean>>({});
   const [selectedAction, setSelectedAction] = useState<string>('all');
   const [currentPage, setCurrentPage] = useState<number>(1);
   const pageSize = 5;
 
   const loadAuditLogs = async () => {
     setLoading(true);
+    setError(null);
     try {
       const res = await api.get('/audit/logs/');
       const data = res.data;
       const items = Array.isArray(data) ? data : data.results || [];
-      if (items.length > 0) {
-        setLogs(items);
-      }
-    } catch {
-      // Use fallback logs safely
+      setLogs(items);
+    } catch (err: any) {
+      setError(err?.response?.data?.detail || 'تعذر تحميل سجلات التدقيق من الخادم.');
+      setLogs([]);
     } finally {
       setLoading(false);
     }
@@ -112,14 +57,10 @@ export function AuditView() {
   }, []);
 
   const handleCopyChecksum = (id: string, checksum: string) => {
-    navigator.clipboard.writeText(checksum);
+    if (!checksum) return;
+    void navigator.clipboard.writeText(checksum);
     setCopiedId(id);
     setTimeout(() => setCopiedId(null), 2000);
-  };
-
-  const handleVerify = (id: string) => {
-    // Simulates cryptographic proof verification
-    setVerifiedMap((prev) => ({ ...prev, [id]: true }));
   };
 
   const filteredLogs = logs.filter((log) => {
@@ -166,7 +107,7 @@ export function AuditView() {
 
         <div className="flex items-center gap-2.5 flex-wrap">
           <Badge className="bg-emerald-500/20 text-emerald-300 border-emerald-400/30 px-3 py-1 text-xs flex items-center gap-1.5">
-            <Lock className="w-3.5 h-3.5" />
+            <Archive className="w-3.5 h-3.5" />
             <span>{t('authority.audit.immutable')}</span>
           </Badge>
           <Button
@@ -189,10 +130,10 @@ export function AuditView() {
             <div>
               <CardTitle className="text-lg font-bold flex items-center gap-2">
                 <Shield className="w-5 h-5 text-primary" />
-                <span>سجلات التتبع الرقمي للبصمات</span>
+                <span>سجلات الأرشفة وبصمات التحقق</span>
               </CardTitle>
               <CardDescription className="text-xs">
-                كل عملية مسجلة مصحوبة ببصمة تشفيرية فريدة غير قابلة للتعديل أو الحذف
+                كل عملية مسجلة مصحوبة ببصمة تحقق (Hash) فريدة، وتُحفظ في سجل التدقيق لأغراض الأرشفة والمراجعة.
               </CardDescription>
             </div>
 
@@ -218,6 +159,14 @@ export function AuditView() {
         </CardHeader>
 
         <CardContent>
+          {error && (
+            <div className="mb-4 p-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-lg text-xs flex items-center justify-between">
+              <span>{error}</span>
+              <Button size="sm" variant="outline" onClick={loadAuditLogs} className="h-7 text-xs">
+                إعادة المحاولة
+              </Button>
+            </div>
+          )}
           <div className="overflow-x-auto">
             <table className="w-full text-sm text-start border-collapse">
               <thead>
@@ -225,13 +174,12 @@ export function AuditView() {
                   <th className="py-3 px-4 text-start font-bold">الوقت والتاريخ</th>
                   <th className="py-3 px-4 text-start font-bold">الإجراء</th>
                   <th className="py-3 px-4 text-start font-bold">المستخدم</th>
-                  <th className="py-3 px-4 text-start font-bold">بصمة التشفير (SHA-256)</th>
-                  <th className="py-3 px-4 text-center font-bold">حالة السلامة</th>
+                  <th className="py-3 px-4 text-start font-bold">بصمة التحقق (SHA-256)</th>
+                  <th className="py-3 px-4 text-center font-bold">حالة الأرشفة</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
                 {paginatedLogs.map((log) => {
-                  const isVerified = verifiedMap[log.id];
                   const truncatedChecksum = log.checksum
                     ? `${log.checksum.slice(0, 10)}...${log.checksum.slice(-8)}`
                     : 'N/A';
@@ -275,6 +223,7 @@ export function AuditView() {
                             variant="ghost"
                             size="sm"
                             onClick={() => handleCopyChecksum(log.id, log.checksum)}
+                            disabled={!log.checksum}
                             title="نسخ البصمة الكاملة"
                             className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground"
                           >
@@ -287,24 +236,12 @@ export function AuditView() {
                         </div>
                       </td>
 
-                      {/* Integrity Verify */}
+                      {/* Archive status */}
                       <td className="py-3.5 px-4 text-center">
-                        {isVerified ? (
-                          <div className="inline-flex items-center gap-1.5 text-emerald-600 text-xs font-bold bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full">
-                            <CheckCircle className="w-3.5 h-3.5" />
-                            <span>سليم 100%</span>
-                          </div>
-                        ) : (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleVerify(log.id)}
-                            className="text-xs h-7 gap-1 border-border hover:bg-muted"
-                          >
-                            <Shield className="w-3 h-3 text-primary" />
-                            <span>{t('authority.audit.verify')}</span>
-                          </Button>
-                        )}
+                        <div className="inline-flex items-center gap-1.5 text-emerald-700 text-xs font-bold bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full">
+                          <Archive className="w-3.5 h-3.5" />
+                          <span>مؤرشف</span>
+                        </div>
                       </td>
                     </tr>
                   );
@@ -313,9 +250,15 @@ export function AuditView() {
             </table>
           </div>
 
-          {filteredLogs.length === 0 && (
+          {filteredLogs.length === 0 && !error && !loading && (
             <div className="py-12 text-center text-muted-foreground text-xs">
               لا توجد سجلات تدقيق مسجلة ضمن التصنيف المختار.
+            </div>
+          )}
+
+          {loading && (
+            <div className="py-12 text-center text-muted-foreground text-xs">
+              جارٍ تحميل سجلات التدقيق من الخادم…
             </div>
           )}
 

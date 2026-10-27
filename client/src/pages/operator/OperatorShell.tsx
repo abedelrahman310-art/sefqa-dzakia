@@ -4,7 +4,7 @@ import { useAuth } from '@/components/auth/AuthProvider';
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
 import OperatorTopBar from '@/components/layout/OperatorTopBar';
 import { LucideIcon } from 'lucide-react';
-import { SafaqatLogo } from '@/components/brand/SafaqatLogo';
+import { Logo } from '@/components/ui/Logo';
 import './operator.css';
 
 export type OperatorNavGroup = 'home' | 'opportunities' | 'activity' | 'system';
@@ -81,7 +81,7 @@ export function OperatorShell({
     <>
       <div className="op-brand">
         <div className="op-brand-logo">
-          <SafaqatLogo size={44} title="" />
+          <Logo size={44} />
         </div>
         <div className="op-brand-text">
           <h1>صفقات ذكية</h1>

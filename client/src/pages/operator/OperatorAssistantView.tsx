@@ -14,7 +14,16 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { operatorLegalChat } from '@/features/ai/api/ai';
-import type { ChatMessage } from '@/features/ai/types';
+import type { ChatMessage, LegalArticle, LegalArticleSource } from '@/features/ai/types';
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 const WELCOME_MESSAGE: ChatMessage = {
   role: 'assistant',
@@ -22,6 +31,125 @@ const WELCOME_MESSAGE: ChatMessage = {
     'مرحباً بك في المساعد القانوني للمتعامل الاقتصادي. يمكنك سؤالي عن آجال إيداع العروض، وثائق ملف الترشح، الضمانات، معايير التقييم، العقود، أو الطعون. إجاباتي استشارية، والقرار النهائي يبقى للجهة المختصة.',
   sources: ['القانون 23-12', 'المرسوم 15-247', 'القانون 18-07'],
   is_advisory: true,
+};
+
+const NO_LEGAL_ANSWER_MESSAGE =
+  'عذراً، لا توجد مادة صريحة في القانون 23-12 تجيب على هذا التساؤل. يرجى استشارة المصلحة المتعاقدة';
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+const firstNonEmptyString = (
+  record: Record<string, unknown>,
+  keys: string[],
+): string | undefined => {
+  for (const key of keys) {
+    const value = record[key];
+    if (typeof value === 'string' && value.trim()) return value.trim();
+    if (typeof value === 'number' && Number.isFinite(value)) return String(value);
+  }
+  return undefined;
+};
+
+const buildLegalArticleLabel = (
+  label: string | undefined,
+  articleNumber: string | undefined,
+  law: string | undefined,
+): string => {
+  if (label) {
+    if (/^\d+$/.test(label) && !articleNumber) {
+      return law ? `المادة ${label} من ${law}` : `المادة ${label}`;
+    }
+    if (law && !label.includes(law) && !/من\s+(?:القانون|المرسوم|الأمر|القرار)/.test(label)) {
+      return `${label} من ${law}`;
+    }
+    return label;
+  }
+  if (articleNumber && law) return `المادة ${articleNumber} من ${law}`;
+  if (articleNumber) return `المادة ${articleNumber}`;
+  return law ? `مادة من ${law}` : '';
+};
+
+const normalizeLegalArticle = (
+  raw: LegalArticleSource,
+  index: number,
+): LegalArticle | null => {
+  if (typeof raw === 'string') {
+    const label = raw.trim();
+    if (!label) return null;
+    return { id: `legal-article-${index}`, label: buildLegalArticleLabel(label, undefined, undefined) };
+  }
+
+  if (!isRecord(raw)) return null;
+
+  // Some RAG implementations nest the article fields under an `article` key.
+  const nestedArticle = isRecord(raw.article) ? raw.article : undefined;
+  const source = nestedArticle ? { ...nestedArticle, ...raw } : raw;
+
+  const label = firstNonEmptyString(source, [
+    'label',
+    'title',
+    'reference',
+    'citation',
+    'display',
+    'article_label',
+    'articleLabel',
+    'legal_article',
+    'legalArticle',
+    'name',
+    'article',
+  ]);
+  const articleNumber = firstNonEmptyString(source, [
+    'article_number',
+    'articleNumber',
+    'article_no',
+    'articleNo',
+    'number',
+    'num',
+    'article_id',
+  ]);
+  const law = firstNonEmptyString(source, [
+    'law',
+    'law_name',
+    'lawName',
+    'statute',
+    'legal_instrument',
+    'legalInstrument',
+    'code',
+    'decree',
+    'source_law',
+    'sourceLaw',
+  ]);
+  const legalText = firstNonEmptyString(source, [
+    'legal_text',
+    'legalText',
+    'text',
+    'content',
+    'article_text',
+    'articleText',
+    'legal_article_text',
+    'body',
+    'full_text',
+    'fullText',
+  ]);
+
+  const computedLabel = buildLegalArticleLabel(label, articleNumber, law);
+  if (!computedLabel && !legalText) return null;
+
+  return {
+    id: firstNonEmptyString(source, ['id', 'slug', 'key']) ?? `legal-article-${index}`,
+    label: computedLabel || 'مادة قانونية',
+    article_number: articleNumber,
+    law,
+    legal_text: legalText,
+  };
+};
+
+const normalizeLegalArticles = (raw: unknown): LegalArticle[] => {
+  const entries = Array.isArray(raw) ? raw : raw === undefined || raw === null ? [] : [raw];
+  return entries
+    .map((entry, index) => normalizeLegalArticle(entry as LegalArticleSource, index))
+    .filter((article): article is LegalArticle => article !== null);
 };
 
 const QUICK_PROMPTS = [
@@ -66,6 +194,7 @@ export function OperatorAssistantView() {
   const [inputValue, setInputValue] = useState('');
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
+  const [selectedArticle, setSelectedArticle] = useState<LegalArticle | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -83,12 +212,33 @@ export function OperatorAssistantView() {
     try {
       const data = await operatorLegalChat(conversationId, query);
       if (data.conversation_id) setConversationId(data.conversation_id);
+
+      const hasLegalArticlesField =
+        data.legal_articles !== undefined && data.legal_articles !== null;
+      const normalizedLegalArticles = hasLegalArticlesField
+        ? normalizeLegalArticles(data.legal_articles)
+        : [];
+      const topLevelLegalText =
+        typeof data.legal_text === 'string' ? data.legal_text.trim() : '';
+      const legalArticles =
+        topLevelLegalText &&
+        normalizedLegalArticles.length === 1 &&
+        !normalizedLegalArticles[0].legal_text
+          ? [{ ...normalizedLegalArticles[0], legal_text: topLevelLegalText }]
+          : normalizedLegalArticles;
+      const noLegalAnswer =
+        data.found_in_law === false ||
+        data.no_answer === true ||
+        (hasLegalArticlesField && legalArticles.length === 0);
+
       setMessages((previous) => [
         ...previous,
         {
           role: 'assistant',
           content: data.answer,
           sources: data.sources ?? [],
+          legal_articles: legalArticles,
+          no_legal_answer: noLegalAnswer,
           is_advisory: data.is_advisory,
         },
       ]);
@@ -125,6 +275,7 @@ export function OperatorAssistantView() {
 
   const handleReset = () => {
     setConversationId(null);
+    setSelectedArticle(null);
     setMessages([WELCOME_MESSAGE]);
     setInputValue('');
   };
@@ -209,6 +360,39 @@ export function OperatorAssistantView() {
                     }`}
                   >
                     <p className="whitespace-pre-wrap">{message.content}</p>
+
+                    {!isUser && message.no_legal_answer ? (
+                      <div className="mt-3 flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5 text-[11px] leading-relaxed text-amber-900">
+                        <AlertTriangle
+                          className="mt-0.5 size-3.5 shrink-0 text-amber-700"
+                          aria-hidden="true"
+                        />
+                        <p>{NO_LEGAL_ANSWER_MESSAGE}</p>
+                      </div>
+                    ) : null}
+
+                    {!isUser && message.legal_articles && message.legal_articles.length > 0 ? (
+                      <div className="mt-3 border-t border-[var(--op-line-2)] pt-2">
+                        <span className="flex items-center gap-1 text-[10px] font-bold text-[var(--op-muted)]">
+                          <Scale className="size-3" aria-hidden="true" />
+                          السند القانوني
+                        </span>
+                        <div className="mt-1.5 flex flex-wrap gap-1.5">
+                          {message.legal_articles.map((article, articleIndex) => (
+                            <button
+                              key={`${article.id ?? article.label}-${articleIndex}`}
+                              type="button"
+                              onClick={() => setSelectedArticle(article)}
+                              className="inline-flex items-center gap-1 rounded-full border border-[var(--op-gold-line)] bg-[var(--op-gold-soft)] px-2.5 py-1 text-[10px] font-bold text-[var(--op-gold-dark)] transition-colors hover:border-[var(--op-gold)] hover:bg-[var(--op-gold-line)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--op-gold)] focus-visible:ring-offset-1"
+                              aria-label={`عرض النص الكامل: ${article.label}`}
+                            >
+                              <BookOpen className="size-3" aria-hidden="true" />
+                              <span>{article.label}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    ) : null}
 
                     {!isUser && message.sources && message.sources.length > 0 ? (
                       <div className="mt-3 border-t border-[var(--op-line-2)] pt-2">
@@ -351,6 +535,49 @@ export function OperatorAssistantView() {
           </div>
         </aside>
       </div>
+
+      <Dialog
+        open={selectedArticle !== null}
+        onOpenChange={(open) => {
+          if (!open) setSelectedArticle(null);
+        }}
+      >
+        <DialogContent
+          dir="rtl"
+          className="max-w-2xl border-slate-200 bg-white text-slate-900"
+        >
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 pe-6 text-right text-base font-extrabold text-slate-900">
+              <Scale className="size-4 shrink-0 text-sky-600" aria-hidden="true" />
+              <span>{selectedArticle?.label ?? 'السند القانوني'}</span>
+            </DialogTitle>
+            <DialogDescription className="text-right text-[11px] leading-relaxed text-slate-500">
+              النص الكامل للمادة القانونية كما أعاده الخادم.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="max-h-[60vh] overflow-y-auto rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm leading-loose text-slate-800">
+            {selectedArticle?.legal_text?.trim() ? (
+              <p className="whitespace-pre-wrap">{selectedArticle.legal_text}</p>
+            ) : (
+              <p className="text-slate-500">
+                النص الكامل لهذه المادة غير متوفر حالياً. يرجى الرجوع إلى النص الرسمي للقانون.
+              </p>
+            )}
+          </div>
+
+          <DialogFooter>
+            <DialogClose asChild>
+              <button
+                type="button"
+                className="inline-flex h-9 items-center justify-center rounded-lg bg-sky-600 px-4 text-xs font-bold text-white transition-colors hover:bg-sky-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2"
+              >
+                إغلاق
+              </button>
+            </DialogClose>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

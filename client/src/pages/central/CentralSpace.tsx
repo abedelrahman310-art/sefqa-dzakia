@@ -115,7 +115,6 @@ export function CentralSpace() {
           subtitle="الإدارة المركزية والرقابة"
           items={navItems}
           accentColor="var(--stamp-green-700)"
-          brandInitial="ص"
           hideUserInfo={true}
           variant="sovereign"
         />
