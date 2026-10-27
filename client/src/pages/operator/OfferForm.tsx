@@ -1,4 +1,4 @@
-import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
 import { useLocation, useParams } from 'wouter';
 import { useI18n } from '@/i18n';
 import { api } from '@/lib/api';
@@ -12,11 +12,15 @@ import {
   Info,
   ListChecks,
   Loader2,
+  Lock,
   Paperclip,
+  Plus,
   RefreshCw,
   Save,
   Send,
+  ShieldAlert,
   ShieldCheck,
+  Trash2,
   X,
 } from 'lucide-react';
 
@@ -36,6 +40,13 @@ interface ComplianceDocument {
   is_mandatory?: boolean;
 }
 
+interface ExpiredDocument {
+  code: string;
+  name: string;
+  expiry_date?: string;
+  reason?: string;
+}
+
 interface ComplianceResult {
   deal_id: string;
   deal_reference?: string;
@@ -47,8 +58,48 @@ interface ComplianceResult {
   missing_count: number;
   missing_documents: ComplianceDocument[];
   available_documents: ComplianceDocument[];
+  expired_documents?: ExpiredDocument[];
+  has_expired_documents?: boolean;
   advisory_notes?: string[];
   submission_deadline?: string | null;
+}
+
+type PriceStatus = 'normal' | 'too_low' | 'too_high' | 'no_reference';
+
+interface ReferencePriceCheckItem {
+  name: string;
+  unit: string;
+  wilaya: string | null;
+  proposed_price: number;
+  reference_price: number | null;
+  reference_unit: string | null;
+  reference_wilaya: string | null;
+  reference_name: string | null;
+  reference_updated_at: string | null;
+  deviation_percent: number | null;
+  is_normal: boolean | null;
+  status: PriceStatus;
+  match_type: 'exact' | 'fuzzy' | 'none';
+  recommendation: string;
+}
+
+interface CheckPricesResponse {
+  threshold_percent: number;
+  items: ReferencePriceCheckItem[];
+}
+
+interface BoqRow {
+  id: string;
+  name: string;
+  unit: string;
+  quantity: number;
+  unitPrice: number;
+}
+
+interface RowPriceCheck {
+  loading: boolean;
+  result: ReferencePriceCheckItem | null;
+  error: string;
 }
 
 const MAX_DOCUMENT_SIZE = 10 * 1024 * 1024;
@@ -88,6 +139,52 @@ const isNotFound = (err: unknown) =>
 
 const asRecord = (value: unknown): Record<string, unknown> =>
   value && typeof value === 'object' ? (value as Record<string, unknown>) : {};
+
+const formatDzd = (value: number | string | null | undefined): string => {
+  const amount = Number(value);
+  if (!Number.isFinite(amount)) return '—';
+  return `${amount.toLocaleString('ar-DZ', { maximumFractionDigits: 2 })} دج`;
+};
+
+const formatReferenceDate = (value?: string | null): string => {
+  if (!value) return '';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  return date.toLocaleDateString('ar-DZ');
+};
+
+const createBoqRow = (overrides: Partial<BoqRow> = {}): BoqRow => ({
+  id: `boq-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+  name: '',
+  unit: 'وحدة',
+  quantity: 1,
+  unitPrice: 0,
+  ...overrides,
+});
+
+const getBoqRowsFromDeal = (deal: unknown): BoqRow[] => {
+  const record = asRecord(deal);
+  const specs = asRecord(record.cahier_specs);
+  const technicalRequirements = asRecord(specs.technical_requirements);
+  const items = technicalRequirements.items;
+
+  if (!Array.isArray(items) || items.length === 0) {
+    return [createBoqRow()];
+  }
+
+  return items.map((rawItem, index) => {
+    const item = asRecord(rawItem);
+    const quantity = Number(item.quantity);
+    return {
+      id: `boq-${index + 1}`,
+      name: typeof item.name === 'string' ? item.name : '',
+      unit: typeof item.unit === 'string' && item.unit.trim() ? item.unit : 'وحدة',
+      quantity: Number.isFinite(quantity) && quantity > 0 ? quantity : 1,
+      // الأسعار يملؤها المتعامل؛ لا نستنسخ أسعار دفتر الشروط التقديرية.
+      unitPrice: 0,
+    };
+  });
+};
 
 const unwrapList = (data: unknown): unknown[] => {
   if (Array.isArray(data)) return data;
@@ -141,11 +238,7 @@ const getErrorMessage = (err: unknown): string => {
   return 'تعذر إتمام العملية. يرجى المحاولة مجدداً.';
 };
 
-const formatAmount = (value: string): string => {
-  const amount = Number(value);
-  if (!Number.isFinite(amount)) return '—';
-  return `${amount.toLocaleString('ar-DZ', { maximumFractionDigits: 2 })} دج`;
-};
+const formatAmount = (value: string): string => formatDzd(value);
 
 function ComplianceResultPanel({ result }: { result: ComplianceResult }) {
   const missingDocuments = Array.isArray(result.missing_documents) ? result.missing_documents : [];
@@ -259,6 +352,10 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
   const [authorityName, setAuthorityName] = useState('');
 
   const [financialOffer, setFinancialOffer] = useState('');
+  const [wilaya, setWilaya] = useState('');
+  const [boqItems, setBoqItems] = useState<BoqRow[]>(() => [createBoqRow()]);
+  const [priceChecks, setPriceChecks] = useState<Record<string, RowPriceCheck>>({});
+  const latestPriceCheckRef = useRef<Record<string, string>>({});
   const [status, setStatus] = useState<'draft' | 'submitted'>('draft');
   const [savedDocument, setSavedDocument] = useState<{ name: string; url: string } | null>(null);
   const [documentFile, setDocumentFile] = useState<File | null>(null);
@@ -268,6 +365,7 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
   const [complianceLoading, setComplianceLoading] = useState(false);
   const [complianceError, setComplianceError] = useState('');
   const [complianceChecked, setComplianceChecked] = useState(false);
+  const [sealConfirmed, setSealConfirmed] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -306,6 +404,24 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
       }
     };
 
+    const applyDealDetails = (deal: unknown) => {
+      const record = asRecord(deal);
+      setOppTitle(
+        typeof record.title === 'string' && record.title.trim()
+          ? record.title
+          : 'صفقة عمومية',
+      );
+      setAuthorityName(
+        typeof record.authority_entity === 'string' && record.authority_entity.trim()
+          ? record.authority_entity
+          : typeof record.authority_name === 'string' && record.authority_name.trim()
+            ? record.authority_name
+            : 'المصلحة المتعاقدة',
+      );
+      setWilaya(typeof record.wilaya === 'string' ? record.wilaya : '');
+      setBoqItems(getBoqRowsFromDeal(record));
+    };
+
     const load = async () => {
       setLoading(true);
       setError('');
@@ -313,25 +429,24 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
       setCompliance(null);
       setComplianceError('');
       setComplianceChecked(false);
+      setWilaya('');
+      setBoqItems([createBoqRow()]);
+      setPriceChecks({});
+      latestPriceCheckRef.current = {};
       try {
         if (activeOfferId) {
           const offer = await fetchOffer(activeOfferId);
           if (cancelled) return;
           applyOffer(offer);
           const dealId = getDealId(offer.deal);
-          if (dealId && (!offer.deal_title || !offer.authority_name)) {
-            api
-              .get(`/procurements/deals/${dealId}/`)
-              .then((response) => {
-                if (cancelled) return;
-                setOppTitle(response.data?.title || 'صفقة عمومية');
-                setAuthorityName(
-                  response.data?.authority_entity ||
-                    response.data?.authority_name ||
-                    'المصلحة المتعاقدة',
-                );
-              })
-              .catch(() => undefined);
+          if (dealId) {
+            try {
+              const dealResponse = await api.get(`/procurements/deals/${dealId}/`);
+              if (cancelled) return;
+              applyDealDetails(dealResponse.data);
+            } catch {
+              // تفاصيل العرض كافية للمتابعة حتى لو تعذر جلب تفاصيل الصفقة.
+            }
           }
         } else if (activeOppId) {
           const offers = await fetchOffersList();
@@ -349,10 +464,8 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
           }
           const response = await api.get(`/procurements/deals/${activeOppId}/`);
           if (cancelled) return;
-          const deal = response.data;
-          setOppTitle(deal?.title || 'صفقة عمومية');
-          setAuthorityName(deal?.authority_entity || deal?.authority_name || 'المصلحة المتعاقدة');
-          setOppId(String(deal?.id || activeOppId));
+          applyDealDetails(response.data);
+          setOppId(String(asRecord(response.data).id || activeOppId));
         }
       } catch {
         if (!cancelled) {
@@ -369,6 +482,21 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
     };
   }, [activeOfferId, activeOppId, setLocation]);
 
+  // استدعاء فحص الامتثال وصلاحية الوثائق تلقائياً عند فتح الصفحة أو تحديد الصفقة
+  useEffect(() => {
+    if (oppId) {
+      void runComplianceCheck();
+    }
+  }, [oppId]);
+
+  const hasComplianceBlock = Boolean(
+    compliance && (
+      !compliance.is_compliant ||
+      (compliance.missing_documents && compliance.missing_documents.length > 0) ||
+      (compliance.expired_documents && compliance.expired_documents.length > 0)
+    )
+  );
+
   const validate = (): string => {
     if (!oppId) return 'يرجى اختيار الصفقة أولاً قبل حفظ العرض.';
     const amount = Number(financialOffer);
@@ -376,6 +504,140 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
       return 'يرجى تحديد مبلغ مالي صحيح أكبر من صفر.';
     }
     return '';
+  };
+
+  const invalidateRowPriceCheck = (rowId: string) => {
+    latestPriceCheckRef.current[rowId] = '';
+    setPriceChecks((prev) => {
+      if (!prev[rowId]) return prev;
+      const next = { ...prev };
+      delete next[rowId];
+      return next;
+    });
+  };
+
+  const handleAddBoqRow = () => {
+    setBoqItems((prev) => [...prev, createBoqRow()]);
+  };
+
+  const handleRemoveBoqRow = (rowId: string) => {
+    setBoqItems((prev) => (prev.length <= 1 ? prev : prev.filter((row) => row.id !== rowId)));
+    latestPriceCheckRef.current[rowId] = '';
+    setPriceChecks((prev) => {
+      if (!prev[rowId]) return prev;
+      const next = { ...prev };
+      delete next[rowId];
+      return next;
+    });
+  };
+
+  const handleUpdateBoqRow = (
+    rowId: string,
+    field: 'name' | 'unit' | 'quantity' | 'unitPrice',
+    value: string | number,
+  ) => {
+    setBoqItems((prev) =>
+      prev.map((row) => (row.id === rowId ? { ...row, [field]: value } : row)),
+    );
+    if (field === 'name' || field === 'unit' || field === 'unitPrice') {
+      invalidateRowPriceCheck(rowId);
+    }
+  };
+
+  const handlePriceBlur = async (row: BoqRow) => {
+    const name = row.name.trim();
+    const price = Number(row.unitPrice);
+
+    if (!name || !Number.isFinite(price) || price <= 0) {
+      invalidateRowPriceCheck(row.id);
+      return;
+    }
+
+    const requestKey = `${row.id}|${name}|${price}|${wilaya}`;
+    latestPriceCheckRef.current[row.id] = requestKey;
+    setPriceChecks((prev) => ({
+      ...prev,
+      [row.id]: { loading: true, result: null, error: '' },
+    }));
+
+    try {
+      const { data } = await api.post<CheckPricesResponse>('/procurements/check-prices/', {
+        ...(wilaya ? { wilaya } : {}),
+        items: [
+          {
+            name,
+            proposed_price: price,
+            ...(row.unit.trim() ? { unit: row.unit.trim() } : {}),
+          },
+        ],
+      });
+
+      if (latestPriceCheckRef.current[row.id] !== requestKey) return;
+      const result = Array.isArray(data.items) && data.items.length > 0 ? data.items[0] : null;
+      setPriceChecks((prev) => ({
+        ...prev,
+        [row.id]: { loading: false, result, error: '' },
+      }));
+    } catch {
+      if (latestPriceCheckRef.current[row.id] !== requestKey) return;
+      setPriceChecks((prev) => ({
+        ...prev,
+        [row.id]: {
+          loading: false,
+          result: null,
+          error: 'تعذر التحقق من السعر المرجعي حالياً.',
+        },
+      }));
+    }
+  };
+
+  const buildReferenceTooltip = (rowId: string): string => {
+    const check = priceChecks[rowId];
+    if (!check) {
+      return 'أدخل اسم المادة والسعر ثم غادر الحقل لعرض السعر المرجعي المتوقع.';
+    }
+    if (check.loading) {
+      return 'جارٍ جلب السعر المرجعي...';
+    }
+    if (check.error) {
+      return check.error;
+    }
+
+    const result = check.result;
+    if (!result || result.reference_price === null) {
+      return wilaya
+        ? 'لا يتوفر سعر مرجعي لهذه المادة في الولاية المحددة.'
+        : 'لا يتوفر سعر مرجعي لهذه المادة.';
+    }
+
+    const updatedAt = formatReferenceDate(result.reference_updated_at);
+    const fuzzyMatch =
+      result.match_type === 'fuzzy' && result.reference_name
+        ? ` (مطابقة تقريبية: ${result.reference_name})`
+        : '';
+    return `السعر المرجعي المتوقع: ${formatDzd(result.reference_price)}${fuzzyMatch} — الولاية: ${
+      result.reference_wilaya || wilaya || '—'
+    }${updatedAt ? ` — آخر تحديث: ${updatedAt}` : ''}`;
+  };
+
+  const getSeverePriceWarning = (
+    check?: RowPriceCheck,
+  ): 'low' | 'high' | null => {
+    const proposed = Number(check?.result?.proposed_price);
+    const reference = Number(check?.result?.reference_price);
+    if (
+      !Number.isFinite(proposed) ||
+      !Number.isFinite(reference) ||
+      proposed <= 0 ||
+      reference <= 0
+    ) {
+      return null;
+    }
+
+    const ratio = proposed / reference;
+    if (ratio < 0.6) return 'low';
+    if (ratio > 1.4) return 'high';
+    return null;
   };
 
   const runComplianceCheck = async (): Promise<boolean> => {
@@ -565,6 +827,10 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
   const isBusy = busyAction !== null;
   const documentName = documentFile?.name || savedDocument?.name || '';
   const documentUrl = savedDocument?.url || '';
+  const boqTotal = boqItems.reduce(
+    (sum, item) => sum + (Number(item.quantity) || 0) * (Number(item.unitPrice) || 0),
+    0,
+  );
 
   return (
     <div className="op-page">
@@ -603,6 +869,95 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
           </p>
         </div>
       </div>
+
+      {/* ── القفل الوقائي لوثائق المتعامل وحالة الامتثال ── */}
+      {compliance && (
+        <div className="space-y-3">
+          {hasComplianceBlock ? (
+            <div className="rounded-2xl border-2 border-rose-300 bg-rose-50/95 p-4 shadow-xs" role="alert">
+              <div className="flex items-start gap-3">
+                <ShieldAlert className="size-6 text-rose-600 shrink-0 mt-0.5" aria-hidden="true" />
+                <div className="flex-1 space-y-2">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <strong className="text-sm font-bold text-rose-900">
+                      لا يمكنك تقديم العرض حالياً. لديك وثائق منتهية الصلاحية أو ناقصة.
+                    </strong>
+                    <span className="inline-flex items-center rounded-md bg-rose-100 px-2 py-0.5 text-xs font-bold text-rose-700">
+                      قفل وقائي مفعّل
+                    </span>
+                  </div>
+                  <p className="text-xs text-rose-800 leading-relaxed font-medium">
+                    تم تطبيق هذا القفل الوقائي الآلي لحمايتكم من الاستبعاد القانوني الفوري في جلسة فحص العروض، عملاً بأحكام المادة 67 من القانون رقم 23-12.
+                  </p>
+
+                  <div className="mt-3 space-y-2 rounded-xl border border-rose-200 bg-white/90 p-3">
+                    <span className="text-xs font-bold text-slate-800 block">
+                      الوثائق الإدارية المطلوب تسويتها قبل إتاحة الإيداع:
+                    </span>
+                    <ul className="divide-y divide-rose-100">
+                      {compliance.expired_documents && compliance.expired_documents.map((doc) => (
+                        <li key={`expired-${doc.code}`} className="flex flex-wrap items-center justify-between gap-2 py-2 text-xs">
+                          <div className="flex items-center gap-2">
+                            <span className="size-2 rounded-full bg-rose-500" />
+                            <strong className="text-slate-800">{doc.name}</strong>
+                            <span className="rounded bg-rose-100 px-1.5 py-0.5 text-[10px] font-bold text-rose-700">
+                              منتهية الصلاحية {doc.expiry_date ? `(${doc.expiry_date})` : ''}
+                            </span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setLocation('/operator/profile')}
+                            className="inline-flex items-center gap-1 rounded-lg bg-rose-600 hover:bg-rose-700 px-3 py-1 text-xs font-bold text-white transition-colors cursor-pointer"
+                          >
+                            <span>تحديث الوثيقة الآن</span>
+                            <ArrowLeft className="size-3" />
+                          </button>
+                        </li>
+                      ))}
+                      {compliance.missing_documents && compliance.missing_documents.map((doc) => (
+                        <li key={`missing-${doc.code}`} className="flex flex-wrap items-center justify-between gap-2 py-2 text-xs">
+                          <div className="flex items-center gap-2">
+                            <span className="size-2 rounded-full bg-amber-500" />
+                            <strong className="text-slate-800">{doc.name}</strong>
+                            <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold text-amber-700">
+                              غير موجودة في الملف
+                            </span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setLocation('/operator/profile')}
+                            className="inline-flex items-center gap-1 rounded-lg bg-[#0A2540] hover:bg-[#1e3a8a] px-3 py-1 text-xs font-bold text-white transition-colors cursor-pointer"
+                          >
+                            <span>تحديث الوثيقة الآن</span>
+                            <ArrowLeft className="size-3" />
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center justify-between gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-emerald-900 shadow-2xs">
+              <div className="flex items-center gap-2.5">
+                <CheckCircle2 className="size-5 text-emerald-600 shrink-0" aria-hidden="true" />
+                <div>
+                  <strong className="text-xs font-bold text-emerald-900">
+                    ملفك الإداري سليم ومحدث
+                  </strong>
+                  <p className="text-[11px] text-emerald-700">
+                    تم استيفاء كافة الوثائق الإدارية والجبائية السارية المشترطة قانوناً. زر تقديم العرض متاح.
+                  </p>
+                </div>
+              </div>
+              <span className="rounded-lg bg-emerald-100 px-2.5 py-1 text-xs font-bold text-emerald-800 shrink-0">
+                جاهز للإيداع
+              </span>
+            </div>
+          )}
+        </div>
+      )}
 
       {isSubmitted && (
         <div className="op-alert success">
@@ -732,6 +1087,227 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
                       disabled
                     />
                   </div>
+                </div>
+              </div>
+            </section>
+            <section className="op-form-block">
+              <div className="op-form-block-head">
+                <span className="op-num">3</span>
+                <h2>الجداول المالية (BPU/DQE)</h2>
+              </div>
+              <div className="op-form-block-body space-y-3">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <p className="m-0 text-xs font-bold text-[var(--op-ink)]">
+                      بنود التسعير التفصيلية
+                    </p>
+                    <p className="op-hint">
+                      عند مغادرة حقل السعر، يُقارن سعرك بالسعر المرجعي لنفس المادة والولاية. التنبيه
+                      إرشادي فقط ولا يمنع حفظ العرض أو إيداعه.
+                    </p>
+                  </div>
+                  {!isSubmitted && (
+                    <button
+                      type="button"
+                      className="op-btn op-btn-outline op-btn-sm"
+                      onClick={handleAddBoqRow}
+                    >
+                      <Plus aria-hidden="true" />
+                      <span>إضافة بند</span>
+                    </button>
+                  )}
+                </div>
+
+                <div className="op-table-wrap">
+                  <div className="op-table-scroll">
+                    <table className="op-table">
+                      <thead>
+                        <tr>
+                          <th className="w-10">#</th>
+                          <th>المادة / الخدمة</th>
+                          <th className="w-24">الوحدة</th>
+                          <th className="w-20">الكمية</th>
+                          <th className="w-64">سعر الوحدة (دج)</th>
+                          <th className="w-32">الإجمالي (دج)</th>
+                          <th className="w-12">حذف</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {boqItems.map((item, index) => {
+                          const check = priceChecks[item.id];
+                          const referencePrice = check?.result?.reference_price;
+                          const severeWarning = getSeverePriceWarning(check);
+
+                          return (
+                            <tr key={item.id}>
+                              <td className="text-center text-[var(--op-muted)]">{index + 1}</td>
+                              <td>
+                                <input
+                                  type="text"
+                                  value={item.name}
+                                  onChange={(event) =>
+                                    handleUpdateBoqRow(item.id, 'name', event.target.value)
+                                  }
+                                  placeholder="اسم المادة أو الخدمة"
+                                  disabled={isSubmitted}
+                                  className="w-full rounded-lg border border-[var(--op-line)] bg-[var(--op-surface-2)] px-2.5 py-2 text-xs text-[var(--op-ink)] focus:border-[var(--op-sky)] focus:outline-none focus:ring-2 focus:ring-[rgba(14,165,233,0.15)]"
+                                />
+                              </td>
+                              <td>
+                                <input
+                                  type="text"
+                                  value={item.unit}
+                                  onChange={(event) =>
+                                    handleUpdateBoqRow(item.id, 'unit', event.target.value)
+                                  }
+                                  placeholder="وحدة"
+                                  disabled={isSubmitted}
+                                  className="w-full rounded-lg border border-[var(--op-line)] bg-[var(--op-surface-2)] px-2.5 py-2 text-xs text-[var(--op-ink)] focus:border-[var(--op-sky)] focus:outline-none focus:ring-2 focus:ring-[rgba(14,165,233,0.15)]"
+                                />
+                              </td>
+                              <td>
+                                <input
+                                  type="number"
+                                  min={1}
+                                  step="1"
+                                  value={item.quantity}
+                                  onChange={(event) =>
+                                    handleUpdateBoqRow(
+                                      item.id,
+                                      'quantity',
+                                      event.target.value === ''
+                                        ? 0
+                                        : Number.parseFloat(event.target.value) || 0,
+                                    )
+                                  }
+                                  disabled={isSubmitted}
+                                  className="w-full rounded-lg border border-[var(--op-line)] bg-[var(--op-surface-2)] px-2.5 py-2 text-center text-xs text-[var(--op-ink)] focus:border-[var(--op-sky)] focus:outline-none focus:ring-2 focus:ring-[rgba(14,165,233,0.15)]"
+                                />
+                              </td>
+                              <td>
+                                <div className="flex items-start gap-1.5">
+                                  <input
+                                    type="number"
+                                    min={0}
+                                    step="0.01"
+                                    value={item.unitPrice === 0 ? '' : item.unitPrice}
+                                    onChange={(event) =>
+                                      handleUpdateBoqRow(
+                                        item.id,
+                                        'unitPrice',
+                                        event.target.value === ''
+                                          ? 0
+                                          : Number.parseFloat(event.target.value) || 0,
+                                      )
+                                    }
+                                    onBlur={() => void handlePriceBlur(item)}
+                                    placeholder="0.00"
+                                    disabled={isSubmitted}
+                                    className="w-full rounded-lg border border-[var(--op-line)] bg-[var(--op-surface-2)] px-2.5 py-2 font-mono text-xs text-[var(--op-ink)] focus:border-[var(--op-sky)] focus:outline-none focus:ring-2 focus:ring-[rgba(14,165,233,0.15)]"
+                                  />
+                                  <span
+                                    className="mt-0.5 inline-flex size-7 shrink-0 cursor-help items-center justify-center rounded-lg border border-[var(--op-line)] bg-[var(--op-surface)] text-[var(--op-sky)]"
+                                    title={buildReferenceTooltip(item.id)}
+                                    aria-label={buildReferenceTooltip(item.id)}
+                                  >
+                                    {check?.loading ? (
+                                      <Loader2
+                                        className="size-3.5 animate-spin"
+                                        aria-hidden="true"
+                                      />
+                                    ) : (
+                                      <Info className="size-3.5" aria-hidden="true" />
+                                    )}
+                                  </span>
+                                </div>
+
+                                {severeWarning && referencePrice !== null && (
+                                  <div
+                                    className={`mt-1.5 flex items-start gap-1.5 rounded-lg border px-2 py-1.5 text-[10.5px] leading-relaxed ${
+                                      severeWarning === 'low'
+                                        ? 'border-rose-200 bg-rose-50 text-rose-800'
+                                        : 'border-amber-200 bg-amber-50 text-amber-900'
+                                    }`}
+                                    role="alert"
+                                  >
+                                    <AlertTriangle
+                                      className="mt-0.5 size-3.5 shrink-0"
+                                      aria-hidden="true"
+                                    />
+                                    <span>
+                                      تنبيه: هذا السعر يختلف بنسبة كبيرة عن السعر الاستدلالي
+                                      (السعر المرجعي: {formatDzd(referencePrice)}). يُرجى مراجعة
+                                      تسعيرتك لتجنب استبعاد العرض أو طلب تبريرات.
+                                    </span>
+                                  </div>
+                                )}
+
+                                {!severeWarning &&
+                                  referencePrice !== null &&
+                                  referencePrice !== undefined && (
+                                    <div className="mt-1.5 flex flex-wrap items-center gap-1 text-[10.5px] text-[var(--op-muted)]">
+                                      <Info className="size-3" aria-hidden="true" />
+                                      <span>السعر المرجعي: {formatDzd(referencePrice)}</span>
+                                      {check?.result?.deviation_percent !== null &&
+                                        check?.result?.deviation_percent !== undefined && (
+                                          <span>
+                                            — انحراف{' '}
+                                            {check.result.deviation_percent > 0 ? '+' : ''}
+                                            {check.result.deviation_percent.toFixed(1)}%
+                                          </span>
+                                        )}
+                                    </div>
+                                  )}
+
+                                {check &&
+                                  !check.loading &&
+                                  !check.error &&
+                                  referencePrice === null && (
+                                    <div className="mt-1.5 text-[10.5px] text-[var(--op-muted)]">
+                                      لا يتوفر سعر مرجعي لهذه المادة.
+                                    </div>
+                                  )}
+
+                                {check?.error && (
+                                  <div className="mt-1.5 text-[10.5px] text-[var(--op-red)]">
+                                    {check.error}
+                                  </div>
+                                )}
+                              </td>
+                              <td className="font-mono text-xs font-bold text-[var(--op-ink)]">
+                                {formatDzd(
+                                  (Number(item.quantity) || 0) * (Number(item.unitPrice) || 0),
+                                )}
+                              </td>
+                              <td className="text-center">
+                                <button
+                                  type="button"
+                                  className="rounded-lg p-1.5 text-[var(--op-red)] transition-colors hover:bg-[var(--op-red-soft)] disabled:cursor-not-allowed disabled:opacity-40"
+                                  onClick={() => handleRemoveBoqRow(item.id)}
+                                  disabled={boqItems.length <= 1 || isSubmitted}
+                                  title="حذف البند"
+                                  aria-label="حذف البند"
+                                >
+                                  <Trash2 className="size-4" aria-hidden="true" />
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <span className="op-hint">
+                    مجموع البنود: <strong>{formatDzd(boqTotal)}</strong>
+                  </span>
+                  {boqTotal > 0 && Math.abs(Number(financialOffer) - boqTotal) > 0.01 && (
+                    <span className="op-hint">
+                      المبلغ الإجمالي أعلاه هو المعتمد عند الحفظ؛ يمكنك مطابقته مع مجموع البنود.
+                    </span>
+                  )}
                 </div>
               </div>
             </section>
@@ -937,15 +1513,41 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
             <section className="op-form-block">
               <div className="op-form-block-head">
                 <span className="op-num">3</span>
-                <h2>التصريح</h2>
+                <h2>الختم التشفيري والتصريح النهائي</h2>
               </div>
-              <div className="op-form-block-body">
-                <div className="op-alert warning">
-                  <ShieldCheck aria-hidden="true" />
-                  <span>
-                    أُقرّ بأن جميع البيانات والوثائق المرفقة صحيحة ومطابقة للواقع، وألتزم بشروط
-                    الصفقة ودفتر الشروط. يتطلب الإيداع النهائي تأكيداً قبل الإرسال.
-                  </span>
+              <div className="op-form-block-body space-y-4">
+                {/* تنبيه الختم التشفيري للأظرفة */}
+                <div className="rounded-xl border border-blue-200 bg-blue-50/80 p-4">
+                  <div className="flex items-start gap-3">
+                    <Lock className="size-5 text-[#1e3a8a] shrink-0 mt-0.5" aria-hidden="true" />
+                    <div className="space-y-1">
+                      <strong className="text-xs font-bold text-[#0A2540] block">
+                        آلية الختم التشفيري للأظرفة (AES-256)
+                      </strong>
+                      <p className="text-xs text-slate-700 leading-relaxed font-semibold">
+                        تنبيه: بمجرد الضغط على إيداع، سيتم تشفير عرضك ولن تتمكن من تعديله أو رؤيته، ولن تراه المصلحة المتعاقدة حتى جلسة فتح الأظرفة.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* إقرار الختم التشفيري والتصريح */}
+                <div className="rounded-xl border border-slate-200 bg-white p-3.5 shadow-2xs">
+                  <label className="flex items-start gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      id="seal-confirmation-checkbox"
+                      checked={sealConfirmed}
+                      onChange={(e) => setSealConfirmed(e.target.checked)}
+                      className="mt-0.5 size-4 rounded border-slate-300 text-[#1e3a8a] focus:ring-[#1e3a8a] cursor-pointer"
+                    />
+                    <div className="text-xs font-bold text-slate-800">
+                      <span>أقر بأنني راجعت الأسعار والوثائق، وأوافق على الختم التشفيري</span>
+                      <p className="mt-0.5 text-[11px] font-normal text-slate-500">
+                        أُقرّ بأن جميع البيانات والوثائق المرفقة صحيحة ومطابقة للواقع، وألتزم بشروط الصفقة ودفتر الشروط وفق القانون رقم 23-12.
+                      </p>
+                    </div>
+                  </label>
                 </div>
               </div>
             </section>
@@ -1018,7 +1620,14 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
               type="button"
               className="op-btn op-btn-gold"
               onClick={handleSubmitOffer}
-              disabled={isBusy || complianceLoading}
+              disabled={isBusy || complianceLoading || hasComplianceBlock || !sealConfirmed}
+              title={
+                hasComplianceBlock
+                  ? 'لا يمكن تقديم العرض حالياً؛ لديك وثائق منتهية الصلاحية أو ناقصة'
+                  : !sealConfirmed
+                  ? 'يرجى تأكيد الموافقة على الختم التشفيري أولاً'
+                  : 'إيداع العرض النهائي'
+              }
             >
               {busyAction === 'submit' ? (
                 <Loader2 className="size-4 animate-spin" aria-hidden="true" />

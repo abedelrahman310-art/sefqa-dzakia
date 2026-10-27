@@ -116,10 +116,10 @@ export function CentralAuthorities() {
   const trainingNeeded = authorities.filter((item) => item.ai_training_needed);
 
   return (
-    <div className="space-y-6" dir="rtl">
+    <div className="space-y-4" dir="rtl">
       <PageHeader
         title="حوكمة المصالح المتعاقدة"
-        titleClassName="text-2xl font-bold"
+        titleClassName="text-xl font-bold"
         description="ترتيب المصالح والهيئات المتعاقدة وفق مؤشر الالتزام بالآجال القانونية ومؤشر الشفافية المركب المحسوبين من بيانات الصفقات والجلسات والإنذارات."
         actions={
           <Button
@@ -127,7 +127,7 @@ export function CentralAuthorities() {
             size="sm"
             onClick={reload}
             disabled={loading}
-            className="text-base"
+            className="h-8 text-xs font-semibold"
           >
             <RefreshCw className="size-3.5" aria-hidden="true" />
             تحديث البيانات
@@ -135,7 +135,7 @@ export function CentralAuthorities() {
         }
       />
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
         <KpiCard
           eyebrow="المصالح المتعاقدة"
           value={formatNumber(summary?.total_authorities ?? authorities.length)}
@@ -175,21 +175,21 @@ export function CentralAuthorities() {
         }
       >
         {trainingNeeded.length === 0 ? (
-          <p className="flex items-center gap-2 text-base text-[var(--color-text-secondary)]">
-            <HelpCircle className="size-4" aria-hidden="true" />
+          <p className="flex items-center gap-2 text-xs text-[var(--color-text-secondary)]">
+            <HelpCircle className="size-3.5" aria-hidden="true" />
             جميع المصالح داخل العتبات المقبولة لمؤشرَي الالتزام والشفافية.
           </p>
         ) : (
-          <ul className="space-y-2.5">
+          <ul className="space-y-2">
             {trainingNeeded.slice(0, 4).map((item) => (
               <li
                 key={item.id}
-                className="flex items-start gap-3 rounded-xl border border-purple-200 bg-purple-500/10 p-3"
+                className="flex items-start gap-2.5 rounded-xl border border-purple-200 bg-purple-500/10 p-2.5"
               >
-                <span className="shrink-0 text-xl">🏛️</span>
+                <span className="shrink-0 text-base">🏛️</span>
                 <div>
-                  <div className="text-base font-bold text-purple-950">{item.name}</div>
-                  <p className="mt-1 text-base text-purple-900">
+                  <div className="text-xs font-bold text-purple-950">{item.name}</div>
+                  <p className="mt-0.5 text-xs leading-relaxed text-purple-900">
                     الالتزام بالآجال {formatNumber(item.compliance_rate)}% · الشفافية{' '}
                     {formatNumber(item.transparency_rate)}% · شبهات مسجّلة{' '}
                     {formatNumber(item.suspicions_count)} — التوصية: مراجعة إجراءات الإعداد وفتح
@@ -203,20 +203,20 @@ export function CentralAuthorities() {
       </AICard>
 
       <Card className="bg-white shadow-sm border-gray-200">
-        <CardHeader className="flex flex-col gap-4 border-b border-gray-200 pb-4 sm:flex-row sm:items-center sm:justify-between">
+        <CardHeader className="flex flex-col gap-3 border-b border-gray-200 pb-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <CardTitle className="text-xl font-bold text-[var(--ink-900)]">
+            <CardTitle className="text-base font-bold text-[var(--ink-900)]">
               الترتيب الوطني لأداء المصالح المتعاقدة
             </CardTitle>
-            <CardDescription className="mt-1 text-base text-gray-500">
+            <CardDescription className="mt-0.5 text-xs text-gray-500">
               ترتيب تنازلي حسب مؤشر الالتزام بالآجال ثم مؤشر الشفافية
             </CardDescription>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2.5">
+          <div className="flex flex-wrap items-center gap-2">
             <div className="relative">
               <Search
-                className="size-4 absolute start-2.5 top-1/2 -translate-y-1/2 text-muted-foreground"
+                className="size-3.5 absolute start-2.5 top-1/2 -translate-y-1/2 text-muted-foreground"
                 aria-hidden="true"
               />
               <input
@@ -225,7 +225,7 @@ export function CentralAuthorities() {
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
                 aria-label="بحث في المصالح المتعاقدة"
-                className="ps-9 pe-3 py-1.5 text-base rounded-lg border border-gray-200 bg-white text-[var(--ink-900)] focus:outline-none focus:ring-1 focus:ring-[var(--stamp-green-700)]"
+                className="ps-8 pe-3 py-1 text-xs h-8 rounded-lg border border-gray-200 bg-white text-[var(--ink-900)] focus:outline-none focus:ring-1 focus:ring-[var(--stamp-green-700)]"
               />
             </div>
 
@@ -233,7 +233,7 @@ export function CentralAuthorities() {
               value={filterStatus}
               onChange={(event) => setFilterStatus(event.target.value)}
               aria-label="تصفية حسب التقييم"
-              className="px-2.5 py-1.5 text-base rounded-lg border border-gray-200 bg-white text-[var(--ink-900)] focus:outline-none focus:ring-1 focus:ring-[var(--stamp-green-700)]"
+              className="px-2.5 py-1 text-xs h-8 rounded-lg border border-gray-200 bg-white text-[var(--ink-900)] focus:outline-none focus:ring-1 focus:ring-[var(--stamp-green-700)]"
             >
               <option value="all">كل التقييمات</option>
               <option value="excellent">ممتازة</option>
@@ -274,33 +274,33 @@ export function CentralAuthorities() {
                   const meta = statusMeta(item.status);
                   return (
                     <TableRow key={item.id} className="transition-colors hover:bg-slate-50/70">
-                      <TableCell className="text-center">
+                      <TableCell className="text-center py-2.5">
                         <span
-                          className={`inline-flex size-7 items-center justify-center gap-0.5 rounded-full text-base font-bold ${
+                          className={`inline-flex size-6 items-center justify-center gap-0.5 rounded-full text-xs font-bold ${
                             item.rank <= 3
                               ? 'border border-amber-300 bg-amber-100 text-amber-900'
                               : 'bg-slate-100 text-slate-700'
                           }`}
                         >
                           {item.rank <= 3 && (
-                            <Trophy className="size-3 text-amber-600" aria-hidden="true" />
+                            <Trophy className="size-2.5 text-amber-600" aria-hidden="true" />
                           )}
                           <span className="font-mono">{item.rank}</span>
                         </span>
                       </TableCell>
-                      <TableCell className="text-base font-semibold text-[var(--ink-900)]">
+                      <TableCell className="text-xs font-semibold text-[var(--ink-900)] py-2.5">
                         <div className="truncate">{item.name || '—'}</div>
-                        <div className="font-mono text-base font-normal text-[var(--ink-500)]">
+                        <div className="font-mono text-xs font-normal text-[var(--ink-500)]">
                           {item.email}
                         </div>
                       </TableCell>
-                      <TableCell className="text-base text-[var(--ink-700)]">
+                      <TableCell className="text-xs text-[var(--ink-700)] py-2.5">
                         {item.wilaya || '—'}
                       </TableCell>
-                      <TableCell className="text-center font-mono text-base font-bold text-[var(--ink-900)]">
+                      <TableCell className="text-center font-mono text-xs font-bold text-[var(--ink-900)] py-2.5">
                         {formatNumber(item.deals_count)}
                       </TableCell>
-                      <TableCell className="text-center font-mono text-base font-bold">
+                      <TableCell className="text-center font-mono text-xs font-bold py-2.5">
                         <span
                           className={
                             item.delayed_deals_count > 0
@@ -311,16 +311,16 @@ export function CentralAuthorities() {
                           {formatNumber(item.delayed_deals_count)}
                         </span>
                       </TableCell>
-                      <TableCell className="text-end font-mono text-base font-semibold tabular-nums text-[var(--ink-900)]">
+                      <TableCell className="text-end font-mono text-xs font-semibold tabular-nums text-[var(--ink-900)] py-2.5">
                         {formatDZD(item.total_volume_dzd)}
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="py-2.5">
                         <Meter value={item.compliance_rate} />
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="py-2.5">
                         <Meter value={item.transparency_rate} tone="navy" />
                       </TableCell>
-                      <TableCell className="text-center font-mono text-base font-bold">
+                      <TableCell className="text-center font-mono text-xs font-bold py-2.5">
                         <span
                           className={
                             item.suspicions_count > 0
@@ -331,10 +331,10 @@ export function CentralAuthorities() {
                           {formatNumber(item.suspicions_count)}
                         </span>
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="py-2.5">
                         <Badge className={meta.className}>{meta.label}</Badge>
                       </TableCell>
-                      <TableCell className="text-end">
+                      <TableCell className="text-end py-2.5">
                         <Button
                           variant="ghost"
                           size="sm"
@@ -342,9 +342,9 @@ export function CentralAuthorities() {
                             setSelectedAuth(item);
                             setIsSheetOpen(true);
                           }}
-                          className="h-8 px-2.5 text-base text-[var(--stamp-green-700)] hover:bg-slate-100"
+                          className="h-7 px-2 text-xs text-[var(--stamp-green-700)] hover:bg-slate-100"
                         >
-                          <Eye className="size-3.5" aria-hidden="true" />
+                          <Eye className="size-3" aria-hidden="true" />
                           عرض
                         </Button>
                       </TableCell>
@@ -355,7 +355,7 @@ export function CentralAuthorities() {
             </TableBody>
           </Table>
 
-          <div className="flex flex-wrap items-center justify-between gap-2 border-t border-gray-200 px-6 py-4 text-base text-[var(--ink-500)]">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-t border-gray-200 px-4 py-2.5 text-xs text-[var(--ink-500)]">
             <span>
               عرض {formatNumber(filtered.length)} من أصل {formatNumber(authorities.length)} مصلحة
               متعاقدة
@@ -368,21 +368,21 @@ export function CentralAuthorities() {
       </Card>
 
       <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-        <SheetContent side="end" className="overflow-y-auto bg-white p-6 sm:max-w-md">
+        <SheetContent side="end" className="overflow-y-auto bg-white p-5 sm:max-w-md">
           {selectedAuth && (
-            <div className="space-y-6">
-              <SheetHeader className="space-y-1 border-b border-gray-200 pb-4 text-start">
-                <span className="eyebrow">بطاقة الرقابة الإدارية</span>
-                <SheetTitle className="text-xl font-bold text-[var(--ink-900)]">
+            <div className="space-y-4">
+              <SheetHeader className="space-y-1 border-b border-gray-200 pb-3 text-start">
+                <span className="eyebrow text-[11px]">بطاقة الرقابة الإدارية</span>
+                <SheetTitle className="text-base font-bold text-[var(--ink-900)]">
                   {selectedAuth.name || '—'}
                 </SheetTitle>
-                <SheetDescription className="mt-1 text-base text-[var(--ink-500)]">
+                <SheetDescription className="mt-0.5 text-xs text-[var(--ink-500)]">
                   الرتبة الوطنية #{selectedAuth.rank} · الولاية: {selectedAuth.wilaya || '—'} ·{' '}
                   {selectedAuth.email}
                 </SheetDescription>
               </SheetHeader>
 
-              <div className="grid grid-cols-2 gap-3 text-base">
+              <div className="grid grid-cols-2 gap-2.5 text-xs">
                 <DetailTile label="الصفقات المدارة" value={formatNumber(selectedAuth.deals_count)} />
                 <DetailTile
                   label="الصفقات النشطة"
@@ -399,7 +399,7 @@ export function CentralAuthorities() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3 text-base">
+              <div className="grid grid-cols-2 gap-2.5 text-xs">
                 <DetailTile label="الالتزام بالآجال" value={`${formatNumber(selectedAuth.compliance_rate)}%`} />
                 <DetailTile
                   label="مؤشر الشفافية"
@@ -407,26 +407,26 @@ export function CentralAuthorities() {
                 />
               </div>
 
-              <div className="rounded-lg border border-gray-200 bg-white p-3">
-                <div className="mb-1 text-base text-[var(--ink-500)]">الحجم المالي الكلي</div>
-                <div className="font-mono text-base font-bold text-[var(--ink-900)]">
+              <div className="rounded-lg border border-gray-200 bg-white p-2.5">
+                <div className="mb-0.5 text-xs text-[var(--ink-500)]">الحجم المالي الكلي</div>
+                <div className="font-mono text-sm font-bold text-[var(--ink-900)]">
                   {formatDZD(selectedAuth.total_volume_dzd)}
                 </div>
               </div>
 
-              <div className="rounded-xl border border-gray-200 bg-slate-50 p-4">
-                <div className="mb-2 flex items-center gap-2 text-base font-bold text-[var(--ink-900)]">
+              <div className="rounded-xl border border-gray-200 bg-slate-50 p-3.5">
+                <div className="mb-1.5 flex items-center gap-1.5 text-xs font-bold text-[var(--ink-900)]">
                   <ShieldCheck className="size-4 text-[var(--stamp-green-700)]" aria-hidden="true" />
                   <span>الملاحظات الرقابية</span>
                 </div>
-                <p className="text-base leading-relaxed text-[var(--ink-700)]">
+                <p className="text-xs leading-relaxed text-[var(--ink-700)]">
                   شبهات مسجّلة: {formatNumber(selectedAuth.suspicions_count)} · التقييم:{' '}
                   {statusMeta(selectedAuth.status).label} ·{' '}
                   {selectedAuth.ai_training_needed
                     ? 'مصنّفة ضمن المصالح التي تحتاج دعماً وتدريباً.'
                     : 'لا توجد حاجة تدريبية مسجّلة حالياً.'}
                 </p>
-                <p className="mt-2 text-base leading-relaxed text-[var(--ink-500)]">
+                <p className="mt-1.5 text-xs leading-relaxed text-[var(--ink-500)]">
                   المؤشرات محسوبة آلياً من الصفقات ودفاتر الشروط وجلسات فتح الأظرفة؛ وهي استشارية
                   ولا تُغني عن المراجعة البشرية المختصة.
                 </p>
@@ -449,10 +449,10 @@ function DetailTile({
   tone?: 'red';
 }) {
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-3">
-      <div className="mb-1 text-base text-[var(--ink-500)]">{label}</div>
+    <div className="rounded-lg border border-gray-200 bg-white p-2.5">
+      <div className="mb-0.5 text-xs text-[var(--ink-500)]">{label}</div>
       <div
-        className={`font-mono text-lg font-bold ${
+        className={`font-mono text-sm font-bold ${
           tone === 'red' ? 'text-[var(--stamp-red-700)]' : 'text-[var(--ink-900)]'
         }`}
       >

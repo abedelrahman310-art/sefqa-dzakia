@@ -4,7 +4,7 @@ from .models import CustomUser, Notification
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ['id', 'email', 'display_name', 'organization_name', 'role', 'is_active', 'created_at']
+        fields = ['id', 'email', 'display_name', 'organization_name', 'role', 'municipality', 'is_active', 'created_at']
         read_only_fields = ['id', 'created_at']
 
 class LoginSerializer(serializers.Serializer):
@@ -20,6 +20,8 @@ class RegisterSerializer(serializers.Serializer):
     company = serializers.CharField(required=False, allow_blank=True, max_length=255)
     phone = serializers.CharField(required=False, allow_blank=True, max_length=50)
     wilaya = serializers.CharField(required=False, allow_blank=True, max_length=50)
+    municipality = serializers.CharField(required=False, allow_blank=True, max_length=100)
+    commune = serializers.CharField(required=False, allow_blank=True, max_length=100)
     legalForm = serializers.CharField(required=False, allow_blank=True, max_length=50)
     rc = serializers.CharField(required=False, allow_blank=True, max_length=50)
     nif = serializers.CharField(required=False, allow_blank=True, max_length=50)
@@ -28,6 +30,18 @@ class RegisterSerializer(serializers.Serializer):
     tutelle = serializers.CharField(required=False, allow_blank=True, max_length=150)
     code = serializers.CharField(required=False, allow_blank=True, max_length=50)
     address = serializers.CharField(required=False, allow_blank=True, max_length=255)
+    commune = serializers.CharField(required=False, allow_blank=True, max_length=100)
+    postalCode = serializers.CharField(required=False, allow_blank=True, max_length=20)
+    fax = serializers.CharField(required=False, allow_blank=True, max_length=50)
+    nin = serializers.CharField(required=False, allow_blank=True, max_length=50)
+    sector = serializers.CharField(required=False, allow_blank=True, max_length=100)
+    legalText = serializers.CharField(required=False, allow_blank=True, max_length=255)
+    delegateName = serializers.CharField(required=False, allow_blank=True, max_length=150)
+    delegatePhone = serializers.CharField(required=False, allow_blank=True, max_length=50)
+    delegateEmail = serializers.CharField(required=False, allow_blank=True, max_length=150)
+    appointedName = serializers.CharField(required=False, allow_blank=True, max_length=150)
+    appointedPhone = serializers.CharField(required=False, allow_blank=True, max_length=50)
+    appointedEmail = serializers.CharField(required=False, allow_blank=True, max_length=150)
 
     def validate_email(self, value):
         normalized = value.strip().lower()

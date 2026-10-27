@@ -151,7 +151,7 @@ export function Meter({
           style={{ width: `${safe}%`, backgroundColor: meterColors[resolvedTone] }}
         />
       </div>
-      <span className="font-mono text-base font-bold tabular-nums text-[var(--ink-900)]">
+      <span className="font-mono text-xs font-bold tabular-nums text-[var(--ink-900)]">
         {formatPercent(value)}
       </span>
     </div>
@@ -181,8 +181,8 @@ export function TableState({
   if (loading) {
     return (
       <TableRow>
-        <TableCell colSpan={colSpan} className="py-10 text-center">
-          <span className="inline-flex items-center gap-2 text-base font-semibold text-[var(--ink-500)]">
+        <TableCell colSpan={colSpan} className="py-8 text-center">
+          <span className="inline-flex items-center gap-2 text-xs font-medium text-[var(--ink-500)]">
             <Loader2 className="size-4 animate-spin" aria-hidden="true" />
             جارٍ تحميل البيانات من الخادم…
           </span>
@@ -194,11 +194,11 @@ export function TableState({
   if (error) {
     return (
       <TableRow>
-        <TableCell colSpan={colSpan} className="py-10 text-center">
-          <div className="mx-auto max-w-md space-y-3">
-            <p className="text-base font-bold text-[var(--stamp-red-700)]">{error}</p>
+        <TableCell colSpan={colSpan} className="py-8 text-center">
+          <div className="mx-auto max-w-md space-y-2">
+            <p className="text-xs font-bold text-[var(--stamp-red-700)]">{error}</p>
             {onRetry && (
-              <Button variant="outline" size="sm" onClick={onRetry} className="text-base">
+              <Button variant="outline" size="sm" onClick={onRetry} className="h-8 text-xs font-semibold">
                 <RefreshCw className="size-3.5" aria-hidden="true" />
                 إعادة المحاولة
               </Button>
@@ -214,7 +214,7 @@ export function TableState({
       <TableRow>
         <TableCell
           colSpan={colSpan}
-          className="py-10 text-center text-base font-medium text-[var(--ink-500)]"
+          className="py-8 text-center text-xs font-medium text-[var(--ink-500)]"
         >
           {emptyLabel}
         </TableCell>

@@ -150,9 +150,10 @@ class TestLegalRagEmbeddingAndSearch:
         system_prompt = build_rag_system_prompt()
         user_prompt = build_rag_user_prompt("كيف أطعن؟", results)
 
-        assert "أنت المستشار القانوني المتخصص" in system_prompt
-        assert "أجب باستخدام النصوص المسترجعة فقط" in system_prompt
-        assert "المواد القانونية المسترجعة من قاعدة البيانات" in user_prompt
+        assert "أنت مساعد قانوني آلي لمنصة \"صفقات ذكية\" الجزائرية" in system_prompt
+        assert "لا تختلق أي مادة قانونية من عندك" in system_prompt
+        assert "السياق القانوني (نصوص المواد المسترجعة):" in user_prompt
+        assert "سؤال المتعامل:" in user_prompt
         assert "المادة 72" in user_prompt or "المادة" in user_prompt
 
 

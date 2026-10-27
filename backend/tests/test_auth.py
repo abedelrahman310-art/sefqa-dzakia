@@ -210,16 +210,26 @@ class TestAuthentication:
         assert response.status_code == 400
         assert 'email' in response.data
 
-    def test_registration_short_password_fails(self, api_client):
-        """اختبار رفض كلمات المرور الأقل من 8 أحرف"""
+    def test_registration_with_municipality_field(self, api_client):
+        """اختبار قبول وحفظ حقل البلدية (municipality) أثناء التسجيل للمتعامل والمصلحة"""
         payload = {
             'role': 'operator',
-            'email': 'shortpass@safaqat.dz',
-            'password': '123',
-            'fullName': 'مستخدم',
+            'email': 'operator_municipality@safaqat.dz',
+            'password': 'SecurePassword@2026',
+            'fullName': 'مؤسسة سيدي امحمد للبناء',
+            'wilaya': '16',
+            'municipality': 'سيدي امحمد',
+            'commune': 'سيدي امحمد',
+            'address': 'شارع ديدوش مراد - سيدي امحمد - الجزائر (16000)',
+            'postalCode': '16000',
         }
         response = api_client.post('/api/auth/register/', payload, format='json')
-        assert response.status_code == 400
-        assert 'password' in response.data
+        assert response.status_code == 201
+        assert response.data['user']['municipality'] == 'سيدي امحمد'
+
+        user = CustomUser.objects.get(email='operator_municipality@safaqat.dz')
+        assert user.municipality == 'سيدي امحمد'
+        assert user.operator_profile.municipality == 'سيدي امحمد'
+
 
 

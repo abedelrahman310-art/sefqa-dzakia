@@ -340,23 +340,22 @@ class AILegalChatView(APIView):
 
         # 4. تجميع المواد القانونية المستند إليها
         retrieved_data = []
-        referenced_articles_set = set()
+        legal_articles = []
 
         for art, score in top_articles:
-            retrieved_data.append({
-                'id': art.id,
-                'law_source': art.law_source,
+            art_obj = {
+                'id': str(art.id),
+                'label': f"{art.article_number} - {art.law_source}",
                 'article_number': art.article_number,
-                'title': art.title,
-                'content': art.content if len(art.content) <= 500 else art.content[:500] + "...",
+                'law_source': art.law_source,
+                'law': art.law_source,
+                'title': art.title or '',
+                'content': art.content,
+                'text': art.content,
                 'similarity_score': score,
-            })
-            referenced_articles_set.add(f"{art.law_source} - {art.article_number}")
-
-        for match in extract_mentioned_articles(final_reply):
-            referenced_articles_set.add(match)
-
-        legal_articles = list(referenced_articles_set)
+            }
+            retrieved_data.append(art_obj)
+            legal_articles.append(art_obj)
 
         sources = [
             "القانون رقم 23-12 المؤرخ في 5 أوت 2023 المحدد للقواعد العامة للصفقات العمومية",

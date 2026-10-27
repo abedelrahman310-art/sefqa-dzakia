@@ -370,14 +370,18 @@ class SessionOpenEnvelopeView(APIView):
         # فك التشفير وتحديد نوع الواقعة والمبلغ المالي
         if envelope_type in ["financial", "opened_financial", "fin"]:
             norm_event_type = "opened_financial"
-            # فك تشفير وقراءة المبلغ المالي المودع
-            announced_amount = offer.financial_amount
+            # فك التشفير التشفيري (AES-256) للمبلغ المالي بطلب من رئيس اللجنة
+            announced_amount = offer.decrypt_financial_amount()
+            offer.is_encrypted = False
+            offer.save(update_fields=['is_encrypted'])
         elif envelope_type in ["technical", "opened_technical", "tech"]:
             norm_event_type = "opened_technical"
             announced_amount = None
         else:
             norm_event_type = "offer_opened"
-            announced_amount = offer.financial_amount
+            announced_amount = offer.decrypt_financial_amount()
+            offer.is_encrypted = False
+            offer.save(update_fields=['is_encrypted'])
 
         # منع فتح نفس الظرف مرتين لنفس العرض (سلامة المحضر)
         if OpeningEvent.objects.filter(session=session, offer=offer, event_type=norm_event_type).exists():

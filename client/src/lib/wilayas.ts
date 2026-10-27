@@ -76,3 +76,6 @@ export const ALGERIA_69_WILAYAS: WilayaItem[] = [
   { code: '68', ar: 'بوسعادة', fr: 'Bou Saâda' },
   { code: '69', ar: 'الأبيض سيدي الشيخ', fr: 'El Abiodh Sidi Cheikh' },
 ];
+
+export { getCommunesForWilaya, REGISTRY_69W } from '@safaqat/shared/territorial';
+

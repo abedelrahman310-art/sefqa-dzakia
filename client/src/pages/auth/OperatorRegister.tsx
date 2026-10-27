@@ -13,7 +13,6 @@ import {
   MapPin,
   ChevronDown,
   Building2,
-  UserPlus,
   ArrowRight,
   ArrowLeft,
   Check,
@@ -21,10 +20,15 @@ import {
   Loader2,
   Search,
   X,
+  FileText,
+  Hash,
+  Printer,
+  ShieldCheck,
 } from 'lucide-react';
 import { RegisterHero } from '@/components/auth/RegisterHero';
 import { RegisterRoleTabs, RegisterRole } from '@/components/auth/RegisterRoleTabs';
 import { PasswordStrengthMeter } from '@/components/auth/PasswordStrengthMeter';
+import { getCommunesForWilaya } from '@safaqat/shared/territorial';
 
 export const WILAYAS = [
   { code: '01', ar: 'أدرار', fr: 'Adrar' },
@@ -87,12 +91,15 @@ export const WILAYAS = [
   { code: '58', ar: 'المنيعة', fr: 'El Meniaa' },
 ];
 
-export const LEGAL_FORMS = [
-  { id: 'individual', ar: 'مؤسسة فردية', fr: 'Entreprise individuelle' },
-  { id: 'eurl', ar: 'مؤسسة ذات شخص وحيد ومسؤولية محدودة (EURL)', fr: 'EURL' },
+export const OPERATOR_LEGAL_FORMS = [
   { id: 'sarl', ar: 'شركة ذات مسؤولية محدودة (SARL)', fr: 'SARL' },
+  { id: 'eurl', ar: 'مؤسسة ذات شخص وحيد وذات مسؤولية محدودة (EURL)', fr: 'EURL' },
   { id: 'spa', ar: 'شركة مساهمة (SPA)', fr: 'SPA' },
   { id: 'snc', ar: 'شركة تضامن (SNC)', fr: 'SNC' },
+  { id: 'individual', ar: 'مؤسسة فردية (شخص طبيعي)', fr: 'Entreprise individuelle' },
+  { id: 'groupement', ar: 'تجمع مؤقت لمؤسسات (Groupement)', fr: 'Groupement momentané' },
+  { id: 'startup', ar: 'مؤسسة ناشئة حائزة على علامة (Label Startup)', fr: 'Startup labellisée' },
+  { id: 'other', ar: 'شكل قانوني آخر', fr: 'Autre forme juridique' },
 ];
 
 export function OperatorRegister() {
@@ -100,23 +107,33 @@ export function OperatorRegister() {
   const [, setLocation] = useLocation();
   const { login } = useAuth();
 
-  // Primary visible fields
+  // 1. البيانات القانونية والجبائية للمؤسسة (الملحق 2)
   const [fullName, setFullName] = useState('');
-  const [email, setEmail] = useState('');
+  const [legalForm, setLegalForm] = useState('sarl');
+  const [nif, setNif] = useState('');
+  const [rc, setRc] = useState('');
+  const [nin, setNin] = useState('');
+
+  // 2. المقر الاجتماعي والعنوان
+  const [address, setAddress] = useState('');
+  const [wilaya, setWilaya] = useState('');
+  const [commune, setCommune] = useState('');
+  const [postalCode, setPostalCode] = useState('');
+
+  // 3. معلومات الاتصال المهنية
   const [phone, setPhone] = useState('');
+  const [fax, setFax] = useState('');
+  const [email, setEmail] = useState('');
+
+  // 4. معلومات الشخص المفوض
+  const [delegateName, setDelegateName] = useState('');
+  const [delegatePhone, setDelegatePhone] = useState('');
+  const [delegateEmail, setDelegateEmail] = useState('');
+
+  // 5. الأمان وكلمة المرور
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [wilaya, setWilaya] = useState('');
-  const [rc, setRc] = useState('');
   const [termsAccepted, setTermsAccepted] = useState(false);
-
-  // Preserved state for backend payload integrity
-  const [company] = useState('');
-  const [legalForm] = useState('sarl');
-  const [nif] = useState('');
-  const [nis] = useState('');
-  const [address] = useState('');
-  const [repRole] = useState('المسير');
 
   // UI State
   const [showPassword, setShowPassword] = useState(false);
@@ -159,17 +176,43 @@ export function OperatorRegister() {
     [wilaya]
   );
 
+  const availableCommunes = useMemo(
+    () => getCommunesForWilaya(wilaya),
+    [wilaya]
+  );
+
   // Inline Validation Helpers
   const isEmailValid = useMemo(() => {
     if (!email.trim()) return true;
     return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.trim());
   }, [email]);
 
+  const isDelegateEmailValid = useMemo(() => {
+    if (!delegateEmail.trim()) return true;
+    return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(delegateEmail.trim());
+  }, [delegateEmail]);
+
   const isPhoneValid = useMemo(() => {
     if (!phone.trim()) return true;
     const clean = phone.replace(/[\s.-]/g, '');
-    return /^0[567]\d{8}$/.test(clean);
+    return /^0\d{8,9}$/.test(clean);
   }, [phone]);
+
+  const isDelegatePhoneValid = useMemo(() => {
+    if (!delegatePhone.trim()) return true;
+    const clean = delegatePhone.replace(/[\s.-]/g, '');
+    return /^0\d{8,9}$/.test(clean);
+  }, [delegatePhone]);
+
+  const isPostalCodeValid = useMemo(() => {
+    if (!postalCode.trim()) return true;
+    return /^\d{4,5}$/.test(postalCode.trim());
+  }, [postalCode]);
+
+  const isNifValid = useMemo(() => {
+    if (!nif.trim()) return true;
+    return nif.trim().length >= 8;
+  }, [nif]);
 
   const passwordsMatch = useMemo(() => {
     if (!confirmPassword) return null;
@@ -183,23 +226,43 @@ export function OperatorRegister() {
   const validateAll = (): boolean => {
     const newTouched = {
       fullName: true,
-      email: true,
+      legalForm: true,
+      nif: true,
+      rc: true,
+      nin: true,
+      address: true,
+      wilaya: true,
+      commune: true,
+      postalCode: true,
       phone: true,
+      fax: true,
+      email: true,
+      delegateName: true,
+      delegatePhone: true,
+      delegateEmail: true,
       password: true,
       confirmPassword: true,
-      wilaya: true,
-      rc: true,
       terms: true,
     };
     setTouched(newTouched);
 
     if (!fullName.trim() || fullName.trim().length < 2) return false;
-    if (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.trim())) return false;
-    if (!phone.trim() || !/^0[567]\d{8}$/.test(phone.replace(/[\s.-]/g, ''))) return false;
+    if (!legalForm.trim()) return false;
+    if (!nif.trim() || nif.trim().length < 8) return false;
+    if (!rc.trim()) return false;
+    if (!nin.trim()) return false;
+    if (!address.trim() || address.trim().length < 3) return false;
+    if (!wilaya) return false;
+    if (!commune.trim()) return false;
+    if (!postalCode.trim() || !isPostalCodeValid) return false;
+    if (!phone.trim() || !isPhoneValid) return false;
+    if (!fax.trim()) return false;
+    if (!email.trim() || !isEmailValid) return false;
+    if (!delegateName.trim() || delegateName.trim().length < 2) return false;
+    if (!delegatePhone.trim() || !isDelegatePhoneValid) return false;
+    if (!delegateEmail.trim() || !isDelegateEmailValid) return false;
     if (!password || password.length < 8) return false;
     if (password !== confirmPassword) return false;
-    if (!wilaya) return false;
-    if (!rc.trim()) return false;
 
     if (!termsAccepted) {
       setShakeTerms(true);
@@ -227,8 +290,7 @@ export function OperatorRegister() {
     }
 
     setIsSubmitting(true);
-    const payloadCompany = company.trim() || fullName.trim();
-    const payloadAddress = address.trim() || (selectedWilayaObj ? `${selectedWilayaObj.ar} - الجزائر` : 'الجزائر');
+    const fullAddress = `${address.trim()} - ${commune.trim()} - ${selectedWilayaObj ? selectedWilayaObj.ar : wilaya} (${postalCode.trim()})`;
 
     try {
       const res = await fetch('/api/auth/register', {
@@ -237,17 +299,24 @@ export function OperatorRegister() {
         body: JSON.stringify({
           role: 'operator',
           fullName: fullName.trim(),
+          company: fullName.trim(),
           email: email.trim(),
           phone: phone.trim(),
+          fax: fax.trim(),
           password,
           wilaya,
-          company: payloadCompany,
+          commune: commune.trim(),
+          municipality: commune.trim(),
+          postalCode: postalCode.trim(),
+          address: fullAddress,
           legalForm,
           rc: rc.trim(),
-          nif: nif.trim() || rc.trim(),
-          nis: nis.trim() || '0000000000',
-          address: payloadAddress,
-          repRole,
+          nif: nif.trim(),
+          nin: nin.trim(),
+          delegateName: delegateName.trim(),
+          delegatePhone: delegatePhone.trim(),
+          delegateEmail: delegateEmail.trim(),
+          repRole: 'المفوض قانوناً',
         }),
       });
 
@@ -259,7 +328,7 @@ export function OperatorRegister() {
           const val = data[firstKey];
           msg = Array.isArray(val) ? val.join(' ') : String(val);
         }
-        setServerError(msg || 'فشل التسجيل. يرجى مراجعة البيانات والمحاولة مجدداً.');
+        setServerError(msg || 'فشل التسجيل. يرجى مراجعة البيانات الإلزامية والمحاولة مجدداً.');
         setIsSubmitting(false);
         return;
       }
@@ -280,7 +349,7 @@ export function OperatorRegister() {
 
   return (
     <div
-      className="min-h-screen lg:h-screen w-full flex flex-col lg:flex-row bg-[#f8fafc] overflow-x-hidden lg:overflow-hidden select-none font-sans"
+      className="min-h-screen lg:h-screen w-full flex flex-col lg:flex-row bg-[#f8fafc] overflow-x-hidden lg:overflow-hidden select-none font-['Cairo',sans-serif]"
       dir={dir}
     >
       <style>{`
@@ -301,7 +370,7 @@ export function OperatorRegister() {
 
       {/* ═══ 2. Form Section (Left in RTL, 55% width) ═══ */}
       <main className="w-full lg:w-[55%] h-full flex flex-col justify-start items-center px-4 sm:px-8 lg:px-12 py-6 lg:py-8 overflow-y-auto">
-        <div className="w-full max-w-[540px] space-y-4">
+        <div className="w-full max-w-[560px] space-y-4">
           {/* Top navigation link */}
           <div className="flex items-center justify-between">
             <Link
@@ -313,13 +382,28 @@ export function OperatorRegister() {
             </Link>
           </div>
 
+          {/* Official Compliance Header Badge */}
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50/80 border border-blue-200/90 rounded-xl p-3 flex items-center gap-2.5 shadow-xs">
+            <div className="w-8 h-8 rounded-lg bg-[#0A2540] text-white flex items-center justify-center shrink-0 shadow-xs">
+              <ShieldCheck className="w-4 h-4 text-emerald-400" />
+            </div>
+            <div className="leading-tight">
+              <span className="block text-xs font-bold text-[#0A2540]">
+                استمارة تسجيل المتعامل الاقتصادي — الملحق رقم 02
+              </span>
+              <span className="text-[11px] text-slate-500">
+                مطابقة تماماً لقرار وزارة المالية المؤرخ في 4 فبراير 2026
+              </span>
+            </div>
+          </div>
+
           {/* Header Title & Subtitle */}
           <div className="space-y-1">
-            <h2 className="text-2xl sm:text-[28px] font-black text-[#0A2540] tracking-tight leading-tight">
-              {t('register.redesign.title')}
+            <h2 className="text-xl sm:text-2xl font-black text-[#0A2540] tracking-tight leading-tight">
+              إنشاء حساب متعامل اقتصادي
             </h2>
-            <p className="text-xs sm:text-[13px] text-[#64748b] leading-relaxed">
-              {t('register.redesign.sub')}
+            <p className="text-xs text-[#64748b] leading-relaxed">
+              يرجى إدخال جميع البيانات القانونية والجبائية الإلزامية للمؤسسة وفق المعايير الوزارية المعتمدة.
             </p>
           </div>
 
@@ -350,440 +434,637 @@ export function OperatorRegister() {
             onSelectRole={handleRoleSelect}
           />
 
-          {/* Registration Form — 3 Visual Cards */}
-          <form onSubmit={handleSubmit} noValidate className="space-y-3.5 pt-1">
-            {/* ── CARD 1: Identity Info (بيانات الهوية والممثل) ── */}
-            <div className="bg-white border border-slate-200/90 rounded-xl p-3.5 sm:p-4 shadow-xs space-y-3">
-              <div className="flex items-center gap-2 pb-1 border-b border-slate-100">
-                <User className="w-4 h-4 text-[#0A2540]" />
+          {/* Registration Form — Structured Cards */}
+          <form onSubmit={handleSubmit} noValidate className="space-y-4 pt-1">
+            {/* ── CARD 1: الهوية القانونية والجبائية للمؤسسة ── */}
+            <div className="bg-white border border-slate-200/90 rounded-xl p-4 shadow-xs space-y-3">
+              <div className="flex items-center gap-2 pb-1.5 border-b border-slate-100">
+                <Building2 className="w-4 h-4 text-[#0A2540]" />
                 <h3 className="text-xs font-bold text-[#0A2540]">
-                  {t('register.redesign.groups.identity')}
+                  1. البيانات القانونية والجبائية للمؤسسة
                 </h3>
               </div>
 
-              {/* Full Name */}
+              {/* التسمية الاجتماعية / الاسم الكامل */}
               <div className="space-y-1">
+                <label className="block text-[11px] font-bold text-[#0A2540]">
+                  التسمية الاجتماعية أو الاسم الكامل للمتعامل <span className="text-red-500">*</span>
+                </label>
                 <div className="relative">
                   <input
                     type="text"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     onBlur={() => markTouched('fullName')}
-                    placeholder={`${t('register.redesign.full_name')} *`}
-                    className={`w-full h-11 pe-11 ps-4 rounded-xl border bg-white text-xs sm:text-sm text-[#0B1A2B] placeholder-[#9ca3af] focus:outline-none focus:border-[#0A2540] focus:ring-2 focus:ring-[#0A2540]/15 transition-all text-start ${
+                    placeholder="مثال: شركة الأشغال والبناء الجزائرية SARL"
+                    className={`w-full h-10 pe-10 ps-3.5 rounded-xl border bg-white text-xs text-[#0B1A2B] placeholder-[#9ca3af] focus:outline-none focus:border-[#0A2540] focus:ring-2 focus:ring-[#0A2540]/15 transition-all ${
                       touched.fullName && (!fullName.trim() || fullName.trim().length < 2)
                         ? 'border-red-500 bg-red-50/20'
                         : 'border-[#e2e8f0]'
                     }`}
                   />
-                  <User className="absolute end-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9ca3af] pointer-events-none" />
+                  <Building2 className="absolute end-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9ca3af] pointer-events-none" />
                 </div>
                 {touched.fullName && (!fullName.trim() || fullName.trim().length < 2) && (
                   <p className="text-[11px] text-red-600 flex items-center gap-1 ps-1">
                     <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                    <span>{t('register.redesign.name_min')}</span>
+                    <span>التسمية الاجتماعية أو الاسم الكامل إلزامي (حرفين على الأقل).</span>
                   </p>
                 )}
               </div>
 
-              {/* Grid: Email & Phone */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {/* Email */}
+              {/* الشكل القانوني للمؤسسة */}
+              <div className="space-y-1">
+                <label className="block text-[11px] font-bold text-[#0A2540]">
+                  الشكل القانوني للمؤسسة <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <select
+                    value={legalForm}
+                    onChange={(e) => setLegalForm(e.target.value)}
+                    onBlur={() => markTouched('legalForm')}
+                    className="w-full h-10 pe-10 ps-3.5 rounded-xl border border-[#e2e8f0] bg-white text-xs text-[#0B1A2B] focus:outline-none focus:border-[#0A2540] focus:ring-2 focus:ring-[#0A2540]/15 transition-all appearance-none cursor-pointer"
+                  >
+                    {OPERATOR_LEGAL_FORMS.map((form) => (
+                      <option key={form.id} value={form.id}>
+                        {form.ar}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="absolute end-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9ca3af] pointer-events-none" />
+                </div>
+              </div>
+
+              {/* الأرقام الجبائية والرسمية: NIF, RC, NIN */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                {/* NIF */}
                 <div className="space-y-1">
+                  <label className="block text-[11px] font-bold text-[#0A2540]">
+                    رقم التعريف الجبائي (NIF) <span className="text-red-500">*</span>
+                  </label>
                   <div className="relative">
                     <input
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      onBlur={() => markTouched('email')}
-                      placeholder={`${t('register.redesign.email')} *`}
-                      className={`w-full h-11 pe-11 ps-4 rounded-xl border bg-white text-xs sm:text-sm text-[#0B1A2B] placeholder-[#9ca3af] focus:outline-none focus:border-[#0A2540] focus:ring-2 focus:ring-[#0A2540]/15 transition-all text-start ${
-                        touched.email && !isEmailValid
+                      type="text"
+                      value={nif}
+                      onChange={(e) => setNif(e.target.value)}
+                      onBlur={() => markTouched('nif')}
+                      placeholder="NIF (15 رقماً)"
+                      className={`w-full h-10 pe-8 ps-2.5 rounded-xl border bg-white text-xs font-mono text-[#0B1A2B] placeholder-[#9ca3af] focus:outline-none focus:border-[#0A2540] focus:ring-2 focus:ring-[#0A2540]/15 ${
+                        touched.nif && (!nif.trim() || !isNifValid)
                           ? 'border-red-500 bg-red-50/20'
                           : 'border-[#e2e8f0]'
                       }`}
                     />
-                    <Mail className="absolute end-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9ca3af] pointer-events-none" />
+                    <Hash className="absolute end-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#9ca3af] pointer-events-none" />
                   </div>
-                  {touched.email && !isEmailValid && (
-                    <p className="text-[11px] text-red-600 flex items-center gap-1 ps-1">
-                      <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                      <span>{t('register.redesign.email_invalid')}</span>
-                    </p>
+                  {touched.nif && (!nif.trim() || !isNifValid) && (
+                    <p className="text-[10px] text-red-600">رقم NIF إلزامي (8 أرقام على الأقل)</p>
                   )}
                 </div>
 
+                {/* RC */}
+                <div className="space-y-1">
+                  <label className="block text-[11px] font-bold text-[#0A2540]">
+                    رقم السجل التجاري <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={rc}
+                      onChange={(e) => setRc(e.target.value)}
+                      onBlur={() => markTouched('rc')}
+                      placeholder="رقم السجل التجاري"
+                      className={`w-full h-10 pe-8 ps-2.5 rounded-xl border bg-white text-xs font-mono text-[#0B1A2B] placeholder-[#9ca3af] focus:outline-none focus:border-[#0A2540] focus:ring-2 focus:ring-[#0A2540]/15 ${
+                        touched.rc && !rc.trim()
+                          ? 'border-red-500 bg-red-50/20'
+                          : 'border-[#e2e8f0]'
+                      }`}
+                    />
+                    <FileText className="absolute end-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#9ca3af] pointer-events-none" />
+                  </div>
+                  {touched.rc && !rc.trim() && (
+                    <p className="text-[10px] text-red-600">رقم السجل التجاري إلزامي</p>
+                  )}
+                </div>
+
+                {/* NIN */}
+                <div className="space-y-1">
+                  <label className="block text-[11px] font-bold text-[#0A2540]">
+                    التعريف الوطني (NIN) <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={nin}
+                      onChange={(e) => setNin(e.target.value)}
+                      onBlur={() => markTouched('nin')}
+                      placeholder="رقم التعريف الوطني"
+                      className={`w-full h-10 pe-8 ps-2.5 rounded-xl border bg-white text-xs font-mono text-[#0B1A2B] placeholder-[#9ca3af] focus:outline-none focus:border-[#0A2540] focus:ring-2 focus:ring-[#0A2540]/15 ${
+                        touched.nin && !nin.trim()
+                          ? 'border-red-500 bg-red-50/20'
+                          : 'border-[#e2e8f0]'
+                      }`}
+                    />
+                    <Hash className="absolute end-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#9ca3af] pointer-events-none" />
+                  </div>
+                  {touched.nin && !nin.trim() && (
+                    <p className="text-[10px] text-red-600">رقم NIN إلزامي</p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* ── CARD 2: المقر الاجتماعي والعنوان الجغرافي ── */}
+            <div className="bg-white border border-slate-200/90 rounded-xl p-4 shadow-xs space-y-3">
+              <div className="flex items-center gap-2 pb-1.5 border-b border-slate-100">
+                <MapPin className="w-4 h-4 text-[#0A2540]" />
+                <h3 className="text-xs font-bold text-[#0A2540]">
+                  2. عنوان المقر الاجتماعي
+                </h3>
+              </div>
+
+              {/* عنوان المقر الاجتماعي */}
+              <div className="space-y-1">
+                <label className="block text-[11px] font-bold text-[#0A2540]">
+                  عنوان المقر الاجتماعي المفصل <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
+                    onBlur={() => markTouched('address')}
+                    placeholder="الحي، الشارع، رقم المبنى..."
+                    className={`w-full h-10 pe-10 ps-3.5 rounded-xl border bg-white text-xs text-[#0B1A2B] placeholder-[#9ca3af] focus:outline-none focus:border-[#0A2540] focus:ring-2 focus:ring-[#0A2540]/15 transition-all ${
+                      touched.address && (!address.trim() || address.trim().length < 3)
+                        ? 'border-red-500 bg-red-50/20'
+                        : 'border-[#e2e8f0]'
+                    }`}
+                  />
+                  <MapPin className="absolute end-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9ca3af] pointer-events-none" />
+                </div>
+                {touched.address && (!address.trim() || address.trim().length < 3) && (
+                  <p className="text-[10px] text-red-600">عنوان المقر الاجتماعي إلزامي.</p>
+                )}
+              </div>
+
+              {/* شبكة: الولاية، البلدية، الرمز البريدي */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                {/* Wilaya Combobox */}
+                <div className="space-y-1" ref={wilayaRef}>
+                  <label className="block text-[11px] font-bold text-[#0A2540]">
+                    الولاية <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <button
+                      type="button"
+                      onClick={() => setIsWilayaOpen(!isWilayaOpen)}
+                      onBlur={() => markTouched('wilaya')}
+                      className={`w-full h-10 pe-8 ps-7 rounded-xl border bg-white text-xs text-start flex items-center justify-between transition-all focus:outline-none focus:border-[#0A2540] focus:ring-2 focus:ring-[#0A2540]/15 cursor-pointer ${
+                        touched.wilaya && !wilaya
+                          ? 'border-red-500 bg-red-50/20'
+                          : 'border-[#e2e8f0]'
+                      } ${!wilaya ? 'text-[#9ca3af]' : 'text-[#0B1A2B] font-medium'}`}
+                    >
+                      <span className="truncate">
+                        {selectedWilayaObj
+                          ? `${selectedWilayaObj.code} — ${lang === 'fr' ? selectedWilayaObj.fr : selectedWilayaObj.ar}`
+                          : 'اختر الولاية'}
+                      </span>
+                    </button>
+                    <MapPin className="absolute end-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#9ca3af] pointer-events-none" />
+                    <ChevronDown
+                      className={`absolute start-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#9ca3af] transition-transform duration-200 pointer-events-none ${
+                        isWilayaOpen ? 'rotate-180 text-[#0A2540]' : ''
+                      }`}
+                    />
+                  </div>
+
+                  {isWilayaOpen && (
+                    <div className="relative z-30">
+                      <div className="absolute top-1 start-0 end-0 bg-white border border-slate-200 rounded-xl shadow-lg p-2 space-y-2 max-h-56 overflow-hidden flex flex-col">
+                        <div className="relative">
+                          <input
+                            type="text"
+                            value={wilayaSearch}
+                            onChange={(e) => setWilayaSearch(e.target.value)}
+                            placeholder="ابحث برقم الولاية أو اسمها..."
+                            className="w-full h-8 pe-8 ps-2.5 rounded-lg border border-slate-200 bg-slate-50 text-xs text-[#0B1A2B] placeholder-slate-400 focus:outline-none focus:bg-white focus:border-[#0A2540]"
+                            autoFocus
+                          />
+                          <Search className="absolute end-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
+                          {wilayaSearch && (
+                            <button
+                              type="button"
+                              onClick={() => setWilayaSearch('')}
+                              className="absolute start-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                            >
+                              <X className="w-3 h-3" />
+                            </button>
+                          )}
+                        </div>
+
+                        <div className="overflow-y-auto max-h-40 divide-y divide-slate-100 text-xs">
+                          {filteredWilayas.length === 0 ? (
+                            <div className="py-2.5 text-center text-slate-400 text-xs">
+                              لا توجد ولاية مطابقة
+                            </div>
+                          ) : (
+                            filteredWilayas.map((w) => (
+                              <button
+                                key={w.code}
+                                type="button"
+                                onClick={() => {
+                                  setWilaya(w.code);
+                                  setCommune('');
+                                  setIsWilayaOpen(false);
+                                  setWilayaSearch('');
+                                }}
+                                className={`w-full text-start py-1.5 px-2.5 rounded-md hover:bg-slate-100 flex items-center justify-between transition-colors cursor-pointer ${
+                                  wilaya === w.code
+                                    ? 'bg-[#0A2540]/10 text-[#0A2540] font-bold'
+                                    : 'text-slate-700'
+                                }`}
+                              >
+                                <span>
+                                  {w.code} — {lang === 'fr' ? w.fr : w.ar}
+                                </span>
+                                {wilaya === w.code && (
+                                  <Check className="w-3 h-3 text-[#0A2540]" />
+                                )}
+                              </button>
+                            ))
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {touched.wilaya && !wilaya && (
+                    <p className="text-[10px] text-red-600">الولاية إلزامية</p>
+                  )}
+                </div>
+
+                {/* Commune / Municipality */}
+                <div className="space-y-1">
+                  <label className="block text-[11px] font-bold text-[#0A2540]">
+                    البلدية <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    value={commune}
+                    onChange={(e) => setCommune(e.target.value)}
+                    onBlur={() => markTouched('commune')}
+                    disabled={!wilaya}
+                    aria-label="البلدية"
+                    className={`w-full h-10 px-3 rounded-xl border bg-white text-xs text-[#0B1A2B] font-['Cairo',sans-serif] focus:outline-none focus:border-[#0A2540] focus:ring-2 focus:ring-[#0A2540]/15 disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed ${
+                      touched.commune && !commune.trim()
+                        ? 'border-red-500 bg-red-50/20'
+                        : 'border-[#e2e8f0]'
+                    }`}
+                  >
+                    {!wilaya ? (
+                      <option value="">اختر الولاية أولاً</option>
+                    ) : (
+                      <>
+                        <option value="">اختر البلدية</option>
+                        {availableCommunes.map((c) => (
+                          <option key={c} value={c}>
+                            {c}
+                          </option>
+                        ))}
+                      </>
+                    )}
+                  </select>
+                  {touched.commune && !commune.trim() && (
+                    <p className="text-[10px] text-red-600">البلدية إلزامية</p>
+                  )}
+                </div>
+
+                {/* Postal Code */}
+                <div className="space-y-1">
+                  <label className="block text-[11px] font-bold text-[#0A2540]">
+                    الرمز البريدي <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={postalCode}
+                    onChange={(e) => setPostalCode(e.target.value)}
+                    onBlur={() => markTouched('postalCode')}
+                    placeholder="مثال: 16000"
+                    maxLength={5}
+                    className={`w-full h-10 px-3 rounded-xl border bg-white text-xs font-mono text-[#0B1A2B] placeholder-[#9ca3af] focus:outline-none focus:border-[#0A2540] focus:ring-2 focus:ring-[#0A2540]/15 ${
+                      touched.postalCode && (!postalCode.trim() || !isPostalCodeValid)
+                        ? 'border-red-500 bg-red-50/20'
+                        : 'border-[#e2e8f0]'
+                    }`}
+                  />
+                  {touched.postalCode && (!postalCode.trim() || !isPostalCodeValid) && (
+                    <p className="text-[10px] text-red-600">رمز بريدي صحيح إلزامي</p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* ── CARD 3: الاتصال المهني للمؤسسة ── */}
+            <div className="bg-white border border-slate-200/90 rounded-xl p-4 shadow-xs space-y-3">
+              <div className="flex items-center gap-2 pb-1.5 border-b border-slate-100">
+                <Phone className="w-4 h-4 text-[#0A2540]" />
+                <h3 className="text-xs font-bold text-[#0A2540]">
+                  3. معلومات الاتصال المهنية
+                </h3>
+              </div>
+
+              {/* البريد الإلكتروني المهني */}
+              <div className="space-y-1">
+                <label className="block text-[11px] font-bold text-[#0A2540]">
+                  البريد الإلكتروني المهني للشركة <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    onBlur={() => markTouched('email')}
+                    placeholder="contact@enterprise.dz"
+                    className={`w-full h-10 pe-10 ps-3.5 rounded-xl border bg-white text-xs text-[#0B1A2B] placeholder-[#9ca3af] focus:outline-none focus:border-[#0A2540] focus:ring-2 focus:ring-[#0A2540]/15 transition-all ${
+                      touched.email && (!email.trim() || !isEmailValid)
+                        ? 'border-red-500 bg-red-50/20'
+                        : 'border-[#e2e8f0]'
+                    }`}
+                  />
+                  <Mail className="absolute end-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9ca3af] pointer-events-none" />
+                </div>
+                {touched.email && (!email.trim() || !isEmailValid) && (
+                  <p className="text-[10px] text-red-600">بريد إلكتروني مهني صحيح إلزامي.</p>
+                )}
+              </div>
+
+              {/* الهاتف والفاكس */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {/* Phone */}
                 <div className="space-y-1">
+                  <label className="block text-[11px] font-bold text-[#0A2540]">
+                    الهاتف المهني <span className="text-red-500">*</span>
+                  </label>
                   <div className="relative">
                     <input
                       type="tel"
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
                       onBlur={() => markTouched('phone')}
-                      placeholder={`${t('register.redesign.phone')} *`}
-                      className={`w-full h-11 pe-11 ps-4 rounded-xl border bg-white text-xs sm:text-sm text-[#0B1A2B] placeholder-[#9ca3af] focus:outline-none focus:border-[#0A2540] focus:ring-2 focus:ring-[#0A2540]/15 transition-all text-start ${
-                        touched.phone && !isPhoneValid
+                      placeholder="021 XX XX XX / 0550 XX XX XX"
+                      className={`w-full h-10 pe-10 ps-3.5 rounded-xl border bg-white text-xs font-mono text-[#0B1A2B] placeholder-[#9ca3af] focus:outline-none focus:border-[#0A2540] focus:ring-2 focus:ring-[#0A2540]/15 ${
+                        touched.phone && (!phone.trim() || !isPhoneValid)
                           ? 'border-red-500 bg-red-50/20'
                           : 'border-[#e2e8f0]'
                       }`}
                     />
-                    <Phone className="absolute end-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9ca3af] pointer-events-none" />
+                    <Phone className="absolute end-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9ca3af] pointer-events-none" />
                   </div>
-                  {touched.phone && !isPhoneValid ? (
-                    <p className="text-[11px] text-red-600 flex items-center gap-1 ps-1">
-                      <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                      <span>{t('register.redesign.phone_invalid')}</span>
-                    </p>
-                  ) : (
-                    <p className="text-[10px] text-slate-400 ps-1">
-                      {t('register.redesign.phone_hint')}
-                    </p>
+                  {touched.phone && (!phone.trim() || !isPhoneValid) && (
+                    <p className="text-[10px] text-red-600">رقم هاتف مهني صحيح إلزامي</p>
+                  )}
+                </div>
+
+                {/* Fax */}
+                <div className="space-y-1">
+                  <label className="block text-[11px] font-bold text-[#0A2540]">
+                    رقم الفاكس <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="tel"
+                      value={fax}
+                      onChange={(e) => setFax(e.target.value)}
+                      onBlur={() => markTouched('fax')}
+                      placeholder="021 XX XX XX"
+                      className={`w-full h-10 pe-10 ps-3.5 rounded-xl border bg-white text-xs font-mono text-[#0B1A2B] placeholder-[#9ca3af] focus:outline-none focus:border-[#0A2540] focus:ring-2 focus:ring-[#0A2540]/15 ${
+                        touched.fax && !fax.trim()
+                          ? 'border-red-500 bg-red-50/20'
+                          : 'border-[#e2e8f0]'
+                      }`}
+                    />
+                    <Printer className="absolute end-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9ca3af] pointer-events-none" />
+                  </div>
+                  {touched.fax && !fax.trim() && (
+                    <p className="text-[10px] text-red-600">رقم الفاكس إلزامي وفق الملحق 2</p>
                   )}
                 </div>
               </div>
             </div>
 
-            {/* ── CARD 2: Role Details (معلومات النشاط والولاية) ── */}
-            <div className="bg-white border border-slate-200/90 rounded-xl p-3.5 sm:p-4 shadow-xs space-y-3">
-              <div className="flex items-center gap-2 pb-1 border-b border-slate-100">
-                <Building2 className="w-4 h-4 text-[#0A2540]" />
+            {/* ── CARD 4: معلومات الشخص المفوض ── */}
+            <div className="bg-white border border-slate-200/90 rounded-xl p-4 shadow-xs space-y-3">
+              <div className="flex items-center gap-2 pb-1.5 border-b border-slate-100">
+                <User className="w-4 h-4 text-[#0A2540]" />
                 <h3 className="text-xs font-bold text-[#0A2540]">
-                  {t('register.redesign.groups.role_operator')}
+                  4. معلومات الشخص المفوض قانوناً
                 </h3>
               </div>
 
-              {/* Wilaya Searchable Dropdown */}
-              <div className="space-y-1" ref={wilayaRef}>
-                <div className="relative">
-                  <button
-                    type="button"
-                    onClick={() => setIsWilayaOpen(!isWilayaOpen)}
-                    onBlur={() => markTouched('wilaya')}
-                    className={`w-full h-11 pe-11 ps-10 rounded-xl border bg-white text-xs sm:text-sm text-start flex items-center justify-between transition-all focus:outline-none focus:border-[#0A2540] focus:ring-2 focus:ring-[#0A2540]/15 cursor-pointer ${
-                      touched.wilaya && !wilaya
-                        ? 'border-red-500 bg-red-50/20'
-                        : 'border-[#e2e8f0]'
-                    } ${!wilaya ? 'text-[#9ca3af]' : 'text-[#0B1A2B] font-medium'}`}
-                  >
-                    <span>
-                      {selectedWilayaObj
-                        ? `${selectedWilayaObj.code} — ${lang === 'fr' ? selectedWilayaObj.fr : selectedWilayaObj.ar}`
-                        : `${t('register.redesign.wilaya')} *`}
-                    </span>
-                  </button>
-                  <MapPin className="absolute end-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9ca3af] pointer-events-none" />
-                  <ChevronDown
-                    className={`absolute start-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9ca3af] transition-transform duration-200 pointer-events-none ${
-                      isWilayaOpen ? 'rotate-180 text-[#0A2540]' : ''
-                    }`}
-                  />
-                </div>
-
-                {/* Combobox Dropdown Menu */}
-                {isWilayaOpen && (
-                  <div className="relative z-30">
-                    <div className="absolute top-1 start-0 end-0 bg-white border border-slate-200 rounded-xl shadow-lg p-2 space-y-2 max-h-60 overflow-hidden flex flex-col">
-                      <div className="relative">
-                        <input
-                          type="text"
-                          value={wilayaSearch}
-                          onChange={(e) => setWilayaSearch(e.target.value)}
-                          placeholder="ابحث برقم الولاية أو اسمها..."
-                          className="w-full h-9 pe-9 ps-3 rounded-lg border border-slate-200 bg-slate-50 text-xs text-[#0B1A2B] placeholder-slate-400 focus:outline-none focus:bg-white focus:border-[#0A2540]"
-                          autoFocus
-                        />
-                        <Search className="absolute end-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
-                        {wilayaSearch && (
-                          <button
-                            type="button"
-                            onClick={() => setWilayaSearch('')}
-                            className="absolute start-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                          >
-                            <X className="w-3 h-3" />
-                          </button>
-                        )}
-                      </div>
-
-                      <div className="overflow-y-auto max-h-48 divide-y divide-slate-100 text-xs">
-                        {filteredWilayas.length === 0 ? (
-                          <div className="py-3 text-center text-slate-400 text-xs">
-                            لا توجد ولاية مطابقة للبحث
-                          </div>
-                        ) : (
-                          filteredWilayas.map((w) => (
-                            <button
-                              key={w.code}
-                              type="button"
-                              onClick={() => {
-                                setWilaya(w.code);
-                                setIsWilayaOpen(false);
-                                setWilayaSearch('');
-                              }}
-                              className={`w-full text-start py-2 px-3 rounded-md hover:bg-slate-100 flex items-center justify-between transition-colors cursor-pointer ${
-                                wilaya === w.code
-                                  ? 'bg-[#0A2540]/10 text-[#0A2540] font-bold'
-                                  : 'text-slate-700'
-                              }`}
-                            >
-                              <span>
-                                {w.code} — {lang === 'fr' ? w.fr : w.ar}
-                              </span>
-                              {wilaya === w.code && (
-                                <Check className="w-3.5 h-3.5 text-[#0A2540]" />
-                              )}
-                            </button>
-                          ))
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {touched.wilaya && !wilaya && (
-                  <p className="text-[11px] text-red-600 flex items-center gap-1 ps-1">
-                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                    <span>{t('register.redesign.wilaya_required')}</span>
-                  </p>
-                )}
-              </div>
-
-              {/* Commercial Register / Tax ID */}
+              {/* اسم ولقب المفوض */}
               <div className="space-y-1">
+                <label className="block text-[11px] font-bold text-[#0A2540]">
+                  الاسم واللقب للشخص المفوض <span className="text-red-500">*</span>
+                </label>
                 <div className="relative">
                   <input
                     type="text"
-                    value={rc}
-                    onChange={(e) => setRc(e.target.value)}
-                    onBlur={() => markTouched('rc')}
-                    placeholder={`${t('register.redesign.rc_nif')} *`}
-                    className={`w-full h-11 pe-11 ps-4 rounded-xl border bg-white text-xs sm:text-sm text-[#0B1A2B] placeholder-[#9ca3af] focus:outline-none focus:border-[#0A2540] focus:ring-2 focus:ring-[#0A2540]/15 transition-all text-start ${
-                      touched.rc && !rc.trim()
+                    value={delegateName}
+                    onChange={(e) => setDelegateName(e.target.value)}
+                    onBlur={() => markTouched('delegateName')}
+                    placeholder="الاسم واللقب الكامل للمسير أو الوكيل المفوض"
+                    className={`w-full h-10 pe-10 ps-3.5 rounded-xl border bg-white text-xs text-[#0B1A2B] placeholder-[#9ca3af] focus:outline-none focus:border-[#0A2540] focus:ring-2 focus:ring-[#0A2540]/15 ${
+                      touched.delegateName && (!delegateName.trim() || delegateName.trim().length < 2)
                         ? 'border-red-500 bg-red-50/20'
                         : 'border-[#e2e8f0]'
                     }`}
                   />
-                  <Building2 className="absolute end-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9ca3af] pointer-events-none" />
+                  <User className="absolute end-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9ca3af] pointer-events-none" />
                 </div>
-                {touched.rc && !rc.trim() && (
-                  <p className="text-[11px] text-red-600 flex items-center gap-1 ps-1">
-                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                    <span>{t('register.redesign.rc_required')}</span>
-                  </p>
+                {touched.delegateName && (!delegateName.trim() || delegateName.trim().length < 2) && (
+                  <p className="text-[10px] text-red-600">اسم ولقب الشخص المفوض إلزامي</p>
                 )}
+              </div>
+
+              {/* هاتف وبريد المفوض */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {/* Delegate Phone */}
+                <div className="space-y-1">
+                  <label className="block text-[11px] font-bold text-[#0A2540]">
+                    هاتف الشخص المفوض <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="tel"
+                      value={delegatePhone}
+                      onChange={(e) => setDelegatePhone(e.target.value)}
+                      onBlur={() => markTouched('delegatePhone')}
+                      placeholder="06XX XX XX XX"
+                      className={`w-full h-10 pe-10 ps-3.5 rounded-xl border bg-white text-xs font-mono text-[#0B1A2B] placeholder-[#9ca3af] focus:outline-none focus:border-[#0A2540] focus:ring-2 focus:ring-[#0A2540]/15 ${
+                        touched.delegatePhone && (!delegatePhone.trim() || !isDelegatePhoneValid)
+                          ? 'border-red-500 bg-red-50/20'
+                          : 'border-[#e2e8f0]'
+                      }`}
+                    />
+                    <Phone className="absolute end-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9ca3af] pointer-events-none" />
+                  </div>
+                  {touched.delegatePhone && (!delegatePhone.trim() || !isDelegatePhoneValid) && (
+                    <p className="text-[10px] text-red-600">رقم هاتف الشخص المفوض إلزامي</p>
+                  )}
+                </div>
+
+                {/* Delegate Email */}
+                <div className="space-y-1">
+                  <label className="block text-[11px] font-bold text-[#0A2540]">
+                    البريد الإلكتروني للمفوض <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="email"
+                      value={delegateEmail}
+                      onChange={(e) => setDelegateEmail(e.target.value)}
+                      onBlur={() => markTouched('delegateEmail')}
+                      placeholder="delegate@enterprise.dz"
+                      className={`w-full h-10 pe-10 ps-3.5 rounded-xl border bg-white text-xs text-[#0B1A2B] placeholder-[#9ca3af] focus:outline-none focus:border-[#0A2540] focus:ring-2 focus:ring-[#0A2540]/15 ${
+                        touched.delegateEmail && (!delegateEmail.trim() || !isDelegateEmailValid)
+                          ? 'border-red-500 bg-red-50/20'
+                          : 'border-[#e2e8f0]'
+                      }`}
+                    />
+                    <Mail className="absolute end-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9ca3af] pointer-events-none" />
+                  </div>
+                  {touched.delegateEmail && (!delegateEmail.trim() || !isDelegateEmailValid) && (
+                    <p className="text-[10px] text-red-600">بريد إلكتروني صحيح للمفوض إلزامي</p>
+                  )}
+                </div>
               </div>
             </div>
 
-            {/* ── CARD 3: Security & Credentials (الأمان وبيانات الدخول) ── */}
-            <div className="bg-white border border-slate-200/90 rounded-xl p-3.5 sm:p-4 shadow-xs space-y-3">
-              <div className="flex items-center gap-2 pb-1 border-b border-slate-100">
+            {/* ── CARD 5: الأمان وبيانات الدخول ── */}
+            <div className="bg-white border border-slate-200/90 rounded-xl p-4 shadow-xs space-y-3">
+              <div className="flex items-center gap-2 pb-1.5 border-b border-slate-100">
                 <Lock className="w-4 h-4 text-[#0A2540]" />
                 <h3 className="text-xs font-bold text-[#0A2540]">
-                  {t('register.redesign.groups.security')}
+                  5. الأمان وكلمة المرور
                 </h3>
               </div>
 
-              {/* Grid: Password & Confirm Password */}
+              {/* Password & Confirm */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {/* Password with Strength Meter */}
+                {/* Password */}
                 <div className="space-y-1">
+                  <label className="block text-[11px] font-bold text-[#0A2540]">
+                    كلمة المرور <span className="text-red-500">*</span>
+                  </label>
                   <div className="relative">
                     <input
                       type={showPassword ? 'text' : 'password'}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       onBlur={() => markTouched('password')}
-                      placeholder={`${t('register.redesign.password')} *`}
-                      className={`w-full h-11 pe-11 ps-10 rounded-xl border bg-white text-xs sm:text-sm text-[#0B1A2B] placeholder-[#9ca3af] focus:outline-none focus:border-[#0A2540] focus:ring-2 focus:ring-[#0A2540]/15 transition-all text-start ${
+                      placeholder="8 محارف على الأقل"
+                      className={`w-full h-10 pe-10 ps-9 rounded-xl border bg-white text-xs text-[#0B1A2B] placeholder-[#9ca3af] focus:outline-none focus:border-[#0A2540] focus:ring-2 focus:ring-[#0A2540]/15 ${
                         touched.password && (!password || password.length < 8)
                           ? 'border-red-500 bg-red-50/20'
                           : 'border-[#e2e8f0]'
                       }`}
                     />
-                    <Lock className="absolute end-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9ca3af] pointer-events-none" />
+                    <Lock className="absolute end-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9ca3af] pointer-events-none" />
                     <button
                       type="button"
-                      tabIndex={-1}
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute start-3.5 top-1/2 -translate-y-1/2 text-[#9ca3af] hover:text-[#0A2540] focus:outline-none"
-                      aria-label={showPassword ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'}
+                      className="absolute start-2.5 top-1/2 -translate-y-1/2 text-[#9ca3af] hover:text-[#0A2540]"
                     >
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                   </div>
-                  {/* Password Strength Meter */}
-                  <PasswordStrengthMeter password={password} />
                   {touched.password && (!password || password.length < 8) && (
-                    <p className="text-[11px] text-red-600 flex items-center gap-1 ps-1">
-                      <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                      <span>{t('register.redesign.password_min')}</span>
-                    </p>
+                    <p className="text-[10px] text-red-600">كلمة المرور يجب ألا تقل عن 8 محارف</p>
                   )}
+                  {password && <PasswordStrengthMeter password={password} />}
                 </div>
 
-                {/* Confirm Password with Live Match Indicator */}
+                {/* Confirm Password */}
                 <div className="space-y-1">
+                  <label className="block text-[11px] font-bold text-[#0A2540]">
+                    تأكيد كلمة المرور <span className="text-red-500">*</span>
+                  </label>
                   <div className="relative">
                     <input
                       type={showConfirmPassword ? 'text' : 'password'}
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       onBlur={() => markTouched('confirmPassword')}
-                      placeholder={`${t('register.redesign.password_confirm')} *`}
-                      className={`w-full h-11 pe-11 ps-10 rounded-xl border bg-white text-xs sm:text-sm text-[#0B1A2B] placeholder-[#9ca3af] focus:outline-none focus:border-[#0A2540] focus:ring-2 focus:ring-[#0A2540]/15 transition-all text-start ${
-                        passwordsMatch === false && confirmPassword.length > 0
+                      placeholder="أعد إدخال كلمة المرور"
+                      className={`w-full h-10 pe-10 ps-9 rounded-xl border bg-white text-xs text-[#0B1A2B] placeholder-[#9ca3af] focus:outline-none focus:border-[#0A2540] focus:ring-2 focus:ring-[#0A2540]/15 ${
+                        touched.confirmPassword && passwordsMatch === false
                           ? 'border-red-500 bg-red-50/20'
-                          : passwordsMatch === true && confirmPassword.length >= 8
-                          ? 'border-emerald-500'
                           : 'border-[#e2e8f0]'
                       }`}
                     />
-                    <Lock className="absolute end-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9ca3af] pointer-events-none" />
+                    <Lock className="absolute end-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9ca3af] pointer-events-none" />
                     <button
                       type="button"
-                      tabIndex={-1}
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="absolute start-3.5 top-1/2 -translate-y-1/2 text-[#9ca3af] hover:text-[#0A2540] focus:outline-none"
-                      aria-label={showConfirmPassword ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'}
+                      className="absolute start-2.5 top-1/2 -translate-y-1/2 text-[#9ca3af] hover:text-[#0A2540]"
                     >
                       {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                   </div>
-
-                  {/* Real-time Match Feedback */}
-                  {confirmPassword.length > 0 && (
-                    <div className="ps-1 pt-0.5">
-                      {passwordsMatch ? (
-                        <p className="text-[11px] text-emerald-600 font-semibold flex items-center gap-1">
-                          <Check className="w-3.5 h-3.5 shrink-0" />
-                          <span>{t('register.redesign.password_match')}</span>
-                        </p>
-                      ) : (
-                        <p className="text-[11px] text-red-600 font-semibold flex items-center gap-1">
-                          <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                          <span>{t('register.redesign.password_mismatch')}</span>
-                        </p>
-                      )}
-                    </div>
+                  {touched.confirmPassword && passwordsMatch === false && (
+                    <p className="text-[10px] text-red-600">كلمات المرور غير متطابقة</p>
                   )}
                 </div>
               </div>
-
-              {/* Checkbox: Terms & Privacy with Shake on Error */}
-              <div
-                className={`pt-1 transition-all rounded-lg p-1.5 ${
-                  shakeTerms ? 'animate-shake bg-red-50/60 border border-red-300' : ''
-                }`}
-              >
-                <label className="flex items-start gap-2.5 cursor-pointer text-xs text-[#4b5563] leading-relaxed">
-                  <input
-                    type="checkbox"
-                    checked={termsAccepted}
-                    onChange={(e) => {
-                      setTermsAccepted(e.target.checked);
-                      if (e.target.checked) setShakeTerms(false);
-                    }}
-                    className="mt-0.5 w-[18px] h-[18px] rounded border-[#0A2540] text-[#0A2540] accent-[#0A2540] cursor-pointer"
-                  />
-                  <span>
-                    {t('register.redesign.terms_prefix')}{' '}
-                    <a
-                      href="#terms"
-                      onClick={(e) => e.preventDefault()}
-                      className="text-[#0A2540] font-bold hover:underline"
-                    >
-                      {t('register.redesign.terms_link')}
-                    </a>{' '}
-                    {t('register.redesign.terms_and')}{' '}
-                    <a
-                      href="#privacy"
-                      onClick={(e) => e.preventDefault()}
-                      className="text-[#0A2540] font-bold hover:underline"
-                    >
-                      {t('register.redesign.privacy_link')}
-                    </a>{' '}
-                    {t('register.redesign.terms_suffix')}
-                  </span>
-                </label>
-                {touched.terms && !termsAccepted && (
-                  <p className="text-[11px] text-red-600 mt-1 flex items-center gap-1 ps-1">
-                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                    <span>{t('register.redesign.terms_required')}</span>
-                  </p>
-                )}
-              </div>
             </div>
 
-            {/* ── Submit Button (3 States: idle, loading, success) ── */}
-            <div className="pt-2">
-              <button
-                type="submit"
-                disabled={isSubmitting || isSuccess}
-                className={`w-full h-[52px] rounded-xl text-white font-bold text-sm flex items-center justify-center gap-2 shadow-md transition-all duration-200 cursor-pointer disabled:opacity-90 ${
-                  isSuccess
-                    ? 'bg-emerald-600 hover:bg-emerald-700'
-                    : 'bg-[#0A2540] hover:bg-[#071d33] active:scale-[0.99]'
-                }`}
-              >
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                    <span>{t('register.redesign.submitting')}</span>
-                  </>
-                ) : isSuccess ? (
-                  <>
-                    <Check className="w-5 h-5 text-white animate-bounce" />
-                    <span>{t('register.redesign.success')}</span>
-                  </>
-                ) : (
-                  <>
-                    <UserPlus className="w-5 h-5" />
-                    <span>{t('register.redesign.submit')}</span>
-                  </>
-                )}
-              </button>
-            </div>
-
-            {/* Divider "أو" */}
-            <div className="relative flex items-center justify-center py-0.5">
-              <div className="w-full border-t border-[#e2e8f0]" />
-              <span className="absolute px-3 bg-[#f8fafc] text-xs text-[#94a3b8] font-medium">
-                {t('register.redesign.or')}
-              </span>
-            </div>
-
-            {/* Google Registration Button */}
-            <button
-              type="button"
-              onClick={() => {}}
-              className="w-full h-11 rounded-xl border border-[#cbd5e1] bg-white hover:bg-slate-50 text-[#334155] font-semibold text-xs sm:text-sm flex items-center justify-center gap-2.5 transition-colors shadow-xs cursor-pointer"
+            {/* Terms and declaration checkbox */}
+            <div
+              className={`p-3 rounded-xl border transition-all ${
+                shakeTerms ? 'animate-shake border-red-500 bg-red-50/20' : 'border-slate-200 bg-white'
+              }`}
             >
-              <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
-                <path
-                  fill="#4285F4"
-                  d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+              <label className="flex items-start gap-2.5 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={termsAccepted}
+                  onChange={(e) => setTermsAccepted(e.target.checked)}
+                  className="mt-0.5 w-4 h-4 rounded border-slate-300 text-[#0A2540] focus:ring-[#0A2540]"
                 />
-                <path
-                  fill="#34A853"
-                  d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                />
-                <path
-                  fill="#FBBC05"
-                  d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
-                />
-                <path
-                  fill="#EA4335"
-                  d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
-                />
-              </svg>
-              <span>{t('register.redesign.google')}</span>
+                <span className="text-xs text-slate-700 leading-relaxed">
+                  أصرح بشرفي بصحة ودقة جميع المعلومات والبيانات المصرح بها أعلاه وفق أحكام القانون رقم 23-12 المتعلق بالصفقات العمومية والملحق 2 لقرار وزارة المالية المؤرخ في 4 فبراير 2026، وأوافق على{' '}
+                  <span className="text-[#1e3a8a] font-bold underline">شروط الاستخدام وميثاق النزاهة الرقمية</span>. <span className="text-red-500">*</span>
+                </span>
+              </label>
+            </div>
+
+            {/* Submit Button */}
+            <button
+              type="submit"
+              disabled={isSubmitting || isSuccess}
+              className="w-full h-11 rounded-xl bg-[#0A2540] hover:bg-[#1e3a8a] text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-sm transition-all duration-150 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>جاري تسجيل وتوثيق الحساب...</span>
+                </>
+              ) : isSuccess ? (
+                <>
+                  <Check className="w-4 h-4 text-emerald-400" />
+                  <span>تم التسجيل بنجاح! جاري التوجيه...</span>
+                </>
+              ) : (
+                <span>تأكيد التسجيل وإنشاء حساب المتعامل الاقتصادي</span>
+              )}
             </button>
 
-            {/* Bottom Link: Already have an account? */}
-            <div className="text-center pt-1 text-xs text-[#64748b]">
-              <span>{t('register.redesign.has_account')}</span>{' '}
-              <Link href="/login" className="text-[#0A2540] font-bold hover:underline">
-                {t('register.redesign.login')}
+            {/* Footer: Already have an account? */}
+            <div className="pt-2 text-center text-xs text-slate-500">
+              لديك حساب بالفعل في المنصة؟{' '}
+              <Link href="/login" className="font-bold text-[#0A2540] hover:underline">
+                تسجيل الدخول
               </Link>
             </div>
           </form>
@@ -792,5 +1073,3 @@ export function OperatorRegister() {
     </div>
   );
 }
-
-export default OperatorRegister;

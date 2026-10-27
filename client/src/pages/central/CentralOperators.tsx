@@ -147,10 +147,10 @@ export function CentralOperators() {
   }, [operators, searchQuery, filterConcentration]);
 
   return (
-    <div className="space-y-6" dir="rtl">
+    <div className="space-y-4" dir="rtl">
       <PageHeader
         title="رقابة المتعاملين الاقتصاديين"
-        titleClassName="text-2xl font-bold"
+        titleClassName="text-xl font-bold"
         description="متابعة مشاركات الشركات ونسب فوزها المتكررة وحصتها من الإسنادات، لكشف حالات تركّز السوق واحتكار الصفقات العمومية."
         actions={
           <Button
@@ -158,7 +158,7 @@ export function CentralOperators() {
             size="sm"
             onClick={reload}
             disabled={loading}
-            className="text-base"
+            className="text-xs h-8"
           >
             <RefreshCw className="size-3.5" aria-hidden="true" />
             تحديث البيانات
@@ -166,7 +166,7 @@ export function CentralOperators() {
         }
       />
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
         <KpiCard
           eyebrow="متعاملون مشاركون"
           value={formatNumber(operators.length)}
@@ -210,21 +210,21 @@ export function CentralOperators() {
         }
       >
         {concentrated.length === 0 ? (
-          <p className="flex items-center gap-2 text-base text-[var(--color-text-secondary)]">
+          <p className="flex items-center gap-2 text-xs text-[var(--color-text-secondary)]">
             <ShieldAlert className="size-4" aria-hidden="true" />
             توزيع الإسنادات الحالي لا يُظهر تركّزاً غير معتاد بين المتعاملين.
           </p>
         ) : (
-          <ul className="space-y-2.5">
+          <ul className="space-y-2">
             {concentrated.slice(0, 4).map((item) => (
               <li
                 key={item.id}
-                className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50/70 p-3"
+                className="flex items-start gap-2.5 rounded-xl border border-amber-200 bg-amber-50/70 p-2.5"
               >
-                <span className="shrink-0 text-xl">⚠️</span>
+                <span className="shrink-0 text-base">⚠️</span>
                 <div>
-                  <div className="text-base font-bold text-amber-950">{item.name}</div>
-                  <p className="mt-1 text-base leading-relaxed text-amber-900">
+                  <div className="text-xs font-bold text-amber-950">{item.name}</div>
+                  <p className="mt-0.5 text-xs leading-relaxed text-amber-900">
                     {formatNumber(item.winsCount)} إسناد من أصل {formatNumber(totalWins)} (
                     {formatPercent(item.awardShare)}) مقابل تقديم{' '}
                     {formatNumber(item.offersCount)} عرضاً. التوصية: مراجعة شروط التأهيل وتنافسية
@@ -238,20 +238,20 @@ export function CentralOperators() {
       </AICard>
 
       <Card className="bg-white shadow-sm border-gray-200">
-        <CardHeader className="flex flex-col gap-4 border-b border-gray-200 pb-4 sm:flex-row sm:items-center sm:justify-between">
+        <CardHeader className="flex flex-col gap-3 border-b border-gray-200 pb-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <CardTitle className="text-xl font-bold text-[var(--ink-900)]">
+            <CardTitle className="text-base font-bold text-[var(--ink-900)]">
               نسب الفوز وتكرار الإسناد
             </CardTitle>
-            <CardDescription className="mt-1 text-base text-gray-500">
+            <CardDescription className="mt-0.5 text-xs text-gray-500">
               مؤشر التركّز يُحتسب من حصة كل متعامل من مجموع الإسنادات
             </CardDescription>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2.5">
+          <div className="flex flex-wrap items-center gap-2">
             <div className="relative">
               <Search
-                className="size-4 absolute start-2.5 top-1/2 -translate-y-1/2 text-muted-foreground"
+                className="size-3.5 absolute start-2.5 top-1/2 -translate-y-1/2 text-muted-foreground"
                 aria-hidden="true"
               />
               <input
@@ -260,7 +260,7 @@ export function CentralOperators() {
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
                 aria-label="بحث في المتعاملين الاقتصاديين"
-                className="ps-9 pe-3 py-1.5 text-base rounded-lg border border-gray-200 bg-white text-[var(--ink-900)] focus:outline-none focus:ring-1 focus:ring-[var(--stamp-green-700)]"
+                className="ps-8 pe-3 py-1 text-xs h-8 rounded-lg border border-gray-200 bg-white text-[var(--ink-900)] focus:outline-none focus:ring-1 focus:ring-[var(--stamp-green-700)]"
               />
             </div>
 
@@ -268,7 +268,7 @@ export function CentralOperators() {
               value={filterConcentration}
               onChange={(event) => setFilterConcentration(event.target.value)}
               aria-label="تصفية حسب تركّز الإسناد"
-              className="px-2.5 py-1.5 text-base rounded-lg border border-gray-200 bg-white text-[var(--ink-900)] focus:outline-none focus:ring-1 focus:ring-[var(--stamp-green-700)]"
+              className="px-2.5 py-1 text-xs h-8 rounded-lg border border-gray-200 bg-white text-[var(--ink-900)] focus:outline-none focus:ring-1 focus:ring-[var(--stamp-green-700)]"
             >
               <option value="all">كل المتعاملين</option>
               <option value="concentrated">تركّز مرتفع فقط</option>
@@ -302,16 +302,16 @@ export function CentralOperators() {
               >
                 {filtered.map((item) => (
                   <TableRow key={item.id} className="transition-colors hover:bg-slate-50/70">
-                    <TableCell className="text-base font-semibold text-[var(--ink-900)]">
+                    <TableCell className="text-xs font-semibold text-[var(--ink-900)] py-2.5">
                       <div className="truncate">{item.name}</div>
-                      <div className="text-base font-normal text-[var(--ink-500)]">
+                      <div className="text-xs font-normal text-[var(--ink-500)]">
                         مشارك في {formatNumber(item.dealsCount)} صفقة
                       </div>
                     </TableCell>
-                    <TableCell className="text-center font-mono text-base font-bold text-[var(--ink-900)]">
+                    <TableCell className="text-center font-mono text-xs font-bold text-[var(--ink-900)] py-2.5">
                       {formatNumber(item.offersCount)}
                     </TableCell>
-                    <TableCell className="text-center font-mono text-base font-bold">
+                    <TableCell className="text-center font-mono text-xs font-bold py-2.5">
                       <span
                         className={
                           item.winsCount > 0
@@ -322,22 +322,22 @@ export function CentralOperators() {
                         {formatNumber(item.winsCount)}
                       </span>
                     </TableCell>
-                    <TableCell className="text-center font-mono text-base text-[var(--ink-700)]">
+                    <TableCell className="text-center font-mono text-xs text-[var(--ink-700)] py-2.5">
                       {formatNumber(item.rejectedCount)}
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="py-2.5">
                       <Meter value={item.winRate} tone="emerald" />
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="py-2.5">
                       <Meter
                         value={item.awardShare}
                         tone={item.concentrated ? 'red' : 'navy'}
                       />
                     </TableCell>
-                    <TableCell className="text-end font-mono text-base font-semibold tabular-nums text-[var(--ink-900)]">
+                    <TableCell className="text-end font-mono text-xs font-semibold tabular-nums text-[var(--ink-900)] py-2.5">
                       {formatDZD(item.totalAmount)}
                     </TableCell>
-                    <TableCell className="text-center">
+                    <TableCell className="text-center py-2.5">
                       {item.concentrated ? (
                         <Badge className="bg-amber-50 text-amber-900 border-amber-300">
                           تركّز مرتفع
@@ -354,7 +354,7 @@ export function CentralOperators() {
             </TableBody>
           </Table>
 
-          <div className="flex flex-wrap items-center justify-between gap-2 border-t border-gray-200 px-6 py-4 text-base text-[var(--ink-500)]">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-t border-gray-200 px-4 py-2.5 text-xs text-[var(--ink-500)]">
             <span>
               عرض {formatNumber(filtered.length)} من أصل {formatNumber(operators.length)} متعاملاً
               اقتصادياً

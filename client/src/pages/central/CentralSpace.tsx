@@ -108,7 +108,7 @@ export function CentralSpace() {
       hideSidebar={false}
       hideTopBar={false}
       workspaceClassName="bg-white"
-      contentClassName={isMapRoute ? 'p-0 h-full overflow-hidden' : 'p-6 md:p-8'}
+      contentClassName={isMapRoute ? 'p-0 h-full overflow-hidden' : 'p-4 md:p-6'}
       sidebar={
         <PortalSidebar
           title="صفقات ذكية"

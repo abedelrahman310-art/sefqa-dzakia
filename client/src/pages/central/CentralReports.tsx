@@ -150,10 +150,10 @@ export function CentralReports() {
   };
 
   return (
-    <div className="space-y-6" dir="rtl">
+    <div className="space-y-4" dir="rtl">
       <PageHeader
         title="التقارير الوطنية الموحدة"
-        titleClassName="text-2xl font-bold"
+        titleClassName="text-xl font-bold"
         description="كتالوج التقارير الوطنية المولّدة من الخادم مع مؤشرات الحصيلة الوطنية للصفقات والشفافية."
         actions={
           <div className="flex items-center gap-2 print:hidden">
@@ -162,30 +162,30 @@ export function CentralReports() {
               size="sm"
               onClick={reload}
               disabled={loading}
-              className="text-base"
+              className="text-xs h-8"
             >
-              <RefreshCw className="size-4" aria-hidden="true" />
+              <RefreshCw className="size-3.5" aria-hidden="true" />
               تحديث
             </Button>
             <Button
               size="sm"
               onClick={handleExportPdf}
               disabled={exporting || filtered.length === 0}
-              className="gap-2 bg-[#0f3154] text-base font-bold text-white hover:bg-[#0b2743]"
+              className="gap-1.5 bg-[#0f3154] text-xs font-bold text-white hover:bg-[#0b2743] h-8"
             >
-              <Download className="size-4" aria-hidden="true" />
+              <Download className="size-3.5" aria-hidden="true" />
               {exporting ? 'جاري التحميل…' : 'تحميل تقرير PDF'}
             </Button>
           </div>
         }
       />
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
         <KpiCard
           eyebrow="إجمالي الصفقات"
           value={formatNumber(summary?.total_deals ?? 0)}
-          valueClassName="font-sans text-2xl"
-          descriptionClassName="text-sm text-gray-500"
+          valueClassName="font-sans text-xl font-bold"
+          descriptionClassName="text-xs text-gray-500"
           icon={FileText}
           accent="navy"
           description={`${formatNumber(summary?.total_authorities ?? 0)} مصلحة متعاقدة مشمولة`}
@@ -195,14 +195,14 @@ export function CentralReports() {
           value=""
           valueClassName="font-sans"
           valueContent={
-            <span className="flex flex-wrap items-baseline gap-2">
-              <span className="text-2xl leading-none">
+            <span className="flex flex-wrap items-baseline gap-1.5">
+              <span className="text-xl font-bold leading-none">
                 {formatNumber(Math.round(summary?.total_volume_dzd ?? 0))}
               </span>
-              <span className="text-base font-semibold text-gray-500">دج</span>
+              <span className="text-xs font-semibold text-gray-500">دج</span>
             </span>
           }
-          descriptionClassName="text-sm text-gray-500"
+          descriptionClassName="text-xs text-gray-500"
           icon={Wallet}
           accent="emerald"
           description="مجموع الميزانيات التقديرية المسجّلة"
@@ -210,8 +210,8 @@ export function CentralReports() {
         <KpiCard
           eyebrow="متوسط الالتزام بالآجال"
           value={formatPercent(summary?.average_compliance_rate ?? 0)}
-          valueClassName="font-sans text-2xl"
-          descriptionClassName="text-sm text-gray-500"
+          valueClassName="font-sans text-xl font-bold"
+          descriptionClassName="text-xs text-gray-500"
           icon={TrendingUp}
           accent="gold"
           description="متوسط وطني على كل المصالح"
@@ -219,8 +219,8 @@ export function CentralReports() {
         <KpiCard
           eyebrow="متوسط مؤشر الشفافية"
           value={formatPercent(summary?.average_transparency_rate ?? 0)}
-          valueClassName="font-sans text-2xl"
-          descriptionClassName="text-sm text-gray-500"
+          valueClassName="font-sans text-xl font-bold"
+          descriptionClassName="text-xs text-gray-500"
           icon={ShieldCheck}
           accent="red"
           description="دفاتر شروط مؤشّرة وجلسات فتح علنية"
@@ -228,20 +228,20 @@ export function CentralReports() {
       </div>
 
       <Card className="bg-white shadow-sm border-gray-200">
-        <CardHeader className="flex flex-col gap-4 border-b border-gray-200 pb-4 sm:flex-row sm:items-center sm:justify-between">
+        <CardHeader className="flex flex-col gap-3 border-b border-gray-200 pb-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <CardTitle className="text-xl font-bold text-[var(--ink-900)]">
+            <CardTitle className="text-base font-bold text-[var(--ink-900)]">
               كتالوج التقارير الوطنية
             </CardTitle>
-            <CardDescription className="mt-1 text-sm text-gray-500">
+            <CardDescription className="mt-0.5 text-xs text-gray-500">
               تقارير دورية مولّدة آلياً من بيانات الصفقات والرقابة
             </CardDescription>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2.5 print:hidden">
+          <div className="flex flex-wrap items-center gap-2 print:hidden">
             <div className="relative">
               <Search
-                className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-gray-400"
+                className="pointer-events-none absolute start-2.5 top-1/2 size-3.5 -translate-y-1/2 text-gray-400"
                 aria-hidden="true"
               />
               <input
@@ -250,7 +250,7 @@ export function CentralReports() {
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
                 aria-label="بحث في التقارير الوطنية"
-                className="h-10 w-full ps-9 pe-3 text-sm leading-none rounded-lg border border-gray-200 bg-white text-[var(--ink-900)] placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-[#0f3154] sm:w-64"
+                className="h-8 w-full ps-8 pe-3 text-xs leading-none rounded-lg border border-gray-200 bg-white text-[var(--ink-900)] placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-[#0f3154] sm:w-64"
               />
             </div>
 
@@ -258,7 +258,7 @@ export function CentralReports() {
               value={filterType}
               onChange={(event) => setFilterType(event.target.value)}
               aria-label="تصفية حسب نوع التقرير"
-              className="h-10 px-3 text-sm leading-none rounded-lg border border-gray-200 bg-white text-[var(--ink-900)] focus:outline-none focus:ring-1 focus:ring-[#0f3154]"
+              className="h-8 px-2.5 text-xs leading-none rounded-lg border border-gray-200 bg-white text-[var(--ink-900)] focus:outline-none focus:ring-1 focus:ring-[#0f3154]"
             >
               <option value="all">كل الأنواع</option>
               {reportTypes.map((type) => (
@@ -274,20 +274,20 @@ export function CentralReports() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="min-w-[150px] whitespace-nowrap text-sm">
+                <TableHead className="min-w-[150px] whitespace-nowrap text-xs">
                   معرّف التقرير
                 </TableHead>
-                <TableHead className="min-w-[260px] text-sm">عنوان التقرير</TableHead>
-                <TableHead className="whitespace-nowrap text-sm">النوع</TableHead>
-                <TableHead className="whitespace-nowrap text-sm">الفترة</TableHead>
-                <TableHead className="min-w-[160px] text-sm">النطاق</TableHead>
-                <TableHead className="whitespace-nowrap text-center text-sm">تاريخ التوليد</TableHead>
-                <TableHead className="whitespace-nowrap text-center text-sm">الصفقات</TableHead>
-                <TableHead className="whitespace-nowrap text-end text-sm">الحجم المالي</TableHead>
-                <TableHead className="whitespace-nowrap text-center text-sm">الالتزام</TableHead>
-                <TableHead className="whitespace-nowrap text-center text-sm">الشفافية</TableHead>
-                <TableHead className="whitespace-nowrap text-sm">الحالة</TableHead>
-                <TableHead className="whitespace-nowrap text-center text-sm print:hidden">
+                <TableHead className="min-w-[260px] text-xs">عنوان التقرير</TableHead>
+                <TableHead className="whitespace-nowrap text-xs">النوع</TableHead>
+                <TableHead className="whitespace-nowrap text-xs">الفترة</TableHead>
+                <TableHead className="min-w-[160px] text-xs">النطاق</TableHead>
+                <TableHead className="whitespace-nowrap text-center text-xs">تاريخ التوليد</TableHead>
+                <TableHead className="whitespace-nowrap text-center text-xs">الصفقات</TableHead>
+                <TableHead className="whitespace-nowrap text-end text-xs">الحجم المالي</TableHead>
+                <TableHead className="whitespace-nowrap text-center text-xs">الالتزام</TableHead>
+                <TableHead className="whitespace-nowrap text-center text-xs">الشفافية</TableHead>
+                <TableHead className="whitespace-nowrap text-xs">الحالة</TableHead>
+                <TableHead className="whitespace-nowrap text-center text-xs print:hidden">
                   التحميل
                 </TableHead>
               </TableRow>
@@ -308,49 +308,49 @@ export function CentralReports() {
                       key={report.id}
                       className="transition-colors hover:bg-slate-50/70"
                     >
-                      <TableCell className="whitespace-nowrap text-sm font-bold text-[var(--ink-900)]">
+                      <TableCell className="whitespace-nowrap text-xs font-bold text-[var(--ink-900)] py-2.5">
                         {report.id}
                       </TableCell>
-                      <TableCell className="min-w-[260px] text-sm font-semibold text-[var(--ink-900)]">
+                      <TableCell className="min-w-[260px] text-xs font-semibold text-[var(--ink-900)] py-2.5">
                         <span className="line-clamp-2">{report.title}</span>
                       </TableCell>
-                      <TableCell className="whitespace-nowrap text-sm text-[var(--ink-700)]">
+                      <TableCell className="whitespace-nowrap text-xs text-[var(--ink-700)] py-2.5">
                         {typeLabel(report.type)}
                       </TableCell>
-                      <TableCell className="whitespace-nowrap text-sm text-[var(--ink-700)]">
+                      <TableCell className="whitespace-nowrap text-xs text-[var(--ink-700)] py-2.5">
                         {report.period || '—'}
                       </TableCell>
-                      <TableCell className="min-w-[160px] text-sm leading-relaxed text-[var(--ink-700)]">
+                      <TableCell className="min-w-[160px] text-xs leading-relaxed text-[var(--ink-700)] py-2.5">
                         {report.wilaya_scope || '—'}
                       </TableCell>
-                      <TableCell className="whitespace-nowrap text-center text-sm tabular-nums text-[var(--ink-700)]">
+                      <TableCell className="whitespace-nowrap text-center text-xs tabular-nums text-[var(--ink-700)] py-2.5">
                         {formatDate(report.generated_date)}
                       </TableCell>
-                      <TableCell className="whitespace-nowrap text-center text-sm font-bold tabular-nums text-[var(--ink-900)]">
+                      <TableCell className="whitespace-nowrap text-center text-xs font-bold tabular-nums text-[var(--ink-900)] py-2.5">
                         {formatNumber(report.total_deals)}
                       </TableCell>
-                      <TableCell className="whitespace-nowrap text-end text-sm font-semibold tabular-nums text-[var(--ink-900)]">
+                      <TableCell className="whitespace-nowrap text-end text-xs font-semibold tabular-nums text-[var(--ink-900)] py-2.5">
                         {formatDZD(report.total_volume_dzd)}
                       </TableCell>
-                      <TableCell className="whitespace-nowrap text-center text-sm tabular-nums text-[var(--ink-700)]">
+                      <TableCell className="whitespace-nowrap text-center text-xs tabular-nums text-[var(--ink-700)] py-2.5">
                         {formatPercent(report.average_compliance_rate)}
                       </TableCell>
-                      <TableCell className="whitespace-nowrap text-center text-sm tabular-nums text-[var(--ink-700)]">
+                      <TableCell className="whitespace-nowrap text-center text-xs tabular-nums text-[var(--ink-700)] py-2.5">
                         {formatPercent(report.average_transparency_rate)}
                       </TableCell>
-                      <TableCell className="whitespace-nowrap">
+                      <TableCell className="whitespace-nowrap py-2.5">
                         <Badge className={meta.className}>{meta.label}</Badge>
                       </TableCell>
-                      <TableCell className="text-center print:hidden">
+                      <TableCell className="text-center print:hidden py-2.5">
                         <Button
                           size="sm"
                           variant="ghost"
                           onClick={() => void downloadReportPdf(report.id)}
                           disabled={exporting}
-                          className="h-8 gap-1 text-sm font-semibold text-[#0f3154] hover:bg-slate-100"
+                          className="h-7 gap-1 text-xs font-semibold text-[#0f3154] hover:bg-slate-100"
                           title="تحميل التقرير بصيغة PDF"
                         >
-                          <Download className="size-3.5" />
+                          <Download className="size-3" />
                           <span>PDF</span>
                         </Button>
                       </TableCell>
@@ -361,7 +361,7 @@ export function CentralReports() {
             </TableBody>
           </Table>
 
-          <div className="flex flex-wrap items-center justify-between gap-2 border-t border-gray-200 px-6 py-4 text-sm text-gray-500">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-t border-gray-200 px-4 py-2.5 text-xs text-gray-500">
             <span>
               عرض {formatNumber(filtered.length)} من أصل {formatNumber(reports.length)} تقريراً
             </span>

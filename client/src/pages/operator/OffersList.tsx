@@ -42,7 +42,10 @@ interface OfferItem {
 
 const STATUS_META: Record<string, { label: string; className: string }> = {
   draft: { label: 'مسودة', className: 'bg-amber-50 text-amber-900 border-amber-200' },
-  submitted: { label: 'تم الإيداع', className: 'bg-blue-50 text-blue-800 border-blue-200' },
+  submitted: {
+    label: 'مشفر ومختوم - بانتظار جلسة الفتح',
+    className: 'bg-blue-50 text-[#1e3a8a] border-blue-300 font-bold',
+  },
   admitted: {
     label: 'مقبول إدارياً وتقنياً',
     className: 'bg-emerald-50 text-emerald-800 border-emerald-200',

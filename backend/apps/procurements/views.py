@@ -27,6 +27,7 @@ from .serializers import (
     ContractSerializer,
     MilestoneSerializer,
     MilestoneProgressReportSerializer,
+    OfferSerializer,
 )
 
 logger = logging.getLogger(__name__)
@@ -166,6 +167,39 @@ class ProcurementDealViewSet(viewsets.ModelViewSet):
             'stage_display': deal.get_current_stage_display(),
             'published_at': now.isoformat(),
         }, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=['get'], url_path='offers')
+    def offers(self, request, pk=None):
+        """
+        مسار GET /api/procurements/deals/{id}/offers/
+        جلب قائمة العروض الخاصة بصفقة معينة.
+        وفق القانون 23-12: إذا كانت الصفقة في مرحلة أقل من 4 (قبل فتح الأظرفة)،
+        يجب حجب المبلغ المالي وإعادته كـ null حتى لو كان الطالب هو المصلحة المتعاقدة.
+        """
+        deal = self.get_object()
+        user = request.user
+
+        # التحقق من الصلاحيات
+        if not user.is_authenticated:
+            return Response({'error': 'تسجيل الدخول مطلوب.'}, status=status.HTTP_401_UNAUTHORIZED)
+
+        is_owner = (getattr(deal, 'authority_id', None) == user.id)
+        is_admin = (user.is_staff or getattr(user, 'role', None) == 'central_admin')
+        if is_owner or is_admin:
+            offers_qs = BidOffer.objects.filter(deal=deal).select_related('operator', 'deal')
+        elif getattr(user, 'role', None) == 'operator':
+            offers_qs = BidOffer.objects.filter(deal=deal, operator=user).select_related('operator', 'deal')
+        else:
+            return Response({'error': 'غير مخول باستعراض عروض هذه الصفقة.'}, status=status.HTTP_403_FORBIDDEN)
+
+        serializer = OfferSerializer(offers_qs, many=True, context={'request': request})
+        return Response({
+            'deal_id': str(deal.id),
+            'deal_reference': deal.reference_number,
+            'current_stage': deal.current_stage,
+            'offers': serializer.data,
+            'count': len(serializer.data),
+        })
 
     @action(detail=True, methods=['post'], url_path='generate-contract')
     def generate_contract(self, request, pk=None):

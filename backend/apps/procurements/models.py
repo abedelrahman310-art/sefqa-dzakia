@@ -269,6 +269,10 @@ class OfferDocument(models.Model):
         'ملف الوثيقة',
         upload_to='offer_documents/%Y/%m/',
     )
+    is_encrypted = models.BooleanField(
+        'هل الوثيقة مشفرة ومختومة',
+        default=True,
+    )
     uploaded_at = models.DateTimeField(
         'تاريخ الرفع',
         auto_now_add=True,

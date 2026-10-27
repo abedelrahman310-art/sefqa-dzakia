@@ -127,10 +127,10 @@ export function CentralDeals() {
   }, [deals, searchQuery, filterStage, onlyDelayed, now]);
 
   return (
-    <div className="space-y-6" dir="rtl">
+    <div className="space-y-4" dir="rtl">
       <PageHeader
         title="السجل الوطني للصفقات"
-        titleClassName="text-2xl font-bold"
+        titleClassName="text-xl font-bold"
         description="سجل موحّد لكل الصفقات العمومية مع مراحل دورة حياتها الاثنتي عشرة، من التخطيط والاحتياج إلى الأداء والدفع والإغلاق."
         actions={
           <Button
@@ -138,7 +138,7 @@ export function CentralDeals() {
             size="sm"
             onClick={reload}
             disabled={loading}
-            className="text-base"
+            className="h-8 text-xs font-semibold"
           >
             <RefreshCw className="size-3.5" aria-hidden="true" />
             تحديث البيانات
@@ -146,7 +146,7 @@ export function CentralDeals() {
         }
       />
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
         <KpiCard
           eyebrow="إجمالي الصفقات"
           value={formatNumber(stats.total)}
@@ -177,41 +177,41 @@ export function CentralDeals() {
         />
       </div>
 
-      <Card className="bg-white shadow-sm border-gray-200">
-        <CardHeader className="border-b border-gray-200 pb-4">
-          <CardTitle className="text-xl font-bold text-[var(--ink-900)]">
+      <Card className="bg-white shadow-xs border-gray-200">
+        <CardHeader className="border-b border-gray-200 p-4 pb-3">
+          <CardTitle className="text-base font-bold text-[var(--ink-900)]">
             توزيع الصفقات على المراحل الـ 12
           </CardTitle>
-          <CardDescription className="mt-1 text-base text-gray-500">
+          <CardDescription className="mt-0.5 text-xs text-gray-500">
             يُحتسب مباشرة من المرحلة الحالية لكل صفقة
           </CardDescription>
         </CardHeader>
-        <CardContent className="pt-5">
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+        <CardContent className="p-4 pt-3.5">
+          <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-6">
             {stats.perStage.map((stage) => (
               <div
                 key={stage.id}
-                className="rounded-lg border border-gray-200 bg-white p-3"
+                className="rounded-lg border border-gray-200 bg-white p-2.5"
                 title={`${stage.id}. ${stage.label}`}
               >
                 <div className="flex items-center justify-between">
-                  <span className="font-mono text-base font-bold text-[var(--ink-500)]">
+                  <span className="font-mono text-xs font-bold text-[var(--ink-500)]">
                     {String(stage.id).padStart(2, '0')}
                   </span>
-                  <span className="font-mono text-lg font-bold text-[var(--ink-900)]">
+                  <span className="font-mono text-sm font-bold text-[var(--ink-900)]">
                     {formatNumber(stage.count)}
                   </span>
                 </div>
-                <div className="mt-1 truncate text-base font-semibold text-[var(--ink-700)]">
+                <div className="mt-1 truncate text-xs font-semibold text-[var(--ink-700)]">
                   {stage.short}
                 </div>
-                <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[var(--paper-200)]">
+                <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-[var(--paper-200)]">
                   <div
                     className="h-full rounded-full bg-[var(--stamp-green-700)]"
                     style={{ width: `${Math.min(100, stage.share)}%` }}
                   />
                 </div>
-                <div className="mt-1 font-mono text-base text-[var(--ink-500)]">
+                <div className="mt-1 font-mono text-[11px] text-[var(--ink-500)]">
                   {formatPercent(stage.share)}
                 </div>
               </div>
@@ -220,21 +220,21 @@ export function CentralDeals() {
         </CardContent>
       </Card>
 
-      <Card className="bg-white shadow-sm border-gray-200">
-        <CardHeader className="flex flex-col gap-4 border-b border-gray-200 pb-4 sm:flex-row sm:items-center sm:justify-between">
+      <Card className="bg-white shadow-xs border-gray-200">
+        <CardHeader className="flex flex-col gap-3 border-b border-gray-200 p-4 pb-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <CardTitle className="text-xl font-bold text-[var(--ink-900)]">
+            <CardTitle className="text-base font-bold text-[var(--ink-900)]">
               الصفقات المسجّلة
             </CardTitle>
-            <CardDescription className="mt-1 text-base text-[var(--ink-500)]">
+            <CardDescription className="mt-0.5 text-xs text-[var(--ink-500)]">
               مرحلة كل صفقة معروضة كمؤشر بصري على السلّم الكامل للمراحل الـ12
             </CardDescription>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2.5">
+          <div className="flex flex-wrap items-center gap-2">
             <div className="relative">
               <Search
-                className="size-4 absolute start-2.5 top-1/2 -translate-y-1/2 text-muted-foreground"
+                className="size-3.5 absolute start-2.5 top-1/2 -translate-y-1/2 text-muted-foreground"
                 aria-hidden="true"
               />
               <input
@@ -243,7 +243,7 @@ export function CentralDeals() {
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
                 aria-label="بحث في الصفقات"
-                className="ps-9 pe-3 py-1.5 text-base rounded-lg border border-gray-200 bg-white text-[var(--ink-900)] focus:outline-none focus:ring-1 focus:ring-[var(--stamp-green-700)]"
+                className="ps-8 pe-3 py-1 text-xs rounded-lg border border-gray-200 bg-white text-[var(--ink-900)] focus:outline-none focus:ring-1 focus:ring-[var(--stamp-green-700)] h-8"
               />
             </div>
 
@@ -251,7 +251,7 @@ export function CentralDeals() {
               value={filterStage}
               onChange={(event) => setFilterStage(event.target.value)}
               aria-label="تصفية حسب المرحلة"
-              className="px-2.5 py-1.5 text-base rounded-lg border border-gray-200 bg-white text-[var(--ink-900)] focus:outline-none focus:ring-1 focus:ring-[var(--stamp-green-700)]"
+              className="px-2 py-1 text-xs rounded-lg border border-gray-200 bg-white text-[var(--ink-900)] focus:outline-none focus:ring-1 focus:ring-[var(--stamp-green-700)] h-8"
             >
               <option value="all">كل المراحل</option>
               {STAGES.map((stage) => (
@@ -261,7 +261,7 @@ export function CentralDeals() {
               ))}
             </select>
 
-            <label className="flex items-center gap-1.5 text-base font-semibold text-[var(--ink-700)]">
+            <label className="flex items-center gap-1.5 text-xs font-semibold text-[var(--ink-700)] cursor-pointer">
               <input
                 type="checkbox"
                 checked={onlyDelayed}
@@ -276,15 +276,15 @@ export function CentralDeals() {
         <CardContent className="p-0">
           <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead className="min-w-[120px]">المرجع</TableHead>
-                <TableHead className="min-w-[220px]">عنوان الصفقة</TableHead>
-                <TableHead>المصلحة المتعاقدة</TableHead>
-                <TableHead>الولاية</TableHead>
-                <TableHead className="text-end">الميزانية</TableHead>
-                <TableHead className="min-w-[190px]">المرحلة الحالية</TableHead>
-                <TableHead className="text-center">آخر أجل للإيداع</TableHead>
-                <TableHead className="text-center">التأخر</TableHead>
+              <TableRow className="hover:bg-transparent">
+                <TableHead className="min-w-[110px] text-xs font-bold">المرجع</TableHead>
+                <TableHead className="min-w-[200px] text-xs font-bold">عنوان الصفقة</TableHead>
+                <TableHead className="text-xs font-bold">المصلحة المتعاقدة</TableHead>
+                <TableHead className="text-xs font-bold">الولاية</TableHead>
+                <TableHead className="text-end text-xs font-bold">الميزانية</TableHead>
+                <TableHead className="min-w-[170px] text-xs font-bold">المرحلة الحالية</TableHead>
+                <TableHead className="text-center text-xs font-bold">آخر أجل للإيداع</TableHead>
+                <TableHead className="text-center text-xs font-bold">التأخر</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -303,41 +303,41 @@ export function CentralDeals() {
                   return (
                     <TableRow
                       key={deal.id}
-                      className="transition-colors hover:bg-slate-50/70"
+                      className="transition-colors hover:bg-slate-50/70 text-xs"
                     >
-                      <TableCell className="font-mono text-base font-bold text-[var(--ink-900)]">
+                      <TableCell className="font-mono text-xs font-bold text-[var(--ink-900)] py-2.5">
                         {deal.reference_number || '—'}
                       </TableCell>
-                      <TableCell className="max-w-[280px] text-base font-semibold text-[var(--ink-900)]">
+                      <TableCell className="max-w-[280px] text-xs font-semibold text-[var(--ink-900)] py-2.5">
                         <div className="truncate">{deal.title || '—'}</div>
-                        <div className="text-base font-normal text-[var(--ink-500)]">
+                        <div className="text-[11px] font-normal text-[var(--ink-500)]">
                           أُنشئت في {formatDate(deal.created_at)}
                         </div>
                       </TableCell>
-                      <TableCell className="max-w-[200px] truncate text-base text-[var(--ink-700)]">
+                      <TableCell className="max-w-[200px] truncate text-xs text-[var(--ink-700)] py-2.5">
                         {deal.authority_name || deal.authority_entity || '—'}
                       </TableCell>
-                      <TableCell className="text-base text-[var(--ink-700)]">
+                      <TableCell className="text-xs text-[var(--ink-700)] py-2.5">
                         {deal.wilaya || '—'}
                       </TableCell>
-                      <TableCell className="text-end font-mono text-base font-semibold tabular-nums text-[var(--ink-900)]">
+                      <TableCell className="text-end font-mono text-xs font-semibold tabular-nums text-[var(--ink-900)] py-2.5">
                         {formatDZD(toNumber(deal.estimated_budget))}
                       </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Badge className="bg-[var(--paper-100)] text-[var(--ink-900)] border-gray-200 font-mono">
+                      <TableCell className="py-2.5">
+                        <div className="flex items-center gap-1.5">
+                          <Badge className="bg-[var(--paper-100)] text-[var(--ink-900)] border-gray-200 font-mono text-[10px] px-1.5 py-0">
                             {String(stage).padStart(2, '0')}
                           </Badge>
-                          <span className="truncate text-base font-semibold text-[var(--ink-700)]">
+                          <span className="truncate text-xs font-semibold text-[var(--ink-700)]">
                             {definition.short}
                           </span>
                         </div>
-                        <div className="mt-1.5 flex items-center gap-0.5" aria-hidden="true">
+                        <div className="mt-1 flex items-center gap-0.5" aria-hidden="true">
                           {STAGES.map((item) => (
                             <span
                               key={item.id}
                               title={`${item.id}. ${item.label}`}
-                              className={`h-1.5 flex-1 rounded-full ${
+                              className={`h-1 flex-1 rounded-full ${
                                 item.id <= stage
                                   ? 'bg-[var(--stamp-green-700)]'
                                   : 'bg-[var(--paper-200)]'
@@ -346,17 +346,17 @@ export function CentralDeals() {
                           ))}
                         </div>
                       </TableCell>
-                      <TableCell className="text-center font-mono text-base text-[var(--ink-700)]">
+                      <TableCell className="text-center font-mono text-xs text-[var(--ink-700)] py-2.5">
                         {formatDate(deal.submission_deadline)}
                       </TableCell>
-                      <TableCell className="text-center">
+                      <TableCell className="text-center py-2.5">
                         {delayed ? (
-                          <Badge className="bg-red-50 text-red-800 border-red-300">
-                            <Clock className="size-3" aria-hidden="true" />
+                          <Badge className="bg-red-50 text-red-800 border-red-300 text-[10px] px-1.5 py-0.5">
+                            <Clock className="size-2.5" aria-hidden="true" />
                             متأخرة
                           </Badge>
                         ) : (
-                          <span className="text-base text-[var(--ink-500)]">داخل الأجل</span>
+                          <span className="text-xs text-[var(--ink-500)]">داخل الأجل</span>
                         )}
                       </TableCell>
                     </TableRow>
@@ -366,7 +366,7 @@ export function CentralDeals() {
             </TableBody>
           </Table>
 
-          <div className="flex flex-wrap items-center justify-between gap-2 border-t border-gray-200 px-6 py-4 text-base text-[var(--ink-500)]">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-t border-gray-200 px-4 py-2.5 text-xs text-[var(--ink-500)]">
             <span>
               عرض {formatNumber(filtered.length)} من أصل {formatNumber(stats.total)} صفقة
             </span>

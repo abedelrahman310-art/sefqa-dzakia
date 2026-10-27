@@ -150,10 +150,10 @@ export function CentralAppeals() {
   }, [objections, searchQuery, filterStatus, onlyOpen]);
 
   return (
-    <div className="space-y-6" dir="rtl">
+    <div className="space-y-4" dir="rtl">
       <PageHeader
         title="الطعون على قرارات الإسناد"
-        titleClassName="text-2xl font-bold"
+        titleClassName="text-xl font-bold"
         description="متابعة الطعون الإدارية والقضائية ومهلها القانونية: عشرة أيام من تاريخ الإعلان عن الإسناد المؤقت، مع عدّاد تنازلي حيّ لكل طعن."
         actions={
           <Button
@@ -161,7 +161,7 @@ export function CentralAppeals() {
             size="sm"
             onClick={reload}
             disabled={loading}
-            className="text-base"
+            className="text-xs h-8"
           >
             <RefreshCw className="size-3.5" aria-hidden="true" />
             تحديث البيانات
@@ -169,7 +169,7 @@ export function CentralAppeals() {
         }
       />
 
-      <div className="flex items-start gap-2 rounded-lg border border-gray-200 bg-white p-3 text-base leading-relaxed text-[var(--ink-700)] shadow-sm">
+      <div className="flex items-start gap-2 rounded-lg border border-gray-200 bg-white p-2.5 text-xs leading-relaxed text-[var(--ink-700)] shadow-sm">
         <Scale className="mt-0.5 size-4 shrink-0 text-[var(--stamp-green-700)]" aria-hidden="true" />
         <p>
           الأساس القانوني: المادة 72 من القانون 23-12 — أجل الطعن عشرة أيام من تاريخ الإعلان عن
@@ -178,7 +178,7 @@ export function CentralAppeals() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
         <KpiCard
           eyebrow="إجمالي الطعون"
           value={formatNumber(stats.total)}
@@ -210,20 +210,20 @@ export function CentralAppeals() {
       </div>
 
       <Card className="bg-white shadow-sm border-gray-200">
-        <CardHeader className="flex flex-col gap-4 border-b border-gray-200 pb-4 sm:flex-row sm:items-center sm:justify-between">
+        <CardHeader className="flex flex-col gap-3 border-b border-gray-200 pb-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <CardTitle className="text-xl font-bold text-[var(--ink-900)]">
+            <CardTitle className="text-base font-bold text-[var(--ink-900)]">
               سجل الطعون والعدّادات التنازلية
             </CardTitle>
-            <CardDescription className="mt-1 text-base text-gray-500">
+            <CardDescription className="mt-0.5 text-xs text-gray-500">
               مرتّب تصاعدياً حسب أقرب أجل قانوني
             </CardDescription>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2.5">
+          <div className="flex flex-wrap items-center gap-2">
             <div className="relative">
               <Search
-                className="size-4 absolute start-2.5 top-1/2 -translate-y-1/2 text-muted-foreground"
+                className="size-3.5 absolute start-2.5 top-1/2 -translate-y-1/2 text-muted-foreground"
                 aria-hidden="true"
               />
               <input
@@ -232,7 +232,7 @@ export function CentralAppeals() {
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
                 aria-label="بحث في الطعون"
-                className="ps-9 pe-3 py-1.5 text-base rounded-lg border border-gray-200 bg-white text-[var(--ink-900)] focus:outline-none focus:ring-1 focus:ring-[var(--stamp-green-700)]"
+                className="ps-8 pe-3 py-1 text-xs h-8 rounded-lg border border-gray-200 bg-white text-[var(--ink-900)] focus:outline-none focus:ring-1 focus:ring-[var(--stamp-green-700)]"
               />
             </div>
 
@@ -240,7 +240,7 @@ export function CentralAppeals() {
               value={filterStatus}
               onChange={(event) => setFilterStatus(event.target.value)}
               aria-label="تصفية حسب حالة الطعن"
-              className="px-2.5 py-1.5 text-base rounded-lg border border-gray-200 bg-white text-[var(--ink-900)] focus:outline-none focus:ring-1 focus:ring-[var(--stamp-green-700)]"
+              className="px-2.5 py-1 text-xs h-8 rounded-lg border border-gray-200 bg-white text-[var(--ink-900)] focus:outline-none focus:ring-1 focus:ring-[var(--stamp-green-700)]"
             >
               <option value="all">كل الحالات</option>
               <option value="submitted">مُودع</option>
@@ -251,7 +251,7 @@ export function CentralAppeals() {
               <option value="withdrawn">مسحوب</option>
             </select>
 
-            <label className="flex items-center gap-1.5 text-base font-semibold text-[var(--ink-700)]">
+            <label className="flex items-center gap-1.5 text-xs font-semibold text-[var(--ink-700)]">
               <input
                 type="checkbox"
                 checked={onlyOpen}
@@ -308,39 +308,39 @@ export function CentralAppeals() {
                       key={item.id}
                       className="transition-colors hover:bg-slate-50/70"
                     >
-                      <TableCell className="font-mono text-base font-bold text-[var(--ink-900)]">
+                      <TableCell className="font-mono text-xs font-bold text-[var(--ink-900)] py-2.5">
                         {item.reference || '—'}
                       </TableCell>
-                      <TableCell className="max-w-[240px]">
-                        <div className="font-mono text-base font-bold text-[var(--ink-700)]">
+                      <TableCell className="max-w-[240px] py-2.5">
+                        <div className="font-mono text-xs font-bold text-[var(--ink-700)]">
                           {item.tender_reference || '—'}
                         </div>
-                        <div className="truncate text-base text-[var(--ink-500)]">
+                        <div className="truncate text-xs text-[var(--ink-500)]">
                           {item.tender_title || '—'}
                         </div>
                       </TableCell>
-                      <TableCell className="max-w-[180px] truncate text-base font-semibold text-[var(--ink-900)]">
+                      <TableCell className="max-w-[180px] truncate text-xs font-semibold text-[var(--ink-900)] py-2.5">
                         {item.objector_name || '—'}
                       </TableCell>
-                      <TableCell className="text-base text-[var(--ink-700)]">
+                      <TableCell className="text-xs text-[var(--ink-700)] py-2.5">
                         {TYPE_LABELS[item.objection_type] ?? item.objection_type ?? '—'}
                       </TableCell>
-                      <TableCell className="max-w-[200px] truncate text-base text-[var(--ink-700)]">
+                      <TableCell className="max-w-[200px] truncate text-xs text-[var(--ink-700)] py-2.5">
                         {groundsLabel(item)}
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="py-2.5">
                         <Badge className={meta.className}>{meta.label}</Badge>
                       </TableCell>
-                      <TableCell className="text-center font-mono text-base text-[var(--ink-700)]">
+                      <TableCell className="text-center font-mono text-xs text-[var(--ink-700)] py-2.5">
                         {formatDateTime(item.submitted_at)}
                       </TableCell>
-                      <TableCell className="text-center font-mono text-base text-[var(--ink-700)]">
+                      <TableCell className="text-center font-mono text-xs text-[var(--ink-700)] py-2.5">
                         {formatDateTime(item.deadline_at)}
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="py-2.5">
                         <div className="space-y-1">
                           <span
-                            className={`block font-mono text-base font-bold ${
+                            className={`block font-mono text-xs font-bold ${
                               countdown.expired
                                 ? 'text-[var(--stamp-red-700)]'
                                 : 'text-[var(--ink-900)]'
@@ -366,9 +366,9 @@ export function CentralAppeals() {
                           )}
                         </div>
                       </TableCell>
-                      <TableCell className="text-center">
+                      <TableCell className="text-center py-2.5">
                         {!hasDeadline ? (
-                          <span className="text-base text-[var(--ink-500)]">—</span>
+                          <span className="text-xs text-[var(--ink-500)]">—</span>
                         ) : withinDeadline ? (
                           <Badge className="bg-emerald-50 text-emerald-800 border-emerald-300">
                             داخل الأجل
@@ -386,7 +386,7 @@ export function CentralAppeals() {
             </TableBody>
           </Table>
 
-          <div className="flex flex-wrap items-center justify-between gap-2 border-t border-gray-200 px-6 py-4 text-base text-[var(--ink-500)]">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-t border-gray-200 px-4 py-2.5 text-xs text-[var(--ink-500)]">
             <span>
               عرض {formatNumber(filtered.length)} من أصل {formatNumber(stats.total)} طعناً
             </span>

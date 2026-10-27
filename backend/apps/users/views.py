@@ -39,8 +39,20 @@ class RegisterView(views.APIView):
         password = data['password']
         role = data['role']
 
-        display_name = data.get('fullName') or data.get('name') or email.split('@')[0]
-        organization_name = data.get('company') or data.get('name') or display_name
+        display_name = (
+            data.get('fullName')
+            or data.get('appointedName')
+            or data.get('delegateName')
+            or data.get('name')
+            or email.split('@')[0]
+        )
+        organization_name = (
+            data.get('company')
+            or data.get('fullName')
+            or data.get('name')
+            or display_name
+        )
+        municipality = data.get('municipality') or data.get('commune') or ''
 
         user = CustomUser.objects.create_user(
             email=email,
@@ -48,6 +60,7 @@ class RegisterView(views.APIView):
             role=role,
             display_name=display_name,
             organization_name=organization_name,
+            municipality=municipality,
             is_active=True,
         )
 
@@ -57,6 +70,11 @@ class RegisterView(views.APIView):
             OperatorProfile.objects.create(
                 user=user,
                 available_wilayas=available_wilayas,
+                municipality=municipality,
+                extra_data={
+                    k: v for k, v in data.items()
+                    if k not in ('password', 'role')
+                },
             )
 
         # التسجيل في سجل التدقيق الرقمي غير القابل للتعديل
@@ -74,6 +92,7 @@ class RegisterView(views.APIView):
                     'role': user.role,
                     'organization_name': user.organization_name,
                     'display_name': user.display_name,
+                    'municipality': user.municipality,
                 },
                 ip_address=ip,
             )
@@ -503,10 +522,25 @@ class OperatorCheckComplianceView(views.APIView):
         user = request.user
         profile, _ = OperatorProfile.objects.get_or_create(user=user)
         extra = profile.extra_data or {}
+        today = timezone.now().date()
 
         # الوثائق المسجلة أو المرفوعة مسبقاً لدى المتعامل في ملفه
-        # أو المرفقة في أي عرض لهذا المتعامل في هذه الصفقة
         existing_doc_codes = set()
+        expired_documents = []
+        expired_doc_codes = set()
+
+        # 0. من جدول وثائق المتعامل OperatorDocument
+        for op_doc in profile.documents.all():
+            if op_doc.expiry_date and op_doc.expiry_date < today:
+                expired_doc_codes.add(op_doc.document_type)
+                expired_documents.append({
+                    'code': op_doc.document_type,
+                    'name': op_doc.name,
+                    'expiry_date': op_doc.expiry_date.isoformat(),
+                    'reason': f"وثيقة {op_doc.name} منتهية الصلاحية منذ {op_doc.expiry_date.isoformat()}",
+                })
+            elif op_doc.is_valid:
+                existing_doc_codes.add(op_doc.document_type)
 
         # 1. من ملف المتعامل extra_data
         for doc_key in ['documents', 'uploaded_documents', 'verified_documents']:
@@ -514,17 +548,41 @@ class OperatorCheckComplianceView(views.APIView):
             if isinstance(docs_list, list):
                 for d in docs_list:
                     if isinstance(d, dict) and 'code' in d:
-                        existing_doc_codes.add(d['code'])
+                        c = d['code']
+                        exp_str = d.get('expiry_date') or d.get('expiryDate')
+                        is_expired = False
+                        if exp_str:
+                            try:
+                                import datetime as dt_mod
+                                exp_dt = dt_mod.date.fromisoformat(str(exp_str).split('T')[0])
+                                if exp_dt < today:
+                                    is_expired = True
+                                    expired_doc_codes.add(c)
+                                    doc_title = d.get('title') or d.get('name') or c
+                                    expired_documents.append({
+                                        'code': c,
+                                        'name': doc_title,
+                                        'expiry_date': exp_dt.isoformat(),
+                                        'reason': f"وثيقة {doc_title} منتهية الصلاحية منذ {exp_dt.isoformat()}",
+                                    })
+                            except Exception:
+                                pass
+                        if not is_expired and c not in expired_doc_codes:
+                            existing_doc_codes.add(c)
                     elif isinstance(d, str):
-                        existing_doc_codes.add(d)
+                        if d not in expired_doc_codes:
+                            existing_doc_codes.add(d)
 
         # 2. من بيانات المؤسسة الأساسية (السجل التجاري، NIF، شهادات التأهيل)
-        if extra.get('registrationNumber') or user.organization_name:
-            existing_doc_codes.add('trade_register')
-        if extra.get('nif') or extra.get('tax_id'):
-            existing_doc_codes.add('tax_id_nif')
-        if extra.get('declaredQualificationLevel') or extra.get('declaredQualificationSector'):
-            existing_doc_codes.add('qualification_certificate')
+        if 'trade_register' not in expired_doc_codes:
+            if extra.get('registrationNumber') or user.organization_name:
+                existing_doc_codes.add('trade_register')
+        if 'tax_id_nif' not in expired_doc_codes:
+            if extra.get('nif') or extra.get('tax_id'):
+                existing_doc_codes.add('tax_id_nif')
+        if 'qualification_certificate' not in expired_doc_codes:
+            if extra.get('declaredQualificationLevel') or extra.get('declaredQualificationSector'):
+                existing_doc_codes.add('qualification_certificate')
 
         # 3. من أي عرض سابق أو حالي للمتعامل على هذه الصفقة
         existing_offer = BidOffer.objects.filter(deal=deal, operator=user).first()
@@ -641,14 +699,17 @@ class OperatorCheckComplianceView(views.APIView):
         total_req = len(STANDARD_DOCUMENTS)
         avail_count = len(available_documents)
         compliance_score = int((avail_count / total_req) * 100) if total_req > 0 else 100
-        is_compliant = (len(missing_documents) == 0)
+        is_compliant = (len(missing_documents) == 0 and len(expired_documents) == 0)
 
         # التوصيات الإرشادية
         advisory_notes = []
         if is_compliant:
             advisory_notes.append("ملفكم يستوفي كافة الوثائق الأساسية المشترطة قانوناً للمشاركة في هذه الصفقة.")
         else:
-            advisory_notes.append(f"تم رصد {len(missing_documents)} وثيقة ناقصة. يرجى استكمالها وإرفاقها قبل انقضاء أجل إيداع العروض.")
+            if expired_documents:
+                advisory_notes.append(f"تنبيه: تم رصد {len(expired_documents)} وثيقة منتهية الصلاحية. يمنع تقديم العرض حتى تجديدها.")
+            if missing_documents:
+                advisory_notes.append(f"تم رصد {len(missing_documents)} وثيقة ناقصة. يرجى استكمالها وإرفاقها قبل انقضاء أجل إيداع العروض.")
             if any(d['code'] == 'qualification_certificate' for d in missing_documents):
                 advisory_notes.append("الصفقة تتطلب شهادة تأهيل مهني متخصصة؛ تأكد من حيازتك للدرجة المطلوبة في دفتر الشروط.")
 
@@ -687,6 +748,8 @@ class OperatorCheckComplianceView(views.APIView):
             'missing_count': len(missing_documents),
             'missing_documents': missing_documents,
             'available_documents': available_documents,
+            'expired_documents': expired_documents,
+            'has_expired_documents': len(expired_documents) > 0,
             'advisory_notes': advisory_notes,
             'submission_deadline': deal.submission_deadline.isoformat() if deal.submission_deadline else None,
         }, status=status.HTTP_200_OK)

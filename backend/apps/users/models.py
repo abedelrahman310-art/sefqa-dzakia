@@ -34,6 +34,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     display_name = models.CharField('الاسم الظاهر', max_length=150, blank=True)
     organization_name = models.CharField('اسم المؤسسة أو المصلحة', max_length=255, blank=True)
     role = models.CharField('الدور الوظيفي', max_length=30, choices=ROLE_CHOICES, default='operator')
+    municipality = models.CharField('البلدية', max_length=100, blank=True, null=True)
     
     is_active = models.BooleanField('مفعل', default=True)
     is_staff = models.BooleanField('موظف إداري', default=False)
@@ -99,6 +100,9 @@ class OperatorProfile(models.Model):
         help_text="قائمة رموز الولايات المتاحة (فارغ = كل الولايات)",
     )
     
+    # البلدية
+    municipality = models.CharField('البلدية', max_length=100, blank=True, null=True)
+    
     # القدرة المالية
     max_capacity = models.DecimalField(
         max_digits=15,
@@ -125,6 +129,135 @@ class OperatorProfile(models.Model):
     
     def __str__(self):
         return f"{self.user.email} - {self.get_sector_display()}"
+
+    def validate_documents_for_bid(self, deal=None):
+        """
+        فحص القفل الوقائي لوثائق المتعامل الاقتصادي قبل إيداع العرض.
+        يرفض العرض إذا كانت أي وثيقة أساسية منتهية الصلاحية أو غير موجودة.
+        """
+        from datetime import date
+        today = timezone.now().date()
+        
+        MANDATORY_DOCS = [
+            ('trade_register', 'السجل التجاري'),
+            ('tax_clearance', 'شهادة الجباية'),
+            ('social_clearance', 'شهادة الضمان الاجتماعي'),
+        ]
+        
+        if deal:
+            title = getattr(deal, 'title', '')
+            sector = getattr(deal, 'sector', '')
+            if 'أشغال' in title or sector == 'works':
+                MANDATORY_DOCS.append(('qualification_certificate', 'شهادة التأهيل والتصنيف المهنيين'))
+
+        docs_by_type = {}
+        for doc in self.documents.all():
+            docs_by_type[doc.document_type] = {
+                'name': doc.name or dict(MANDATORY_DOCS).get(doc.document_type, doc.document_type),
+                'expiry_date': doc.expiry_date,
+                'is_valid': doc.is_valid,
+            }
+            
+        extra = self.extra_data or {}
+        extra_docs = extra.get('documents') or extra.get('uploaded_documents') or []
+        if isinstance(extra_docs, list):
+            for d in extra_docs:
+                if isinstance(d, dict):
+                    code = d.get('code') or d.get('type') or d.get('document_type')
+                    if code and code not in docs_by_type:
+                        exp = d.get('expiry_date') or d.get('expiryDate')
+                        parsed_exp = None
+                        if exp:
+                            try:
+                                if isinstance(exp, str):
+                                    parsed_exp = date.fromisoformat(exp.split('T')[0])
+                                elif isinstance(exp, date):
+                                    parsed_exp = exp
+                            except Exception:
+                                pass
+                        docs_by_type[code] = {
+                            'name': d.get('name') or d.get('title') or dict(MANDATORY_DOCS).get(code, code),
+                            'expiry_date': parsed_exp,
+                            'is_valid': True,
+                        }
+
+        # دعم الحقول المباشرة بالسجل التجاري والضرائب
+        if 'trade_register' not in docs_by_type and (extra.get('registrationNumber') or getattr(self.user, 'organization_name', '')):
+            exp = extra.get('trade_register_expiry')
+            parsed_exp = None
+            if exp:
+                try:
+                    parsed_exp = date.fromisoformat(str(exp).split('T')[0])
+                except Exception:
+                    pass
+            docs_by_type['trade_register'] = {
+                'name': 'السجل التجاري',
+                'expiry_date': parsed_exp,
+                'is_valid': True,
+            }
+        if 'tax_clearance' not in docs_by_type and extra.get('tax_clearance_status') == 'valid':
+            docs_by_type['tax_clearance'] = {
+                'name': 'شهادة الجباية',
+                'expiry_date': None,
+                'is_valid': True,
+            }
+        if 'social_clearance' not in docs_by_type and extra.get('social_clearance_status') == 'valid':
+            docs_by_type['social_clearance'] = {
+                'name': 'شهادة الضمان الاجتماعي',
+                'expiry_date': None,
+                'is_valid': True,
+            }
+
+        for doc_code, doc_name in MANDATORY_DOCS:
+            if doc_code not in docs_by_type:
+                return False, f"لا يمكن تقديم العرض. وثيقة {doc_name} غير موجودة. يرجى رفعها في ملف مؤسستك أولاً.", doc_code
+                
+            doc_info = docs_by_type[doc_code]
+            exp_date = doc_info.get('expiry_date')
+            if exp_date and exp_date < today:
+                return False, f"لا يمكن تقديم العرض. وثيقة {doc_name} منتهية الصلاحية. يرجى تحديثها في ملف مؤسستك أولاً.", doc_code
+
+        return True, "كافة الوثائق الإدارية الأساسية سليمة ومحدثة.", None
+
+
+class OperatorDocument(models.Model):
+    """
+    وثائق المتعامل الاقتصادي الإدارية والجبائية مع تاريخ انتهاء الصلاحية.
+    """
+    DOCUMENT_TYPES = (
+        ('trade_register', 'السجل التجاري'),
+        ('tax_clearance', 'شهادة الجباية (Extrait de rôle)'),
+        ('social_clearance', 'شهادة الضمان الاجتماعي (CNAS / CASNOS)'),
+        ('candidacy_declaration', 'التصريح بالترشح'),
+        ('probity_declaration', 'التصريح بالنزاهة'),
+        ('qualification_certificate', 'شهادة التأهيل والتصنيف المهنيين'),
+        ('other', 'وثيقة أخرى'),
+    )
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    profile = models.ForeignKey(
+        OperatorProfile,
+        on_delete=models.CASCADE,
+        related_name='documents',
+        verbose_name='ملف المتعامل',
+    )
+    document_type = models.CharField('نوع الوثيقة', max_length=50, choices=DOCUMENT_TYPES)
+    name = models.CharField('اسم الوثيقة', max_length=255)
+    file = models.FileField('ملف الوثيقة', upload_to='operator_docs/%Y/%m/', null=True, blank=True)
+    issue_date = models.DateField('تاريخ الإصدار', null=True, blank=True)
+    expiry_date = models.DateField('تاريخ انتهاء الصلاحية', null=True, blank=True)
+    is_valid = models.BooleanField('سارية المفعول', default=True)
+    created_at = models.DateTimeField('تاريخ الرفع', auto_now_add=True)
+    updated_at = models.DateTimeField('تاريخ التحديث', auto_now=True)
+
+    class Meta:
+        verbose_name = 'وثيقة المتعامل الاقتصادي'
+        verbose_name_plural = 'وثائق المتعاملين الاقتصاديين'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.name} ({self.get_document_type_display()}) - {self.profile.user.email}"
+
 
 
 class Notification(models.Model):

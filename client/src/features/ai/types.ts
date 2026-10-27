@@ -107,7 +107,13 @@ export interface LegalArticle {
   label: string;
   article_number?: string;
   law?: string;
+  law_source?: string;
+  title?: string;
+  content?: string;
+  text?: string;
   legal_text?: string;
+  similarity_score?: number;
+  match_percentage?: string;
 }
 
 /**
@@ -131,8 +137,10 @@ export interface ChatMessage {
 export interface ChatResponse {
   conversation_id: string;
   answer: string;
+  reply?: string;
   sources: string[];
   legal_articles?: LegalArticleSource[];
+  retrieved_articles?: any[];
   /** Optional top-level full text when the backend returns a single article. */
   legal_text?: string;
   /** Explicit RAG signals used by newer backend versions. */

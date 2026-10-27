@@ -51,13 +51,15 @@ interface EvaluationFormState {
   saving?: boolean;
 }
 
-/** استجابة /api/authority/analyze-prices/ — تحليل مالي استشاري للعروض. */
+/** استجابة /api/authority/analyze-prices/ — وكيل تحليل الأسعار المالي للعروض. */
 interface PriceOfferAnalysisApi {
   offer_id: string;
   operator_name: string;
   amount: number | null;
   deviation_percent: number | null;
-  status: 'normal' | 'outlier' | 'unknown';
+  status: 'normal' | 'abnormally_low' | 'abnormally_high' | 'outlier' | 'unknown';
+  warnings?: string[];
+  ai_recommendation?: string;
   recommendation: string;
 }
 
@@ -65,6 +67,9 @@ interface PriceAnalysisApi {
   deal_id: string;
   deal_reference: string;
   deal_title: string;
+  estimated_budget?: number | null;
+  average?: number | null;
+  standard_deviation?: number | null;
   baseline: { amount: number | null; source: string | null; source_label: string };
   threshold_percent: number;
   offers: PriceOfferAnalysisApi[];
@@ -72,7 +77,12 @@ interface PriceAnalysisApi {
     offers_count: number;
     outliers_count: number;
     normal_count: number;
+    abnormally_low_count?: number;
+    abnormally_high_count?: number;
+    average?: number | null;
     average_amount: number | null;
+    standard_deviation?: number | null;
+    estimated_budget?: number | null;
     min_amount: number | null;
     max_amount: number | null;
   };
@@ -826,33 +836,41 @@ export function EvaluationWorkspace() {
             </div>
           ) : priceData ? (
             <div className="space-y-4 py-1">
-              <div className="grid grid-cols-3 gap-2">
-                <div className="rounded-xl border border-border bg-muted/30 p-3 text-center">
-                  <span className="block text-[10px] font-bold text-muted-foreground">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                <div className="rounded-xl border border-border bg-muted/30 p-2.5 text-center">
+                  <span className="block text-[10px] font-bold text-muted-foreground truncate">
                     {priceData.baseline.source_label}
                   </span>
-                  <span className="mt-1 block text-sm font-extrabold text-navy-900">
+                  <span className="mt-1 block text-xs sm:text-sm font-extrabold text-navy-900">
                     {formatPrice(priceData.baseline.amount)}
                   </span>
                 </div>
-                <div className="rounded-xl border border-border bg-muted/30 p-3 text-center">
+                <div className="rounded-xl border border-border bg-muted/30 p-2.5 text-center">
                   <span className="block text-[10px] font-bold text-muted-foreground">
                     متوسط العروض
                   </span>
-                  <span className="mt-1 block text-sm font-extrabold text-navy-900">
-                    {formatPrice(priceData.summary.average_amount)}
+                  <span className="mt-1 block text-xs sm:text-sm font-extrabold text-navy-900">
+                    {formatPrice(priceData.average ?? priceData.summary.average_amount)}
                   </span>
                 </div>
-                <div className="rounded-xl border border-border bg-muted/30 p-3 text-center">
+                <div className="rounded-xl border border-border bg-muted/30 p-2.5 text-center">
                   <span className="block text-[10px] font-bold text-muted-foreground">
-                    عروض شاذة
+                    الانحراف المعياري
+                  </span>
+                  <span className="mt-1 block text-xs sm:text-sm font-extrabold text-indigo-700 font-mono">
+                    {formatPrice(priceData.standard_deviation ?? priceData.summary.standard_deviation)}
+                  </span>
+                </div>
+                <div className="rounded-xl border border-border bg-muted/30 p-2.5 text-center">
+                  <span className="block text-[10px] font-bold text-muted-foreground">
+                    عروض غير عادية
                   </span>
                   <span
-                    className={`mt-1 block text-sm font-extrabold ${
-                      priceData.summary.outliers_count > 0 ? 'text-red-600' : 'text-emerald-600'
+                    className={`mt-1 block text-xs sm:text-sm font-extrabold ${
+                      (priceData.summary.outliers_count || 0) > 0 ? 'text-red-600' : 'text-emerald-600'
                     }`}
                   >
-                    {priceData.summary.outliers_count}
+                    {priceData.summary.outliers_count || 0}
                   </span>
                 </div>
               </div>
@@ -868,41 +886,51 @@ export function EvaluationWorkspace() {
               ) : (
                 <div className="space-y-3">
                   {priceData.offers.map((offer) => {
-                    const isOutlier = offer.status === 'outlier';
+                    const isAbnormallyLow = offer.status === 'abnormally_low';
+                    const isAbnormallyHigh = offer.status === 'abnormally_high';
+                    const isOutlier = isAbnormallyLow || isAbnormallyHigh || offer.status === 'outlier';
                     const deviation = offer.deviation_percent;
-                    const badgeClass = isOutlier
-                      ? 'border-red-200 bg-red-50 text-red-700'
-                      : offer.status === 'normal'
-                        ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
-                        : 'border-slate-200 bg-slate-50 text-slate-600';
+                    const badgeClass = isAbnormallyLow
+                      ? 'border-amber-300 bg-amber-50 text-amber-900'
+                      : isAbnormallyHigh
+                        ? 'border-red-200 bg-red-50 text-red-700'
+                        : offer.status === 'normal'
+                          ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+                          : 'border-slate-200 bg-slate-50 text-slate-600';
+
+                    const statusLabel = isAbnormallyLow
+                      ? 'عرض منخفض بصفة غير عادية'
+                      : isAbnormallyHigh
+                        ? 'عرض مرتفع بصفة غير عادية'
+                        : offer.status === 'normal'
+                          ? 'سعر طبيعي'
+                          : isOutlier
+                            ? 'سعر شاذ'
+                            : 'غير محدد';
 
                     return (
                       <div
                         key={offer.offer_id}
-                        className="rounded-xl border border-border bg-card p-3"
+                        className="rounded-xl border border-border bg-card p-3 space-y-2"
                       >
                         <div className="flex items-center justify-between gap-2">
                           <span className="text-sm font-bold text-navy-900">
                             {offer.operator_name}
                           </span>
                           <span
-                            className={`rounded-full border px-2 py-1 text-[10px] font-bold ${badgeClass}`}
+                            className={`rounded-full border px-2.5 py-0.5 text-[10px] font-bold ${badgeClass}`}
                           >
-                            {isOutlier
-                              ? 'سعر شاذ'
-                              : offer.status === 'normal'
-                                ? 'سعر طبيعي'
-                                : 'غير محدد'}
+                            {statusLabel}
                           </span>
                         </div>
 
-                        <div className="mt-1.5 flex items-center justify-between gap-2 text-xs">
+                        <div className="flex items-center justify-between gap-2 text-xs">
                           <span className="font-mono font-bold text-navy-900">
                             {formatPrice(offer.amount)}
                           </span>
                           <span
                             className={`inline-flex items-center gap-1 font-bold ${
-                              isOutlier ? 'text-red-600' : 'text-emerald-600'
+                              isOutlier ? (isAbnormallyLow ? 'text-amber-700' : 'text-red-600') : 'text-emerald-600'
                             }`}
                           >
                             {deviation !== null && deviation < 0 ? (
@@ -916,8 +944,23 @@ export function EvaluationWorkspace() {
                           </span>
                         </div>
 
-                        <p className="mt-2 rounded-lg border border-amber-200 bg-amber-50 p-2 text-[11px] leading-relaxed text-amber-900">
-                          {offer.recommendation}
+                        {offer.warnings && offer.warnings.length > 0 && (
+                          <div className="space-y-1 pt-1">
+                            {offer.warnings.map((w, wIdx) => (
+                              <div
+                                key={wIdx}
+                                className="flex items-start gap-1.5 text-[11px] font-semibold text-red-700 bg-red-50/80 border border-red-200/80 rounded-lg p-1.5"
+                              >
+                                <AlertCircle className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+                                <span>{w}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        <p className="rounded-lg border border-indigo-100 bg-indigo-50/60 p-2 text-[11px] leading-relaxed text-indigo-950 font-medium">
+                          <span className="font-bold text-indigo-900 block mb-0.5">توصية الذكاء الاصطناعي:</span>
+                          {offer.ai_recommendation || offer.recommendation}
                         </p>
                       </div>
                     );

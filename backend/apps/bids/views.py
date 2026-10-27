@@ -73,6 +73,17 @@ class BidOfferViewSet(viewsets.ModelViewSet):
         requested_status = serializer.validated_data.get('status', 'draft')
         if requested_status not in OPERATOR_SETTABLE_STATUSES:
             raise exceptions.ValidationError('حالة العرض المطلوبة غير مسموح بها عند الإيداع (مسموح: مسودة/مودَع فقط).')
+        
+        # القفل الوقائي لمنع المتعامل من تقديم عرض إذا كانت وثائقه منتهية الصلاحية أو ناقصة
+        if requested_status == 'submitted':
+            profile = getattr(user, 'operator_profile', None)
+            if not profile:
+                from apps.users.models import OperatorProfile
+                profile, _ = OperatorProfile.objects.get_or_create(user=user)
+            is_valid, doc_err, _ = profile.validate_documents_for_bid(deal)
+            if not is_valid:
+                raise exceptions.ValidationError({'detail': doc_err, 'error': doc_err})
+
         # العلامة التقنية تمنحها لجنة التقييم حصراً — تُتجاهل أي قيمة مرسلة من المتعامل
         serializer.validated_data.pop('technical_score', None)
         bid = serializer.save(operator=user, submission_timestamp=now)
@@ -110,6 +121,17 @@ class BidOfferViewSet(viewsets.ModelViewSet):
         new_status = serializer.validated_data.get('status')
         if new_status and new_status not in OPERATOR_SETTABLE_STATUSES:
             raise exceptions.ValidationError('حالة العرض المطلوبة غير مسموح بها (مسموح: مسودة/مودَع فقط).')
+        
+        # القفل الوقائي عند تحويل المسودة إلى عرض مودع رسمياً
+        if new_status == 'submitted':
+            profile = getattr(user, 'operator_profile', None)
+            if not profile:
+                from apps.users.models import OperatorProfile
+                profile, _ = OperatorProfile.objects.get_or_create(user=user)
+            is_valid, doc_err, _ = profile.validate_documents_for_bid(deal)
+            if not is_valid:
+                raise exceptions.ValidationError({'detail': doc_err, 'error': doc_err})
+
         serializer.validated_data.pop('technical_score', None)
         bid = serializer.save()
         AuditLog.objects.create(

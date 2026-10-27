@@ -151,10 +151,10 @@ export function CentralPermissions() {
   const pageRows = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
   return (
-    <div className="space-y-6" dir="rtl">
+    <div className="space-y-4" dir="rtl">
       <PageHeader
         title="الصلاحيات وسجل التدقيق"
-        titleClassName="text-2xl font-bold"
+        titleClassName="text-xl font-bold"
         description="إدارة حسابات المراقبين ومتابعة سجل التدقيق القانوني غير القابل للتعديل: كل عملية حساسة في المنصة تُختم ببصمة رقمية ولا يمكن تعديلها أو حذفها."
         actions={
           <Button
@@ -162,7 +162,7 @@ export function CentralPermissions() {
             size="sm"
             onClick={reload}
             disabled={loading}
-            className="text-base"
+            className="text-xs h-8"
           >
             <RefreshCw className="size-3.5" aria-hidden="true" />
             تحديث السجل
@@ -170,7 +170,7 @@ export function CentralPermissions() {
         }
       />
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
         <KpiCard
           eyebrow="سجلات التدقيق"
           value={formatNumber(stats.total)}
@@ -201,7 +201,7 @@ export function CentralPermissions() {
         />
       </div>
 
-      <div className="flex items-start gap-2 rounded-lg border border-gray-200 bg-white p-3 text-base leading-relaxed text-[var(--ink-700)] shadow-sm">
+      <div className="flex items-start gap-2 rounded-lg border border-gray-200 bg-white p-2.5 text-xs leading-relaxed text-[var(--ink-700)] shadow-sm">
         <Lock className="mt-0.5 size-4 shrink-0 text-[var(--stamp-green-700)]" aria-hidden="true" />
         <p>
           إنشاء حسابات المراقبين ومنح دور <span className="font-mono">central_admin</span> عملية
@@ -212,11 +212,11 @@ export function CentralPermissions() {
       </div>
 
       <Card className="bg-white shadow-sm border-gray-200">
-        <CardHeader className="border-b border-gray-200 pb-4">
-          <CardTitle className="text-xl font-bold text-[var(--ink-900)]">
+        <CardHeader className="border-b border-gray-200 pb-3">
+          <CardTitle className="text-base font-bold text-[var(--ink-900)]">
             حسابات المراقبة النشطة
           </CardTitle>
-          <CardDescription className="mt-1 text-base text-[var(--ink-500)]">
+          <CardDescription className="mt-0.5 text-xs text-[var(--ink-500)]">
             مستخرجة من سجل التدقيق الفعلي — عدد العمليات وآخر نشاط لكل حساب
           </CardDescription>
         </CardHeader>
@@ -244,7 +244,7 @@ export function CentralPermissions() {
               >
                 {reviewers.map((reviewer) => (
                   <TableRow key={reviewer.key} className="transition-colors hover:bg-slate-50/70">
-                    <TableCell className="text-base font-semibold text-[var(--ink-900)]">
+                    <TableCell className="text-xs font-semibold text-[var(--ink-900)] py-2.5">
                       <div className="flex items-center gap-2">
                         <Shield
                           className="size-3.5 text-[var(--stamp-green-700)]"
@@ -253,21 +253,21 @@ export function CentralPermissions() {
                         {reviewer.name}
                       </div>
                     </TableCell>
-                    <TableCell className="font-mono text-base text-[var(--ink-700)]">
+                    <TableCell className="font-mono text-xs text-[var(--ink-700)] py-2.5">
                       {reviewer.email}
                     </TableCell>
-                    <TableCell className="text-center font-mono text-base font-bold text-[var(--ink-900)]">
+                    <TableCell className="text-center font-mono text-xs font-bold text-[var(--ink-900)] py-2.5">
                       {formatNumber(reviewer.actionsCount)}
                     </TableCell>
-                    <TableCell className="text-center font-mono text-base text-[var(--ink-700)]">
+                    <TableCell className="text-center font-mono text-xs text-[var(--ink-700)] py-2.5">
                       {formatNumber(reviewer.actionTypes)}
                     </TableCell>
-                    <TableCell className="text-center font-mono text-base text-[var(--ink-500)]">
+                    <TableCell className="text-center font-mono text-xs text-[var(--ink-500)] py-2.5">
                       {formatDateTime(
                         reviewer.firstActivity ? new Date(reviewer.firstActivity).toISOString() : null,
                       )}
                     </TableCell>
-                    <TableCell className="text-center font-mono text-base text-[var(--ink-700)]">
+                    <TableCell className="text-center font-mono text-xs text-[var(--ink-700)] py-2.5">
                       {formatDateTime(
                         reviewer.lastActivity ? new Date(reviewer.lastActivity).toISOString() : null,
                       )}
@@ -281,20 +281,20 @@ export function CentralPermissions() {
       </Card>
 
       <Card className="bg-white shadow-sm border-gray-200">
-        <CardHeader className="flex flex-col gap-4 border-b border-gray-200 pb-4 sm:flex-row sm:items-center sm:justify-between">
+        <CardHeader className="flex flex-col gap-3 border-b border-gray-200 pb-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <CardTitle className="text-xl font-bold text-[var(--ink-900)]">
+            <CardTitle className="text-base font-bold text-[var(--ink-900)]">
               سجل التدقيق القانوني (AuditLog)
             </CardTitle>
-            <CardDescription className="mt-1 text-base text-gray-500">
+            <CardDescription className="mt-0.5 text-xs text-gray-500">
               السجلات مختومة ببصمة SHA-256 وغير قابلة للتعديل أو الحذف
             </CardDescription>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2.5">
+          <div className="flex flex-wrap items-center gap-2">
             <div className="relative">
               <Search
-                className="size-4 absolute start-2.5 top-1/2 -translate-y-1/2 text-muted-foreground"
+                className="size-3.5 absolute start-2.5 top-1/2 -translate-y-1/2 text-muted-foreground"
                 aria-hidden="true"
               />
               <input
@@ -306,7 +306,7 @@ export function CentralPermissions() {
                   setPage(1);
                 }}
                 aria-label="بحث في سجل التدقيق"
-                className="ps-9 pe-3 py-1.5 text-base rounded-lg border border-gray-200 bg-white text-[var(--ink-900)] focus:outline-none focus:ring-1 focus:ring-[var(--stamp-green-700)]"
+                className="ps-8 pe-3 py-1 text-xs h-8 rounded-lg border border-gray-200 bg-white text-[var(--ink-900)] focus:outline-none focus:ring-1 focus:ring-[var(--stamp-green-700)]"
               />
             </div>
 
@@ -317,7 +317,7 @@ export function CentralPermissions() {
                 setPage(1);
               }}
               aria-label="تصفية حسب نوع الكيان"
-              className="px-2.5 py-1.5 text-base rounded-lg border border-gray-200 bg-white text-[var(--ink-900)] focus:outline-none focus:ring-1 focus:ring-[var(--stamp-green-700)]"
+              className="px-2.5 py-1 text-xs h-8 rounded-lg border border-gray-200 bg-white text-[var(--ink-900)] focus:outline-none focus:ring-1 focus:ring-[var(--stamp-green-700)]"
             >
               <option value="all">كل الكيانات</option>
               {resourceTypes.map((resource) => (
@@ -333,12 +333,12 @@ export function CentralPermissions() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="min-w-[140px]">ختم الوقت</TableHead>
-                <TableHead className="min-w-[170px]">المستخدم</TableHead>
-                <TableHead className="min-w-[150px]">العملية</TableHead>
-                <TableHead className="min-w-[130px]">الكيان</TableHead>
-                <TableHead className="min-w-[280px]">البيان</TableHead>
-                <TableHead className="min-w-[110px]">البصمة</TableHead>
+                <TableHead className="min-w-[140px] text-xs">ختم الوقت</TableHead>
+                <TableHead className="min-w-[170px] text-xs">المستخدم</TableHead>
+                <TableHead className="min-w-[150px] text-xs">العملية</TableHead>
+                <TableHead className="min-w-[130px] text-xs">الكيان</TableHead>
+                <TableHead className="min-w-[280px] text-xs">البيان</TableHead>
+                <TableHead className="min-w-[110px] text-xs">البصمة</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -352,30 +352,30 @@ export function CentralPermissions() {
               >
                 {pageRows.map((log) => (
                   <TableRow key={log.id} className="transition-colors hover:bg-slate-50/70">
-                    <TableCell className="font-mono text-base text-[var(--ink-700)]">
+                    <TableCell className="font-mono text-xs text-[var(--ink-700)] py-2.5">
                       {formatDateTime(log.timestamp)}
                     </TableCell>
-                    <TableCell className="text-base font-semibold text-[var(--ink-900)]">
+                    <TableCell className="text-xs font-semibold text-[var(--ink-900)] py-2.5">
                       <div className="truncate">{log.user_name || log.user_email || 'حساب محذوف'}</div>
-                      <div className="font-mono text-base font-normal text-[var(--ink-500)]">
+                      <div className="font-mono text-xs font-normal text-[var(--ink-500)]">
                         {log.user_email || '—'}
                       </div>
                     </TableCell>
-                    <TableCell>
-                      <Badge className="border-gray-200 bg-[var(--paper-100)] font-mono text-base text-[var(--ink-900)]">
+                    <TableCell className="py-2.5">
+                      <Badge className="border-gray-200 bg-[var(--paper-100)] font-mono text-xs text-[var(--ink-900)]">
                         {log.action || '—'}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-base text-[var(--ink-700)]">
+                    <TableCell className="text-xs text-[var(--ink-700)] py-2.5">
                       <div className="truncate">{log.resource_type || '—'}</div>
-                      <div className="truncate font-mono text-base text-[var(--ink-500)]">
+                      <div className="truncate font-mono text-xs text-[var(--ink-500)]">
                         {log.resource_id || '—'}
                       </div>
                     </TableCell>
-                    <TableCell className="max-w-[340px] text-base leading-relaxed text-[var(--ink-700)]">
+                    <TableCell className="max-w-[340px] text-xs leading-relaxed text-[var(--ink-700)] py-2.5">
                       <span className="line-clamp-2">{log.description || '—'}</span>
                     </TableCell>
-                    <TableCell className="font-mono text-base text-[var(--ink-500)]">
+                    <TableCell className="font-mono text-xs text-[var(--ink-500)] py-2.5">
                       {log.checksum ? `${log.checksum.slice(0, 12)}…` : '—'}
                     </TableCell>
                   </TableRow>
@@ -384,7 +384,7 @@ export function CentralPermissions() {
             </TableBody>
           </Table>
 
-          <div className="flex flex-wrap items-center justify-between gap-2 border-t border-gray-200 px-6 py-4 text-base text-[var(--ink-500)]">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-t border-gray-200 px-4 py-2.5 text-xs text-[var(--ink-500)]">
             <span>
               عرض {formatNumber(pageRows.length)} من أصل {formatNumber(filtered.length)} سجلاً — صفحة{' '}
               {formatNumber(currentPage)} من {formatNumber(totalPages)}
@@ -395,7 +395,7 @@ export function CentralPermissions() {
                 size="sm"
                 onClick={() => setPage((current) => Math.max(1, current - 1))}
                 disabled={currentPage <= 1}
-                className="h-7 px-2 text-base"
+                className="h-7 px-2 text-xs"
               >
                 <ChevronRight className="size-3" aria-hidden="true" />
                 السابق
@@ -405,7 +405,7 @@ export function CentralPermissions() {
                 size="sm"
                 onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
                 disabled={currentPage >= totalPages}
-                className="h-7 px-2 text-base"
+                className="h-7 px-2 text-xs"
               >
                 التالي
                 <ChevronLeft className="size-3" aria-hidden="true" />
