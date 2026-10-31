@@ -1,9 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'wouter';
 import { useAuth } from '@/components/auth/AuthProvider';
+import { useI18n } from '@/i18n';
+import { useSidebarCollapse } from '@/hooks/useSidebarCollapse';
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
 import OperatorTopBar from '@/components/layout/OperatorTopBar';
-import { LucideIcon } from 'lucide-react';
+import { LucideIcon, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Logo } from '@/components/ui/Logo';
 import './operator.css';
 
@@ -59,9 +61,15 @@ export function OperatorShell({
   children,
 }: OperatorShellProps) {
   const { user } = useAuth();
+  const { dir, t } = useI18n();
+  const { isCollapsed, toggle: toggleSidebar } = useSidebarCollapse();
   const [location] = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const mainRef = useRef<HTMLElement>(null);
+
+  const CollapseIcon = dir === 'rtl'
+    ? (isCollapsed ? ChevronLeft : ChevronRight)
+    : (isCollapsed ? ChevronRight : ChevronLeft);
 
   const orgName =
     (user?.organizationName || '').trim() ||
@@ -77,26 +85,43 @@ export function OperatorShell({
     setMobileOpen(false);
   }, [location]);
 
-  const sidebarContent = (onNavigate?: () => void) => (
+  const sidebarContent = (onNavigate?: () => void, collapsed = false) => (
     <>
       <div className="op-brand">
         <div className="op-brand-logo">
-          <Logo size={44} />
+          <Logo size={collapsed ? 32 : 44} />
         </div>
-        <div className="op-brand-text">
-          <h1>صفقات ذكية</h1>
-          <span>بوابة المتعامل الاقتصادي</span>
-        </div>
+        {!collapsed && (
+          <div className="op-brand-text">
+            <h1>صفقات ذكية</h1>
+            <span>بوابة المتعامل الاقتصادي</span>
+          </div>
+        )}
+        {!onNavigate && (
+          <button
+            type="button"
+            onClick={toggleSidebar}
+            className="op-toggle-btn"
+            title={collapsed ? t('common.expand_sidebar') : t('common.collapse_sidebar')}
+            aria-label={collapsed ? t('common.expand_sidebar') : t('common.collapse_sidebar')}
+          >
+            <CollapseIcon className="w-4 h-4" />
+          </button>
+        )}
       </div>
 
-      <nav className="op-nav" aria-label="التنقل الرئيسي">
+      <nav className="op-nav" aria-label={t('common.main_navigation')}>
         {GROUP_ORDER.map((group) => {
           const groupItems = navItems.filter((item) => item.group === group);
           if (groupItems.length === 0) return null;
 
           return (
             <div key={group}>
-              <span className="op-nav-label">{GROUP_LABELS[group]}</span>
+              {!collapsed ? (
+                <span className="op-nav-label">{GROUP_LABELS[group]}</span>
+              ) : (
+                <div className="my-2 border-t border-white/10" aria-hidden="true" />
+              )}
               {groupItems.map((item) => {
                 const Icon = item.icon;
 
@@ -105,11 +130,13 @@ export function OperatorShell({
                     <a
                       href={item.href}
                       onClick={onNavigate}
+                      title={item.label}
+                      aria-label={item.label}
                       aria-current={item.isActive ? 'page' : undefined}
                       className={`op-nav-item${item.isActive ? ' active' : ''}`}
                     >
                       <Icon strokeWidth={1.8} aria-hidden="true" />
-                      <span>{item.label}</span>
+                      {!collapsed && <span>{item.label}</span>}
                     </a>
                   </Link>
                 );
@@ -120,14 +147,16 @@ export function OperatorShell({
       </nav>
 
       <div className="op-sidebar-foot">
-        <div className="op-user-chip">
+        <div className="op-user-chip" title={orgName}>
           <div className="op-avatar" aria-hidden="true">
             {initial}
           </div>
-          <div className="op-user-info">
-            <strong title={orgName}>{orgName}</strong>
-            <span>متعامل اقتصادي</span>
-          </div>
+          {!collapsed && (
+            <div className="op-user-info">
+              <strong title={orgName}>{orgName}</strong>
+              <span>{t('common.operator_breadcrumb')}</span>
+            </div>
+          )}
         </div>
       </div>
     </>
@@ -135,14 +164,17 @@ export function OperatorShell({
 
   return (
     <div className="operator-app">
-      <aside className="op-sidebar op-sidebar-desktop" aria-label="القائمة الجانبية">
-        {sidebarContent()}
+      <aside
+        className={`op-sidebar op-sidebar-desktop ${isCollapsed ? 'op-collapsed' : ''}`}
+        aria-label={t('common.main_navigation')}
+      >
+        {sidebarContent(undefined, isCollapsed)}
       </aside>
 
       <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
         <SheetContent side="start" className="op-sheet" aria-label={mobileTitle}>
-          <SheetTitle className="sr-only">قائمة التنقل</SheetTitle>
-          {sidebarContent(() => setMobileOpen(false))}
+          <SheetTitle className="sr-only">{t('common.main_navigation')}</SheetTitle>
+          {sidebarContent(() => setMobileOpen(false), false)}
         </SheetContent>
       </Sheet>
 
