@@ -327,3 +327,45 @@ class ExcludedOperator(models.Model):
         return f"{self.operator_name} (NIF: {self.nif}) - قرار: {self.decision_reference}"
 
 
+class Subscription(models.Model):
+    """
+    اشتراكات وباقات الذكاء الاصطناعي للمتعاملين والمؤسسات
+    (Starter, Pro AI, Enterprise).
+    """
+    PLAN_CHOICES = (
+        ('starter', 'الأساسية (Starter)'),
+        ('pro', 'المحترفين (Pro AI)'),
+        ('enterprise', 'المؤسسات (Enterprise)'),
+    )
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name='subscriptions',
+        verbose_name='المستخدم',
+    )
+    plan_type = models.CharField(
+        'نوع الباقة',
+        max_length=20,
+        choices=PLAN_CHOICES,
+        default='starter',
+        db_index=True,
+    )
+    start_date = models.DateTimeField('تاريخ بداية الاشتراك', default=timezone.now)
+    end_date = models.DateTimeField('تاريخ نهاية الاشتراك', null=True, blank=True)
+    is_active = models.BooleanField('حالة الاشتراك', default=True, db_index=True)
+
+    created_at = models.DateTimeField('تاريخ الإنشاء', default=timezone.now)
+    updated_at = models.DateTimeField('تاريخ التحديث', auto_now=True)
+
+    class Meta:
+        verbose_name = 'اشتراك ذكاء اصطناعي'
+        verbose_name_plural = 'اشتراكات الذكاء الاصطناعي'
+        ordering = ['-start_date', '-created_at']
+
+    def __str__(self):
+        return f"اشتراك {self.user.email} - {self.get_plan_type_display()} ({'نشط' if self.is_active else 'غير نشط'})"
+
+
+

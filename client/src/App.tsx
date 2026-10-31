@@ -12,6 +12,7 @@ import { LandingV2Page } from './pages/landing-v2/LandingV2Page';
 import { TermsPage } from './pages/legal/TermsPage';
 import { FAQPage } from './pages/legal/FAQPage';
 import { AccessibilityPage } from './pages/legal/AccessibilityPage';
+import { AISubscriptionPage } from './pages/pricing/AISubscriptionPage';
 import { PWAInstallPrompt } from '@/shared/components/PWAInstallPrompt';
 
 export function App() {
@@ -55,6 +56,7 @@ export function App() {
       <Route path="/terms" component={TermsPage} />
       <Route path="/faq" component={FAQPage} />
       <Route path="/accessibility" component={AccessibilityPage} />
+      <Route path="/pricing" component={AISubscriptionPage} />
       <Route path="/" component={LandingV2Page} />
 
       <Route>

@@ -12,7 +12,7 @@ export function TermsPage() {
       kicker={isFr ? 'Cadre Réglementaire' : 'الإطار التنظيمي والتعاقدي'}
       subtitle={
         isFr
-          ? 'Règles et conditions régissant l’accès et l’utilisation de la plateforme nationale « Safaqat Dhakia », conformément à la loi n° 23-12 relative aux marchés publics et à la loi 18-07 sur la protection des données.'
+          ? 'Règles et conditions régissant l’accès et l’utilisation de la Plateforme Intelligente « Safaqat Dhakia », conformément à la loi n° 23-12 relative aux marchés publics et à la loi 18-07 sur la protection des données.'
           : 'القواعد والضوابط المنظمة لاستخدام منصة «صفقات ذكية» للطلبيات والصفقات العمومية في الجمهورية الجزائرية الديمقراطية الشعبية، وفقاً لأحكام القانون رقم 23-12 وقانون حماية المعطيات رقم 18-07.'
       }
       icon={<Scale className="w-3.5 h-3.5" />}
@@ -50,8 +50,8 @@ export function TermsPage() {
             <li>
               <strong className="text-[#0f3154]">{isFr ? 'La Plateforme :' : 'المنصة:'}</strong>{' '}
               {isFr
-                ? 'Le système d’information national sécurisé « Safaqat Dhakia » dédié à la dématérialisation intégrale des marchés publics.'
-                : 'المنظومة الرقمية الوطنية الموحدة «صفقات ذكية» المخصصة لأتمتة ورقمنة كافة محطات دورة حياة الصفقات العمومية.'}
+                ? 'La Plateforme Intelligente « Safaqat Dhakia » dédiée à la dématérialisation intégrale des marchés publics.'
+                : 'المنصة الذكية الموحدة «صفقات ذكية» المخصصة لأتمتة ورقمنة كافة محطات دورة حياة الصفقات العمومية.'}
             </li>
             <li>
               <strong className="text-[#0f3154]">{isFr ? 'L’Opérateur Économique :' : 'المتعامل الاقتصادي:'}</strong>{' '}

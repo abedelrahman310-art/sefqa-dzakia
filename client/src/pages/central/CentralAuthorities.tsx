@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useI18n } from '@/i18n';
 import { PageHeader, KpiCard, AICard } from '@/shared/components';
 import {
   Building,
@@ -78,6 +79,7 @@ function statusMeta(status: string) {
 type RankedAuthority = CentralAuthorityReport & { rank: number };
 
 export function CentralAuthorities() {
+  const { dir } = useI18n();
   const { data, loading, error, reload } = useCentralResource(fetchCentralReports);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
@@ -116,7 +118,7 @@ export function CentralAuthorities() {
   const trainingNeeded = authorities.filter((item) => item.ai_training_needed);
 
   return (
-    <div className="space-y-4" dir="rtl">
+    <div className="space-y-4" dir={dir}>
       <PageHeader
         title="حوكمة المصالح المتعاقدة"
         titleClassName="text-xl font-bold"

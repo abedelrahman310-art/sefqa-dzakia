@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useI18n } from '@/i18n';
 import { PageHeader, KpiCard } from '@/shared/components';
 import {
   Gavel,
@@ -104,6 +105,7 @@ function groundsLabel(row: CentralObjectionRow): string {
 }
 
 export function CentralAppeals() {
+  const { dir } = useI18n();
   const { data, loading, error, reload } = useCentralResource(fetchCentralObjections);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
@@ -150,7 +152,7 @@ export function CentralAppeals() {
   }, [objections, searchQuery, filterStatus, onlyOpen]);
 
   return (
-    <div className="space-y-4" dir="rtl">
+    <div className="space-y-4" dir={dir}>
       <PageHeader
         title="الطعون على قرارات الإسناد"
         titleClassName="text-xl font-bold"

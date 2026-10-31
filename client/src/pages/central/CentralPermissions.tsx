@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useI18n } from '@/i18n';
 import { PageHeader, KpiCard } from '@/shared/components';
 import {
   Shield,
@@ -109,6 +110,7 @@ function buildReviewers(logs: CentralAuditLogRow[]): ReviewerActivity[] {
 }
 
 export function CentralPermissions() {
+  const { dir } = useI18n();
   const { data, loading, error, reload } = useCentralResource(fetchCentralAuditLogs);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterResource, setFilterResource] = useState('all');
@@ -151,7 +153,7 @@ export function CentralPermissions() {
   const pageRows = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
   return (
-    <div className="space-y-4" dir="rtl">
+    <div className="space-y-4" dir={dir}>
       <PageHeader
         title="الصلاحيات وسجل التدقيق"
         titleClassName="text-xl font-bold"

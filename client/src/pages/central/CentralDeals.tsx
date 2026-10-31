@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useI18n } from '@/i18n';
 import { PageHeader, KpiCard } from '@/shared/components';
 import {
   Briefcase,
@@ -79,6 +80,7 @@ function isDelayed(deal: ProcurementDealApi, now: number): boolean {
 }
 
 export function CentralDeals() {
+  const { dir } = useI18n();
   const { data, loading, error, reload } = useCentralResource(fetchNationalDeals);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStage, setFilterStage] = useState('all');
@@ -127,7 +129,7 @@ export function CentralDeals() {
   }, [deals, searchQuery, filterStage, onlyDelayed, now]);
 
   return (
-    <div className="space-y-4" dir="rtl">
+    <div className="space-y-4" dir={dir}>
       <PageHeader
         title="السجل الوطني للصفقات"
         titleClassName="text-xl font-bold"

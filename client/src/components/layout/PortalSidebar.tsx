@@ -1,7 +1,7 @@
 import { useAuth } from '@/components/auth/AuthProvider';
 import { useI18n } from '@/i18n';
 import { Link } from 'wouter';
-import { Languages, LucideIcon, HelpCircle, X, Building2 } from 'lucide-react';
+import { LucideIcon, HelpCircle, X, Building2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { LogoutButton, DesktopAppButton } from '@/shared/components';
 import { Logo } from '@/components/ui/Logo';
 
@@ -30,6 +30,10 @@ export interface PortalSidebarProps {
   hideUserInfo?: boolean;
   /** نمط القائمة الجانبية: 'default' | 'mint' | 'operator' | 'authority' | 'sovereign' */
   variant?: 'default' | 'mint' | 'operator' | 'authority' | 'sovereign';
+  /** هل القائمة مطوية على شاشات سطح المكتب */
+  isCollapsed?: boolean;
+  /** دالة طي/توسيع القائمة */
+  onToggleCollapse?: () => void;
 }
 
 export function PortalSidebar({
@@ -41,9 +45,15 @@ export function PortalSidebar({
   badgeTitle,
   hideUserInfo = false,
   variant = 'default',
+  isCollapsed = false,
+  onToggleCollapse,
 }: PortalSidebarProps) {
   const { user } = useAuth();
-  const { lang, setLang, t } = useI18n();
+  const { dir, t } = useI18n();
+
+  const CollapseIcon = dir === 'rtl'
+    ? (isCollapsed ? ChevronLeft : ChevronRight)
+    : (isCollapsed ? ChevronRight : ChevronLeft);
 
   const orgName = user?.organizationName || user?.displayName || user?.email || '';
   const authorityOrgName = (user?.organizationName || user?.displayName || t('authority.topbar.default_org')).trim();
@@ -59,16 +69,44 @@ export function PortalSidebar({
     return (
       <div className="flex h-full w-full select-none flex-col bg-[#0f3154] font-sans text-white">
         {/* 1. منطقة الهوية */}
-        <div className="flex flex-none items-center justify-between gap-3 border-b border-white/10 px-5 py-[18px]">
-          <div className="flex min-w-0 items-center gap-3">
-            <div className="flex size-10 flex-none items-center justify-center rounded-xl bg-white shadow-sm">
-              <Logo size={36} />
+        <div
+          className={`flex flex-none items-center ${
+            isCollapsed
+              ? 'justify-center flex-col gap-2 p-3'
+              : 'justify-between gap-3 px-5 py-[18px]'
+          } border-b border-white/10 transition-all duration-300`}
+        >
+          <div className={`flex min-w-0 items-center ${isCollapsed ? 'justify-center' : 'gap-3'}`}>
+            <div
+              className={`flex ${
+                isCollapsed ? 'size-9' : 'size-10'
+              } flex-none items-center justify-center rounded-xl bg-white shadow-sm transition-all`}
+            >
+              <Logo size={isCollapsed ? 30 : 36} />
             </div>
-            <div className="min-w-0">
-              <h2 className="truncate text-lg font-bold leading-tight text-white">{title}</h2>
-              <p className="mt-0.5 truncate text-sm text-white/70">{subtitle}</p>
-            </div>
+            {!isCollapsed && (
+              <div className="min-w-0">
+                <h2 className="truncate text-lg font-bold leading-tight text-white">{title}</h2>
+                <p className="mt-0.5 truncate text-sm text-white/70">{subtitle}</p>
+              </div>
+            )}
           </div>
+
+          {/* زر طي/توسيع القائمة لشاشات سطح المكتب */}
+          {onToggleCollapse && (
+            <button
+              type="button"
+              onClick={onToggleCollapse}
+              className={`hidden md:flex ${
+                isCollapsed ? 'size-7' : 'size-8'
+              } cursor-pointer items-center justify-center rounded-lg border border-white/10 bg-white/10 text-white/80 hover:bg-white/20 hover:text-white transition-all`}
+              title={isCollapsed ? t('common.expand_sidebar') : t('common.collapse_sidebar')}
+              aria-label={isCollapsed ? t('common.expand_sidebar') : t('common.collapse_sidebar')}
+            >
+              <CollapseIcon className="h-4 w-4" />
+            </button>
+          )}
+
           {onLinkClick && (
             <button
               type="button"
@@ -83,7 +121,9 @@ export function PortalSidebar({
 
         {/* 2. عناصر التنقل */}
         <nav
-          className="min-h-0 flex-1 space-y-1.5 overflow-y-auto p-4 pb-6"
+          className={`min-h-0 flex-1 space-y-1.5 overflow-y-auto ${
+            isCollapsed ? 'p-2' : 'p-4 pb-6'
+          }`}
           aria-label={t('common.main_navigation')}
         >
           {items.map((item) => {
@@ -92,8 +132,12 @@ export function PortalSidebar({
               <Link key={item.href} href={item.href}>
                 <a
                   onClick={onLinkClick}
+                  title={item.label}
+                  aria-label={item.label}
                   aria-current={item.isActive ? 'page' : undefined}
-                  className={`flex items-center gap-3 rounded-xl px-4 py-3 text-base font-medium transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 ${
+                  className={`flex items-center ${
+                    isCollapsed ? 'justify-center px-0 py-3' : 'gap-3 px-4 py-3'
+                  } rounded-xl text-base font-medium transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 ${
                     item.isActive
                       ? 'bg-white font-bold text-[#0f3154] shadow-sm'
                       : 'text-white hover:bg-white/10 hover:text-white'
@@ -106,7 +150,7 @@ export function PortalSidebar({
                     strokeWidth={2}
                     aria-hidden="true"
                   />
-                  <span className="truncate">{item.label}</span>
+                  {!isCollapsed && <span className="truncate">{item.label}</span>}
                 </a>
               </Link>
             );
@@ -171,21 +215,6 @@ export function PortalSidebar({
             );
           })}
         </nav>
-
-        {/* تذييل القائمة: زر تبديل اللغة */}
-        <div className="flex-none border-t border-white/10 p-3 flex items-center justify-between">
-          <span className="text-xs text-white/70 font-semibold">{t('header.tools.language')}</span>
-          <button
-            type="button"
-            onClick={() => setLang(lang === 'ar' ? 'fr' : 'ar')}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer border-0"
-            title={t('common.change_language')}
-            aria-label={t('common.change_language')}
-          >
-            <Languages className="w-3.5 h-3.5 text-white/80" />
-            <span>{lang === 'ar' ? 'Français' : 'العربية'}</span>
-          </button>
-        </div>
       </div>
     );
   }
@@ -194,20 +223,48 @@ export function PortalSidebar({
     return (
       <div className="flex flex-col h-full bg-[#0b4348] select-none text-white font-sans w-full">
         {/* 1. Header — منطقة العنوان */}
-        <div className="p-5 border-b border-white/10 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="size-10 rounded-xl bg-white flex items-center justify-center shadow-sm flex-none">
-              <Logo size={36} />
+        <div
+          className={`p-4 border-b border-white/10 flex items-center ${
+            isCollapsed
+              ? 'justify-center flex-col gap-2 p-3'
+              : 'justify-between gap-3 p-5'
+          } transition-all duration-300`}
+        >
+          <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'gap-3'} min-w-0`}>
+            <div
+              className={`flex ${
+                isCollapsed ? 'size-9' : 'size-10'
+              } rounded-xl bg-white items-center justify-center shadow-sm flex-none transition-all`}
+            >
+              <Logo size={isCollapsed ? 30 : 36} />
             </div>
-            <div className="min-w-0">
-              <h2 className="text-lg font-bold text-white leading-tight truncate">
-                {title}
-              </h2>
-              <p className="text-xs text-white/70 mt-0.5 truncate">
-                {subtitle}
-              </p>
-            </div>
+            {!isCollapsed && (
+              <div className="min-w-0">
+                <h2 className="text-lg font-bold text-white leading-tight truncate">
+                  {title}
+                </h2>
+                <p className="text-xs text-white/70 mt-0.5 truncate">
+                  {subtitle}
+                </p>
+              </div>
+            )}
           </div>
+
+          {/* زر طي/توسيع القائمة لشاشات سطح المكتب */}
+          {onToggleCollapse && (
+            <button
+              type="button"
+              onClick={onToggleCollapse}
+              className={`hidden md:flex ${
+                isCollapsed ? 'size-7' : 'size-8'
+              } cursor-pointer items-center justify-center rounded-lg border border-white/10 bg-white/10 text-white/80 hover:bg-white/20 hover:text-white transition-all`}
+              title={isCollapsed ? t('common.expand_sidebar') : t('common.collapse_sidebar')}
+              aria-label={isCollapsed ? t('common.expand_sidebar') : t('common.collapse_sidebar')}
+            >
+              <CollapseIcon className="h-4 w-4" />
+            </button>
+          )}
+
           {onLinkClick && (
             <button
               type="button"
@@ -221,21 +278,35 @@ export function PortalSidebar({
         </div>
 
         {/* 2. Navigation items — تملأ المساحة الرأسية كاملة بسلاسة وبدون أي تذييل */}
-        <nav className="flex-1 min-h-0 overflow-y-auto p-4 space-y-1.5 pb-4" aria-label={t('common.main_navigation')}>
+        <nav
+          className={`flex-1 min-h-0 overflow-y-auto ${
+            isCollapsed ? 'p-2' : 'p-4'
+          } space-y-1.5 pb-4`}
+          aria-label={t('common.main_navigation')}
+        >
           {items.map((item) => {
             const Icon = item.icon;
             return (
               <Link key={item.href} href={item.href}>
                 <a
                   onClick={onLinkClick}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 ${
+                  title={item.label}
+                  aria-label={item.label}
+                  className={`flex items-center ${
+                    isCollapsed ? 'justify-center px-0 py-3' : 'gap-3 px-4 py-3'
+                  } rounded-xl text-sm font-medium transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 ${
                     item.isActive
                       ? 'bg-white text-[#0b4348] font-bold shadow-xs'
                       : 'text-white/85 hover:bg-white/10 hover:text-white'
                   }`}
                 >
-                  <Icon className={`size-5 shrink-0 ${item.isActive ? 'text-[#0b4348]' : 'text-white/85'}`} strokeWidth={2} />
-                  <span className="truncate">{item.label}</span>
+                  <Icon
+                    className={`size-5 shrink-0 ${
+                      item.isActive ? 'text-[#0b4348]' : 'text-white/85'
+                    }`}
+                    strokeWidth={2}
+                  />
+                  {!isCollapsed && <span className="truncate">{item.label}</span>}
                 </a>
               </Link>
             );
@@ -243,35 +314,27 @@ export function PortalSidebar({
         </nav>
 
         {/* 3. بطاقة المصلحة المتعاقدة في أسفل القائمة الجانبية */}
-        <div className="flex-none p-3.5 border-t border-white/10">
-          <div className="bg-white/10 backdrop-blur-xs border border-white/15 rounded-xl p-3 flex items-center gap-3 shadow-xs">
+        <div className={`flex-none ${isCollapsed ? 'p-2' : 'p-3.5'} border-t border-white/10`}>
+          <div
+            className={`bg-white/10 backdrop-blur-xs border border-white/15 rounded-xl ${
+              isCollapsed ? 'p-2 justify-center' : 'p-3'
+            } flex items-center gap-3 shadow-xs`}
+            title={authorityOrgName}
+          >
             <div className="size-9 rounded-lg bg-white text-[#0b4348] flex items-center justify-center shrink-0 shadow-xs">
               <Building2 className="size-5 text-[#0b4348]" aria-hidden="true" />
             </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-xs font-bold text-white truncate leading-tight" title={authorityOrgName}>
-                {authorityOrgName}
-              </p>
-              <p className="text-[11px] text-white/70 mt-0.5 truncate font-medium">
-                {t('authority.topbar.account_label')}
-              </p>
-            </div>
+            {!isCollapsed && (
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-bold text-white truncate leading-tight" title={authorityOrgName}>
+                  {authorityOrgName}
+                </p>
+                <p className="text-[11px] text-white/70 mt-0.5 truncate font-medium">
+                  {t('authority.topbar.account_label')}
+                </p>
+              </div>
+            )}
           </div>
-        </div>
-
-        {/* 4. تذييل القائمة: زر تبديل اللغة */}
-        <div className="flex-none border-t border-white/10 p-3 flex items-center justify-between">
-          <span className="text-xs text-white/70 font-semibold">{t('header.tools.language')}</span>
-          <button
-            type="button"
-            onClick={() => setLang(lang === 'ar' ? 'fr' : 'ar')}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer border-0"
-            title={t('common.change_language')}
-            aria-label={t('common.change_language')}
-          >
-            <Languages className="w-3.5 h-3.5 text-white/80" />
-            <span>{lang === 'ar' ? 'Français' : 'العربية'}</span>
-          </button>
         </div>
       </div>
     );
@@ -378,17 +441,6 @@ export function PortalSidebar({
                   </p>
                 </div>
               </div>
-
-              {/* Lang toggle */}
-              <button
-                type="button"
-                onClick={() => setLang(lang === 'ar' ? 'fr' : 'ar')}
-                className="flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-lg bg-white text-[#1F6B54] border border-[#E7EAED] hover:bg-[#E9F6F1] transition-colors shadow-xs flex-none"
-                title={t('common.change_language')}
-              >
-                <Languages className="w-3.5 h-3.5 text-[#5B6472]" />
-                <span>{lang === 'ar' ? 'FR' : 'عربي'}</span>
-              </button>
             </div>
 
             {/* Optional Desktop App Button */}
@@ -413,45 +465,74 @@ export function PortalSidebar({
   return (
     <div className="flex flex-col h-full bg-[#0b4348] select-none text-white">
       {/* 1. Header — منطقة العنوان */}
-      <div className="p-5 border-b border-white/10 flex items-center justify-between">
+      <div
+        className={`p-4 border-b border-white/10 flex items-center ${
+          isCollapsed ? 'justify-center flex-col gap-2 p-3' : 'justify-between gap-3 p-5'
+        } transition-all duration-300`}
+      >
         {badgeTitle ? (
           <div className="flex items-center gap-2 text-amber-400 font-bold text-sm tracking-wide">
             <span className="size-2 rounded-full bg-amber-400 shrink-0 shadow-xs" />
-            <span>{badgeTitle.replace(/^[•\s]+/, '')}</span>
+            {!isCollapsed && <span>{badgeTitle.replace(/^[•\s]+/, '')}</span>}
           </div>
         ) : (
-          <div className="flex items-center gap-3">
-            <div className="size-10 rounded-xl bg-white flex items-center justify-center shadow-sm flex-none">
-              <Logo size={36} />
+          <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'gap-3'} min-w-0`}>
+            <div
+              className={`flex ${
+                isCollapsed ? 'size-9' : 'size-10'
+              } rounded-xl bg-white items-center justify-center shadow-sm flex-none transition-all`}
+            >
+              <Logo size={isCollapsed ? 30 : 36} />
             </div>
-            <div className="min-w-0">
-              <h2 className="text-lg font-bold text-white leading-tight truncate">
-                {title}
-              </h2>
-              <p className="text-xs text-white/70 mt-0.5 truncate">
-                {subtitle}
-              </p>
-            </div>
+            {!isCollapsed && (
+              <div className="min-w-0">
+                <h2 className="text-lg font-bold text-white leading-tight truncate">
+                  {title}
+                </h2>
+                <p className="text-xs text-white/70 mt-0.5 truncate">
+                  {subtitle}
+                </p>
+              </div>
+            )}
           </div>
+        )}
+
+        {/* زر طي/توسيع القائمة لشاشات سطح المكتب */}
+        {onToggleCollapse && (
+          <button
+            type="button"
+            onClick={onToggleCollapse}
+            className={`hidden md:flex ${
+              isCollapsed ? 'size-7' : 'size-8'
+            } cursor-pointer items-center justify-center rounded-lg border border-white/10 bg-white/10 text-white/80 hover:bg-white/20 hover:text-white transition-all`}
+            title={isCollapsed ? t('common.expand_sidebar') : t('common.collapse_sidebar')}
+            aria-label={isCollapsed ? t('common.expand_sidebar') : t('common.collapse_sidebar')}
+          >
+            <CollapseIcon className="h-4 w-4" />
+          </button>
         )}
       </div>
 
       {/* 2. Nav — scrollable وسط */}
-      <nav className="flex-1 overflow-y-auto p-4 space-y-1.5">
+      <nav className={`flex-1 overflow-y-auto ${isCollapsed ? 'p-2' : 'p-4'} space-y-1.5`}>
         {items.map((item) => {
           const Icon = item.icon;
           return (
             <Link key={item.href} href={item.href}>
               <a
                 onClick={onLinkClick}
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-150 ${
+                title={item.label}
+                aria-label={item.label}
+                className={`flex items-center ${
+                  isCollapsed ? 'justify-center px-0 py-3' : 'gap-3 px-4 py-3'
+                } rounded-xl text-sm font-medium transition-all duration-150 ${
                   item.isActive
                     ? 'bg-white text-[#0b4348] font-bold shadow-xs'
                     : 'text-white/85 hover:bg-white/10 hover:text-white'
                 }`}
               >
                 <Icon className={`size-5 shrink-0 ${item.isActive ? 'text-[#0b4348]' : 'text-white/85'}`} strokeWidth={2} />
-                <span className="truncate">{item.label}</span>
+                {!isCollapsed && <span className="truncate">{item.label}</span>}
               </a>
             </Link>
           );
@@ -460,48 +541,46 @@ export function PortalSidebar({
 
       {/* 3. Footer — إما تذييل المساعدة النظيف أو معلومات المستخدم */}
       {hideUserInfo ? null : (
-        <div className="border-t border-white/10 p-4 bg-[#0b4348] flex flex-col gap-3">
+        <div className={`border-t border-white/10 ${isCollapsed ? 'p-2' : 'p-4'} bg-[#0b4348] flex flex-col gap-3`}>
           {/* بطاقة المصلحة المتعاقدة */}
-          <div className="bg-white/10 backdrop-blur-xs border border-white/15 rounded-xl p-3 flex items-center gap-3 shadow-xs">
+          <div
+            className={`bg-white/10 backdrop-blur-xs border border-white/15 rounded-xl ${
+              isCollapsed ? 'p-2 justify-center' : 'p-3'
+            } flex items-center gap-3 shadow-xs`}
+            title={authorityOrgName}
+          >
             <div className="size-9 rounded-lg bg-white text-[#0b4348] flex items-center justify-center shrink-0 shadow-xs">
               <Building2 className="size-5 text-[#0b4348]" aria-hidden="true" />
             </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-xs font-bold text-white truncate leading-tight" title={authorityOrgName}>
-                {authorityOrgName}
-              </p>
-              <p className="text-[11px] text-white/70 mt-0.5 truncate font-medium">
-                {t('authority.topbar.account_label')}
-              </p>
-            </div>
+            {!isCollapsed && (
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-bold text-white truncate leading-tight" title={authorityOrgName}>
+                  {authorityOrgName}
+                </p>
+                <p className="text-[11px] text-white/70 mt-0.5 truncate font-medium">
+                  {t('authority.topbar.account_label')}
+                </p>
+              </div>
+            )}
           </div>
 
           {/* User row */}
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-3 min-w-0">
+          <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'} gap-2`}>
+            <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'gap-3'} min-w-0`} title={user?.displayName || orgName}>
               <div className="size-10 rounded-full bg-white text-[#0b4348] flex items-center justify-center font-semibold text-sm flex-none shadow-sm">
                 {initial}
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-bold text-white truncate">
-                  {user?.displayName || orgName}
-                </p>
-                <p className="text-xs text-white/70 truncate">
-                  {user?.email || ''}
-                </p>
-              </div>
+              {!isCollapsed && (
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-bold text-white truncate">
+                    {user?.displayName || orgName}
+                  </p>
+                  <p className="text-xs text-white/70 truncate">
+                    {user?.email || ''}
+                  </p>
+                </div>
+              )}
             </div>
-
-            {/* Lang toggle */}
-            <button
-              type="button"
-              onClick={() => setLang(lang === 'ar' ? 'fr' : 'ar')}
-              className="flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-lg bg-white/10 text-white border border-white/20 hover:bg-white/20 transition-colors shadow-xs flex-none"
-              title={t('common.change_language')}
-            >
-              <Languages className="w-3.5 h-3.5 text-white/80" />
-              <span>{lang === 'ar' ? 'FR' : 'عربي'}</span>
-            </button>
           </div>
 
           {/* Optional Desktop App Button */}

@@ -98,6 +98,10 @@ urlpatterns = [
     path('media/<path:relative_path>', SecureDocumentDownloadView.as_view(), name='secure_media_download'),
     path('api/documents/<str:document_id>/download/', SecureDocumentDownloadView.as_view(), name='secure_document_download'),
 
+    # 10. AI Subscriptions & Pricing: /api/subscriptions/plans/ & /api/subscriptions/checkout/
+    path('api/subscriptions/', include('apps.users.subscription_urls')),
+    path('api/subscriptions', include('apps.users.subscription_urls')),
+
     # Modular Domain APIs
     path('api/auth/', include('apps.users.urls')),
     path('api/users/', include('apps.users.urls')),

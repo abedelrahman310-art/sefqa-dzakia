@@ -21,7 +21,7 @@ def central_admin(db):
         email="central@safaqat.dz",
         password="AdminPass123!",
         role="central_admin",
-        organization_name="الرقابة الوطنية للصفقات",
+        organization_name="الرقابة العامة على الصفقات",
     )
 
 

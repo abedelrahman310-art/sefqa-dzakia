@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useI18n } from '@/i18n';
 import { toast } from 'sonner';
 import { PageHeader, KpiCard } from '@/shared/components';
 import {
@@ -79,6 +80,7 @@ function statusMeta(status: string) {
 }
 
 export function CentralReports() {
+  const { dir } = useI18n();
   const { data, loading, error, reload } = useCentralResource(fetchCentralReports);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState('all');
@@ -150,11 +152,11 @@ export function CentralReports() {
   };
 
   return (
-    <div className="space-y-4" dir="rtl">
+    <div className="space-y-4" dir={dir}>
       <PageHeader
         title="التقارير الوطنية الموحدة"
         titleClassName="text-xl font-bold"
-        description="كتالوج التقارير الوطنية المولّدة من الخادم مع مؤشرات الحصيلة الوطنية للصفقات والشفافية."
+        description="كتالوج التقارير الوطنية المولّدة من الخادم مع مؤشرات الحصيلة الشاملة والشفافية."
         actions={
           <div className="flex items-center gap-2 print:hidden">
             <Button

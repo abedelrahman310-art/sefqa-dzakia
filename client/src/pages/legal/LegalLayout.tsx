@@ -83,7 +83,7 @@ export function LegalLayout({
                 {isFr ? 'Safaqat Dhakia' : 'صفقات ذكية'}
               </span>
               <span className="text-[10px] font-semibold text-[#047857] leading-none">
-                {isFr ? 'Plateforme Nationale des Marchés Publics' : 'المنصة الوطنية للصفقات العمومية'}
+                {isFr ? 'Plateforme Intelligente' : 'المنصة الذكية'}
               </span>
             </div>
           </Link>

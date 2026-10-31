@@ -62,6 +62,82 @@
   border-inline-end: 1px solid rgba(255, 255, 255, 0.12);
   min-height: 0;
   color: #ffffff;
+  transition: width 0.3s ease-in-out, flex 0.3s ease-in-out;
+  overflow: hidden;
+}
+
+.op-sidebar.op-collapsed {
+  width: 80px;
+  flex: 0 0 80px;
+}
+
+.op-sidebar.op-collapsed .op-brand {
+  padding: 14px 8px;
+  flex-direction: column;
+  gap: 10px;
+  justify-content: center;
+}
+
+.op-sidebar.op-collapsed .op-brand-logo {
+  width: 36px;
+  height: 36px;
+  padding: 2px;
+}
+
+.op-sidebar.op-collapsed .op-brand-text {
+  display: none;
+}
+
+.op-sidebar.op-collapsed .op-nav {
+  padding: 12px 6px;
+}
+
+.op-sidebar.op-collapsed .op-nav-label {
+  display: none;
+}
+
+.op-sidebar.op-collapsed .op-nav-item {
+  justify-content: center;
+  padding: 10px 0;
+}
+
+.op-sidebar.op-collapsed .op-nav-item span {
+  display: none;
+}
+
+.op-sidebar.op-collapsed .op-user-chip {
+  justify-content: center;
+  padding: 6px;
+}
+
+.op-sidebar.op-collapsed .op-user-info {
+  display: none;
+}
+
+.op-toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.9);
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+  margin-inline-start: auto;
+}
+
+.op-sidebar.op-collapsed .op-toggle-btn {
+  width: 28px;
+  height: 28px;
+  margin-inline-start: 0;
+}
+
+.op-toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
 }
 
 .op-brand {

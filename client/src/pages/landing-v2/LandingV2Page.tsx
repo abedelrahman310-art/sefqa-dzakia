@@ -9,7 +9,7 @@ import logoCss from '@/components/ui/logo.css?inline';
 import fr from '@/locales/fr.json';
 
 const frTranslations = fr as unknown as Record<string, string>;
-const LANDING_TITLE = 'صفقات ذكية | المنصة الوطنية الذكية للصفقات العمومية';
+const LANDING_TITLE = 'صفقات ذكية | المنصة الذكية';
 
 /** يوحّد المسافات كما في جرد النصوص الأصلي (194 نصاً). */
 function normalizeText(value: string): string {
@@ -250,7 +250,7 @@ export function LandingV2Page() {
     const a11yLink = root.querySelector<HTMLAnchorElement>('.footer-col a[href="/accessibility"]');
     if (a11yLink) a11yLink.textContent = t('landing.footer.accessibility');
 
-    const aiPowerLink = root.querySelector<HTMLAnchorElement>('.footer-col a[href="#ai"]');
+    const aiPowerLink = root.querySelector<HTMLAnchorElement>('.footer-col a[href="/pricing"]');
     if (aiPowerLink) aiPowerLink.textContent = t('landing.footer.ai_power');
   }, [lang, t]);
 

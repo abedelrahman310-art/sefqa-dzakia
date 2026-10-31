@@ -2430,7 +2430,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                     الوثائق والسندات العامة والتنظيمية
                   </h2>
                   <p className="text-xs text-gray-500">
-                    نماذج رسمية غير مقيدة بصفقة معينة صادرة عن وزارة المالية واللجنة الوطنية للصفقات.
+                    نماذج رسمية غير مقيدة بصفقة معينة صادرة عن وزارة المالية واللجنة المختصة بالصفقات العمومية.
                   </p>
                 </div>
 

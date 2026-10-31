@@ -970,7 +970,7 @@ export function LandingPage() {
                 <li><Link href="/terms" className="hover:text-emerald-700 transition-colors">{t('landing.footer.terms')}</Link></li>
                 <li><Link href="/faq" className="hover:text-emerald-700 transition-colors">{t('landing.footer.faq')}</Link></li>
                 <li><Link href="/accessibility" className="hover:text-emerald-700 transition-colors">{t('landing.footer.accessibility')}</Link></li>
-                <li><a href="#ai" className="hover:text-emerald-700 transition-colors">{t('landing.footer.ai_power')}</a></li>
+                <li><Link href="/pricing" className="hover:text-emerald-700 transition-colors">{t('landing.footer.ai_power')}</Link></li>
               </ul>
             </div>
 

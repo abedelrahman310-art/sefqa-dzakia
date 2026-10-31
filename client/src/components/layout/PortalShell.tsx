@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useState, ReactNode } from 'react';
 import { useLocation } from 'wouter';
 import { useI18n } from '@/i18n';
+import { useSidebarCollapse } from '@/hooks/useSidebarCollapse';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Menu } from 'lucide-react';
 
@@ -49,6 +50,7 @@ export function PortalShell({
   children,
 }: PortalShellProps) {
   const { lang, setLang, t } = useI18n();
+  const { isCollapsed, toggle: toggleSidebar } = useSidebarCollapse();
   const [location] = useLocation();
   const mainRef = useRef<HTMLElement>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -62,11 +64,23 @@ export function PortalShell({
   }, [location]);
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[var(--paper-50)]" dir="rtl">
-      {/* Desktop Sidebar: 280px fixed (أو مخصص) */}
+    <div className="flex h-screen overflow-hidden bg-[var(--paper-50)]" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
+      {/* Desktop Sidebar: Collapsible between 80px and 280px */}
       {!hideSidebar && (
-        <aside className={`hidden md:flex flex-col ${sidebarWidth} h-screen bg-white border-e border-[var(--color-border-subtle)] flex-none print:hidden`}>
-          {sidebar}
+        <aside
+          className={`hidden md:flex flex-col ${
+            isCollapsed ? 'w-20' : sidebarWidth
+          } h-screen bg-white border-e border-[var(--color-border-subtle)] flex-none print:hidden transition-all duration-300 ease-in-out overflow-hidden`}
+        >
+          {React.isValidElement(sidebar)
+            ? React.cloneElement(sidebar as React.ReactElement<{
+                isCollapsed?: boolean;
+                onToggleCollapse?: () => void;
+              }>, {
+                isCollapsed,
+                onToggleCollapse: toggleSidebar,
+              })
+            : sidebar}
         </aside>
       )}
 
@@ -90,11 +104,15 @@ export function PortalShell({
               </SheetTrigger>
               <SheetContent side="start" className="p-0 w-[280px] border-e border-[var(--color-border-subtle)]">
                 {React.isValidElement(sidebar)
-                  ? React.cloneElement(sidebar as React.ReactElement<{ onLinkClick?: () => void }>, {
+                  ? React.cloneElement(sidebar as React.ReactElement<{
+                      onLinkClick?: () => void;
+                      isCollapsed?: boolean;
+                    }>, {
                       onLinkClick: () => {
                         setMobileOpen(false);
                         (sidebar as React.ReactElement<{ onLinkClick?: () => void }>).props.onLinkClick?.();
                       },
+                      isCollapsed: false,
                     })
                   : sidebar}
               </SheetContent>
