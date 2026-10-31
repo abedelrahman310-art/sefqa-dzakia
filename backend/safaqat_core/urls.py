@@ -21,6 +21,7 @@ from apps.users.views import (
 )
 from apps.procurements.views_secure_media import SecureDocumentDownloadView
 from apps.procurements.views_pricing import AuthorityPriceAnalysisView
+from apps.reports.views import DashboardMetricsView
 
 # Routers for direct top-level endpoints
 opportunities_router = DefaultRouter()
@@ -81,6 +82,10 @@ urlpatterns = [
     # 5.1 التحليل المالي الذكي لعروض الصفقة (استشاري)
     path('api/authority/analyze-prices/', AuthorityPriceAnalysisView.as_view(), name='direct_authority_analyze_prices'),
     path('api/authority/analyze-prices', AuthorityPriceAnalysisView.as_view(), name='direct_authority_analyze_prices_no_slash'),
+
+    # 5.2 لوحة القيادة والمؤشرات للمصلحة المتعاقدة (مع عزل صارم للبيانات)
+    path('api/authority/dashboard/', DashboardMetricsView.as_view(), name='direct_authority_dashboard'),
+    path('api/authority/dashboard', DashboardMetricsView.as_view(), name='direct_authority_dashboard_no_slash'),
 
     # 6. AI Intelligence: Legal Chat & Tender Document Analysis
     path('api/ai/legal-chat/', AILegalChatView.as_view(), name='direct_ai_legal_chat'),

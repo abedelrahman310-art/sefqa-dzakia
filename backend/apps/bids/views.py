@@ -31,12 +31,12 @@ class BidOfferViewSet(viewsets.ModelViewSet):
         user = self.request.user
         if not user.is_authenticated:
             return self.queryset.none()
-        if user.role == 'operator':
-            qs = self.queryset.filter(operator=user)
-        elif user.role == 'authority':
-            qs = self.queryset.filter(deal__authority=user)
-        elif user.role == 'central_admin':
+        if getattr(user, 'is_superuser', False) or getattr(user, 'is_staff', False) or getattr(user, 'role', None) == 'central_admin':
             qs = self.queryset
+        elif getattr(user, 'role', None) == 'authority':
+            qs = self.queryset.filter(deal__authority=user)
+        elif getattr(user, 'role', None) == 'operator':
+            qs = self.queryset.filter(operator=user)
         else:
             return self.queryset.none()
 
@@ -190,12 +190,12 @@ class OfferViewSet(BidOfferViewSet):
         user = self.request.user
         if not user.is_authenticated:
             return self.queryset.none()
-        if user.role == 'operator':
-            qs = self.queryset.filter(operator=user)
-        elif user.role == 'authority':
-            qs = self.queryset.filter(deal__authority=user)
-        elif user.role == 'central_admin':
+        if getattr(user, 'is_superuser', False) or getattr(user, 'is_staff', False) or getattr(user, 'role', None) == 'central_admin':
             qs = self.queryset
+        elif getattr(user, 'role', None) == 'authority':
+            qs = self.queryset.filter(deal__authority=user)
+        elif getattr(user, 'role', None) == 'operator':
+            qs = self.queryset.filter(operator=user)
         else:
             return self.queryset.none()
 

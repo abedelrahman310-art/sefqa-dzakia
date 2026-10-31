@@ -25,6 +25,7 @@ from .views_opening import (
 )
 from .views_pdf import OpeningSessionPdfView, CahierSpecsPdfView
 from .views_reference_prices import CheckPricesView
+from apps.reports.views import DashboardMetricsView
 
 router = DefaultRouter()
 router.register(r'deals', ProcurementDealViewSet, basename='procurement-deal')
@@ -34,6 +35,8 @@ router.register(r'milestones', MilestoneViewSet, basename='milestone')
 router.register(r'contracts', ContractViewSet, basename='procurement-contract')
 
 urlpatterns = [
+    path("authority/dashboard/", DashboardMetricsView.as_view(), name="authority-dashboard"),
+    path("authority/dashboard", DashboardMetricsView.as_view(), name="authority-dashboard-no-slash"),
     path("check-prices/", CheckPricesView.as_view(), name="check-prices"),
     path("check-prices", CheckPricesView.as_view(), name="check-prices-no-slash"),
     path("authority/opportunities/<str:pk>/evaluation-data/", EvaluationDataView.as_view(), name="authority-evaluation-data"),

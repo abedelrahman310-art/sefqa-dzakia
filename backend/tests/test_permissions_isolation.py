@@ -560,3 +560,114 @@ class TestExecutionPermissionsIsolation:
         assert str(record_a.id) not in _response_ids(res_authority_b)
 
 
+# ═══════════════════════════════════════════════════════════════
+# BE-02: عزل الصفقات والمؤشرات للمصالح المتعاقدة وحالة الصفر (Zero State)
+# ═══════════════════════════════════════════════════════════════
+
+@pytest.mark.django_db
+class TestNewAuthorityZeroStateAndIsolation:
+    def test_new_authority_sees_zero_deals_and_offers(self, client_authority_1):
+        """المصلحة المتعاقدة الجديدة المسجلة حديثاً لا ترى أي صفقات أو عروض لمصالح أخرى وتظهر لها حالة الصفر"""
+        _, auth1 = client_authority_1
+
+        # إنشاء صفقة وعرض لمصلحة قائمة
+        deal1 = ProcurementDeal.objects.create(
+            reference_number='DEAL-EXISTING-01',
+            title='صفقة مصلحة قديمة',
+            description='وصف الصفقة القديمة',
+            authority=auth1,
+            current_stage=5,
+            estimated_budget=Decimal('5000000.00'),
+        )
+        op = CustomUser.objects.create_user(
+            email='op_demo@safaqat.dz', password='pass', role='operator'
+        )
+        BidOffer.objects.create(
+            deal=deal1,
+            operator=op,
+            financial_amount=Decimal('4800000.00'),
+            status='submitted',
+        )
+
+        # تسجيل مصلحة متعاقدة جديدة كلياً
+        auth_new = CustomUser.objects.create_user(
+            email='new_authority@safaqat.dz', password='pass', role='authority'
+        )
+        c_new = APIClient()
+        c_new.force_authenticate(user=auth_new)
+
+        # 1. فحص قائمة الصفقات: صفر صفقات
+        res_deals = c_new.get('/api/procurements/deals/')
+        assert res_deals.status_code == 200
+        data_deals = res_deals.json()
+        items_deals = data_deals if isinstance(data_deals, list) else data_deals.get('results', [])
+        assert len(items_deals) == 0
+
+        # محاولة الوصول المباشر لصفقة المصلحة الأولى تعود بـ 404
+        res_deal_detail = c_new.get(f'/api/procurements/deals/{deal1.id}/')
+        assert res_deal_detail.status_code == 404
+
+        # 2. فحص قائمة العروض: صفر عروض
+        res_offers = c_new.get('/api/bids/offers/')
+        assert res_offers.status_code == 200
+        data_offers = res_offers.json()
+        items_offers = data_offers if isinstance(data_offers, list) else data_offers.get('results', [])
+        assert len(items_offers) == 0
+
+        # محاولة استعراض عروض الصفقة القديمة تعود بقائمة فارغة
+        res_offers_deal = c_new.get(f'/api/bids/offers/?deal={deal1.id}')
+        assert res_offers_deal.status_code == 200
+        data_offers_deal = res_offers_deal.json()
+        items_offers_deal = data_offers_deal if isinstance(data_offers_deal, list) else data_offers_deal.get('results', [])
+        assert len(items_offers_deal) == 0
+
+        # 3. فحص لوحة القيادة والمؤشرات للمصلحة الجديدة: كل المؤشرات صفر تماماً
+        res_dash = c_new.get('/api/authority/dashboard/')
+        assert res_dash.status_code == 200
+        dash_data = res_dash.json()
+        assert dash_data['total_deals'] == 0
+        assert dash_data['total_budget_dzd'] == 0
+        assert dash_data['total_contracts'] == 0
+        assert dash_data['total_contracted_amount_dzd'] == 0
+        assert dash_data['total_paid_dzd'] == 0
+        assert dash_data['total_bids'] == 0
+        assert dash_data['stages_distribution'] == []
+
+    def test_operator_only_sees_published_deals(self, client_authority_1, client_operator_1):
+        """المتعامل الاقتصادي يرى فقط الصفقات المنشورة (المرحلة 3 فما فوق) ولا يرى المسودات إطلاقاً"""
+        _, auth = client_authority_1
+        c_op, op = client_operator_1
+
+        # صفقة في مرحلة الإعداد/المسودة (مرحلة 2)
+        draft_deal = ProcurementDeal.objects.create(
+            reference_number='DRAFT-DEAL-01',
+            title='صفقة مسودة خاصة بالمصلحة',
+            authority=auth,
+            current_stage=2,
+            estimated_budget=Decimal('1000000.00'),
+        )
+
+        # صفقة منشورة (مرحلة 3)
+        published_deal = ProcurementDeal.objects.create(
+            reference_number='PUB-DEAL-01',
+            title='صفقة منشورة للإعلان',
+            authority=auth,
+            current_stage=3,
+            estimated_budget=Decimal('2000000.00'),
+        )
+
+        res = c_op.get('/api/procurements/deals/')
+        assert res.status_code == 200
+        data = res.json()
+        deals_list = data if isinstance(data, list) else data.get('results', [])
+        deal_ids = [d['id'] for d in deals_list]
+
+        assert str(published_deal.id) in deal_ids
+        assert str(draft_deal.id) not in deal_ids
+
+        # محاولة الوصول المباشر للمسودة تعود بـ 404
+        res_draft_detail = c_op.get(f'/api/procurements/deals/{draft_deal.id}/')
+        assert res_draft_detail.status_code == 404
+
+
+

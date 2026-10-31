@@ -8,13 +8,31 @@ from apps.contracts.models import Contract
 from apps.execution.models import PaymentSituation
 
 class DashboardMetricsView(APIView):
-    """مؤشرات لوحة القيادة والرقابة المركزية وفق القانون 23-12"""
+    """مؤشرات لوحة القيادة والرقابة وفق القانون 23-12 مع عزل صارم لبيانات المصالح المتعاقدة"""
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
-        deals_qs = ProcurementDeal.objects.all()
-        bids_qs = BidOffer.objects.all()
-        contracts_qs = Contract.objects.all()
+        user = request.user
+        if getattr(user, 'is_superuser', False) or getattr(user, 'is_staff', False) or getattr(user, 'role', None) == 'central_admin':
+            deals_qs = ProcurementDeal.objects.all()
+            bids_qs = BidOffer.objects.all()
+            contracts_qs = Contract.objects.all()
+            payments_qs = PaymentSituation.objects.filter(status='paid')
+        elif getattr(user, 'role', None) == 'authority':
+            deals_qs = ProcurementDeal.objects.filter(authority=user)
+            bids_qs = BidOffer.objects.filter(deal__authority=user)
+            contracts_qs = Contract.objects.filter(deal__authority=user)
+            payments_qs = PaymentSituation.objects.filter(contract__deal__authority=user, status='paid')
+        elif getattr(user, 'role', None) == 'operator':
+            deals_qs = ProcurementDeal.objects.filter(current_stage__gte=3)
+            bids_qs = BidOffer.objects.filter(operator=user)
+            contracts_qs = Contract.objects.filter(awarded_operator=user)
+            payments_qs = PaymentSituation.objects.filter(contract__awarded_operator=user, status='paid')
+        else:
+            deals_qs = ProcurementDeal.objects.none()
+            bids_qs = BidOffer.objects.none()
+            contracts_qs = Contract.objects.none()
+            payments_qs = PaymentSituation.objects.none()
 
         total_deals = deals_qs.count()
         total_budget = deals_qs.aggregate(Sum('estimated_budget'))['estimated_budget__sum'] or 0
@@ -22,10 +40,10 @@ class DashboardMetricsView(APIView):
         total_contracted_amount = contracts_qs.aggregate(Sum('signed_amount'))['signed_amount__sum'] or 0
 
         # Stage distribution
-        stages_data = deals_qs.values('current_stage').annotate(count=Count('id')).order_by('current_stage')
+        stages_data = list(deals_qs.values('current_stage').annotate(count=Count('id')).order_by('current_stage'))
         
         # Payment situations aggregated
-        total_paid = PaymentSituation.objects.filter(status='paid').aggregate(Sum('net_payable_amount'))['net_payable_amount__sum'] or 0
+        total_paid = payments_qs.aggregate(Sum('net_payable_amount'))['net_payable_amount__sum'] or 0
 
         return Response({
             'total_deals': total_deals,

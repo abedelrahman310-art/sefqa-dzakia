@@ -56,11 +56,23 @@ class IsContractingAuthorityOrReadOnly(permissions.BasePermission):
         )
 
 class ProcurementDealViewSet(viewsets.ModelViewSet):
-    """إدارة الصفقات العمومية وفق القانون 23-12"""
+    """إدارة الصفقات العمومية وفق القانون 23-12 مع عزل صارم لبيانات المصالح المتعاقدة"""
     queryset = ProcurementDeal.objects.all().select_related('authority')
     serializer_class = ProcurementDealSerializer
     permission_classes = [IsContractingAuthorityOrReadOnly]
     throttle_classes = [UserRateThrottle, AnonRateThrottle]
+
+    def get_queryset(self):
+        user = self.request.user
+        if not user or not user.is_authenticated:
+            return ProcurementDeal.objects.filter(current_stage__gte=3).select_related('authority')
+        if getattr(user, 'is_superuser', False) or getattr(user, 'is_staff', False) or getattr(user, 'role', None) == 'central_admin':
+            return ProcurementDeal.objects.all().select_related('authority')
+        if getattr(user, 'role', None) == 'authority':
+            return ProcurementDeal.objects.filter(authority=user).select_related('authority')
+        if getattr(user, 'role', None) == 'operator':
+            return ProcurementDeal.objects.filter(current_stage__gte=3).select_related('authority')
+        return ProcurementDeal.objects.filter(current_stage__gte=3).select_related('authority')
 
     def perform_create(self, serializer):
         serializer.save(authority=self.request.user)
@@ -347,6 +359,16 @@ class CahierSpecsViewSet(viewsets.ModelViewSet):
     serializer_class = CahierSpecsSerializer
     permission_classes = [permissions.IsAuthenticated, IsCahierAuthorityOwner]
 
+    def get_queryset(self):
+        user = self.request.user
+        if not user or not user.is_authenticated:
+            return CahierSpecs.objects.none()
+        if getattr(user, 'is_superuser', False) or getattr(user, 'is_staff', False) or getattr(user, 'role', None) == 'central_admin':
+            return CahierSpecs.objects.all().select_related('deal')
+        if getattr(user, 'role', None) == 'authority':
+            return CahierSpecs.objects.filter(deal__authority=user).select_related('deal')
+        return CahierSpecs.objects.filter(deal__current_stage__gte=3).select_related('deal')
+
 
 class OpportunityViewSet(viewsets.ReadOnlyModelViewSet):
     """
@@ -357,6 +379,16 @@ class OpportunityViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = ProcurementDeal.objects.all().select_related('authority', 'cahier_specs')
     serializer_class = OpportunitySerializer
     permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        if not user or not user.is_authenticated:
+            return ProcurementDeal.objects.filter(current_stage__gte=3).select_related('authority', 'cahier_specs')
+        if getattr(user, 'is_superuser', False) or getattr(user, 'is_staff', False) or getattr(user, 'role', None) == 'central_admin':
+            return ProcurementDeal.objects.all().select_related('authority', 'cahier_specs')
+        if getattr(user, 'role', None) == 'authority':
+            return ProcurementDeal.objects.filter(authority=user).select_related('authority', 'cahier_specs')
+        return ProcurementDeal.objects.filter(current_stage__gte=3).select_related('authority', 'cahier_specs')
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
