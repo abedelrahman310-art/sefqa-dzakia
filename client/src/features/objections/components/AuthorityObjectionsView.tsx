@@ -238,13 +238,13 @@ export function AuthorityObjectionsView() {
       {/* Filter and Search Bar */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-card p-3 rounded-xl border border-border/60 shadow-sm">
         <div className="relative w-full sm:w-80">
-          <Search className="absolute right-3 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute start-3 top-2.5 h-4 w-4 text-muted-foreground" />
           <input
             type="text"
             placeholder="بحث بالمرجع، عنوان الصفقة، أو الطاعن..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-3 pr-9 py-1.5 text-sm rounded-lg border border-input bg-background focus:outline-none focus:ring-2 focus:ring-primary/20"
+            className="w-full ps-9 pe-3 py-1.5 text-sm rounded-lg border border-input bg-background focus:outline-none focus:ring-2 focus:ring-primary/20"
           />
         </div>
 

@@ -1,4 +1,5 @@
 import { useId, useState } from 'react';
+import { useI18n } from '@/i18n';
 import { ChevronDown, FileSignature } from 'lucide-react';
 import {
   COMPETITION_SCOPE_LABELS,
@@ -33,8 +34,6 @@ interface FormMeta {
   legalRef: string;
 }
 
-const EMPTY_VALUE = 'غير محدد في دفتر الشروط';
-
 function lookupForm(value?: string | null): FormMeta | undefined {
   if (!value) return undefined;
   return (FORM_LABELS as Record<string, FormMeta>)[value];
@@ -56,6 +55,7 @@ function scopeLabel(value?: string | null): string | undefined {
 }
 
 export function ProcedureTypeCollapsible({ info }: { info: ProcedureTypeInfo }) {
+  const { t } = useI18n();
   const [open, setOpen] = useState(false);
   const panelId = useId();
 
@@ -66,7 +66,7 @@ export function ProcedureTypeCollapsible({ info }: { info: ProcedureTypeInfo }) 
     ? methodMeta
       ? `${methodMeta.ar} — ${formMeta.ar}`
       : formMeta.ar
-    : methodMeta?.ar ?? EMPTY_VALUE;
+    : methodMeta?.ar ?? t('operator.procedure.empty');
 
   const description = formMeta?.desc ?? methodMeta?.desc;
   const legalRef = formMeta?.legalRef ?? methodMeta?.legalRef;
@@ -88,8 +88,8 @@ export function ProcedureTypeCollapsible({ info }: { info: ProcedureTypeInfo }) 
         <span className="op-proc-icon" aria-hidden="true">
           <FileSignature />
         </span>
-        <span className="op-proc-label">نوع الإجراء</span>
-        <span className="op-proc-value" title={value}>
+        <span className="op-proc-label whitespace-nowrap">{t('operator.procedure.type_label')}</span>
+        <span className="op-proc-value truncate" title={value}>
           {value}
         </span>
         <ChevronDown className="op-proc-chevron" aria-hidden="true" />
@@ -99,7 +99,7 @@ export function ProcedureTypeCollapsible({ info }: { info: ProcedureTypeInfo }) 
         className="op-proc-panel"
         id={panelId}
         role="region"
-        aria-label="تفاصيل نوع الإجراء"
+        aria-label={t('operator.procedure.details_label')}
         aria-hidden={!open}
       >
         <div className="op-proc-panel-inner">
@@ -108,8 +108,7 @@ export function ProcedureTypeCollapsible({ info }: { info: ProcedureTypeInfo }) 
               <p className="op-proc-desc">{description}</p>
             ) : (
               <p className="op-proc-hint">
-                لم يُسجَّل نوع الإجراء لهذه الصفقة بعد؛ يُحدَّد في دفتر الشروط عند إعداده من
-                المصلحة المتعاقدة.
+                {t('operator.procedure.empty_hint')}
               </p>
             )}
 
@@ -117,19 +116,19 @@ export function ProcedureTypeCollapsible({ info }: { info: ProcedureTypeInfo }) 
               <dl className="op-proc-meta">
                 {nature && (
                   <div className="op-proc-meta-row">
-                    <dt>طبيعة الصفقة</dt>
+                    <dt className="whitespace-nowrap">{t('operator.procedure.nature')}</dt>
                     <dd>{nature}</dd>
                   </div>
                 )}
                 {scope && (
                   <div className="op-proc-meta-row">
-                    <dt>نطاق المنافسة</dt>
+                    <dt className="whitespace-nowrap">{t('operator.procedure.scope')}</dt>
                     <dd>{scope}</dd>
                   </div>
                 )}
                 {legalRef && (
                   <div className="op-proc-meta-row">
-                    <dt>المرجع</dt>
+                    <dt className="whitespace-nowrap">{t('operator.procedure.legal_ref')}</dt>
                     <dd>{legalRef}</dd>
                   </div>
                 )}

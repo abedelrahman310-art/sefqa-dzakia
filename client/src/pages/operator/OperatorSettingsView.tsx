@@ -96,7 +96,7 @@ export function OperatorSettingsView() {
     }
   };
 
-  const orgName = user?.organizationName || user?.displayName || 'المتعامل الاقتصادي';
+  const orgName = user?.organizationName || user?.displayName || t('login.demo_operator');
   const email = user?.email || 'operator@safaqat.dz';
 
   return (
@@ -113,7 +113,7 @@ export function OperatorSettingsView() {
             onClick={() => setLocation('/operator/profile')}
           >
             <ExternalLink aria-hidden="true" />
-            <span>ملف المؤسسة</span>
+            <span>{t('operator.settings.profile_btn')}</span>
           </button>
         </div>
       </div>
@@ -163,7 +163,7 @@ export function OperatorSettingsView() {
               </div>
 
               <div className="flex flex-col justify-between gap-2 rounded-xl border border-[var(--op-line-2)] bg-[var(--op-surface-2)] p-4">
-                <span className="text-[11px] font-bold text-[var(--op-muted)]">ملف النشاط والتأهيل المصرح به</span>
+                <span className="text-[11px] font-bold text-[var(--op-muted)]">{t('operator.settings.qualification_box')}</span>
                 <button
                   type="button"
                   className="op-btn op-btn-ghost op-btn-sm self-start"
@@ -190,25 +190,25 @@ export function OperatorSettingsView() {
           <div className="op-card-body py-2">
             <SwitchRow
               title={t('operator.settings.notif_matched')}
-              description="تلقي إشعار فوري عند نشر مصلحة متعاقدة لصفقة تتقاطع مع رموز نشاطك أو ولايتك."
+              description={t('operator.settings.notif_matched_desc')}
               checked={prefs.matchedDeals}
               onChange={() => handleToggle('matchedDeals')}
             />
             <SwitchRow
               title={t('operator.settings.notif_opening')}
-              description="إشعار عند انعقاد جلسة فتح أظرفة العروض واعتماد محضر الفتح الخاص بالصفقات المشارك فيها."
+              description={t('operator.settings.notif_opening_desc')}
               checked={prefs.openingSessions}
               onChange={() => handleToggle('openingSessions')}
             />
             <SwitchRow
               title={t('operator.settings.notif_eval')}
-              description="تنبيه فوري عند صدور مقرر المنح المؤقت وإعلان نتائج التقييم الإداري والتقني والمالي."
+              description={t('operator.settings.notif_eval_desc')}
               checked={prefs.evaluationResults}
               onChange={() => handleToggle('evaluationResults')}
             />
             <SwitchRow
               title={t('operator.settings.notif_email')}
-              description="تلقي نشرة أسبوعية تتضمن ملخص الفرص والصفقات في قطاعك عبر البريد الإلكتروني."
+              description={t('operator.settings.notif_email_desc')}
               checked={prefs.emailDigest}
               onChange={() => handleToggle('emailDigest')}
             />
@@ -221,11 +221,11 @@ export function OperatorSettingsView() {
             className="op-btn op-btn-outline"
             onClick={() => setLocation('/operator')}
           >
-            إلغاء
+            {t('common.cancel')}
           </button>
           <button type="submit" className="op-btn op-btn-gold" disabled={saving}>
             <Save aria-hidden="true" />
-            <span>{saving ? 'جارٍ الحفظ...' : t('operator.settings.save_btn')}</span>
+            <span>{saving ? t('operator.settings.saving') : t('operator.settings.save_btn')}</span>
           </button>
         </div>
       </form>

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useLocation, useParams } from 'wouter';
 import { useI18n } from '@/i18n';
 import { api } from '@/lib/api';
+import { formatCurrency, formatDate } from '@/lib/format';
 import { analyzeTender } from '@/features/ai/api/ai';
 import type { TenderAnalysisResponse, TenderAnalysisSeverity } from '@/features/ai/types';
 import { Button } from '@/components/ui/button';
@@ -66,7 +67,7 @@ const getAnalysisErrorMessage = (err: unknown): string => {
 export function OpportunityDetails() {
   const { id } = useParams<{ id: string }>();
   const [, setLocation] = useLocation();
-  const { t, dir } = useI18n();
+  const { t, dir, lang } = useI18n();
   const [opp, setOpp] = useState<Opportunity | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -88,8 +89,8 @@ export function OpportunityDetails() {
             id: String(deal.id),
             title: deal.title,
             description: deal.description || '',
-            estimatedBudget: deal.estimated_budget ? `${Number(deal.estimated_budget).toLocaleString('ar-DZ')} دج` : null,
-            authorityName: deal.authority_entity || deal.authority_name || 'مصلحة متعاقدة',
+            estimatedBudget: deal.estimated_budget ? formatCurrency(Number(deal.estimated_budget), lang) : null,
+            authorityName: deal.authority_entity || deal.authority_name || t('operator.opportunities.table_authority'),
             updatedAt: deal.updated_at || deal.created_at || new Date().toISOString(),
             hasDocument: !!deal.cahier_specs,
           });
@@ -105,7 +106,7 @@ export function OpportunityDetails() {
         if (found) setExistingOfferId(found.id);
       })
       .catch(() => {});
-  }, [id]);
+  }, [id, lang, t]);
 
   const ArrowIcon = dir === 'rtl' ? ArrowRight : ArrowLeft;
 
@@ -162,7 +163,7 @@ export function OpportunityDetails() {
   }
 
   return (
-    <div className="op-page">
+    <div className="op-page" dir={dir}>
       <div className="op-page-head">
         <div>
           <span className="op-chip gold mb-2">
@@ -170,9 +171,9 @@ export function OpportunityDetails() {
             <span>{opp.authorityName}</span>
           </span>
           <h1>{opp.title}</h1>
-          <p className="flex items-center gap-1.5">
+          <p className="flex items-center gap-1.5 text-xs text-[var(--op-muted)]">
             <Calendar className="size-3.5" aria-hidden="true" />
-            <span>تاريخ التحديث: {new Date(opp.updatedAt).toLocaleDateString('ar-DZ')}</span>
+            <span>{t('operator.offers.last_updated')} {formatDate(opp.updatedAt, lang)}</span>
           </p>
         </div>
         <div className="op-page-actions">

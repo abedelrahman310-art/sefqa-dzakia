@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useLocation } from 'wouter';
+import { useI18n } from '@/i18n';
 import { api } from '@/lib/api';
+import { formatCurrency, formatDate } from '@/lib/format';
 import { downloadPdfBlob } from '@/lib/pdfDownloader';
 import type { ProcurementContractApi } from '@/lib/procurementApiTypes';
 import { ExecutionTracker } from '@/features/execution/components/ExecutionTracker';
@@ -64,21 +66,8 @@ const getApiErrorMessage = (err: unknown, fallback: string): string => {
   return fallback;
 };
 
-const formatDate = (value: string | null | undefined): string => {
-  if (!value) return '—';
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleDateString('ar-DZ', { dateStyle: 'medium' });
-};
-
-const formatAmount = (value: string | null | undefined): string => {
-  if (value === null || value === undefined || value === '') return '—';
-  const amount = Number(value);
-  if (!Number.isFinite(amount)) return '—';
-  return `${amount.toLocaleString('ar-DZ', { maximumFractionDigits: 2 })} دج`;
-};
-
 export function OperatorContractsView({ dealId }: OperatorContractsViewProps) {
+  const { lang, dir } = useI18n();
   const [, setLocation] = useLocation();
 
   const [contracts, setContracts] = useState<ProcurementContractApi[]>([]);
@@ -144,7 +133,7 @@ export function OperatorContractsView({ dealId }: OperatorContractsViewProps) {
   };
 
   return (
-    <div className="op-page" dir="rtl">
+    <div className="op-page" dir={dir}>
       <div className="op-page-head">
         <div>
           <h1>العقود والتنفيذ</h1>
@@ -308,7 +297,7 @@ export function OperatorContractsView({ dealId }: OperatorContractsViewProps) {
                     </span>
                     <span className="mt-0.5 inline-flex items-center gap-1 font-bold text-[#3a4555]">
                       <Calendar className="size-3.5" />
-                      {formatDate(contract.signed_at)}
+                      {formatDate(contract.signed_at, lang)}
                     </span>
                   </div>
                   <div>
@@ -317,7 +306,7 @@ export function OperatorContractsView({ dealId }: OperatorContractsViewProps) {
                     </span>
                     <span className="mt-0.5 inline-flex items-center gap-1 font-bold text-[#3a4555]">
                       <Banknote className="size-3.5" />
-                      {formatAmount(contract.amount)}
+                      {formatCurrency(Number(contract.amount), lang)}
                     </span>
                   </div>
                   <div>

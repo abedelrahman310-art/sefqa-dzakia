@@ -647,7 +647,7 @@ export function AuthorityDealWizard() {
                 <button
                   type="button"
                   onClick={() => setCurrentStep(s.step)}
-                  className={`w-full text-right p-3 rounded-xl transition-all flex items-center gap-3 border ${
+                  className={`w-full text-start p-3 rounded-xl transition-all flex items-center gap-3 border ${
                     isActive
                       ? 'bg-navy-900 text-white border-navy-900 shadow-sm'
                       : isPassed
@@ -781,9 +781,9 @@ export function AuthorityDealWizard() {
                     placeholder="مثال: 45000000"
                     value={budget}
                     onChange={(e) => setBudget(e.target.value)}
-                    className="rounded-xl border-[#D5DDEA] focus:border-navy-500 pl-12"
+                    className="rounded-xl border-[#D5DDEA] focus:border-navy-500 pe-12"
                   />
-                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-400">
+                  <span className="absolute end-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-400">
                     دج
                   </span>
                 </div>
@@ -1100,7 +1100,7 @@ export function AuthorityDealWizard() {
                             onClick={() => setPreviewingTemplate(tpl)}
                             className="text-xs border-gray-200 rounded-xl"
                           >
-                            <Eye className="w-3.5 h-3.5 ml-1 text-gray-500" />
+                            <Eye className="w-3.5 h-3.5 me-1 text-gray-500" />
                             معاينة القالب
                           </Button>
 
@@ -1266,13 +1266,13 @@ export function AuthorityDealWizard() {
                   onClick={handleAddBoqRow}
                   className="border-gray-200 text-xs font-bold rounded-xl"
                 >
-                  <Plus className="w-3.5 h-3.5 ml-1" />
+                  <Plus className="w-3.5 h-3.5 me-1" />
                   إضافة بند
                 </Button>
               </div>
 
               <div className="border border-gray-200 rounded-xl overflow-hidden">
-                <table className="w-full text-right text-xs border-collapse">
+                <table className="w-full text-start text-xs border-collapse">
                   <thead>
                     <tr className="bg-gray-50 border-b border-gray-200 font-bold text-gray-600">
                       <th className="py-2 px-3 w-10 text-center">#</th>
@@ -1280,7 +1280,7 @@ export function AuthorityDealWizard() {
                       <th className="py-2 px-3 w-24">الوحدة</th>
                       <th className="py-2 px-3 w-20">الكمية</th>
                       <th className="py-2 px-3 w-32">السعر الأحادي (دج)</th>
-                      <th className="py-2 px-3 w-32 text-left">الإجمالي (دج)</th>
+                      <th className="py-2 px-3 w-32 text-end">الإجمالي (دج)</th>
                       <th className="py-2 px-2 w-10 text-center">حذف</th>
                     </tr>
                   </thead>
@@ -1321,10 +1321,10 @@ export function AuthorityDealWizard() {
                             onChange={(e) =>
                               handleUpdateBoqRow(item.id, 'unitPrice', parseFloat(e.target.value) || 0)
                             }
-                            className="h-7 text-xs rounded-lg text-left font-mono"
+                            className="h-7 text-xs rounded-lg text-end font-mono"
                           />
                         </td>
-                        <td className="py-2 px-3 text-left font-mono font-bold text-navy-900">
+                        <td className="py-2 px-3 text-end font-mono font-bold text-navy-900">
                           {((item.quantity || 0) * (item.unitPrice || 0)).toLocaleString('ar-DZ')} دج
                         </td>
                         <td className="py-2 px-2 text-center">

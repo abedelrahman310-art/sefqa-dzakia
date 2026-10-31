@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useI18n } from '@/i18n';
 import { useLocation } from 'wouter';
 import { api } from '@/lib/api';
+import { formatCurrency, formatDate } from '@/lib/format';
 import { Button } from '@/components/ui/button';
 import {
   FileText,
@@ -40,21 +41,6 @@ interface OfferItem {
   technicalScore: number | null;
 }
 
-const STATUS_META: Record<string, { label: string; className: string }> = {
-  draft: { label: 'مسودة', className: 'bg-amber-50 text-amber-900 border-amber-200' },
-  submitted: {
-    label: 'مشفر ومختوم - بانتظار جلسة الفتح',
-    className: 'bg-blue-50 text-[#1e3a8a] border-blue-300 font-bold',
-  },
-  admitted: {
-    label: 'مقبول إدارياً وتقنياً',
-    className: 'bg-emerald-50 text-emerald-800 border-emerald-200',
-  },
-  rejected: { label: 'مرفوض', className: 'bg-rose-50 text-rose-800 border-rose-200' },
-  evaluated: { label: 'مقيّم ومؤهل', className: 'bg-teal-50 text-teal-800 border-teal-200' },
-  awarded: { label: 'حائز على الصفقة', className: 'bg-emerald-50 text-emerald-900 border-emerald-300' },
-};
-
 const asRecord = (value: unknown): Record<string, unknown> =>
   value && typeof value === 'object' ? (value as Record<string, unknown>) : {};
 
@@ -89,28 +75,8 @@ const fetchOffers = async (): Promise<unknown[]> => {
   }
 };
 
-const formatAmount = (value: unknown): string => {
-  if (value === null || value === undefined || value === '') return 'غير محدد';
-  const amount = Number(value);
-  if (!Number.isFinite(amount)) return 'غير محدد';
-  return `${amount.toLocaleString('ar-DZ', { maximumFractionDigits: 2 })} دج`;
-};
-
-const formatDate = (value: string | null | undefined): string => {
-  if (!value) return '';
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleDateString('ar-DZ', { dateStyle: 'medium' });
-};
-
-const getStatusMeta = (status: string) =>
-  STATUS_META[status] || {
-    label: status || 'غير محددة',
-    className: 'bg-slate-100 text-slate-700 border-slate-200',
-  };
-
 export function OffersList() {
-  const { t } = useI18n();
+  const { t, lang, dir } = useI18n();
   const [, setLocation] = useLocation();
 
   const [deals, setDeals] = useState<DealOption[]>([]);
@@ -119,6 +85,36 @@ export function OffersList() {
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [selectedDealId, setSelectedDealId] = useState('all');
   const [selectedStatus, setSelectedStatus] = useState('all');
+
+  const getStatusMeta = (status: string) => {
+    const map: Record<string, { label: string; className: string }> = {
+      draft: { label: t('operator.offers.status_draft'), className: 'bg-amber-50 text-amber-900 border-amber-200' },
+      submitted: {
+        label: t('operator.offers.status_encrypted'),
+        className: 'bg-blue-50 text-[#1e3a8a] border-blue-300 font-bold',
+      },
+      admitted: {
+        label: t('operator.offers.status_accepted'),
+        className: 'bg-emerald-50 text-emerald-800 border-emerald-200',
+      },
+      rejected: { label: t('operator.offers.status_rejected'), className: 'bg-rose-50 text-rose-800 border-rose-200' },
+      evaluated: { label: t('operator.offers.status_qualified'), className: 'bg-teal-50 text-teal-800 border-teal-200' },
+      awarded: { label: t('operator.offers.status_awarded'), className: 'bg-emerald-50 text-emerald-900 border-emerald-300' },
+    };
+    return (
+      map[status] || {
+        label: status || t('operator.offers.undefined'),
+        className: 'bg-slate-100 text-slate-700 border-slate-200',
+      }
+    );
+  };
+
+  const formatAmount = (value: unknown): string => {
+    if (value === null || value === undefined || value === '') return t('operator.offers.undefined');
+    const amount = Number(value);
+    if (!Number.isFinite(amount)) return t('operator.offers.undefined');
+    return formatCurrency(amount, lang);
+  };
 
   const loadData = async () => {
     setLoading(true);
@@ -211,8 +207,8 @@ export function OffersList() {
       const status = (err as { response?: { status?: number } })?.response?.status;
       setFetchError(
         status === 404
-          ? 'خدمة العروض غير متاحة حالياً. يرجى المحاولة لاحقاً أو التواصل مع الدعم.'
-          : 'تعذر تحميل بيانات العروض. يرجى التحقق من الاتصال بالخادم والمحاولة مجدداً.',
+          ? t('operator.offers.error_404')
+          : t('operator.offers.error_default'),
       );
     } finally {
       setLoading(false);
@@ -236,8 +232,8 @@ export function OffersList() {
         });
       }
     });
-    return Array.from(map.values()).sort((a, b) => a.title.localeCompare(b.title, 'ar'));
-  }, [deals, offers]);
+    return Array.from(map.values()).sort((a, b) => a.title.localeCompare(b.title, lang === 'fr' ? 'fr' : 'ar'));
+  }, [deals, offers, lang]);
 
   const filteredOffers = useMemo(
     () =>
@@ -253,29 +249,41 @@ export function OffersList() {
   const submittedCount = offers.filter((offer) => offer.status !== 'draft').length;
   const documentsCount = offers.filter((offer) => offer.hasDocument).length;
 
+  const statusFilterOptions = useMemo(
+    () => [
+      { id: 'draft', label: t('operator.offers.status_draft') },
+      { id: 'submitted', label: t('operator.offers.status_encrypted') },
+      { id: 'admitted', label: t('operator.offers.status_accepted') },
+      { id: 'rejected', label: t('operator.offers.status_rejected') },
+      { id: 'evaluated', label: t('operator.offers.status_qualified') },
+      { id: 'awarded', label: t('operator.offers.status_awarded') },
+    ],
+    [t],
+  );
+
   return (
-    <div className="op-page">
+    <div className="op-page" dir={dir}>
       <div className="op-page-head">
         <div>
-          <h1>إدارة العروض</h1>
-          <p>تابع مسوداتك وعروضك المودعة، وافتح أي عرض لمراجعة بياناته ووثيقته المرفقة.</p>
+          <h1>{t('operator.offers.title')}</h1>
+          <p>{t('operator.offers.subtitle')}</p>
         </div>
         <div className="op-page-actions">
           <button
             type="button"
-            className="op-btn op-btn-outline"
+            className="op-btn op-btn-outline whitespace-nowrap"
             onClick={() => void loadData()}
             disabled={loading}
           >
             <RefreshCw className={loading ? 'animate-spin' : undefined} aria-hidden="true" />
-            <span>تحديث</span>
+            <span>{t('operator.offers.refresh')}</span>
           </button>
           <Button
-            className="bg-[#8a6e1c] hover:bg-[#3a4555] text-white text-xs font-bold"
+            className="bg-[#8a6e1c] hover:bg-[#3a4555] text-white text-xs font-bold whitespace-nowrap"
             onClick={() => setLocation('/operator/deals')}
           >
             <Plus className="size-4" />
-            <span>استكشاف الصفقات</span>
+            <span>{t('operator.offers.explore_deals')}</span>
           </Button>
         </div>
       </div>
@@ -287,7 +295,7 @@ export function OffersList() {
           </div>
           <div>
             <div className="text-xl font-extrabold text-[#3a4555]">{offers.length}</div>
-            <div className="text-xs font-bold text-[#5d6b7e]">إجمالي العروض</div>
+            <div className="text-xs font-bold text-[#5d6b7e] whitespace-nowrap">{t('operator.offers.kpi_total')}</div>
           </div>
         </div>
 
@@ -297,7 +305,7 @@ export function OffersList() {
           </div>
           <div>
             <div className="text-xl font-extrabold text-[#3a4555]">{draftsCount}</div>
-            <div className="text-xs font-bold text-[#5d6b7e]">مسودات</div>
+            <div className="text-xs font-bold text-[#5d6b7e] whitespace-nowrap">{t('operator.offers.kpi_drafts')}</div>
           </div>
         </div>
 
@@ -307,7 +315,7 @@ export function OffersList() {
           </div>
           <div>
             <div className="text-xl font-extrabold text-[#3a4555]">{submittedCount}</div>
-            <div className="text-xs font-bold text-[#5d6b7e]">عروض مودعة</div>
+            <div className="text-xs font-bold text-[#5d6b7e] whitespace-nowrap">{t('operator.offers.kpi_submitted')}</div>
           </div>
         </div>
 
@@ -317,7 +325,7 @@ export function OffersList() {
           </div>
           <div>
             <div className="text-xl font-extrabold text-[#3a4555]">{documentsCount}</div>
-            <div className="text-xs font-bold text-[#5d6b7e]">وثائق مرفقة</div>
+            <div className="text-xs font-bold text-[#5d6b7e] whitespace-nowrap">{t('operator.offers.kpi_docs')}</div>
           </div>
         </div>
       </section>
@@ -325,7 +333,7 @@ export function OffersList() {
       <section className="op-card flex flex-col gap-3 p-4 md:flex-row md:items-end">
         <div className="op-field min-w-[240px] flex-1">
           <label htmlFor="deal-filter" className="text-xs font-bold text-[#8a6e1c]">
-            الصفقة
+            {t('operator.offers.filter_deal')}
           </label>
           <select
             id="deal-filter"
@@ -333,7 +341,7 @@ export function OffersList() {
             onChange={(event) => setSelectedDealId(event.target.value)}
             className="op-select h-10 w-full cursor-pointer"
           >
-            <option value="all">كل الصفقات</option>
+            <option value="all">{t('operator.offers.all_deals')}</option>
             {dealOptions.map((deal) => (
               <option key={deal.id} value={deal.id}>
                 {deal.reference_number ? `${deal.reference_number} — ` : ''}
@@ -345,7 +353,7 @@ export function OffersList() {
 
         <div className="op-field min-w-[180px]">
           <label htmlFor="status-filter" className="text-xs font-bold text-[#8a6e1c]">
-            حالة العرض
+            {t('operator.offers.filter_status')}
           </label>
           <select
             id="status-filter"
@@ -353,17 +361,17 @@ export function OffersList() {
             onChange={(event) => setSelectedStatus(event.target.value)}
             className="op-select h-10 w-full cursor-pointer"
           >
-            <option value="all">كل الحالات</option>
-            {Object.entries(STATUS_META).map(([value, meta]) => (
-              <option key={value} value={value}>
-                {meta.label}
+            <option value="all">{t('operator.offers.all_statuses')}</option>
+            {statusFilterOptions.map((opt) => (
+              <option key={opt.id} value={opt.id}>
+                {opt.label}
               </option>
             ))}
           </select>
         </div>
 
-        <span className="ms-auto text-xs font-bold text-[#5d6b7e]">
-          {filteredOffers.length} عرض معروض
+        <span className="ms-auto text-xs font-bold text-[#5d6b7e] whitespace-nowrap">
+          {filteredOffers.length} {t('operator.offers.count_label')}
         </span>
       </section>
 
@@ -374,11 +382,11 @@ export function OffersList() {
             <span>{fetchError}</span>
             <button
               type="button"
-              className="op-btn op-btn-outline op-btn-sm"
+              className="op-btn op-btn-outline op-btn-sm whitespace-nowrap"
               onClick={() => void loadData()}
             >
               <RefreshCw aria-hidden="true" />
-              <span>إعادة المحاولة</span>
+              <span>{t('operator.offers.retry')}</span>
             </button>
           </div>
         </div>
@@ -404,19 +412,19 @@ export function OffersList() {
           <div className="op-big-empty-icon">
             <FileText aria-hidden="true" />
           </div>
-          <h3>{offers.length === 0 ? 'لا توجد عروض بعد' : 'لا توجد عروض مطابقة للتصفية'}</h3>
+          <h3>{offers.length === 0 ? t('operator.offers.empty_title') : t('operator.offers.empty_filtered')}</h3>
           <p>
             {offers.length === 0
-              ? 'ابدأ من صفحة الصفقات المتاحة واختر صفقة لتقديم عرضك التقني والمالي.'
-              : 'جرّب تغيير الصفقة أو حالة العرض لعرض نتائج أخرى.'}
+              ? t('operator.offers.empty_desc')
+              : t('operator.offers.empty_filtered_desc')}
           </p>
           {offers.length === 0 && (
             <Button
-              className="bg-[#8a6e1c] hover:bg-[#3a4555] text-white text-xs font-bold"
+              className="bg-[#8a6e1c] hover:bg-[#3a4555] text-white text-xs font-bold whitespace-nowrap"
               onClick={() => setLocation('/operator/deals')}
             >
               <Plus className="size-4" />
-              <span>استكشاف الصفقات</span>
+              <span>{t('operator.offers.explore_deals')}</span>
             </Button>
           )}
         </div>
@@ -441,7 +449,7 @@ export function OffersList() {
                           {offer.opportunityTitle}
                         </h3>
                         <span
-                          className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-bold ${statusMeta.className}`}
+                          className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-bold whitespace-nowrap ${statusMeta.className}`}
                         >
                           {statusMeta.label}
                         </span>
@@ -460,24 +468,24 @@ export function OffersList() {
                       </div>
 
                       <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-[#5d6b7e]">
-                        <span className="inline-flex items-center gap-1">
+                        <span className="inline-flex items-center gap-1 whitespace-nowrap">
                           <Calendar className="size-3.5" />
                           {isDraft
                             ? offer.updatedAt
-                              ? `آخر تحديث ${formatDate(offer.updatedAt)}`
-                              : 'مسودة قيد الإعداد'
+                              ? `${t('operator.offers.last_updated')} ${formatDate(offer.updatedAt, lang)}`
+                              : t('operator.offers.draft_in_progress')
                             : offer.submittedAt
-                              ? `أودع في ${formatDate(offer.submittedAt)}`
-                              : 'لم يُودع بعد'}
+                              ? `${t('operator.offers.submitted_at')} ${formatDate(offer.submittedAt, lang)}`
+                              : t('operator.offers.not_submitted')}
                         </span>
-                        <span className="inline-flex items-center gap-1">
+                        <span className="inline-flex items-center gap-1 whitespace-nowrap">
                           <Paperclip className="size-3.5" />
-                          {offer.hasDocument ? 'وثيقة مرفقة' : 'لا توجد وثيقة مرفقة'}
+                          {offer.hasDocument ? t('operator.offers.has_doc') : t('operator.offers.no_doc')}
                         </span>
                         {offer.technicalScore !== null && (
-                          <span className="inline-flex items-center gap-1">
+                          <span className="inline-flex items-center gap-1 whitespace-nowrap">
                             <ShieldCheck className="size-3.5" />
-                            العلامة التقنية: {offer.technicalScore}
+                            {t('operator.offers.technical_score')}: {offer.technicalScore}
                           </span>
                         )}
                       </div>
@@ -486,10 +494,10 @@ export function OffersList() {
 
                   <div className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-t border-[#f3efdf] pt-3 lg:border-0 lg:pt-0">
                     <div className="text-start">
-                      <span className="block text-[10px] font-bold text-[#5d6b7e]">
-                        المبلغ المالي
+                      <span className="block text-[10px] font-bold text-[#5d6b7e] whitespace-nowrap">
+                        {t('operator.offers.financial_amount')}
                       </span>
-                      <span className="block text-sm font-extrabold text-[#3a4555]">
+                      <span className="block text-sm font-extrabold text-[#3a4555] whitespace-nowrap">
                         {offer.financialOffer}
                       </span>
                     </div>
@@ -498,11 +506,11 @@ export function OffersList() {
                       <Button
                         variant="outline"
                         size="sm"
-                        className="border-emerald-200 bg-emerald-50 text-emerald-800 hover:bg-emerald-100 text-xs font-bold"
+                        className="border-emerald-200 bg-emerald-50 text-emerald-800 hover:bg-emerald-100 text-xs font-bold whitespace-nowrap"
                         onClick={() => setLocation(`/operator/contracts/${offer.dealId}`)}
                       >
                         <FileSignature className="size-3.5" />
-                        <span>العقد والتنفيذ</span>
+                        <span>{t('operator.offers.contracts_link')}</span>
                       </Button>
                     )}
 
@@ -511,13 +519,13 @@ export function OffersList() {
                       size="sm"
                       className={
                         isDraft
-                          ? 'bg-[#8a6e1c] hover:bg-[#3a4555] text-white text-xs font-bold'
-                          : 'border-[#ece7d6] bg-white text-[#8a6e1c] hover:bg-[#fffdf5] text-xs font-bold'
+                          ? 'bg-[#8a6e1c] hover:bg-[#3a4555] text-white text-xs font-bold whitespace-nowrap'
+                          : 'border-[#ece7d6] bg-white text-[#8a6e1c] hover:bg-[#fffdf5] text-xs font-bold whitespace-nowrap'
                       }
                       onClick={() => setLocation(`/operator/offers/${offer.id}`)}
                     >
                       <Eye className="size-3.5" />
-                      <span>{isDraft ? 'متابعة المسودة' : 'عرض التفاصيل'}</span>
+                      <span>{isDraft ? t('operator.offers.continue_draft') : t('operator.offers.view_details')}</span>
                     </Button>
                   </div>
                 </div>
@@ -530,8 +538,7 @@ export function OffersList() {
       <div className="flex items-start gap-2 rounded-xl border border-[#f3efdf] bg-[#fffdf5] p-3 text-xs text-[#5d6b7e]">
         <Info className="mt-0.5 size-4 shrink-0 text-[#8a6e1c]" />
         <p className="m-0 leading-relaxed">
-          {t('offers.title')}: تُرفع الوثائق من شاشة العرض عبر طلب <code>FormData</code> إلى خدمة
-          العروض. لا تُحفظ الملفات في متصفح هذا الجهاز.
+          {t('operator.offers.info_banner')}
         </p>
       </div>
     </div>

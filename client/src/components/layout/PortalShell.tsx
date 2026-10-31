@@ -48,7 +48,7 @@ export function PortalShell({
   sidebarWidth = 'w-[280px]',
   children,
 }: PortalShellProps) {
-  const { lang, setLang } = useI18n();
+  const { lang, setLang, t } = useI18n();
   const [location] = useLocation();
   const mainRef = useRef<HTMLElement>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -83,7 +83,7 @@ export function PortalShell({
                 <button
                   type="button"
                   className="p-2 rounded-lg bg-[var(--paper-100)] text-[var(--ink-900)] hover:bg-[var(--paper-200)] transition-colors"
-                  aria-label="فتح القائمة"
+                  aria-label={t('common.open_menu')}
                 >
                   <Menu className="w-5 h-5" />
                 </button>

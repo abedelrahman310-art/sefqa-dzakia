@@ -6,13 +6,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardDescription, CardTitle } from '@/components/ui/card';
-import { ArrowRight } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { LanguageSwitcher } from '@/components/layout/LanguageSwitcher';
 import { Logo } from '@/components/ui/Logo';
 
 export function Login() {
   const { login, logout, user, status } = useAuth();
-  const { t } = useI18n();
+  const { t, dir } = useI18n();
   const [, setLocation] = useLocation();
   
   const [email, setEmail] = useState('');
@@ -49,14 +49,14 @@ export function Login() {
       return <Redirect to="/central" />;
     }
     return (
-      <div className="flex min-h-screen items-center justify-center bg-muted/40 p-4 text-center">
+      <div className="flex min-h-screen items-center justify-center bg-muted/40 p-4 text-center" dir={dir}>
         <Card className="w-full max-w-md p-6 space-y-4">
-          <CardTitle className="text-destructive text-xl">دور غير معروف</CardTitle>
+          <CardTitle className="text-destructive text-xl">{t('login.unknown_role_title')}</CardTitle>
           <CardDescription>
-            حسابك لا يملك دوراً معتمداً في المنصة. يرجى التواصل مع الإدارة.
+            {t('login.unknown_role_desc')}
           </CardDescription>
           <Button variant="outline" onClick={() => logout()}>
-            تسجيل الخروج
+            {t('common.logout')}
           </Button>
         </Card>
       </div>
@@ -101,7 +101,7 @@ export function Login() {
           (data.email && Array.isArray(data.email) ? data.email[0] : null) ||
           (data.password && Array.isArray(data.password) ? data.password[0] : null) ||
           (res.status === 502 || res.status === 504
-            ? 'تعذر الاتصال بخادم الواجهة الخلفية، يرجى التأكد من تشغيل الخادم.'
+            ? t('login.server_connection_error')
             : t('login.error'));
         throw new Error(errorMessage);
       }
@@ -120,16 +120,16 @@ export function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--paper-50)] flex flex-col" dir="rtl">
+    <div className="min-h-screen bg-[var(--paper-50)] flex flex-col" dir={dir}>
       {/* ═══ Top Bar ═══ */}
       <header className="fixed top-0 start-0 end-0 z-50 flex items-center justify-between px-4 sm:px-6 py-4 bg-white/80 backdrop-blur-sm border-b border-[var(--color-border-subtle)]">
         {/* زر العودة للرئيسية */}
         <Link
           href="/"
-          className="group inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-[var(--ink-700)] hover:text-[var(--official-700)] hover:bg-[var(--paper-100)] transition-all duration-150"
+          className="group inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-[var(--ink-700)] hover:text-[var(--official-700)] hover:bg-[var(--paper-100)] transition-all duration-150 whitespace-nowrap"
         >
-          <ArrowRight className="size-4 transition-transform duration-150 group-hover:-translate-x-0.5" />
-          <span>العودة للرئيسية</span>
+          <ArrowLeft className="size-4 transition-transform duration-150 rtl:rotate-180" />
+          <span>{t('login.back_to_home')}</span>
         </Link>
 
         {/* Language Switcher */}
@@ -143,7 +143,7 @@ export function Login() {
             <div className="flex justify-center mb-3">
               <Logo size={52} />
             </div>
-            <h1 className="text-2xl font-bold text-primary">صفقات ذكية</h1>
+            <h1 className="text-2xl font-bold text-primary">{t('portal.brand')}</h1>
             <p className="text-sm text-muted-foreground mt-1">{t('login.title')}</p>
           </div>
 
@@ -182,7 +182,7 @@ export function Login() {
             {/* Quick-fill buttons displayed ONLY when demo login is explicitly enabled via environment */}
             {isDemoLoginEnabled && (
               <div className="pt-2 border-t border-border/50">
-                <p className="text-xs text-muted-foreground font-semibold mb-2">حسابات تجريبية للمعاينة (Demo):</p>
+                <p className="text-xs text-muted-foreground font-semibold mb-2">{t('login.demo_accounts_title')}</p>
                 <div className="grid grid-cols-3 gap-1.5 text-xs">
                   <Button
                     type="button"
@@ -191,7 +191,7 @@ export function Login() {
                     className="text-xs h-8 px-1 truncate"
                     onClick={() => fillTestAccount('authority@safaqat.dz')}
                   >
-                    المصلحة المتعاقدة
+                    {t('login.demo_authority')}
                   </Button>
                   <Button
                     type="button"
@@ -200,7 +200,7 @@ export function Login() {
                     className="text-xs h-8 px-1 truncate"
                     onClick={() => fillTestAccount('operator@safaqat.dz')}
                   >
-                    المتعامل الاقتصادي
+                    {t('login.demo_operator')}
                   </Button>
                   <Button
                     type="button"
@@ -209,11 +209,11 @@ export function Login() {
                     className="text-xs h-8 px-1 truncate"
                     onClick={() => fillTestAccount('admin@safaqat.dz')}
                   >
-                    الرقابة المركزية
+                    {t('login.demo_central')}
                   </Button>
                 </div>
                 <p className="text-[11px] text-muted-foreground mt-2 text-center font-mono">
-                  كلمة المرور لجميع الحسابات التجريبية: <span className="font-bold text-primary select-all">Safaqat@2026</span>
+                  {t('login.demo_password_label')} <span className="font-bold text-primary select-all">Safaqat@2026</span>
                 </p>
               </div>
             )}

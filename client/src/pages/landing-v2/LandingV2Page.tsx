@@ -1,17 +1,14 @@
 import { useLayoutEffect, useRef } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
+import { useLocation } from 'wouter';
 import Logo from '@/components/ui/Logo';
 import { useI18n } from '@/i18n';
 import landingCss from './landing-v2.css?inline';
 import landingHtml from './landing-page.html?raw';
 import logoCss from '@/components/ui/logo.css?inline';
-import {
-  LANDING_FR,
-  LANDING_FR_ATTRIBUTES,
-  LANDING_FR_STORY_INTRO,
-  LANDING_FR_TITLE,
-} from './landing-fr';
+import fr from '@/locales/fr.json';
 
+const frTranslations = fr as unknown as Record<string, string>;
 const LANDING_TITLE = 'صفقات ذكية | المنصة الوطنية الذكية للصفقات العمومية';
 
 /** يوحّد المسافات كما في جرد النصوص الأصلي (194 نصاً). */
@@ -53,7 +50,7 @@ function applyLandingLanguage(
     if (original === undefined) {
       original = text.data;
       const key = normalizeText(original);
-      if (!key || !LANDING_FR[key]) continue;
+      if (!key || !frTranslations[key]) continue;
       textOriginals.set(text, original);
     }
 
@@ -62,7 +59,7 @@ function applyLandingLanguage(
       continue;
     }
 
-    const translated = LANDING_FR[normalizeText(original)];
+    const translated = frTranslations[normalizeText(original)];
     if (!translated) continue;
 
     const leading = original.match(/^\s*/)?.[0] ?? '';
@@ -77,7 +74,7 @@ function applyLandingLanguage(
       attributeOriginals.set(element, originals);
     }
     const original = originals.get('aria-label') ?? '';
-    const translated = LANDING_FR_ATTRIBUTES[original];
+    const translated = frTranslations[original];
     if (!translated) return;
     element.setAttribute('aria-label', isFr ? translated : original);
   });
@@ -89,7 +86,7 @@ function applyLandingLanguage(
       original = storyIntro.innerHTML;
       storyIntroOriginals.set(storyIntro, original);
     }
-    storyIntro.innerHTML = isFr ? LANDING_FR_STORY_INTRO : original;
+    storyIntro.innerHTML = isFr ? frTranslations['landing.story_intro'] : original;
   }
 }
 
@@ -107,7 +104,8 @@ export function LandingV2Page() {
   const textOriginalsRef = useRef(new WeakMap<Text, string>());
   const attributeOriginalsRef = useRef(new WeakMap<Element, Map<string, string>>());
   const storyIntroOriginalsRef = useRef(new WeakMap<Element, string>());
-  const { lang, dir, setLang } = useI18n();
+  const { lang, dir, setLang, t } = useI18n();
+  const [, setLocation] = useLocation();
   const langRef = useRef(lang);
   langRef.current = lang;
 
@@ -173,11 +171,20 @@ export function LandingV2Page() {
 
       const anchor = target.closest('a');
       const href = anchor?.getAttribute('href');
-      if (!href?.startsWith('#')) return;
+      if (!href) return;
 
-      event.preventDefault();
-      window.history.replaceState(null, '', href);
-      scrollToHash(href, 'smooth');
+      if (href.startsWith('#')) {
+        event.preventDefault();
+        window.history.replaceState(null, '', href);
+        scrollToHash(href, 'smooth');
+        return;
+      }
+
+      if (href.startsWith('/') && !href.startsWith('//')) {
+        event.preventDefault();
+        setLocation(href);
+        return;
+      }
     };
 
     shadow.addEventListener('click', handleClick);
@@ -223,7 +230,7 @@ export function LandingV2Page() {
       attributeOriginalsRef.current,
       storyIntroOriginalsRef.current,
     );
-    document.title = lang === 'fr' ? LANDING_FR_TITLE : LANDING_TITLE;
+    document.title = lang === 'fr' ? frTranslations['landing.page_title'] : LANDING_TITLE;
 
     const langBtn = root.querySelector<HTMLButtonElement>('#landing-lang-btn');
     if (langBtn) {
@@ -233,7 +240,19 @@ export function LandingV2Page() {
         lang === 'ar' ? 'Passer au français' : 'التحويل إلى العربية',
       );
     }
-  }, [lang]);
+
+    const termsLink = root.querySelector<HTMLAnchorElement>('.footer-col a[href="/terms"]');
+    if (termsLink) termsLink.textContent = t('landing.footer.terms');
+
+    const faqLink = root.querySelector<HTMLAnchorElement>('.footer-col a[href="/faq"]');
+    if (faqLink) faqLink.textContent = t('landing.footer.faq');
+
+    const a11yLink = root.querySelector<HTMLAnchorElement>('.footer-col a[href="/accessibility"]');
+    if (a11yLink) a11yLink.textContent = t('landing.footer.accessibility');
+
+    const aiPowerLink = root.querySelector<HTMLAnchorElement>('.footer-col a[href="#ai"]');
+    if (aiPowerLink) aiPowerLink.textContent = t('landing.footer.ai_power');
+  }, [lang, t]);
 
   return (
     <div

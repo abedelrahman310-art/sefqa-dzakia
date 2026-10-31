@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from 'r
 import { useLocation, useParams } from 'wouter';
 import { useI18n } from '@/i18n';
 import { api } from '@/lib/api';
+import { formatCurrency, formatDate as intlFormatDate } from '@/lib/format';
 import {
   AlertCircle,
   AlertTriangle,
@@ -140,17 +141,15 @@ const isNotFound = (err: unknown) =>
 const asRecord = (value: unknown): Record<string, unknown> =>
   value && typeof value === 'object' ? (value as Record<string, unknown>) : {};
 
-const formatDzd = (value: number | string | null | undefined): string => {
+const formatDzd = (value: number | string | null | undefined, lang?: string): string => {
   const amount = Number(value);
   if (!Number.isFinite(amount)) return '—';
-  return `${amount.toLocaleString('ar-DZ', { maximumFractionDigits: 2 })} دج`;
+  return formatCurrency(amount, lang);
 };
 
-const formatReferenceDate = (value?: string | null): string => {
+const formatReferenceDate = (value?: string | null, lang?: string): string => {
   if (!value) return '';
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return '';
-  return date.toLocaleDateString('ar-DZ');
+  return intlFormatDate(value, lang);
 };
 
 const createBoqRow = (overrides: Partial<BoqRow> = {}): BoqRow => ({

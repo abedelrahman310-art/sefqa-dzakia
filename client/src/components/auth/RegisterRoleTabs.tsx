@@ -1,6 +1,7 @@
 import React from 'react';
 import { User, Landmark, Shield } from 'lucide-react';
 import { useLocation } from 'wouter';
+import { useI18n } from '@/i18n';
 
 export type RegisterRole = 'operator' | 'authority' | 'central';
 
@@ -11,6 +12,7 @@ interface RegisterRoleTabsProps {
 
 export function RegisterRoleTabs({ activeRole, onSelectRole }: RegisterRoleTabsProps) {
   const [, setLocation] = useLocation();
+  const { t } = useI18n();
 
   const handleTabClick = (role: RegisterRole) => {
     if (onSelectRole) {
@@ -25,16 +27,16 @@ export function RegisterRoleTabs({ activeRole, onSelectRole }: RegisterRoleTabsP
   };
 
   const tabs: Array<{ role: RegisterRole; label: string; icon: React.ElementType }> = [
-    { role: 'operator', label: 'المتعامل الإقتصادي', icon: User },
-    { role: 'authority', label: 'المصلحة المتعاقدة', icon: Landmark },
-    { role: 'central', label: 'الإدارة المركزية', icon: Shield },
+    { role: 'operator', label: t('login.demo_operator'), icon: User },
+    { role: 'authority', label: t('login.demo_authority'), icon: Landmark },
+    { role: 'central', label: t('login.demo_central'), icon: Shield },
   ];
 
   return (
     <div
       className="flex items-center justify-between w-full bg-[#f1f5f9] p-1.5 rounded-2xl select-none"
       role="tablist"
-      aria-label="أدوار التسجيل"
+      aria-label={t('register.roles_tablist')}
     >
       {tabs.map((tab, idx) => {
         const Icon = tab.icon;

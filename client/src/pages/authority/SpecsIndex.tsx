@@ -15,7 +15,7 @@ interface Draft {
 }
 
 export function SpecsIndex() {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const [, setLocation] = useLocation();
   const [drafts, setDrafts] = useState<Draft[]>([]);
   const [loading, setLoading] = useState(true);
@@ -42,7 +42,7 @@ export function SpecsIndex() {
       <section className="rounded-2xl p-6 md:p-8 text-white bg-navy-900 border border-navy-800">
         <div className="space-y-2 max-w-2xl">
           <span className="text-xs font-semibold text-navy-100">
-            سند — سلسلة الإسناد الحيّة
+            {lang === 'ar' ? 'سند — سلسلة الإسناد الحيّة' : 'SANAD — Chaîne de traçabilité en temps réel'}
           </span>
           <h2 className="text-xl md:text-2xl font-bold text-white">
             {t('specs.index.title')}
@@ -62,13 +62,15 @@ export function SpecsIndex() {
         {loading ? (
           <div className="py-12 flex flex-col items-center justify-center text-muted-foreground gap-2">
             <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-            <span className="text-xs">جاري التحميل...</span>
+            <span className="text-xs">{t('common.loading')}</span>
           </div>
         ) : drafts.length === 0 ? (
           <div className="border border-dashed border-border rounded-xl p-10 text-center space-y-3 bg-muted/20">
             <FileText className="w-10 h-10 text-muted-foreground/40 mx-auto" />
             <p className="text-xs text-muted-foreground">
-              لا توجد مسودات صفقات حالياً. أنشئ مسودة أولاً من قسم المسودات.
+              {lang === 'ar'
+                ? 'لا توجد مسودات صفقات حالياً. أنشئ مسودة أولاً من قسم المسودات.'
+                : 'Aucun projet de marché disponible. Créez un projet depuis la section Brouillons.'}
             </p>
           </div>
         ) : (
@@ -89,11 +91,13 @@ export function SpecsIndex() {
                           : 'bg-navy-50 text-navy-800 border-navy-200'
                       }`}
                     >
-                      {draft.status === 'published' ? 'منشورة' : 'مسودة'}
+                      {draft.status === 'published'
+                        ? (lang === 'ar' ? 'منشورة' : 'Publié')
+                        : (lang === 'ar' ? 'مسودة' : 'Brouillon')}
                     </span>
                   </div>
                   <p className="text-xs text-muted-foreground line-clamp-1">
-                    {draft.description || 'بدون وصف'}
+                    {draft.description || (lang === 'ar' ? 'بدون وصف' : 'Sans description')}
                   </p>
                 </div>
 
@@ -107,14 +111,18 @@ export function SpecsIndex() {
                         `/procurements/deals/${draft.id}/specs-pdf/`,
                         `Cahier_Specs_${draft.title || draft.id}.pdf`
                       ).catch(() => {
-                        alert('تعذر تنزيل دفتر الشروط PDF. تأكد من أن الصفقة معتمدة ومتاحة.');
+                        alert(
+                          lang === 'ar'
+                            ? 'تعذر تنزيل دفتر الشروط PDF. تأكد من أن الصفقة معتمدة ومتاحة.'
+                            : 'Impossible de télécharger le cahier des charges PDF.'
+                        );
                       });
                     }}
                     className="border-border hover:bg-muted text-xs font-semibold rounded-xl px-3 py-1.5 shadow-sm flex items-center gap-1.5"
-                    title="تصدير دفتر الشروط بصيغة PDF"
+                    title={lang === 'ar' ? 'تصدير دفتر الشروط بصيغة PDF' : 'Exporter le cahier des charges en PDF'}
                   >
                     <Download className="w-3.5 h-3.5 text-primary" />
-                    <span>تصدير PDF</span>
+                    <span>{lang === 'ar' ? 'تصدير PDF' : 'Export PDF'}</span>
                   </Button>
 
                   <Button

@@ -1,7 +1,7 @@
 import { useAuth } from '@/components/auth/AuthProvider';
 import { useI18n } from '@/i18n';
 import { Link } from 'wouter';
-import { Languages, LucideIcon, HelpCircle, X } from 'lucide-react';
+import { Languages, LucideIcon, HelpCircle, X, Building2 } from 'lucide-react';
 import { LogoutButton, DesktopAppButton } from '@/shared/components';
 import { Logo } from '@/components/ui/Logo';
 
@@ -46,6 +46,7 @@ export function PortalSidebar({
   const { lang, setLang, t } = useI18n();
 
   const orgName = user?.organizationName || user?.displayName || user?.email || '';
+  const authorityOrgName = (user?.organizationName || user?.displayName || t('authority.topbar.default_org')).trim();
   const initial = user?.displayName?.charAt(0) || user?.email?.charAt(0) || t('common.brand').charAt(0);
   const isOperator = variant === 'operator';
   const isMint = variant === 'mint';
@@ -235,7 +236,7 @@ export function PortalSidebar({
         </div>
 
         {/* 2. Navigation items — تملأ المساحة الرأسية كاملة بسلاسة وبدون أي تذييل */}
-        <nav className="flex-1 min-h-0 overflow-y-auto p-4 space-y-1.5 pb-6" aria-label={t('common.main_navigation')}>
+        <nav className="flex-1 min-h-0 overflow-y-auto p-4 space-y-1.5 pb-4" aria-label={t('common.main_navigation')}>
           {items.map((item) => {
             const Icon = item.icon;
             return (
@@ -256,7 +257,24 @@ export function PortalSidebar({
           })}
         </nav>
 
-        {/* تذييل القائمة: زر تبديل اللغة */}
+        {/* 3. بطاقة المصلحة المتعاقدة في أسفل القائمة الجانبية */}
+        <div className="flex-none p-3.5 border-t border-white/10">
+          <div className="bg-white/10 backdrop-blur-xs border border-white/15 rounded-xl p-3 flex items-center gap-3 shadow-xs">
+            <div className="size-9 rounded-lg bg-white text-[#0b4348] flex items-center justify-center shrink-0 shadow-xs">
+              <Building2 className="size-5 text-[#0b4348]" aria-hidden="true" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-xs font-bold text-white truncate leading-tight" title={authorityOrgName}>
+                {authorityOrgName}
+              </p>
+              <p className="text-[11px] text-white/70 mt-0.5 truncate font-medium">
+                {t('authority.topbar.account_label')}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* 4. تذييل القائمة: زر تبديل اللغة */}
         <div className="flex-none border-t border-white/10 p-3 flex items-center justify-between">
           <span className="text-xs text-white/70 font-semibold">{t('header.tools.language')}</span>
           <button
@@ -458,6 +476,21 @@ export function PortalSidebar({
       {/* 3. Footer — إما تذييل المساعدة النظيف أو معلومات المستخدم */}
       {hideUserInfo ? null : (
         <div className="border-t border-white/10 p-4 bg-[#0b4348] flex flex-col gap-3">
+          {/* بطاقة المصلحة المتعاقدة */}
+          <div className="bg-white/10 backdrop-blur-xs border border-white/15 rounded-xl p-3 flex items-center gap-3 shadow-xs">
+            <div className="size-9 rounded-lg bg-white text-[#0b4348] flex items-center justify-center shrink-0 shadow-xs">
+              <Building2 className="size-5 text-[#0b4348]" aria-hidden="true" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-xs font-bold text-white truncate leading-tight" title={authorityOrgName}>
+                {authorityOrgName}
+              </p>
+              <p className="text-[11px] text-white/70 mt-0.5 truncate font-medium">
+                {t('authority.topbar.account_label')}
+              </p>
+            </div>
+          </div>
+
           {/* User row */}
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-3 min-w-0">

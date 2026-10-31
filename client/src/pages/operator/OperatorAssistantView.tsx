@@ -569,7 +569,7 @@ export function OperatorAssistantView() {
                 <span className="flex size-8 items-center justify-center rounded-lg bg-blue-50 text-[#1e3a8a]">
                   <Scale className="size-4 shrink-0" aria-hidden="true" />
                 </span>
-                <DialogTitle className="text-right text-base font-extrabold text-[#0A2540]">
+                <DialogTitle className="text-start text-base font-extrabold text-[#0A2540]">
                   {selectedArticle?.label ?? 'السند القانوني'}
                 </DialogTitle>
               </div>
@@ -581,11 +581,11 @@ export function OperatorAssistantView() {
               )}
             </div>
             {selectedArticle?.title && (
-              <p className="text-right text-xs font-bold text-slate-700">
+              <p className="text-start text-xs font-bold text-slate-700">
                 الموضوع: {selectedArticle.title}
               </p>
             )}
-            <DialogDescription className="text-right text-[11px] leading-relaxed text-slate-500">
+            <DialogDescription className="text-start text-[11px] leading-relaxed text-slate-500">
               النص الحرفي للمادة المسترجعة من المنظومة التشريعية الرسمية للصفقات العمومية.
             </DialogDescription>
           </DialogHeader>

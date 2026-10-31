@@ -1,5 +1,4 @@
-import { useI18n } from '@/i18n';
-import { TranslationKey } from '@/i18n/ar';
+import { useI18n, type TranslationKey } from '@/i18n';
 import { useLocation } from 'wouter';
 import type { ComponentType } from 'react';
 import {
@@ -30,7 +29,7 @@ interface OperatorSidebarProps {
 }
 
 export function OperatorSidebar({ onCloseMobile, className }: OperatorSidebarProps) {
-  const { t } = useI18n();
+  const { t, lang, dir } = useI18n();
   const [location, setLocation] = useLocation();
 
   // The 8 Primary Workspaces
@@ -209,8 +208,8 @@ export function OperatorSidebar({ onCloseMobile, className }: OperatorSidebarPro
       {/* Institutional Legal Footprint */}
       <div className="p-3 border-t border-white/20 bg-black/10 flex-none">
         <div className="text-[10px] text-white/80 flex items-center justify-between px-1">
-          <span>المرسوم الرئاسي 15-247</span>
-          <span className="font-mono text-[9px] text-white/90">RTL · 100dvh</span>
+          <span>{lang === 'ar' ? 'المرسوم الرئاسي 15-247' : 'Décret présidentiel 15-247'}</span>
+          <span className="font-mono text-[9px] text-white/90">{dir.toUpperCase()} · 100dvh</span>
         </div>
       </div>
     </aside>

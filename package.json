@@ -13,7 +13,10 @@
     "start": "cd backend && python manage.py runserver 8001",
     "typecheck": "pnpm -r typecheck",
     "lint": "pnpm -r lint",
-    "test": "cd backend && python -m pytest -q"
+    "test": "cd backend && python -m pytest -q",
+    "i18n:check": "node scripts/i18n/check.mjs",
+    "i18n:unused": "node scripts/i18n/unused.mjs",
+    "i18n:report": "node scripts/i18n/report.mjs"
   },
   "workspaces": ["client", "shared"]
 }

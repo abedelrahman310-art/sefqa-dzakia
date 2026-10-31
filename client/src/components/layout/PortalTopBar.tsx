@@ -45,11 +45,11 @@ export function PortalTopBar({
   pulseColor = 'var(--color-success-500, var(--stamp-green-500))',
   showLogout = false,
 }: PortalTopBarProps) {
-  const { lang, setLang } = useI18n();
+  const { lang, setLang, t } = useI18n();
   const { user, logout } = useAuth();
   const [pathname, setLocation] = useLocation();
 
-  const orgName = user?.organizationName || user?.displayName || TOPBAR_TRANSLATIONS[lang]?.['portal.default_org'] || 'المؤسسة';
+  const orgName = user?.organizationName || user?.displayName || t('portal.default_org');
 
   // Hide on configured routes (e.g. interactive full-screen maps)
   if (hiddenOnRoutes.includes(pathname)) {
@@ -63,10 +63,6 @@ export function PortalTopBar({
       || navItems.find((item) => pathname.startsWith(item.path) && item.path !== routePrefix);
     resolvedTitle = matchedItem?.label ?? defaultTitle;
   }
-
-  const t = (key: string): string => {
-    return TOPBAR_TRANSLATIONS[lang]?.[key] || key;
-  };
 
   const toggleLang = () => {
     setLang(lang === 'ar' ? 'fr' : 'ar');
@@ -119,8 +115,8 @@ export function PortalTopBar({
           type="button"
           onClick={() => setLocation('/operator/assistant')}
           className="portal-topbar__icon-btn bg-[#047857]/10 hover:bg-[#047857] text-[#047857] hover:text-white transition-colors"
-          aria-label="المساعد القانوني الذكي (RAG)"
-          title="المساعد القانوني الذكي (RAG)"
+          aria-label={t('common.assistant_rag')}
+          title={t('common.assistant_rag')}
         >
           <Sparkles className="w-4 h-4 shrink-0" aria-hidden="true" />
         </button>

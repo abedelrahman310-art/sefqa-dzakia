@@ -3,6 +3,7 @@ import { useI18n } from '@/i18n';
 import { useLocation } from 'wouter';
 import { useSearch } from 'wouter/use-location';
 import { api } from '@/lib/api';
+import { formatCurrency, formatDate } from '@/lib/format';
 import {
   Search,
   Lock,
@@ -43,15 +44,6 @@ interface Opportunity {
   };
 }
 
-const PROC_DEFS = [
-  { id: 'open', title: 'طلب العروض المفتوح', desc: 'إجراء يتاح فيه لكل متعامل اقتصادي مؤهل تقديم عرضه.' },
-  { id: 'openMin', title: 'طلب العروض المفتوح مع اشتراط قدرات دنيا', desc: 'مفتوح للمتعاملين الذين يستوفون القدرات الدنيا المحددة في دفتر الشروط.' },
-  { id: 'limited', title: 'طلب العروض المحدود', desc: 'يُوجَّه إلى متعاملين اقتصاديين تم انتقاؤهم مسبقًا.' },
-  { id: 'contest', title: 'المسابقة', desc: 'إجراء يُختار فيه مشروع أو دراسة بعد المنافسة بين المشاركين.' },
-  { id: 'consult', title: 'الاستشارة', desc: 'إجراء مبسّط تُستشار فيه عدة متعاملين لتلبية حاجات محدودة.' },
-  { id: 'direct', title: 'التراضي', desc: 'إبرام الصفقة مع متعامل واحد في الحالات التي يحددها التنظيم.' },
-];
-
 /** ربط معرّفات التصفية بقيم `procurement_form` القادمة من دفتر الشروط. */
 const PROC_FILTER_VALUES: Record<string, string> = {
   open: 'open',
@@ -63,7 +55,7 @@ const PROC_FILTER_VALUES: Record<string, string> = {
 };
 
 export function OperatorOpportunities() {
-  const { t, lang } = useI18n();
+  const { t, lang, dir } = useI18n();
   const [, setLocation] = useLocation();
   const search = useSearch();
 
@@ -75,6 +67,15 @@ export function OperatorOpportunities() {
   const [selectedSuitabilityId, setSelectedSuitabilityId] = useState<string | null>(null);
   const [selectedProc, setSelectedProc] = useState('all');
   const [isProcOpen, setIsProcOpen] = useState(false);
+
+  const procDefs = useMemo(() => [
+    { id: 'open', title: t('operator.proc.open'), desc: t('operator.proc.open_desc') },
+    { id: 'openMin', title: t('operator.proc.open_min'), desc: t('operator.proc.open_min_desc') },
+    { id: 'limited', title: t('operator.proc.limited'), desc: t('operator.proc.limited_desc') },
+    { id: 'contest', title: t('operator.proc.contest'), desc: t('operator.proc.contest_desc') },
+    { id: 'consult', title: t('operator.proc.consult'), desc: t('operator.proc.consult_desc') },
+    { id: 'direct', title: t('operator.proc.direct'), desc: t('operator.proc.direct_desc') },
+  ], [t]);
 
   useEffect(() => {
     const q = new URLSearchParams(search).get('q') || '';
@@ -99,10 +100,10 @@ export function OperatorOpportunities() {
             title: d.title,
             description: d.description || '',
             estimatedBudget: d.estimated_budget
-              ? `${Number(d.estimated_budget).toLocaleString('ar-DZ')} دج`
+              ? formatCurrency(Number(d.estimated_budget), lang)
               : null,
-            authorityName: d.authority_entity || d.authority_name || 'مصلحة متعاقدة',
-            status: d.stage_display || 'طلب عروض مفتوح',
+            authorityName: d.authority_entity || d.authority_name || t('operator.opportunities.table_authority'),
+            status: d.stage_display || t('operator.proc.open'),
             submissionDeadline: d.submission_deadline || null,
             hasDocument: !!d.cahier_specs,
             procedure: {
@@ -150,48 +151,43 @@ export function OperatorOpportunities() {
 
   const currentProcLabel =
     selectedProc === 'all'
-      ? 'الكل'
-      : (PROC_DEFS.find((proc) => proc.id === selectedProc)?.title ?? 'الكل');
-
-  const formatDate = (value?: string | null) => {
-    if (!value) return '—';
-    return new Date(value).toLocaleDateString(lang === 'ar' ? 'ar-DZ' : 'fr-FR');
-  };
+      ? t('operator.opportunities.all_procs')
+      : (procDefs.find((proc) => proc.id === selectedProc)?.title ?? t('operator.opportunities.all_procs'));
 
   const renderSignalPill = (signal?: string) => {
     switch (signal) {
       case 'relevant':
-        return <span className="op-chip green">{t('operator.suitability.signal_relevant')}</span>;
+        return <span className="op-chip green whitespace-nowrap">{t('operator.suitability.signal_relevant')}</span>;
       case 'partial':
-        return <span className="op-chip gold">{t('operator.suitability.signal_partial')}</span>;
+        return <span className="op-chip gold whitespace-nowrap">{t('operator.suitability.signal_partial')}</span>;
       case 'unclassified':
-        return <span className="op-chip blue">{t('operator.suitability.signal_unclassified')}</span>;
+        return <span className="op-chip blue whitespace-nowrap">{t('operator.suitability.signal_unclassified')}</span>;
       default:
-        return <span className="op-chip">{t('operator.suitability.signal_neutral')}</span>;
+        return <span className="op-chip whitespace-nowrap">{t('operator.suitability.signal_neutral')}</span>;
     }
   };
 
   return (
-    <div className="op-page">
+    <div className="op-page" dir={dir}>
       <div className="op-page-head">
         <div>
-          <h1>الإعلانات وفرص الصفقات</h1>
-          <p>تصفح الإعلانات المنشورة وقدّم عروضك على ما يناسب مؤسستك.</p>
+          <h1>{t('operator.opportunities.title')}</h1>
+          <p>{t('operator.opportunities.subtitle')}</p>
         </div>
         <div className="op-page-actions">
           <button
             type="button"
-            className="op-btn op-btn-outline"
+            className="op-btn op-btn-outline whitespace-nowrap"
             onClick={() => loadOpportunities(true)}
             disabled={refreshing}
           >
             <RefreshCw className={refreshing ? 'animate-spin' : ''} aria-hidden="true" />
-            <span>{refreshing ? 'جاري التحديث...' : 'تحديث القائمة'}</span>
+            <span>{refreshing ? t('operator.opportunities.refreshing') : t('operator.opportunities.refresh')}</span>
           </button>
         </div>
       </div>
 
-      <section aria-label="تصفية حسب نوع الإجراء">
+      <section aria-label={t('operator.opportunities.proc_filter')}>
         <div className={`op-proc-filter${isProcOpen ? ' is-open' : ''}`}>
           <button
             type="button"
@@ -204,11 +200,11 @@ export function OperatorOpportunities() {
               <Filter />
             </span>
             <span className="op-proc-filter-text">
-              <span className="op-proc-filter-label">نوع الإجراء:</span>
+              <span className="op-proc-filter-label">{t('operator.opportunities.proc_filter')}:</span>
               <strong className="op-proc-filter-value">{currentProcLabel}</strong>
             </span>
-            <span className="op-proc-filter-meta">
-              {filteredOpportunities.length} إعلان
+            <span className="op-proc-filter-meta whitespace-nowrap">
+              {filteredOpportunities.length} {t('operator.opportunities.ad_unit')}
             </span>
             <ChevronDown className="op-proc-filter-chevron" aria-hidden="true" />
           </button>
@@ -217,11 +213,11 @@ export function OperatorOpportunities() {
             className="op-proc-filter-panel"
             id="procedure-filter-panel"
             role="region"
-            aria-label="خيارات نوع الإجراء"
+            aria-label={t('operator.opportunities.proc_filter')}
             aria-hidden={!isProcOpen}
           >
             <div className="op-proc-filter-panel-inner">
-              <div className="op-choice-grid" role="group" aria-label="نوع الإجراء">
+              <div className="op-choice-grid" role="group" aria-label={t('operator.opportunities.proc_filter')}>
                 <button
                   type="button"
                   aria-pressed={selectedProc === 'all'}
@@ -233,14 +229,14 @@ export function OperatorOpportunities() {
                   className={`op-choice${selectedProc === 'all' ? ' active' : ''}`}
                 >
                   <span className="flex items-start justify-between gap-2">
-                    <span className="op-choice-title">كل الإجراءات</span>
+                    <span className="op-choice-title">{t('operator.opportunities.all_procs')}</span>
                     {selectedProc === 'all' && (
                       <Sparkles className="size-4 flex-none text-[var(--op-gold)]" aria-hidden="true" />
                     )}
                   </span>
-                  <span className="op-choice-desc">عرض جميع الإعلانات بغض النظر عن نوع الإجراء.</span>
+                  <span className="op-choice-desc">{t('operator.opportunities.all_procs_desc')}</span>
                 </button>
-                {PROC_DEFS.map((proc) => {
+                {procDefs.map((proc) => {
                   const isSelected = selectedProc === proc.id;
                   return (
                     <button
@@ -274,14 +270,14 @@ export function OperatorOpportunities() {
         <div className="op-info-banner">
           <UserCheck aria-hidden="true" />
           <div>
-            <strong>خصص ملف نشاطك وشهاداتك المصرح بها للحصول على مطابقة دقيقة</strong>
-            <p>أدخل قطاعك الرئيسي وولايتك ورموز الأنشطة التجارية لتسهيل فرز ومطابقة الفرص.</p>
+            <strong>{t('operator.opportunities.profile_nudge_title')}</strong>
+            <p>{t('operator.opportunities.profile_nudge_desc')}</p>
             <button
               type="button"
               className="op-btn op-btn-ghost op-btn-sm mt-3"
               onClick={() => setLocation('/operator/profile')}
             >
-              إعداد ملف النشاط
+              {t('operator.opportunities.profile_nudge_btn')}
             </button>
           </div>
         </div>
@@ -307,8 +303,8 @@ export function OperatorOpportunities() {
               type="search"
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
-              placeholder={t('deals.search.placeholder')}
-              aria-label="بحث في الصفقات"
+              placeholder={t('operator.opportunities.search_ph')}
+              aria-label={t('operator.opportunities.search_label')}
             />
           </div>
         </div>
@@ -317,14 +313,14 @@ export function OperatorOpportunities() {
           <table className="op-table">
             <thead>
               <tr>
-                <th>رقم الصفقة</th>
-                <th>الموضوع</th>
-                <th>المصلحة المتعاقدة</th>
-                <th>نوع الإجراء</th>
-                <th>الميزانية</th>
-                <th>آخر أجل</th>
-                <th>المطابقة</th>
-                <th>إجراء</th>
+                <th className="whitespace-nowrap">{t('operator.opportunities.table_ref')}</th>
+                <th className="whitespace-nowrap">{t('operator.opportunities.table_subject')}</th>
+                <th className="whitespace-nowrap">{t('operator.opportunities.table_authority')}</th>
+                <th className="whitespace-nowrap">{t('operator.opportunities.table_proc')}</th>
+                <th className="whitespace-nowrap">{t('operator.opportunities.table_budget')}</th>
+                <th className="whitespace-nowrap">{t('operator.opportunities.table_deadline')}</th>
+                <th className="whitespace-nowrap">{t('operator.opportunities.table_match')}</th>
+                <th className="whitespace-nowrap">{t('operator.opportunities.table_action')}</th>
               </tr>
             </thead>
             <tbody>
@@ -348,19 +344,19 @@ export function OperatorOpportunities() {
                         {hasActiveFilters
                           ? searchQuery
                             ? t('deals.search.empty_desc')
-                            : 'لا توجد إعلانات مسجّلة بهذا النوع من الإجراء حالياً.'
-                          : 'ستظهر الصفقات المنشورة هنا فور توفرها'}
+                            : t('operator.opportunities.no_results_filtered')
+                          : t('operator.opportunities.no_results')}
                       </p>
                       {hasActiveFilters && (
                         <button
                           type="button"
-                          className="op-btn op-btn-outline op-btn-sm mt-2"
+                          className="op-btn op-btn-outline op-btn-sm mt-2 whitespace-nowrap"
                           onClick={() => {
                             setSearchQuery('');
                             setSelectedProc('all');
                           }}
                         >
-                          إلغاء التصفية
+                          {t('operator.opportunities.reset_filter')}
                         </button>
                       )}
                     </div>
@@ -392,20 +388,20 @@ export function OperatorOpportunities() {
                       <ProcedureTypeCollapsible info={opp.procedure} />
                     </td>
                     <td>
-                      <span className="font-mono text-xs font-bold text-[var(--op-ink)]">
+                      <span className="font-mono text-xs font-bold text-[var(--op-ink)] whitespace-nowrap">
                         {opp.estimatedBudget || '—'}
                       </span>
                     </td>
                     <td>
-                      <span className="flex items-center gap-1.5 text-xs">
+                      <span className="flex items-center gap-1.5 text-xs whitespace-nowrap">
                         <Calendar className="size-3.5 flex-none text-[var(--op-muted)]" aria-hidden="true" />
-                        <span>{formatDate(opp.submissionDeadline)}</span>
+                        <span>{formatDate(opp.submissionDeadline, lang)}</span>
                       </span>
                     </td>
                     <td>
                       <div className="flex flex-col items-start gap-1">
                         {opp.status === 'submission_closed' ? (
-                          <span className="op-chip red">أجل الإيداع منتهٍ</span>
+                          <span className="op-chip red whitespace-nowrap">{t('operator.opportunities.deadline_passed')}</span>
                         ) : (
                           renderSignalPill(opp.matching?.overallSignal)
                         )}
@@ -415,7 +411,7 @@ export function OperatorOpportunities() {
                       <div className="flex flex-wrap items-center justify-end gap-2">
                         <button
                           type="button"
-                          className="op-btn op-btn-outline op-btn-sm"
+                          className="op-btn op-btn-outline op-btn-sm whitespace-nowrap"
                           onClick={() => setSelectedSuitabilityId(opp.id)}
                         >
                           <Sparkles aria-hidden="true" />
@@ -423,11 +419,11 @@ export function OperatorOpportunities() {
                         </button>
                         <button
                           type="button"
-                          className="op-btn op-btn-gold op-btn-sm"
+                          className="op-btn op-btn-gold op-btn-sm whitespace-nowrap inline-flex items-center gap-1"
                           onClick={() => setLocation(`/operator/opportunities/${opp.id}`)}
                         >
-                          {t('opps.details')}
-                          <ChevronLeft aria-hidden="true" />
+                          <span>{t('opps.details')}</span>
+                          <ChevronLeft className="size-3.5 transition-transform rtl:rotate-0 ltr:rotate-180" aria-hidden="true" />
                         </button>
                         <button
                           type="button"
@@ -449,7 +445,7 @@ export function OperatorOpportunities() {
       </section>
 
       <p className="text-[11px] text-[var(--op-muted)]">
-        الوثائق المرفقة غير قابلة للتنزيل حالياً من قائمة الصفقات؛ يمكنك الاطلاع على التفاصيل من صفحة الصفقة.
+        {t('operator.opportunities.docs_notice')}
       </p>
 
       <SuitabilityModal

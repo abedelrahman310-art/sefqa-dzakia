@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'wouter';
+import { useI18n } from '@/i18n';
 import {
   Sparkles,
   AlertTriangle,
@@ -74,21 +75,25 @@ const flattenSuspicions = (data: { suspicions?: Record<string, SuspicionItem[]> 
   return Object.values(data.suspicions).flat();
 };
 
-const formatCompactDzd = (amount: number) => {
+const formatCompactDzd = (amount: number, lang: 'ar' | 'fr' = 'ar') => {
+  const locale = lang === 'fr' ? 'fr-DZ' : 'ar-DZ';
   if (amount >= 1_000_000_000) {
-    return `${(amount / 1_000_000_000).toLocaleString('ar-DZ', {
+    const formatted = (amount / 1_000_000_000).toLocaleString(locale, {
       maximumFractionDigits: 1,
-    })} مليار دج`;
+    });
+    return lang === 'fr' ? `${formatted} Mrd DA` : `${formatted} مليار دج`;
   }
   if (amount >= 1_000_000) {
-    return `${(amount / 1_000_000).toLocaleString('ar-DZ', {
+    const formatted = (amount / 1_000_000).toLocaleString(locale, {
       maximumFractionDigits: 1,
-    })} مليون دج`;
+    });
+    return lang === 'fr' ? `${formatted} M DA` : `${formatted} مليون دج`;
   }
-  return `${amount.toLocaleString('ar-DZ')} دج`;
+  return lang === 'fr' ? `${amount.toLocaleString(locale)} DA` : `${amount.toLocaleString(locale)} دج`;
 };
 
 export function CentralMapView() {
+  const { lang } = useI18n();
   const [, setLocation] = useLocation();
   const [selectedWilaya, setSelectedWilaya] = useState<WilayaDetail | null>(null);
   const [hoveredWilayaName, setHoveredWilayaName] = useState<string | null>(null);
@@ -615,9 +620,9 @@ export function CentralMapView() {
                   </div>
                   <div
                     className="truncate font-mono text-lg font-black leading-tight text-[#24352E]"
-                    title={formatCompactDzd(totalBudgetDzd)}
+                    title={formatCompactDzd(totalBudgetDzd, lang)}
                   >
-                    {formatCompactDzd(totalBudgetDzd)}
+                    {formatCompactDzd(totalBudgetDzd, lang)}
                   </div>
                   <span className="mt-0.5 block text-xs font-semibold text-[#2563EB]">
                     الميزانيات التقديرية
@@ -630,7 +635,7 @@ export function CentralMapView() {
                     <MapPin className="size-3.5 shrink-0 text-[#167354]" />
                   </div>
                   <div className="font-mono text-xl font-black leading-tight text-[#24352E]">
-                    {activeWilayas.toLocaleString('ar-DZ')}{' '}
+                    {activeWilayas.toLocaleString(lang === 'fr' ? 'fr-DZ' : 'ar-DZ')}{' '}
                     <span className="text-xs font-bold text-gray-500">ولاية</span>
                   </div>
                   <span className="mt-0.5 block text-xs font-semibold text-gray-500">
@@ -687,7 +692,7 @@ export function CentralMapView() {
                     <button
                       key={wilaya.code}
                       type="button"
-                      className="w-full cursor-pointer rounded-xl border border-gray-200 bg-white p-2.5 text-right transition-colors hover:border-[#167354] hover:bg-emerald-50/30"
+                      className="w-full cursor-pointer rounded-xl border border-gray-200 bg-white p-2.5 text-start transition-colors hover:border-[#167354] hover:bg-emerald-50/30"
                       onClick={() => handleWilayaClick(wilaya.code)}
                     >
                       <div className="mb-1 flex items-center justify-between gap-2 text-xs font-bold text-[#24352E]">
@@ -733,7 +738,7 @@ export function CentralMapView() {
                         key={wilaya.code}
                         type="button"
                         onClick={() => handleWilayaClick(wilaya.code, wilaya)}
-                        className={`flex w-full items-center justify-between gap-2 rounded-xl border p-2.5 text-right transition-all ${
+                        className={`flex w-full items-center justify-between gap-2 rounded-xl border p-2.5 text-start transition-all ${
                           isSelected
                             ? 'border-emerald-300 bg-emerald-50/60 shadow-sm'
                             : 'border-gray-200 bg-white hover:bg-gray-50'
@@ -748,10 +753,10 @@ export function CentralMapView() {
                               {wilaya.name}
                             </span>
                             <span className="block truncate font-mono text-xs leading-relaxed text-gray-500">
-                              {wilaya.budget.toLocaleString('ar-DZ', {
+                              {wilaya.budget.toLocaleString(lang === 'fr' ? 'fr-DZ' : 'ar-DZ', {
                                 maximumFractionDigits: 1,
                               })}{' '}
-                              مليار دج
+                              {lang === 'fr' ? 'Mrd DA' : 'مليار دج'}
                             </span>
                           </div>
                         </div>

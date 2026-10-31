@@ -1519,9 +1519,9 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                         type="number"
                         value={budget}
                         onChange={(e) => setBudget(e.target.value)}
-                        className="rounded-xl border-[#D5DDEA] pl-10"
+                        className="rounded-xl border-[#D5DDEA] pe-10"
                       />
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-400">
+                      <span className="absolute end-3 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-400">
                         دج
                       </span>
                     </div>
@@ -1735,14 +1735,14 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                       onClick={handleAddBoqRow}
                       className="border-[#D5DDEA] text-xs font-bold rounded-xl"
                     >
-                      <Plus className="w-3.5 h-3.5 ml-1" />
+                      <Plus className="w-3.5 h-3.5 me-1" />
                       إضافة بند
                     </Button>
                   </div>
 
                   <div className="border border-[#D5DDEA] rounded-xl overflow-hidden bg-white">
                     <div className="overflow-x-auto">
-                      <table className="w-full text-right text-xs border-collapse">
+                      <table className="w-full text-start text-xs border-collapse">
                         <thead>
                           <tr className="bg-gray-50 border-b border-[#D5DDEA] text-gray-600 font-bold">
                             <th className="py-2.5 px-3 w-10 text-center">#</th>
@@ -1750,7 +1750,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                             <th className="py-2.5 px-3 w-24">الوحدة</th>
                             <th className="py-2.5 px-3 w-20">الكمية</th>
                             <th className="py-2.5 px-3 w-32">السعر الأحادي (دج)</th>
-                            <th className="py-2.5 px-3 w-32 text-left">الإجمالي (دج)</th>
+                            <th className="py-2.5 px-3 w-32 text-end">الإجمالي (دج)</th>
                             <th className="py-2.5 px-2 w-10 text-center">حذف</th>
                           </tr>
                         </thead>
@@ -1801,10 +1801,10 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                                     onChange={(e) =>
                                       handleUpdateBoqRow(item.id, 'unitPrice', parseFloat(e.target.value) || 0)
                                     }
-                                    className="h-7 text-xs rounded-lg text-left font-mono"
+                                    className="h-7 text-xs rounded-lg text-end font-mono"
                                   />
                                 </td>
-                                <td className="py-2 px-3 text-left font-mono font-bold text-navy-900">
+                                <td className="py-2 px-3 text-end font-mono font-bold text-navy-900">
                                   {subtotal.toLocaleString('ar-DZ')} دج
                                 </td>
                                 <td className="py-2 px-2 text-center">
@@ -1822,10 +1822,10 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                         </tbody>
                         <tfoot>
                           <tr className="bg-gray-50 border-t-2 border-[#D5DDEA] text-xs font-bold">
-                            <td colSpan={5} className="py-2.5 px-3 text-left text-gray-700">
+                            <td colSpan={5} className="py-2.5 px-3 text-end text-gray-700">
                               مجموع جدول الكميات التقديري:
                             </td>
-                            <td className="py-2.5 px-3 text-left font-mono text-emerald-800 font-bold">
+                            <td className="py-2.5 px-3 text-end font-mono text-emerald-800 font-bold">
                               {boqTotal.toLocaleString('ar-DZ')} دج
                             </td>
                             <td></td>
@@ -2174,7 +2174,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                 {/* Documents Table */}
                 <div className="border border-[#D5DDEA] rounded-xl overflow-hidden bg-white">
                   <div className="overflow-x-auto">
-                    <table className="w-full text-right text-xs border-collapse">
+                    <table className="w-full text-start text-xs border-collapse">
                       <thead>
                         <tr className="bg-gray-50 border-b border-[#D5DDEA] text-gray-600 font-bold">
                           <th className="py-2.5 px-3 w-10 text-center">#</th>
@@ -2325,7 +2325,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                     }}
                     className="bg-navy-900 hover:bg-navy-800 text-white rounded-xl text-xs font-bold shrink-0"
                   >
-                    <Plus className="w-3.5 h-3.5 ml-1" />
+                    <Plus className="w-3.5 h-3.5 me-1" />
                     إضافة وثيقة
                   </Button>
                 </div>
@@ -2398,7 +2398,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                       disabled={exportingPdf}
                       className="bg-navy-900 hover:bg-navy-800 text-white rounded-xl text-xs font-bold shrink-0"
                     >
-                      <Download className="w-3.5 h-3.5 ml-1" />
+                      <Download className="w-3.5 h-3.5 me-1" />
                       تنزيل PDF
                     </Button>
                   </div>

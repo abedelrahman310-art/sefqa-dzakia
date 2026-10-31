@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useI18n } from '@/i18n';
 import { useLocation } from 'wouter';
+import { formatCurrency, formatDate } from '@/lib/format';
 import {
   Archive,
   Search,
@@ -105,7 +106,7 @@ export function OperatorArchiveView() {
         <div>
           <span className="op-chip gold mb-2">
             <Archive aria-hidden="true" />
-            <span>{t('nav.operator.archive')} — السجل الرقمي الموثق</span>
+            <span>{t('nav.operator.archive')} — {lang === 'ar' ? 'السجل الرقمي الموثق' : 'Registre numérique certifié'}</span>
           </span>
           <h1>{t('operator.archive.title')}</h1>
           <p>{t('operator.archive.subtitle')}</p>
@@ -116,7 +117,7 @@ export function OperatorArchiveView() {
             className="op-btn op-btn-outline"
             onClick={() => setLocation('/operator')}
           >
-            <ArrowRight aria-hidden="true" />
+            <ArrowRight className="rtl:rotate-180" aria-hidden="true" />
             <span>{lang === 'ar' ? 'العودة إلى مساحة العمل' : "Retour à l'espace de travail"}</span>
           </button>
         </div>
@@ -124,7 +125,7 @@ export function OperatorArchiveView() {
 
       <section className="op-card" aria-labelledby="archive-workspace-title">
         <div className="op-card-head">
-          <div className="op-tabs" role="tablist" aria-label="أقسام الأرشيف">
+          <div className="op-tabs" role="tablist" aria-label={lang === 'ar' ? 'أقسام الأرشيف' : "Sections d'archives"}>
             <button
               type="button"
               role="tab"
@@ -161,7 +162,11 @@ export function OperatorArchiveView() {
                   ? t('operator.archive.search_deals_ph')
                   : t('operator.archive.search_offers_ph')
               }
-              aria-label={activeTab === 'deals' ? 'بحث في الصفقات المؤرشفة' : 'بحث في العروض المؤرشفة'}
+              aria-label={
+                activeTab === 'deals'
+                  ? (lang === 'ar' ? 'بحث في الصفقات المؤرشفة' : 'Rechercher dans les marchés archivés')
+                  : (lang === 'ar' ? 'بحث في العروض المؤرشفة' : 'Rechercher dans les offres archivées')
+              }
             />
           </div>
         </div>
@@ -187,8 +192,12 @@ export function OperatorArchiveView() {
               </h4>
               <p>
                 {searchQuery
-                  ? 'جرّب تعديل كلمات البحث أو إلغاء التصفية للعودة إلى كافة السجلات.'
-                  : 'ستظهر هنا السجلات المؤرشفة فور توفرها في حساب مؤسستك.'}
+                  ? (lang === 'ar'
+                      ? 'جرّب تعديل كلمات البحث أو إلغاء التصفية للعودة إلى كافة السجلات.'
+                      : 'Essayez de modifier les mots-clés ou de réinitialiser le filtre.')
+                  : (lang === 'ar'
+                      ? 'ستظهر هنا السجلات المؤرشفة فور توفرها في حساب مؤسستك.'
+                      : 'Les dossiers archivés apparaîtront ici dès leur disponibilité.')}
               </p>
               {searchQuery && (
                 <button
@@ -196,7 +205,7 @@ export function OperatorArchiveView() {
                   className="op-btn op-btn-outline op-btn-sm mt-2"
                   onClick={() => setSearchQuery('')}
                 >
-                  إلغاء التصفية
+                  {lang === 'ar' ? 'إلغاء التصفية' : 'Réinitialiser le filtre'}
                 </button>
               )}
             </div>
@@ -218,7 +227,7 @@ export function OperatorArchiveView() {
                       )}
                       <span className="inline-flex items-center gap-1 text-[11px] text-[var(--op-muted)]">
                         <Calendar className="size-3.5" aria-hidden="true" />
-                        <span>{new Date(opp.updatedAt).toLocaleDateString('ar-DZ')}</span>
+                        <span>{formatDate(opp.updatedAt, lang)}</span>
                       </span>
                     </div>
 
@@ -279,13 +288,13 @@ export function OperatorArchiveView() {
                           {t('offers.field.financial')}:
                         </strong>{' '}
                         <span className="op-mono font-bold text-[var(--op-ink)]">
-                          {offer.financialOffer} د.ج
+                          {formatCurrency(Number(offer.financialOffer), lang)}
                         </span>
                       </span>
                       <span>
                         {offer.submittedAt
-                          ? `${t('offers.status.submitted')}: ${new Date(offer.submittedAt).toLocaleDateString('ar-DZ')}`
-                          : `آخر تعديل: ${new Date(offer.updatedAt).toLocaleDateString('ar-DZ')}`}
+                          ? `${t('offers.status.submitted')}: ${formatDate(offer.submittedAt, lang)}`
+                          : `${t('operator.offers.last_updated')} ${formatDate(offer.updatedAt, lang)}`}
                       </span>
                     </div>
                   </div>

@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo } from 'react';
 import { useI18n } from '@/i18n';
 import { Link, useLocation } from 'wouter';
 import { api } from '@/lib/api';
+import { formatCurrency } from '@/lib/format';
 import { PageHeader, KpiCard } from '@/shared/components';
 import { FileText, Send, Award, Plus, Radio, BookOpen, Gavel } from 'lucide-react';
 import { DraftsTable, DraftSummary } from './components/DraftsTable';
@@ -22,7 +23,7 @@ export function AuthorityOverview() {
           reference: d.reference_number || undefined,
           status: d.current_stage >= 3 ? 'published' : 'draft',
           updatedAt: d.updated_at || d.created_at || new Date().toISOString(),
-          estimatedBudget: d.estimated_budget ? `${Number(d.estimated_budget).toLocaleString('ar-DZ')} دج` : undefined,
+          estimatedBudget: d.estimated_budget ? formatCurrency(d.estimated_budget, lang) : undefined,
         }));
         setDrafts(mapped);
       })

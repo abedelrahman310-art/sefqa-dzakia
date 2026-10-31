@@ -96,7 +96,7 @@ export function NotificationDropdown({
   allNotificationsHref,
   iconSize = 20,
 }: NotificationDropdownProps) {
-  const { lang, dir, t } = useI18n();
+  const { lang, dir } = useI18n();
   const [isOpen, setIsOpen] = useState(false);
   const [currentLocation, setLocation] = useLocation();
   const dropdownRef = useRef<HTMLDivElement>(null);

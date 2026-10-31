@@ -1,6 +1,8 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useLocation } from 'wouter';
+import { useI18n } from '@/i18n';
 import { api } from '@/lib/api';
+import { formatCurrency, formatDate as intlFormatDate } from '@/lib/format';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -144,34 +146,26 @@ export function AuthorityDealsList({ initialView = 'deals' }: AuthorityDealsList
     );
   };
 
+  const { lang, dir } = useI18n();
+
   const renderBudget = (budget: string | number | null) => {
-    if (!budget) return <span className="text-xs text-gray-400">غير محدد</span>;
+    if (!budget) return <span className="text-xs text-gray-400">—</span>;
     const num = typeof budget === 'string' ? parseFloat(budget) : budget;
-    if (isNaN(num)) return <span className="text-xs text-gray-400">غير محدد</span>;
+    if (isNaN(num)) return <span className="text-xs text-gray-400">—</span>;
     return (
-      <div className="flex items-baseline gap-1 font-mono text-sm font-semibold text-navy-900 tabular-nums">
-        <span>{num.toLocaleString('ar-DZ')}</span>
-        <span className="text-[11px] font-normal text-gray-500 font-sans">دج</span>
+      <div className="font-mono text-sm font-semibold text-navy-900 tabular-nums">
+        <span>{formatCurrency(num, lang)}</span>
       </div>
     );
   };
 
   const formatDate = (dateStr?: string) => {
     if (!dateStr) return '—';
-    try {
-      const d = new Date(dateStr);
-      return d.toLocaleDateString('ar-DZ', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-      });
-    } catch {
-      return dateStr;
-    }
+    return intlFormatDate(dateStr, lang);
   };
 
   return (
-    <div className="space-y-6" dir="rtl">
+    <div className="space-y-6" dir={dir}>
       {/* ─── Hero / Header Banner ────────────────────────────────────────── */}
       <section className="bg-white border border-[#D5DDEA] rounded-2xl p-6 md:p-8 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div className="space-y-2 max-w-2xl">
@@ -262,7 +256,7 @@ export function AuthorityDealsList({ initialView = 'deals' }: AuthorityDealsList
                   placeholder="البحث بالموضوع، الرقم المرجعي، أو الوصف..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="pr-10 pl-4 py-2 text-sm rounded-xl border-[#D5DDEA] bg-gray-50/50 focus:bg-white focus:border-navy-500 transition-colors"
+                  className="ps-10 pe-4 py-2 text-sm rounded-xl border-[#D5DDEA] bg-gray-50/50 focus:bg-white focus:border-navy-500 transition-colors"
                 />
               </div>
 
@@ -356,20 +350,20 @@ export function AuthorityDealsList({ initialView = 'deals' }: AuthorityDealsList
                   onClick={() => setLocation('/authority/deals/new')}
                   className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl"
                 >
-                  <Plus className="w-4 h-4 ml-1" />
+                  <Plus className="w-4 h-4 me-1" />
                   إنشاء أول ملف صفقة
                 </Button>
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full text-right border-collapse text-xs">
+                <table className="w-full text-start border-collapse text-xs">
                   <thead>
                     <tr className="border-b border-[#D5DDEA] bg-gray-50/75 text-xs font-bold text-gray-600">
                       <th className="py-2.5 px-4">الرقم المرجعي والموضوع</th>
                       <th className="py-2.5 px-4">الموقع والميزانية</th>
                       <th className="py-2.5 px-4">مرحلة الإعداد</th>
                       <th className="py-2.5 px-4">آخر تحديث</th>
-                      <th className="py-2.5 px-4 text-left">إدارة الملف</th>
+                      <th className="py-2.5 px-4 text-end">إدارة الملف</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#E5EBF4]">
@@ -429,7 +423,7 @@ export function AuthorityDealsList({ initialView = 'deals' }: AuthorityDealsList
                             {formatDate(deal.updated_at || deal.created_at)}
                           </td>
 
-                          <td className="py-2.5 px-4 whitespace-nowrap text-left" onClick={(e) => e.stopPropagation()}>
+                          <td className="py-2.5 px-4 whitespace-nowrap text-end" onClick={(e) => e.stopPropagation()}>
                             <div className="flex items-center justify-end gap-1.5">
                               <Button
                                 variant="ghost"
@@ -506,7 +500,7 @@ export function AuthorityDealsList({ initialView = 'deals' }: AuthorityDealsList
                     onClick={(e) => handleExportPdf(e, d)}
                     className="border-gray-200 text-xs font-bold rounded-xl"
                   >
-                    <Download className="w-3.5 h-3.5 ml-1 text-emerald-600" />
+                    <Download className="w-3.5 h-3.5 me-1 text-emerald-600" />
                     تصدير PDF
                   </Button>
 

@@ -4,7 +4,6 @@ import { useAuth } from '@/components/auth/AuthProvider';
 import { useI18n } from '@/i18n';
 import {
   Check,
-  Building2,
   Sparkles,
   Search,
   Calendar,
@@ -44,8 +43,8 @@ export interface ServiceTopBarProps {
 }
 
 export function ServiceTopBar(_props: ServiceTopBarProps) {
-  const { user, logout } = useAuth();
-  const { lang, setLang } = useI18n();
+  const { logout } = useAuth();
+  const { lang, setLang, dir, t } = useI18n();
   const [location, setLocation] = useLocation();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [isMoreOpen, setIsMoreOpen] = useState(false);
@@ -54,8 +53,6 @@ export function ServiceTopBar(_props: ServiceTopBarProps) {
   const moreRef = useRef<HTMLDivElement>(null);
 
   const [isSettingsActive] = useRoute('/authority/settings');
-
-  const orgName = (user?.organizationName || user?.displayName || 'المصلحة المتعاقدة').trim();
 
   // 1. المحادثة / الاستفسارات
   const handleChat = () => {
@@ -148,7 +145,7 @@ export function ServiceTopBar(_props: ServiceTopBarProps) {
     <header
       className="h-[72px] min-h-[72px] bg-white border-b border-[#D5DDEA] flex items-center gap-2 sm:gap-2.5 px-3 sm:px-5 select-none w-full box-border relative"
       role="banner"
-      dir="rtl"
+      dir={dir}
     >
       {/* ══════════════════════════════════════════════════════════════════
           1. الهوية: الشعار واسم المنصة (دون تكرار)
@@ -158,21 +155,8 @@ export function ServiceTopBar(_props: ServiceTopBarProps) {
           <Check className="size-5 stroke-[3]" aria-hidden="true" />
         </div>
         <span className="hidden sm:inline tracking-tight font-extrabold text-[#0B1F3A] text-sm">
-          صفقات ذكية
+          {t('portal.brand')}
         </span>
-      </div>
-
-      {/* ══════════════════════════════════════════════════════════════════
-          2. السياق: اسم المؤسسة (بعرض مرن ومحدود مع إظهار الاسم كاملاً)
-          ══════════════════════════════════════════════════════════════════ */}
-      <div
-        className="bg-[#E8F5F1] text-[#0B4348] border border-[#A7D9CC] rounded-full px-3 py-1.5 text-xs font-semibold max-w-[120px] sm:max-w-[180px] md:max-w-[260px] truncate shadow-xs shrink-0 flex items-center gap-1.5 cursor-default focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#047857]"
-        title={orgName}
-        tabIndex={0}
-        aria-label={`المؤسسة: ${orgName}`}
-      >
-        <Building2 className="size-3.5 text-[#0B4348] shrink-0" aria-hidden="true" />
-        <span className="truncate">{orgName}</span>
       </div>
 
       {/* فاصل مرن */}
@@ -191,8 +175,8 @@ export function ServiceTopBar(_props: ServiceTopBarProps) {
             type="button"
             onClick={handleAssistant}
             className="size-10 rounded-[10px] bg-[#047857]/10 hover:bg-[#047857] text-[#047857] hover:text-white flex items-center justify-center transition-colors flex-none border-0 cursor-pointer shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#047857]"
-            title="المساعد القانوني الذكي (RAG)"
-            aria-label="المساعد القانوني الذكي (RAG)"
+            title={t('common.assistant_rag')}
+            aria-label={t('common.assistant_rag')}
           >
             <Sparkles className="size-5 shrink-0" strokeWidth={1.8} aria-hidden="true" />
           </button>
@@ -202,8 +186,8 @@ export function ServiceTopBar(_props: ServiceTopBarProps) {
             type="button"
             onClick={handleOpenSearch}
             className="size-10 rounded-[10px] text-[#5B6472] hover:text-[#0f3154] hover:bg-slate-100 flex items-center justify-center transition-colors flex-none border-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0f3154]"
-            title="البحث السريع في الصفقات (Ctrl+K)"
-            aria-label="البحث السريع في الصفقات"
+            title={t('topbar.quick_search_title')}
+            aria-label={t('common.search')}
           >
             <Search className="size-5 shrink-0" strokeWidth={1.8} aria-hidden="true" />
           </button>
@@ -213,8 +197,8 @@ export function ServiceTopBar(_props: ServiceTopBarProps) {
             type="button"
             onClick={handleCalendar}
             className="size-10 rounded-[10px] text-[#5B6472] hover:text-[#0f3154] hover:bg-slate-100 flex items-center justify-center transition-colors flex-none border-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0f3154]"
-            title="جدول جلسات فتح الأظرفة والمواعيد"
-            aria-label="جدول جلسات فتح الأظرفة والمواعيد"
+            title={t('topbar.calendar_title')}
+            aria-label={t('common.calendar')}
           >
             <Calendar className="size-5 shrink-0" strokeWidth={1.8} aria-hidden="true" />
           </button>
@@ -224,8 +208,8 @@ export function ServiceTopBar(_props: ServiceTopBarProps) {
             type="button"
             onClick={handleChat}
             className="size-10 rounded-[10px] text-[#5B6472] hover:text-[#0f3154] hover:bg-slate-100 flex items-center justify-center transition-colors flex-none border-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0f3154]"
-            title="المحادثة والمساعد القانوني"
-            aria-label="المحادثة والمساعد القانوني"
+            title={t('topbar.chat_title')}
+            aria-label={t('topbar.chat_title')}
           >
             <MessageSquare className="size-5 shrink-0" strokeWidth={1.8} aria-hidden="true" />
           </button>
@@ -239,8 +223,8 @@ export function ServiceTopBar(_props: ServiceTopBarProps) {
             aria-expanded={isMoreOpen}
             aria-haspopup="menu"
             className="size-10 rounded-[10px] text-[#5B6472] hover:text-[#0f3154] hover:bg-slate-100 flex items-center justify-center transition-colors flex-none border-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0f3154]"
-            title="أدوات إضافية"
-            aria-label="أدوات إضافية"
+            title={t('common.more_tools')}
+            aria-label={t('common.more_tools')}
           >
             <MoreHorizontal className="size-5 shrink-0" strokeWidth={1.8} aria-hidden="true" />
           </button>
@@ -249,7 +233,7 @@ export function ServiceTopBar(_props: ServiceTopBarProps) {
             <div
               className="absolute top-[48px] start-0 z-50 bg-white border border-[#D5DDEA] rounded-xl shadow-lg p-2 flex flex-col gap-1 min-w-[200px]"
               role="menu"
-              aria-label="أدوات إضافية"
+              aria-label={t('common.more_tools')}
             >
               <button
                 type="button"
@@ -260,7 +244,7 @@ export function ServiceTopBar(_props: ServiceTopBarProps) {
                 className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-bold text-[#047857] hover:bg-[#E8F5F1] transition-colors text-start border-0 bg-transparent cursor-pointer w-full"
               >
                 <Sparkles className="size-4 text-[#047857] shrink-0" aria-hidden="true" />
-                <span>المساعد الذكي (RAG)</span>
+                <span>{t('topbar.assistant_rag')}</span>
               </button>
               <button
                 type="button"
@@ -271,7 +255,7 @@ export function ServiceTopBar(_props: ServiceTopBarProps) {
                 className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-bold text-[#5B6472] hover:bg-slate-100 transition-colors text-start border-0 bg-transparent cursor-pointer w-full"
               >
                 <Search className="size-4 shrink-0" aria-hidden="true" />
-                <span>البحث السريع</span>
+                <span>{t('topbar.quick_search')}</span>
               </button>
               <button
                 type="button"
@@ -282,7 +266,7 @@ export function ServiceTopBar(_props: ServiceTopBarProps) {
                 className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-bold text-[#5B6472] hover:bg-slate-100 transition-colors text-start border-0 bg-transparent cursor-pointer w-full"
               >
                 <Calendar className="size-4 shrink-0" aria-hidden="true" />
-                <span>التقويم وجلسات الفتح</span>
+                <span>{t('topbar.calendar_and_sessions')}</span>
               </button>
               <button
                 type="button"
@@ -293,7 +277,7 @@ export function ServiceTopBar(_props: ServiceTopBarProps) {
                 className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-bold text-[#5B6472] hover:bg-slate-100 transition-colors text-start border-0 bg-transparent cursor-pointer w-full"
               >
                 <MessageSquare className="size-4 shrink-0" aria-hidden="true" />
-                <span>المحادثة والاستفسارات</span>
+                <span>{t('topbar.chat_label')}</span>
               </button>
             </div>
           )}
@@ -319,8 +303,8 @@ export function ServiceTopBar(_props: ServiceTopBarProps) {
           className="min-h-[40px] min-w-[40px] px-2.5 rounded-[10px] text-[#14325C] hover:text-[#0B4348] hover:bg-[#F1F5F9] text-xs font-bold transition-colors flex items-center justify-center flex-none border-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#047857]"
           lang="fr"
           dir="ltr"
-          title="تغيير اللغة"
-          aria-label="تغيير اللغة"
+          title={t('topbar.language_toggle')}
+          aria-label={t('topbar.language_toggle')}
         >
           {lang === 'ar' ? 'FR' : 'عربي'}
         </button>
@@ -333,8 +317,8 @@ export function ServiceTopBar(_props: ServiceTopBarProps) {
                 ? 'bg-[#E8F5F1] text-[#0B4348]'
                 : 'text-[#5B6472] hover:text-[#0B4348] hover:bg-[#F1F5F9]'
             }`}
-            title="الإعدادات"
-            aria-label="الإعدادات"
+            title={t('topbar.settings_title')}
+            aria-label={t('topbar.settings_title')}
           >
             <Settings className="size-5 shrink-0" strokeWidth={1.8} aria-hidden="true" />
           </a>
@@ -345,8 +329,8 @@ export function ServiceTopBar(_props: ServiceTopBarProps) {
           type="button"
           onClick={() => setShowLogoutConfirm(true)}
           className="size-10 rounded-[10px] text-[#5B6472] hover:text-[#B42318] hover:bg-[#FEE4E2] focus-visible:text-[#B42318] flex items-center justify-center transition-colors flex-none border-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B42318]"
-          title="تسجيل الخروج"
-          aria-label="تسجيل الخروج"
+          title={t('topbar.logout_title')}
+          aria-label={t('topbar.logout_title')}
         >
           <LogOut className="size-5 shrink-0" strokeWidth={1.8} aria-hidden="true" />
         </button>
@@ -354,33 +338,31 @@ export function ServiceTopBar(_props: ServiceTopBarProps) {
 
       {/* نافذة تأكيد تسجيل الخروج */}
       <AlertDialog open={showLogoutConfirm} onOpenChange={setShowLogoutConfirm}>
-        <AlertDialogContent dir="rtl">
+        <AlertDialogContent dir={dir}>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {lang === 'ar' ? 'تأكيد تسجيل الخروج' : 'Confirmer la déconnexion'}
+              {t('common.logout_confirm_title')}
             </AlertDialogTitle>
             <AlertDialogDescription>
-              {lang === 'ar'
-                ? 'هل أنت متأكد من رغبتك في تسجيل الخروج من منصة صفقات؟'
-                : 'Êtes-vous sûr de vouloir vous déconnecter de la plateforme Safaqat ?'}
+              {t('common.logout_confirm_message')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>
-              {lang === 'ar' ? 'إلغاء' : 'Annuler'}
+              {t('common.cancel')}
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleLogout}
               className="bg-[#B42318] hover:bg-[#912018] text-white"
             >
-              {lang === 'ar' ? 'تسجيل الخروج' : 'Déconnexion'}
+              {t('common.logout')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
       {/* نافذة البحث السريع (Search Modal) */}
       <Dialog open={isSearchOpen} onOpenChange={setIsSearchOpen}>
-        <DialogContent className="max-w-xl p-0 overflow-hidden rounded-2xl bg-white border border-[#D5DDEA] shadow-xl" dir="rtl">
+        <DialogContent className="max-w-xl p-0 overflow-hidden rounded-2xl bg-white border border-[#D5DDEA] shadow-xl" dir={dir}>
           <DialogHeader className="p-4 border-b border-gray-100 bg-slate-50/70 text-start">
             <div className="flex items-center gap-2">
               <div className="p-1.5 rounded-lg bg-navy-900 text-white">
@@ -388,10 +370,10 @@ export function ServiceTopBar(_props: ServiceTopBarProps) {
               </div>
               <div>
                 <DialogTitle className="text-sm font-bold text-navy-900">
-                  البحث السريع في الصفقات والملفات
+                  {t('topbar.search.title')}
                 </DialogTitle>
                 <DialogDescription className="text-xs text-gray-500">
-                  ابحث برقم الصفقة، الكلمات المفتاحية، أو اسم المتعامل
+                  {t('topbar.search.hint')}
                 </DialogDescription>
               </div>
             </div>
@@ -405,14 +387,14 @@ export function ServiceTopBar(_props: ServiceTopBarProps) {
                 autoFocus
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="اكتب رقم المرجع أو موضوع الصفقة واضغط Enter..."
+                placeholder={t('topbar.search.placeholder')}
                 className="ps-9 pe-4 py-2.5 text-sm h-11 rounded-xl border-gray-200 focus-visible:ring-[#0f3154]"
               />
             </div>
 
             <div className="space-y-2">
               <span className="text-[11px] font-bold text-gray-400 block">
-                اختصارات وتصفح مباشر:
+                {t('topbar.search.shortcuts')}
               </span>
               <div className="grid grid-cols-2 gap-2 text-xs">
                 <button
@@ -425,9 +407,9 @@ export function ServiceTopBar(_props: ServiceTopBarProps) {
                 >
                   <div className="flex items-center gap-2">
                     <FileText className="size-4 text-navy-900" />
-                    <span className="font-semibold text-gray-800">سجل الصفقات</span>
+                    <span className="font-semibold text-gray-800">{t('topbar.search.deals_log')}</span>
                   </div>
-                  <ArrowRight className="size-3 text-gray-400 rotate-180" />
+                  <ArrowRight className="size-3 text-gray-400 rtl:rotate-180" />
                 </button>
 
                 <button
@@ -440,9 +422,9 @@ export function ServiceTopBar(_props: ServiceTopBarProps) {
                 >
                   <div className="flex items-center gap-2">
                     <Clock className="size-4 text-emerald-700" />
-                    <span className="font-semibold text-gray-800">جلسات الفتح</span>
+                    <span className="font-semibold text-gray-800">{t('topbar.search.opening_sessions')}</span>
                   </div>
-                  <ArrowRight className="size-3 text-gray-400 rotate-180" />
+                  <ArrowRight className="size-3 text-gray-400 rtl:rotate-180" />
                 </button>
 
                 <button
@@ -455,9 +437,9 @@ export function ServiceTopBar(_props: ServiceTopBarProps) {
                 >
                   <div className="flex items-center gap-2">
                     <Sparkles className="size-4 text-emerald-600" />
-                    <span className="font-semibold text-gray-800">المساعد القانوني</span>
+                    <span className="font-semibold text-gray-800">{t('topbar.search.legal_assistant')}</span>
                   </div>
-                  <ArrowRight className="size-3 text-gray-400 rotate-180" />
+                  <ArrowRight className="size-3 text-gray-400 rtl:rotate-180" />
                 </button>
 
                 <button
@@ -470,21 +452,21 @@ export function ServiceTopBar(_props: ServiceTopBarProps) {
                 >
                   <div className="flex items-center gap-2">
                     <Bell className="size-4 text-amber-600" />
-                    <span className="font-semibold text-gray-800">سجل التدقيق</span>
+                    <span className="font-semibold text-gray-800">{t('topbar.search.audit_log')}</span>
                   </div>
-                  <ArrowRight className="size-3 text-gray-400 rotate-180" />
+                  <ArrowRight className="size-3 text-gray-400 rtl:rotate-180" />
                 </button>
               </div>
             </div>
 
             <div className="flex items-center justify-between pt-2 border-t border-gray-100 text-[11px] text-gray-400">
-              <span>اضغط Enter للبحث أو Esc للإغلاق</span>
+              <span>{t('topbar.search.footer')}</span>
               <Button
                 type="submit"
                 size="sm"
                 className="bg-navy-900 hover:bg-navy-800 text-white text-xs font-semibold rounded-lg px-3.5 h-8"
               >
-                بحث
+                {t('topbar.search.submit')}
               </Button>
             </div>
           </form>

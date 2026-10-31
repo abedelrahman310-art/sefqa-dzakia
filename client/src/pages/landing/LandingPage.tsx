@@ -967,11 +967,10 @@ export function LandingPage() {
             <div>
               <h4 className="font-bold text-slate-900 mb-3 text-xs uppercase tracking-wider">{t('landing.footer.sections')}</h4>
               <ul className="flex flex-col gap-2">
-                <li><a href="#problem" className="hover:text-emerald-700 transition-colors">{t('landing.nav.problem')}</a></li>
-                <li><a href="#solution" className="hover:text-emerald-700 transition-colors">{t('landing.nav.solution')}</a></li>
-                <li><a href="#journey" className="hover:text-emerald-700 transition-colors">{t('landing.nav.journey')}</a></li>
-                <li><a href="#innovation" className="hover:text-emerald-700 transition-colors">{t('landing.nav.innovation')}</a></li>
-                <li><a href="#agents" className="hover:text-emerald-700 transition-colors">{t('landing.nav.agents')}</a></li>
+                <li><Link href="/terms" className="hover:text-emerald-700 transition-colors">{t('landing.footer.terms')}</Link></li>
+                <li><Link href="/faq" className="hover:text-emerald-700 transition-colors">{t('landing.footer.faq')}</Link></li>
+                <li><Link href="/accessibility" className="hover:text-emerald-700 transition-colors">{t('landing.footer.accessibility')}</Link></li>
+                <li><a href="#ai" className="hover:text-emerald-700 transition-colors">{t('landing.footer.ai_power')}</a></li>
               </ul>
             </div>
 

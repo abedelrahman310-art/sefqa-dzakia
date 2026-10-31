@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useI18n } from '@/i18n';
 import { Link, useLocation } from 'wouter';
 import { api } from '@/lib/api';
+import { formatCurrency, formatDate as intlFormatDate } from '@/lib/format';
 import {
   Search,
   FileText,
@@ -68,7 +69,7 @@ interface RecommendedDeal {
 }
 
 export function OperatorOverview() {
-  const { t, lang } = useI18n();
+  const { t, lang, dir } = useI18n();
   const [, setLocation] = useLocation();
 
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
@@ -91,9 +92,9 @@ export function OperatorOverview() {
             title: d.title,
             description: d.description || '',
             estimatedBudget: d.estimated_budget
-              ? `${Number(d.estimated_budget).toLocaleString('ar-DZ')} دج`
+              ? formatCurrency(Number(d.estimated_budget), lang)
               : null,
-            authorityName: d.authority_entity || d.authority_name || 'مصلحة متعاقدة',
+            authorityName: d.authority_entity || d.authority_name || t('operator.opportunities.table_authority'),
             updatedAt: d.updated_at || d.created_at || new Date().toISOString(),
             submissionDeadline: d.submission_deadline || null,
           }));
@@ -180,8 +181,7 @@ export function OperatorOverview() {
   })();
   const offerChartSummary = `مسودات ${draftsCount}، قيد التقييم ${underEvaluationCount}، فائزة ${awardedCount}، مرفوضة ${rejectedCount}`;
 
-  const formatDate = (value: string) =>
-    new Date(value).toLocaleDateString(lang === 'ar' ? 'ar-DZ' : 'fr-FR');
+  const formatDate = (value: string) => intlFormatDate(value, lang);
 
   const kpiValue = (value: number) => {
     if (loading) return '…';
@@ -189,7 +189,7 @@ export function OperatorOverview() {
   };
 
   return (
-    <div className="op-page">
+    <div className="op-page" dir={dir}>
       <div className="op-page-head">
         <div>
           <h1>مساحة العمل</h1>
@@ -518,9 +518,9 @@ export function OperatorOverview() {
                         </span>
                       )}
                       {deal.estimated_budget && (
-                        <span className="inline-flex items-center gap-1">
+                        <span className="inline-flex items-center gap-1 font-mono font-bold">
                           <Coins className="size-3.5" aria-hidden="true" />
-                          {Number(deal.estimated_budget).toLocaleString('ar-DZ')} دج
+                          {formatCurrency(Number(deal.estimated_budget), lang)}
                         </span>
                       )}
                     </div>

@@ -1,12 +1,12 @@
 import { PortalTopBar, PortalNavItem } from './PortalTopBar';
-import { useI18n } from '@/i18n';
+import { useI18n, type TranslationKey } from '@/i18n';
 
 export interface CentralAdminTopBarProps {
   title?: string;
   notificationsCount?: number;
 }
 
-const CENTRAL_NAV_ITEMS = (t: (key: string) => string): PortalNavItem[] => [
+const CENTRAL_NAV_ITEMS = (t: (key: TranslationKey) => string): PortalNavItem[] => [
   { path: '/central/dashboard', label: t('nav.central.dashboard') },
   { path: '/central/overview', label: t('nav.central.overview') },
   { path: '/central/map', label: t('nav.central.map') },

@@ -42,7 +42,7 @@ export function OperatorIdentityCard() {
 
   const displayName = user?.displayName?.trim() || user?.email || '';
   const organizationName = user?.organizationName?.trim() || '';
-  const avatarLetters = (organizationName || displayName || 'ص').slice(0, 2);
+  const avatarLetters = (organizationName || displayName || (lang === 'ar' ? 'ص' : 'S')).slice(0, 2);
 
   // Derive localized wilaya name if available
   let wilayaName = '';

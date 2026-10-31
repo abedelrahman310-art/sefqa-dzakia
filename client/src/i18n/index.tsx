@@ -1,6 +1,8 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import i18n, { normalizeLanguage, type AppLanguage } from '@/lib/i18n';
-import type { TranslationKey } from './ar';
+import ar from '@/locales/ar.json';
+
+export type TranslationKey = keyof typeof ar;
 
 /**
  * واجهة التوافق (Compatibility Layer) لنظام الترجمة.
@@ -13,7 +15,6 @@ import type { TranslationKey } from './ar';
 
 export type Language = AppLanguage;
 export type Direction = 'rtl' | 'ltr';
-export type { TranslationKey };
 
 interface I18nContextProps {
   lang: Language;

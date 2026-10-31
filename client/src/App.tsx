@@ -9,6 +9,9 @@ import { CentralSpace } from './pages/central/CentralSpace';
 import { RequireRole } from './components/auth/RequireRole';
 import { LandingPage } from './pages/landing/LandingPage';
 import { LandingV2Page } from './pages/landing-v2/LandingV2Page';
+import { TermsPage } from './pages/legal/TermsPage';
+import { FAQPage } from './pages/legal/FAQPage';
+import { AccessibilityPage } from './pages/legal/AccessibilityPage';
 import { PWAInstallPrompt } from '@/shared/components/PWAInstallPrompt';
 
 export function App() {
@@ -49,6 +52,9 @@ export function App() {
 
       <Route path="/landing-v2" component={LandingV2Page} />
       <Route path="/landing-old" component={LandingPage} />
+      <Route path="/terms" component={TermsPage} />
+      <Route path="/faq" component={FAQPage} />
+      <Route path="/accessibility" component={AccessibilityPage} />
       <Route path="/" component={LandingV2Page} />
 
       <Route>

@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
+import { useI18n } from '@/i18n';
 import { api } from '@/lib/api';
+import { formatCurrency, formatDate as intlFormatDate } from '@/lib/format';
 import type {
   DealMilestonesResponseApi,
   MilestoneApi,
@@ -104,18 +106,16 @@ const getApiErrorMessage = (err: unknown, fallback: string): string => {
   return fallback;
 };
 
-const formatDate = (value: string | null | undefined): string => {
+const formatDate = (value: string | null | undefined, lang?: string): string => {
   if (!value) return '—';
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleDateString('ar-DZ', { dateStyle: 'medium' });
+  return intlFormatDate(value, lang);
 };
 
-const formatAmount = (value: string | null | undefined): string => {
+const formatAmount = (value: string | number | null | undefined, lang?: string): string => {
   if (value === null || value === undefined || value === '') return '—';
   const amount = Number(value);
   if (!Number.isFinite(amount)) return '—';
-  return `${amount.toLocaleString('ar-DZ', { maximumFractionDigits: 2 })} دج`;
+  return formatCurrency(amount, lang);
 };
 
 const createReportForm = (milestone: MilestoneApi): ReportFormState => ({
@@ -138,6 +138,7 @@ const getStatusMeta = (status: string) =>
   };
 
 export function ExecutionTracker({ dealId, role, className = '' }: ExecutionTrackerProps) {
+  const { lang, dir } = useI18n();
   const [milestones, setMilestones] = useState<MilestoneApi[]>([]);
   const [dealReference, setDealReference] = useState('');
   const [loading, setLoading] = useState(true);
@@ -289,7 +290,7 @@ export function ExecutionTracker({ dealId, role, className = '' }: ExecutionTrac
   return (
     <section
       className={`rounded-2xl border border-[#D5DDEA] bg-white p-5 shadow-sm space-y-4 ${className}`}
-      dir="rtl"
+      dir={dir}
       aria-labelledby={`execution-tracker-${dealId}`}
     >
       <div className="flex flex-col gap-3 border-b border-[#E5EBF4] pb-3 sm:flex-row sm:items-center sm:justify-between">
@@ -434,22 +435,22 @@ export function ExecutionTracker({ dealId, role, className = '' }: ExecutionTrac
                       <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-gray-500">
                         <span className="inline-flex items-center gap-1">
                           <Calendar className="h-3.5 w-3.5" />
-                          الاستحقاق: {formatDate(milestone.due_date)}
+                          الاستحقاق: {formatDate(milestone.due_date, lang)}
                         </span>
                         <span className="inline-flex items-center gap-1">
                           <Wallet className="h-3.5 w-3.5" />
-                          {formatAmount(milestone.amount)}
+                          {formatAmount(milestone.amount, lang)}
                         </span>
                         {milestone.completion_date && (
                           <span className="inline-flex items-center gap-1">
                             <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
-                            الإنجاز: {formatDate(milestone.completion_date)}
+                            الإنجاز: {formatDate(milestone.completion_date, lang)}
                           </span>
                         )}
                       </div>
                     </div>
 
-                    <div className="min-w-[130px] shrink-0 text-left">
+                    <div className="min-w-[130px] shrink-0 text-end">
                       <div className="text-[11px] font-bold text-gray-500">نسبة التقدم</div>
                       <div className="text-lg font-extrabold text-emerald-800">{progress}%</div>
                     </div>
@@ -515,7 +516,7 @@ export function ExecutionTracker({ dealId, role, className = '' }: ExecutionTrac
                               {report.report_text}
                             </p>
                             <div className="mt-2 flex flex-wrap items-center gap-3 text-[10px] text-gray-500">
-                              <span>{formatDate(report.submitted_at)}</span>
+                              <span>{formatDate(report.submitted_at, lang)}</span>
                               {report.report_file_url && (
                                 <a
                                   href={report.report_file_url}
@@ -588,7 +589,7 @@ export function ExecutionTracker({ dealId, role, className = '' }: ExecutionTrac
                                 success: '',
                               })
                             }
-                            className="cursor-pointer rounded-xl border-[#D5DDEA] bg-white text-xs file:mr-3 file:rounded-lg file:border-0 file:bg-emerald-50 file:px-3 file:py-1.5 file:text-[11px] file:font-bold file:text-emerald-800"
+                            className="cursor-pointer rounded-xl border-[#D5DDEA] bg-white text-xs file:me-3 file:rounded-lg file:border-0 file:bg-emerald-50 file:px-3 file:py-1.5 file:text-[11px] file:font-bold file:text-emerald-800"
                           />
                         </div>
                       </div>

@@ -26,7 +26,6 @@ import {
   Scale,
   Users,
   FileSignature,
-  Sparkles,
 } from 'lucide-react';
 
 export function OperatorSpace() {
@@ -42,7 +41,6 @@ export function OperatorSpace() {
   const [isContractsActive] = useRoute('/operator/contracts');
   const [isContractDealActive] = useRoute('/operator/contracts/:dealId');
   const [isObjectionsActive] = useRoute('/operator/objections');
-  const [isAssistantActive] = useRoute('/operator/assistant');
   const [isSmartSpecsActive] = useRoute('/operator/smart-specs');
   const [isSettingsActive] = useRoute('/operator/settings');
 
@@ -87,13 +85,6 @@ export function OperatorSpace() {
       href: '/operator/objections',
       icon: Scale,
       isActive: isObjectionsActive,
-      group: 'activity',
-    },
-    {
-      label: t('nav.operator.legal_assistant'),
-      href: '/operator/assistant',
-      icon: Sparkles,
-      isActive: isAssistantActive,
       group: 'activity',
     },
     {

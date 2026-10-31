@@ -4,7 +4,8 @@ import { useI18n } from '@/i18n';
 
 
 export function RegisterHero() {
-  const { dir } = useI18n();
+  const { dir, lang } = useI18n();
+  const isFr = lang === 'fr';
 
   return (
     <aside
@@ -68,10 +69,10 @@ export function RegisterHero() {
 
         <div className="flex flex-col">
           <span className="text-lg lg:text-xl font-black tracking-tight text-white leading-tight font-display">
-            صفقات ذكية
+            {isFr ? 'Safaqat Dhakia' : 'صفقات ذكية'}
           </span>
           <span className="text-[10px] lg:text-[11px] font-medium text-cyan-200/90 tracking-wide">
-            منصة إدارة الصفقات العمومية
+            {isFr ? 'Plateforme de gestion des marchés publics' : 'منصة إدارة الصفقات العمومية'}
           </span>
         </div>
       </div>
@@ -80,13 +81,24 @@ export function RegisterHero() {
       <div className="relative z-10 my-auto py-3 lg:py-6 space-y-4 lg:space-y-6 max-w-xl text-start">
         <div className="space-y-2 lg:space-y-3">
           <h1 className="text-xl sm:text-2xl lg:text-[32px] font-black text-white leading-snug lg:leading-[1.3] font-display">
-            من أجل صفقات عمومية
-            <br />
-            أكثر شفافية وفعالية
+            {isFr ? (
+              <>
+                Pour des marchés publics
+                <br />
+                plus transparents et efficaces
+              </>
+            ) : (
+              <>
+                من أجل صفقات عمومية
+                <br />
+                أكثر شفافية وفعالية
+              </>
+            )}
           </h1>
           <p className="hidden lg:block text-xs sm:text-sm text-slate-200/90 leading-relaxed font-normal max-w-md">
-            منصة رقمية متكاملة لإدارة الصفقات العمومية وفق القوانين الجزائرية،
-            تعزز الشفافية، وتُسهّل الإجراءات لجميع المتدخلين.
+            {isFr
+              ? 'Plateforme numérique intégrée de gestion des marchés publics conformément à la réglementation algérienne, renforçant la transparence et simplifiant les procédures pour tous les intervenants.'
+              : 'منصة رقمية متكاملة لإدارة الصفقات العمومية وفق القوانين الجزائرية، تعزز الشفافية، وتُسهّل الإجراءات لجميع المتدخلين.'}
           </p>
         </div>
 
@@ -99,10 +111,10 @@ export function RegisterHero() {
             </div>
             <div>
               <h3 className="text-sm font-bold text-white leading-tight">
-                شفافية أكبر
+                {isFr ? 'Plus de transparence' : 'شفافية أكبر'}
               </h3>
               <p className="text-xs text-slate-300/90 font-medium mt-0.5">
-                في كل مراحل الصفقة
+                {isFr ? 'À toutes les étapes du marché' : 'في كل مراحل الصفقة'}
               </p>
             </div>
           </div>
@@ -114,10 +126,10 @@ export function RegisterHero() {
             </div>
             <div>
               <h3 className="text-sm font-bold text-white leading-tight">
-                إجراءات مبسطة
+                {isFr ? 'Procédures simplifiées' : 'إجراءات مبسطة'}
               </h3>
               <p className="text-xs text-slate-300/90 font-medium mt-0.5">
-                من الإعلان إلى الإسناد
+                {isFr ? "De l'avis d'appel d'offres à l'attribution" : 'من الإعلان إلى الإسناد'}
               </p>
             </div>
           </div>
@@ -129,10 +141,10 @@ export function RegisterHero() {
             </div>
             <div>
               <h3 className="text-sm font-bold text-white leading-tight">
-                متابعة دقيقة
+                {isFr ? 'Suivi rigoureux' : 'متابعة دقيقة'}
               </h3>
               <p className="text-xs text-slate-300/90 font-medium mt-0.5">
-                لجميع العمليات والآجال
+                {isFr ? 'De toutes les opérations et des délais' : 'لجميع العمليات والآجال'}
               </p>
             </div>
           </div>
@@ -141,7 +153,11 @@ export function RegisterHero() {
 
       {/* ═══ Bottom: Curved Wave with Vision Slogan (Desktop only) ═══ */}
       <div className="hidden lg:flex relative z-10 pt-4 border-t border-white/10 items-center justify-start text-xs text-slate-300/90">
-        <span>الصفقات العمومية .. رافعة للتنمية المستدامة</span>
+        <span>
+          {isFr
+            ? 'Les marchés publics .. levier de développement durable'
+            : 'الصفقات العمومية .. رافعة للتنمية المستدامة'}
+        </span>
       </div>
     </aside>
   );
