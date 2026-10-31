@@ -14,6 +14,7 @@ import { AuthorityObjectionsView } from '@/features/objections/components/Author
 import { ReportsView } from './ReportsView';
 import { AuditView } from './AuditView';
 import { SettingsView } from './SettingsView';
+import { OperatorNotificationsView } from '@/pages/operator/OperatorNotificationsView';
 import { PortalShell } from '@/components/layout/PortalShell';
 import { PortalSidebar } from '@/components/layout/PortalSidebar';
 import ServiceTopBar from '@/components/layout/ServiceTopBar';
@@ -64,7 +65,7 @@ export function AuthoritySpace() {
       isActive: isOverviewActive || isOverviewAliasActive,
     },
     {
-      label: 'الصفقات',
+      label: t('authority.nav.deals'),
       href: '/authority/deals',
       icon: Briefcase,
       isActive:
@@ -96,7 +97,7 @@ export function AuthoritySpace() {
       isActive: isOffersActive || isOffersDetailActive,
     },
     {
-      label: 'الطعون والإسناد',
+      label: t('authority.nav.objections'),
       href: '/authority/objections',
       icon: Scale,
       isActive: isObjectionsActive,
@@ -117,13 +118,13 @@ export function AuthoritySpace() {
 
   return (
     <PortalShell
-      mobileTitle="صفقات ذكية · المصلحة المتعاقدة"
+      mobileTitle={t('common.authority_mobile_title')}
       topBar={<ServiceTopBar />}
       showTopBarOnMobile
       sidebar={
         <PortalSidebar
-          title="صفقات ذكية"
-          subtitle="فضاء المصلحة المتعاقدة"
+          title={t('common.brand')}
+          subtitle={t('common.authority_space')}
           items={navItems}
           variant="authority"
         />
@@ -156,6 +157,7 @@ export function AuthoritySpace() {
         <Route path="/authority/reports" component={ReportsView} />
         <Route path="/authority/audit" component={AuditView} />
         <Route path="/authority/settings" component={SettingsView} />
+        <Route path="/authority/notifications" component={OperatorNotificationsView} />
         <Route path="/authority/opportunities/:id/received-offers" component={ReceivedOffers} />
         <Route path="/authority/opportunities/:id/committee" component={DealCommitteeManager} />
         <Route path="/authority/opportunities/:id/evaluation" component={EvaluationWorkspace} />
@@ -164,7 +166,7 @@ export function AuthoritySpace() {
         <Route path="/authority/overview" component={AuthorityOverview} />
         <Route path="/authority" component={AuthorityOverview} />
         <Route>
-          <PortalNotFound basePath="/authority" baseTitle="الرئيسية للمصلحة" />
+          <PortalNotFound basePath="/authority" baseTitle={t('common.authority_not_found')} />
         </Route>
       </Switch>
     </PortalShell>

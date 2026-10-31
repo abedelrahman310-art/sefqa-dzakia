@@ -449,8 +449,8 @@ export function CentralMapView() {
       </header>
 
       <div className="relative flex min-h-0 flex-1 flex-col gap-4 overflow-hidden p-4 xl:flex-row">
-        <main className="relative flex min-h-[420px] flex-1 items-center justify-center overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-[#FAFBFA] via-[#F4F6F5] to-[#E9ECE9]" />
+        <main className="relative flex min-h-[420px] flex-1 items-center justify-center overflow-hidden rounded-2xl border border-gray-200 bg-[#F4F6F5]">
+          <div className="pointer-events-none absolute inset-0 bg-[#F4F6F5]" />
           {hoveredWilayaName && (
             <div className="absolute start-4 top-4 z-20 flex animate-in items-center gap-2 rounded-xl border border-gray-200 bg-white/95 px-3.5 py-2 text-sm shadow-sm backdrop-blur-md duration-150 fade-in">
               <span className="size-2 animate-pulse rounded-full bg-[#167354]" />

@@ -4,11 +4,17 @@ import '@fontsource/cairo/400.css';
 import '@fontsource/cairo/600.css';
 import '@fontsource/cairo/700.css';
 import '@fontsource/cairo/800.css';
+import '@fontsource/inter/400.css';
+import '@fontsource/inter/500.css';
+import '@fontsource/inter/600.css';
+import '@fontsource/inter/700.css';
+import '@fontsource/inter/800.css';
 import './theme/tokens/primitives.css';
 import './theme/tokens/semantic.css';
 import './theme/tokens/components.css';
 import './index.css';
-import { I18nProvider } from '@/i18n';
+import '@/lib/i18n';
+import { I18nProvider, useI18n } from '@/i18n';
 import { AuthProvider } from '@/components/auth/AuthProvider';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'sonner';
@@ -23,6 +29,12 @@ const queryClient = new QueryClient({
   },
 });
 
+/** التوستات تتبع اتجاه الصفحة الحالي (RTL للعربية / LTR للفرنسية). */
+function AppToaster() {
+  const { dir } = useI18n();
+  return <Toaster position="top-center" richColors dir={dir} />;
+}
+
 // Security: purge API responses cached by older service-worker versions.
 // API traffic is network-only now; this removes stale authenticated or
 // financial data that may still exist in the browser's Cache Storage.
@@ -36,7 +48,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <I18nProvider>
         <AuthProvider>
           <App />
-          <Toaster position="top-center" richColors dir="rtl" />
+          <AppToaster />
         </AuthProvider>
       </I18nProvider>
     </QueryClientProvider>

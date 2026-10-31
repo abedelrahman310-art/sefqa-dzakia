@@ -43,10 +43,10 @@ export function PortalSidebar({
   variant = 'default',
 }: PortalSidebarProps) {
   const { user } = useAuth();
-  const { lang, setLang } = useI18n();
+  const { lang, setLang, t } = useI18n();
 
   const orgName = user?.organizationName || user?.displayName || user?.email || '';
-  const initial = user?.displayName?.charAt(0) || user?.email?.charAt(0) || 'م';
+  const initial = user?.displayName?.charAt(0) || user?.email?.charAt(0) || t('common.brand').charAt(0);
   const isOperator = variant === 'operator';
   const isMint = variant === 'mint';
 
@@ -73,7 +73,7 @@ export function PortalSidebar({
               type="button"
               onClick={onLinkClick}
               className="flex size-9 cursor-pointer items-center justify-center rounded-lg border-0 bg-white/10 text-white hover:bg-white/20 md:hidden"
-              aria-label="إغلاق القائمة"
+              aria-label={t('common.close_menu')}
             >
               <X className="h-5 w-5" />
             </button>
@@ -83,7 +83,7 @@ export function PortalSidebar({
         {/* 2. عناصر التنقل */}
         <nav
           className="min-h-0 flex-1 space-y-1.5 overflow-y-auto p-4 pb-6"
-          aria-label="التنقل الرئيسي"
+          aria-label={t('common.main_navigation')}
         >
           {items.map((item) => {
             const Icon = item.icon;
@@ -111,6 +111,21 @@ export function PortalSidebar({
             );
           })}
         </nav>
+
+        {/* تذييل القائمة: زر تبديل اللغة */}
+        <div className="flex-none border-t border-white/10 p-3 flex items-center justify-between">
+          <span className="text-xs text-white/70 font-semibold">{t('header.tools.language')}</span>
+          <button
+            type="button"
+            onClick={() => setLang(lang === 'ar' ? 'fr' : 'ar')}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer border-0"
+            title={t('common.change_language')}
+            aria-label={t('common.change_language')}
+          >
+            <Languages className="w-3.5 h-3.5 text-white/80" />
+            <span>{lang === 'ar' ? 'Français' : 'العربية'}</span>
+          </button>
+        </div>
       </div>
     );
   }
@@ -124,14 +139,14 @@ export function PortalSidebar({
             <div className="bg-white p-1 rounded-xl shadow-xs">
               <Logo size={36} className="shrink-0" />
             </div>
-            <span className="text-[20px] font-extrabold text-white">صفقات ذكية</span>
+            <span className="text-[20px] font-extrabold text-white">{t('common.brand')}</span>
           </div>
           {onLinkClick && (
             <button
               type="button"
               onClick={onLinkClick}
               className="md:hidden size-11 rounded-[10px] bg-white/20 hover:bg-white/30 text-white flex items-center justify-center cursor-pointer border-0"
-              aria-label="إغلاق القائمة"
+              aria-label={t('common.close_menu')}
             >
               <X className="w-5 h-5" />
             </button>
@@ -141,11 +156,11 @@ export function PortalSidebar({
         {/* 2. Role header badge */}
         <div className="flex items-center gap-2 mx-4 mt-4 mb-2 text-[13px] font-bold text-white/90">
           <span className="size-2 rounded-full bg-white inline-block shrink-0 shadow-xs" />
-          <span>بوابة المتعامل الاقتصادي</span>
+          <span>{t('common.portal_operator')}</span>
         </div>
 
         {/* 3. Navigation items */}
-        <nav className="flex-1 min-h-0 flex flex-col gap-1.5 p-2 px-3 overflow-y-auto pb-4" aria-label="التنقل الرئيسي">
+        <nav className="flex-1 min-h-0 flex flex-col gap-1.5 p-2 px-3 overflow-y-auto pb-4" aria-label={t('common.main_navigation')}>
           {items.map((item) => {
             const Icon = item.icon;
             return (
@@ -170,6 +185,21 @@ export function PortalSidebar({
             );
           })}
         </nav>
+
+        {/* تذييل القائمة: زر تبديل اللغة */}
+        <div className="flex-none border-t border-white/10 p-3 flex items-center justify-between">
+          <span className="text-xs text-white/70 font-semibold">{t('header.tools.language')}</span>
+          <button
+            type="button"
+            onClick={() => setLang(lang === 'ar' ? 'fr' : 'ar')}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer border-0"
+            title={t('common.change_language')}
+            aria-label={t('common.change_language')}
+          >
+            <Languages className="w-3.5 h-3.5 text-white/80" />
+            <span>{lang === 'ar' ? 'Français' : 'العربية'}</span>
+          </button>
+        </div>
       </div>
     );
   }
@@ -197,7 +227,7 @@ export function PortalSidebar({
               type="button"
               onClick={onLinkClick}
               className="md:hidden size-9 rounded-lg bg-white/10 hover:bg-white/20 text-white flex items-center justify-center cursor-pointer border-0"
-              aria-label="إغلاق القائمة"
+              aria-label={t('common.close_menu')}
             >
               <X className="w-5 h-5" />
             </button>
@@ -205,7 +235,7 @@ export function PortalSidebar({
         </div>
 
         {/* 2. Navigation items — تملأ المساحة الرأسية كاملة بسلاسة وبدون أي تذييل */}
-        <nav className="flex-1 min-h-0 overflow-y-auto p-4 space-y-1.5 pb-6" aria-label="التنقل الرئيسي">
+        <nav className="flex-1 min-h-0 overflow-y-auto p-4 space-y-1.5 pb-6" aria-label={t('common.main_navigation')}>
           {items.map((item) => {
             const Icon = item.icon;
             return (
@@ -225,6 +255,21 @@ export function PortalSidebar({
             );
           })}
         </nav>
+
+        {/* تذييل القائمة: زر تبديل اللغة */}
+        <div className="flex-none border-t border-white/10 p-3 flex items-center justify-between">
+          <span className="text-xs text-white/70 font-semibold">{t('header.tools.language')}</span>
+          <button
+            type="button"
+            onClick={() => setLang(lang === 'ar' ? 'fr' : 'ar')}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer border-0"
+            title={t('common.change_language')}
+            aria-label={t('common.change_language')}
+          >
+            <Languages className="w-3.5 h-3.5 text-white/80" />
+            <span>{lang === 'ar' ? 'Français' : 'العربية'}</span>
+          </button>
+        </div>
       </div>
     );
   }
@@ -309,7 +354,7 @@ export function PortalSidebar({
                   className="size-5 shrink-0 text-[#5B6472] group-hover:text-[#1F6B54] transition-colors [transition-duration:180ms]"
                   strokeWidth={1.75}
                 />
-                <span>{lang === 'ar' ? 'المساعدة' : 'Aide'}</span>
+                <span>{t('common.help')}</span>
               </a>
             </Link>
           </div>
@@ -336,7 +381,7 @@ export function PortalSidebar({
                 type="button"
                 onClick={() => setLang(lang === 'ar' ? 'fr' : 'ar')}
                 className="flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-lg bg-white text-[#1F6B54] border border-[#E7EAED] hover:bg-[#E9F6F1] transition-colors shadow-xs flex-none"
-                title="تبديل اللغة / Changer de langue"
+                title={t('common.change_language')}
               >
                 <Languages className="w-3.5 h-3.5 text-[#5B6472]" />
                 <span>{lang === 'ar' ? 'FR' : 'عربي'}</span>
@@ -434,7 +479,7 @@ export function PortalSidebar({
               type="button"
               onClick={() => setLang(lang === 'ar' ? 'fr' : 'ar')}
               className="flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-lg bg-white/10 text-white border border-white/20 hover:bg-white/20 transition-colors shadow-xs flex-none"
-              title="تبديل اللغة / Changer de langue"
+              title={t('common.change_language')}
             >
               <Languages className="w-3.5 h-3.5 text-white/80" />
               <span>{lang === 'ar' ? 'FR' : 'عربي'}</span>

@@ -166,7 +166,7 @@ export function OperatorOverview() {
   const offerChartTotal = offerChartData.reduce((sum, item) => sum + item.value, 0);
   const offerChartGradient = (() => {
     if (offerChartTotal === 0) {
-      return 'conic-gradient(#e5e7eb 0% 100%)';
+      return 'conic-gradient(#e5e7eb 0% 100%)'; /* taste-skill-ignore */
     }
     let cursor = 0;
     const segments = offerChartData
@@ -176,7 +176,7 @@ export function OperatorOverview() {
         cursor += (item.value / offerChartTotal) * 100;
         return `${item.color} ${start}% ${cursor}%`;
       });
-    return `conic-gradient(${segments.join(', ')})`;
+    return `conic-gradient(${segments.join(', ')})`; /* taste-skill-ignore */
   })();
   const offerChartSummary = `مسودات ${draftsCount}، قيد التقييم ${underEvaluationCount}، فائزة ${awardedCount}، مرفوضة ${rejectedCount}`;
 

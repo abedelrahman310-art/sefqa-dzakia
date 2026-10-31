@@ -87,17 +87,17 @@ export function AuditView() {
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
       {/* Banner */}
-      <section className="rounded-2xl p-6 md:p-8 text-white bg-gradient-to-r from-navy-900 to-navy-700 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <section className="rounded-2xl p-6 md:p-8 text-white bg-navy-900 border border-navy-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div className="space-y-1.5">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-bold text-navy-100 uppercase tracking-wider">
+            <span className="text-xs font-semibold text-navy-100">
               صفقات ذكية · نظام التتبع والرقابة القانونية
             </span>
             <Badge variant="outline" className="text-[11px] bg-white/10 text-white border-white/20">
               قانون 23-12
             </Badge>
           </div>
-          <h1 className="text-2xl md:text-3xl font-extrabold text-white">
+          <h1 className="text-xl md:text-2xl font-bold text-white">
             {t('authority.audit.title')}
           </h1>
           <p className="text-xs md:text-sm text-navy-100 max-w-2xl">

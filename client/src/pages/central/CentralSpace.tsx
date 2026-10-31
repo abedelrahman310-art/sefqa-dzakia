@@ -8,6 +8,7 @@ import { CentralOperators } from './CentralOperators';
 import { CentralAppeals } from './CentralAppeals';
 import { CentralReports } from './CentralReports';
 import { CentralPermissions } from './CentralPermissions';
+import { OperatorNotificationsView } from '@/pages/operator/OperatorNotificationsView';
 import { PortalNotFound } from '@/components/common/PortalNotFound';
 import CentralAdminTopBar from '@/components/layout/CentralAdminTopBar';
 import { PortalShell } from '@/components/layout/PortalShell';
@@ -103,7 +104,7 @@ export function CentralSpace() {
 
   return (
     <PortalShell
-      mobileTitle="صفقات ذكية · الإدارة المركزية"
+      mobileTitle={t('common.central_mobile_title')}
       topBar={<CentralAdminTopBar title={currentTitle} />}
       hideSidebar={false}
       hideTopBar={false}
@@ -111,8 +112,8 @@ export function CentralSpace() {
       contentClassName={isMapRoute ? 'p-0 h-full overflow-hidden' : 'p-4 md:p-6'}
       sidebar={
         <PortalSidebar
-          title="صفقات ذكية"
-          subtitle="الإدارة المركزية والرقابة"
+          title={t('common.brand')}
+          subtitle={t('common.central_admin')}
           items={navItems}
           accentColor="var(--stamp-green-700)"
           hideUserInfo={true}
@@ -129,10 +130,11 @@ export function CentralSpace() {
         <Route path="/central/appeals" component={CentralAppeals} />
         <Route path="/central/reports" component={CentralReports} />
         <Route path="/central/permissions" component={CentralPermissions} />
+        <Route path="/central/notifications" component={OperatorNotificationsView} />
         <Route path="/central/overview" component={CentralOverview} />
         <Route path="/central" component={CentralOverview} />
         <Route>
-          <PortalNotFound basePath="/central" baseTitle="الرئيسية المركزية" />
+          <PortalNotFound basePath="/central" baseTitle={t('common.central_not_found')} />
         </Route>
       </Switch>
     </PortalShell>

@@ -134,6 +134,17 @@
     font-size: 16px;
     font-family: 'Cairo', sans-serif;
   }
+  /* الفرنسية: خط Inter مع اتجاه LTR، والعربية تبقى على Cairo. */
+  html.lang-fr {
+    --font-display: 'Inter', 'Roboto', 'Segoe UI', system-ui, sans-serif;
+  }
+  html.lang-fr body,
+  html.lang-fr button,
+  html.lang-fr input,
+  html.lang-fr textarea,
+  html.lang-fr select {
+    font-family: 'Inter', 'Roboto', 'Segoe UI', system-ui, sans-serif;
+  }
   * {
     @apply border-border;
   }

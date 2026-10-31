@@ -192,7 +192,7 @@ export function DraftsList() {
                         جلسة الفتح جارية
                       </span>
                     ) : ['opened_pv_signed', 'technical_evaluation', 'financial_evaluation'].includes(draft.status) ? (
-                      <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-800 border border-indigo-200">
+                      <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-teal-50 text-teal-800 border border-teal-200">
                         قيد التقييم
                       </span>
                     ) : draft.status === 'provisional_award' ? (

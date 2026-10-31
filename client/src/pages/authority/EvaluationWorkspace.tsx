@@ -369,7 +369,7 @@ export function EvaluationWorkspace() {
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
       {/* Banner */}
-      <section className="rounded-2xl p-6 md:p-8 text-white bg-gradient-to-r from-navy-900 to-navy-700 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <section className="rounded-2xl p-6 md:p-8 text-white bg-navy-900 border border-navy-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <Button
@@ -380,11 +380,11 @@ export function EvaluationWorkspace() {
             >
               <ArrowIcon className="w-4 h-4" />
             </Button>
-            <span className="text-xs font-bold text-navy-100 uppercase tracking-wider">
+            <span className="text-xs font-semibold text-navy-100">
               {t('lifecycle.opening.decree_ref')}
             </span>
           </div>
-          <h2 className="text-2xl font-extrabold text-white">
+          <h2 className="text-xl md:text-2xl font-bold text-white">
             {t('lifecycle.eval.title')}
           </h2>
           <p className="text-xs text-navy-100">
@@ -461,7 +461,7 @@ export function EvaluationWorkspace() {
               size="sm"
               onClick={() => void runPriceAnalysis()}
               disabled={offers.length === 0}
-              className="gap-1.5 rounded-xl bg-indigo-600 text-xs font-bold text-white hover:bg-indigo-700"
+              className="gap-1.5 rounded-xl bg-navy-900 text-xs font-bold text-white hover:bg-navy-800"
             >
               <Sparkles className="w-4 h-4" aria-hidden="true" />
               التحليل المالي الذكي
@@ -813,7 +813,7 @@ export function EvaluationWorkspace() {
         <DialogContent className="max-h-[88vh] max-w-2xl overflow-y-auto" dir={dir}>
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-lg font-bold">
-              <Sparkles className="h-5 w-5 text-indigo-600" aria-hidden="true" />
+              <Sparkles className="h-5 w-5 text-navy-900" aria-hidden="true" />
               التحليل المالي الذكي
             </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground">
@@ -827,7 +827,7 @@ export function EvaluationWorkspace() {
 
           {priceLoading ? (
             <div className="flex flex-col items-center justify-center gap-3 py-12 text-xs text-muted-foreground">
-              <Loader2 className="h-8 w-8 animate-spin text-indigo-600" aria-hidden="true" />
+              <Loader2 className="h-8 w-8 animate-spin text-navy-900" aria-hidden="true" />
               جاري تحليل أسعار العروض…
             </div>
           ) : priceError ? (
@@ -857,7 +857,7 @@ export function EvaluationWorkspace() {
                   <span className="block text-[10px] font-bold text-muted-foreground">
                     الانحراف المعياري
                   </span>
-                  <span className="mt-1 block text-xs sm:text-sm font-extrabold text-indigo-700 font-mono">
+                  <span className="mt-1 block text-xs sm:text-sm font-extrabold text-navy-900 font-mono">
                     {formatPrice(priceData.standard_deviation ?? priceData.summary.standard_deviation)}
                   </span>
                 </div>
@@ -958,8 +958,8 @@ export function EvaluationWorkspace() {
                           </div>
                         )}
 
-                        <p className="rounded-lg border border-indigo-100 bg-indigo-50/60 p-2 text-[11px] leading-relaxed text-indigo-950 font-medium">
-                          <span className="font-bold text-indigo-900 block mb-0.5">توصية الذكاء الاصطناعي:</span>
+                        <p className="rounded-lg border border-blue-100 bg-blue-50/60 p-2 text-[11px] leading-relaxed text-navy-950 font-medium">
+                          <span className="font-bold text-navy-900 block mb-0.5">توصية التحليل الذكي:</span>
                           {offer.ai_recommendation || offer.recommendation}
                         </p>
                       </div>

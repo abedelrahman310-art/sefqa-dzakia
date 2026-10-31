@@ -111,43 +111,49 @@ export function AuthorityDealsList({ initialView = 'deals' }: AuthorityDealsList
   }, [deals, search, stageFilter]);
 
   const getStageBadge = (stage: number) => {
+    const stageNum = String(stage).padStart(2, '0');
     if (stage === 1) {
       return (
-        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200">
-          <Clock className="w-3.5 h-3.5 text-amber-600" />
-          {STAGE_LABELS[stage] || 'التخطيط والاحتياج'}
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-800 border border-amber-200">
+          <Clock className="size-3 text-amber-600 shrink-0" />
+          <span>{stageNum} — {STAGE_LABELS[stage] || 'التخطيط والاحتياج'}</span>
         </span>
       );
     }
     if (stage === 2) {
       return (
-        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-800 border border-blue-200">
-          <FileText className="w-3.5 h-3.5 text-blue-600" />
-          {STAGE_LABELS[stage] || 'إعداد دفتر الشروط'}
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-blue-50 text-blue-800 border border-blue-200">
+          <FileText className="size-3 text-blue-600 shrink-0" />
+          <span>{stageNum} — {STAGE_LABELS[stage] || 'إعداد دفتر الشروط'}</span>
         </span>
       );
     }
     if (stage >= 3 && stage <= 7) {
       return (
-        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">
-          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-          {STAGE_LABELS[stage] || 'معلنة ومتاحة للمنافسة'}
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">
+          <CheckCircle2 className="size-3 text-emerald-600 shrink-0" />
+          <span>{stageNum} — {STAGE_LABELS[stage] || 'معلنة ومتاحة للمنافسة'}</span>
         </span>
       );
     }
     return (
-      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-purple-50 text-purple-800 border border-purple-200">
-        <FileCheck2 className="w-3.5 h-3.5 text-purple-600" />
-        {STAGE_LABELS[stage] || `المرحلة ${stage}`}
+      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-blue-50 text-blue-900 border border-blue-200">
+        <FileCheck2 className="size-3 text-blue-700 shrink-0" />
+        <span>{stageNum} — {STAGE_LABELS[stage] || `المرحلة ${stage}`}</span>
       </span>
     );
   };
 
-  const formatBudget = (budget: string | number | null) => {
-    if (!budget) return 'غير محدد';
+  const renderBudget = (budget: string | number | null) => {
+    if (!budget) return <span className="text-xs text-gray-400">غير محدد</span>;
     const num = typeof budget === 'string' ? parseFloat(budget) : budget;
-    if (isNaN(num)) return 'غير محدد';
-    return `${num.toLocaleString('ar-DZ')} دج`;
+    if (isNaN(num)) return <span className="text-xs text-gray-400">غير محدد</span>;
+    return (
+      <div className="flex items-baseline gap-1 font-mono text-sm font-semibold text-navy-900 tabular-nums">
+        <span>{num.toLocaleString('ar-DZ')}</span>
+        <span className="text-[11px] font-normal text-gray-500 font-sans">دج</span>
+      </div>
+    );
   };
 
   const formatDate = (dateStr?: string) => {
@@ -311,8 +317,8 @@ export function AuthorityDealsList({ initialView = 'deals' }: AuthorityDealsList
                   onClick={() => setStageFilter('awarded')}
                   className={`px-3.5 py-1.5 rounded-xl font-bold transition-all whitespace-nowrap ${
                     stageFilter === 'awarded'
-                      ? 'bg-purple-600 text-white shadow-sm'
-                      : 'bg-purple-50 text-purple-800 hover:bg-purple-100 border border-purple-200/60'
+                      ? 'bg-navy-900 text-white shadow-sm'
+                      : 'bg-slate-50 text-slate-800 hover:bg-slate-100 border border-slate-200'
                   }`}
                 >
                   الإسناد والتعاقد ({deals.filter((d) => d.current_stage >= 8).length})
@@ -356,14 +362,14 @@ export function AuthorityDealsList({ initialView = 'deals' }: AuthorityDealsList
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full text-right border-collapse text-sm">
+                <table className="w-full text-right border-collapse text-xs">
                   <thead>
                     <tr className="border-b border-[#D5DDEA] bg-gray-50/75 text-xs font-bold text-gray-600">
-                      <th className="py-3.5 px-5">الرقم المرجعي والموضوع</th>
-                      <th className="py-3.5 px-4">الموقع والميزانية</th>
-                      <th className="py-3.5 px-4">مرحلة الإعداد</th>
-                      <th className="py-3.5 px-4">آخر تحديث</th>
-                      <th className="py-3.5 px-5 text-left">إدارة الملف</th>
+                      <th className="py-2.5 px-4">الرقم المرجعي والموضوع</th>
+                      <th className="py-2.5 px-4">الموقع والميزانية</th>
+                      <th className="py-2.5 px-4">مرحلة الإعداد</th>
+                      <th className="py-2.5 px-4">آخر تحديث</th>
+                      <th className="py-2.5 px-4 text-left">إدارة الملف</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#E5EBF4]">
@@ -375,20 +381,20 @@ export function AuthorityDealsList({ initialView = 'deals' }: AuthorityDealsList
                           className="hover:bg-gray-50/60 transition-colors group cursor-pointer"
                           onClick={() => setLocation(`/authority/deals/${deal.id}`)}
                         >
-                          <td className="py-4 px-5">
-                            <div className="space-y-1.5 max-w-lg">
+                          <td className="py-2.5 px-4">
+                            <div className="space-y-1 max-w-lg">
                               <div className="flex items-center gap-1.5 flex-wrap">
-                                <span className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-gray-100 text-gray-700 border border-gray-200">
+                                <span className="font-mono text-[11px] font-semibold px-2 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200">
                                   {deal.reference_number || 'مسودة قيد الترقيم'}
                                 </span>
                                 {clauses?.procurement_nature && (
-                                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
+                                  <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
                                     {NATURE_LABELS[clauses.procurement_nature]?.ar ||
                                       clauses.procurement_nature}
                                   </span>
                                 )}
                                 {clauses?.procurement_method && (
-                                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-navy-50 text-navy-800 border border-navy-100">
+                                  <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-navy-50 text-navy-800 border border-navy-100">
                                     {METHOD_LABELS[clauses.procurement_method]?.ar || 'طلب العروض'}
                                     {clauses.procurement_form
                                       ? ` (${
@@ -399,52 +405,50 @@ export function AuthorityDealsList({ initialView = 'deals' }: AuthorityDealsList
                                   </span>
                                 )}
                               </div>
-                              <p className="font-bold text-navy-900 group-hover:text-emerald-700 transition-colors line-clamp-1">
+                              <p className="text-sm font-bold text-navy-900 group-hover:text-emerald-700 transition-colors line-clamp-1 leading-snug">
                                 {deal.title}
                               </p>
                               {deal.description && (
-                                <p className="text-xs text-gray-500 line-clamp-1">{deal.description}</p>
+                                <p className="text-[11px] text-gray-500 line-clamp-1 mt-0.5">{deal.description}</p>
                               )}
                             </div>
                           </td>
 
-                          <td className="py-4 px-4 whitespace-nowrap">
-                            <div className="font-semibold text-gray-900 text-xs">
-                              {formatBudget(deal.estimated_budget)}
-                            </div>
-                            <div className="text-xs text-gray-500">
+                          <td className="py-2.5 px-4 whitespace-nowrap">
+                            {renderBudget(deal.estimated_budget)}
+                            <div className="text-[11px] text-gray-500 mt-0.5">
                               {deal.wilaya ? `ولاية: ${deal.wilaya}` : 'الولاية: غير محددة'}
                             </div>
                           </td>
 
-                          <td className="py-4 px-4 whitespace-nowrap">
+                          <td className="py-2.5 px-4 whitespace-nowrap">
                             {getStageBadge(deal.current_stage)}
                           </td>
 
-                          <td className="py-4 px-4 whitespace-nowrap text-xs text-gray-500">
+                          <td className="py-2.5 px-4 whitespace-nowrap text-xs text-gray-500 font-mono">
                             {formatDate(deal.updated_at || deal.created_at)}
                           </td>
 
-                          <td className="py-4 px-5 whitespace-nowrap text-left" onClick={(e) => e.stopPropagation()}>
-                            <div className="flex items-center justify-end gap-2">
+                          <td className="py-2.5 px-4 whitespace-nowrap text-left" onClick={(e) => e.stopPropagation()}>
+                            <div className="flex items-center justify-end gap-1.5">
                               <Button
                                 variant="ghost"
                                 size="sm"
                                 title="تصدير مسودة دفتر الشروط PDF"
                                 onClick={(e) => handleExportPdf(e, deal)}
                                 disabled={exportingId === deal.id}
-                                className="text-gray-600 hover:text-navy-900 hover:bg-gray-100 rounded-lg p-2 h-auto"
+                                className="h-8 w-8 p-0 text-gray-500 hover:text-navy-900 hover:bg-gray-100 rounded-lg shrink-0"
                               >
-                                <Download className="w-4 h-4" />
+                                <Download className="w-3.5 h-3.5" />
                               </Button>
 
                               <Button
                                 size="sm"
                                 onClick={() => setLocation(`/authority/deals/${deal.id}`)}
-                                className="bg-navy-900 hover:bg-navy-800 text-white font-bold px-3 py-1.5 rounded-xl text-xs flex items-center gap-1.5"
+                                className="h-8 px-3 rounded-lg bg-navy-900 hover:bg-navy-800 text-white font-semibold text-xs flex items-center gap-1.5 shrink-0 transition-colors"
                               >
                                 <span>فتح ملف الصفقة</span>
-                                <ChevronRight className="w-3.5 h-3.5 rotate-180" />
+                                <ChevronRight className="size-3 rotate-180 shrink-0" />
                               </Button>
                             </div>
                           </td>
@@ -566,7 +570,7 @@ export function AuthorityDealsList({ initialView = 'deals' }: AuthorityDealsList
                 شروط ونسب قبول كفالة التعهد، كفالة حسن التنفيذ، وكفالة استرجاع التسبيقات وفق المرسوم الرئاسي 15-247.
               </p>
               <div className="pt-2 flex items-center gap-2">
-                <span className="px-2 py-0.5 rounded bg-purple-50 text-purple-800 border border-purple-200 text-[10px] font-bold">
+                <span className="px-2 py-0.5 rounded bg-blue-50 text-blue-800 border border-blue-200 text-[10px] font-bold">
                   ضمان مالي
                 </span>
                 <span className="text-gray-400 text-[11px]">البنوك المعتمدة</span>

@@ -83,7 +83,7 @@ const STATUS_META: Record<string, { label: string; className: string }> = {
   },
   escalated: {
     label: 'مُحال للقضاء',
-    className: 'bg-purple-50 text-purple-800 border-purple-300',
+    className: 'bg-slate-100 text-slate-800 border-slate-300',
   },
 };
 

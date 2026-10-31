@@ -51,7 +51,7 @@ const STATUS_META: Record<string, { label: string; className: string }> = {
     className: 'bg-emerald-50 text-emerald-800 border-emerald-200',
   },
   rejected: { label: 'مرفوض', className: 'bg-rose-50 text-rose-800 border-rose-200' },
-  evaluated: { label: 'مقيّم ومؤهل', className: 'bg-violet-50 text-violet-800 border-violet-200' },
+  evaluated: { label: 'مقيّم ومؤهل', className: 'bg-teal-50 text-teal-800 border-teal-200' },
   awarded: { label: 'حائز على الصفقة', className: 'bg-emerald-50 text-emerald-900 border-emerald-300' },
 };
 

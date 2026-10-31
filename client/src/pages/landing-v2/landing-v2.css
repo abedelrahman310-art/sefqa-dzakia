@@ -1644,6 +1644,29 @@
       transform: translateY(-2px);
       box-shadow: 0 12px 28px rgba(14, 169, 104, 0.30);
     }
+    .topbar-lang-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      padding: 9px 15px;
+      border-radius: 999px;
+      color: #0f3154;
+      background: rgba(255, 255, 255, 0.95);
+      border: 1px solid rgba(15, 49, 84, 0.16);
+      font-size: 13px;
+      font-weight: 800;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+    .topbar-lang-btn:hover {
+      background: #ffffff;
+      border-color: rgba(15, 49, 84, 0.32);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
     .landing-root section[id] { scroll-margin-top: 92px; }
 
     @media (max-width: 900px) {
@@ -1702,3 +1725,9 @@
         margin-bottom: 14px;
       }
     }
+
+/* ─── الفرنسية: Inter بدل Cairo/Amiri مع الحفاظ على التسلسل البصري ─── */
+.landing-root[lang='fr'],
+.landing-root[lang='fr'] * {
+  font-family: 'Inter', 'Segoe UI', Roboto, system-ui, sans-serif;
+}

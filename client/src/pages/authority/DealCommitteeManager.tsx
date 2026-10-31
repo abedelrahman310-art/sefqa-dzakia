@@ -127,7 +127,7 @@ export function DealCommitteeManager() {
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
       {/* Top Banner */}
-      <section className="rounded-2xl p-6 md:p-8 text-white bg-gradient-to-r from-navy-900 to-navy-700 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <section className="rounded-2xl p-6 md:p-8 text-white bg-navy-900 border border-navy-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <Button
@@ -138,11 +138,11 @@ export function DealCommitteeManager() {
             >
               <ArrowIcon className="w-4 h-4" />
             </Button>
-            <span className="text-xs font-bold text-navy-100 uppercase tracking-wider">
+            <span className="text-xs font-semibold text-navy-100">
               {t('lifecycle.opening.decree_ref')}
             </span>
           </div>
-          <h2 className="text-2xl font-extrabold text-white">
+          <h2 className="text-xl md:text-2xl font-bold text-white">
             {t('lifecycle.committee.title')}
           </h2>
           <p className="text-xs text-navy-100">
@@ -230,7 +230,7 @@ export function DealCommitteeManager() {
                                 : m.role === 'secretary'
                                 ? 'bg-blue-50 text-blue-900 border-blue-200'
                                 : m.role === 'controller'
-                                ? 'bg-purple-50 text-purple-900 border-purple-200'
+                                ? 'bg-teal-50 text-teal-900 border-teal-200'
                                 : 'bg-slate-50 text-slate-800 border-slate-200'
                             }`}
                           >

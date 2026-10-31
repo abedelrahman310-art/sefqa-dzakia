@@ -58,11 +58,10 @@
   flex: 0 0 272px;
   display: flex;
   flex-direction: column;
-  background: linear-gradient(180deg, #075985 0%, #0369a1 48%, #0284c7 100%);
-  border-inline-end: 1px solid rgba(255, 255, 255, 0.15);
+  background: #0f3154;
+  border-inline-end: 1px solid rgba(255, 255, 255, 0.12);
   min-height: 0;
   color: #ffffff;
-  box-shadow: 2px 0 12px rgba(2, 132, 199, 0.08);
 }
 
 .op-brand {
@@ -102,7 +101,6 @@
   font-weight: 800;
   color: #ffffff;
   margin: 0;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .op-brand-text span {
@@ -437,7 +435,7 @@
   max-width: 90vw !important;
   padding: 0 !important;
   border: 0 !important;
-  background: linear-gradient(180deg, #075985 0%, #0369a1 48%, #0284c7 100%) !important;
+  background: #0f3154 !important;
   display: flex;
   flex-direction: column;
   font-family: "Cairo", "Segoe UI", Tahoma, sans-serif;
@@ -567,14 +565,12 @@
 }
 
 .op-btn-gold {
-  background: linear-gradient(135deg, var(--op-sky-dark), var(--op-sky));
+  background: var(--op-sky-dark);
   color: #fff;
-  box-shadow: 0 6px 16px rgba(2, 132, 199, 0.24);
 }
 
 .op-btn-gold:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 10px 22px rgba(2, 132, 199, 0.3);
+  background: var(--op-sky);
 }
 
 .op-btn-outline {
@@ -597,12 +593,12 @@
 }
 
 .op-btn-green {
-  background: linear-gradient(135deg, #22c07d, var(--op-green));
+  background: var(--op-green);
   color: #fff;
 }
 
 .op-btn-green:hover {
-  transform: translateY(-1px);
+  filter: brightness(0.95);
 }
 
 .op-btn-red {
@@ -773,7 +769,7 @@
   padding: 22px;
   border: 1.5px dashed var(--op-gold-line);
   border-radius: 12px;
-  background: linear-gradient(180deg, var(--op-surface-2), var(--op-surface));
+  background: var(--op-surface-2);
   text-align: center;
 }
 
@@ -1037,7 +1033,7 @@
   padding: 14px 18px;
   border: 1px solid var(--op-gold-line);
   border-radius: 12px;
-  background: linear-gradient(180deg, var(--op-sky-soft), var(--op-surface-2));
+  background: var(--op-sky-soft);
 }
 
 .op-info-banner > svg {
@@ -1492,15 +1488,15 @@ a.op-list-item:hover .op-list-title {
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, var(--op-gold-2), var(--op-gold));
+  background: var(--op-gold);
 }
 
 .op-progress.green > span {
-  background: linear-gradient(90deg, #22c07d, var(--op-green));
+  background: var(--op-green);
 }
 
 .op-progress.blue > span {
-  background: linear-gradient(90deg, #5ba4f4, var(--op-blue));
+  background: var(--op-blue);
 }
 
 .op-progress.slate > span {
@@ -1509,7 +1505,7 @@ a.op-list-item:hover .op-list-title {
 
 .op-skeleton {
   border-radius: 12px;
-  background: linear-gradient(90deg, var(--op-line-2), #e0f2fe, var(--op-line-2));
+  background: linear-gradient(90deg, var(--op-line-2), #e0f2fe, var(--op-line-2)); /* taste-skill-ignore */
   background-size: 200% 100%;
   animation: op-shimmer 1.4s ease infinite;
 }

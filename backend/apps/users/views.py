@@ -303,6 +303,10 @@ class NotificationViewSet(viewsets.ModelViewSet):
             'is_read': True,
         })
 
+    @action(detail=True, methods=['post', 'patch'], url_path='read')
+    def read(self, request, pk=None):
+        return self.mark_read(request, pk)
+
     @action(detail=False, methods=['post', 'patch'], url_path='mark-all-read')
     def mark_all_read(self, request):
         updated_count = self.get_queryset().filter(is_read=False).update(is_read=True)

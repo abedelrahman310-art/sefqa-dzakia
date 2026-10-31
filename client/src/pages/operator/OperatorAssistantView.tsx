@@ -137,7 +137,7 @@ const normalizeLegalArticle = (
     content: content || 'النص الكامل لهذه المادة غير مدرج في الاستجابة.',
     text: content || 'النص الكامل لهذه المادة غير مدرج في الاستجابة.',
     legal_text: content,
-    match_percentage: matchPercentage,
+    match_percentage: matchPercentage ?? undefined,
     similarity_score: typeof rawScore === 'number' ? rawScore : 0.95,
   };
 };

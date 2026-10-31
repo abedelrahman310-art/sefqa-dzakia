@@ -118,13 +118,13 @@ export function OperatorSidebar({ onCloseMobile, className }: OperatorSidebarPro
   return (
     <aside
       className={cn(
-        'w-64 flex-none flex flex-col border-e border-white/20 bg-gradient-to-b from-[#0284c7] via-[#0ea5e9] to-[#38bdf8] text-white select-none h-full',
+        'w-64 flex-none flex flex-col border-e border-white/10 bg-[#0f3154] text-white select-none h-full',
         className
       )}
     >
       {/* Navigation Group Header */}
       <div className="px-4 pt-4 pb-2">
-        <span className="text-[11px] font-bold uppercase tracking-wider text-white/80">
+        <span className="text-[11px] font-semibold text-white/80">
           {t('topbar.account_label')}
         </span>
       </div>
@@ -140,9 +140,9 @@ export function OperatorSidebar({ onCloseMobile, className }: OperatorSidebarPro
               key={item.id}
               onClick={() => handleNavigate(item.href)}
               className={cn(
-                'w-full flex items-center justify-between px-3.5 py-2.5 rounded-lg text-xs font-semibold transition-all group text-start',
+                'w-full flex items-center justify-between px-3.5 py-2.5 rounded-lg text-xs font-semibold transition-colors duration-150 group text-start',
                 active
-                  ? 'bg-white text-[#0284c7] shadow-sm font-bold'
+                  ? 'bg-white text-navy-900 shadow-sm font-bold'
                   : 'text-white hover:text-white hover:bg-white/15'
               )}
             >
@@ -150,7 +150,7 @@ export function OperatorSidebar({ onCloseMobile, className }: OperatorSidebarPro
                 <Icon
                   className={cn(
                     'w-4 h-4 flex-none transition-colors',
-                    active ? 'text-[#0284c7]' : 'text-white'
+                    active ? 'text-navy-900' : 'text-white'
                   )}
                 />
                 <span className="truncate">{t(item.labelKey)}</span>
@@ -161,7 +161,7 @@ export function OperatorSidebar({ onCloseMobile, className }: OperatorSidebarPro
                   className={cn(
                     'text-[10px] font-bold px-1.5 py-0.5 rounded-full flex-none',
                     active
-                      ? 'bg-[#0284c7]/15 text-[#0284c7]'
+                      ? 'bg-navy-900/15 text-navy-900'
                       : 'bg-white/20 text-white'
                   )}
                 >
@@ -186,9 +186,9 @@ export function OperatorSidebar({ onCloseMobile, className }: OperatorSidebarPro
               key={item.id}
               onClick={() => handleNavigate(item.href)}
               className={cn(
-                'w-full flex items-center justify-between px-3.5 py-2 rounded-lg text-xs font-medium transition-all group text-start',
+                'w-full flex items-center justify-between px-3.5 py-2 rounded-lg text-xs font-medium transition-colors duration-150 group text-start',
                 active
-                  ? 'bg-white text-[#0284c7] font-bold shadow-sm'
+                  ? 'bg-white text-navy-900 font-bold shadow-sm'
                   : 'text-white/85 hover:text-white hover:bg-white/15'
               )}
             >
@@ -196,7 +196,7 @@ export function OperatorSidebar({ onCloseMobile, className }: OperatorSidebarPro
                 <Icon
                   className={cn(
                     'w-3.5 h-3.5 flex-none transition-colors',
-                    active ? 'text-[#0284c7]' : 'text-white'
+                    active ? 'text-navy-900' : 'text-white'
                   )}
                 />
                 <span className="truncate">{t(item.labelKey)}</span>

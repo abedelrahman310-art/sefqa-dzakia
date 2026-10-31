@@ -8,6 +8,7 @@ import {
   Search,
   RefreshCw,
   ShieldAlert,
+  AlertTriangle,
 } from 'lucide-react';
 import {
   Card,
@@ -221,7 +222,7 @@ export function CentralOperators() {
                 key={item.id}
                 className="flex items-start gap-2.5 rounded-xl border border-amber-200 bg-amber-50/70 p-2.5"
               >
-                <span className="shrink-0 text-base">⚠️</span>
+                <AlertTriangle className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
                 <div>
                   <div className="text-xs font-bold text-amber-950">{item.name}</div>
                   <p className="mt-0.5 text-xs leading-relaxed text-amber-900">

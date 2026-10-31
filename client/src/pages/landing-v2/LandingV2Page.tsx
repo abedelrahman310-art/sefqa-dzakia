@@ -1,11 +1,97 @@
 import { useLayoutEffect, useRef } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import Logo from '@/components/ui/Logo';
+import { useI18n } from '@/i18n';
 import landingCss from './landing-v2.css?inline';
 import landingHtml from './landing-page.html?raw';
 import logoCss from '@/components/ui/logo.css?inline';
+import {
+  LANDING_FR,
+  LANDING_FR_ATTRIBUTES,
+  LANDING_FR_STORY_INTRO,
+  LANDING_FR_TITLE,
+} from './landing-fr';
 
 const LANDING_TITLE = 'صفقات ذكية | المنصة الوطنية الذكية للصفقات العمومية';
+
+/** يوحّد المسافات كما في جرد النصوص الأصلي (194 نصاً). */
+function normalizeText(value: string): string {
+  return value.replace(/\s+/g, ' ').trim();
+}
+
+/**
+ * يطبّق لغة الصفحة على شجرة Shadow DOM دون إعادة بنائها.
+ *
+ * النصوص الأصلية تُحفظ في WeakMap لكل عقدة نصية، حتى يمكن الرجوع إليها عند
+ * التبديل من الفرنسية إلى العربية. فقرة `.story-intro` تحتوي وسوم <em> مجزأة،
+ * لذلك تُستبدل ككتلة HTML كاملة بدل معالجة عقدها النصية.
+ */
+function applyLandingLanguage(
+  root: HTMLElement,
+  lang: 'ar' | 'fr',
+  textOriginals: WeakMap<Text, string>,
+  attributeOriginals: WeakMap<Element, Map<string, string>>,
+  storyIntroOriginals: WeakMap<Element, string>,
+): void {
+  const isFr = lang === 'fr';
+  root.lang = lang;
+  root.dir = isFr ? 'ltr' : 'rtl';
+
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  let current = walker.nextNode();
+  while (current) {
+    const text = current as Text;
+    const parent = text.parentElement;
+    current = walker.nextNode();
+
+    if (!parent) continue;
+    const tag = parent.tagName;
+    if (tag === 'SCRIPT' || tag === 'STYLE') continue;
+    if (parent.closest('.story-intro')) continue;
+
+    let original = textOriginals.get(text);
+    if (original === undefined) {
+      original = text.data;
+      const key = normalizeText(original);
+      if (!key || !LANDING_FR[key]) continue;
+      textOriginals.set(text, original);
+    }
+
+    if (!isFr) {
+      text.data = original;
+      continue;
+    }
+
+    const translated = LANDING_FR[normalizeText(original)];
+    if (!translated) continue;
+
+    const leading = original.match(/^\s*/)?.[0] ?? '';
+    const trailing = original.match(/\s*$/)?.[0] ?? '';
+    text.data = `${leading}${translated}${trailing}`;
+  }
+
+  root.querySelectorAll<HTMLElement>('[aria-label]').forEach((element) => {
+    let originals = attributeOriginals.get(element);
+    if (!originals) {
+      originals = new Map([['aria-label', element.getAttribute('aria-label') ?? '']]);
+      attributeOriginals.set(element, originals);
+    }
+    const original = originals.get('aria-label') ?? '';
+    const translated = LANDING_FR_ATTRIBUTES[original];
+    if (!translated) return;
+    element.setAttribute('aria-label', isFr ? translated : original);
+  });
+
+  const storyIntro = root.querySelector<HTMLElement>('.story-intro');
+  if (storyIntro) {
+    let original = storyIntroOriginals.get(storyIntro);
+    if (original === undefined) {
+      original = storyIntro.innerHTML;
+      storyIntroOriginals.set(storyIntro, original);
+    }
+    storyIntro.innerHTML = isFr ? LANDING_FR_STORY_INTRO : original;
+  }
+}
 
 /**
  * The attached landing page is a complete standalone HTML document. It is
@@ -17,6 +103,13 @@ const LANDING_TITLE = 'صفقات ذكية | المنصة الوطنية الذ�
  */
 export function LandingV2Page() {
   const hostRef = useRef<HTMLDivElement>(null);
+  const rootRef = useRef<HTMLDivElement | null>(null);
+  const textOriginalsRef = useRef(new WeakMap<Text, string>());
+  const attributeOriginalsRef = useRef(new WeakMap<Element, Map<string, string>>());
+  const storyIntroOriginalsRef = useRef(new WeakMap<Element, string>());
+  const { lang, dir, setLang } = useI18n();
+  const langRef = useRef(lang);
+  langRef.current = lang;
 
   useLayoutEffect(() => {
     const host = hostRef.current;
@@ -37,9 +130,8 @@ export function LandingV2Page() {
 
     const root = document.createElement('div');
     root.className = 'landing-root';
-    root.lang = 'ar';
-    root.dir = 'rtl';
     root.innerHTML = landingHtml;
+    rootRef.current = root;
 
     shadow.replaceChildren(fontLink, style, root);
 
@@ -72,6 +164,13 @@ export function LandingV2Page() {
       const target = event.target;
       if (!(target instanceof Element)) return;
 
+      const langBtn = target.closest('#landing-lang-btn');
+      if (langBtn) {
+        event.preventDefault();
+        setLang(langRef.current === 'ar' ? 'fr' : 'ar');
+        return;
+      }
+
       const anchor = target.closest('a');
       const href = anchor?.getAttribute('href');
       if (!href?.startsWith('#')) return;
@@ -102,6 +201,7 @@ export function LandingV2Page() {
       if (initialScrollTimer !== undefined) window.clearTimeout(initialScrollTimer);
       window.removeEventListener('hashchange', handleHashChange);
       shadow.removeEventListener('click', handleClick);
+      rootRef.current = null;
       // إلغاء تركيب الشعارات خارج دورة تصيير React لتفادي تحذير الإلغاء المتزامن
       queueMicrotask(() => {
         logoRoots.forEach((logoRoot) => logoRoot.unmount());
@@ -111,11 +211,36 @@ export function LandingV2Page() {
     };
   }, []);
 
+  // تطبيق الترجمة عند أول تركيب وعند كل تبديل لغة، دون إعادة بناء الصفحة.
+  useLayoutEffect(() => {
+    const root = rootRef.current;
+    if (!root) return;
+
+    applyLandingLanguage(
+      root,
+      lang,
+      textOriginalsRef.current,
+      attributeOriginalsRef.current,
+      storyIntroOriginalsRef.current,
+    );
+    document.title = lang === 'fr' ? LANDING_FR_TITLE : LANDING_TITLE;
+
+    const langBtn = root.querySelector<HTMLButtonElement>('#landing-lang-btn');
+    if (langBtn) {
+      langBtn.textContent = lang === 'ar' ? 'FR' : 'عربي';
+      langBtn.setAttribute(
+        'aria-label',
+        lang === 'ar' ? 'Passer au français' : 'التحويل إلى العربية',
+      );
+    }
+  }, [lang]);
+
   return (
     <div
       ref={hostRef}
       className="landing-standalone"
-      dir="rtl"
+      dir={dir}
+      lang={lang}
       id="top"
       style={{ display: 'block', width: '100%', minHeight: '100vh' }}
     />

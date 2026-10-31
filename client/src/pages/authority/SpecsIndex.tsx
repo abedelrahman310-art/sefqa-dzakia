@@ -39,12 +39,12 @@ export function SpecsIndex() {
 
   return (
     <div className="space-y-6">
-      <section className="rounded-2xl p-6 md:p-8 text-white bg-gradient-to-r from-navy-900 to-navy-700 shadow-sm">
+      <section className="rounded-2xl p-6 md:p-8 text-white bg-navy-900 border border-navy-800">
         <div className="space-y-2 max-w-2xl">
-          <span className="text-xs font-bold text-navy-100 uppercase tracking-wider">
+          <span className="text-xs font-semibold text-navy-100">
             سند — سلسلة الإسناد الحيّة
           </span>
-          <h2 className="text-2xl md:text-3xl font-extrabold text-white">
+          <h2 className="text-xl md:text-2xl font-bold text-white">
             {t('specs.index.title')}
           </h2>
           <p className="text-sm text-navy-100 leading-relaxed">

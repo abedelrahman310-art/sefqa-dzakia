@@ -69,7 +69,7 @@ export function OperatorIdentityCard() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         {/* Left / Start: Operator Avatar & Identity Details */}
         <div className="flex items-center gap-3 min-w-0">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-navy-900 to-navy-800 text-gold-400 font-extrabold flex items-center justify-center text-sm shadow-sm ring-1 ring-gold-500/20 flex-none">
+          <div className="w-10 h-10 rounded-xl bg-navy-900 text-gold-400 font-extrabold flex items-center justify-center text-sm shadow-sm ring-1 ring-gold-500/20 flex-none">
             {avatarLetters}
           </div>
 

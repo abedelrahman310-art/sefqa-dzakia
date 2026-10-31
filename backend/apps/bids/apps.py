@@ -4,3 +4,6 @@ class BidsConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'apps.bids'
     verbose_name = 'العطاءات والعروض والتقييم (المراحل 5-7)'
+
+    def ready(self):
+        import apps.bids.signals

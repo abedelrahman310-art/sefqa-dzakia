@@ -5,14 +5,15 @@ import {
   Search,
   Calendar,
   MessageSquare,
-  Bell,
   User,
   Languages,
   LogOut,
+  Sparkles,
 } from 'lucide-react';
 import { useI18n } from '@/i18n';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { useLocation } from 'wouter';
+import { NotificationDropdown } from './NotificationDropdown';
 import './PortalTopBar.css';
 
 export interface PortalNavItem {
@@ -35,51 +36,20 @@ export interface PortalTopBarProps {
   showLogout?: boolean;
 }
 
-const TOPBAR_TRANSLATIONS: Record<string, Record<string, string>> = {
-  ar: {
-    'portal.brand': 'صفقات ذكية',
-    'portal.default_org': 'المؤسسة',
-    'common.change_language': 'تبديل اللغة',
-    'common.notifications': 'التنبيهات',
-    'common.search': 'بحث',
-    'common.calendar': 'التقويم',
-    'common.messages': 'الرسائل',
-    'common.logout': 'تسجيل الخروج',
-  },
-  fr: {
-    'portal.brand': 'Safaqat Dhakia',
-    'portal.default_org': 'Organisation',
-    'common.change_language': 'Changer de langue',
-    'common.notifications': 'Notifications',
-    'common.search': 'Recherche',
-    'common.calendar': 'Calendrier',
-    'common.messages': 'Messages',
-    'common.logout': 'Déconnexion',
-  },
-};
-
 export function PortalTopBar({
   title,
   navItems,
   defaultTitle,
   routePrefix,
   hiddenOnRoutes = [],
-  notificationCount = 0,
   pulseColor = 'var(--color-success-500, var(--stamp-green-500))',
   showLogout = false,
 }: PortalTopBarProps) {
   const { lang, setLang } = useI18n();
   const { user, logout } = useAuth();
-  const loc = useLocation();
+  const [pathname, setLocation] = useLocation();
 
   const orgName = user?.organizationName || user?.displayName || TOPBAR_TRANSLATIONS[lang]?.['portal.default_org'] || 'المؤسسة';
-
-  // String pathname matching
-  const pathname: string = typeof loc === 'string'
-    ? loc
-    : Array.isArray(loc) && typeof loc[0] === 'string'
-      ? loc[0]
-      : ((loc as unknown as { pathname?: string })?.pathname ?? '');
 
   // Hide on configured routes (e.g. interactive full-screen maps)
   if (hiddenOnRoutes.includes(pathname)) {
@@ -144,48 +114,56 @@ export function PortalTopBar({
           <span className="text-xs font-bold text-gray-800">{lang === 'ar' ? 'FR' : 'عربي'}</span>
         </button>
 
+        {/* 1. المساعد الذكي — أخضر ومميز */}
         <button
           type="button"
-          className="portal-topbar__icon-btn"
+          onClick={() => setLocation('/operator/assistant')}
+          className="portal-topbar__icon-btn bg-[#047857]/10 hover:bg-[#047857] text-[#047857] hover:text-white transition-colors"
+          aria-label="المساعد القانوني الذكي (RAG)"
+          title="المساعد القانوني الذكي (RAG)"
+        >
+          <Sparkles className="w-4 h-4 shrink-0" aria-hidden="true" />
+        </button>
+
+        {/* 2. بحث */}
+        <button
+          type="button"
+          onClick={() => setLocation(routePrefix === '/central' ? '/central/deals' : '/operator/deals')}
+          className="portal-topbar__icon-btn hover:text-[#0f3154] hover:bg-slate-100 transition-colors"
           aria-label={t('common.search')}
           title={t('common.search')}
         >
           <Search className="w-4 h-4 text-gray-600" aria-hidden="true" />
         </button>
 
+        {/* 3. التقويم */}
         <button
           type="button"
-          className="portal-topbar__icon-btn"
+          onClick={() => setLocation(routePrefix === '/central' ? '/central/deals' : '/operator/opening-sessions')}
+          className="portal-topbar__icon-btn hover:text-[#0f3154] hover:bg-slate-100 transition-colors"
           aria-label={t('common.calendar')}
           title={t('common.calendar')}
         >
           <Calendar className="w-4 h-4 text-gray-600" aria-hidden="true" />
         </button>
 
+        {/* 4. الرسائل والمحادثة */}
         <button
           type="button"
-          className="portal-topbar__icon-btn"
+          onClick={() => setLocation('/operator/assistant')}
+          className="portal-topbar__icon-btn hover:text-[#0f3154] hover:bg-slate-100 transition-colors"
           aria-label={t('common.messages')}
           title={t('common.messages')}
         >
           <MessageSquare className="w-4 h-4 text-gray-600" aria-hidden="true" />
         </button>
 
-        <button
-          type="button"
-          className="portal-topbar__icon-btn relative"
-          aria-label={t('common.notifications')}
-          title={t('common.notifications')}
-        >
-          <Bell className="w-4 h-4 text-gray-600" aria-hidden="true" />
-          {notificationCount > 0 ? (
-            <span className="portal-topbar__badge">
-              {notificationCount > 9 ? '9+' : notificationCount}
-            </span>
-          ) : (
-            <span className="size-2 rounded-full bg-rose-500 absolute top-1.5 inset-inline-end-1.5" />
-          )}
-        </button>
+        {/* 5. الإشعارات */}
+        <NotificationDropdown
+          buttonClassName="portal-topbar__icon-btn relative hover:text-[#0f3154] hover:bg-slate-100 transition-colors"
+          iconSize={16}
+          allNotificationsHref={routePrefix === '/central' ? '/central/notifications' : '/operator/notifications'}
+        />
 
         {/* الصورة الرمزية للمستخدم */}
         <div

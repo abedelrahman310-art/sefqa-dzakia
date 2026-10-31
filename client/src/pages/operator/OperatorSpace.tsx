@@ -1,4 +1,5 @@
 import { Route, Switch, useRoute } from 'wouter';
+import { useI18n } from '@/i18n';
 import { OperatorOverview } from './OperatorOverview';
 import { OperatorOpportunities } from './OperatorOpportunities';
 import { OpportunityDetails } from './OpportunityDetails';
@@ -29,6 +30,7 @@ import {
 } from 'lucide-react';
 
 export function OperatorSpace() {
+  const { t } = useI18n();
   // Route matchers for active highlighting
   const [isOverviewActive] = useRoute('/operator');
   const [isOverviewAliasActive] = useRoute('/operator/overview');
@@ -46,56 +48,56 @@ export function OperatorSpace() {
 
   const navItems: OperatorNavItem[] = [
     {
-      label: 'مساحة العمل',
+      label: t('nav.operator.workspace'),
       href: '/operator',
       icon: LayoutDashboard,
       isActive: isOverviewActive || isOverviewAliasActive,
       group: 'home',
     },
     {
-      label: 'الإعلانات وفرص الصفقات',
+      label: t('nav.operator.announcements'),
       href: '/operator/deals',
       icon: Megaphone,
       isActive: isDealsActive || isOppsActive || isOppsDetailsActive,
       group: 'opportunities',
     },
     {
-      label: 'دفاتر الشروط',
+      label: t('nav.operator.specs'),
       href: '/operator/smart-specs',
       icon: FileText,
       isActive: isSmartSpecsActive,
       group: 'opportunities',
     },
     {
-      label: 'إدارة العروض',
+      label: t('nav.operator.offers_manage'),
       href: '/operator/offers',
       icon: ClipboardCheck,
       isActive: isOffersActive || isOffersIdActive,
       group: 'activity',
     },
     {
-      label: 'العقود والتنفيذ',
+      label: t('nav.operator.contracts'),
       href: '/operator/contracts',
       icon: FileSignature,
       isActive: isContractsActive || isContractDealActive,
       group: 'activity',
     },
     {
-      label: 'الطعون والتظلمات',
+      label: t('nav.operator.objections'),
       href: '/operator/objections',
       icon: Scale,
       isActive: isObjectionsActive,
       group: 'activity',
     },
     {
-      label: 'المساعد القانوني',
+      label: t('nav.operator.legal_assistant'),
       href: '/operator/assistant',
       icon: Sparkles,
       isActive: isAssistantActive,
       group: 'activity',
     },
     {
-      label: 'الفريق والصلاحيات',
+      label: t('nav.operator.team'),
       href: '/operator/settings',
       icon: Users,
       isActive: isSettingsActive,
@@ -104,7 +106,7 @@ export function OperatorSpace() {
   ];
 
   return (
-    <OperatorShell navItems={navItems} mobileTitle="صفقات ذكية · المتعامل الاقتصادي">
+    <OperatorShell navItems={navItems} mobileTitle={t('common.operator_mobile_title')}>
       <Switch>
         <Route path="/operator/opening-sessions/:id" component={OperatorSessionLive} />
         <Route path="/operator/opening-sessions" component={OperatorSessionList} />
@@ -135,7 +137,7 @@ export function OperatorSpace() {
         <Route path="/operator/overview" component={OperatorOverview} />
         <Route path="/operator" component={OperatorOverview} />
         <Route>
-          <PortalNotFound basePath="/operator" baseTitle="الرئيسية للمتعامل" />
+          <PortalNotFound basePath="/operator" baseTitle={t('common.operator_not_found')} />
         </Route>
       </Switch>
     </OperatorShell>

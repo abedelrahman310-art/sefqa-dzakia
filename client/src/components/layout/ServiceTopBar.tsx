@@ -1,5 +1,5 @@
-import { useState, useRef, useEffect } from 'react';
-import { Link, useRoute } from 'wouter';
+import { useState, useRef, useEffect, type FormEvent } from 'react';
+import { Link, useRoute, useLocation } from 'wouter';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { useI18n } from '@/i18n';
 import {
@@ -13,7 +13,20 @@ import {
   Settings,
   LogOut,
   MoreHorizontal,
+  ArrowRight,
+  FileText,
+  Clock,
 } from 'lucide-react';
+import { NotificationDropdown } from './NotificationDropdown';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,18 +43,70 @@ export interface ServiceTopBarProps {
   notificationsCount?: number;
 }
 
-export function ServiceTopBar({
-  notificationsCount = 0,
-}: ServiceTopBarProps) {
+export function ServiceTopBar(_props: ServiceTopBarProps) {
   const { user, logout } = useAuth();
   const { lang, setLang } = useI18n();
+  const [location, setLocation] = useLocation();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [isMoreOpen, setIsMoreOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const moreRef = useRef<HTMLDivElement>(null);
 
   const [isSettingsActive] = useRoute('/authority/settings');
 
   const orgName = (user?.organizationName || user?.displayName || 'المصلحة المتعاقدة').trim();
+
+  // 1. المحادثة / الاستفسارات
+  const handleChat = () => {
+    setLocation('/operator/assistant');
+  };
+
+  // 3. التقويم / جلسات الفتح والمواعيد
+  const handleCalendar = () => {
+    if (location.startsWith('/operator')) {
+      setLocation('/operator/opening-sessions');
+    } else if (location.startsWith('/central')) {
+      setLocation('/central/deals');
+    } else {
+      setLocation('/authority/opening-sessions');
+    }
+  };
+
+  // 4. البحث السريع
+  const handleOpenSearch = () => {
+    setIsSearchOpen(true);
+  };
+
+  const handleSearchSubmit = (e?: FormEvent) => {
+    if (e) e.preventDefault();
+    const q = searchQuery.trim();
+    setIsSearchOpen(false);
+    if (location.startsWith('/operator')) {
+      setLocation(q ? `/operator/deals?q=${encodeURIComponent(q)}` : '/operator/deals');
+    } else if (location.startsWith('/central')) {
+      setLocation(q ? `/central/deals?q=${encodeURIComponent(q)}` : '/central/deals');
+    } else {
+      setLocation(q ? `/authority/deals?q=${encodeURIComponent(q)}` : '/authority/deals');
+    }
+  };
+
+  // 5. المساعد الذكي (RAG)
+  const handleAssistant = () => {
+    setLocation('/operator/assistant');
+  };
+
+  // اختصار لوحة المفاتيح Ctrl+K أو Cmd+K لفتح البحث السريع
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setIsSearchOpen((prev) => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   const toggleLang = () => {
     setLang(lang === 'ar' ? 'fr' : 'ar');
@@ -121,42 +186,46 @@ export function ServiceTopBar({
         {/* ─── أدوات النظام (المساعد، البحث، التقويم، الرسائل) ─── */}
         {/* على الشاشات الكبيرة تظهر مباشرة، وعلى الشاشات الصغيرة تجمع في قائمة «المزيد» */}
         <div className="hidden sm:flex items-center gap-1.5 sm:gap-2">
-          {/* زر المساعد الذكي — مختصر إلى أيقونة 40x40px مع تلميح ووصولية */}
+          {/* 1. زر المساعد الذكي — أخضر ومميز مع تلميح ووصولية */}
           <button
             type="button"
+            onClick={handleAssistant}
             className="size-10 rounded-[10px] bg-[#047857]/10 hover:bg-[#047857] text-[#047857] hover:text-white flex items-center justify-center transition-colors flex-none border-0 cursor-pointer shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#047857]"
-            title="المساعد الذكي"
-            aria-label="المساعد الذكي"
+            title="المساعد القانوني الذكي (RAG)"
+            aria-label="المساعد القانوني الذكي (RAG)"
           >
             <Sparkles className="size-5 shrink-0" strokeWidth={1.8} aria-hidden="true" />
           </button>
 
-          {/* بحث */}
+          {/* 2. بحث */}
           <button
             type="button"
-            className="size-10 rounded-[10px] text-[#5B6472] hover:text-[#0B4348] hover:bg-[#F1F5F9] flex items-center justify-center transition-colors flex-none border-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#047857]"
-            title="بحث"
-            aria-label="بحث"
+            onClick={handleOpenSearch}
+            className="size-10 rounded-[10px] text-[#5B6472] hover:text-[#0f3154] hover:bg-slate-100 flex items-center justify-center transition-colors flex-none border-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0f3154]"
+            title="البحث السريع في الصفقات (Ctrl+K)"
+            aria-label="البحث السريع في الصفقات"
           >
             <Search className="size-5 shrink-0" strokeWidth={1.8} aria-hidden="true" />
           </button>
 
-          {/* التقويم */}
+          {/* 3. التقويم */}
           <button
             type="button"
-            className="size-10 rounded-[10px] text-[#5B6472] hover:text-[#0B4348] hover:bg-[#F1F5F9] flex items-center justify-center transition-colors flex-none border-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#047857]"
-            title="التقويم"
-            aria-label="التقويم"
+            onClick={handleCalendar}
+            className="size-10 rounded-[10px] text-[#5B6472] hover:text-[#0f3154] hover:bg-slate-100 flex items-center justify-center transition-colors flex-none border-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0f3154]"
+            title="جدول جلسات فتح الأظرفة والمواعيد"
+            aria-label="جدول جلسات فتح الأظرفة والمواعيد"
           >
             <Calendar className="size-5 shrink-0" strokeWidth={1.8} aria-hidden="true" />
           </button>
 
-          {/* الرسائل والاستفسارات */}
+          {/* 4. الرسائل والاستفسارات */}
           <button
             type="button"
-            className="size-10 rounded-[10px] text-[#5B6472] hover:text-[#0B4348] hover:bg-[#F1F5F9] flex items-center justify-center transition-colors flex-none border-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#047857]"
-            title="الرسائل والاستفسارات"
-            aria-label="الرسائل والاستفسارات"
+            onClick={handleChat}
+            className="size-10 rounded-[10px] text-[#5B6472] hover:text-[#0f3154] hover:bg-slate-100 flex items-center justify-center transition-colors flex-none border-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0f3154]"
+            title="المحادثة والمساعد القانوني"
+            aria-label="المحادثة والمساعد القانوني"
           >
             <MessageSquare className="size-5 shrink-0" strokeWidth={1.8} aria-hidden="true" />
           </button>
@@ -169,7 +238,7 @@ export function ServiceTopBar({
             onClick={() => setIsMoreOpen((prev) => !prev)}
             aria-expanded={isMoreOpen}
             aria-haspopup="menu"
-            className="size-10 rounded-[10px] text-[#5B6472] hover:text-[#0B4348] hover:bg-[#F1F5F9] flex items-center justify-center transition-colors flex-none border-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#047857]"
+            className="size-10 rounded-[10px] text-[#5B6472] hover:text-[#0f3154] hover:bg-slate-100 flex items-center justify-center transition-colors flex-none border-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0f3154]"
             title="أدوات إضافية"
             aria-label="أدوات إضافية"
           >
@@ -184,54 +253,60 @@ export function ServiceTopBar({
             >
               <button
                 type="button"
-                onClick={() => setIsMoreOpen(false)}
-                className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-bold text-[#0B4348] hover:bg-[#E8F5F1] transition-colors text-start border-0 bg-transparent cursor-pointer w-full"
+                onClick={() => {
+                  setIsMoreOpen(false);
+                  handleAssistant();
+                }}
+                className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-bold text-[#047857] hover:bg-[#E8F5F1] transition-colors text-start border-0 bg-transparent cursor-pointer w-full"
               >
                 <Sparkles className="size-4 text-[#047857] shrink-0" aria-hidden="true" />
-                <span>المساعد الذكي</span>
+                <span>المساعد الذكي (RAG)</span>
               </button>
               <button
                 type="button"
-                onClick={() => setIsMoreOpen(false)}
-                className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-bold text-[#5B6472] hover:bg-[#F1F5F9] transition-colors text-start border-0 bg-transparent cursor-pointer w-full"
+                onClick={() => {
+                  setIsMoreOpen(false);
+                  handleOpenSearch();
+                }}
+                className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-bold text-[#5B6472] hover:bg-slate-100 transition-colors text-start border-0 bg-transparent cursor-pointer w-full"
               >
                 <Search className="size-4 shrink-0" aria-hidden="true" />
-                <span>بحث</span>
+                <span>البحث السريع</span>
               </button>
               <button
                 type="button"
-                onClick={() => setIsMoreOpen(false)}
-                className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-bold text-[#5B6472] hover:bg-[#F1F5F9] transition-colors text-start border-0 bg-transparent cursor-pointer w-full"
+                onClick={() => {
+                  setIsMoreOpen(false);
+                  handleCalendar();
+                }}
+                className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-bold text-[#5B6472] hover:bg-slate-100 transition-colors text-start border-0 bg-transparent cursor-pointer w-full"
               >
                 <Calendar className="size-4 shrink-0" aria-hidden="true" />
-                <span>التقويم</span>
+                <span>التقويم وجلسات الفتح</span>
               </button>
               <button
                 type="button"
-                onClick={() => setIsMoreOpen(false)}
-                className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-bold text-[#5B6472] hover:bg-[#F1F5F9] transition-colors text-start border-0 bg-transparent cursor-pointer w-full"
+                onClick={() => {
+                  setIsMoreOpen(false);
+                  handleChat();
+                }}
+                className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-bold text-[#5B6472] hover:bg-slate-100 transition-colors text-start border-0 bg-transparent cursor-pointer w-full"
               >
                 <MessageSquare className="size-4 shrink-0" aria-hidden="true" />
-                <span>الرسائل والاستفسارات</span>
+                <span>المحادثة والاستفسارات</span>
               </button>
             </div>
           )}
         </div>
 
-        {/* الإشعارات (تظهر دائماً في الشريط) */}
-        <button
-          type="button"
-          className="relative size-10 rounded-[10px] text-[#5B6472] hover:text-[#0B4348] hover:bg-[#F1F5F9] flex items-center justify-center transition-colors flex-none border-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#047857]"
-          title="الإشعارات"
-          aria-label="الإشعارات"
-        >
-          <Bell className="size-5 shrink-0" strokeWidth={1.8} aria-hidden="true" />
-          {notificationsCount > 0 ? (
-            <span className="absolute top-2 inset-inline-end-2 size-2 rounded-full bg-[#B42318] border-2 border-white box-border" />
-          ) : (
-            <span className="absolute top-2 inset-inline-end-2 size-2 rounded-full bg-[#047857] border-2 border-white box-border" />
-          )}
-        </button>
+        {/* 5. الإشعارات (تظهر دائماً في الشريط مع قائمة منسدلة تفاعلية) */}
+        <NotificationDropdown
+          allNotificationsHref={
+            location.startsWith('/operator')
+              ? '/operator/notifications'
+              : '/authority/notifications'
+          }
+        />
 
         {/* فاصل رأسي خفيف بين مجموعات الأدوات */}
         <div className="hidden sm:block h-6 w-[1px] bg-[#D5DDEA] mx-0.5" aria-hidden="true" />
@@ -303,6 +378,118 @@ export function ServiceTopBar({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      {/* نافذة البحث السريع (Search Modal) */}
+      <Dialog open={isSearchOpen} onOpenChange={setIsSearchOpen}>
+        <DialogContent className="max-w-xl p-0 overflow-hidden rounded-2xl bg-white border border-[#D5DDEA] shadow-xl" dir="rtl">
+          <DialogHeader className="p-4 border-b border-gray-100 bg-slate-50/70 text-start">
+            <div className="flex items-center gap-2">
+              <div className="p-1.5 rounded-lg bg-navy-900 text-white">
+                <Search className="size-4" />
+              </div>
+              <div>
+                <DialogTitle className="text-sm font-bold text-navy-900">
+                  البحث السريع في الصفقات والملفات
+                </DialogTitle>
+                <DialogDescription className="text-xs text-gray-500">
+                  ابحث برقم الصفقة، الكلمات المفتاحية، أو اسم المتعامل
+                </DialogDescription>
+              </div>
+            </div>
+          </DialogHeader>
+
+          <form onSubmit={handleSearchSubmit} className="p-4 space-y-4">
+            <div className="relative">
+              <Search className="absolute start-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
+              <Input
+                type="search"
+                autoFocus
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="اكتب رقم المرجع أو موضوع الصفقة واضغط Enter..."
+                className="ps-9 pe-4 py-2.5 text-sm h-11 rounded-xl border-gray-200 focus-visible:ring-[#0f3154]"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <span className="text-[11px] font-bold text-gray-400 block">
+                اختصارات وتصفح مباشر:
+              </span>
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsSearchOpen(false);
+                    setLocation('/authority/deals');
+                  }}
+                  className="p-2.5 rounded-xl border border-gray-200 hover:border-navy-900 hover:bg-slate-50 transition-colors text-start flex items-center justify-between"
+                >
+                  <div className="flex items-center gap-2">
+                    <FileText className="size-4 text-navy-900" />
+                    <span className="font-semibold text-gray-800">سجل الصفقات</span>
+                  </div>
+                  <ArrowRight className="size-3 text-gray-400 rotate-180" />
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsSearchOpen(false);
+                    setLocation('/authority/opening-sessions');
+                  }}
+                  className="p-2.5 rounded-xl border border-gray-200 hover:border-navy-900 hover:bg-slate-50 transition-colors text-start flex items-center justify-between"
+                >
+                  <div className="flex items-center gap-2">
+                    <Clock className="size-4 text-emerald-700" />
+                    <span className="font-semibold text-gray-800">جلسات الفتح</span>
+                  </div>
+                  <ArrowRight className="size-3 text-gray-400 rotate-180" />
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsSearchOpen(false);
+                    setLocation('/operator/assistant');
+                  }}
+                  className="p-2.5 rounded-xl border border-gray-200 hover:border-navy-900 hover:bg-slate-50 transition-colors text-start flex items-center justify-between"
+                >
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="size-4 text-emerald-600" />
+                    <span className="font-semibold text-gray-800">المساعد القانوني</span>
+                  </div>
+                  <ArrowRight className="size-3 text-gray-400 rotate-180" />
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsSearchOpen(false);
+                    setLocation('/authority/audit');
+                  }}
+                  className="p-2.5 rounded-xl border border-gray-200 hover:border-navy-900 hover:bg-slate-50 transition-colors text-start flex items-center justify-between"
+                >
+                  <div className="flex items-center gap-2">
+                    <Bell className="size-4 text-amber-600" />
+                    <span className="font-semibold text-gray-800">سجل التدقيق</span>
+                  </div>
+                  <ArrowRight className="size-3 text-gray-400 rotate-180" />
+                </button>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between pt-2 border-t border-gray-100 text-[11px] text-gray-400">
+              <span>اضغط Enter للبحث أو Esc للإغلاق</span>
+              <Button
+                type="submit"
+                size="sm"
+                className="bg-navy-900 hover:bg-navy-800 text-white text-xs font-semibold rounded-lg px-3.5 h-8"
+              >
+                بحث
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </header>
   );
 }

@@ -184,12 +184,12 @@ export function CentralAuthorities() {
             {trainingNeeded.slice(0, 4).map((item) => (
               <li
                 key={item.id}
-                className="flex items-start gap-2.5 rounded-xl border border-purple-200 bg-purple-500/10 p-2.5"
+                className="flex items-start gap-2.5 rounded-xl border border-amber-200 bg-amber-50/70 p-2.5"
               >
-                <span className="shrink-0 text-base">🏛️</span>
+                <Building className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
                 <div>
-                  <div className="text-xs font-bold text-purple-950">{item.name}</div>
-                  <p className="mt-0.5 text-xs leading-relaxed text-purple-900">
+                  <div className="text-xs font-bold text-amber-950">{item.name}</div>
+                  <p className="mt-0.5 text-xs leading-relaxed text-amber-900">
                     الالتزام بالآجال {formatNumber(item.compliance_rate)}% · الشفافية{' '}
                     {formatNumber(item.transparency_rate)}% · شبهات مسجّلة{' '}
                     {formatNumber(item.suspicions_count)} — التوصية: مراجعة إجراءات الإعداد وفتح
@@ -372,7 +372,7 @@ export function CentralAuthorities() {
           {selectedAuth && (
             <div className="space-y-4">
               <SheetHeader className="space-y-1 border-b border-gray-200 pb-3 text-start">
-                <span className="eyebrow text-[11px]">بطاقة الرقابة الإدارية</span>
+                <span className="text-[11px] font-semibold text-slate-500">بطاقة الرقابة الإدارية</span>
                 <SheetTitle className="text-base font-bold text-[var(--ink-900)]">
                   {selectedAuth.name || '—'}
                 </SheetTitle>

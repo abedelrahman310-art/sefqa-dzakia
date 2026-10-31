@@ -2,68 +2,46 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { Loader2, RefreshCw } from 'lucide-react';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
+import {
+  formatCurrency,
+  formatDate as formatIntlDate,
+  formatDateTime as formatIntlDateTime,
+  formatDecimal as formatIntlDecimal,
+  formatNumber as formatIntlNumber,
+  formatPercent as formatIntlPercent,
+} from '@/lib/format';
 
 /**
  * عناصر عرض مشتركة لفضاء الرقابة المركزية:
  * تنسيق الأرقام والتواريخ، مؤشرات النسب، وحالات الجداول (تحميل/خطأ/فراغ).
+ *
+ * التنسيق يمرّ عبر @/lib/format حتى يتبع لغة الواجهة الحالية (ar/fr) بدل
+ * تثبيت ar-DZ في الثوابت.
  */
 
-const numberFormatter = new Intl.NumberFormat('ar-DZ-u-nu-latn', {
-  maximumFractionDigits: 0,
-});
-
-const decimalFormatter = new Intl.NumberFormat('ar-DZ-u-nu-latn', {
-  minimumFractionDigits: 1,
-  maximumFractionDigits: 1,
-});
-
-const dateFormatter = new Intl.DateTimeFormat('ar-DZ-u-nu-latn', {
-  day: '2-digit',
-  month: '2-digit',
-  year: 'numeric',
-});
-
-const dateTimeFormatter = new Intl.DateTimeFormat('ar-DZ-u-nu-latn', {
-  day: '2-digit',
-  month: '2-digit',
-  year: 'numeric',
-  hour: '2-digit',
-  minute: '2-digit',
-});
-
 export function formatNumber(value: number | null | undefined): string {
-  if (value === null || value === undefined || Number.isNaN(value)) return '—';
-  return numberFormatter.format(value);
+  return formatIntlNumber(value, { maximumFractionDigits: 0 });
 }
 
 export function formatDecimal(value: number | null | undefined): string {
-  if (value === null || value === undefined || Number.isNaN(value)) return '—';
-  return decimalFormatter.format(value);
+  return formatIntlDecimal(value);
 }
 
 /** المبالغ بالدينار الجزائري بصيغة موحّدة. */
 export function formatDZD(value: number | null | undefined): string {
-  if (value === null || value === undefined || Number.isNaN(value)) return '—';
-  return `${numberFormatter.format(Math.round(value))} دج`;
+  return formatCurrency(value === null || value === undefined ? value : Math.round(value));
 }
 
 export function formatPercent(value: number | null | undefined): string {
-  if (value === null || value === undefined || Number.isNaN(value)) return '—';
-  return `${decimalFormatter.format(value)}%`;
+  return formatIntlPercent(value);
 }
 
 export function formatDate(value: string | null | undefined): string {
-  if (!value) return '—';
-  const parsed = new Date(value);
-  if (Number.isNaN(parsed.getTime())) return '—';
-  return dateFormatter.format(parsed);
+  return formatIntlDate(value);
 }
 
 export function formatDateTime(value: string | null | undefined): string {
-  if (!value) return '—';
-  const parsed = new Date(value);
-  if (Number.isNaN(parsed.getTime())) return '—';
-  return dateTimeFormatter.format(parsed);
+  return formatIntlDateTime(value);
 }
 
 /** ساعة مشتركة تتحدّث دورياً — تُستعمل للعدّادات التنازلية دون مؤقّت لكل صف. */

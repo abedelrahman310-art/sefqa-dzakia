@@ -5,11 +5,13 @@ import { useAuth } from '@/components/auth/AuthProvider';
 import { useI18n } from '@/i18n';
 import {
   Search,
-  Bell,
   Building2,
   LogOut,
   Menu,
+  Sparkles,
+  Calendar,
 } from 'lucide-react';
+import { NotificationDropdown } from './NotificationDropdown';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,16 +32,16 @@ export interface OperatorTopBarProps {
 }
 
 export function OperatorTopBar({
-  breadcrumb = 'مساحة العمل',
+  breadcrumb,
   onMenuClick,
-  notificationsCount = 0,
 }: OperatorTopBarProps) {
   const { logout } = useAuth();
-  const { lang, setLang } = useI18n();
+  const { lang, setLang, t, dir } = useI18n();
   const [, setLocation] = useLocation();
   const search = useSearch();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [query, setQuery] = useState('');
+  const currentBreadcrumb = breadcrumb ?? t('nav.operator.workspace');
 
   useEffect(() => {
     setQuery(new URLSearchParams(search).get('q') || '');
@@ -67,18 +69,18 @@ export function OperatorTopBar({
         type="button"
         onClick={onMenuClick}
         className="op-icon-btn op-menu-btn"
-        aria-label="فتح القائمة"
-        title="فتح القائمة"
+        aria-label={t('common.open_menu')}
+        title={t('common.open_menu')}
       >
         <Menu aria-hidden="true" />
       </button>
 
-      <div className="op-breadcrumb" aria-label="مسار التنقل">
-        <span className="op-breadcrumb-label">المتعامل الاقتصادي</span>
+      <div className="op-breadcrumb" aria-label={t('common.breadcrumb')}>
+        <span className="op-breadcrumb-label">{t('common.operator_breadcrumb')}</span>
         <span className="op-breadcrumb-sep" aria-hidden="true">
           /
         </span>
-        <strong>{breadcrumb}</strong>
+        <strong>{currentBreadcrumb}</strong>
       </div>
 
       <form className="op-search" role="search" onSubmit={handleSearch}>
@@ -87,8 +89,8 @@ export function OperatorTopBar({
           type="search"
           value={query}
           onChange={(event) => setQuery(event.target.value)}
-          placeholder="بحث في الصفقات والعروض..."
-          aria-label="بحث في الصفقات والعروض"
+          placeholder={t('common.search_deals_placeholder')}
+          aria-label={t('common.search_deals_placeholder')}
         />
       </form>
 
@@ -99,35 +101,46 @@ export function OperatorTopBar({
           className="op-icon-btn op-lang-btn"
           lang="fr"
           dir="ltr"
-          title={lang === 'ar' ? 'Changer de langue (FR)' : 'تبديل اللغة (عربي)'}
-          aria-label={lang === 'ar' ? 'تبديل اللغة إلى الفرنسية' : "Changer la langue vers l'arabe"}
+          title={t('common.change_language')}
+          aria-label={t('common.change_language')}
         >
           {lang === 'ar' ? 'FR' : 'عربي'}
         </button>
 
-        <Link href="/operator/notifications">
+        <Link href="/operator/assistant">
           <a
-            href="/operator/notifications"
-            className="op-icon-btn"
-            aria-label="الإشعارات"
-            title="الإشعارات"
+            href="/operator/assistant"
+            className="op-icon-btn bg-emerald-600/10 text-emerald-700 hover:bg-emerald-600 hover:text-white transition-colors"
+            aria-label={t('common.assistant_rag')}
+            title={t('common.assistant_rag')}
           >
-            <Bell aria-hidden="true" />
-            {notificationsCount > 0 && (
-              <span
-                className="absolute top-2 end-2 size-2 rounded-full bg-[#e63946] border-2 border-white"
-                aria-hidden="true"
-              />
-            )}
+            <Sparkles className="size-4" aria-hidden="true" />
           </a>
         </Link>
+
+        <Link href="/operator/opening-sessions">
+          <a
+            href="/operator/opening-sessions"
+            className="op-icon-btn op-hide-sm"
+            aria-label={t('common.opening_schedule')}
+            title={t('common.opening_schedule')}
+          >
+            <Calendar className="size-4" aria-hidden="true" />
+          </a>
+        </Link>
+
+        <NotificationDropdown
+          buttonClassName="op-icon-btn relative"
+          iconSize={16}
+          allNotificationsHref="/operator/notifications"
+        />
 
         <Link href="/operator/profile">
           <a
             href="/operator/profile"
             className="op-icon-btn op-hide-sm"
-            aria-label="ملف المؤسسة"
-            title="ملف المؤسسة"
+            aria-label={t('nav.operator.profile')}
+            title={t('nav.operator.profile')}
           >
             <Building2 aria-hidden="true" />
           </a>
@@ -137,34 +150,28 @@ export function OperatorTopBar({
           type="button"
           onClick={() => setShowLogoutConfirm(true)}
           className="op-icon-btn danger"
-          aria-label="تسجيل الخروج"
-          title="تسجيل الخروج"
+          aria-label={t('common.logout')}
+          title={t('common.logout')}
         >
           <LogOut aria-hidden="true" />
         </button>
       </div>
 
       <AlertDialog open={showLogoutConfirm} onOpenChange={setShowLogoutConfirm}>
-        <AlertDialogContent dir="rtl">
+        <AlertDialogContent dir={dir}>
           <AlertDialogHeader>
-            <AlertDialogTitle>
-              {lang === 'ar' ? 'تأكيد تسجيل الخروج' : 'Confirmer la déconnexion'}
-            </AlertDialogTitle>
+            <AlertDialogTitle>{t('common.logout_confirm_title')}</AlertDialogTitle>
             <AlertDialogDescription>
-              {lang === 'ar'
-                ? 'هل أنت متأكد من رغبتك في تسجيل الخروج من منصة صفقات؟'
-                : 'Êtes-vous sûr de vouloir vous déconnecter de la plateforme Safaqat ?'}
+              {t('common.logout_confirm_message')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>
-              {lang === 'ar' ? 'إلغاء' : 'Annuler'}
-            </AlertDialogCancel>
+            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleLogout}
               className="bg-[#e63946] hover:bg-[#c62f3b] text-white"
             >
-              {lang === 'ar' ? 'تسجيل الخروج' : 'Déconnexion'}
+              {t('common.logout')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

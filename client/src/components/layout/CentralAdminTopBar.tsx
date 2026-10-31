@@ -6,16 +6,16 @@ export interface CentralAdminTopBarProps {
   notificationsCount?: number;
 }
 
-const CENTRAL_NAV_ITEMS: PortalNavItem[] = [
-  { path: '/central/dashboard', label: 'لوحة القيادة' },
-  { path: '/central/overview', label: 'مركز المراقبة والتحليل' },
-  { path: '/central/map', label: 'الخريطة الحرارية' },
-  { path: '/central/authorities', label: 'المصالح المتعاقدة' },
-  { path: '/central/operators', label: 'المتعاملين الاقتصاديين' },
-  { path: '/central/deals', label: 'الصفقات' },
-  { path: '/central/appeals', label: 'الطعون' },
-  { path: '/central/reports', label: 'التقارير والإحصائيات' },
-  { path: '/central/permissions', label: 'إدارة الصلاحيات' },
+const CENTRAL_NAV_ITEMS = (t: (key: string) => string): PortalNavItem[] => [
+  { path: '/central/dashboard', label: t('nav.central.dashboard') },
+  { path: '/central/overview', label: t('nav.central.overview') },
+  { path: '/central/map', label: t('nav.central.map') },
+  { path: '/central/authorities', label: t('nav.central.authorities') },
+  { path: '/central/operators', label: t('nav.central.operators') },
+  { path: '/central/deals', label: t('nav.central.deals') },
+  { path: '/central/appeals', label: t('nav.central.appeals') },
+  { path: '/central/reports', label: t('nav.central.reports') },
+  { path: '/central/permissions', label: t('nav.central.permissions') },
 ];
 
 export function CentralAdminTopBar({
@@ -27,7 +27,7 @@ export function CentralAdminTopBar({
   return (
     <PortalTopBar
       title={title}
-      navItems={CENTRAL_NAV_ITEMS}
+      navItems={CENTRAL_NAV_ITEMS(t)}
       defaultTitle={t('central.workspace.title')}
       routePrefix="/central"
       notificationCount={notificationsCount}

@@ -44,7 +44,7 @@ export function KPICompact({
       </div>
 
       <div className="flex-1 min-w-0">
-        <div className="eyebrow text-[10px] text-[var(--ink-500)] mb-0.5 truncate">{eyebrow}</div>
+        <div className="text-[11px] font-medium text-[var(--ink-500)] mb-0.5 truncate">{eyebrow}</div>
         <div className="flex items-baseline gap-1 mt-0.5">
           <span className="font-mono text-2xl font-bold text-[var(--ink-900)] leading-none">
             {value}

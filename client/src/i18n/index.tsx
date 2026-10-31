@@ -1,8 +1,17 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { ar, TranslationKey } from './ar';
-import { fr } from './fr';
+import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import i18n, { normalizeLanguage, type AppLanguage } from '@/lib/i18n';
+import type { TranslationKey } from './ar';
 
-export type Language = 'ar' | 'fr';
+/**
+ * واجهة التوافق (Compatibility Layer) لنظام الترجمة.
+ *
+ * المحرك الفعلي أصبح i18next (client/src/lib/i18n.ts)، لكن هذه الواجهة تحافظ
+ * على نفس التوقيع القديم (lang / dir / t / setLang) المستخدم في أكثر من
+ * خمسين مكوّناً، فلا حاجة لتعديلها جميعاً دفعة واحدة. أي مكوّن جديد يمكنه
+ * استخدام useTranslation() من react-i18next مباشرة.
+ */
+
+export type Language = AppLanguage;
 export type Direction = 'rtl' | 'ltr';
 export type { TranslationKey };
 
@@ -15,16 +24,19 @@ interface I18nContextProps {
 
 const I18nContext = createContext<I18nContextProps | undefined>(undefined);
 
-const dictionaries = {
-  ar,
-  fr,
-};
-
 export const I18nProvider = ({ children }: { children: ReactNode }) => {
-  const [lang, setLangState] = useState<Language>(() => {
-    const saved = localStorage.getItem('lang');
-    return (saved === 'ar' || saved === 'fr') ? saved : 'ar';
-  });
+  const [lang, setLangState] = useState<Language>(() => normalizeLanguage(i18n.language));
+
+  // مزامنة الحالة مع أي تغيير لغة يحدث خارج هذا المزود (مثل useTranslation).
+  useEffect(() => {
+    const handleLanguageChanged = (next: string) => {
+      setLangState(normalizeLanguage(next));
+    };
+    i18n.on('languageChanged', handleLanguageChanged);
+    return () => {
+      i18n.off('languageChanged', handleLanguageChanged);
+    };
+  }, []);
 
   const dir: Direction = lang === 'ar' ? 'rtl' : 'ltr';
 
@@ -35,12 +47,10 @@ export const I18nProvider = ({ children }: { children: ReactNode }) => {
   }, [lang, dir]);
 
   const setLang = (newLang: Language) => {
-    setLangState(newLang);
+    void i18n.changeLanguage(newLang);
   };
 
-  const t = (key: TranslationKey): string => {
-    return dictionaries[lang][key] || key;
-  };
+  const t = (key: TranslationKey): string => i18n.t(key);
 
   return (
     <I18nContext.Provider value={{ lang, dir, t, setLang }}>
