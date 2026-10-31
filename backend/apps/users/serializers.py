@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import CustomUser, Notification
+from .models import CustomUser, Notification, ExcludedOperator
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -90,5 +90,30 @@ class NotificationSerializer(serializers.ModelSerializer):
             'date',
         ]
         read_only_fields = ['id', 'created_at']
+
+
+class ExcludedOperatorSerializer(serializers.ModelSerializer):
+    """محدد بيانات المتعاملين الاقتصاديين في القائمة السوداء"""
+    created_by_name = serializers.ReadOnlyField(source='created_by.display_name')
+    created_by_email = serializers.ReadOnlyField(source='created_by.email')
+
+    class Meta:
+        model = ExcludedOperator
+        fields = [
+            'id',
+            'operator_name',
+            'nif',
+            'reason',
+            'decision_reference',
+            'start_date',
+            'end_date',
+            'is_active',
+            'created_by',
+            'created_by_name',
+            'created_by_email',
+            'created_at',
+            'updated_at',
+        ]
+        read_only_fields = ['id', 'created_by', 'created_at', 'updated_at']
 
 

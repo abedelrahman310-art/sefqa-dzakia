@@ -112,21 +112,6 @@ export function PortalSidebar({
             );
           })}
         </nav>
-
-        {/* تذييل القائمة: زر تبديل اللغة */}
-        <div className="flex-none border-t border-white/10 p-3 flex items-center justify-between">
-          <span className="text-xs text-white/70 font-semibold">{t('header.tools.language')}</span>
-          <button
-            type="button"
-            onClick={() => setLang(lang === 'ar' ? 'fr' : 'ar')}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer border-0"
-            title={t('common.change_language')}
-            aria-label={t('common.change_language')}
-          >
-            <Languages className="w-3.5 h-3.5 text-white/80" />
-            <span>{lang === 'ar' ? 'Français' : 'العربية'}</span>
-          </button>
-        </div>
       </div>
     );
   }

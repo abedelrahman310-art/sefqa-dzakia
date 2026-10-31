@@ -1,4 +1,6 @@
-from django.urls import path
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from apps.users.views import ExcludedOperatorViewSet
 from .central_views import (
     CentralHeatmapView,
     CentralDashboardView,
@@ -6,6 +8,9 @@ from .central_views import (
     CentralReportsView,
     CentralReportPdfView,
 )
+
+excluded_router = DefaultRouter()
+excluded_router.register(r'excluded-operators', ExcludedOperatorViewSet, basename='central-excluded-operators')
 
 urlpatterns = [
     # 1. الخريطة الحرارية (Heatmap API)
@@ -27,4 +32,9 @@ urlpatterns = [
     # 5. تصدير التقرير الوطني بصيغة PDF قابلة للأرشفة (Server-side PDF)
     path('reports/<str:report_id>/pdf/', CentralReportPdfView.as_view(), name='central-report-pdf'),
     path('reports/<str:report_id>/pdf', CentralReportPdfView.as_view(), name='central-report-pdf-no-slash'),
+
+    # 6. القائمة السوداء للمتعاملين الاقتصاديين المقصيين (Excluded Operators API)
+    path('', include(excluded_router.urls)),
+    path('excluded-operators', ExcludedOperatorViewSet.as_view({'get': 'list', 'post': 'create'}), name='central-excluded-operators-no-slash'),
+    path('excluded-operators/<str:pk>', ExcludedOperatorViewSet.as_view({'get': 'retrieve', 'delete': 'destroy'}), name='central-excluded-operators-detail-no-slash'),
 ]

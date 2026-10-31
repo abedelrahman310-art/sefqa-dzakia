@@ -249,3 +249,48 @@ export function useCentralResource<T>(loader: () => Promise<T>): CentralResource
     reload: () => setReloadKey((current) => current + 1),
   };
 }
+
+// ─── القائمة السوداء للمتعاملين الاقتصاديين المقصيين ───────────────────────
+// GET /api/central/excluded-operators/
+export interface CentralExcludedOperator {
+  id: string;
+  operator_name: string;
+  nif: string;
+  reason: string;
+  decision_reference: string;
+  start_date: string;
+  end_date?: string | null;
+  is_active: boolean;
+  created_by?: string | null;
+  created_by_name?: string | null;
+  created_by_email?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CreateExcludedOperatorPayload {
+  operator_name: string;
+  nif: string;
+  reason: string;
+  decision_reference: string;
+  start_date: string;
+  end_date?: string | null;
+  is_active?: boolean;
+}
+
+export async function fetchCentralExcludedOperators(): Promise<CentralExcludedOperator[]> {
+  const { data } = await api.get<unknown>('/central/excluded-operators/');
+  return extractList<CentralExcludedOperator>(data, ['results', 'excluded_operators']);
+}
+
+export async function createCentralExcludedOperator(
+  payload: CreateExcludedOperatorPayload,
+): Promise<CentralExcludedOperator> {
+  const { data } = await api.post<CentralExcludedOperator>('/central/excluded-operators/', payload);
+  return data;
+}
+
+export async function deleteCentralExcludedOperator(id: string): Promise<void> {
+  await api.delete(`/central/excluded-operators/${id}/`);
+}
+

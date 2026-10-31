@@ -15,12 +15,13 @@ from apps.ai_gateway.services.operator_matcher import (
     SECTOR_KEYWORDS,
     WILAYA_MAP,
 )
-from .models import CustomUser, OperatorProfile, Notification
+from .models import CustomUser, OperatorProfile, Notification, ExcludedOperator
 from .serializers import (
     UserSerializer,
     LoginSerializer,
     RegisterSerializer,
     NotificationSerializer,
+    ExcludedOperatorSerializer,
 )
 
 logger = logging.getLogger(__name__)
@@ -757,6 +758,87 @@ class OperatorCheckComplianceView(views.APIView):
             'advisory_notes': advisory_notes,
             'submission_deadline': deal.submission_deadline.isoformat() if deal.submission_deadline else None,
         }, status=status.HTTP_200_OK)
+
+
+class IsCentralAdminUser(permissions.BasePermission):
+    """
+    التحقق من أن المستخدم مسجل الدخول ويحمل دور الإدارة المركزية (central_admin)
+    أو مشرف النظام العام (is_superuser).
+    """
+    message = "الوصول مقتصر حصرياً على حسابات الإدارة المركزية والرقابة الوطنية (central_admin)."
+
+    def has_permission(self, request, view):
+        return bool(
+            request.user
+            and request.user.is_authenticated
+            and (
+                getattr(request.user, "role", None) == "central_admin"
+                or request.user.is_superuser
+            )
+        )
+
+
+class ExcludedOperatorViewSet(viewsets.ModelViewSet):
+    """
+    إدارة القائمة السوداء للمتعاملين الاقتصاديين المقصيين.
+    المسار: /api/central/excluded-operators/
+    مقتصر حصرياً على الإدارة المركزية (central_admin) وموثق في سجل التدقيق.
+    يدعم: GET (list, retrieve), POST (create), DELETE (destroy).
+    """
+    queryset = ExcludedOperator.objects.all().select_related('created_by').order_by('-created_at')
+    serializer_class = ExcludedOperatorSerializer
+    permission_classes = [permissions.IsAuthenticated, IsCentralAdminUser]
+    http_method_names = ['get', 'post', 'delete', 'head', 'options']
+
+    def perform_create(self, serializer):
+        instance = serializer.save(created_by=self.request.user)
+        try:
+            ip = self.request.META.get('HTTP_X_FORWARDED_FOR') or self.request.META.get('REMOTE_ADDR')
+            if ip and ',' in ip:
+                ip = ip.split(',')[0].strip()
+            AuditLog.objects.create(
+                user=self.request.user,
+                action='EXCLUDED_OPERATOR_ADDED',
+                resource_type='ExcludedOperator',
+                resource_id=str(instance.id),
+                description=f"إدراج المتعامل «{instance.operator_name}» (NIF: {instance.nif}) في القائمة السوداء بموجب القرار {instance.decision_reference}.",
+                changes={
+                    'operator_name': instance.operator_name,
+                    'nif': instance.nif,
+                    'reason': instance.reason,
+                    'decision_reference': instance.decision_reference,
+                    'start_date': str(instance.start_date),
+                    'end_date': str(instance.end_date) if instance.end_date else None,
+                    'is_active': instance.is_active,
+                },
+                ip_address=ip,
+            )
+        except Exception as exc:
+            logger.error("خطأ أثناء تسجيل إدراج المتعامل في سجل التدقيق: %s", exc)
+
+    def perform_destroy(self, instance):
+        try:
+            ip = self.request.META.get('HTTP_X_FORWARDED_FOR') or self.request.META.get('REMOTE_ADDR')
+            if ip and ',' in ip:
+                ip = ip.split(',')[0].strip()
+            AuditLog.objects.create(
+                user=self.request.user,
+                action='EXCLUDED_OPERATOR_REMOVED',
+                resource_type='ExcludedOperator',
+                resource_id=str(instance.id),
+                description=f"إلغاء إقصاء/حذف المتعامل «{instance.operator_name}» (NIF: {instance.nif}) من القائمة السوداء.",
+                changes={
+                    'operator_name': instance.operator_name,
+                    'nif': instance.nif,
+                    'decision_reference': instance.decision_reference,
+                    'reason': instance.reason,
+                },
+                ip_address=ip,
+            )
+        except Exception as exc:
+            logger.error("خطأ أثناء تسجيل إزالة المتعامل من سجل التدقيق: %s", exc)
+        instance.delete()
+
 
 
 

@@ -1,8 +1,8 @@
 {
-  "timestamp": "2026-10-31T17:27:53.487Z",
+  "timestamp": "2026-10-31T18:01:18.932Z",
   "metrics": {
-    "arKeyCount": 1604,
-    "frKeyCount": 1604,
+    "arKeyCount": 1639,
+    "frKeyCount": 1639,
     "arDuplicatesCount": 0,
     "frDuplicatesCount": 0,
     "missingInFrCount": 0,
@@ -11,9 +11,9 @@
     "emptyValuesFrCount": 0,
     "untranslatedArabicInFrCount": 0,
     "identicalValuesCount": 7,
-    "directlyReferencedKeysCount": 1018,
-    "potentiallyUnusedKeysCount": 579,
-    "hardcodedArabicLinesCount": 3292,
+    "directlyReferencedKeysCount": 1052,
+    "potentiallyUnusedKeysCount": 580,
+    "hardcodedArabicLinesCount": 3311,
     "directFormattingCallsCount": 59,
     "physicalDirectionalClassesCount": 0
   },

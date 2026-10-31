@@ -293,3 +293,37 @@ class Notification(models.Model):
         return f"إشعار لـ {self.user.email}: {self.title}"
 
 
+class ExcludedOperator(models.Model):
+    """
+    سجل المتعاملين الاقتصاديين المقصيين من الصفقات العمومية (القائمة السوداء)
+    وفق أحكام المرسوم الرئاسي 15-247 وأحكام القانون 23-12.
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    operator_name = models.CharField('اسم الشركة/المؤسسة', max_length=255)
+    nif = models.CharField('رقم التعريف الجبائي (NIF)', max_length=30, db_index=True)
+    reason = models.TextField('سبب الإقصاء')
+    decision_reference = models.CharField('رقم القرار الإداري للإقصاء', max_length=100)
+    start_date = models.DateField('تاريخ بداية الإقصاء')
+    end_date = models.DateField('تاريخ نهاية الإقصاء', null=True, blank=True, help_text='يمكن تركه فارغاً إذا كان الإقصاء دائماً')
+    is_active = models.BooleanField('حالة الإقصاء', default=True)
+
+    created_by = models.ForeignKey(
+        CustomUser,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='excluded_operators_created',
+        verbose_name='المسؤول المنفذ'
+    )
+    created_at = models.DateTimeField('تاريخ التسجيل', default=timezone.now)
+    updated_at = models.DateTimeField('تاريخ التحديث', auto_now=True)
+
+    class Meta:
+        verbose_name = 'متعامل مقصى (القائمة السوداء)'
+        verbose_name_plural = 'القائمة السوداء للمتعاملين'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.operator_name} (NIF: {self.nif}) - قرار: {self.decision_reference}"
+
+
