@@ -1,0 +1,116 @@
+{% extends 'base/base.html' %}
+
+{% block title %}{{ tender.title }} - Tenders Dashboard{% endblock %}
+
+{% block content %}
+<div class="tender-detail">
+    <div class="tender-header">
+        <h2>{{ tender.title }}</h2>
+        <span class="badge badge-{{ tender.status }}">{{ tender.get_status_display }}</span>
+    </div>
+
+    <div class="tender-info">
+        <div class="info-row">
+            <strong>Reference:</strong> {{ tender.reference_number }}
+        </div>
+        <div class="info-row">
+            <strong>Organization:</strong> {{ tender.organization }}
+        </div>
+        <div class="info-row">
+            <strong>Category:</strong> {{ tender.category }}
+        </div>
+        <div class="info-row">
+            <strong>Location:</strong> {{ tender.location|default:"Not specified" }}
+        </div>
+        <div class="info-row">
+            <strong>Deadline:</strong> {{ tender.deadline|date:"F d, Y H:i" }}
+        </div>
+        <div class="info-row">
+            <strong>Budget:</strong>
+            {% if tender.budget_min and tender.budget_max %}
+                ${{ tender.budget_min|floatformat:0 }} - ${{ tender.budget_max|floatformat:0 }} {{ tender.currency }}
+            {% elif tender.budget_max %}
+                Up to ${{ tender.budget_max|floatformat:0 }} {{ tender.currency }}
+            {% else %}
+                On request
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="tender-section">
+        <h3>Description</h3>
+        <p>{{ tender.description|linebreaks }}</p>
+    </div>
+
+    {% if tender.requirements %}
+    <div class="tender-section">
+        <h3>Requirements</h3>
+        <p>{{ tender.requirements|linebreaks }}</p>
+    </div>
+    {% endif %}
+
+    {% if tender.documents %}
+    <div class="tender-section">
+        <h3>Documents</h3>
+        <a href="{{ tender.documents.url }}" class="btn btn-secondary" download>Download Documents</a>
+    </div>
+    {% endif %}
+
+    {% if user.is_authenticated and tender.status == 'published' %}
+    <div class="tender-section">
+        <h3>Submit Your Bid</h3>
+        <form method="post" class="bid-form">
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+            
+            <div class="form-group">
+                <label for="{{ form.amount.id_for_label }}">Bid Amount ($)</label>
+                {{ form.amount }}
+                {{ form.amount.errors }}
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.proposal.id_for_label }}">Proposal</label>
+                {{ form.proposal }}
+                {{ form.proposal.errors }}
+            </div>
+            
+            <button type="submit" class="btn btn-primary">Submit Bid</button>
+        </form>
+    </div>
+
+    {% if bids %}
+    <div class="tender-section">
+        <h3>Your Bids</h3>
+        <table class="bids-table">
+            <thead>
+                <tr>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>Submitted</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for bid in bids %}
+                <tr>
+                    <td>${{ bid.amount|floatformat:0 }}</td>
+                    <td><span class="badge badge-{{ bid.status }}">{{ bid.get_status_display }}</span></td>
+                    <td>{{ bid.submitted_at|date:"M d, Y" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+    {% endif %}
+
+    {% if user == tender.created_by %}
+    <div class="tender-actions">
+        <a href="{% url 'tenders:update' tender.pk %}" class="btn btn-secondary">Edit</a>
+        <a href="{% url 'tenders:delete' tender.pk %}" class="btn btn-danger">Delete</a>
+    </div>
+    {% endif %}
+
+    <a href="{% url 'tenders:list' %}" class="btn btn-link">← Back to Tenders</a>
+</div>
+{% endblock %}
