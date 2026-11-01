@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "clario": {
+      "command": "C:\\Users\\NADIR\\.clario\\runtime\\node-win32-x64.exe",
+      "args": [
+        "C:\\Users\\NADIR\\.clario\\mcp-server\\index.js"
+      ],
+      "env": {
+        "CLAR_WORKSPACE": "d:\\dev\\safaqat",
+        "CLAR_API_URL": "https://hub.clario.chat",
+        "PATH": "C:\\Users\\NADIR\\.clario\\runtime;C:\\Python314\\Scripts\\;C:\\Python314\\;C:\\WINDOWS\\system32;C:\\WINDOWS;C:\\WINDOWS\\System32\\Wbem;C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\;C:\\WINDOWS\\System32\\OpenSSH\\;C:\\Program Files\\dotnet\\;C:\\Program Files\\Go\\bin;C:\\ProgramData\\chocolatey\\bin;C:\\Program Files\\nodejs\\;C:\\Program Files\\Git\\cmd;C:\\Users\\NADIR\\.local\\bin;C:\\Users\\NADIR\\.amp\\bin;C:\\Users\\NADIR\\AppData\\Local\\Microsoft\\WindowsApps;C:\\Users\\NADIR\\go\\bin;C:\\Users\\NADIR\\AppData\\Local\\Google\\Cloud SDK\\google-cloud-sdk\\bin;C:\\Users\\NADIR\\AppData\\Local\\Programs\\Antigravity\\bin;C:\\Users\\NADIR\\AppData\\Roaming\\npm;C:\\Users\\NADIR\\AppData\\Local\\Programs\\MiKTeX\\miktex\\bin\\x64\\;C:\\Users\\NADIR\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin;C:\\Users\\NADIR\\AppData\\Local\\Programs\\Microsoft VS Code\\bin;C:\\Users\\NADIR\\AppData\\Local\\Programs\\Devin\\bin;C:\\Users\\NADIR\\AppData\\Local\\Programs\\Ollama;C:\\Users\\NADIR\\.bun\\bin;C:\\Users\\NADIR\\AppData\\Local\\Programs\\Antigravity IDE\\bin;C:\\Users\\NADIR\\AppData\\Roaming\\Python\\Python314\\Scripts"
+      }
+    }
+  }
+}

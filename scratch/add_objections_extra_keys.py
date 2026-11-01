@@ -1,0 +1,126 @@
+import json
+
+extra_ar = {
+    'objections.auth_suspensive_p1': 'تجمّد القرارات النهائية للإسناد تلقائياً فور تسجيل الطعن خلال أجل الـ 10 أيام من تاريخ إعلان المنح المؤقت.',
+    'objections.auth_suspensive_p2': 'تتولى لجنة الصفقات المختصة فحص أسباب الطعن وإصدار قرار معلل بقبول الطعن أو رفضه وتوثيق النتائج ببصمة رقمية في سجل التدقيق غير القابل للتعديل.',
+    'objections.auth_stat_total_sub': 'مسجلة على صفقات المصلحة',
+    'objections.auth_stat_new': 'طعون جديدة (بحاجة لمعالجة)',
+    'objections.auth_stat_new_sub': 'تتطلب إحالة للدراسة',
+    'objections.auth_stat_under_review_sub': 'أمام لجنة فحص الصفقات',
+    'objections.auth_stat_resolved': 'طعون مفصول فيها',
+    'objections.auth_stat_resolved_sub': 'قرارات مبررة وموثقة',
+    'objections.filter_all_label': 'الكل',
+    'objections.filter_submitted_label': 'مُودع',
+    'objections.filter_under_review_label': 'قيد الدراسة',
+    'objections.filter_accepted_label': 'مقبول',
+    'objections.filter_rejected_label': 'مرفوض',
+    'objections.auth_loading': 'جاري جلب سجل الطعون الواردة...',
+    'objections.auth_empty_filtered': 'لا توجد طعون مطابقة',
+    'objections.auth_empty_filtered_desc': 'لا توجد نتائج تطابق معايير البحث والفلترة المحددة.',
+    'objections.default_registered_operator': 'متعامل مسجل',
+    'objections.days_remaining_label': 'متبقي {{days}} يوم',
+    'objections.deadline_expired_badge': 'انقضت المهلة',
+    'objections.decision_sha_notice': 'يتم تسجيل هذا التبرير بصورة نهائية في سجل التدقيق SHA-256.',
+    'objections.characters_count': 'أحرف',
+    'objections.detail_arguments_sub': 'بيان ومبررات الطعن المقدمة من العارض:',
+    'objections.detail_sha_verified': 'تم التحقق من سلامة البصمة الرقمية وعدم تعديل السجل.',
+    'objections.submit_badge_law': 'المادة 72 — القانون 23-12',
+    'objections.submit_type_label': 'نوع الطعن *',
+    'objections.submit_award_info': 'تاريخ إعلان الإسناد: {{date}} · آخر أجل للطعن: {{deadline}}',
+    'objections.submit_btn_add_file': 'ملف إضافي',
+    'objections.submit_warning_title': 'تنبيه نظامي:',
+    'objections.submit_warning_desc': 'إيداع الطعن يوقف إجراءات الإبرام النهائي للصفقة. يتم التحقق من صحة التمثيل التجاري وإشعار المصلحة المتعاقدة فورياً مع توثيق العملية ببصمة رقمية.',
+    'objections.op_countdown_title': 'العد التنازلي لأقرب أجل طعن',
+    'objections.op_less_than_3_days': 'أقل من 3 أيام',
+    'objections.op_countdown_sub': 'الطعن {{ref}} — آخر أجل: {{date}}',
+    'objections.op_no_open_deadlines': 'لا توجد آجال طعن مفتوحة حالياً. تُحسب المهلة من تاريخ نشر الإسناد المؤقت.',
+    'objections.op_remaining_label': 'المتبقي',
+    'objections.op_urgent_warning': 'تنبيه: بقي أقل من 3 أيام على انقضاء الأجل. بادر باستكمال الإجراء أو مراجعة ملف الطعن قبل انتهاء المهلة.',
+    'objections.op_kpi_aria': 'مؤشرات الطعون',
+    'objections.op_kpi_total': 'إجمالي طعوني',
+    'objections.op_kpi_total_sub': 'موثقة برقم مرجعي وبصمة',
+    'objections.op_kpi_under_review': 'قيد المعالجة والدراسة',
+    'objections.op_kpi_under_review_sub': 'أمام لجان الصفقات',
+    'objections.op_kpi_accepted': 'طعون مقبولة',
+    'objections.op_kpi_accepted_sub': 'ألغي فيها الإسناد المؤقت',
+    'objections.op_kpi_rejected': 'طعون مرفوضة',
+    'objections.op_kpi_rejected_sub': 'مع تبرير معلل من اللجنة',
+    'objections.op_table_heading': 'سجل الطعون',
+    'objections.op_table_sub': 'تابع حالة طعونك والآجال المرتبطة بها.',
+    'objections.op_search_placeholder': 'بحث برقم الطعن أو الصفقة...',
+    'objections.op_search_aria': 'بحث في الطعون',
+    'objections.op_filter_aria': 'تصفية حسب الحالة',
+    'objections.op_table_type': 'نوع الطعن',
+    'objections.op_table_date': 'تاريخ الإيداع',
+}
+
+extra_fr = {
+    'objections.auth_suspensive_p1': 'Les décisions définitives d\'attribution sont gelées automatiquement dès l\'enregistrement du recours pendant le délai de 10 jours.',
+    'objections.auth_suspensive_p2': 'La commission des marchés examine les motifs du recours et rend une décision motivée consignée avec empreinte numérique dans le journal d\'audit.',
+    'objections.auth_stat_total_sub': 'Enregistrés sur les marchés du service',
+    'objections.auth_stat_new': 'Nouveaux recours (à traiter)',
+    'objections.auth_stat_new_sub': 'Nécessitent un renvoi pour examen',
+    'objections.auth_stat_under_review_sub': 'Devant la commission d\'examen',
+    'objections.auth_stat_resolved': 'Recours statués',
+    'objections.auth_stat_resolved_sub': 'Décisions motivées et consignées',
+    'objections.filter_all_label': 'Tous',
+    'objections.filter_submitted_label': 'Déposé',
+    'objections.filter_under_review_label': 'En examen',
+    'objections.filter_accepted_label': 'Accepté',
+    'objections.filter_rejected_label': 'Rejeté',
+    'objections.auth_loading': 'Chargement du registre des recours en cours...',
+    'objections.auth_empty_filtered': 'Aucun recours correspondant',
+    'objections.auth_empty_filtered_desc': 'Aucun résultat ne correspond aux filtres et critères sélectionnés.',
+    'objections.default_registered_operator': 'Opérateur inscrit',
+    'objections.days_remaining_label': 'Reste {{days}} jour(s)',
+    'objections.deadline_expired_badge': 'Délai expiré',
+    'objections.decision_sha_notice': 'Cette motivation est définitivement consignée dans le journal d\'audit SHA-256.',
+    'objections.characters_count': 'caractères',
+    'objections.detail_arguments_sub': 'Exposé des motifs du recours présenté par le soumissionnaire :',
+    'objections.detail_sha_verified': 'Intégrité de l\'empreinte numérique vérifiée sans altération.',
+    'objections.submit_badge_law': 'Art. 72 — Loi 23-12',
+    'objections.submit_type_label': 'Type de recours *',
+    'objections.submit_award_info': 'Publication de l\'attribution : {{date}} · Délai limite : {{deadline}}',
+    'objections.submit_btn_add_file': 'Pièce supplémentaire',
+    'objections.submit_warning_title': 'Avertissement réglementaire :',
+    'objections.submit_warning_desc': 'Le recours suspend la contractualisation définitive. La représentativité est contrôlée et le service contractant est notifié immédiatement.',
+    'objections.op_countdown_title': 'Compte à rebours du plus proche délai',
+    'objections.op_less_than_3_days': 'Moins de 3 jours',
+    'objections.op_countdown_sub': 'Recours {{ref}} — Échéance : {{date}}',
+    'objections.op_no_open_deadlines': 'Aucun délai de recours ouvert actuellement. Le délai court dès la publication de l\'attribution provisoire.',
+    'objections.op_remaining_label': 'Restant',
+    'objections.op_urgent_warning': 'Avertissement : Moins de 3 jours restants. Veuillez compléter votre démarche avant expiration.',
+    'objections.op_kpi_aria': 'Indicateurs des recours',
+    'objections.op_kpi_total': 'Total de mes recours',
+    'objections.op_kpi_total_sub': 'Certifiés par référence et empreinte',
+    'objections.op_kpi_under_review': 'En cours d\'instruction',
+    'objections.op_kpi_under_review_sub': 'Devant les commissions des marchés',
+    'objections.op_kpi_accepted': 'Recours acceptés',
+    'objections.op_kpi_accepted_sub': 'Attribution provisoire annulée',
+    'objections.op_kpi_rejected': 'Recours rejetés',
+    'objections.op_kpi_rejected_sub': 'Avec décision motivée de la commission',
+    'objections.op_table_heading': 'Registre des recours',
+    'objections.op_table_sub': 'Suivez le statut de vos recours et les délais associés.',
+    'objections.op_search_placeholder': 'Rechercher par n° de recours ou marché...',
+    'objections.op_search_aria': 'Rechercher dans les recours',
+    'objections.op_filter_aria': 'Filtrer par statut',
+    'objections.op_table_type': 'Type de recours',
+    'objections.op_table_date': 'Date de dépôt',
+}
+
+with open('client/src/locales/ar.json', 'r', encoding='utf-8') as f:
+    ar_data = json.load(f)
+with open('client/src/locales/fr.json', 'r', encoding='utf-8') as f:
+    fr_data = json.load(f)
+
+for k, v in extra_ar.items():
+    ar_data[k] = v
+for k, v in extra_fr.items():
+    fr_data[k] = v
+
+with open('client/src/locales/ar.json', 'w', encoding='utf-8') as f:
+    json.dump(ar_data, f, ensure_ascii=False, indent=2)
+with open('client/src/locales/fr.json', 'w', encoding='utf-8') as f:
+    json.dump(fr_data, f, ensure_ascii=False, indent=2)
+
+print(f"Added {len(extra_ar)} extra objection keys to locales.")

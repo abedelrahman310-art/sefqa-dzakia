@@ -1,0 +1,14 @@
+[
+  [
+    877,
+    "? `قالب: ${CAHIER_TEMPLATES_LIBRARY.find((t) => t.id === templateId)?.title || templateId}`"
+  ],
+  [
+    1881,
+    "السند الإجرائي: {METHOD_LABELS[procurementMethod].ar} — {FORM_LABELS[procurementForm].ar} ({NATURE_LABELS[procurementNature].ar})"
+  ],
+  [
+    2671,
+    "<strong>طبيعة الحاجة:</strong> {NATURE_LABELS[procurementNature].ar}"
+  ]
+]

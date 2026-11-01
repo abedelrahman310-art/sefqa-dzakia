@@ -1,0 +1,55 @@
+/* Purpose aliases — هذه ما تستخدمه في المكونات */
+:root {
+  /* Default = Authority (green) */
+  --portal-primary:        var(--stamp-green-700);
+  --portal-primary-dark:   var(--stamp-green-900);
+  --portal-primary-light:  var(--stamp-green-300);
+  --portal-accent:         var(--stamp-gold-500);
+
+  /* Base semantic */
+  --color-bg-base:         var(--paper-50);          /* Snow White */
+  --color-text-primary:    var(--ink-900);          /* Black Navy */
+  --color-text-secondary:  var(--ink-700);
+  --color-text-muted:      var(--ink-500);
+  --color-text-inverse:    var(--paper-50);
+
+  --color-bg-elevated:     var(--white);
+  --color-bg-subtle:       var(--paper-100);
+  --color-bg-muted:        var(--paper-200);
+
+  --color-border-subtle:   var(--ink-100);
+  --color-border-strong:   var(--ink-300);
+  --color-border-primary:  var(--portal-primary);
+
+  /* Status */
+  --color-success:         var(--stamp-green-500);
+  --color-warning:         var(--stamp-gold-500);
+  --color-error:           var(--stamp-red-500);
+  --color-info:            var(--official-500);
+
+  /* Rejected / Awarded */
+  --color-rejected:        var(--stamp-red-700);
+  --color-awarded:         var(--stamp-gold-700);
+}
+
+/* Portal overrides */
+[data-portal="admin"] {
+  --portal-primary:        var(--official-700);
+  --portal-primary-dark:   var(--official-900);
+  --portal-primary-light:  var(--official-300);
+  --portal-accent:         var(--stamp-gold-500);
+}
+
+[data-portal="authority"] {
+  --portal-primary:        var(--stamp-green-700);
+  --portal-primary-dark:   var(--stamp-green-900);
+  --portal-primary-light:  var(--stamp-green-300);
+  --portal-accent:         var(--stamp-gold-500);
+}
+
+[data-portal="operator"] {
+  --portal-primary:        var(--sepia-700);
+  --portal-primary-dark:   var(--sepia-900);
+  --portal-primary-light:  var(--sepia-300);
+  --portal-accent:         var(--official-500);
+}

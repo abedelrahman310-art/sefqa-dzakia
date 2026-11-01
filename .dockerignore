@@ -1,0 +1,14 @@
+node_modules
+**/node_modules
+server/dist
+.git
+.github
+.agents
+.venv
+__pycache__
+**/__pycache__
+*.pyc
+.pytest_cache
+.coverage
+htmlcov
+*.log

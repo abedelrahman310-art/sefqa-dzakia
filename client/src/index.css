@@ -1,0 +1,303 @@
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap');
+@import './theme/tokens/primitives.css';
+@import './theme/tokens/semantic.css';
+@import './theme/tokens/components.css';
+@import './components/ui/logo.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+
+    /* Official Ledger Design System Tokens */
+    /* Paper — الخلفيات */
+    --paper-50:  #FFFAFA;   /* snow white — الخلفية */
+    --paper-100: #F5F5F7;
+    --paper-200: #EBEBEF;
+    
+    /* Ink — النصوص */
+    --ink-900: #0B1A2B;     /* primary — أسود كحلي */
+    --ink-700: #1A3247;     /* secondary */
+    --ink-500: #47586E;     /* muted */
+    --ink-300: #8B9BB0;
+    --ink-100: #D4DCE4;
+    
+    /* Stamp Green — الأخضر الرسمي (الختم) */
+    --stamp-green-900: #0F2419;
+    --stamp-green-700: #1B4332;   /* ← الأساسي */
+    --stamp-green-500: #2D6A4F;
+    --stamp-green-300: #74C69D;
+    
+    /* Gold — للإسناد الرسمي فقط */
+    --stamp-gold-700: #8B6914;
+    --stamp-gold-500: #B8860B;
+
+    /* Navy - Primary */
+    --navy-50: 216 100% 98%;
+    --navy-100: 214 32% 91%;
+    --navy-500: 215 25% 27%;
+    --navy-700: 215 32% 17%;
+    --navy-900: 217 33% 10%;
+
+    /* Emerald - Secondary */
+    --emerald-50: 160 84% 96%;
+    --emerald-100: 160 84% 90%;
+    --emerald-500: 160 84% 39%;
+    --emerald-700: 160 84% 29%;
+    --emerald-900: 160 84% 19%;
+
+    /* Gold - Accent */
+    --gold-50: 45 100% 96%;
+    --gold-100: 45 100% 90%;
+    --gold-500: 45 93% 47%;
+    --gold-700: 45 93% 37%;
+    --gold-900: 45 93% 27%;
+
+    /* Algerian National Flag Tokens */
+    --flag-green: 153 100% 19%;
+    --flag-white: 0 0% 100%;
+    --flag-red: 349 86% 44%;
+
+    /* Authority Dashboard Design Tokens */
+    --auth-navy: #12314d;
+    --auth-navy2: #265d85;
+    --auth-emerald: #0d7c6c;
+    --auth-emerald2: #27aa92;
+    --auth-gold: #bb862a;
+    --auth-gold2: #d4aa50;
+    --auth-red: #963c47;
+    --auth-red2: #bd5962;
+    --auth-bg: var(--paper-50);
+    --auth-card: #ffffff;
+    --auth-line: #dfe5ea;
+    --auth-text: var(--ink-900);
+    --auth-muted: var(--ink-500);
+
+    --primary: var(--navy-500);
+    --primary-foreground: var(--navy-50);
+
+    --secondary: var(--emerald-500);
+    --secondary-foreground: var(--emerald-50);
+
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    --accent: var(--gold-500);
+    --accent-foreground: var(--gold-900);
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: var(--navy-500);
+
+    --radius: 0.5rem;
+
+    /* Breakpoints موسّعة لـ 4K */
+    --breakpoint-3xl: 1920px;   /* Full HD+ */
+    --breakpoint-4xl: 2560px;   /* QHD / 2K */
+    --breakpoint-5xl: 3840px;   /* 4K UHD */
+
+    /* Container widths موسّعة */
+    --container-8xl: 1440px;    /* default max */
+    --container-9xl: 1920px;    /* 3xl */
+    --container-10xl: 2560px;   /* 4xl */
+    --container-11xl: 3000px;   /* 5xl / 4K */
+
+    /* Fluid type scale */
+    --fs-xs:     clamp(0.75rem, 0.7rem + 0.15vw, 0.875rem);
+    --fs-sm:     clamp(0.875rem, 0.8rem + 0.2vw, 1rem);
+    --fs-base:   clamp(1rem, 0.9rem + 0.3vw, 1.25rem);
+    --fs-lg:     clamp(1.125rem, 1rem + 0.4vw, 1.5rem);
+    --fs-xl:     clamp(1.25rem, 1.1rem + 0.5vw, 1.75rem);
+    --fs-2xl:    clamp(1.5rem, 1.2rem + 0.8vw, 2.25rem);
+    --fs-3xl:    clamp(1.875rem, 1.5rem + 1.2vw, 3rem);
+    --fs-4xl:    clamp(2.25rem, 1.8rem + 1.8vw, 4rem);
+    --fs-5xl:    clamp(2.75rem, 2rem + 2.5vw, 5rem);
+    --fs-6xl:    clamp(3.5rem, 2.5rem + 3.5vw, 6.5rem);
+  }
+}
+
+@layer base {
+  html {
+    font-size: 16px;
+    font-family: 'Cairo', sans-serif;
+  }
+  /* الفرنسية: خط Inter مع اتجاه LTR، والعربية تبقى على Cairo. */
+  html.lang-fr {
+    --font-display: 'Inter', 'Roboto', 'Segoe UI', system-ui, sans-serif;
+  }
+  html.lang-fr body,
+  html.lang-fr button,
+  html.lang-fr input,
+  html.lang-fr textarea,
+  html.lang-fr select {
+    font-family: 'Inter', 'Roboto', 'Segoe UI', system-ui, sans-serif;
+  }
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Cairo', sans-serif;
+    font-size: var(--text-body);
+    line-height: 1.6;
+  }
+}
+
+@layer components {
+  .page-transition {
+    animation: pageFadeIn 200ms ease-out;
+  }
+
+  @keyframes pageFadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .page-container {
+    max-width: var(--page-max-width);
+    margin-inline: auto;
+    padding-inline: var(--spacing-24);
+  }
+
+  .eyebrow {
+    font-size: var(--text-eyebrow);
+    font-weight: 600;
+    letter-spacing: var(--tracking-eyebrow);
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+    margin-block-end: var(--spacing-8);
+  }
+
+  .heading-display {
+    font-family: var(--font-display);
+    font-size: var(--text-display);
+    font-weight: 700;
+    line-height: var(--leading-tight);
+    letter-spacing: var(--tracking-tighter);
+    color: var(--color-text-primary);
+  }
+
+  .heading-h1 {
+    font-family: var(--font-display);
+    font-size: var(--text-h1);
+    font-weight: 700;
+    line-height: var(--leading-tight);
+    letter-spacing: var(--tracking-tight);
+    color: var(--color-text-primary);
+  }
+
+  .heading-h2 {
+    font-family: var(--font-display);
+    font-size: var(--text-h2);
+    font-weight: 600;
+    line-height: var(--leading-snug);
+    color: var(--color-text-primary);
+  }
+
+  .heading-h3 {
+    font-family: var(--font-display);
+    font-size: var(--text-h3);
+    font-weight: 600;
+    line-height: var(--leading-snug);
+    color: var(--color-text-primary);
+  }
+
+  /* ═══ AI Card ═══ */
+  .ai-card {
+    position: relative;
+    background: var(--ai-bg);
+    border: 1px solid var(--ai-border);
+    border-radius: 12px;
+    padding: 20px;
+    overflow: hidden;
+  }
+
+  .ai-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      var(--ai-bg-strong),
+      transparent
+    );
+    transform: translateX(-100%);
+    animation: shimmer 3s infinite;
+    pointer-events: none;
+  }
+
+  @keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    50% { transform: translateX(100%); }
+    100% { transform: translateX(-100%); }
+  }
+
+  .ai-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    background: var(--ai-bg-strong);
+    color: var(--ai-text-strong);
+    border: 1px solid var(--ai-border);
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .ai-sparkle {
+    display: inline-block;
+    animation: pulse-sparkle 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse-sparkle {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.7; transform: scale(1.1); }
+  }
+
+  .section-gap {
+    margin-block-end: var(--section-gap);
+  }
+
+  .text-body-sm {
+    font-size: var(--text-body-sm, 13px);
+    line-height: var(--leading-normal, 1.5);
+  }
+
+  .text-body-lg {
+    font-size: var(--text-body-lg, 16px);
+    line-height: var(--leading-normal, 1.5);
+  }
+
+  .text-h3 {
+    font-size: var(--text-h3, 22px);
+    font-weight: 600;
+    line-height: var(--leading-snug, 1.25);
+  }
+
+  .badge-amber {
+    background-color: rgba(245, 158, 11, 0.1);
+    color: #b45309;
+    border: 1px solid rgba(245, 158, 11, 0.25);
+  }
+}

@@ -1,0 +1,937 @@
+[
+  {
+    "file": "types.ts",
+    "line": 84,
+    "code": "procedural: 'مخالفة إجرائية',"
+  },
+  {
+    "file": "types.ts",
+    "line": 85,
+    "code": "evaluation: 'خطأ في التقييم والتنقيط',"
+  },
+  {
+    "file": "types.ts",
+    "line": 86,
+    "code": "price: 'سعر غير منطقي أو منخفض بشكل غير عادي',"
+  },
+  {
+    "file": "types.ts",
+    "line": 87,
+    "code": "capacity: 'عدم استيفاء شروط القدرات والتأهيل',"
+  },
+  {
+    "file": "types.ts",
+    "line": 88,
+    "code": "conflict: 'تنازع مصالح',"
+  },
+  {
+    "file": "types.ts",
+    "line": 89,
+    "code": "discrimination: 'تمييز غير قانوني ومساس بالمساواة',"
+  },
+  {
+    "file": "types.ts",
+    "line": 90,
+    "code": "other: 'أسباب قانونية أخرى',"
+  },
+  {
+    "file": "types.ts",
+    "line": 94,
+    "code": "administrative: 'طعن إداري أمام لجنة الصفقات',"
+  },
+  {
+    "file": "types.ts",
+    "line": 95,
+    "code": "judicial: 'طعن قضائي أمام المحكمة الإدارية',"
+  },
+  {
+    "file": "types.ts",
+    "line": 99,
+    "code": "draft: { label: 'مسودة', variant: 'outline' },"
+  },
+  {
+    "file": "types.ts",
+    "line": 100,
+    "code": "submitted: { label: 'مُودع رسمياً', variant: 'secondary' },"
+  },
+  {
+    "file": "types.ts",
+    "line": 101,
+    "code": "under_review: { label: 'قيد الدراسة', variant: 'default' },"
+  },
+  {
+    "file": "types.ts",
+    "line": 102,
+    "code": "accepted: { label: 'مقبول — إلغاء الإسناد', variant: 'default' },"
+  },
+  {
+    "file": "types.ts",
+    "line": 103,
+    "code": "rejected: { label: 'مرفوض — تثبيت الإسناد', variant: 'destructive' },"
+  },
+  {
+    "file": "types.ts",
+    "line": 104,
+    "code": "withdrawn: { label: 'مسحوب', variant: 'outline' },"
+  },
+  {
+    "file": "types.ts",
+    "line": 105,
+    "code": "escalated: { label: 'مُحال للقضاء', variant: 'outline' },"
+  },
+  {
+    "file": "components\\AuthorityObjectionsView.tsx",
+    "line": 54,
+    "code": "toast.error('تعذر تحميل قائمة الطعون الواردة للمصلحة المتعاقدة.');"
+  },
+  {
+    "file": "components\\AuthorityObjectionsView.tsx",
+    "line": 68,
+    "code": "toast.success('تم تسجيل بدء دراسة الطعن وتوثيق الإجراء في سجل التدقيق.');"
+  },
+  {
+    "file": "components\\AuthorityObjectionsView.tsx",
+    "line": 71,
+    "code": "toast.error(err.response?.data?.detail || 'تعذر بدء دراسة الطعن.');"
+  },
+  {
+    "file": "components\\AuthorityObjectionsView.tsx",
+    "line": 89,
+    "code": "toast.error('تعذر تحميل تفاصيل الطعن.');"
+  },
+  {
+    "file": "components\\AuthorityObjectionsView.tsx",
+    "line": 98,
+    "code": "return <Badge className=\"bg-blue-50 text-blue-800 border-blue-200\">جديد — مُودع</Badge>;"
+  },
+  {
+    "file": "components\\AuthorityObjectionsView.tsx",
+    "line": 100,
+    "code": "return <Badge className=\"bg-amber-50 text-amber-800 border-amber-300\">قيد الدراسة أمام اللجنة</Badge>;"
+  },
+  {
+    "file": "components\\AuthorityObjectionsView.tsx",
+    "line": 102,
+    "code": "return <Badge className=\"bg-emerald-50 text-emerald-800 border-emerald-300\">مقبول — إلغاء الإسناد</Badge>;"
+  },
+  {
+    "file": "components\\AuthorityObjectionsView.tsx",
+    "line": 104,
+    "code": "return <Badge className=\"bg-rose-50 text-rose-800 border-rose-300\">مرفوض — تثبيت الإسناد</Badge>;"
+  },
+  {
+    "file": "components\\AuthorityObjectionsView.tsx",
+    "line": 106,
+    "code": "return <Badge className=\"bg-slate-100 text-slate-700 border-slate-300\">مسحوب من الطاعن</Badge>;"
+  },
+  {
+    "file": "components\\AuthorityObjectionsView.tsx",
+    "line": 108,
+    "code": "return <Badge className=\"bg-purple-50 text-purple-800 border-purple-200\">مُحال للقضاء</Badge>;"
+  },
+  {
+    "file": "components\\AuthorityObjectionsView.tsx",
+    "line": 143,
+    "code": "إدارة الطعون ونزاعات الإسناد المؤقت"
+  },
+  {
+    "file": "components\\AuthorityObjectionsView.tsx",
+    "line": 147,
+    "code": "معالجة وفحص الطعون المودعة من قبل المتعاملين الاقتصاديين وفقاً للمادة 72 من القانون رقم 23-12."
+  },
+  {
+    "file": "components\\AuthorityObjectionsView.tsx",
+    "line": 159,
+    "code": "تحديث السجل"
+  },
+  {
+    "file": "components\\AuthorityObjectionsView.tsx",
+    "line": 168,
+    "code": "الأثر الواقف للطعن والمهل القانونية (المادة 72 من القانون 23-12):"
+  },
+  {
+    "file": "components\\AuthorityObjectionsView.tsx",
+    "line": 171,
+    "code": "تجمّد القرارات النهائية للإسناد تلقائياً فور تسجيل الطعن خلال أجل الـ 10 أيام من تاريخ إعلان المنح المؤقت."
+  },
+  {
+    "file": "components\\AuthorityObjectionsView.tsx",
+    "line": 172,
+    "code": "تتولى لجنة الصفقات المختصة فحص أسباب الطعن وإصدار قرار معلل بقبول الطعن أو رفضه وتوثيق النتائج ببصمة رقمية في سجل التدقيق غير القابل للتعديل."
+  },
+  {
+    "file": "components\\AuthorityObjectionsView.tsx",
+    "line": 182,
+    "code": "إجمالي الطعون الواردة"
+  },
+  {
+    "file": "components\\AuthorityObjectionsView.tsx",
+    "line": 188,
+    "code": "<p className=\"text-xs text-muted-foreground mt-1\">مسجلة على صفقات المصلحة</p>"
+  },
+  {
+    "file": "components\\AuthorityObjectionsView.tsx",
+    "line": 195,
+    "code": "طعون جديدة (بحاجة لمعالجة)"
+  },
+  {
+    "file": "components\\AuthorityObjectionsView.tsx",
+    "line": 203,
+    "code": "<p className=\"text-xs text-muted-foreground mt-1\">تتطلب إحالة للدراسة</p>"
+  },
+  {
+    "file": "components\\AuthorityObjectionsView.tsx",
+    "line": 210,
+    "code": "قيد الفحص والمداولة"
+  },
+  {
+    "file": "components\\AuthorityObjectionsView.tsx",
+    "line": 218,
+    "code": "<p className=\"text-xs text-muted-foreground mt-1\">أمام لجنة فحص الصفقات</p>"
+  },
+  {
+    "file": "components\\AuthorityObjectionsView.tsx",
+    "line": 225,
+    "code": "طعون مفصول فيها"
+  },
+  {
+    "file": "components\\AuthorityObjectionsView.tsx",
+    "line": 233,
+    "code": "<p className=\"text-xs text-muted-foreground mt-1\">قرارات مبررة وموثقة</p>"
+  },
+  {
+    "file": "components\\AuthorityObjectionsView.tsx",
+    "line": 244,
+    "code": "placeholder=\"بحث بالمرجع، عنوان الصفقة، أو الطاعن...\""
+  },
+  {
+    "file": "components\\AuthorityObjectionsView.tsx",
+    "line": 255,
+    "code": "{ id: 'all', label: 'الكل' },"
+  },
+  {
+    "file": "components\\AuthorityObjectionsView.tsx",
+    "line": 256,
+    "code": "{ id: 'submitted', label: 'مُودع' },"
+  },
+  {
+    "file": "components\\AuthorityObjectionsView.tsx",
+    "line": 257,
+    "code": "{ id: 'under_review', label: 'قيد الدراسة' },"
+  },
+  {
+    "file": "components\\AuthorityObjectionsView.tsx",
+    "line": 258,
+    "code": "{ id: 'accepted', label: 'مقبول' },"
+  },
+  {
+    "file": "components\\AuthorityObjectionsView.tsx",
+    "line": 259,
+    "code": "{ id: 'rejected', label: 'مرفوض' },"
+  },
+  {
+    "file": "components\\AuthorityObjectionsView.tsx",
+    "line": 280,
+    "code": "<p className=\"text-sm\">جاري جلب سجل الطعون الواردة...</p>"
+  },
+  {
+    "file": "components\\AuthorityObjectionsView.tsx",
+    "line": 285,
+    "code": "<h3 className=\"text-base font-semibold text-foreground mb-1\">لا توجد طعون مطابقة</h3>"
+  },
+  {
+    "file": "components\\AuthorityObjectionsView.tsx",
+    "line": 288,
+    "code": "? 'لا توجد نتائج تطابق معايير البحث والفلترة المحددة.'"
+  },
+  {
+    "file": "components\\AuthorityObjectionsView.tsx",
+    "line": 289,
+    "code": ": 'لم يرد أي طعن على الصفقات التابعة لمصلحتكم المتعاقدة حتى الآن.'}"
+  },
+  {
+    "file": "components\\AuthorityObjectionsView.tsx",
+    "line": 296,
+    "code": "<TableHead className=\"text-start font-semibold\">مرجع الطعن</TableHead>"
+  },
+  {
+    "file": "components\\AuthorityObjectionsView.tsx",
+    "line": 297,
+    "code": "<TableHead className=\"text-start font-semibold\">الصفقة المعنية</TableHead>"
+  },
+  {
+    "file": "components\\AuthorityObjectionsView.tsx",
+    "line": 298,
+    "code": "<TableHead className=\"text-start font-semibold\">المتعامل الطاعن</TableHead>"
+  },
+  {
+    "file": "components\\AuthorityObjectionsView.tsx",
+    "line": 299,
+    "code": "<TableHead className=\"text-start font-semibold\">أسباب الطعن</TableHead>"
+  },
+  {
+    "file": "components\\AuthorityObjectionsView.tsx",
+    "line": 300,
+    "code": "<TableHead className=\"text-start font-semibold\">المهلة المتبقية</TableHead>"
+  },
+  {
+    "file": "components\\AuthorityObjectionsView.tsx",
+    "line": 301,
+    "code": "<TableHead className=\"text-start font-semibold\">الحالة</TableHead>"
+  },
+  {
+    "file": "components\\AuthorityObjectionsView.tsx",
+    "line": 302,
+    "code": "<TableHead className=\"text-end font-semibold\">الإجراءات</TableHead>"
+  },
+  {
+    "file": "components\\AuthorityObjectionsView.tsx",
+    "line": 331,
+    "code": "{item.objector_name || 'متعامل مسجل'}"
+  },
+  {
+    "file": "components\\AuthorityObjectionsView.tsx",
+    "line": 366,
+    "code": "متبقي {item.days_remaining} يوم"
+  },
+  {
+    "file": "components\\AuthorityObjectionsView.tsx",
+    "line": 373,
+    "code": "انقضت المهلة"
+  },
+  {
+    "file": "components\\AuthorityObjectionsView.tsx",
+    "line": 393,
+    "code": "بدء الدراسة"
+  },
+  {
+    "file": "components\\AuthorityObjectionsView.tsx",
+    "line": 405,
+    "code": "البت في الطعن"
+  },
+  {
+    "file": "components\\AuthorityObjectionsView.tsx",
+    "line": 418,
+    "code": "عرض"
+  },
+  {
+    "file": "components\\ObjectionDecisionModal.tsx",
+    "line": 46,
+    "code": "toast.error('يجب كتابة تبرير معلل للقرار (10 أحرف على الأقل).');"
+  },
+  {
+    "file": "components\\ObjectionDecisionModal.tsx",
+    "line": 58,
+    "code": "? 'تم قبول الطعن وإلغاء الإسناد المؤقت وتوثيقه في سجل التدقيق.'"
+  },
+  {
+    "file": "components\\ObjectionDecisionModal.tsx",
+    "line": 59,
+    "code": ": 'تم رفض الطعن وتثبيت قرار الإسناد وتوثيقه في سجل التدقيق.'"
+  },
+  {
+    "file": "components\\ObjectionDecisionModal.tsx",
+    "line": 65,
+    "code": "const msg = err.response?.data?.detail || 'تعذر تسجيل القرار.';"
+  },
+  {
+    "file": "components\\ObjectionDecisionModal.tsx",
+    "line": 79,
+    "code": "<span>إصدار قرار لجنة الصفقات: {objection.reference}</span>"
+  },
+  {
+    "file": "components\\ObjectionDecisionModal.tsx",
+    "line": 82,
+    "code": "الصفقة: {objection.tender_reference} · المُطعِن: {objection.objector_name}"
+  },
+  {
+    "file": "components\\ObjectionDecisionModal.tsx",
+    "line": 90,
+    "code": "مضمون قرار اللجنة:"
+  },
+  {
+    "file": "components\\ObjectionDecisionModal.tsx",
+    "line": 104,
+    "code": "<div className=\"text-xs\">قبول الطعن</div>"
+  },
+  {
+    "file": "components\\ObjectionDecisionModal.tsx",
+    "line": 106,
+    "code": "إلغاء الإسناد المؤقت وإعادة فحص العروض"
+  },
+  {
+    "file": "components\\ObjectionDecisionModal.tsx",
+    "line": 122,
+    "code": "<div className=\"text-xs\">رفض الطعن</div>"
+  },
+  {
+    "file": "components\\ObjectionDecisionModal.tsx",
+    "line": 124,
+    "code": "تثبيت الإسناد المؤقت ومواصلة التعاقد"
+  },
+  {
+    "file": "components\\ObjectionDecisionModal.tsx",
+    "line": 134,
+    "code": "التبرير القانوني والتقني للقرار (إلزامي):"
+  },
+  {
+    "file": "components\\ObjectionDecisionModal.tsx",
+    "line": 141,
+    "code": "placeholder=\"بيّن بالتفصيل مبررات القرار المستخلصة من مداولات لجنة الصفقات ومطابقتها للمادة 72...\""
+  },
+  {
+    "file": "components\\ObjectionDecisionModal.tsx",
+    "line": 145,
+    "code": "<span>يتم تسجيل هذا التبرير بصورة نهائية في سجل التدقيق SHA-256.</span>"
+  },
+  {
+    "file": "components\\ObjectionDecisionModal.tsx",
+    "line": 147,
+    "code": "{reason.trim().length}/10 أحرف"
+  },
+  {
+    "file": "components\\ObjectionDecisionModal.tsx",
+    "line": 161,
+    "code": "إلغاء"
+  },
+  {
+    "file": "components\\ObjectionDecisionModal.tsx",
+    "line": 176,
+    "code": "جاري تسجيل القرار..."
+  },
+  {
+    "file": "components\\ObjectionDecisionModal.tsx",
+    "line": 179,
+    "code": "'اعتماد القرار رسمياً'"
+  },
+  {
+    "file": "components\\ObjectionDetailModal.tsx",
+    "line": 52,
+    "code": "return <Badge className=\"bg-blue-50 text-blue-800 border-blue-200\">مُودع رسمياً</Badge>;"
+  },
+  {
+    "file": "components\\ObjectionDetailModal.tsx",
+    "line": 54,
+    "code": "return <Badge className=\"bg-amber-50 text-amber-800 border-amber-300\">قيد الدراسة أمام اللجنة</Badge>;"
+  },
+  {
+    "file": "components\\ObjectionDetailModal.tsx",
+    "line": 56,
+    "code": "return <Badge className=\"bg-emerald-50 text-emerald-800 border-emerald-300\">مقبول — إلغاء الإسناد المؤقت</Badge>;"
+  },
+  {
+    "file": "components\\ObjectionDetailModal.tsx",
+    "line": 58,
+    "code": "return <Badge className=\"bg-rose-50 text-rose-800 border-rose-300\">مرفوض — تثبيت الإسناد</Badge>;"
+  },
+  {
+    "file": "components\\ObjectionDetailModal.tsx",
+    "line": 60,
+    "code": "return <Badge className=\"bg-slate-100 text-slate-700 border-slate-300\">مسحوب بطلب المُطعِن</Badge>;"
+  },
+  {
+    "file": "components\\ObjectionDetailModal.tsx",
+    "line": 73,
+    "code": "<span>ملف الطعن: {objection.reference}</span>"
+  },
+  {
+    "file": "components\\ObjectionDetailModal.tsx",
+    "line": 78,
+    "code": "وفق أحكام المادة 72 من القانون 23-12 المتعلق بالصفقات العمومية"
+  },
+  {
+    "file": "components\\ObjectionDetailModal.tsx",
+    "line": 86,
+    "code": "<span>الصفقة محل الطعن:</span>"
+  },
+  {
+    "file": "components\\ObjectionDetailModal.tsx",
+    "line": 96,
+    "code": "<span className=\"text-slate-500\">نوع الطعن: </span>"
+  },
+  {
+    "file": "components\\ObjectionDetailModal.tsx",
+    "line": 100,
+    "code": "<span className=\"text-slate-500\">المُطعِن: </span>"
+  },
+  {
+    "file": "components\\ObjectionDetailModal.tsx",
+    "line": 106,
+    "code": "{/* Grounds / الأسباب */}"
+  },
+  {
+    "file": "components\\ObjectionDetailModal.tsx",
+    "line": 108,
+    "code": "<h4 className=\"text-xs font-bold text-slate-700 mb-2\">أسباب وأوجه الطعن القانونية:</h4>"
+  },
+  {
+    "file": "components\\ObjectionDetailModal.tsx",
+    "line": 123,
+    "code": "<h4 className=\"text-xs font-bold text-slate-700 mb-1.5\">بيان تفاصيل وأسباب الطعن:</h4>"
+  },
+  {
+    "file": "components\\ObjectionDetailModal.tsx",
+    "line": 145,
+    "code": "قرار لجنة الصفقات: {objection.decision === 'accepted' ? 'قبول الطعن وإلغاء الإسناد المؤقت' : 'رفض الطعن وتثبيت الإسناد'}"
+  },
+  {
+    "file": "components\\ObjectionDetailModal.tsx",
+    "line": 149,
+    "code": "{objection.decision_reason || 'لا يوجد تبرير مرفق.'}"
+  },
+  {
+    "file": "components\\ObjectionDetailModal.tsx",
+    "line": 153,
+    "code": "تاريخ صدور القرار: {new Date(objection.review_ended_at).toLocaleString('ar-DZ')}"
+  },
+  {
+    "file": "components\\ObjectionDetailModal.tsx",
+    "line": 159,
+    "code": "{/* Timeline / السجل الزمني */}"
+  },
+  {
+    "file": "components\\ObjectionDetailModal.tsx",
+    "line": 163,
+    "code": "<span>السجل الزمني للأحداث الإجرائية:</span>"
+  },
+  {
+    "file": "components\\ObjectionDetailModal.tsx",
+    "line": 171,
+    "code": "<span>{item.actor_name || 'النظام'}</span>"
+  },
+  {
+    "file": "components\\ObjectionDetailModal.tsx",
+    "line": 178,
+    "code": "<div className=\"text-slate-400 text-xs\">لا توجد أحداث مسجلة بعد.</div>"
+  },
+  {
+    "file": "components\\ObjectionDetailModal.tsx",
+    "line": 188,
+    "code": "<div className=\"text-[11px] text-slate-500\">بصمة النزاهة الرقمية (SHA-256) — القانون 18-07:</div>"
+  },
+  {
+    "file": "components\\ObjectionDetailModal.tsx",
+    "line": 199,
+    "code": "<span className=\"ms-1\">{copied ? 'تم النسخ' : 'نسخ'}</span>"
+  },
+  {
+    "file": "components\\ObjectionDetailModal.tsx",
+    "line": 211,
+    "code": "سحب الطعن"
+  },
+  {
+    "file": "components\\ObjectionDetailModal.tsx",
+    "line": 217,
+    "code": "إغلاق"
+  },
+  {
+    "file": "components\\ObjectionSubmissionModal.tsx",
+    "line": 57,
+    "code": "toast.error('تعذر جلب الصفقات المتاحة.');"
+  },
+  {
+    "file": "components\\ObjectionSubmissionModal.tsx",
+    "line": 75,
+    "code": "toast.error('يرجى اختيار الصفقة محل الطعن.');"
+  },
+  {
+    "file": "components\\ObjectionSubmissionModal.tsx",
+    "line": 80,
+    "code": "toast.error('يرجى اختيار سبب واحد للطعن على الأقل.');"
+  },
+  {
+    "file": "components\\ObjectionSubmissionModal.tsx",
+    "line": 85,
+    "code": "toast.error('يرجى كتابة تفاصيل الطعن وأسبابه (20 حرفاً على الأقل).');"
+  },
+  {
+    "file": "components\\ObjectionSubmissionModal.tsx",
+    "line": 99,
+    "code": "toast.success('تم إيداع الطعن وتوثيقه بنجاح مع بصمة SHA-256.');"
+  },
+  {
+    "file": "components\\ObjectionSubmissionModal.tsx",
+    "line": 105,
+    "code": "const msg = err.response?.data?.detail || 'تعذر إيداع الطعن. يرجى مراجعة الشروط والآجال.';"
+  },
+  {
+    "file": "components\\ObjectionSubmissionModal.tsx",
+    "line": 119,
+    "code": "<span>إيداع طعن على قرار الإسناد المؤقت</span>"
+  },
+  {
+    "file": "components\\ObjectionSubmissionModal.tsx",
+    "line": 122,
+    "code": "المادة 72 من القانون 23-12: يجب إيداع الطعن خلال مهلة 10 أيام من تاريخ الإعلان، مع وجوب تقديم عرض مسبق في الصفقة."
+  },
+  {
+    "file": "components\\ObjectionSubmissionModal.tsx",
+    "line": 130,
+    "code": "الصفقة المعنية بالطعن:"
+  },
+  {
+    "file": "components\\ObjectionSubmissionModal.tsx",
+    "line": 133,
+    "code": "<div className=\"text-xs text-slate-400 py-2\">جاري تحميل الصفقات...</div>"
+  },
+  {
+    "file": "components\\ObjectionSubmissionModal.tsx",
+    "line": 149,
+    "code": "لم يتم العثور على صفقات نشطة في مرحلة الإسناد المؤقت."
+  },
+  {
+    "file": "components\\ObjectionSubmissionModal.tsx",
+    "line": 156,
+    "code": "<Label className=\"text-xs font-bold text-slate-700 mb-2 block\">نوع الطعن:</Label>"
+  },
+  {
+    "file": "components\\ObjectionSubmissionModal.tsx",
+    "line": 172,
+    "code": "? 'أمام لجنة الصفقات العمومية للمصلحة المتعاقدة'"
+  },
+  {
+    "file": "components\\ObjectionSubmissionModal.tsx",
+    "line": 173,
+    "code": ": 'أمام المحكمة الإدارية المختصة إقليمياً'}"
+  },
+  {
+    "file": "components\\ObjectionSubmissionModal.tsx",
+    "line": 183,
+    "code": "أسباب وأوجه الطعن القانونية (اختر ما ينطبق):"
+  },
+  {
+    "file": "components\\ObjectionSubmissionModal.tsx",
+    "line": 210,
+    "code": "شرح وتفاصيل أسباب الطعن والمآخذ الموضوعية:"
+  },
+  {
+    "file": "components\\ObjectionSubmissionModal.tsx",
+    "line": 217,
+    "code": "placeholder=\"بيّن بالتفصيل النقاط القانونية والتقنية أو المالية محل الاعتراض ومطابقتها لدفتر الشروط...\""
+  },
+  {
+    "file": "components\\ObjectionSubmissionModal.tsx",
+    "line": 221,
+    "code": "<span>يجب أن يتضمن الطعن وقائع واضحة قابلة للتدقيق.</span>"
+  },
+  {
+    "file": "components\\ObjectionSubmissionModal.tsx",
+    "line": 223,
+    "code": "{description.trim().length}/20 حرفاً"
+  },
+  {
+    "file": "components\\ObjectionSubmissionModal.tsx",
+    "line": 237,
+    "code": "إلغاء"
+  },
+  {
+    "file": "components\\ObjectionSubmissionModal.tsx",
+    "line": 248,
+    "code": "جاري الإيداع والتوثيق..."
+  },
+  {
+    "file": "components\\ObjectionSubmissionModal.tsx",
+    "line": 253,
+    "code": "إيداع الطعن رسمياً"
+  },
+  {
+    "file": "components\\OperatorObjectionsView.tsx",
+    "line": 29,
+    "code": "if (remainingMs <= 0) return 'انقضى الأجل';"
+  },
+  {
+    "file": "components\\OperatorObjectionsView.tsx",
+    "line": 36,
+    "code": "if (days > 0) return `${days} يوم${hours > 0 ? ` و${hours} ساعة` : ''}`;"
+  },
+  {
+    "file": "components\\OperatorObjectionsView.tsx",
+    "line": 37,
+    "code": "if (hours > 0) return `${hours} ساعة${minutes > 0 ? ` و${minutes} دقيقة` : ''}`;"
+  },
+  {
+    "file": "components\\OperatorObjectionsView.tsx",
+    "line": 38,
+    "code": "return `${Math.max(minutes, 1)} دقيقة`;"
+  },
+  {
+    "file": "components\\OperatorObjectionsView.tsx",
+    "line": 57,
+    "code": "title={`آخر أجل: ${formatDeadline(deadlineAt)}`}"
+  },
+  {
+    "file": "components\\OperatorObjectionsView.tsx",
+    "line": 83,
+    "code": "toast.error('تعذر تحميل قائمة الطعون الخاصة بك.');"
+  },
+  {
+    "file": "components\\OperatorObjectionsView.tsx",
+    "line": 105,
+    "code": "toast.error('تعذر تحميل تفاصيل الطعن.');"
+  },
+  {
+    "file": "components\\OperatorObjectionsView.tsx",
+    "line": 112,
+    "code": "if (!window.confirm('هل أنت متأكد من رغبتك في سحب هذا الطعن؟ الإجراء نهائي ولا يمكن التراجع عنه.')) {"
+  },
+  {
+    "file": "components\\OperatorObjectionsView.tsx",
+    "line": 117,
+    "code": "toast.success('تم سحب الطعن وتوثيق الإجراء.');"
+  },
+  {
+    "file": "components\\OperatorObjectionsView.tsx",
+    "line": 121,
+    "code": "toast.error(err.response?.data?.detail || 'تعذر سحب الطعن.');"
+  },
+  {
+    "file": "components\\OperatorObjectionsView.tsx",
+    "line": 128,
+    "code": "return <span className=\"op-chip blue\">مُودع</span>;"
+  },
+  {
+    "file": "components\\OperatorObjectionsView.tsx",
+    "line": 130,
+    "code": "return <span className=\"op-chip gold\">قيد الدراسة</span>;"
+  },
+  {
+    "file": "components\\OperatorObjectionsView.tsx",
+    "line": 132,
+    "code": "return <span className=\"op-chip green\">مقبول</span>;"
+  },
+  {
+    "file": "components\\OperatorObjectionsView.tsx",
+    "line": 134,
+    "code": "return <span className=\"op-chip red\">مرفوض</span>;"
+  },
+  {
+    "file": "components\\OperatorObjectionsView.tsx",
+    "line": 136,
+    "code": "return <span className=\"op-chip\">مسحوب</span>;"
+  },
+  {
+    "file": "components\\OperatorObjectionsView.tsx",
+    "line": 175,
+    "code": "<span className=\"op-chip gold mb-2\">المادة 72 — القانون 23-12</span>"
+  },
+  {
+    "file": "components\\OperatorObjectionsView.tsx",
+    "line": 176,
+    "code": "<h1>الطعون والتظلمات</h1>"
+  },
+  {
+    "file": "components\\OperatorObjectionsView.tsx",
+    "line": 178,
+    "code": "يحق لكل عارض يرى مساساً بحقوقه أو خرقاً لدفتر الشروط أو معايير التقييم تقديم طعن إداري"
+  },
+  {
+    "file": "components\\OperatorObjectionsView.tsx",
+    "line": 179,
+    "code": "أمام لجنة الصفقات خلال أجل 10 أيام من نشر الإسناد."
+  },
+  {
+    "file": "components\\OperatorObjectionsView.tsx",
+    "line": 189,
+    "code": "<span>إيداع طعن جديد</span>"
+  },
+  {
+    "file": "components\\OperatorObjectionsView.tsx",
+    "line": 217,
+    "code": "العد التنازلي لأقرب أجل طعن"
+  },
+  {
+    "file": "components\\OperatorObjectionsView.tsx",
+    "line": 219,
+    "code": "{isNextUrgent ? <span className=\"op-chip red\">أقل من 3 أيام</span> : null}"
+  },
+  {
+    "file": "components\\OperatorObjectionsView.tsx",
+    "line": 224,
+    "code": "الطعن <span className=\"op-mono font-bold\">{nextObjection.reference}</span> —"
+  },
+  {
+    "file": "components\\OperatorObjectionsView.tsx",
+    "line": 225,
+    "code": "آخر أجل: {formatDeadline(nextObjection.deadline_at)}"
+  },
+  {
+    "file": "components\\OperatorObjectionsView.tsx",
+    "line": 228,
+    "code": "'لا توجد آجال طعن مفتوحة حالياً. تُحسب المهلة من تاريخ نشر الإسناد المؤقت.'"
+  },
+  {
+    "file": "components\\OperatorObjectionsView.tsx",
+    "line": 241,
+    "code": "<span className=\"block text-[10px] font-bold text-[var(--op-muted)]\">المتبقي</span>"
+  },
+  {
+    "file": "components\\OperatorObjectionsView.tsx",
+    "line": 255,
+    "code": "تنبيه: بقي أقل من 3 أيام على انقضاء الأجل. بادر باستكمال الإجراء أو مراجعة ملف"
+  },
+  {
+    "file": "components\\OperatorObjectionsView.tsx",
+    "line": 256,
+    "code": "الطعن قبل انتهاء المهلة."
+  },
+  {
+    "file": "components\\OperatorObjectionsView.tsx",
+    "line": 261,
+    "code": "<section className=\"op-kpi-grid\" aria-label=\"مؤشرات الطعون\">"
+  },
+  {
+    "file": "components\\OperatorObjectionsView.tsx",
+    "line": 266,
+    "code": "<div className=\"op-kpi-label\">إجمالي طعوني</div>"
+  },
+  {
+    "file": "components\\OperatorObjectionsView.tsx",
+    "line": 268,
+    "code": "<div className=\"op-kpi-sub\">موثقة برقم مرجعي وبصمة</div>"
+  },
+  {
+    "file": "components\\OperatorObjectionsView.tsx",
+    "line": 275,
+    "code": "<div className=\"op-kpi-label\">قيد المعالجة والدراسة</div>"
+  },
+  {
+    "file": "components\\OperatorObjectionsView.tsx",
+    "line": 279,
+    "code": "<div className=\"op-kpi-sub\">أمام لجان الصفقات</div>"
+  },
+  {
+    "file": "components\\OperatorObjectionsView.tsx",
+    "line": 286,
+    "code": "<div className=\"op-kpi-label\">طعون مقبولة</div>"
+  },
+  {
+    "file": "components\\OperatorObjectionsView.tsx",
+    "line": 290,
+    "code": "<div className=\"op-kpi-sub\">ألغي فيها الإسناد المؤقت</div>"
+  },
+  {
+    "file": "components\\OperatorObjectionsView.tsx",
+    "line": 297,
+    "code": "<div className=\"op-kpi-label\">طعون مرفوضة</div>"
+  },
+  {
+    "file": "components\\OperatorObjectionsView.tsx",
+    "line": 301,
+    "code": "<div className=\"op-kpi-sub\">مع تبرير معلل من اللجنة</div>"
+  },
+  {
+    "file": "components\\OperatorObjectionsView.tsx",
+    "line": 308,
+    "code": "<h3 id=\"objections-list-title\">سجل الطعون</h3>"
+  },
+  {
+    "file": "components\\OperatorObjectionsView.tsx",
+    "line": 310,
+    "code": "تابع حالة طعونك والآجال المرتبطة بها."
+  },
+  {
+    "file": "components\\OperatorObjectionsView.tsx",
+    "line": 318,
+    "code": "placeholder=\"بحث برقم الطعن أو الصفقة...\""
+  },
+  {
+    "file": "components\\OperatorObjectionsView.tsx",
+    "line": 321,
+    "code": "aria-label=\"بحث في الطعون\""
+  },
+  {
+    "file": "components\\OperatorObjectionsView.tsx",
+    "line": 330,
+    "code": "aria-label=\"تصفية حسب الحالة\""
+  },
+  {
+    "file": "components\\OperatorObjectionsView.tsx",
+    "line": 332,
+    "code": "<option value=\"all\">كافة الحالات</option>"
+  },
+  {
+    "file": "components\\OperatorObjectionsView.tsx",
+    "line": 333,
+    "code": "<option value=\"submitted\">مُودع</option>"
+  },
+  {
+    "file": "components\\OperatorObjectionsView.tsx",
+    "line": 334,
+    "code": "<option value=\"under_review\">قيد الدراسة</option>"
+  },
+  {
+    "file": "components\\OperatorObjectionsView.tsx",
+    "line": 335,
+    "code": "<option value=\"accepted\">مقبول</option>"
+  },
+  {
+    "file": "components\\OperatorObjectionsView.tsx",
+    "line": 336,
+    "code": "<option value=\"rejected\">مرفوض</option>"
+  },
+  {
+    "file": "components\\OperatorObjectionsView.tsx",
+    "line": 337,
+    "code": "<option value=\"withdrawn\">مسحوب</option>"
+  },
+  {
+    "file": "components\\OperatorObjectionsView.tsx",
+    "line": 347,
+    "code": "<th>رقم الطعن</th>"
+  },
+  {
+    "file": "components\\OperatorObjectionsView.tsx",
+    "line": 348,
+    "code": "<th>الصفقة</th>"
+  },
+  {
+    "file": "components\\OperatorObjectionsView.tsx",
+    "line": 349,
+    "code": "<th>نوع الطعن</th>"
+  },
+  {
+    "file": "components\\OperatorObjectionsView.tsx",
+    "line": 350,
+    "code": "<th>أبرز الأسباب</th>"
+  },
+  {
+    "file": "components\\OperatorObjectionsView.tsx",
+    "line": 351,
+    "code": "<th>الحالة</th>"
+  },
+  {
+    "file": "components\\OperatorObjectionsView.tsx",
+    "line": 352,
+    "code": "<th>المهلة المتبقية</th>"
+  },
+  {
+    "file": "components\\OperatorObjectionsView.tsx",
+    "line": 353,
+    "code": "<th>تاريخ الإيداع</th>"
+  },
+  {
+    "file": "components\\OperatorObjectionsView.tsx",
+    "line": 354,
+    "code": "<th>إجراءات</th>"
+  },
+  {
+    "file": "components\\OperatorObjectionsView.tsx",
+    "line": 373,
+    "code": "<h4>لا توجد طعون مسجلة حالياً</h4>"
+  },
+  {
+    "file": "components\\OperatorObjectionsView.tsx",
+    "line": 375,
+    "code": "يمكنك إيداع طعن على أي صفقة مؤهلة خلال 10 أيام من إعلان الإسناد المؤقت."
+  },
+  {
+    "file": "components\\OperatorObjectionsView.tsx",
+    "line": 383,
+    "code": "<span>إيداع طعن جديد</span>"
+  },
+  {
+    "file": "components\\OperatorObjectionsView.tsx",
+    "line": 436,
+    "code": "<span>{fetchingDetail ? 'جارٍ التحميل...' : 'عرض الملف'}</span>"
+  }
+]

@@ -1,0 +1,10 @@
+{
+  "$schema": "https://app.kilo.ai/config.json",
+  "snapshot": false,
+  "mcp": {
+    "anaconda": {
+      "type": "remote",
+      "url": "https://anaconda.com/api/mcp"
+    }
+  }
+}
