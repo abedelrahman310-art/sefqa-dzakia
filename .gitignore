@@ -1,90 +1,29 @@
-# ─── Python ───
+﻿# Python / Django
 __pycache__/
 *.py[cod]
-*.egg-info/
 .venv/
 venv/
 env/
-.pytest_cache/
-.coverage
-htmlcov/
-*.sqlite3
-db.sqlite3
-*.log
+backend/db.sqlite3
+backend/media/
+backend/staticfiles/
 
-# ─── Django ───
-media/
-staticfiles/
-local_settings.py
-
-# ─── Node ───
-node_modules/
-dist/
-dev-dist/
-build/
-.pnpm-store/
-*.tsbuildinfo
-
-# ─── Env & Secrets ───
+# Secrets
 .env
 .env.*
 !.env.example
 *.pem
 *.key
-credentials.json
-credentials.*
-secrets/
-.clario/
-.claude/settings.local.json
+*.crt
 
-# ─── IDE ───
-.vscode/
-.idea/
-*.swp
-*.swo
-.cursor/
-*.code-workspace
+# Node / Vite
+node_modules/
+client/dist/
+client/.vite/
 
-# ─── OS ───
+# Logs / OS / IDE
+*.log
 .DS_Store
 Thumbs.db
-desktop.ini
-
-# ─── Project specific ───
-scratch/
-*.bak
-git-backup-*.txt
-git-diff-backup-*.txt
-
-# ─── Security ───
-cookies.txt
-*.cookies
-session.txt
-
-# ─── AI Tools (Clario, Copilot, etc.) ───
-.mcp.json
-.clario/
-.claude/
-AGENT.md
-CLAUDE.md
-.windsurfrules
-.github/copilot-instructions.md
-.cursor/
-
-# ─── Evidence (يمكن commit يدوياً) ───
-# client/docs/evidence/  ← معطّل مؤقتاً
-
-# ─── Git backups ───
-git-*.txt
-
-
-# User-specific desktop shortcuts
-Run_Safaqat_Desktop.bat
-Safaqat_Desktop.url
-*.url
-
-# Root-level docs (use docs/ instead)
-/EVIDENCE-CHECKLIST.md
-
-# Desktop launcher + logo
-assets/logo.ico
+.vscode/
+.idea/

@@ -1,4 +1,5 @@
 import { useAIHealth } from '../hooks/useAI';
+import { useI18n } from '@/i18n';
 import { Bot } from 'lucide-react';
 
 interface AIHealthBadgeProps {
@@ -7,6 +8,7 @@ interface AIHealthBadgeProps {
 }
 
 export function AIHealthBadge({ className = '', compact = false }: AIHealthBadgeProps) {
+  const { t } = useI18n();
   const { data: health, isLoading } = useAIHealth();
 
   if (isLoading) {
@@ -15,7 +17,7 @@ export function AIHealthBadge({ className = '', compact = false }: AIHealthBadge
         className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-muted/60 text-muted-foreground text-xs animate-pulse ${className}`}
       >
         <Bot className="w-3.5 h-3.5" />
-        <span>فحص الذكاء الاصطناعي...</span>
+        <span>{t('ai.health_checking')}</span>
       </div>
     );
   }
@@ -31,7 +33,7 @@ export function AIHealthBadge({ className = '', compact = false }: AIHealthBadge
             ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
             : 'bg-rose-50 text-rose-800 border-rose-200'
         } ${className}`}
-        title={`محرك AI: ${provider} (${isAvailable ? 'متصل' : 'غير متصل'})`}
+        title={`${t('ai.health_engine')}: ${provider} (${isAvailable ? t('ai.health_ok') : t('ai.health_down')})`}
       >
         <span
           className={`w-2 h-2 rounded-full ${
@@ -65,7 +67,7 @@ export function AIHealthBadge({ className = '', compact = false }: AIHealthBadge
             isAvailable ? 'text-emerald-800' : 'text-rose-800'
           }`}
         >
-          {isAvailable ? 'متصل' : 'غير متصل'}
+          {isAvailable ? t('ai.health_ok') : t('ai.health_down')}
         </span>
       </div>
     </div>

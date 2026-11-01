@@ -105,12 +105,6 @@ interface RowPriceCheck {
 
 const MAX_DOCUMENT_SIZE = 10 * 1024 * 1024;
 
-const WIZARD_STEPS: Array<{ id: WizardStep; title: string; hint: string }> = [
-  { id: 1, title: 'العرض المالي', hint: 'تحديد المبلغ الإجمالي' },
-  { id: 2, title: 'الوثائق والامتثال', hint: 'رفع الملف وفحص النواقص' },
-  { id: 3, title: 'المراجعة والإرسال', hint: 'تأكيد العرض وإيداعه' },
-];
-
 interface OfferApiRecord {
   id?: string;
   deal?: string | { id?: string };
@@ -152,23 +146,23 @@ const formatReferenceDate = (value?: string | null, lang?: string): string => {
   return intlFormatDate(value, lang);
 };
 
-const createBoqRow = (overrides: Partial<BoqRow> = {}): BoqRow => ({
+const createBoqRow = (overrides: Partial<BoqRow> = {}, defaultUnit = 'unité'): BoqRow => ({
   id: `boq-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
   name: '',
-  unit: 'وحدة',
+  unit: overrides.unit ?? defaultUnit,
   quantity: 1,
   unitPrice: 0,
   ...overrides,
 });
 
-const getBoqRowsFromDeal = (deal: unknown): BoqRow[] => {
+const getBoqRowsFromDeal = (deal: unknown, defaultUnit = 'unité'): BoqRow[] => {
   const record = asRecord(deal);
   const specs = asRecord(record.cahier_specs);
   const technicalRequirements = asRecord(specs.technical_requirements);
   const items = technicalRequirements.items;
 
   if (!Array.isArray(items) || items.length === 0) {
-    return [createBoqRow()];
+    return [createBoqRow({}, defaultUnit)];
   }
 
   return items.map((rawItem, index) => {
@@ -177,9 +171,9 @@ const getBoqRowsFromDeal = (deal: unknown): BoqRow[] => {
     return {
       id: `boq-${index + 1}`,
       name: typeof item.name === 'string' ? item.name : '',
-      unit: typeof item.unit === 'string' && item.unit.trim() ? item.unit : 'وحدة',
+      unit: typeof item.unit === 'string' && item.unit.trim() ? item.unit : defaultUnit,
       quantity: Number.isFinite(quantity) && quantity > 0 ? quantity : 1,
-      // الأسعار يملؤها المتعامل؛ لا نستنسخ أسعار دفتر الشروط التقديرية.
+      // Prices filled by operator; do not copy estimated specs prices.
       unitPrice: 0,
     };
   });
@@ -223,7 +217,7 @@ const getDocumentName = (offer: OfferApiRecord): string => {
   }
 };
 
-const getErrorMessage = (err: unknown): string => {
+const getErrorMessage = (err: unknown, fallback = 'Operation failed. Please try again.'): string => {
   const response = (err as { response?: { data?: unknown } })?.response;
   const data = response?.data;
   if (typeof data === 'string' && data.trim()) return data;
@@ -234,12 +228,13 @@ const getErrorMessage = (err: unknown): string => {
   if (Array.isArray(firstValue) && typeof firstValue[0] === 'string') return firstValue[0];
   if (typeof firstValue === 'string' && firstValue.trim()) return firstValue;
   if (err instanceof Error && err.message) return err.message;
-  return 'تعذر إتمام العملية. يرجى المحاولة مجدداً.';
+  return fallback;
 };
 
 const formatAmount = (value: string): string => formatDzd(value);
 
 function ComplianceResultPanel({ result }: { result: ComplianceResult }) {
+  const { t } = useI18n();
   const missingDocuments = Array.isArray(result.missing_documents) ? result.missing_documents : [];
   const advisoryNotes = Array.isArray(result.advisory_notes) ? result.advisory_notes : [];
 
@@ -254,12 +249,14 @@ function ComplianceResultPanel({ result }: { result: ComplianceResult }) {
         <div>
           <strong className="block text-[13px]">
             {result.is_compliant
-              ? 'ملف الامتثال مستوفٍ للوثائق الأساسية'
-              : `تم رصد ${result.missing_count} وثيقة ناقصة`}
+              ? t('operator.form.comp_success')
+              : `${t('operator.form.comp_missing')} (${result.missing_count})`}
           </strong>
           <p className="mt-1 text-xs">
-            نسبة الامتثال: {result.compliance_score}% — تم العثور على {result.submitted_count} من{' '}
-            {result.total_required} وثيقة مطلوبة.
+            {t('operator.form.comp_score_summary')
+              .replace('{score}', String(result.compliance_score))
+              .replace('{submitted}', String(result.submitted_count))
+              .replace('{total}', String(result.total_required))}
           </p>
         </div>
       </div>
@@ -268,14 +265,14 @@ function ComplianceResultPanel({ result }: { result: ComplianceResult }) {
         <div className="overflow-hidden rounded-xl border border-[var(--op-line)]">
           <div className="flex items-center gap-2 border-b border-[var(--op-line-2)] bg-[var(--op-surface-2)] px-4 py-2.5 text-xs font-extrabold text-[var(--op-ink)]">
             <ListChecks className="size-4 text-[var(--op-gold-dark)]" aria-hidden="true" />
-            <span>الوثائق الناقصة</span>
+            <span>{t('operator.form.missing_docs_label')}</span>
           </div>
           <ul className="divide-y divide-[var(--op-line-2)]">
             {missingDocuments.map((document) => (
               <li key={document.code} className="px-4 py-3">
                 <div className="flex flex-wrap items-center gap-2">
                   <strong className="text-xs text-[var(--op-ink)]">{document.name}</strong>
-                  {document.is_mandatory && <span className="op-chip red">إلزامية</span>}
+                  {document.is_mandatory && <span className="op-chip red">{t('operator.form.chip_mandatory')}</span>}
                 </div>
                 {document.category && (
                   <p className="mt-1 text-[11px] font-semibold text-[var(--op-muted)]">
@@ -338,7 +335,7 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
   const activeOfferId = offerId || (params.id && !params.oppId ? params.id : undefined);
   const activeOppId = opportunityId || params.oppId;
 
-  const { t } = useI18n();
+  const { t, lang, dir } = useI18n();
   const [, setLocation] = useLocation();
 
   const [loading, setLoading] = useState(true);
@@ -352,7 +349,7 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
 
   const [financialOffer, setFinancialOffer] = useState('');
   const [wilaya, setWilaya] = useState('');
-  const [boqItems, setBoqItems] = useState<BoqRow[]>(() => [createBoqRow()]);
+  const [boqItems, setBoqItems] = useState<BoqRow[]>(() => [createBoqRow({}, t('operator.form.unit_default'))]);
   const [priceChecks, setPriceChecks] = useState<Record<string, RowPriceCheck>>({});
   const latestPriceCheckRef = useRef<Record<string, string>>({});
   const [status, setStatus] = useState<'draft' | 'submitted'>('draft');
@@ -374,13 +371,13 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
       setId(offer.id ? String(offer.id) : activeOfferId);
       if (dealId) setOppId(dealId);
       setOppTitle(
-        offer.opportunityTitle || offer.opportunity_title || offer.deal_title || 'صفقة عمومية',
+        offer.opportunityTitle || offer.opportunity_title || offer.deal_title || t('operator.form.deal_fallback'),
       );
       setAuthorityName(
         offer.authorityName ||
           offer.authority_name ||
           offer.authority_entity ||
-          'المصلحة المتعاقدة',
+          t('operator.form.authority_fallback'),
       );
       setFinancialOffer(
         offer.financialOffer !== undefined && offer.financialOffer !== null
@@ -397,7 +394,7 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
       const documentUrl = getDocumentUrl(offer);
       if (documentUrl || offer.hasDocument || offer.has_document || offer.encrypted_hash) {
         setSavedDocument({
-          name: getDocumentName(offer) || 'وثيقة العرض المرفقة',
+          name: getDocumentName(offer) || t('operator.form.doc_attached_fallback'),
           url: documentUrl,
         });
       }
@@ -408,17 +405,17 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
       setOppTitle(
         typeof record.title === 'string' && record.title.trim()
           ? record.title
-          : 'صفقة عمومية',
+          : t('operator.form.deal_fallback'),
       );
       setAuthorityName(
         typeof record.authority_entity === 'string' && record.authority_entity.trim()
           ? record.authority_entity
           : typeof record.authority_name === 'string' && record.authority_name.trim()
             ? record.authority_name
-            : 'المصلحة المتعاقدة',
+            : t('operator.form.authority_fallback'),
       );
       setWilaya(typeof record.wilaya === 'string' ? record.wilaya : '');
-      setBoqItems(getBoqRowsFromDeal(record));
+      setBoqItems(getBoqRowsFromDeal(record, t('operator.form.unit_default')));
     };
 
     const load = async () => {
@@ -429,7 +426,7 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
       setComplianceError('');
       setComplianceChecked(false);
       setWilaya('');
-      setBoqItems([createBoqRow()]);
+      setBoqItems([createBoqRow({}, t('operator.form.unit_default'))]);
       setPriceChecks({});
       latestPriceCheckRef.current = {};
       try {
@@ -444,7 +441,7 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
               if (cancelled) return;
               applyDealDetails(dealResponse.data);
             } catch {
-              // تفاصيل العرض كافية للمتابعة حتى لو تعذر جلب تفاصيل الصفقة.
+              // Deal details are secondary; offer record suffices to proceed.
             }
           }
         } else if (activeOppId) {
@@ -468,7 +465,7 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
         }
       } catch {
         if (!cancelled) {
-          setError('تعذر تحميل بيانات العرض. يرجى التحقق من الاتصال والمحاولة مجدداً.');
+          setError(t('operator.form.err_load_offer'));
         }
       } finally {
         if (!cancelled) setLoading(false);
@@ -481,7 +478,7 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
     };
   }, [activeOfferId, activeOppId, setLocation]);
 
-  // استدعاء فحص الامتثال وصلاحية الوثائق تلقائياً عند فتح الصفحة أو تحديد الصفقة
+  // Automatically run compliance check upon page load or deal change
   useEffect(() => {
     if (oppId) {
       void runComplianceCheck();
@@ -497,10 +494,10 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
   );
 
   const validate = (): string => {
-    if (!oppId) return 'يرجى اختيار الصفقة أولاً قبل حفظ العرض.';
+    if (!oppId) return t('operator.form.err_select_deal');
     const amount = Number(financialOffer);
     if (!financialOffer.trim() || !Number.isFinite(amount) || amount <= 0) {
-      return 'يرجى تحديد مبلغ مالي صحيح أكبر من صفر.';
+      return t('operator.form.err_invalid_amount');
     }
     return '';
   };
@@ -516,7 +513,7 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
   };
 
   const handleAddBoqRow = () => {
-    setBoqItems((prev) => [...prev, createBoqRow()]);
+    setBoqItems((prev) => [...prev, createBoqRow({}, t('operator.form.unit_default'))]);
   };
 
   const handleRemoveBoqRow = (rowId: string) => {
@@ -584,7 +581,7 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
         [row.id]: {
           loading: false,
           result: null,
-          error: 'تعذر التحقق من السعر المرجعي حالياً.',
+          error: t('operator.form.err_ref_price'),
         },
       }));
     }
@@ -593,10 +590,10 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
   const buildReferenceTooltip = (rowId: string): string => {
     const check = priceChecks[rowId];
     if (!check) {
-      return 'أدخل اسم المادة والسعر ثم غادر الحقل لعرض السعر المرجعي المتوقع.';
+      return t('operator.form.ref_price_idle');
     }
     if (check.loading) {
-      return 'جارٍ جلب السعر المرجعي...';
+      return t('operator.form.ref_price_loading');
     }
     if (check.error) {
       return check.error;
@@ -605,18 +602,18 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
     const result = check.result;
     if (!result || result.reference_price === null) {
       return wilaya
-        ? 'لا يتوفر سعر مرجعي لهذه المادة في الولاية المحددة.'
-        : 'لا يتوفر سعر مرجعي لهذه المادة.';
+        ? t('operator.form.ref_price_none_wilaya')
+        : t('operator.form.ref_price_none');
     }
 
-    const updatedAt = formatReferenceDate(result.reference_updated_at);
+    const updatedAt = formatReferenceDate(result.reference_updated_at, lang);
     const fuzzyMatch =
       result.match_type === 'fuzzy' && result.reference_name
-        ? ` (مطابقة تقريبية: ${result.reference_name})`
+        ? ` (${t('operator.form.ref_price_approx')}${result.reference_name})`
         : '';
-    return `السعر المرجعي المتوقع: ${formatDzd(result.reference_price)}${fuzzyMatch} — الولاية: ${
+    return `${t('operator.form.ref_price_expected')}${formatDzd(result.reference_price, lang)}${fuzzyMatch}${t('operator.form.ref_price_wilaya')}${
       result.reference_wilaya || wilaya || '—'
-    }${updatedAt ? ` — آخر تحديث: ${updatedAt}` : ''}`;
+    }${updatedAt ? `${t('operator.form.ref_price_updated')}${updatedAt}` : ''}`;
   };
 
   const getSeverePriceWarning = (
@@ -641,7 +638,7 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
 
   const runComplianceCheck = async (): Promise<boolean> => {
     if (!oppId) {
-      setComplianceError('يرجى اختيار الصفقة أولاً قبل فحص الامتثال.');
+      setComplianceError(t('operator.form.err_select_deal_comp'));
       return false;
     }
 
@@ -657,7 +654,7 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
     } catch (err) {
       setCompliance(null);
       setComplianceChecked(false);
-      setComplianceError(getErrorMessage(err) || 'تعذر إجراء فحص الامتثال. يرجى المحاولة مجدداً.');
+      setComplianceError(getErrorMessage(err, t('operator.form.err_comp_failed')));
       return false;
     } finally {
       setComplianceLoading(false);
@@ -756,7 +753,7 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
       if (nextStatus === 'submitted' && persistedStatus === 'draft') {
         setStatus('draft');
         setError(
-          'لم يؤكد الخادم إيداع العرض، وما زال محفوظاً كمسودة. يرجى المحاولة مجدداً أو التواصل مع الدعم.',
+          t('operator.form.err_submit_unconfirmed'),
         );
         return;
       }
@@ -768,7 +765,7 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
         persistedStatus === 'draft' ? t('offers.msg.saved') : t('offers.msg.submitted'),
       );
     } catch (err) {
-      setError(getErrorMessage(err));
+      setError(getErrorMessage(err, t('operator.form.err_generic_op')));
     } finally {
       setBusyAction(null);
     }
@@ -790,12 +787,12 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
     if (!file) return;
     const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
     if (!isPdf) {
-      setError('يرجى اختيار ملف PDF فقط.');
+      setError(t('operator.form.err_pdf_only'));
       event.target.value = '';
       return;
     }
     if (file.size > MAX_DOCUMENT_SIZE) {
-      setError('حجم الملف يتجاوز الحد الأقصى المسموح به (10 ميغابايت).');
+      setError(t('operator.form.err_file_size'));
       event.target.value = '';
       return;
     }
@@ -808,7 +805,7 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
 
   if (loading) {
     return (
-      <div className="op-page">
+      <div className="op-page" dir={dir}>
         <div className="op-page-head">
           <div>
             <div className="op-skeleton h-7 w-52" />
@@ -832,17 +829,17 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
   );
 
   return (
-    <div className="op-page">
+    <div className="op-page" dir={dir}>
       <div className="op-page-head">
         <div>
           <h1>{id ? (isSubmitted ? t('offers.view') : t('offers.edit')) : t('offers.new')}</h1>
           {oppTitle ? (
             <p>
-              الفرصة: <strong className="text-[var(--op-ink)]">{oppTitle}</strong>
+              {t('operator.form.opp_label')}<strong className="text-[var(--op-ink)]">{oppTitle}</strong>
               {authorityName ? ` — ${authorityName}` : ''}
             </p>
           ) : (
-            <p>قدّم عرضك التقني والمالي مع الوثائق المطلوبة على إحدى الصفقات.</p>
+            <p>{t('operator.form.opp_hint')}</p>
           )}
         </div>
         <div className="op-page-actions">
@@ -860,16 +857,16 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
       <div className="op-info-banner">
         <Info aria-hidden="true" />
         <div>
-          <strong>{isSubmitted ? 'تم إيداع العرض رسمياً' : 'يمكنك الحفظ كمسودة'}</strong>
+          <strong>{isSubmitted ? t('operator.form.status_submitted_strong') : t('operator.form.status_draft_strong')}</strong>
           <p>
             {isSubmitted
-              ? 'العرض مقفل بعد الإيداع ولا يمكن تعديل مضمونه. يمكنك مراجعة تفاصيله من قائمة العروض.'
-              : 'سيتم حفظ العرض كمسودة ولن يُرسل إلى المصلحة المتعاقدة حتى تضغط «تقديم العرض».'}
+              ? t('operator.form.status_submitted_desc')
+              : t('operator.form.status_draft_desc')}
           </p>
         </div>
       </div>
 
-      {/* ── القفل الوقائي لوثائق المتعامل وحالة الامتثال ── */}
+      {/* Protective lock for operator docs & compliance */}
       {compliance && (
         <div className="space-y-3">
           {hasComplianceBlock ? (
@@ -879,19 +876,19 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
                 <div className="flex-1 space-y-2">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <strong className="text-sm font-bold text-rose-900">
-                      لا يمكنك تقديم العرض حالياً. لديك وثائق منتهية الصلاحية أو ناقصة.
+                      {t('operator.form.lock_title')}
                     </strong>
                     <span className="inline-flex items-center rounded-md bg-rose-100 px-2 py-0.5 text-xs font-bold text-rose-700">
-                      قفل وقائي مفعّل
+                      {t('operator.form.lock_badge')}
                     </span>
                   </div>
                   <p className="text-xs text-rose-800 leading-relaxed font-medium">
-                    تم تطبيق هذا القفل الوقائي الآلي لحمايتكم من الاستبعاد القانوني الفوري في جلسة فحص العروض، عملاً بأحكام المادة 67 من القانون رقم 23-12.
+                    {t('operator.form.lock_desc')}
                   </p>
 
                   <div className="mt-3 space-y-2 rounded-xl border border-rose-200 bg-white/90 p-3">
                     <span className="text-xs font-bold text-slate-800 block">
-                      الوثائق الإدارية المطلوب تسويتها قبل إتاحة الإيداع:
+                      {t('operator.form.lock_docs_required')}
                     </span>
                     <ul className="divide-y divide-rose-100">
                       {compliance.expired_documents && compliance.expired_documents.map((doc) => (
@@ -900,7 +897,7 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
                             <span className="size-2 rounded-full bg-rose-500" />
                             <strong className="text-slate-800">{doc.name}</strong>
                             <span className="rounded bg-rose-100 px-1.5 py-0.5 text-[10px] font-bold text-rose-700">
-                              منتهية الصلاحية {doc.expiry_date ? `(${doc.expiry_date})` : ''}
+                              {t('operator.form.doc_expired')} {doc.expiry_date ? `(${doc.expiry_date})` : ''}
                             </span>
                           </div>
                           <button
@@ -908,7 +905,7 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
                             onClick={() => setLocation('/operator/profile')}
                             className="inline-flex items-center gap-1 rounded-lg bg-rose-600 hover:bg-rose-700 px-3 py-1 text-xs font-bold text-white transition-colors cursor-pointer"
                           >
-                            <span>تحديث الوثيقة الآن</span>
+                            <span>{t('operator.form.btn_update_doc_now')}</span>
                             <ArrowLeft className="size-3" />
                           </button>
                         </li>
@@ -919,7 +916,7 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
                             <span className="size-2 rounded-full bg-amber-500" />
                             <strong className="text-slate-800">{doc.name}</strong>
                             <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold text-amber-700">
-                              غير موجودة في الملف
+                              {t('operator.form.doc_missing_in_file')}
                             </span>
                           </div>
                           <button
@@ -927,7 +924,7 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
                             onClick={() => setLocation('/operator/profile')}
                             className="inline-flex items-center gap-1 rounded-lg bg-[#0A2540] hover:bg-[#1e3a8a] px-3 py-1 text-xs font-bold text-white transition-colors cursor-pointer"
                           >
-                            <span>تحديث الوثيقة الآن</span>
+                            <span>{t('operator.form.btn_update_doc_now')}</span>
                             <ArrowLeft className="size-3" />
                           </button>
                         </li>
@@ -943,15 +940,15 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
                 <CheckCircle2 className="size-5 text-emerald-600 shrink-0" aria-hidden="true" />
                 <div>
                   <strong className="text-xs font-bold text-emerald-900">
-                    ملفك الإداري سليم ومحدث
+                    {t('operator.form.docs_valid_title')}
                   </strong>
                   <p className="text-[11px] text-emerald-700">
-                    تم استيفاء كافة الوثائق الإدارية والجبائية السارية المشترطة قانوناً. زر تقديم العرض متاح.
+                    {t('operator.form.docs_valid_desc')}
                   </p>
                 </div>
               </div>
               <span className="rounded-lg bg-emerald-100 px-2.5 py-1 text-xs font-bold text-emerald-800 shrink-0">
-                جاهز للإيداع
+                {t('operator.form.ready_for_submission')}
               </span>
             </div>
           )}
@@ -983,8 +980,12 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
       )}
 
       {!isSubmitted && (
-        <ol className="grid gap-2 sm:grid-cols-3" aria-label="خطوات تقديم العرض">
-          {WIZARD_STEPS.map((wizardStep) => {
+        <ol className="grid gap-2 sm:grid-cols-3" aria-label={t('operator.form.wizard_aria')}>
+          {[
+            { id: 1 as WizardStep, title: t('operator.form.step1_title'), hint: t('operator.form.step1_hint') },
+            { id: 2 as WizardStep, title: t('operator.form.step2_title'), hint: t('operator.form.step2_hint') },
+            { id: 3 as WizardStep, title: t('operator.form.step3_title'), hint: t('operator.form.step3_hint') },
+          ].map((wizardStep) => {
             const active = step === wizardStep.id;
             const done = step > wizardStep.id || (wizardStep.id === 2 && complianceChecked);
             return (
@@ -1029,22 +1030,21 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
             <section className="op-form-block">
               <div className="op-form-block-head">
                 <span className="op-num">1</span>
-                <h2>الصفقة</h2>
+                <h2>{t('operator.form.lbl_deal')}</h2>
               </div>
               <div className="op-form-block-body">
                 <div className="op-form-grid">
                   <div className="op-field full">
-                    <label htmlFor="offer-deal">الصفقة المراد التقديم عليها</label>
+                    <label htmlFor="offer-deal">{t('operator.form.deal_target_label')}</label>
                     <input
                       id="offer-deal"
                       type="text"
-                      value={oppTitle || 'لم يتم اختيار صفقة'}
+                      value={oppTitle || t('operator.form.no_deal_selected')}
                       readOnly
                       disabled
                     />
                     <span className="op-hint">
-                      يمكنك بدء عرض جديد من صفحة تفاصيل الصفقة، أو متابعة مسودة موجودة من قائمة
-                      العروض.
+                      {t('operator.form.deal_target_hint')}
                     </span>
                   </div>
                 </div>
@@ -1054,13 +1054,13 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
             <section className="op-form-block">
               <div className="op-form-block-head">
                 <span className="op-num">2</span>
-                <h2>العرض المالي</h2>
+                <h2>{t('operator.form.step1_title')}</h2>
               </div>
               <div className="op-form-block-body">
                 <div className="op-form-grid">
                   <div className="op-field">
                     <label htmlFor="financial-offer">
-                      المبلغ الإجمالي <span className="op-required">*</span>
+                      {t('operator.form.lbl_total_amount')} <span className="op-required">*</span>
                     </label>
                     <input
                       id="financial-offer"
@@ -1073,15 +1073,15 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
                       disabled={isSubmitted}
                       placeholder="0.00"
                     />
-                    <span className="op-hint">المبلغ بالدينار الجزائري (DZD).</span>
+                    <span className="op-hint">{t('operator.form.financial_amount_hint')}</span>
                   </div>
 
                   <div className="op-field">
-                    <label htmlFor="financial-currency">العملة</label>
+                    <label htmlFor="financial-currency">{t('operator.form.currency_label')}</label>
                     <input
                       id="financial-currency"
                       type="text"
-                      value="دينار جزائري (DZD)"
+                      value={t('operator.form.currency_dzd_full')}
                       readOnly
                       disabled
                     />
@@ -1092,17 +1092,16 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
             <section className="op-form-block">
               <div className="op-form-block-head">
                 <span className="op-num">3</span>
-                <h2>الجداول المالية (BPU/DQE)</h2>
+                <h2>{t('operator.form.financial_schedules_title')}</h2>
               </div>
               <div className="op-form-block-body space-y-3">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
                     <p className="m-0 text-xs font-bold text-[var(--op-ink)]">
-                      بنود التسعير التفصيلية
+                      {t('operator.form.boq_detailed_items')}
                     </p>
                     <p className="op-hint">
-                      عند مغادرة حقل السعر، يُقارن سعرك بالسعر المرجعي لنفس المادة والولاية. التنبيه
-                      إرشادي فقط ولا يمنع حفظ العرض أو إيداعه.
+                      {t('operator.form.boq_benchmark_notice')}
                     </p>
                   </div>
                   {!isSubmitted && (
@@ -1112,7 +1111,7 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
                       onClick={handleAddBoqRow}
                     >
                       <Plus aria-hidden="true" />
-                      <span>إضافة بند</span>
+                      <span>{t('operator.form.btn_add_item')}</span>
                     </button>
                   )}
                 </div>
@@ -1123,12 +1122,12 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
                       <thead>
                         <tr>
                           <th className="w-10">#</th>
-                          <th>المادة / الخدمة</th>
-                          <th className="w-24">الوحدة</th>
-                          <th className="w-20">الكمية</th>
-                          <th className="w-64">سعر الوحدة (دج)</th>
-                          <th className="w-32">الإجمالي (دج)</th>
-                          <th className="w-12">حذف</th>
+                          <th>{t('operator.form.th_item')}</th>
+                          <th className="w-24">{t('operator.form.th_unit')}</th>
+                          <th className="w-20">{t('operator.form.th_qty')}</th>
+                          <th className="w-64">{t('operator.form.th_unit_price')}</th>
+                          <th className="w-32">{t('operator.form.th_total')}</th>
+                          <th className="w-12">{t('operator.form.th_delete')}</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -1147,7 +1146,7 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
                                   onChange={(event) =>
                                     handleUpdateBoqRow(item.id, 'name', event.target.value)
                                   }
-                                  placeholder="اسم المادة أو الخدمة"
+                                  placeholder={t('operator.form.ph_item_name')}
                                   disabled={isSubmitted}
                                   className="w-full rounded-lg border border-[var(--op-line)] bg-[var(--op-surface-2)] px-2.5 py-2 text-xs text-[var(--op-ink)] focus:border-[var(--op-sky)] focus:outline-none focus:ring-2 focus:ring-[rgba(14,165,233,0.15)]"
                                 />
@@ -1159,7 +1158,7 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
                                   onChange={(event) =>
                                     handleUpdateBoqRow(item.id, 'unit', event.target.value)
                                   }
-                                  placeholder="وحدة"
+                                  placeholder={t('operator.form.ph_unit')}
                                   disabled={isSubmitted}
                                   className="w-full rounded-lg border border-[var(--op-line)] bg-[var(--op-surface-2)] px-2.5 py-2 text-xs text-[var(--op-ink)] focus:border-[var(--op-sky)] focus:outline-none focus:ring-2 focus:ring-[rgba(14,165,233,0.15)]"
                                 />
@@ -1234,9 +1233,7 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
                                       aria-hidden="true"
                                     />
                                     <span>
-                                      تنبيه: هذا السعر يختلف بنسبة كبيرة عن السعر الاستدلالي
-                                      (السعر المرجعي: {formatDzd(referencePrice)}). يُرجى مراجعة
-                                      تسعيرتك لتجنب استبعاد العرض أو طلب تبريرات.
+                                      {t('operator.form.warn_price_diff').replace('{refPrice}', formatDzd(referencePrice, lang))}
                                     </span>
                                   </div>
                                 )}
@@ -1246,11 +1243,11 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
                                   referencePrice !== undefined && (
                                     <div className="mt-1.5 flex flex-wrap items-center gap-1 text-[10.5px] text-[var(--op-muted)]">
                                       <Info className="size-3" aria-hidden="true" />
-                                      <span>السعر المرجعي: {formatDzd(referencePrice)}</span>
+                                      <span>{t('operator.form.ref_price_label')}{formatDzd(referencePrice, lang)}</span>
                                       {check?.result?.deviation_percent !== null &&
                                         check?.result?.deviation_percent !== undefined && (
                                           <span>
-                                            — انحراف{' '}
+                                            {t('operator.form.deviation_label')}
                                             {check.result.deviation_percent > 0 ? '+' : ''}
                                             {check.result.deviation_percent.toFixed(1)}%
                                           </span>
@@ -1263,7 +1260,7 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
                                   !check.error &&
                                   referencePrice === null && (
                                     <div className="mt-1.5 text-[10.5px] text-[var(--op-muted)]">
-                                      لا يتوفر سعر مرجعي لهذه المادة.
+                                      {t('operator.form.no_ref_price_item')}
                                     </div>
                                   )}
 
@@ -1276,6 +1273,7 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
                               <td className="font-mono text-xs font-bold text-[var(--op-ink)]">
                                 {formatDzd(
                                   (Number(item.quantity) || 0) * (Number(item.unitPrice) || 0),
+                                  lang,
                                 )}
                               </td>
                               <td className="text-center">
@@ -1284,8 +1282,8 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
                                   className="rounded-lg p-1.5 text-[var(--op-red)] transition-colors hover:bg-[var(--op-red-soft)] disabled:cursor-not-allowed disabled:opacity-40"
                                   onClick={() => handleRemoveBoqRow(item.id)}
                                   disabled={boqItems.length <= 1 || isSubmitted}
-                                  title="حذف البند"
-                                  aria-label="حذف البند"
+                                  title={t('operator.form.btn_delete_item')}
+                                  aria-label={t('operator.form.btn_delete_item')}
                                 >
                                   <Trash2 className="size-4" aria-hidden="true" />
                                 </button>
@@ -1300,11 +1298,11 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
 
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <span className="op-hint">
-                    مجموع البنود: <strong>{formatDzd(boqTotal)}</strong>
+                    {t('operator.form.boq_total_label')}<strong>{formatDzd(boqTotal, lang)}</strong>
                   </span>
                   {boqTotal > 0 && Math.abs(Number(financialOffer) - boqTotal) > 0.01 && (
                     <span className="op-hint">
-                      المبلغ الإجمالي أعلاه هو المعتمد عند الحفظ؛ يمكنك مطابقته مع مجموع البنود.
+                      {t('operator.form.boq_total_note')}
                     </span>
                   )}
                 </div>
@@ -1318,13 +1316,12 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
             <section className="op-form-block">
               <div className="op-form-block-head">
                 <span className="op-num">1</span>
-                <h2>الوثيقة المرفقة</h2>
+                <h2>{t('operator.form.section_doc_title')}</h2>
               </div>
               <div className="op-form-block-body">
                 <div className="flex flex-col gap-3">
                   <p className="m-0 text-xs text-[var(--op-muted)]">
-                    أرفق العرض الفني والوثائق الإدارية المطلوبة في ملف PDF واحد. لا تُحفظ الملفات في
-                    متصفح هذا الجهاز.
+                    {t('operator.form.section_doc_desc')}
                   </p>
                   {documentName ? (
                     <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[var(--op-line-2)] bg-[var(--op-surface-2)] p-4">
@@ -1332,7 +1329,7 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
                         <Paperclip className="size-4 text-[var(--op-muted)]" aria-hidden="true" />
                         <span className="font-mono font-semibold">{documentName}</span>
                         <span className="op-chip green">
-                          {isSubmitted ? 'مجمّدة' : documentFile ? 'جاهزة للإرسال' : 'مرفقة'}
+                          {isSubmitted ? t('operator.form.status_doc_frozen') : documentFile ? t('operator.form.status_doc_ready') : t('operator.form.status_doc_attached')}
                         </span>
                       </span>
                       <div className="flex items-center gap-2">
@@ -1359,20 +1356,20 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
                             }}
                           >
                             <X aria-hidden="true" />
-                            <span>إزالة</span>
+                            <span>{t('operator.form.btn_remove_doc')}</span>
                           </button>
                         )}
                       </div>
                     </div>
                   ) : (
                     <div className="rounded-xl border border-dashed border-[var(--op-line-2)] bg-[var(--op-surface-2)] p-4 text-xs text-[var(--op-muted)]">
-                      لم يتم إرفاق وثيقة بعد.
+                      {t('operator.form.no_doc_yet')}
                     </div>
                   )}
 
                   {!isSubmitted && (
                     <div className="op-field">
-                      <label htmlFor="offer-document">إضافة أو استبدال الوثيقة (PDF)</label>
+                      <label htmlFor="offer-document">{t('operator.form.label_add_replace_doc')}</label>
                       <input
                         id="offer-document"
                         type="file"
@@ -1381,16 +1378,14 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
                         disabled={isBusy}
                       />
                       <span className="op-hint">
-                        ملف PDF واحد، بحد أقصى 10 ميغابايت. سيتم إرساله ضمن طلب{' '}
-                        <code>FormData</code> إلى خدمة العروض عند الحفظ أو الإيداع، دون حفظه في
-                        المتصفح.
+                        {t('operator.form.doc_upload_rules')}
                       </span>
                     </div>
                   )}
 
                   {isSubmitted && savedDocument && !savedDocument.url && (
                     <span className="op-hint">
-                      الوثيقة محفوظة على الخادم، ولا يتوفر رابط معاينة مباشر لها.
+                      {t('operator.form.doc_server_stored')}
                     </span>
                   )}
                 </div>
@@ -1400,17 +1395,15 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
             <section className="op-form-block">
               <div className="op-form-block-head">
                 <span className="op-num">2</span>
-                <h2>فحص الامتثال</h2>
+                <h2>{t('operator.form.section_comp_title')}</h2>
               </div>
               <div className="op-form-block-body space-y-3">
                 <div className="op-info-banner">
                   <FileCheck2 aria-hidden="true" />
                   <div>
-                    <strong>فحص آلي للوثائق قبل المراجعة</strong>
+                    <strong>{t('operator.form.comp_precheck_title')}</strong>
                     <p>
-                      عند الضغط على «متابعة إلى المراجعة» يتم استدعاء خدمة فحص الامتثال. تعتمد
-                      النتيجة على بيانات ملف مؤسستك والوثائق المحفوظة مسبقاً، وتُعرض الوثائق الناقصة
-                      إن وجدت.
+                      {t('operator.form.comp_precheck_desc')}
                     </p>
                   </div>
                 </div>
@@ -1427,7 +1420,7 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
                         disabled={complianceLoading}
                       >
                         <RefreshCw aria-hidden="true" />
-                        <span>إعادة المحاولة</span>
+                        <span>{t('operator.form.btn_retry')}</span>
                       </button>
                     </div>
                   </div>
@@ -1439,7 +1432,7 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
                       className="size-4 animate-spin text-[var(--op-gold-dark)]"
                       aria-hidden="true"
                     />
-                    <span>جارٍ فحص ملف الامتثال...</span>
+                    <span>{t('operator.form.comp_checking')}</span>
                   </div>
                 )}
 
@@ -1447,7 +1440,7 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
 
                 {compliance && !compliance.is_compliant && (
                   <p className="op-hint">
-                    يمكنك متابعة المراجعة، لكن يُنصح باستكمال الوثائق الناقصة قبل الإيداع النهائي.
+                    {t('operator.form.comp_advice_incomplete')}
                   </p>
                 )}
               </div>
@@ -1460,27 +1453,27 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
             <section className="op-form-block">
               <div className="op-form-block-head">
                 <span className="op-num">1</span>
-                <h2>مراجعة العرض</h2>
+                <h2>{t('operator.form.section_review_title')}</h2>
               </div>
               <div className="op-form-block-body">
                 <div className="op-form-grid">
                   <div className="op-field">
-                    <label>الصفقة</label>
+                    <label>{t('operator.form.lbl_deal')}</label>
                     <input type="text" value={oppTitle || '—'} readOnly disabled />
                   </div>
                   <div className="op-field">
-                    <label>المصلحة المتعاقدة</label>
+                    <label>{t('operator.form.lbl_authority')}</label>
                     <input type="text" value={authorityName || '—'} readOnly disabled />
                   </div>
                   <div className="op-field">
-                    <label>المبلغ الإجمالي</label>
+                    <label>{t('operator.form.lbl_total_amount')}</label>
                     <input type="text" value={formatAmount(financialOffer)} readOnly disabled />
                   </div>
                   <div className="op-field">
-                    <label>الوثيقة المرفقة</label>
+                    <label>{t('operator.form.lbl_attached_doc')}</label>
                     <input
                       type="text"
-                      value={documentName || 'لا توجد وثيقة مرفقة'}
+                      value={documentName || t('operator.form.no_doc_attached_val')}
                       readOnly
                       disabled
                     />
@@ -1490,7 +1483,7 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
                   <div className="op-alert warning mt-3">
                     <AlertTriangle aria-hidden="true" />
                     <span>
-                      لم تُرفق وثيقة بالعرض. يمكنك الرجوع إلى خطوة الوثائق لإضافتها قبل الإيداع.
+                      {t('operator.form.no_doc_warn')}
                     </span>
                   </div>
                 )}
@@ -1501,7 +1494,7 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
               <section className="op-form-block">
                 <div className="op-form-block-head">
                   <span className="op-num">2</span>
-                  <h2>نتيجة فحص الامتثال</h2>
+                  <h2>{t('operator.form.comp_result_title')}</h2>
                 </div>
                 <div className="op-form-block-body">
                   <ComplianceResultPanel result={compliance} />
@@ -1512,25 +1505,25 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
             <section className="op-form-block">
               <div className="op-form-block-head">
                 <span className="op-num">3</span>
-                <h2>الختم التشفيري والتصريح النهائي</h2>
+                <h2>{t('operator.form.crypto_section_title')}</h2>
               </div>
               <div className="op-form-block-body space-y-4">
-                {/* تنبيه الختم التشفيري للأظرفة */}
+                {/* Crypto seal notice for bids */}
                 <div className="rounded-xl border border-blue-200 bg-blue-50/80 p-4">
                   <div className="flex items-start gap-3">
                     <Lock className="size-5 text-[#1e3a8a] shrink-0 mt-0.5" aria-hidden="true" />
                     <div className="space-y-1">
                       <strong className="text-xs font-bold text-[#0A2540] block">
-                        آلية الختم التشفيري للأظرفة (AES-256)
+                        {t('operator.form.crypto_badge_title')}
                       </strong>
                       <p className="text-xs text-slate-700 leading-relaxed font-semibold">
-                        تنبيه: بمجرد الضغط على إيداع، سيتم تشفير عرضك ولن تتمكن من تعديله أو رؤيته، ولن تراه المصلحة المتعاقدة حتى جلسة فتح الأظرفة.
+                        {t('operator.form.crypto_badge_desc')}
                       </p>
                     </div>
                   </div>
                 </div>
 
-                {/* إقرار الختم التشفيري والتصريح */}
+                {/* Crypto seal declaration */}
                 <div className="rounded-xl border border-slate-200 bg-white p-3.5 shadow-2xs">
                   <label className="flex items-start gap-3 cursor-pointer">
                     <input
@@ -1541,9 +1534,9 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
                       className="mt-0.5 size-4 rounded border-slate-300 text-[#1e3a8a] focus:ring-[#1e3a8a] cursor-pointer"
                     />
                     <div className="text-xs font-bold text-slate-800">
-                      <span>أقر بأنني راجعت الأسعار والوثائق، وأوافق على الختم التشفيري</span>
+                      <span>{t('operator.form.crypto_checkbox_label')}</span>
                       <p className="mt-0.5 text-[11px] font-normal text-slate-500">
-                        أُقرّ بأن جميع البيانات والوثائق المرفقة صحيحة ومطابقة للواقع، وألتزم بشروط الصفقة ودفتر الشروط وفق القانون رقم 23-12.
+                        {t('operator.form.crypto_declaration_text')}
                       </p>
                     </div>
                   </label>
@@ -1571,7 +1564,7 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
               disabled={isBusy || complianceLoading}
             >
               <ArrowRight aria-hidden="true" />
-              <span>رجوع</span>
+              <span>{t('operator.form.btn_back')}</span>
             </button>
           )}
 
@@ -1582,7 +1575,7 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
               onClick={handleContinueToDocuments}
               disabled={isBusy}
             >
-              <span>متابعة</span>
+              <span>{t('operator.form.btn_next')}</span>
               <ArrowLeft aria-hidden="true" />
             </button>
           )}
@@ -1599,7 +1592,7 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
               ) : (
                 <ArrowLeft aria-hidden="true" />
               )}
-              <span>{complianceLoading ? 'جارٍ فحص الامتثال...' : 'متابعة إلى المراجعة'}</span>
+              <span>{complianceLoading ? t('operator.form.comp_checking') : t('operator.form.btn_proceed_review')}</span>
             </button>
           )}
 
@@ -1610,7 +1603,7 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
               disabled={isBusy || complianceLoading}
             >
               <Save aria-hidden="true" />
-              <span>{busyAction === 'save' ? 'جارٍ الحفظ...' : t('offers.btn.save_draft')}</span>
+              <span>{busyAction === 'save' ? t('operator.form.btn_saving_draft') : t('offers.btn.save_draft')}</span>
             </button>
           )}
 
@@ -1622,10 +1615,10 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
               disabled={isBusy || complianceLoading || hasComplianceBlock || !sealConfirmed}
               title={
                 hasComplianceBlock
-                  ? 'لا يمكن تقديم العرض حالياً؛ لديك وثائق منتهية الصلاحية أو ناقصة'
+                  ? t('operator.form.lock_submit_tooltip')
                   : !sealConfirmed
-                  ? 'يرجى تأكيد الموافقة على الختم التشفيري أولاً'
-                  : 'إيداع العرض النهائي'
+                  ? t('operator.form.crypto_submit_tooltip')
+                  : t('operator.form.btn_submit_final')
               }
             >
               {busyAction === 'submit' ? (
@@ -1633,7 +1626,7 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
               ) : (
                 <Send aria-hidden="true" />
               )}
-              <span>{busyAction === 'submit' ? 'جارٍ الإيداع...' : t('offers.btn.submit')}</span>
+              <span>{busyAction === 'submit' ? t('operator.form.btn_submitting') : t('offers.btn.submit')}</span>
             </button>
           )}
         </div>

@@ -1,3 +1,4 @@
+import { useI18n } from "@/i18n";
 import React, { useState } from 'react';
 import {
   Dialog,
@@ -33,6 +34,7 @@ export function ObjectionDecisionModal({
   onOpenChange,
   onSuccess,
 }: ObjectionDecisionModalProps) {
+  const { t, lang, dir } = useI18n();
   const [decision, setDecision] = useState<'accepted' | 'rejected'>('rejected');
   const [reason, setReason] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -43,7 +45,7 @@ export function ObjectionDecisionModal({
     e.preventDefault();
 
     if (reason.trim().length < 10) {
-      toast.error('يجب كتابة تبرير معلل للقرار (10 أحرف على الأقل).');
+      toast.error(t('objections.decision_err_rationale_short'));
       return;
     }
 
@@ -55,14 +57,14 @@ export function ObjectionDecisionModal({
       });
       toast.success(
         decision === 'accepted'
-          ? 'تم قبول الطعن وإلغاء الإسناد المؤقت وتوثيقه في سجل التدقيق.'
-          : 'تم رفض الطعن وتثبيت قرار الإسناد وتوثيقه في سجل التدقيق.'
+          ? t('objections.decision_toast_accepted')
+          : t('objections.decision_toast_rejected')
       );
       setReason('');
       onOpenChange(false);
       onSuccess();
     } catch (err: any) {
-      const msg = err.response?.data?.detail || 'تعذر تسجيل القرار.';
+      const msg = err.response?.data?.detail || t('objections.decision_toast_error');
       toast.error(msg);
     } finally {
       setSubmitting(false);
@@ -76,10 +78,10 @@ export function ObjectionDecisionModal({
           <DialogHeader className="border-b border-slate-200 pb-3">
             <DialogTitle className="text-lg font-bold text-slate-900 flex items-center gap-2">
               <Gavel className="w-5 h-5 text-emerald-700" />
-              <span>إصدار قرار لجنة الصفقات: {objection.reference}</span>
+              <span>{t('objections.decision_modal_title', { ref: objection.reference })}</span>
             </DialogTitle>
             <DialogDescription className="text-xs text-slate-500 mt-1">
-              الصفقة: {objection.tender_reference} · المُطعِن: {objection.objector_name}
+              {t('objections.decision_deal_sub', { deal: objection.tender_reference, objector: objection.objector_name })}
             </DialogDescription>
           </DialogHeader>
 
@@ -87,7 +89,7 @@ export function ObjectionDecisionModal({
             {/* Decision selector */}
             <div>
               <Label className="text-xs font-bold text-slate-700 mb-2 block">
-                مضمون قرار اللجنة:
+                {t("objections.decision_content_label")}
               </Label>
               <div className="grid grid-cols-2 gap-3">
                 <button
@@ -101,9 +103,9 @@ export function ObjectionDecisionModal({
                 >
                   <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
                   <div>
-                    <div className="text-xs">قبول الطعن</div>
+                    <div className="text-xs">{t("objections.decision_accept_title")}</div>
                     <div className="text-[10px] font-normal text-slate-500 mt-0.5">
-                      إلغاء الإسناد المؤقت وإعادة فحص العروض
+                      {t("objections.decision_accept_desc")}
                     </div>
                   </div>
                 </button>
@@ -119,9 +121,9 @@ export function ObjectionDecisionModal({
                 >
                   <XCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
                   <div>
-                    <div className="text-xs">رفض الطعن</div>
+                    <div className="text-xs">{t("objections.decision_reject_title")}</div>
                     <div className="text-[10px] font-normal text-slate-500 mt-0.5">
-                      تثبيت الإسناد المؤقت ومواصلة التعاقد
+                      {t("objections.decision_reject_desc")}
                     </div>
                   </div>
                 </button>
@@ -131,20 +133,20 @@ export function ObjectionDecisionModal({
             {/* Justification Textarea */}
             <div>
               <Label htmlFor="decision-reason" className="text-xs font-bold text-slate-700 mb-1.5 block">
-                التبرير القانوني والتقني للقرار (إلزامي):
+                {t("objections.decision_rationale_label")}
               </Label>
               <Textarea
                 id="decision-reason"
                 rows={4}
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
-                placeholder="بيّن بالتفصيل مبررات القرار المستخلصة من مداولات لجنة الصفقات ومطابقتها للمادة 72..."
+                placeholder={t("objections.decision_rationale_placeholder")}
                 className="text-xs"
               />
               <div className="flex justify-between items-center text-[11px] text-slate-500 mt-1">
-                <span>يتم تسجيل هذا التبرير بصورة نهائية في سجل التدقيق SHA-256.</span>
+                <span>{t("objections.decision_sha_notice")}</span>
                 <span className={reason.trim().length < 10 ? 'text-amber-600 font-bold' : 'text-slate-400'}>
-                  {reason.trim().length}/10 أحرف
+                  {reason.trim().length}/10 {t("objections.characters_count")}
                 </span>
               </div>
             </div>
@@ -158,7 +160,7 @@ export function ObjectionDecisionModal({
               onClick={() => onOpenChange(false)}
               disabled={submitting}
             >
-              إلغاء
+              {t("common.cancel")}
             </Button>
             <Button
               type="submit"
@@ -173,10 +175,10 @@ export function ObjectionDecisionModal({
               {submitting ? (
                 <>
                   <Loader2 className="w-3.5 h-3.5 animate-spin me-1.5" />
-                  جاري تسجيل القرار...
+                  {t("objections.decision_btn_saving")}
                 </>
               ) : (
-                'اعتماد القرار رسمياً'
+                t('objections.decision_btn_submit')
               )}
             </Button>
           </DialogFooter>

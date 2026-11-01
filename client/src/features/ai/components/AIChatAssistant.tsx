@@ -19,25 +19,26 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import type { ChatMessage } from '../types';
-
-const QUICK_SUGGESTIONS = [
-  'كم عدد الصفقات المتأخرة حالياً؟',
-  'ما هي أبرز المخاطر المرصودة في المنصة؟',
-  'أعطني تقريراً عن ولاية وهران',
-  'هل توجد شبهات تواطؤ بين متعاملين محددين؟',
-];
+import { useI18n } from '@/i18n';
 
 export function AIChatAssistant() {
+  const { t, dir } = useI18n();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       role: 'assistant',
-      content:
-        'مرحباً بك في المساعد الرقابي الذكي لمنصة صفقات ذكية. يمكنك سؤالي عن الصفقات، مؤشرات المخاطر، التنبيهات الإجرائية، أو التفسيرات المتعلقة بالمرسوم 15-247 والقانون 23-12.',
+      content: t('ai.chat_welcome_msg'),
       is_advisory: true,
-      sources: ['قواعد بيانات الصفقات الوطنية', 'القانون 23-12', 'المرسوم 15-247'],
+      sources: [t('ai.source_deals_db'), t('ai.source_law_23_12'), t('ai.source_decree_15_247')],
     },
   ]);
+
+  const quickSuggestions = [
+    t('ai.prompt_late_deals'),
+    t('ai.prompt_top_risks'),
+    t('ai.prompt_oran_report'),
+    t('ai.prompt_collusion_suspicions'),
+  ];
   const [inputValue, setInputValue] = useState('');
   const [conversationId, setConversationId] = useState<string | null>(null);
 
@@ -84,8 +85,7 @@ export function AIChatAssistant() {
         onError: () => {
           const errMsg: ChatMessage = {
             role: 'assistant',
-            content:
-              'تعذر إتمام التحليل والاستجابة في الوقت الحالي. يرجى إعادة المحاولة لاحقاً.',
+            content: t('ai.chat_error_response'),
             is_advisory: true,
           };
           setMessages((prev) => [...prev, errMsg]);
@@ -99,8 +99,7 @@ export function AIChatAssistant() {
     setMessages([
       {
         role: 'assistant',
-        content:
-          'تم بدء محادثة جديدة. يمكنك طرح أي استفسار رقابي أو إحصائي حول صفقات المنصة.',
+        content: t('ai.chat_new_conv_msg'),
         is_advisory: true,
       },
     ]);
@@ -116,8 +115,8 @@ export function AIChatAssistant() {
           className="gap-2 h-9 px-3 text-sm border-border hover:bg-muted hover:border-primary transition-colors"
         >
           <Bot className="size-4 text-primary" />
-          <span className="hidden md:inline">اسأل AI</span>
-          {/* مؤشر الاتصال */}
+          <span className="hidden md:inline">{t('ai.chat_btn')}</span>
+          {/* Connection indicator */}
           <span className="size-1.5 rounded-full bg-emerald-500 hidden md:inline-block" />
         </Button>
       </SheetTrigger>
@@ -126,7 +125,7 @@ export function AIChatAssistant() {
       <SheetContent
         side="end"
         className="w-full md:w-[500px] p-0 flex flex-col h-full bg-background border-s shadow-2xl"
-        dir="rtl"
+        dir={dir}
       >
           {/* Header */}
           <SheetHeader className="p-4 border-b border-border bg-card">
@@ -137,10 +136,10 @@ export function AIChatAssistant() {
                 </div>
                 <div>
                   <SheetTitle className="text-sm font-extrabold text-navy-900">
-                    المساعد الرقابي الذكي
+                    {t('ai.chat_supervisory_title')}
                   </SheetTitle>
                   <span className="text-[11px] text-muted-foreground">
-                    الإدارة المركزية — الرقابة الوطنية
+                    {t('ai.chat_supervisory_subtitle')}
                   </span>
                 </div>
               </div>
@@ -150,7 +149,7 @@ export function AIChatAssistant() {
                 variant="ghost"
                 onClick={handleResetConversation}
                 className="h-8 w-8 text-muted-foreground hover:text-navy-900"
-                title="محادثة جديدة"
+                title={t('ai.chat_new_conv')}
               >
                 <RotateCcw className="w-4 h-4" />
               </Button>
@@ -160,7 +159,7 @@ export function AIChatAssistant() {
             <div className="mt-2.5 p-2 rounded-lg bg-amber-50 text-amber-900 border border-amber-200 text-[10px] flex items-center gap-1.5 font-medium">
               <AlertTriangle className="w-3.5 h-3.5 text-amber-700 shrink-0" />
               <span>
-                إجابات استشارية مؤتمتة — القرار النهائي للمفتش (قانون 23-12).
+                {t('ai.chat_disclaimer')}
               </span>
             </div>
           </SheetHeader>
@@ -204,7 +203,7 @@ export function AIChatAssistant() {
                     <div className="pt-2 mt-1 border-t border-border/60 text-[10px] space-y-1 text-muted-foreground">
                       <div className="flex items-center gap-1 font-bold text-navy-800">
                         <BookOpen className="w-3 h-3" />
-                        <span>المصادر المعتمدة:</span>
+                        <span>{t('ai.chat_sources_label')}</span>
                       </div>
                       <div className="flex flex-wrap gap-1">
                         {msg.sources.map((src, i) => (
@@ -230,7 +229,7 @@ export function AIChatAssistant() {
                 </div>
                 <div className="p-3 rounded-2xl rounded-tl-xs bg-muted/50 border border-border space-y-1.5 text-xs text-muted-foreground flex items-center gap-2">
                   <Sparkles className="w-3.5 h-3.5 text-gold-500 animate-spin" />
-                  <span>جاري التحليل والمطابقة الإجرائية...</span>
+                  <span>{t('ai.chat_analyzing')}</span>
                 </div>
               </div>
             )}
@@ -241,7 +240,7 @@ export function AIChatAssistant() {
           {/* Quick Suggestions Chips */}
           <div className="p-2 border-t border-border bg-muted/20">
             <div className="flex gap-1.5 overflow-x-auto pb-1 text-[11px]">
-              {QUICK_SUGGESTIONS.map((sug, idx) => (
+              {quickSuggestions.map((sug, idx) => (
                 <button
                   key={idx}
                   onClick={() => handleSendMessage(sug)}
@@ -266,7 +265,7 @@ export function AIChatAssistant() {
               <Input
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
-                placeholder="اسأل عن أي صفقة، مؤشر، أو إجراء..."
+                placeholder={t('ai.chat_input_placeholder')}
                 disabled={chatMutation.isPending}
                 className="text-xs h-9"
               />

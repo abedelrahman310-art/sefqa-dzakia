@@ -46,7 +46,7 @@ export function ReceivedOffers() {
           setOpp({
             id: deal.id,
             title: deal.title,
-            status: deal.stage_display || 'مستمرة',
+            status: deal.stage_display || t('common.ongoing'),
           });
         }
         const items = Array.isArray(offersRes.data) ? offersRes.data : offersRes.data?.results || [];
@@ -61,10 +61,10 @@ export function ReceivedOffers() {
         setOffersCount(mapped.length);
       })
       .catch((err: any) => {
-        setError(err?.response?.data?.detail || err?.message || 'حدث خطأ أثناء تحميل البيانات');
+        setError(err?.response?.data?.detail || err?.message || t('common.error_loading_data'));
       })
       .finally(() => setLoading(false));
-  }, [id]);
+  }, [id, t]);
 
   const ArrowIcon = dir === 'rtl' ? ArrowRight : ArrowLeft;
 
@@ -72,7 +72,7 @@ export function ReceivedOffers() {
     return (
       <div className="py-24 flex flex-col items-center justify-center text-muted-foreground space-y-2">
         <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-        <span className="text-sm">جاري تحميل بيانات الأظرفة المستلمة...</span>
+        <span className="text-sm">{t('authority.offers.loading')}</span>
       </div>
     );
   }
@@ -86,14 +86,14 @@ export function ReceivedOffers() {
             <span>{t('authority.nav.offers')}</span>
           </div>
           <p className="text-sm text-muted-foreground">
-            تُعرض الأظرفة المستلمة والمشفرة لكل صفقة على حدة احتراماً لمبدأ السرية وفق أحكام القانون 23-12. لعرض العروض المستلمة الخاصة بصفقة معينة، يرجى التوجه إلى قائمة الصفقات واختيار الصفقة المطلوبة.
+            {t('authority.offers.no_id_desc')}
           </p>
           <Button
             variant="default"
             className="rounded-xl text-xs"
             onClick={() => setLocation('/authority/drafts')}
           >
-            الانتقال إلى الصفقات والمسودات
+            {t('authority.offers.go_to_deals')}
           </Button>
         </div>
       </div>
@@ -105,14 +105,14 @@ export function ReceivedOffers() {
       <div className="space-y-4 max-w-4xl mx-auto">
         <div className="p-4 bg-destructive/10 border border-destructive/20 text-destructive rounded-xl text-sm flex items-center gap-2">
           <AlertCircle className="w-5 h-5 shrink-0" />
-          <span>{error || 'الفرصة غير متوفرة'}</span>
+          <span>{error || t('authority.offers.opportunity_not_found')}</span>
         </div>
         <Button
           variant="outline"
           className="rounded-xl text-xs"
           onClick={() => setLocation('/authority/drafts')}
         >
-          العودة للمسودات والفرص
+          {t('authority.offers.back_to_drafts')}
         </Button>
       </div>
     );
@@ -133,14 +133,14 @@ export function ReceivedOffers() {
               <ArrowIcon className="w-4 h-4" />
             </Button>
             <span className="text-xs font-semibold text-navy-100">
-              صفقات ذكية · المصلحة المتعاقدة
+              {t('authority.topbar.brand_sub')}
             </span>
           </div>
           <h2 className="text-xl md:text-2xl font-bold text-white">
             {t('received.title')}
           </h2>
           <p className="text-xs text-navy-100">
-            الفرصة: <span className="font-bold text-white">{opp.title}</span>
+            {t('authority.offers.deal_label')}: <span className="font-bold text-white">{opp.title}</span>
           </p>
         </div>
 
@@ -166,13 +166,13 @@ export function ReceivedOffers() {
       <section className="bg-card border border-border rounded-2xl p-5 shadow-sm space-y-3">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h4 className="text-xs font-bold text-navy-900">مرحلة دورة حياة الصفقة الحالية</h4>
+            <h4 className="text-xs font-bold text-navy-900">{t('authority.offers.current_stage_title')}</h4>
             <p className="text-[11px] text-muted-foreground mt-0.5">
-              {opp.status === 'published' && 'الصفقة مفتوحة لاستقبال عروض المتعاملين الاقتصاديين.'}
-              {opp.status === 'submission_closed' && 'تم إغلاق أجل الإيداع. الصفقة جاهزة لانعقاد جلسة فتح الأظرفة.'}
-              {opp.status === 'opening_in_progress' && 'جلسة فتح الأظرفة جارية حالياً (المادتان 71 و72 من المرسوم 15-247).'}
-              {['opened_pv_signed', 'technical_evaluation', 'financial_evaluation'].includes(opp.status) && 'تم اعتماد محضر الفتح وأرشفته. العروض قيد الفحص والتقييم.'}
-              {opp.status === 'provisional_award' && 'تم المنح المؤقت للصفقة واعتماد محضر التقييم النهائي.'}
+              {opp.status === 'published' && t('authority.offers.stage_desc.published')}
+              {opp.status === 'submission_closed' && t('authority.offers.stage_desc.submission_closed')}
+              {opp.status === 'opening_in_progress' && t('authority.offers.stage_desc.opening_in_progress')}
+              {['opened_pv_signed', 'technical_evaluation', 'financial_evaluation'].includes(opp.status) && t('authority.offers.stage_desc.under_evaluation')}
+              {opp.status === 'provisional_award' && t('authority.offers.stage_desc.provisional_award')}
             </p>
           </div>
 
@@ -183,7 +183,7 @@ export function ReceivedOffers() {
               className="text-xs rounded-xl gap-1.5"
               onClick={() => setLocation(`/authority/opportunities/${id}/committee`)}
             >
-              إدارة أعضاء اللجنة
+              {t('authority.offers.manage_committee')}
             </Button>
 
             {opp.status === 'published' && (
@@ -224,7 +224,7 @@ export function ReceivedOffers() {
                 className="text-xs rounded-xl gap-1.5 bg-blue-700 hover:bg-blue-800 text-white"
                 onClick={() => setLocation('/authority/opening-sessions')}
               >
-                الدخول لجلسة الفتح
+                {t('authority.offers.enter_opening_session')}
               </Button>
             )}
 
@@ -234,7 +234,7 @@ export function ReceivedOffers() {
                 className="text-xs rounded-xl gap-1.5 bg-emerald-700 hover:bg-emerald-800 text-white"
                 onClick={() => setLocation(`/authority/opportunities/${id}/evaluation`)}
               >
-                فضاء تقييم العروض
+                {t('authority.offers.evaluation_space')}
               </Button>
             )}
           </div>
@@ -244,9 +244,9 @@ export function ReceivedOffers() {
       {/* Offers Envelopes List */}
       <section className="bg-card border border-border rounded-2xl p-6 shadow-sm space-y-4">
         <div className="flex items-center justify-between pb-2 border-b border-border">
-          <h3 className="text-base font-bold text-navy-900">سجل استلام الأظرفة المودعة</h3>
+          <h3 className="text-base font-bold text-navy-900">{t('authority.offers.registry_title')}</h3>
           <span className="text-xs text-muted-foreground">
-            {offers.length} ظرف مودع ومسجل خادمياً
+            {t('authority.offers.registry_count', { count: offers.length })}
           </span>
         </div>
 
@@ -255,14 +255,14 @@ export function ReceivedOffers() {
             <Lock className="w-12 h-12 text-muted-foreground/40 mx-auto" />
             <h4 className="text-base font-bold text-navy-900">{t('received.empty')}</h4>
             <p className="text-xs text-muted-foreground max-w-md mx-auto">
-              لم يقم أي متعامل اقتصادي بإيداع عرضه بعد. عند استلام أي ظرف مشفر ومودع سيظهر إيصال استلامه هنا تلقائياً.
+              {t('authority.offers.empty_desc')}
             </p>
             <Button
               variant="outline"
               className="text-xs rounded-xl"
               onClick={() => setLocation('/authority/drafts')}
             >
-              العودة لقائمة الصفقات
+              {t('authority.offers.back_to_deals')}
             </Button>
           </div>
         ) : (

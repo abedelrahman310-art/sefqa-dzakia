@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { aiApi } from '../api/ai';
 import { toast } from 'sonner';
+import { useI18n } from '@/i18n';
 import type {
   AIInsightFilters,
   PriceEstimateRequest,
@@ -12,39 +13,41 @@ export const useInsights = (params: AIInsightFilters = {}) =>
   useQuery({
     queryKey: ['ai-insights', params],
     queryFn: () => aiApi.getInsights(params),
-    refetchInterval: 60000, // كل دقيقة
+    refetchInterval: 60000, // 1 min
   });
 
 export const useGenerateInsights = () => {
+  const { t } = useI18n();
   const qc = useQueryClient();
   return useMutation({
     mutationFn: aiApi.generateInsights,
     onSuccess: (data) => {
-      toast.success(`تم توليد ${data.generated} توصية ذكية جديدة بنجاح`);
+      toast.success(t('ai.toast_generated_success', { count: data.generated }));
       qc.invalidateQueries({ queryKey: ['ai-insights'] });
     },
     onError: (err: any) => {
       toast.error(
-        err.response?.data?.detail || 'تعذر توليد التوصيات في الوقت الحالي'
+        err.response?.data?.detail || t('ai.toast_generated_error')
       );
     },
   });
 };
 
 export const useResolveInsight = () => {
+  const { t } = useI18n();
   const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ id, notes }: { id: string; notes: string }) =>
       aiApi.resolveInsight(id, notes),
     onSuccess: () => {
-      toast.success('تم توثيق المعالجة وتحديث سجل التدقيق بنجاح');
+      toast.success(t('ai.toast_resolve_success'));
       qc.invalidateQueries({ queryKey: ['ai-insights'] });
     },
     onError: (err: any) => {
       toast.error(
         err.response?.data?.resolution_notes?.[0] ||
           err.response?.data?.detail ||
-          'تعذر حفظ معالجة التوصية'
+          t('ai.toast_resolve_error')
       );
     },
   });
@@ -54,7 +57,7 @@ export const useSuspicions = () =>
   useQuery({
     queryKey: ['ai-suspicions'],
     queryFn: aiApi.getSuspicions,
-    refetchInterval: 120000, // كل دقيقتين
+    refetchInterval: 120000, // 2 mins
   });
 
 export const useChat = () =>
@@ -79,11 +82,11 @@ export const useAIHealth = () =>
   useQuery({
     queryKey: ['ai-health'],
     queryFn: aiApi.getHealth,
-    staleTime: 300000, // 5 دقائق
+    staleTime: 300000, // 5 mins
   });
 
 /**
- * Hook لتقدير الميزانية المرجعية تلقائياً مع Debounce وزر تحديث فوري
+ * Hook for reference budget estimation with debounce and instant refresh
  */
 export function usePriceEstimate(
   payload: PriceEstimateRequest | null,
@@ -163,7 +166,7 @@ export function usePriceEstimate(
     return cancel;
   }, [debouncedPayload, fetchEstimate, fetchTrigger]);
 
-  // Manual immediate refetch (التحسين 4)
+  // Manual immediate refetch
   const refetch = useCallback(() => {
     if (payload) {
       setDebouncedPayload(payload);
@@ -175,13 +178,13 @@ export function usePriceEstimate(
 }
 
 /**
- * Hook لجلب التوصيات الذكية لفرص الصفقات للمتعامل الاقتصادي
+ * Hook for fetching smart tender recommendations for economic operator
  */
 export const useOperatorRecommendations = (limit: number = 10) =>
   useQuery({
     queryKey: ['ai-operator-recommendations', limit],
     queryFn: () => aiApi.operatorRecommendations(limit),
-    refetchInterval: 120000, // كل دقيقتين
+    refetchInterval: 120000, // 2 mins
     staleTime: 60000,
   });
 

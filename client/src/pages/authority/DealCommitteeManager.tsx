@@ -54,14 +54,14 @@ export function DealCommitteeManager() {
     setLoading(true);
     fetch(`/api/authority/opportunities/${id}/committee/members`)
       .then((res) => {
-        if (!res.ok) throw new Error('فشل جلب قائمة أعضاء اللجنة');
+        if (!res.ok) throw new Error(t('authority.committee.fetch_error'));
         return res.json();
       })
       .then((data) => {
         setMembers(data.committee || data.members || []);
       })
       .catch((err: any) => {
-        setError(err.message || 'حدث خطأ أثناء تحميل الأعضاء');
+        setError(err.message || t('authority.committee.load_error'));
       })
       .finally(() => setLoading(false));
   };
@@ -83,13 +83,13 @@ export function DealCommitteeManager() {
       const newMember = {
         displayName: fullName.trim(),
         role: assignedRole,
-        appointmentReference: organization.trim() || 'قرار تعيين إداري',
+        appointmentReference: organization.trim() || t('authority.committee.default_appointment_ref'),
       };
 
       const existingPayload = members.map((m: any) => ({
-        displayName: m.displayName || m.fullName || 'عضو لجنة',
+        displayName: m.displayName || m.fullName || t('authority.committee.default_member_name'),
         role: (m.role === 'secretary' ? 'rapporteur' : m.role === 'controller' ? 'member' : m.role) as 'president' | 'rapporteur' | 'member',
-        appointmentReference: m.appointmentReference || m.organization || 'قرار تعيين داخلي',
+        appointmentReference: m.appointmentReference || m.organization || t('authority.committee.default_appointment_internal'),
       }));
 
       const res = await fetch(`/api/authority/opportunities/${id}/committee/members`, {
@@ -105,17 +105,17 @@ export function DealCommitteeManager() {
 
       if (!res.ok) {
         const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.error || 'فشل تعيين العضو في اللجنة');
+        throw new Error(errData.error || t('authority.committee.assign_error'));
       }
 
-      setSuccess('تم تعيين العضو بنجاح في سجل اللجنة.');
+      setSuccess(t('authority.committee.assign_success'));
       setFullName('');
       setOrganization('');
       setTitle('');
       setEmail('');
       loadMembers();
     } catch (err: any) {
-      setError(err.message || 'حدث خطأ أثناء التعيين');
+      setError(err.message || t('authority.committee.generic_error'));
     } finally {
       setSubmitting(false);
     }
@@ -146,7 +146,7 @@ export function DealCommitteeManager() {
             {t('lifecycle.committee.title')}
           </h2>
           <p className="text-xs text-navy-100">
-            لجنة دائمة مكلّفة بفتح الأظرفة وفحص وتقييم العروض والترشيحات وفق دفتر الشروط.
+            {t('authority.committee.desc')}
           </p>
         </div>
 
@@ -165,7 +165,7 @@ export function DealCommitteeManager() {
                 </span>
               ) : (
                 <span className="text-amber-300">
-                  {members.length < 3 ? `يحتاج ${3 - members.length} أعضاء إضافيين` : 'يتطلب تعيين رئيس'}
+                  {members.length < 3 ? t('authority.committee.quorum_need_members', { count: 3 - members.length }) : t('authority.committee.quorum_need_president')}
                 </span>
               )}
             </div>
@@ -194,20 +194,20 @@ export function DealCommitteeManager() {
             <div className="flex items-center justify-between pb-2 border-b border-border">
               <h3 className="text-base font-bold text-navy-900 flex items-center gap-2">
                 <Users className="w-5 h-5 text-primary" />
-                أعضاء اللجنة المعينين رسمياً
+                {t('authority.committee.official_members')}
               </h3>
-              <span className="text-xs text-muted-foreground">{members.length} عضو</span>
+              <span className="text-xs text-muted-foreground">{t('authority.committee.members_count', { count: members.length })}</span>
             </div>
 
             {loading ? (
               <div className="py-12 text-center text-muted-foreground text-xs">
-                جاري تحميل سجل الأعضاء...
+                {t('authority.committee.loading')}
               </div>
             ) : members.length === 0 ? (
               <div className="border border-dashed border-border rounded-xl p-8 text-center text-muted-foreground text-xs space-y-2">
                 <Users className="w-8 h-8 mx-auto text-muted-foreground/50" />
-                <p>لم يتم تعيين أي عضو في هذه اللجنة بعد.</p>
-                <p className="text-[11px]">استخدم النموذج الجانبي لتعيين أعضاء اللجنة ورئيسها.</p>
+                <p>{t('authority.committee.empty_title')}</p>
+                <p className="text-[11px]">{t('authority.committee.empty_desc')}</p>
               </div>
             ) : (
               <div className="space-y-3">
@@ -245,7 +245,7 @@ export function DealCommitteeManager() {
                         </div>
                         <div className="text-xs text-muted-foreground mt-0.5">
                           {m.title && <span>{m.title} · </span>}
-                          {m.organization || 'المصلحة المتعاقدة'}
+                          {m.organization || t('authority.topbar.default_org')}
                           {m.email && <span> · {m.email}</span>}
                         </div>
                       </div>
@@ -274,13 +274,13 @@ export function DealCommitteeManager() {
                 required
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                placeholder="الاسم واللقب الكامل"
+                placeholder={t('authority.committee.name_placeholder')}
                 className="text-xs rounded-xl"
               />
             </div>
 
             <div className="space-y-1">
-              <Label className="text-xs font-semibold">الصفة في اللجنة *</Label>
+              <Label className="text-xs font-semibold">{t('authority.committee.role_label')}</Label>
               <select
                 value={role}
                 onChange={(e) => setRole(e.target.value as any)}
@@ -298,23 +298,23 @@ export function DealCommitteeManager() {
               <Input
                 value={organization}
                 onChange={(e) => setOrganization(e.target.value)}
-                placeholder="مثال: مصلحة الصفقات، الإدارة المالية"
+                placeholder={t('authority.committee.dept_placeholder')}
                 className="text-xs rounded-xl"
               />
             </div>
 
             <div className="space-y-1">
-              <Label className="text-xs font-semibold">الرتبة / الوظيفة</Label>
+              <Label className="text-xs font-semibold">{t('authority.committee.title_label')}</Label>
               <Input
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="مثال: مهندس رئيسي، متصرف إداري"
+                placeholder={t('authority.committee.title_placeholder')}
                 className="text-xs rounded-xl"
               />
             </div>
 
             <div className="space-y-1">
-              <Label className="text-xs font-semibold">البريد الإلكتروني المهني</Label>
+              <Label className="text-xs font-semibold">{t('authority.committee.email_label')}</Label>
               <Input
                 type="email"
                 value={email}
@@ -330,7 +330,7 @@ export function DealCommitteeManager() {
               className="w-full rounded-xl text-xs font-bold gap-2 mt-2"
             >
               <UserPlus className="w-4 h-4" />
-              {submitting ? 'جاري التعيين...' : t('lifecycle.committee.save')}
+              {submitting ? t('authority.committee.submitting') : t('lifecycle.committee.save')}
             </Button>
           </form>
         </div>

@@ -56,7 +56,8 @@ export function ServiceTopBar(_props: ServiceTopBarProps) {
 
   // 1. المحادثة / الاستفسارات
   const handleChat = () => {
-    setLocation('/operator/assistant');
+    // توجيه مستخدم المصلحة المتعاقدة إلى مسار المساعد الذكي الخاص بالمصلحة
+    setLocation('/authority/assistant');
   };
 
   // 3. التقويم / جلسات الفتح والمواعيد
@@ -90,7 +91,8 @@ export function ServiceTopBar(_props: ServiceTopBarProps) {
 
   // 5. المساعد الذكي (RAG)
   const handleAssistant = () => {
-    setLocation('/operator/assistant');
+    // توجيه مستخدم المصلحة المتعاقدة إلى مسار المساعد الذكي الخاص بالمصلحة
+    setLocation('/authority/assistant');
   };
 
   // اختصار لوحة المفاتيح Ctrl+K أو Cmd+K لفتح البحث السريع
@@ -148,7 +150,7 @@ export function ServiceTopBar(_props: ServiceTopBarProps) {
       dir={dir}
     >
       {/* ══════════════════════════════════════════════════════════════════
-          1. الهوية: الشعار واسم المنصة (دون تكرار)
+          1. Brand Identity: Logo and platform brand name
           ══════════════════════════════════════════════════════════════════ */}
       <div className="flex items-center gap-2 text-[#0B4348] font-bold text-sm shrink-0">
         <div className="size-8 rounded-lg bg-[#0B4348] text-white flex items-center justify-center shadow-xs flex-none">
@@ -163,8 +165,8 @@ export function ServiceTopBar(_props: ServiceTopBarProps) {
       <div className="flex-1 min-w-[8px]" />
 
       {/* ══════════════════════════════════════════════════════════════════
-          3. الأدوات: أدوات النظام + أدوات الحساب
-          تباعد موحد بين 8 و12px، وأبعاد تفاعلية لا تقل عن 40×40px
+          3. Action tools: System tools and Account menu
+          Unified 8-12px spacing, min 40x40px touch targets
           ══════════════════════════════════════════════════════════════════ */}
       <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
         {/* ─── أدوات النظام (المساعد، البحث، التقويم، الرسائل) ─── */}
@@ -306,7 +308,7 @@ export function ServiceTopBar(_props: ServiceTopBarProps) {
           title={t('topbar.language_toggle')}
           aria-label={t('topbar.language_toggle')}
         >
-          {lang === 'ar' ? 'FR' : 'عربي'}
+          {t('common.lang_switch_short')}
         </button>
 
         {/* 2. الإعدادات */}
@@ -431,7 +433,8 @@ export function ServiceTopBar(_props: ServiceTopBarProps) {
                   type="button"
                   onClick={() => {
                     setIsSearchOpen(false);
-                    setLocation('/operator/assistant');
+                    // توجيه مستخدم المصلحة المتعاقدة إلى مسار المساعد الذكي الخاص بالمصلحة
+                    setLocation('/authority/assistant');
                   }}
                   className="p-2.5 rounded-xl border border-gray-200 hover:border-navy-900 hover:bg-slate-50 transition-colors text-start flex items-center justify-between"
                 >

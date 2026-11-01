@@ -44,22 +44,22 @@ export function OperatorHeader({
           className="flex items-center gap-2 cursor-pointer select-none group"
         >
           <div className="w-8 h-8 rounded-lg bg-navy-900 text-gold-500 font-extrabold flex items-center justify-center text-xs shadow-sm ring-1 ring-gold-500/20 group-hover:ring-gold-500/40 transition-all flex-none">
-            ص.ذ
+            {t('brand.short')}
           </div>
           <div className="hidden sm:flex flex-col leading-none">
             <span className="text-xs font-bold text-navy-900 dark:text-slate-100 tracking-tight">
-              صفقات ذكية
+              {t('brand.title')}
             </span>
             <span className="text-[10px] text-muted-foreground font-medium mt-0.5">
-              {lang === 'ar' ? 'بوابة المتعامل الاقتصادي' : 'Portail Opérateur'}
+              {t('operator.header.portal_badge')}
             </span>
           </div>
         </div>
       </div>
 
-      {/* End: Account & System Tools (Strictly No Content Navigation) */}
+      {/* End: Account & System Tools */}
       <div className="flex items-center gap-1 sm:gap-2">
-        {/* 1. Settings (الإعدادات) */}
+        {/* 1. Settings */}
         <Button
           variant="ghost"
           size="sm"
@@ -71,7 +71,7 @@ export function OperatorHeader({
           <span className="hidden md:inline">{t('header.tools.settings')}</span>
         </Button>
 
-        {/* 2. Notifications (التنبيهات) with Badge */}
+        {/* 2. Notifications with Badge */}
         <Button
           variant="ghost"
           size="sm"
@@ -88,7 +88,7 @@ export function OperatorHeader({
           )}
         </Button>
 
-        {/* 3. Language Toggle (اللغة) */}
+        {/* 3. Language Toggle */}
         <Button
           variant="ghost"
           size="sm"
@@ -102,7 +102,7 @@ export function OperatorHeader({
 
         <div className="h-4 w-px bg-slate-200 dark:bg-slate-700 mx-0.5 sm:mx-1" />
 
-        {/* 4. Profile (الملف الشخصي) */}
+        {/* 4. Profile */}
         <Button
           variant="ghost"
           size="sm"
@@ -116,7 +116,7 @@ export function OperatorHeader({
           </span>
         </Button>
 
-        {/* 5. Logout (تسجيل الخروج) */}
+        {/* 5. Logout */}
         <Button
           variant="ghost"
           size="sm"

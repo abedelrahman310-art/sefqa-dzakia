@@ -136,7 +136,7 @@ export function OperatorRecommendationsCard({
             className="text-xs h-8 gap-1.5 hover:bg-destructive/10 text-destructive font-bold"
           >
             <RefreshCw className="size-3" />
-            <span>إعادة المحاولة</span>
+            <span>{t('common.retry')}</span>
           </Button>
         </CardContent>
       </Card>
@@ -177,7 +177,7 @@ export function OperatorRecommendationsCard({
             onClick={() => setLocation('/operator/profile')}
             className="text-xs rounded-xl font-bold"
           >
-            تحديث ملف المؤسسة
+            {t('ai.update_company_profile')}
           </Button>
         </CardContent>
       </Card>
@@ -220,7 +220,7 @@ export function OperatorRecommendationsCard({
               className="size-7 rounded-lg text-muted-foreground hover:text-navy-900"
               onClick={() => refetch()}
               disabled={isFetching}
-              title="تحديث التوصيات"
+              title={t('ai.refresh_recommendations')}
             >
               <RefreshCw className={`size-3.5 ${isFetching ? 'animate-spin' : ''}`} />
             </Button>
@@ -240,11 +240,11 @@ export function OperatorRecommendationsCard({
           <span className="font-extrabold text-navy-900">{t('ai.rec_based_on')}</span>
           <div className="flex items-center gap-1.5">
             <span className="text-muted-foreground">• {t('ai.rec_sector')}:</span>
-            <span className="font-bold text-navy-900">الأشغال العمومية والبناء</span>
+            <span className="font-bold text-navy-900">{t('operator.sector.btph')}</span>
           </div>
           <div className="flex items-center gap-1.5">
             <span className="text-muted-foreground">• {t('ai.rec_wilayas')}:</span>
-            <span className="font-bold text-navy-900">الجزائر، البليدة، بومرداس</span>
+            <span className="font-bold text-navy-900">{t('ai.rec_demo_wilayas')}</span>
           </div>
         </div>
 
@@ -329,7 +329,7 @@ export function OperatorRecommendationsCard({
         <div className="flex items-center justify-between pt-1 text-xs">
           <div className="flex items-center gap-1.5 text-muted-foreground text-[11px]">
             <TrendingUp className="size-3.5 text-primary" />
-            <span>يتم تحديث التوصيات دورياً بناءً على الصفقات المفتوحة حديثاً في القطاع</span>
+            <span>{t('ai.recommendations_periodic_update')}</span>
           </div>
           {onViewAll && (
             <Button

@@ -14,6 +14,7 @@ import { AuthorityObjectionsView } from '@/features/objections/components/Author
 import { ReportsView } from './ReportsView';
 import { AuditView } from './AuditView';
 import { SettingsView } from './SettingsView';
+import { AuthorityAssistantView } from './AuthorityAssistantView';
 import { OperatorNotificationsView } from '@/pages/operator/OperatorNotificationsView';
 import { PortalShell } from '@/components/layout/PortalShell';
 import { PortalSidebar } from '@/components/layout/PortalSidebar';
@@ -56,7 +57,7 @@ export function AuthoritySpace() {
   const [isReportsActive] = useRoute('/authority/reports');
   const [isAuditActive] = useRoute('/authority/audit');
 
-  // Final Approved Unified Navigation: "الصفقات" is the unified entry point
+  // Final Approved Unified Navigation: "Deals" is the unified entry point
   const navItems = [
     {
       label: t('authority.nav.overview'),
@@ -150,6 +151,7 @@ export function AuthoritySpace() {
         <Route path="/authority/specs">{() => <AuthorityDealsList initialView="specs" />}</Route>
 
         {/* ═══ Rest of Authority Portal Sections (Preserved Untouched) ═══ */}
+        <Route path="/authority/assistant" component={AuthorityAssistantView} />
         <Route path="/authority/committee" component={DealCommitteeManager} />
         <Route path="/authority/offers" component={ReceivedOffers} />
         <Route path="/authority/objections" component={AuthorityObjectionsView} />

@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Search, X } from 'lucide-react';
 import type { WilayaDetail } from './WilayaDetailCard';
+import { useI18n } from '@/i18n';
 
 export interface SearchBoxProps {
   value: string;
@@ -15,10 +16,13 @@ export function SearchBox({
   onChange,
   results = [],
   onSelect,
-  placeholder = 'ابحث عن ولاية...',
+  placeholder,
 }: SearchBoxProps) {
+  const { t } = useI18n();
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  const resolvedPlaceholder = placeholder ?? t('central.map_view.search_placeholder');
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -38,7 +42,7 @@ export function SearchBox({
         <Search className="absolute start-3 top-1/2 -translate-y-1/2 size-4 text-[var(--ink-500)] pointer-events-none" />
         <input
           type="text"
-          placeholder={placeholder}
+          placeholder={resolvedPlaceholder}
           value={value}
           onChange={(e) => {
             onChange(e.target.value);
@@ -65,7 +69,7 @@ export function SearchBox({
               setIsOpen(false);
             }}
             className="absolute end-3 top-1/2 -translate-y-1/2 text-[var(--ink-400)] hover:text-[var(--ink-700)] p-0.5"
-            aria-label="مسح البحث"
+            aria-label={t('central.ui.clear_search')}
           >
             <X className="size-3.5" />
           </button>
@@ -95,7 +99,7 @@ export function SearchBox({
                 )}
               </div>
               <span className="shrink-0 font-mono text-xs font-semibold text-[var(--ink-700)]">
-                {w.tenders_count} صفقة
+                {t('central.ui.deals_count', { count: w.tenders_count })}
               </span>
             </button>
           ))}

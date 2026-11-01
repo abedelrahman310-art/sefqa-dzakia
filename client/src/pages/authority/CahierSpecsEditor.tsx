@@ -138,7 +138,7 @@ export function CahierSpecsEditor({ draftId }: CahierSpecsEditorProps) {
       const filename = `Cahier_Specs_${draftTitle || draftId}.pdf`;
       await downloadPdfBlob(`/procurements/deals/${draftId}/specs-pdf/`, filename);
     } catch {
-      alert('تعذر تصدير دفتر الشروط بصيغة PDF. يرجى إعادة المحاولة.');
+      alert(t('specs.export_error'));
     } finally {
       setIsExportingPdf(false);
     }
@@ -151,7 +151,7 @@ export function CahierSpecsEditor({ draftId }: CahierSpecsEditorProps) {
 
       const dealRes = await api.get(`/procurements/deals/${draftId}/`);
       const dealData = dealRes.data;
-      setDraftTitle(dealData?.title || 'صفقة عمومية');
+      setDraftTitle(dealData?.title || t('specs.default_deal_title'));
 
       let specs = dealData?.cahier_specs;
       if (!specs) {
@@ -172,16 +172,16 @@ export function CahierSpecsEditor({ draftId }: CahierSpecsEditorProps) {
         draftId: String(draftId),
         versionNumber: 1,
         status: specs.is_validated ? 'frozen' : 'active',
-        changeSummary: 'دفتر شروط معتمد وفق القانون 23-12',
+        changeSummary: t('specs.statutory_ref_source'),
       });
 
       const loadedClauses: Clause[] = [];
       const sections = [
-        { key: 'general_provisions', title: 'الأحكام العامة وموضوع الصفقة', content: specs.administrative_clauses?.general || 'تحدد هذه الصفقة شروط وكيفيات إنجاز المشروع وفقاً للقانون 23-12' },
-        { key: 'administrative', title: 'الملف الإداري وشروط المشاركة', content: specs.administrative_clauses?.rules || 'يجب على المتعهد تقديم التصريح بالترشح، التصريح بالنزاهة، والسجل التجاري' },
-        { key: 'technical_specs', title: 'المواصفات التقنية وجدول الأسعار', content: specs.technical_requirements?.details || 'المواصفات التقنية مطابقة للأنظمة والمعايير الجزائرية المعتمدة' },
-        { key: 'financial_terms', title: 'الشروط المالية والضمانات', content: specs.financial_criteria?.terms || 'الضمان البنكي لحسن التنفيذ والدفع على أساس الوضعيات الشهرية' },
-        { key: 'evaluation_criteria', title: 'معايير التقييم ومنهجية الاختيار', content: specs.financial_criteria?.scoring || 'معيار العرض الأقل ثمناً من بين العروض التقنية المقبولة' },
+        { key: 'general_provisions', title: t('specs.section.general_provisions'), content: specs.administrative_clauses?.general || '' },
+        { key: 'administrative', title: t('specs.section.administrative'), content: specs.administrative_clauses?.rules || '' },
+        { key: 'technical_specs', title: t('specs.section.technical_specs'), content: specs.technical_requirements?.details || '' },
+        { key: 'financial_terms', title: t('specs.section.financial_terms'), content: specs.financial_criteria?.terms || '' },
+        { key: 'evaluation_criteria', title: t('specs.section.evaluation_criteria'), content: specs.financial_criteria?.scoring || '' },
       ];
 
       sections.forEach((sec, idx) => {
@@ -199,7 +199,7 @@ export function CahierSpecsEditor({ draftId }: CahierSpecsEditorProps) {
             {
               id: `prov-${idx}`,
               sourceType: 'standard_decree',
-              sourceLabel: 'المرسوم الرئاسي 15-247 والقانون 23-12',
+              sourceLabel: t('specs.statutory_ref_source'),
               verificationStatus: 'verified',
             },
           ],
@@ -226,9 +226,9 @@ export function CahierSpecsEditor({ draftId }: CahierSpecsEditorProps) {
       setLoading(true);
       await api.post('/procurements/specs/', {
         deal: draftId,
-        administrative_clauses: { general: 'تحدد هذه الصفقة الشروط الإدارية والتعاقدية وفق القانون 23-12' },
-        technical_requirements: { details: 'المواصفات التقنية التفصيلية للمشروع' },
-        financial_criteria: { scoring: 'معايير التنقيط المالي والتقني' },
+        administrative_clauses: { general: '' },
+        technical_requirements: { details: '' },
+        financial_criteria: { scoring: '' },
       });
       await fetchCahierData();
     } catch (err: any) {
@@ -316,7 +316,7 @@ export function CahierSpecsEditor({ draftId }: CahierSpecsEditorProps) {
     return (
       <div className="py-20 flex flex-col items-center justify-center text-muted-foreground gap-3">
         <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-        <span className="text-sm font-medium">جاري تحميل بيانات دفتر الشروط وسلسلة الإسناد...</span>
+        <span className="text-sm font-medium">{t('specs.loading')}</span>
       </div>
     );
   }
@@ -369,12 +369,12 @@ export function CahierSpecsEditor({ draftId }: CahierSpecsEditorProps) {
           <div className="p-4 rounded-xl bg-muted/40 border border-border/80 max-w-lg mx-auto text-start space-y-2 text-xs text-muted-foreground">
             <div className="flex items-center gap-2 font-bold text-navy-900">
               <ShieldCheck className="w-4 h-4 text-emerald-600" />
-              <span>المرجعية النظامية المعتمدة تلقائياً:</span>
+              <span>{t('specs.statutory_ref_title')}</span>
             </div>
             <ul className="list-disc ps-5 space-y-1">
-              <li>المرسوم الرئاسي 15-247 (المادتان 53 و67: دفاتر الشروط النموذجية والتأمينات)</li>
-              <li>القانون 23-12 (المادتان 5 و26: حرية المنافسة والشفافية وتكافؤ الفرص)</li>
-              <li>فحص تلقائي لمخاطر حصر المنافسة وذكر الماركات التجارية</li>
+              <li>{t('specs.statutory_ref_decree')}</li>
+              <li>{t('specs.statutory_ref_law')}</li>
+              <li>{t('specs.statutory_ref_check')}</li>
             </ul>
           </div>
 
@@ -413,7 +413,7 @@ export function CahierSpecsEditor({ draftId }: CahierSpecsEditorProps) {
           <h1 className="text-xl md:text-2xl font-extrabold text-navy-900 flex items-center gap-3">
             <span>{draftTitle}</span>
             <span className="text-xs px-2.5 py-1 rounded-full bg-navy-50 text-navy-800 border border-navy-200 font-bold">
-              الإصدار {cahier.versionNumber}
+              {t('specs.version_label', { version: cahier.versionNumber })}
             </span>
             <span
               className={`text-xs px-2.5 py-1 rounded-full font-bold border ${
@@ -434,10 +434,10 @@ export function CahierSpecsEditor({ draftId }: CahierSpecsEditorProps) {
             onClick={handleExportPdf}
             disabled={isExportingPdf}
             className="border-border hover:bg-muted text-foreground font-bold text-xs px-4 py-2.5 rounded-xl shadow-sm flex items-center gap-1.5"
-            title="تصدير دفتر الشروط والمواصفات العامة والتقنية المعتمدة بصيغة PDF"
+            title={t('specs.export_pdf_tooltip')}
           >
             <FileText className="w-4 h-4 text-primary" />
-            <span>{isExportingPdf ? 'جاري التصدير...' : 'تصدير دفتر الشروط (PDF)'}</span>
+            <span>{isExportingPdf ? t('specs.exporting') : t('specs.export_pdf_btn')}</span>
           </Button>
 
           {!isFrozen ? (
@@ -466,7 +466,7 @@ export function CahierSpecsEditor({ draftId }: CahierSpecsEditorProps) {
             </div>
             <div className="space-y-0.5">
               <div className="font-extrabold text-emerald-900 text-sm">
-                تم تجميد دفتر الشروط وإحالته للاعتماد بنجاح
+                {t('specs.frozen_success_title')}
               </div>
               <div className="font-mono text-[11px] text-emerald-800 break-all">
                 {t('specs.frozen_digest_label')}:{' '}
@@ -487,7 +487,7 @@ export function CahierSpecsEditor({ draftId }: CahierSpecsEditorProps) {
             <AlertTriangle className="w-6 h-6 text-amber-600 shrink-0 mt-0.5" />
             <div className="space-y-1">
               <h4 className="font-bold text-sm text-amber-900">
-                تأكيد التجميد الرقمي لدفتر الشروط
+                {t('specs.freeze_modal_title')}
               </h4>
               <p className="text-xs text-amber-800 leading-relaxed">
                 {t('specs.freeze_confirm')}
@@ -502,7 +502,7 @@ export function CahierSpecsEditor({ draftId }: CahierSpecsEditorProps) {
               onClick={() => setShowFreezeConfirm(false)}
               className="text-xs"
             >
-              إلغاء
+              {t('common.cancel')}
             </Button>
             <Button
               size="sm"
@@ -510,7 +510,7 @@ export function CahierSpecsEditor({ draftId }: CahierSpecsEditorProps) {
               onClick={handleFreeze}
               className="bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs px-4"
             >
-              {freezing ? 'جاري التجميد واستخراج المتطلبات...' : 'نعم، تجميد النسخة'}
+              {freezing ? t('specs.freezing_status') : t('specs.freeze_confirm_btn')}
             </Button>
           </div>
         </div>
@@ -577,7 +577,7 @@ export function CahierSpecsEditor({ draftId }: CahierSpecsEditorProps) {
               <span>{t('specs.requirements.title')}</span>
             </h3>
             <span className="text-xs text-muted-foreground">
-              تُستخرج هذه المتطلبات تلقائياً من بنود الدفتر عند التجميد لتمكين التحقق الرقمي للمتعاملين
+              {t('specs.requirements_disclaimer')}
             </span>
           </div>
 
@@ -603,7 +603,7 @@ export function CahierSpecsEditor({ draftId }: CahierSpecsEditorProps) {
                     </div>
                     {req.isDisqualifying && (
                       <span className="px-2 py-0.5 bg-destructive/10 text-destructive border border-destructive/20 rounded font-bold">
-                        إقصائي في حال عدم التقديم
+                        {t('specs.disqualifying_badge')}
                       </span>
                     )}
                   </div>
@@ -617,7 +617,7 @@ export function CahierSpecsEditor({ draftId }: CahierSpecsEditorProps) {
         <div className="space-y-4">
           {currentSectionClauses.length === 0 ? (
             <div className="bg-card border border-border rounded-2xl p-8 text-center text-muted-foreground text-xs">
-              لا توجد بنود مدرجة في هذا القسم حالياً.
+              {t('specs.no_clauses_in_section')}
             </div>
           ) : (
             currentSectionClauses.map((clause) => {
@@ -639,7 +639,7 @@ export function CahierSpecsEditor({ draftId }: CahierSpecsEditorProps) {
                       <h4 className="text-sm font-bold text-navy-900">{clause.title}</h4>
                       {clause.isMandatory && (
                         <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-navy-50 text-navy-800 border border-navy-200">
-                          بند إلزامي
+                          {t('specs.mandatory_clause')}
                         </span>
                       )}
                     </div>
@@ -687,7 +687,7 @@ export function CahierSpecsEditor({ draftId }: CahierSpecsEditorProps) {
                       />
                       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2">
                         <Input
-                          placeholder="مبرر التعديل (إلزامي للتوثيق في سجل التدقيق)..."
+                          placeholder={t('specs.edit_reason_placeholder')}
                           value={editReason}
                           onChange={(e) => setEditReason(e.target.value)}
                           className="text-xs rounded-xl h-9 flex-1"
@@ -700,7 +700,7 @@ export function CahierSpecsEditor({ draftId }: CahierSpecsEditorProps) {
                             onClick={() => setEditingClauseId(null)}
                             className="text-xs rounded-xl"
                           >
-                            إلغاء
+                            {t('common.cancel')}
                           </Button>
                           <Button
                             size="sm"
@@ -708,7 +708,7 @@ export function CahierSpecsEditor({ draftId }: CahierSpecsEditorProps) {
                             onClick={() => handleSaveClause(clause.id)}
                             className="bg-navy-900 hover:bg-navy-800 text-white font-bold text-xs rounded-xl"
                           >
-                            {savingClause ? 'جاري الحفظ...' : t('specs.save_clause')}
+                            {savingClause ? t('specs.saving_justification') : t('specs.save_clause')}
                           </Button>
                         </div>
                       </div>
@@ -726,7 +726,7 @@ export function CahierSpecsEditor({ draftId }: CahierSpecsEditorProps) {
                             onClick={() => handleStartEdit(clause)}
                             className="text-xs text-navy-700 hover:text-navy-900 hover:bg-navy-50"
                           >
-                            تعديل نص البند
+                            {t('specs.edit_clause_btn')}
                           </Button>
                         </div>
                       )}
@@ -746,8 +746,10 @@ export function CahierSpecsEditor({ draftId }: CahierSpecsEditorProps) {
                               <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
                               <div className="space-y-1">
                                 <span className="font-bold text-amber-900 block">
-                                  {t('specs.stress.detected')}: رصد مصطلح مقيد للمنافسة («
-                                  {finding.detectedTerm}»)
+                                  {t('specs.competition_term_detected', {
+                                    label: t('specs.stress.detected'),
+                                    term: finding.detectedTerm,
+                                  })}
                                 </span>
                                 <p className="text-amber-800 leading-relaxed">
                                   {finding.explanationAr}
@@ -785,7 +787,7 @@ export function CahierSpecsEditor({ draftId }: CahierSpecsEditorProps) {
                           {justifyingFindingId === finding.id && (
                             <div className="pt-2 border-t border-amber-200 space-y-2">
                               <Input
-                                placeholder="اكتب المبرر الإداري أو الفني لاستعمال هذا المصطلح أو الطراز..."
+                                placeholder={t('specs.justify_placeholder')}
                                 value={justificationText}
                                 onChange={(e) => setJustificationText(e.target.value)}
                                 className="text-xs bg-white rounded-lg h-8"
@@ -797,7 +799,7 @@ export function CahierSpecsEditor({ draftId }: CahierSpecsEditorProps) {
                                   onClick={() => setJustifyingFindingId(null)}
                                   className="text-[11px] h-7"
                                 >
-                                  إلغاء
+                                  {t('common.cancel')}
                                 </Button>
                                 <Button
                                   size="sm"
@@ -805,7 +807,7 @@ export function CahierSpecsEditor({ draftId }: CahierSpecsEditorProps) {
                                   onClick={() => handleSaveJustification(clause.id, finding.id)}
                                   className="bg-amber-700 hover:bg-amber-800 text-white text-[11px] h-7 px-3 font-bold"
                                 >
-                                  {savingJustification ? 'جاري الحفظ...' : 'تثبيت المبرر'}
+                                  {savingJustification ? t('specs.saving_justification') : t('specs.justify_save_btn')}
                                 </Button>
                               </div>
                             </div>
@@ -813,7 +815,7 @@ export function CahierSpecsEditor({ draftId }: CahierSpecsEditorProps) {
 
                           {finding.humanJustification && (
                             <div className="text-[11px] text-amber-900 bg-white/70 p-2 rounded border border-amber-200/80">
-                              <span className="font-bold">المبرر الإداري المسجل: </span>
+                              <span className="font-bold">{t('specs.justification_recorded')} </span>
                               <span>{finding.humanJustification}</span>
                             </div>
                           )}
@@ -834,18 +836,21 @@ export function CahierSpecsEditor({ draftId }: CahierSpecsEditorProps) {
                           <div key={ev.id} className="pt-2 first:pt-0 space-y-1">
                             <div className="flex items-center justify-between text-[11px] text-muted-foreground">
                               <span className="font-semibold text-navy-800">
-                                {ev.eventType} — بواسطة ({ev.actorType})
+                                {t('specs.by_actor', {
+                                  type: ev.eventType,
+                                  actor: ev.actorType,
+                                })}
                               </span>
                               <span>{new Date(ev.createdAt).toLocaleString()}</span>
                             </div>
                             {ev.actionReason && (
                               <p className="text-[11px] text-navy-900 italic">
-                                السبب: {ev.actionReason}
+                                {t('specs.reason_label')} {ev.actionReason}
                               </p>
                             )}
                             {ev.previousContent && (
                               <div className="text-[10px] text-muted-foreground line-through">
-                                النص السابق: {ev.previousContent}
+                                {t('specs.previous_text')} {ev.previousContent}
                               </div>
                             )}
                           </div>

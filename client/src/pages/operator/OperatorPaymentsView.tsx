@@ -30,12 +30,10 @@ export function OperatorPaymentsView() {
           <Shield className="w-5 h-5 text-navy-900 dark:text-gold-400 flex-none mt-0.5" />
           <div className="space-y-1">
             <h3 className="font-bold text-navy-900 dark:text-slate-100 text-sm">
-              {lang === 'ar' ? 'الإطار التنظيمي للمدفوعات وحقوق المشاركة' : 'Cadre réglementaire des paiements et droits de participation'}
+              {t('operator.payments.framework_title')}
             </h3>
             <p className="text-muted-foreground leading-relaxed">
-              {lang === 'ar'
-                ? 'يتم دفع حقوق سحب دفاتر الشروط والضمانات المالية (ضمان التعهد وحسن التنفيذ) وفق القنوات المالية الرسمية المعتمدة لدى الخزينة العمومية والمصالح المتعاقدة وفقاً لأحكام المرسوم الرئاسي 15-247. يجري حالياً الربط التقني لتفعيل الدفع الرقمي الحكومي المباشر.'
-                : 'Le règlement des droits de retrait des cahiers des charges et des cautions (soumission et bonne exécution) s\'effectue via les canaux financiers officiels du Trésor Public et des services contractants conformément au décret présidentiel 15-247.'}
+              {t('operator.payments.framework_desc')}
             </p>
           </div>
         </div>
@@ -51,9 +49,7 @@ export function OperatorPaymentsView() {
             {t('operator.payments.empty')}
           </h4>
           <p className="text-xs text-muted-foreground">
-            {lang === 'ar'
-              ? 'عند إيداع وصولات الدفع الورقية أو تفعيل بوابات الدفع البنكية، ستظهر كافة الوصولات الموثقة وسجلات التحقق المالي هنا تلقائياً.'
-              : 'Dès l\'enregistrement des quittances physiques ou l\'activation des passerelles bancaires, tous vos reçus certifiés apparaîtront automatiquement ici.'}
+            {t('operator.payments.empty_desc')}
           </p>
         </div>
       </div>

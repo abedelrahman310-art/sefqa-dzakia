@@ -1,5 +1,6 @@
 import axios from 'axios';
 import type { AxiosError, InternalAxiosRequestConfig } from 'axios';
+import i18n from '@/lib/i18n';
 
 export const ACCESS_TOKEN_KEY = 'safaqat_access_token';
 export const REFRESH_TOKEN_KEY = 'safaqat_refresh_token';
@@ -169,16 +170,16 @@ export function extractApiErrorMessage(error: unknown): string {
 
     const status = candidate.response?.status;
     if (typeof status === 'number') {
-      if (status === 401) return 'انتهت صلاحية الجلسة. أعد تسجيل الدخول للمتابعة.';
-      if (status === 403) return 'لا تملك الصلاحية لعرض هذه البيانات.';
-      if (status === 404) return 'الخدمة المطلوبة غير متوفرة على الخادم.';
-      if (status >= 500) return 'حدث خطأ في الخادم. أعد المحاولة بعد قليل.';
-      return `تعذر تحميل البيانات من الخادم (رمز ${status}).`;
+      if (status === 401) return i18n.t('api.error.session_expired');
+      if (status === 403) return i18n.t('api.error.forbidden');
+      if (status === 404) return i18n.t('api.error.not_found');
+      if (status >= 500) return i18n.t('api.error.server');
+      return i18n.t('api.error.load_failed', { status });
     }
 
     if (typeof candidate.message === 'string' && candidate.message.trim() !== '') {
       return candidate.message;
     }
   }
-  return 'تعذر الاتصال بالخادم. تحقق من الشبكة ثم أعد المحاولة.';
+  return i18n.t('api.error.network');
 }

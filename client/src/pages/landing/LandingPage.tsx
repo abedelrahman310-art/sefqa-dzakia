@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { useLocation, Link } from 'wouter';
 import { Button } from '@/components/ui/button';
-import { useI18n } from '@/i18n';
+import { useI18n, type TranslationKey } from '@/i18n';
 import './landing.css';
 import { HeroSection } from './components/HeroSection';
 import {
@@ -22,109 +22,117 @@ import {
   CreditCard,
   FileSignature,
   LinkIcon,
+  type LucideIcon,
 } from 'lucide-react';
 
-const availableFeatures = [
+type LandingFeature = {
+  icon: LucideIcon;
+  titleKey: TranslationKey;
+  descKey: TranslationKey;
+  readiness: number;
+};
+
+const availableFeatures: LandingFeature[] = [
   // ═══ الميزات الموجودة (6) ═══
   {
     icon: Bot,
-    title: 'وكلاء الذكاء الاصطناعي',
-    description: 'تحليل ومساعدة ذكية داخل مراحل العمل',
+    titleKey: 'landing.innovation.f_ai_title',
+    descKey: 'landing.innovation.f_ai_desc',
     readiness: 95,
   },
   {
     icon: FileSearch,
-    title: 'تحليل الوثائق',
-    description: 'استخراج وفهم المعلومات من الوثائق',
+    titleKey: 'landing.innovation.f_docs_title',
+    descKey: 'landing.innovation.f_docs_desc',
     readiness: 90,
   },
   {
     icon: ShieldAlert,
-    title: 'كشف المخاطر والحالات غير العادية',
-    description: 'اكتشاف المؤشرات التي تحتاج إلى مراجعة بشرية',
+    titleKey: 'landing.innovation.f_risk_title',
+    descKey: 'landing.innovation.f_risk_desc',
     readiness: 85,
   },
   {
     icon: Workflow,
-    title: 'تتبع دورة الصفقة',
-    description: 'متابعة مراحل الصفقة والعمليات المرتبطة بها',
+    titleKey: 'landing.innovation.f_cycle_title',
+    descKey: 'landing.innovation.f_cycle_desc',
     readiness: 92,
   },
   {
     icon: KeyRound,
-    title: 'إدارة الصلاحيات والأدوار',
-    description: 'وصول مخصص حسب دور كل مستخدم',
+    titleKey: 'landing.innovation.f_roles_title',
+    descKey: 'landing.innovation.f_roles_desc',
     readiness: 88,
   },
   {
     icon: Radar,
-    title: 'الرقابة والتحليل المركزي',
-    description: 'متابعة وتحليل الصفقات والجهات',
+    titleKey: 'landing.innovation.f_central_title',
+    descKey: 'landing.innovation.f_central_desc',
     readiness: 85,
   },
 
   // ═══ الميزات المُهملة (6 جديدة) ═══
   {
     icon: Calculator,
-    title: 'المساعد الذكي لتقدير الأسعار',
-    description: 'تقدير الميزانية من قاعدة 69 ولاية و20 فئة',
+    titleKey: 'landing.innovation.f_price_title',
+    descKey: 'landing.innovation.f_price_desc',
     readiness: 92,
   },
   {
     icon: Target,
-    title: 'مطابقة ذكية للفرص',
-    description: 'AI يطابق ملف المتعامل مع الفرص المتاحة',
+    titleKey: 'landing.innovation.f_match_title',
+    descKey: 'landing.innovation.f_match_desc',
     readiness: 88,
   },
   {
     icon: Radio,
-    title: 'فتح الأظرفة الحي',
-    description: 'متابعة مباشرة مع حجب هويات المنافسين',
+    titleKey: 'landing.innovation.f_opening_title',
+    descKey: 'landing.innovation.f_opening_desc',
     readiness: 85,
   },
   {
     icon: Lock,
-    title: 'سجل تدقيق SHA-256',
-    description: 'كل قرار موثّق ببصمة رقمية غير قابلة للتعديل',
+    titleKey: 'landing.innovation.f_audit_title',
+    descKey: 'landing.innovation.f_audit_desc',
     readiness: 95,
   },
   {
     icon: MapPin,
-    title: 'الخريطة الحرارية الوطنية',
-    description: 'رصد تفاعلي لـ 69 ولاية حسب النشاط والشبهات',
+    titleKey: 'landing.innovation.f_map_title',
+    descKey: 'landing.innovation.f_map_desc',
     readiness: 90,
   },
   {
     icon: Smartphone,
-    title: 'تطبيق قابل للتثبيت',
-    description: 'PWA يعمل على سطح المكتب والهاتف',
+    titleKey: 'landing.innovation.f_pwa_title',
+    descKey: 'landing.innovation.f_pwa_desc',
     readiness: 85,
   },
 ];
 
-const developingFeatures = [
+const developingFeatures: LandingFeature[] = [
   {
     icon: Building2,
-    title: 'التكامل مع الأنظمة الحكومية',
-    description: 'ربط المنصة بالخدمات والهيئات الحكومية',
+    titleKey: 'landing.innovation.d_gov_title',
+    descKey: 'landing.innovation.d_gov_desc',
     readiness: 50,
   },
   {
     icon: CreditCard,
-    title: 'الدفع الإلكتروني',
-    description: 'دعم المسارات الإلكترونية للدفع',
+    titleKey: 'landing.innovation.d_pay_title',
+    descKey: 'landing.innovation.d_pay_desc',
     readiness: 40,
   },
   {
     icon: FileSignature,
-    title: 'التوقيع الإلكتروني',
-    description: 'تطوير مسارات التوقيع الرقمي المعتمد',
+    titleKey: 'landing.innovation.d_sign_title',
+    descKey: 'landing.innovation.d_sign_desc',
     readiness: 35,
   },
   {
     icon: LinkIcon,
-    title: 'التكامل مع CNRC والهيئات',
-    description: 'جلب البيانات الحكومية المسموح بها آلياً',
+    titleKey: 'landing.innovation.d_cnrc_title',
+    descKey: 'landing.innovation.d_cnrc_desc',
     readiness: 30,
   },
 ];
@@ -147,7 +155,7 @@ export function LandingPage() {
       {status === 'authenticated' && user && (
         <aside className="w-full bg-slate-900 border-b border-slate-700/60 px-4 py-2.5 text-xs text-slate-200 flex flex-wrap items-center justify-between gap-2 z-50">
           <div className="truncate max-w-[280px] sm:max-w-none">
-            أنت مسجل بحساب: <strong className="text-emerald-400 font-semibold">{user.displayName || user.email}</strong>
+            {t('landing.old.logged_in_as')} <strong className="text-emerald-400 font-semibold">{user.displayName || user.email}</strong>
           </div>
           <Button
             size="sm"
@@ -155,7 +163,7 @@ export function LandingPage() {
             className="text-xs h-7 border-emerald-600/70 text-emerald-300 hover:bg-emerald-950/80 whitespace-nowrap"
             onClick={() => setLocation(getPortalPath())}
           >
-            الانتقال إلى مساحة عملك
+            {t('landing.old.go_workspace')}
           </Button>
         </aside>
       )}
@@ -193,7 +201,7 @@ export function LandingPage() {
               type="button"
               onClick={() => setLang(lang === 'ar' ? 'fr' : 'ar')}
               className="inst-lang-btn px-3 py-1.5 text-xs font-bold rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 transition-colors cursor-pointer"
-              aria-label="تبديل لغة العرض"
+              aria-label={t('landing.old.lang_toggle_aria')}
             >
               {lang === 'ar' ? 'Français' : 'العربية'}
             </button>
@@ -333,8 +341,8 @@ export function LandingPage() {
                   </p>
                 </div>
                 <div className="pt-6 mt-6 border-t border-slate-200/80 flex items-center justify-between text-xs font-bold text-slate-500">
-                  <span>مشاركة ومتابعة العروض</span>
-                  <span className="text-emerald-700">✓ مفعّل</span>
+                  <span>{t('landing.old.actor1_status')}</span>
+                  <span className="text-emerald-700">✓ {t('landing.old.enabled')}</span>
                 </div>
               </article>
 
@@ -359,8 +367,8 @@ export function LandingPage() {
                   </p>
                 </div>
                 <div className="pt-6 mt-6 border-t border-slate-200/80 flex items-center justify-between text-xs font-bold text-slate-500">
-                  <span>تسيير وإبرام الصفقة</span>
-                  <span className="text-emerald-700">✓ مفعّل</span>
+                  <span>{t('landing.old.actor2_status')}</span>
+                  <span className="text-emerald-700">✓ {t('landing.old.enabled')}</span>
                 </div>
               </article>
 
@@ -384,8 +392,8 @@ export function LandingPage() {
                   </div>
                 </div>
                 <div className="pt-6 mt-6 border-t border-slate-200/80 flex items-center justify-between text-xs font-bold text-slate-500">
-                  <span>رقابة وتحليل مستقل</span>
-                  <span className="text-emerald-700">✓ مفعّل</span>
+                  <span>{t('landing.old.actor3_status')}</span>
+                  <span className="text-emerald-700">✓ {t('landing.old.enabled')}</span>
                 </div>
               </article>
             </div>
@@ -537,12 +545,12 @@ export function LandingPage() {
                             {t('landing.innovation.status_available')}
                           </span>
                         </div>
-                        <h4 className="text-base font-bold text-slate-900 mb-1.5 text-start">{feature.title}</h4>
-                        <p className="text-xs text-slate-600 leading-relaxed text-start">{feature.description}</p>
+                        <h4 className="text-base font-bold text-slate-900 mb-1.5 text-start">{t(feature.titleKey)}</h4>
+                        <p className="text-xs text-slate-600 leading-relaxed text-start">{t(feature.descKey)}</p>
                       </div>
 
                       <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-                        <span className="text-slate-500 font-medium text-[11px]">نسبة الجاهزية</span>
+                        <span className="text-slate-500 font-medium text-[11px]">{t('landing.old.readiness')}</span>
                         <div className="flex items-center gap-2">
                           <div className="w-16 h-1.5 rounded-full bg-slate-100 overflow-hidden">
                             <div
@@ -588,12 +596,12 @@ export function LandingPage() {
                             {t('landing.innovation.status_dev')}
                           </span>
                         </div>
-                        <h4 className="text-base font-bold text-slate-900 mb-1.5 text-start">{feature.title}</h4>
-                        <p className="text-xs text-slate-600 leading-relaxed text-start">{feature.description}</p>
+                        <h4 className="text-base font-bold text-slate-900 mb-1.5 text-start">{t(feature.titleKey)}</h4>
+                        <p className="text-xs text-slate-600 leading-relaxed text-start">{t(feature.descKey)}</p>
                       </div>
 
                       <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-                        <span className="text-slate-500 font-medium text-[11px]">نسبة الجاهزية</span>
+                        <span className="text-slate-500 font-medium text-[11px]">{t('landing.old.readiness')}</span>
                         <div className="flex items-center gap-2">
                           <div className="w-16 h-1.5 rounded-full bg-slate-100 overflow-hidden">
                             <div

@@ -135,7 +135,7 @@ export function DraftsList() {
             <Input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="بحث في المسودات..."
+              placeholder={t('authority.drafts.search_placeholder')}
               className="ps-9 text-xs rounded-xl h-9"
             />
           </div>
@@ -145,11 +145,11 @@ export function DraftsList() {
         {loading ? (
           <div className="py-16 flex flex-col items-center justify-center text-muted-foreground space-y-2">
             <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-            <span className="text-xs">جاري تحميل المسودات...</span>
+            <span className="text-xs">{t('authority.drafts.loading')}</span>
           </div>
         ) : error ? (
           <div className="p-8 text-center bg-destructive/10 text-destructive rounded-xl border border-destructive/20 text-sm">
-            حدث خطأ أثناء تحميل المسودات. يرجى إعادة المحاولة.
+            {t('authority.drafts.error')}
           </div>
         ) : filteredDrafts.length === 0 ? (
           <div className="border border-dashed border-border rounded-xl p-12 text-center space-y-3 bg-muted/20">
@@ -157,8 +157,8 @@ export function DraftsList() {
             <h4 className="text-base font-bold text-navy-900">{t('drafts.msg.empty')}</h4>
             <p className="text-xs text-muted-foreground max-w-md mx-auto">
               {search
-                ? 'لا توجد نتائج تطابق معايير البحث الحالية.'
-                : 'ابدأ بإنشاء مسودة صفقة جديدة لتنظيم متطلبات الشراء.'}
+                ? t('authority.drafts.no_search_results')
+                : t('authority.drafts.empty_hint')}
             </p>
             {!search && (
               <Button
@@ -185,19 +185,19 @@ export function DraftsList() {
                       </span>
                     ) : draft.status === 'submission_closed' ? (
                       <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200">
-                        مغلق للإيداع
+                        {t('authority.drafts.status.submission_closed')}
                       </span>
                     ) : draft.status === 'opening_in_progress' ? (
                       <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-800 border border-blue-200">
-                        جلسة الفتح جارية
+                        {t('authority.drafts.status.opening_in_progress')}
                       </span>
                     ) : ['opened_pv_signed', 'technical_evaluation', 'financial_evaluation'].includes(draft.status) ? (
                       <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-teal-50 text-teal-800 border border-teal-200">
-                        قيد التقييم
+                        {t('authority.drafts.status.under_evaluation')}
                       </span>
                     ) : draft.status === 'provisional_award' ? (
                       <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-900 border border-emerald-300 font-bold">
-                        منح مؤقت
+                        {t('authority.drafts.status.provisional_award')}
                       </span>
                     ) : (
                       <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-navy-50 text-navy-800 border border-navy-200">
@@ -215,7 +215,7 @@ export function DraftsList() {
                         {t('authority.drafts.budget_label')}:{' '}
                         <strong className="text-navy-900">
                           {draft.estimatedBudget
-                            ? `${Number(draft.estimatedBudget).toLocaleString()} دج`
+                            ? `${Number(draft.estimatedBudget).toLocaleString()} ${t('common.dzd')}`
                             : t('authority.drafts.no_budget')}
                         </strong>
                       </span>
@@ -251,7 +251,7 @@ export function DraftsList() {
                     className="text-xs rounded-xl px-3 py-1.5"
                     onClick={() => setLocation(`/authority/drafts/${draft.id}/edit`)}
                   >
-                    {draft.status !== 'draft' ? 'عرض' : t('drafts.btn.edit')}
+                    {draft.status !== 'draft' ? t('common.view') : t('drafts.btn.edit')}
                   </Button>
                 </div>
               </div>

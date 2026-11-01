@@ -54,9 +54,10 @@ export function CentralOverview() {
           <h3 className="text-xs font-semibold text-slate-600 truncate">{t('central.dashboard.kpi_active_deals')}</h3>
           <p className="text-2xl font-bold text-sky-600 mt-1 tabular-nums">{data.active_deals_count ?? 0}</p>
           <span className="text-xs text-slate-500 mt-0.5 block truncate">
-            {lang === 'ar'
-              ? `من أصل ${data.total_deals ?? 0} ${t('central.dashboard.kpi_active_deals_sub')}`
-              : `Sur ${data.total_deals ?? 0} ${t('central.dashboard.kpi_active_deals_sub')}`}
+            {t('central.dashboard.out_of', {
+              total: data.total_deals ?? 0,
+              label: t('central.dashboard.kpi_active_deals_sub'),
+            })}
           </span>
         </div>
 
@@ -78,9 +79,10 @@ export function CentralOverview() {
           <h3 className="text-xs font-semibold text-slate-600 truncate">{t('central.dashboard.kpi_authorities')}</h3>
           <p className="text-2xl font-bold text-emerald-600 mt-1 tabular-nums">{data.active_authorities_count ?? 0}</p>
           <span className="text-xs text-slate-500 mt-0.5 block truncate">
-            {lang === 'ar'
-              ? `من أصل ${data.total_authorities_count ?? 0} ${t('central.dashboard.kpi_authorities_sub')}`
-              : `Sur ${data.total_authorities_count ?? 0} ${t('central.dashboard.kpi_authorities_sub')}`}
+            {t('central.dashboard.out_of', {
+              total: data.total_authorities_count ?? 0,
+              label: t('central.dashboard.kpi_authorities_sub'),
+            })}
           </span>
         </div>
       </div>

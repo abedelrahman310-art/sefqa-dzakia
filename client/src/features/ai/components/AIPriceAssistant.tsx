@@ -201,7 +201,7 @@ export function AIPriceAssistant({
             <span className="text-muted-foreground me-1">{t('ai.price_based_on')}</span>
             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-muted text-muted-foreground font-medium">
               <Layers className="size-3" />
-              {t('ai.price_basis_69')}
+              {t('ai.price_basis_58')}
             </span>
             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-primary/10 text-primary font-medium">
               {estimate.template_type_ar || estimate.template_type}
@@ -237,14 +237,14 @@ export function AIPriceAssistant({
               <div>
                 <span className="text-muted-foreground block">{t('ai.price_range')}</span>
                 <span className="font-mono tabular-nums font-semibold text-navy-900 block mt-0.5">
-                  {formatMoney(estimate.estimated_min)} — {formatMoney(estimate.estimated_max)} دج
+                  {formatMoney(estimate.estimated_min)} — {formatMoney(estimate.estimated_max)} {t('common.dzd')}
                 </span>
               </div>
 
               {/* Unit Price & Quantity */}
               <div>
                 <span className="text-muted-foreground block">
-                  {t('ai.price_unit')} {formatMoney(estimate.unit_price)} دج/{estimate.unit}
+                  {t('ai.price_unit')} {formatMoney(estimate.unit_price)} {t('common.dzd')}/{estimate.unit}
                 </span>
                 <span className="font-semibold text-navy-900 block mt-0.5">
                   {t('ai.price_qty')} {estimate.quantity} {estimate.unit}
@@ -312,7 +312,7 @@ export function AIPriceAssistant({
         </CardContent>
       </Card>
 
-      {/* Confirmation Dialog (التحسين 3) */}
+      {/* Confirmation Dialog */}
       <Dialog open={showConfirm} onOpenChange={setShowConfirm}>
         <DialogContent className="sm:max-w-md text-start">
           <DialogHeader>
@@ -332,7 +332,7 @@ export function AIPriceAssistant({
           {/* Amount Box */}
           <div className="my-2 p-4 rounded-xl border border-emerald-500/20 bg-emerald-50/50 dark:bg-emerald-950/20 text-center space-y-1">
             <span className="text-2xl font-black text-navy-900 font-mono tabular-nums tracking-tight">
-              {formatMoney(estimate.estimated_avg)} دج
+              {formatMoney(estimate.estimated_avg)} {t('common.dzd')}
             </span>
             <div className="text-[11px] text-muted-foreground">
               {estimate.category} • {estimate.quantity} {estimate.unit} ({estimate.wilaya_name?.ar || estimate.wilaya})

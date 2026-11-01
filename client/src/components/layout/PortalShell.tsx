@@ -127,7 +127,7 @@ export function PortalShell({
               onClick={() => setLang(lang === 'ar' ? 'fr' : 'ar')}
               className="text-base font-bold px-2.5 py-1 rounded-lg bg-[var(--paper-100)] text-[var(--ink-700)] border border-[var(--color-border-subtle)]"
             >
-              {lang === 'ar' ? 'FR' : 'عربي'}
+              {t('common.lang_switch_short')}
             </button>
           </div>
         )}

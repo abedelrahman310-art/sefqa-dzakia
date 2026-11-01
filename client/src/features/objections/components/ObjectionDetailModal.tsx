@@ -1,3 +1,4 @@
+import { useI18n } from "@/i18n";
 import { useState } from 'react';
 import {
   Dialog,
@@ -19,7 +20,7 @@ import {
   Lock,
 } from 'lucide-react';
 import type { ObjectionDetailItem } from '../types';
-import { GROUND_LABELS, TYPE_LABELS } from '../types';
+import { getGroundLabel, getTypeLabel } from '../types';
 
 interface ObjectionDetailModalProps {
   objection: ObjectionDetailItem | null;
@@ -36,6 +37,7 @@ export function ObjectionDetailModal({
   onWithdraw,
   canWithdraw = false,
 }: ObjectionDetailModalProps) {
+  const { t, lang, dir } = useI18n();
   const [copied, setCopied] = useState(false);
 
   if (!objection) return null;
@@ -49,15 +51,15 @@ export function ObjectionDetailModal({
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'submitted':
-        return <Badge className="bg-blue-50 text-blue-800 border-blue-200">مُودع رسمياً</Badge>;
+        return <Badge className="bg-blue-50 text-blue-800 border-blue-200">{t("objections.status_submitted")}</Badge>;
       case 'under_review':
-        return <Badge className="bg-amber-50 text-amber-800 border-amber-300">قيد الدراسة أمام اللجنة</Badge>;
+        return <Badge className="bg-amber-50 text-amber-800 border-amber-300">{t("objections.badge_under_review")}</Badge>;
       case 'accepted':
-        return <Badge className="bg-emerald-50 text-emerald-800 border-emerald-300">مقبول — إلغاء الإسناد المؤقت</Badge>;
+        return <Badge className="bg-emerald-50 text-emerald-800 border-emerald-300">{t("objections.badge_accepted_cancel")}</Badge>;
       case 'rejected':
-        return <Badge className="bg-rose-50 text-rose-800 border-rose-300">مرفوض — تثبيت الإسناد</Badge>;
+        return <Badge className="bg-rose-50 text-rose-800 border-rose-300">{t("objections.badge_rejected_confirm")}</Badge>;
       case 'withdrawn':
-        return <Badge className="bg-slate-100 text-slate-700 border-slate-300">مسحوب بطلب المُطعِن</Badge>;
+        return <Badge className="bg-slate-100 text-slate-700 border-slate-300">{t("objections.badge_withdrawn_by_objector")}</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
@@ -70,12 +72,12 @@ export function ObjectionDetailModal({
           <div className="flex items-center justify-between gap-3">
             <DialogTitle className="text-lg font-bold text-slate-900 flex items-center gap-2">
               <ShieldAlert className="w-5 h-5 text-emerald-700" />
-              <span>ملف الطعن: {objection.reference}</span>
+              <span>{t('objections.detail_modal_title', { ref: objection.reference })}</span>
             </DialogTitle>
             {getStatusBadge(objection.status)}
           </div>
           <DialogDescription className="text-xs text-slate-500 mt-1">
-            وفق أحكام المادة 72 من القانون 23-12 المتعلق بالصفقات العمومية
+            {t('objections.detail_legal_basis')}
           </DialogDescription>
         </DialogHeader>
 
@@ -83,7 +85,7 @@ export function ObjectionDetailModal({
           {/* Tender & Subject Information */}
           <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
             <div className="flex justify-between items-center text-xs text-slate-500">
-              <span>الصفقة محل الطعن:</span>
+              <span>{t("objections.detail_deal_label")}</span>
               <span className="font-mono font-bold text-slate-800">{objection.tender_reference}</span>
             </div>
             {objection.tender_title && (
@@ -93,26 +95,26 @@ export function ObjectionDetailModal({
             )}
             <div className="flex flex-wrap gap-4 pt-2 border-t border-slate-200 text-xs text-slate-600">
               <div>
-                <span className="text-slate-500">نوع الطعن: </span>
-                <strong className="text-slate-800">{TYPE_LABELS[objection.objection_type] || objection.objection_type}</strong>
+                <span className="text-slate-500">{t("objections.detail_type_label")} </span>
+                <strong className="text-slate-800">{getTypeLabel(objection.objection_type, t) || objection.objection_type}</strong>
               </div>
               <div>
-                <span className="text-slate-500">المُطعِن: </span>
+                <span className="text-slate-500">{t("objections.detail_objector_label")} </span>
                 <strong className="text-slate-800">{objection.objector_name}</strong>
               </div>
             </div>
           </div>
 
-          {/* Grounds / الأسباب */}
+          {/* Grounds */}
           <div>
-            <h4 className="text-xs font-bold text-slate-700 mb-2">أسباب وأوجه الطعن القانونية:</h4>
+            <h4 className="text-xs font-bold text-slate-700 mb-2">{t("objections.detail_ground_label")}</h4>
             <div className="flex flex-wrap gap-2">
               {objection.grounds.map((g, idx) => (
                 <span
                   key={idx}
                   className="px-2.5 py-1 rounded-md text-xs font-semibold bg-emerald-50 text-emerald-900 border border-emerald-200"
                 >
-                  {GROUND_LABELS[g] || g}
+                  {getGroundLabel(g, t)}
                 </span>
               ))}
             </div>
@@ -120,7 +122,7 @@ export function ObjectionDetailModal({
 
           {/* Description */}
           <div>
-            <h4 className="text-xs font-bold text-slate-700 mb-1.5">بيان تفاصيل وأسباب الطعن:</h4>
+            <h4 className="text-xs font-bold text-slate-700 mb-1.5">{t("objections.detail_arguments_title")}</h4>
             <div className="p-3 rounded-lg bg-white border border-slate-200 text-slate-800 text-xs leading-relaxed whitespace-pre-wrap">
               {objection.description}
             </div>
@@ -142,25 +144,25 @@ export function ObjectionDetailModal({
                   <XCircle className="w-5 h-5 text-rose-700" />
                 )}
                 <span>
-                  قرار لجنة الصفقات: {objection.decision === 'accepted' ? 'قبول الطعن وإلغاء الإسناد المؤقت' : 'رفض الطعن وتثبيت الإسناد'}
+                  {t("objections.detail_decision_title")} {objection.decision === 'accepted' ? t('objections.decision_accept_title') : t('objections.decision_reject_title')}
                 </span>
               </div>
               <p className="text-xs leading-relaxed">
-                {objection.decision_reason || 'لا يوجد تبرير مرفق.'}
+                {objection.decision_reason || t('objections.detail_no_decision_reason')}
               </p>
               {objection.review_ended_at && (
                 <div className="text-[11px] text-slate-500 mt-2">
-                  تاريخ صدور القرار: {new Date(objection.review_ended_at).toLocaleString('ar-DZ')}
+                  {t('objections.detail_decision_date')} {new Date(objection.review_ended_at).toLocaleString(lang === 'fr' ? 'fr-DZ' : 'ar-DZ')}
                 </div>
               )}
             </div>
           )}
 
-          {/* Timeline / السجل الزمني */}
+          {/* Timeline */}
           <div>
             <h4 className="text-xs font-bold text-slate-700 mb-2.5 flex items-center gap-1.5">
               <History className="w-4 h-4 text-slate-600" />
-              <span>السجل الزمني للأحداث الإجرائية:</span>
+              <span>{t("objections.detail_timeline_title")}</span>
             </h4>
             <div className="space-y-2 border-s-2 border-slate-200 ms-2 ps-3 text-xs">
               {objection.timeline && objection.timeline.length > 0 ? (
@@ -168,14 +170,14 @@ export function ObjectionDetailModal({
                   <div key={idx} className="relative pb-3">
                     <div className="absolute -start-[19px] top-0 w-3 h-3 rounded-full bg-emerald-600 border-2 border-white ring-1 ring-emerald-200" />
                     <div className="flex items-center justify-between text-slate-500 text-[11px]">
-                      <span>{item.actor_name || 'النظام'}</span>
+                      <span>{item.actor_name || t('common.system')}</span>
                       <span>{new Date(item.created_at).toLocaleString('ar-DZ')}</span>
                     </div>
                     <div className="font-semibold text-slate-800 mt-0.5">{item.notes}</div>
                   </div>
                 ))
               ) : (
-                <div className="text-slate-400 text-xs">لا توجد أحداث مسجلة بعد.</div>
+                <div className="text-slate-400 text-xs">{t("objections.detail_no_timeline_events")}</div>
               )}
             </div>
           </div>
@@ -185,7 +187,7 @@ export function ObjectionDetailModal({
             <div className="flex items-center gap-2 min-w-0">
               <Lock className="w-4 h-4 text-emerald-700 shrink-0" />
               <div className="min-w-0">
-                <div className="text-[11px] text-slate-500">بصمة النزاهة الرقمية (SHA-256) — القانون 18-07:</div>
+                <div className="text-[11px] text-slate-500">{t("objections.detail_sha_fingerprint_notice")}</div>
                 <div className="font-mono text-[10px] text-slate-800 truncate select-all">{objection.checksum}</div>
               </div>
             </div>
@@ -196,7 +198,7 @@ export function ObjectionDetailModal({
               onClick={handleCopyChecksum}
             >
               {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
-              <span className="ms-1">{copied ? 'تم النسخ' : 'نسخ'}</span>
+              <span className="ms-1">{copied ? t('common.copied') : t('common.copy')}</span>
             </Button>
           </div>
         </div>
@@ -208,13 +210,13 @@ export function ObjectionDetailModal({
               size="sm"
               onClick={() => onWithdraw && onWithdraw(objection.id)}
             >
-              سحب الطعن
+              {t('objections.op_btn_withdraw')}
             </Button>
           ) : (
             <div />
           )}
           <Button variant="outline" size="sm" onClick={() => onOpenChange(false)}>
-            إغلاق
+            {t('common.close')}
           </Button>
         </DialogFooter>
       </DialogContent>

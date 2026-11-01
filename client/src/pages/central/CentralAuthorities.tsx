@@ -44,33 +44,32 @@ import {
 import { Meter, TableState, formatDZD, formatNumber } from './centralUi';
 
 /**
- * حوكمة المصالح المتعاقدة — ترتيب المصالح حسب مؤشر الالتزام بالآجال
- * ومؤشر الشفافية المحسوبين في الخادم (GET /api/central/reports/).
+ * Contracting Authorities Governance — ranking authorities by punctuality
+ * and composite transparency score (GET /api/central/reports/).
  */
 
-const STATUS_META: Record<string, { label: string; className: string }> = {
-  excellent: {
-    label: 'أداء ممتاز',
-    className: 'bg-emerald-50 text-emerald-800 border-emerald-300',
-  },
-  normal: {
-    label: 'أداء عادي',
-    className: 'bg-slate-50 text-slate-700 border-slate-300',
-  },
-  needs_support: {
-    label: 'تحتاج دعماً وتدريباً',
-    className: 'bg-amber-50 text-amber-800 border-amber-300',
-  },
-  infractions: {
-    label: 'بمخالفات مسجلة',
-    className: 'bg-red-50 text-red-800 border-red-300',
-  },
-};
-
-function statusMeta(status: string) {
+function getStatusMeta(status: string, t: (key: string) => string) {
+  const map: Record<string, { label: string; className: string }> = {
+    excellent: {
+      label: t('central.authorities.status_excellent'),
+      className: 'bg-emerald-50 text-emerald-800 border-emerald-300',
+    },
+    normal: {
+      label: t('central.authorities.status_normal'),
+      className: 'bg-slate-50 text-slate-700 border-slate-300',
+    },
+    needs_support: {
+      label: t('central.authorities.status_needs_support'),
+      className: 'bg-amber-50 text-amber-800 border-amber-300',
+    },
+    infractions: {
+      label: t('central.authorities.status_infractions'),
+      className: 'bg-red-50 text-red-800 border-red-300',
+    },
+  };
   return (
-    STATUS_META[status] ?? {
-      label: status || 'غير محدّد',
+    map[status] ?? {
+      label: status || t('central.authorities.status_unspecified'),
       className: 'bg-slate-50 text-slate-700 border-slate-300',
     }
   );
@@ -79,7 +78,7 @@ function statusMeta(status: string) {
 type RankedAuthority = CentralAuthorityReport & { rank: number };
 
 export function CentralAuthorities() {
-  const { dir } = useI18n();
+  const { dir, t } = useI18n();
   const { data, loading, error, reload } = useCentralResource(fetchCentralReports);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
@@ -89,7 +88,7 @@ export function CentralAuthorities() {
   const summary = data?.national_summary;
   const authorities = useMemo(() => data?.authorities ?? [], [data]);
 
-  /** الترتيب الوطني: الالتزام بالآجال أولاً ثم الشفافية ثم حجم النشاط. */
+  /** National ranking: punctuality first, then transparency, then volume. */
   const ranked = useMemo(() => {
     return [...authorities]
       .sort(
@@ -120,66 +119,72 @@ export function CentralAuthorities() {
   return (
     <div className="space-y-4" dir={dir}>
       <PageHeader
-        title="حوكمة المصالح المتعاقدة"
+        title={t('central.authorities.title')}
         titleClassName="text-xl font-bold"
-        description="ترتيب المصالح والهيئات المتعاقدة وفق مؤشر الالتزام بالآجال القانونية ومؤشر الشفافية المركب المحسوبين من بيانات الصفقات والجلسات والإنذارات."
+        description={t('central.authorities.description')}
         actions={
           <Button
             variant="outline"
             size="sm"
             onClick={reload}
             disabled={loading}
-            className="h-8 text-xs font-semibold"
+            className="h-8 text-xs font-semibold gap-1.5"
           >
             <RefreshCw className="size-3.5" aria-hidden="true" />
-            تحديث البيانات
+            {t('central.authorities.refresh')}
           </Button>
         }
       />
 
       <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
         <KpiCard
-          eyebrow="المصالح المتعاقدة"
+          eyebrow={t('central.authorities.kpi_authorities')}
           value={formatNumber(summary?.total_authorities ?? authorities.length)}
           icon={Building}
           accent="navy"
-          description={`الحجم الوطني المسجّل: ${formatDZD(summary?.total_volume_dzd ?? 0)}`}
+          description={t('central.authorities.kpi_national_volume', {
+            volume: formatDZD(summary?.total_volume_dzd ?? 0),
+          })}
         />
         <KpiCard
-          eyebrow="متوسط الالتزام بالآجال"
+          eyebrow={t('central.authorities.kpi_avg_punctuality')}
           value={`${formatNumber(summary?.average_compliance_rate ?? 0)}%`}
           icon={CheckCircle2}
           accent="emerald"
-          description={`على ${formatNumber(summary?.total_deals ?? 0)} صفقة مسجّلة`}
+          description={t('central.authorities.kpi_deals_counted', {
+            count: formatNumber(summary?.total_deals ?? 0),
+          })}
         />
         <KpiCard
-          eyebrow="متوسط مؤشر الشفافية"
+          eyebrow={t('central.authorities.kpi_avg_transparency')}
           value={`${formatNumber(summary?.average_transparency_rate ?? 0)}%`}
           icon={ShieldCheck}
           accent="gold"
-          description="دفاتر شروط مؤشّرة وجلسات فتح علنية"
+          description={t('central.authorities.kpi_transparency_sub')}
         />
         <KpiCard
-          eyebrow="مصالح بمخالفات"
+          eyebrow={t('central.authorities.kpi_with_infractions')}
           value={formatNumber(infractionsCount)}
           icon={AlertTriangle}
           accent="red"
-          description="تحتاج متابعة رقابية فورية"
+          description={t('central.authorities.kpi_infractions_sub')}
         />
       </div>
 
       <AICard
-        title="توصيات الدعم والتدريب (استشارية)"
+        title={t('central.authorities.advisory_title')}
         subtitle={
           trainingNeeded.length > 0
-            ? `${formatNumber(trainingNeeded.length)} مصلحة مصنّفة بحاجة إلى دعم تقني أو تكويني`
-            : 'لا توجد حالياً مصالح مصنّفة بحاجة إلى تدريب وفق المؤشرات الحالية'
+            ? t('central.authorities.training_needed_count', {
+                count: formatNumber(trainingNeeded.length),
+              })
+            : t('central.authorities.training_not_needed')
         }
       >
         {trainingNeeded.length === 0 ? (
           <p className="flex items-center gap-2 text-xs text-[var(--color-text-secondary)]">
             <HelpCircle className="size-3.5" aria-hidden="true" />
-            جميع المصالح داخل العتبات المقبولة لمؤشرَي الالتزام والشفافية.
+            {t('central.authorities.all_within_thresholds')}
           </p>
         ) : (
           <ul className="space-y-2">
@@ -192,10 +197,11 @@ export function CentralAuthorities() {
                 <div>
                   <div className="text-xs font-bold text-amber-950">{item.name}</div>
                   <p className="mt-0.5 text-xs leading-relaxed text-amber-900">
-                    الالتزام بالآجال {formatNumber(item.compliance_rate)}% · الشفافية{' '}
-                    {formatNumber(item.transparency_rate)}% · شبهات مسجّلة{' '}
-                    {formatNumber(item.suspicions_count)} — التوصية: مراجعة إجراءات الإعداد وفتح
-                    الأظرفة مع هذه المصلحة.
+                    {t('central.authorities.training_card_desc', {
+                      compliance: formatNumber(item.compliance_rate),
+                      transparency: formatNumber(item.transparency_rate),
+                      suspicions: formatNumber(item.suspicions_count),
+                    })}
                   </p>
                 </div>
               </li>
@@ -208,10 +214,10 @@ export function CentralAuthorities() {
         <CardHeader className="flex flex-col gap-3 border-b border-gray-200 pb-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <CardTitle className="text-base font-bold text-[var(--ink-900)]">
-              الترتيب الوطني لأداء المصالح المتعاقدة
+              {t('central.authorities.ranking_title')}
             </CardTitle>
             <CardDescription className="mt-0.5 text-xs text-gray-500">
-              ترتيب تنازلي حسب مؤشر الالتزام بالآجال ثم مؤشر الشفافية
+              {t('central.authorities.ranking_subtitle')}
             </CardDescription>
           </div>
 
@@ -223,10 +229,10 @@ export function CentralAuthorities() {
               />
               <input
                 type="text"
-                placeholder="بحث باسم المصلحة أو الولاية…"
+                placeholder={t('central.authorities.search_placeholder')}
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
-                aria-label="بحث في المصالح المتعاقدة"
+                aria-label={t('central.authorities.search_aria')}
                 className="ps-8 pe-3 py-1 text-xs h-8 rounded-lg border border-gray-200 bg-white text-[var(--ink-900)] focus:outline-none focus:ring-1 focus:ring-[var(--stamp-green-700)]"
               />
             </div>
@@ -234,14 +240,14 @@ export function CentralAuthorities() {
             <select
               value={filterStatus}
               onChange={(event) => setFilterStatus(event.target.value)}
-              aria-label="تصفية حسب التقييم"
+              aria-label={t('central.authorities.filter_eval_aria')}
               className="px-2.5 py-1 text-xs h-8 rounded-lg border border-gray-200 bg-white text-[var(--ink-900)] focus:outline-none focus:ring-1 focus:ring-[var(--stamp-green-700)]"
             >
-              <option value="all">كل التقييمات</option>
-              <option value="excellent">ممتازة</option>
-              <option value="normal">عادية</option>
-              <option value="needs_support">تحتاج دعماً</option>
-              <option value="infractions">بمخالفات</option>
+              <option value="all">{t('central.authorities.all_evaluations')}</option>
+              <option value="excellent">{t('central.authorities.eval_excellent')}</option>
+              <option value="normal">{t('central.authorities.eval_normal')}</option>
+              <option value="needs_support">{t('central.authorities.eval_needs_support')}</option>
+              <option value="infractions">{t('central.authorities.eval_infractions')}</option>
             </select>
           </div>
         </CardHeader>
@@ -250,16 +256,16 @@ export function CentralAuthorities() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[70px] text-center">الرتبة</TableHead>
-                <TableHead className="min-w-[240px]">المصلحة المتعاقدة</TableHead>
-                <TableHead>الولاية</TableHead>
-                <TableHead className="text-center">الصفقات</TableHead>
-                <TableHead className="text-center">المتأخرة</TableHead>
-                <TableHead className="text-end">حجم الصفقات</TableHead>
-                <TableHead className="text-center">الالتزام بالآجال</TableHead>
-                <TableHead className="text-center">الشفافية</TableHead>
-                <TableHead className="text-center">شبهات</TableHead>
-                <TableHead>التقييم</TableHead>
+                <TableHead className="w-[70px] text-center">{t('central.authorities.col_rank')}</TableHead>
+                <TableHead className="min-w-[240px]">{t('central.authorities.col_authority')}</TableHead>
+                <TableHead>{t('central.authorities.col_wilaya')}</TableHead>
+                <TableHead className="text-center">{t('central.authorities.col_deals')}</TableHead>
+                <TableHead className="text-center">{t('central.authorities.col_delayed')}</TableHead>
+                <TableHead className="text-end">{t('central.authorities.col_volume')}</TableHead>
+                <TableHead className="text-center">{t('central.authorities.col_punctuality')}</TableHead>
+                <TableHead className="text-center">{t('central.authorities.col_transparency')}</TableHead>
+                <TableHead className="text-center">{t('central.authorities.col_suspicions')}</TableHead>
+                <TableHead>{t('central.authorities.col_evaluation')}</TableHead>
                 <TableHead className="w-[70px]" />
               </TableRow>
             </TableHeader>
@@ -269,11 +275,15 @@ export function CentralAuthorities() {
                 loading={loading && !data}
                 error={error}
                 empty={!loading && filtered.length === 0}
-                emptyLabel="لا توجد مصالح متعاقدة مطابقة للبحث أو التصفية الحالية."
+                emptyLabel={
+                  authorities.length === 0
+                    ? t('central.authorities.no_registered_authorities')
+                    : t('central.authorities.empty_authorities')
+                }
                 onRetry={reload}
               >
                 {filtered.map((item) => {
-                  const meta = statusMeta(item.status);
+                  const meta = getStatusMeta(item.status, t);
                   return (
                     <TableRow key={item.id} className="transition-colors hover:bg-slate-50/70">
                       <TableCell className="text-center py-2.5">
@@ -344,10 +354,10 @@ export function CentralAuthorities() {
                             setSelectedAuth(item);
                             setIsSheetOpen(true);
                           }}
-                          className="h-7 px-2 text-xs text-[var(--stamp-green-700)] hover:bg-slate-100"
+                          className="h-7 px-2 text-xs text-[var(--stamp-green-700)] hover:bg-slate-100 gap-1"
                         >
                           <Eye className="size-3" aria-hidden="true" />
-                          عرض
+                          {t('central.authorities.btn_view')}
                         </Button>
                       </TableCell>
                     </TableRow>
@@ -359,11 +369,15 @@ export function CentralAuthorities() {
 
           <div className="flex flex-wrap items-center justify-between gap-2 border-t border-gray-200 px-4 py-2.5 text-xs text-[var(--ink-500)]">
             <span>
-              عرض {formatNumber(filtered.length)} من أصل {formatNumber(authorities.length)} مصلحة
-              متعاقدة
+              {t('central.authorities.showing_count', {
+                count: formatNumber(filtered.length),
+                total: formatNumber(authorities.length),
+              })}
             </span>
             <span className="font-mono">
-              متوسط الشفافية الوطني: {formatNumber(summary?.average_transparency_rate ?? 0)}%
+              {t('central.authorities.national_avg_transparency', {
+                rate: formatNumber(summary?.average_transparency_rate ?? 0),
+              })}
             </span>
           </div>
         </CardContent>
@@ -374,43 +388,57 @@ export function CentralAuthorities() {
           {selectedAuth && (
             <div className="space-y-4">
               <SheetHeader className="space-y-1 border-b border-gray-200 pb-3 text-start">
-                <span className="text-[11px] font-semibold text-slate-500">بطاقة الرقابة الإدارية</span>
+                <span className="text-[11px] font-semibold text-slate-500">
+                  {t('central.authorities.drawer_badge')}
+                </span>
                 <SheetTitle className="text-base font-bold text-[var(--ink-900)]">
                   {selectedAuth.name || '—'}
                 </SheetTitle>
                 <SheetDescription className="mt-0.5 text-xs text-[var(--ink-500)]">
-                  الرتبة الوطنية #{selectedAuth.rank} · الولاية: {selectedAuth.wilaya || '—'} ·{' '}
-                  {selectedAuth.email}
+                  {t('central.authorities.drawer_header_info', {
+                    rank: selectedAuth.rank,
+                    wilaya: selectedAuth.wilaya || '—',
+                    deals: selectedAuth.deals_count,
+                  })}{' '}
+                  · {selectedAuth.email}
                 </SheetDescription>
               </SheetHeader>
 
               <div className="grid grid-cols-2 gap-2.5 text-xs">
-                <DetailTile label="الصفقات المدارة" value={formatNumber(selectedAuth.deals_count)} />
                 <DetailTile
-                  label="الصفقات النشطة"
+                  label={t('central.authorities.detail_total_deals')}
+                  value={formatNumber(selectedAuth.deals_count)}
+                />
+                <DetailTile
+                  label={t('central.authorities.detail_active_deals')}
                   value={formatNumber(selectedAuth.active_deals_count)}
                 />
                 <DetailTile
-                  label="المكتملة"
+                  label={t('central.authorities.detail_completed_deals')}
                   value={formatNumber(selectedAuth.completed_deals_count)}
                 />
                 <DetailTile
-                  label="المتأخرة"
+                  label={t('central.authorities.detail_delayed_deals')}
                   value={formatNumber(selectedAuth.delayed_deals_count)}
                   tone="red"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-2.5 text-xs">
-                <DetailTile label="الالتزام بالآجال" value={`${formatNumber(selectedAuth.compliance_rate)}%`} />
                 <DetailTile
-                  label="مؤشر الشفافية"
+                  label={t('central.authorities.detail_compliance')}
+                  value={`${formatNumber(selectedAuth.compliance_rate)}%`}
+                />
+                <DetailTile
+                  label={t('central.authorities.detail_transparency')}
                   value={`${formatNumber(selectedAuth.transparency_rate)}%`}
                 />
               </div>
 
               <div className="rounded-lg border border-gray-200 bg-white p-2.5">
-                <div className="mb-0.5 text-xs text-[var(--ink-500)]">الحجم المالي الكلي</div>
+                <div className="mb-0.5 text-xs text-[var(--ink-500)]">
+                  {t('central.authorities.detail_total_volume')}
+                </div>
                 <div className="font-mono text-sm font-bold text-[var(--ink-900)]">
                   {formatDZD(selectedAuth.total_volume_dzd)}
                 </div>
@@ -419,18 +447,20 @@ export function CentralAuthorities() {
               <div className="rounded-xl border border-gray-200 bg-slate-50 p-3.5">
                 <div className="mb-1.5 flex items-center gap-1.5 text-xs font-bold text-[var(--ink-900)]">
                   <ShieldCheck className="size-4 text-[var(--stamp-green-700)]" aria-hidden="true" />
-                  <span>الملاحظات الرقابية</span>
+                  <span>{t('central.authorities.detail_control_notes')}</span>
                 </div>
                 <p className="text-xs leading-relaxed text-[var(--ink-700)]">
-                  شبهات مسجّلة: {formatNumber(selectedAuth.suspicions_count)} · التقييم:{' '}
-                  {statusMeta(selectedAuth.status).label} ·{' '}
+                  {t('central.authorities.detail_suspicions_line', {
+                    suspicions: formatNumber(selectedAuth.suspicions_count),
+                    status: getStatusMeta(selectedAuth.status, t).label,
+                  })}{' '}
+                  ·{' '}
                   {selectedAuth.ai_training_needed
-                    ? 'مصنّفة ضمن المصالح التي تحتاج دعماً وتدريباً.'
-                    : 'لا توجد حاجة تدريبية مسجّلة حالياً.'}
+                    ? t('central.authorities.detail_training_needed')
+                    : t('central.authorities.detail_training_not_needed')}
                 </p>
                 <p className="mt-1.5 text-xs leading-relaxed text-[var(--ink-500)]">
-                  المؤشرات محسوبة آلياً من الصفقات ودفاتر الشروط وجلسات فتح الأظرفة؛ وهي استشارية
-                  ولا تُغني عن المراجعة البشرية المختصة.
+                  {t('central.authorities.detail_disclaimer')}
                 </p>
               </div>
             </div>

@@ -51,7 +51,7 @@ export function AuthoritySessionControl() {
   const params = useParams<{ id: string }>();
   const id = params.id;
   const [, setLocation] = useLocation();
-  const { t, dir } = useI18n();
+  const { t, lang, dir } = useI18n();
 
   const { data: session, isLoading, error } = useOpeningSession(id || null);
   const { data: dealOffers, isLoading: offersLoading } = useSessionOffers(
@@ -80,7 +80,7 @@ export function AuthoritySessionControl() {
       const filename = `PV_Opening_${session.tender_reference || session.id}.pdf`;
       await downloadPdfBlob(`/procurements/sessions/${session.id}/pdf/`, filename);
     } catch (err: any) {
-      alert("تعذر تصدير محضر الجلسة PDF. يرجى التأكد من استقرار الاتصال بالخادم.");
+      alert(t("opening.pdf_export_error"));
     } finally {
       setIsDownloadingPdf(false);
     }
@@ -167,18 +167,16 @@ export function AuthoritySessionControl() {
       <div className="p-8 text-center space-y-4">
         <AlertCircle className="w-12 h-12 text-destructive mx-auto" />
         <h2 className="text-xl font-bold text-navy-900">
-          تعذر تحميل بيانات جلسة فتح الأظرفة
+          {t("opening.load_session_error")}
         </h2>
-        <p className="text-sm text-muted-foreground">
-          الجلسة المطلوبة غير موجودة أو انتهت صلاحية الوصول إليها.
-        </p>
+        <p className="text-sm text-muted-foreground">{t("opening.session_not_found")}</p>
         <Button
           onClick={() => setLocation("/authority/opening-sessions")}
           variant="outline"
           className="rounded-xl text-xs gap-2"
         >
           <ArrowIcon className="w-4 h-4" />
-          <span>العودة لقائمة الجلسات</span>
+          <span>{t("opening.back_to_sessions")}</span>
         </Button>
       </div>
     );
@@ -210,7 +208,7 @@ export function AuthoritySessionControl() {
             className="rounded-xl text-xs gap-1.5"
           >
             <ArrowIcon className="w-4 h-4" />
-            <span>جلسات الفتح</span>
+            <span>{t("opening.sessions_breadcrumb")}</span>
           </Button>
 
           <span className="text-xs font-mono font-bold bg-slate-100 dark:bg-slate-800 text-navy-900 px-2.5 py-1 rounded-md border border-slate-200">
@@ -218,7 +216,7 @@ export function AuthoritySessionControl() {
           </span>
         </div>
 
-        {/* Badge قانون 18-07 */}
+        {/* Badge Law 18-07 */}
         <div className="flex items-center gap-2">
           <Badge
             variant="outline"
@@ -265,7 +263,7 @@ export function AuthoritySessionControl() {
 
                 <span className="text-xs text-muted-foreground flex items-center gap-1">
                   <MapPin className="w-3.5 h-3.5" />
-                  {session.location || "المقر الرئيسي"}
+                  {session.location || t("opening.location_hq")}
                 </span>
 
                 {session.stream_url && (
@@ -276,7 +274,7 @@ export function AuthoritySessionControl() {
                     className="text-xs text-blue-600 hover:underline flex items-center gap-1 ms-2"
                   >
                     <Video className="w-3.5 h-3.5" />
-                    <span>رابط البث الحي</span>
+                    <span>{t("opening.live_stream_link")}</span>
                   </a>
                 )}
               </div>
@@ -286,19 +284,19 @@ export function AuthoritySessionControl() {
               </CardTitle>
 
               <CardDescription className="text-xs text-slate-500">
-                تاريخ الجلسة:{" "}
+                {t("opening.session_date_label")}{" "}
                 <strong className="text-navy-900">
                   {new Date(session.scheduled_at).toLocaleString("ar-DZ")}
                 </strong>
                 {session.started_at && (
                   <span className="ms-3">
-                    بدأت:{" "}
+                    {t("opening.session_started_label")}{" "}
                     <strong>{new Date(session.started_at).toLocaleTimeString("ar-DZ")}</strong>
                   </span>
                 )}
                 {session.ended_at && (
                   <span className="ms-3">
-                    انتهت:{" "}
+                    {t("opening.session_ended_label")}{" "}
                     <strong>{new Date(session.ended_at).toLocaleTimeString("ar-DZ")}</strong>
                   </span>
                 )}
@@ -312,10 +310,10 @@ export function AuthoritySessionControl() {
                 onClick={handleDownloadPdf}
                 disabled={isDownloadingPdf}
                 className="border-slate-300 hover:bg-slate-100 text-slate-800 font-bold text-xs gap-1.5 rounded-xl shadow-sm px-3.5 py-2"
-                title="تصدير وتحميل محضر وقائع جلسة فتح الأظرفة بصيغة PDF قابلة للطباعة والأرشفة"
+                title={t("opening.download_minutes_tooltip")}
               >
                 <FileText className="w-4 h-4 text-blue-700" />
-                <span>{isDownloadingPdf ? "جاري التوليد..." : "تحميل المحضر (PDF)"}</span>
+                <span>{isDownloadingPdf ? t("opening.generating") : t("opening.download_minutes_pdf")}</span>
               </Button>
 
               {isScheduled && (
@@ -326,7 +324,7 @@ export function AuthoritySessionControl() {
                 >
                   <PlayCircle className="w-4 h-4" />
                   <span>
-                    {startMutation.isPending ? "جاري البدء..." : t("opening.start")}
+                    {startMutation.isPending ? t("opening.starting") : t("opening.start")}
                   </span>
                 </Button>
               )}
@@ -355,11 +353,11 @@ export function AuthoritySessionControl() {
                 <span className="font-bold text-navy-900 font-mono">
                   {session.opened_count}
                 </span>{" "}
-                من إجمالي{" "}
+                {t("opening.of_total")}{" "}
                 <span className="font-bold text-navy-900 font-mono">
                   {session.total_offers}
                 </span>{" "}
-                عروض مودعة
+                {t("opening.deposited_offers")}
               </span>
               <span className="font-bold text-navy-900 font-mono text-sm">
                 {progress}%
@@ -388,14 +386,14 @@ export function AuthoritySessionControl() {
                 <div>
                   <CardTitle className="text-base font-bold text-navy-900 flex items-center gap-2">
                     <Layers className="w-4 h-4 text-emerald-600" />
-                    <span>قائمة العروض المودعة للإجراء</span>
+                    <span>{t("opening.deposited_offers_title")}</span>
                   </CardTitle>
                   <CardDescription className="text-xs">
-                    فتح الأظرفة علنياً وتسجيل السعر المُعلن والتحفظات أمام الحضور
+                    {t("opening.deposited_offers_desc")}
                   </CardDescription>
                 </div>
                 <Badge variant="secondary" className="font-mono text-xs">
-                  {dealOffers?.length ?? session.total_offers} عروض
+                  {t("opening.offers_count", { count: dealOffers?.length ?? session.total_offers })}
                 </Badge>
               </div>
             </CardHeader>
@@ -430,12 +428,12 @@ export function AuthoritySessionControl() {
                               #{idx + 1}
                             </span>
                             <span className="font-bold text-sm text-navy-900">
-                              {offer.operator_name || offer.operator || "متعامل اقتصادي"}
+                              {offer.operator_name || offer.operator || t("opening.default_operator")}
                             </span>
                             {isOpened && (
                               <Badge className="bg-emerald-100 text-emerald-800 hover:bg-emerald-100 text-[11px] px-2 py-0.5 border border-emerald-200">
                                 <CheckCircle2 className="w-3 h-3 me-1" />
-                                <span>تم الفتح</span>
+                                <span>{t("opening.status_opened")}</span>
                               </Badge>
                             )}
                           </div>
@@ -443,21 +441,21 @@ export function AuthoritySessionControl() {
                           <div className="text-xs text-muted-foreground flex items-center gap-3">
                             {offer.financial_amount != null && (
                               <span>
-                                السعر المقترح في العرض:{" "}
+                                {t("opening.proposed_price_label")}{" "}
                                 <strong className="text-navy-900 font-mono">
                                   {Number(offer.financial_amount).toLocaleString("ar-DZ")}{" "}
-                                  دج
+                                  {t("common.dzd")}
                                 </strong>
                               </span>
                             )}
                             {matchingEvent && matchingEvent.announced_price != null && (
                               <span className="text-emerald-700 font-medium">
-                                المُعلن رسمياً:{" "}
+                                {t("opening.announced_officially_label")}{" "}
                                 <strong className="font-mono">
                                   {Number(matchingEvent.announced_price).toLocaleString(
                                     "ar-DZ"
                                   )}{" "}
-                                  دج
+                                  {t("common.dzd")}
                                 </strong>
                               </span>
                             )}
@@ -472,7 +470,7 @@ export function AuthoritySessionControl() {
                               disabled={!isLive || openOfferMutation.isPending}
                               title={
                                 !isLive
-                                ? "يجب بدء الجلسة أولاً لفتح الأظرفة"
+                                ? t("opening.must_start_first_tooltip")
                                 : undefined
                               }
                               className="bg-navy-900 hover:bg-navy-800 text-white font-bold text-xs gap-1.5 rounded-xl whitespace-nowrap shadow-xs"
@@ -489,7 +487,7 @@ export function AuthoritySessionControl() {
               ) : (
                 <div className="p-8 text-center text-muted-foreground text-xs space-y-2">
                   <FileText className="w-8 h-8 text-slate-300 mx-auto" />
-                  <p>لا توجد عروض مودعة في قاعدة البيانات لهذه الصفقة بعد.</p>
+                  <p>{t("opening.no_offers_yet")}</p>
                 </div>
               )}
             </CardContent>
@@ -503,11 +501,11 @@ export function AuthoritySessionControl() {
               <div className="flex items-center justify-between">
                 <CardTitle className="text-base font-bold text-navy-900 flex items-center gap-2">
                   <History className="w-4 h-4 text-blue-600" />
-                  <span>محضر وقائع الجلسة العلنية</span>
+                  <span>{t("opening.minutes_records_title")}</span>
                 </CardTitle>
                 <div className="flex items-center gap-2">
                   <Badge variant="outline" className="text-[11px] font-mono">
-                    {session.events.length} وقائع
+                    {t("opening.events_count", { count: session.events.length })}
                   </Badge>
                   <Button
                     variant="ghost"
@@ -515,15 +513,15 @@ export function AuthoritySessionControl() {
                     onClick={handleDownloadPdf}
                     disabled={isDownloadingPdf}
                     className="h-7 text-xs text-blue-700 hover:text-blue-800 hover:bg-blue-50 px-2 rounded-lg gap-1 font-semibold"
-                    title="تصدير المحضر بصيغة PDF"
+                    title={t("opening.export_minutes_pdf_tooltip")}
                   >
                     <Download className="w-3.5 h-3.5" />
-                    <span>تصدير PDF</span>
+                    <span>{t("opening.export_pdf")}</span>
                   </Button>
                 </div>
               </div>
               <CardDescription className="text-xs">
-                تسجيل زمني لكافة العمليات والأظرفة المفتوحة
+                {t("opening.records_timeline_desc")}
               </CardDescription>
             </CardHeader>
 
@@ -545,7 +543,7 @@ export function AuthoritySessionControl() {
                             <span className="font-bold text-navy-900">
                               {event.operator_display ||
                                 event.operator_label ||
-                                "عرض متعهد"}
+                                t("opening.bidder_offer")}
                             </span>
                           </div>
 
@@ -567,7 +565,7 @@ export function AuthoritySessionControl() {
                               {t("opening.announced_price")}:
                             </span>
                             <span className="font-mono font-bold text-navy-900 text-sm">
-                              {Number(event.announced_price).toLocaleString("ar-DZ")} دج
+                              {Number(event.announced_price).toLocaleString(lang === "fr" ? "fr-DZ" : "ar-DZ")} {t("common.dzd")}
                             </span>
                           </div>
                         )}
@@ -575,11 +573,11 @@ export function AuthoritySessionControl() {
                         <div className="flex items-center justify-between pt-1">
                           {isAcceptedEvent ? (
                             <Badge className="bg-emerald-100 text-emerald-800 hover:bg-emerald-100 text-[10px] px-2 py-0.5">
-                              مقبول نظامياً
+                              {t("opening.status_accepted")}
                             </Badge>
                           ) : (
                             <Badge className="bg-red-100 text-red-800 hover:bg-red-100 text-[10px] px-2 py-0.5">
-                              مرفوض / غير مستوف
+                              {t("opening.status_rejected")}
                             </Badge>
                           )}
 
@@ -610,26 +608,26 @@ export function AuthoritySessionControl() {
           <DialogHeader>
             <DialogTitle className="text-base font-bold text-navy-900 flex items-center gap-2">
               <FileText className="w-4 h-4 text-emerald-600" />
-              <span>فتح العرض وإعلان السعر</span>
+              <span>{t("opening.modal_open_title")}</span>
             </DialogTitle>
             <DialogDescription className="text-xs">
-              تسجيل عملية فتح الظرف وإعلان السعر المالي أمام الحضور ولجنة فتح الأظرفة
+              {t("opening.modal_open_desc")}
             </DialogDescription>
           </DialogHeader>
 
           {selectedOffer && (
             <form onSubmit={handleSubmitOpenOffer} className="space-y-4 pt-2">
               <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/50 border text-xs space-y-1">
-                <span className="text-muted-foreground block">المتعامل الاقتصادي:</span>
+                <span className="text-muted-foreground block">{t("opening.modal_operator_label")}</span>
                 <strong className="text-navy-900 text-sm block">
-                  {selectedOffer.operator_name || selectedOffer.operator || "متعامل اقتصادي"}
+                  {selectedOffer.operator_name || selectedOffer.operator || t("opening.default_operator")}
                 </strong>
               </div>
 
               {/* Announced Price Input */}
               <div className="space-y-1.5">
                 <Label htmlFor="price" className="text-xs font-semibold">
-                  {t("opening.announced_price")} (دج) *
+                  {t("opening.announced_price")} ({t("common.dzd")}) *
                 </Label>
                 <div className="relative">
                   <Input
@@ -644,7 +642,7 @@ export function AuthoritySessionControl() {
                     className="text-sm font-mono font-bold rounded-xl pe-12"
                   />
                   <span className="absolute end-3 top-1/2 -translate-y-1/2 text-xs font-bold text-muted-foreground">
-                    دج
+                    {t("common.dzd")}
                   </span>
                 </div>
               </div>
@@ -662,19 +660,19 @@ export function AuthoritySessionControl() {
                   htmlFor="is_accepted"
                   className="text-xs font-medium cursor-pointer"
                 >
-                  استيفاء الشروط الشكلية للظرف (قبول العرض نظامياً)
+                  {t("opening.formal_compliance_label")}
                 </Label>
               </div>
 
               {/* Notes Input */}
               <div className="space-y-1.5">
                 <Label htmlFor="notes" className="text-xs font-semibold">
-                  ملاحظات أو تحفظات الجلسة (اختياري)
+                  {t("opening.remarks_label")}
                 </Label>
                 <textarea
                   id="notes"
                   rows={2}
-                  placeholder="أي ملاحظات أبدتها اللجنة أو المتعهد أثناء فتح الظرف..."
+                  placeholder={t("opening.remarks_placeholder")}
                   value={offerNotes}
                   onChange={(e) => setOfferNotes(e.target.value)}
                   className="w-full rounded-xl border border-input bg-background p-2.5 text-xs ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
@@ -688,14 +686,14 @@ export function AuthoritySessionControl() {
                   onClick={() => setIsDialogOpen(false)}
                   className="rounded-xl text-xs"
                 >
-                  إلغاء
+                  {t("common.cancel")}
                 </Button>
                 <Button
                   type="submit"
                   disabled={openOfferMutation.isPending}
                   className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl"
                 >
-                  {openOfferMutation.isPending ? "جاري التسجيل..." : "تأكيد وإعلان السعر"}
+                  {openOfferMutation.isPending ? t("opening.saving") : t("opening.btn_confirm_open")}
                 </Button>
               </DialogFooter>
             </form>
@@ -712,8 +710,7 @@ export function AuthoritySessionControl() {
               <span>{t("opening.end")}</span>
             </DialogTitle>
             <DialogDescription className="text-xs">
-              هل أنت متأكد من اختتام جلسة فتح الأظرفة؟ سيتم تثبيت كافة الوقائع المسجلة وإغلاق
-              البث المباشر رسمياً.
+              {t("opening.modal_end_desc")}
             </DialogDescription>
           </DialogHeader>
 
@@ -724,7 +721,7 @@ export function AuthoritySessionControl() {
               onClick={() => setIsEndConfirmOpen(false)}
               className="rounded-xl text-xs"
             >
-              متابعة الجلسة
+              {t("opening.btn_continue_session")}
             </Button>
             <Button
               type="button"
@@ -733,7 +730,7 @@ export function AuthoritySessionControl() {
               onClick={handleEndSession}
               className="font-bold text-xs rounded-xl"
             >
-              {endMutation.isPending ? "جاري الاختتام..." : "تأكيد إنهاء الجلسة"}
+              {endMutation.isPending ? t("opening.ending") : t("opening.btn_confirm_end")}
             </Button>
           </DialogFooter>
         </DialogContent>

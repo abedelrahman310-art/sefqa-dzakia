@@ -1,3 +1,4 @@
+import { useI18n } from "@/i18n";
 import { useState, useEffect } from 'react';
 import {
   ShieldAlert,
@@ -14,7 +15,7 @@ import {
 import { toast } from 'sonner';
 import { objectionsApi } from '../api/objections';
 import type { ObjectionListItem, ObjectionDetailItem } from '../types';
-import { GROUND_LABELS, TYPE_LABELS } from '../types';
+import { getGroundLabel, getTypeLabel } from '../types';
 import { ObjectionSubmissionModal } from './ObjectionSubmissionModal';
 import { ObjectionDetailModal } from './ObjectionDetailModal';
 
@@ -25,17 +26,25 @@ const getRemainingMs = (deadlineAt: string, now: number): number => {
   return Number.isFinite(deadline) ? deadline - now : 0;
 };
 
-const formatRemaining = (remainingMs: number): string => {
-  if (remainingMs <= 0) return 'انقضى الأجل';
+const formatRemaining = (remainingMs: number, t: (k: string, v?: any) => string): string => {
+  if (remainingMs <= 0) return t('objections.op_deadline_expired');
 
   const totalMinutes = Math.floor(remainingMs / 60_000);
   const days = Math.floor(totalMinutes / 1_440);
   const hours = Math.floor((totalMinutes % 1_440) / 60);
   const minutes = totalMinutes % 60;
 
-  if (days > 0) return `${days} يوم${hours > 0 ? ` و${hours} ساعة` : ''}`;
-  if (hours > 0) return `${hours} ساعة${minutes > 0 ? ` و${minutes} دقيقة` : ''}`;
-  return `${Math.max(minutes, 1)} دقيقة`;
+  if (days > 0) {
+    return hours > 0
+      ? t('objections.op_deadline_days_hours', { days, hours })
+      : t('objections.op_deadline_days', { days });
+  }
+  if (hours > 0) {
+    return minutes > 0
+      ? t('objections.op_deadline_hours_mins', { hours, minutes })
+      : t('objections.op_deadline_hours', { hours });
+  }
+  return t('objections.op_deadline_mins', { minutes: Math.max(minutes, 1) });
 };
 
 const formatDeadline = (deadlineAt: string): string =>
@@ -45,6 +54,7 @@ const formatDeadline = (deadlineAt: string): string =>
   });
 
 function ObjectionCountdown({ deadlineAt, now }: { deadlineAt: string; now: number }) {
+  const { t } = useI18n();
   const remaining = getRemainingMs(deadlineAt, now);
   const isExpired = remaining <= 0;
   const isUrgent = !isExpired && remaining < THREE_DAYS_MS;
@@ -54,15 +64,16 @@ function ObjectionCountdown({ deadlineAt, now }: { deadlineAt: string; now: numb
       className={`flex items-center gap-1.5 text-xs font-bold ${
         isExpired || isUrgent ? 'text-rose-700' : 'text-[var(--op-gold-dark)]'
       }`}
-      title={`آخر أجل: ${formatDeadline(deadlineAt)}`}
+      title={t('objections.op_deadline_tooltip', { date: formatDeadline(deadlineAt) })}
     >
       <Clock className="size-3.5" aria-hidden="true" />
-      <span>{formatRemaining(remaining)}</span>
+      <span>{formatRemaining(remaining, t)}</span>
     </span>
   );
 }
 
 export function OperatorObjectionsView() {
+  const { t, lang, dir } = useI18n();
   const [objections, setObjections] = useState<ObjectionListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -80,7 +91,7 @@ export function OperatorObjectionsView() {
       const data = await objectionsApi.list();
       setObjections(data || []);
     } catch (err) {
-      toast.error('تعذر تحميل قائمة الطعون الخاصة بك.');
+      toast.error(t('objections.op_load_error'));
     } finally {
       setLoading(false);
     }
@@ -102,38 +113,38 @@ export function OperatorObjectionsView() {
       setSelectedDetail(detail);
       setDetailModalOpen(true);
     } catch (err) {
-      toast.error('تعذر تحميل تفاصيل الطعن.');
+      toast.error(t('objections.op_load_detail_error'));
     } finally {
       setFetchingDetail(false);
     }
   };
 
   const handleWithdraw = async (id: string) => {
-    if (!window.confirm('هل أنت متأكد من رغبتك في سحب هذا الطعن؟ الإجراء نهائي ولا يمكن التراجع عنه.')) {
+    if (!window.confirm(t('objections.op_withdraw_confirm'))) {
       return;
     }
     try {
       await objectionsApi.withdraw(id);
-      toast.success('تم سحب الطعن وتوثيق الإجراء.');
+      toast.success(t('objections.op_withdraw_success'));
       setDetailModalOpen(false);
       fetchObjections();
     } catch (err: any) {
-      toast.error(err.response?.data?.detail || 'تعذر سحب الطعن.');
+      toast.error(err.response?.data?.detail || t('objections.op_withdraw_error'));
     }
   };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'submitted':
-        return <span className="op-chip blue">مُودع</span>;
+        return <span className="op-chip blue">{t("objections.filter_submitted_label")}</span>;
       case 'under_review':
-        return <span className="op-chip gold">قيد الدراسة</span>;
+        return <span className="op-chip gold">{t("objections.filter_under_review_label")}</span>;
       case 'accepted':
-        return <span className="op-chip green">مقبول</span>;
+        return <span className="op-chip green">{t("objections.filter_accepted_label")}</span>;
       case 'rejected':
-        return <span className="op-chip red">مرفوض</span>;
+        return <span className="op-chip red">{t("objections.filter_rejected_label")}</span>;
       case 'withdrawn':
-        return <span className="op-chip">مسحوب</span>;
+        return <span className="op-chip">{t("objections.status_withdrawn")}</span>;
       default:
         return <span className="op-chip">{status}</span>;
     }
@@ -172,11 +183,10 @@ export function OperatorObjectionsView() {
     <div className="op-page">
       <div className="op-page-head">
         <div>
-          <span className="op-chip gold mb-2">المادة 72 — القانون 23-12</span>
-          <h1>الطعون والتظلمات</h1>
+          <span className="op-chip gold mb-2">{t("objections.submit_badge_law")}</span>
+          <h1>{t("objections.op_page_title")}</h1>
           <p>
-            يحق لكل عارض يرى مساساً بحقوقه أو خرقاً لدفتر الشروط أو معايير التقييم تقديم طعن إداري
-            أمام لجنة الصفقات خلال أجل 10 أيام من نشر الإسناد.
+            {t("objections.op_page_desc")}
           </p>
         </div>
         <div className="op-page-actions">
@@ -186,7 +196,7 @@ export function OperatorObjectionsView() {
             onClick={() => setSubmitModalOpen(true)}
           >
             <Plus aria-hidden="true" />
-            <span>إيداع طعن جديد</span>
+            <span>{t("objections.op_btn_new")}</span>
           </button>
         </div>
       </div>
@@ -214,18 +224,17 @@ export function OperatorObjectionsView() {
                   id="objection-countdown-title"
                   className="text-sm font-extrabold text-[var(--op-ink)]"
                 >
-                  العد التنازلي لأقرب أجل طعن
+                  {t("objections.op_countdown_title")}
                 </h2>
-                {isNextUrgent ? <span className="op-chip red">أقل من 3 أيام</span> : null}
+                {isNextUrgent ? <span className="op-chip red">{t("objections.op_less_than_3_days")}</span> : null}
               </div>
               <p className="mt-1 text-xs leading-relaxed text-[var(--op-muted)]">
                 {nextObjection ? (
                   <>
-                    الطعن <span className="op-mono font-bold">{nextObjection.reference}</span> —
-                    آخر أجل: {formatDeadline(nextObjection.deadline_at)}
+                    {t("objections.op_countdown_sub", { ref: nextObjection.reference, date: formatDeadline(nextObjection.deadline_at) })}
                   </>
                 ) : (
-                  'لا توجد آجال طعن مفتوحة حالياً. تُحسب المهلة من تاريخ نشر الإسناد المؤقت.'
+                  t('objections.op_no_open_deadlines')
                 )}
               </p>
             </div>
@@ -238,7 +247,7 @@ export function OperatorObjectionsView() {
                 : 'border-[var(--op-line)] bg-[var(--op-surface-2)]'
             }`}
           >
-            <span className="block text-[10px] font-bold text-[var(--op-muted)]">المتبقي</span>
+            <span className="block text-[10px] font-bold text-[var(--op-muted)]">{t("objections.op_remaining_label")}</span>
             <div
               role="timer"
               aria-live="polite"
@@ -246,68 +255,67 @@ export function OperatorObjectionsView() {
                 isNextUrgent ? 'text-rose-700' : 'text-[var(--op-ink)]'
               }`}
             >
-              {nextRemaining !== null ? formatRemaining(nextRemaining) : '—'}
+              {nextRemaining !== null ? formatRemaining(nextRemaining, t) : '—'}
             </div>
           </div>
         </div>
         {isNextUrgent ? (
           <p className="border-t border-rose-100 bg-rose-50/70 px-5 py-2.5 text-[11px] font-semibold text-rose-800">
-            تنبيه: بقي أقل من 3 أيام على انقضاء الأجل. بادر باستكمال الإجراء أو مراجعة ملف
-            الطعن قبل انتهاء المهلة.
+            {t("objections.op_urgent_warning")}
           </p>
         ) : null}
       </section>
 
-      <section className="op-kpi-grid" aria-label="مؤشرات الطعون">
+      <section className="op-kpi-grid" aria-label={t("objections.op_kpi_aria")}>
         <article className="op-kpi">
           <div className="op-kpi-icon gold">
             <FileText aria-hidden="true" />
           </div>
-          <div className="op-kpi-label">إجمالي طعوني</div>
+          <div className="op-kpi-label">{t("objections.op_kpi_total")}</div>
           <div className={`op-kpi-value${totalCount === 0 ? ' empty' : ''}`}>{kpiValue(totalCount)}</div>
-          <div className="op-kpi-sub">موثقة برقم مرجعي وبصمة</div>
+          <div className="op-kpi-sub">{t("objections.op_kpi_total_sub")}</div>
         </article>
 
         <article className="op-kpi">
           <div className="op-kpi-icon blue">
             <Clock aria-hidden="true" />
           </div>
-          <div className="op-kpi-label">قيد المعالجة والدراسة</div>
+          <div className="op-kpi-label">{t("objections.op_kpi_under_review")}</div>
           <div className={`op-kpi-value${underReviewCount === 0 ? ' empty' : ''}`}>
             {kpiValue(underReviewCount)}
           </div>
-          <div className="op-kpi-sub">أمام لجان الصفقات</div>
+          <div className="op-kpi-sub">{t("objections.op_kpi_under_review_sub")}</div>
         </article>
 
         <article className="op-kpi">
           <div className="op-kpi-icon green">
             <CheckCircle2 aria-hidden="true" />
           </div>
-          <div className="op-kpi-label">طعون مقبولة</div>
+          <div className="op-kpi-label">{t("objections.op_kpi_accepted")}</div>
           <div className={`op-kpi-value${acceptedCount === 0 ? ' empty' : ''}`}>
             {kpiValue(acceptedCount)}
           </div>
-          <div className="op-kpi-sub">ألغي فيها الإسناد المؤقت</div>
+          <div className="op-kpi-sub">{t("objections.op_kpi_accepted_sub")}</div>
         </article>
 
         <article className="op-kpi">
           <div className="op-kpi-icon rose">
             <XCircle aria-hidden="true" />
           </div>
-          <div className="op-kpi-label">طعون مرفوضة</div>
+          <div className="op-kpi-label">{t("objections.op_kpi_rejected")}</div>
           <div className={`op-kpi-value${rejectedCount === 0 ? ' empty' : ''}`}>
             {kpiValue(rejectedCount)}
           </div>
-          <div className="op-kpi-sub">مع تبرير معلل من اللجنة</div>
+          <div className="op-kpi-sub">{t("objections.op_kpi_rejected_sub")}</div>
         </article>
       </section>
 
       <section className="op-card" aria-labelledby="objections-list-title">
         <div className="op-card-head">
           <div>
-            <h3 id="objections-list-title">سجل الطعون</h3>
+            <h3 id="objections-list-title">{t("objections.op_table_heading")}</h3>
             <p className="mt-0.5 text-xs text-[var(--op-muted)]">
-              تابع حالة طعونك والآجال المرتبطة بها.
+              {t("objections.op_table_sub")}
             </p>
           </div>
           <div className="op-toolbar w-full sm:w-auto">
@@ -315,10 +323,10 @@ export function OperatorObjectionsView() {
               <Search aria-hidden="true" />
               <input
                 type="text"
-                placeholder="بحث برقم الطعن أو الصفقة..."
+                placeholder={t("objections.op_search_placeholder")}
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
-                aria-label="بحث في الطعون"
+                aria-label={t("objections.op_search_aria")}
               />
             </div>
             <div className="flex items-center gap-2">
@@ -327,14 +335,14 @@ export function OperatorObjectionsView() {
                 value={statusFilter}
                 onChange={(event) => setStatusFilter(event.target.value)}
                 className="op-select"
-                aria-label="تصفية حسب الحالة"
+                aria-label={t("objections.op_filter_aria")}
               >
-                <option value="all">كافة الحالات</option>
-                <option value="submitted">مُودع</option>
-                <option value="under_review">قيد الدراسة</option>
-                <option value="accepted">مقبول</option>
-                <option value="rejected">مرفوض</option>
-                <option value="withdrawn">مسحوب</option>
+                <option value="all">{t("objections.auth_filter_all")}</option>
+                <option value="submitted">{t("objections.filter_submitted_label")}</option>
+                <option value="under_review">{t("objections.filter_under_review_label")}</option>
+                <option value="accepted">{t("objections.filter_accepted_label")}</option>
+                <option value="rejected">{t("objections.filter_rejected_label")}</option>
+                <option value="withdrawn">{t("objections.status_withdrawn")}</option>
               </select>
             </div>
           </div>
@@ -344,14 +352,14 @@ export function OperatorObjectionsView() {
           <table className="op-table op-table-wide">
             <thead>
               <tr>
-                <th>رقم الطعن</th>
-                <th>الصفقة</th>
-                <th>نوع الطعن</th>
-                <th>أبرز الأسباب</th>
-                <th>الحالة</th>
-                <th>المهلة المتبقية</th>
-                <th>تاريخ الإيداع</th>
-                <th>إجراءات</th>
+                <th>{t("objections.op_table_ref")}</th>
+                <th>{t("objections.op_table_deal")}</th>
+                <th>{t("objections.op_table_type")}</th>
+                <th>{t("objections.op_table_ground")}</th>
+                <th>{t("objections.op_table_status")}</th>
+                <th>{t("objections.op_table_deadline")}</th>
+                <th>{t("objections.op_table_date")}</th>
+                <th>{t("objections.op_table_actions")}</th>
               </tr>
             </thead>
             <tbody>
@@ -370,9 +378,9 @@ export function OperatorObjectionsView() {
                   <td colSpan={8}>
                     <div className="op-empty-state">
                       <ShieldAlert aria-hidden="true" />
-                      <h4>لا توجد طعون مسجلة حالياً</h4>
+                      <h4>{t("objections.op_empty_title")}</h4>
                       <p>
-                        يمكنك إيداع طعن على أي صفقة مؤهلة خلال 10 أيام من إعلان الإسناد المؤقت.
+                        {t("objections.op_empty_desc")}
                       </p>
                       <button
                         type="button"
@@ -380,7 +388,7 @@ export function OperatorObjectionsView() {
                         onClick={() => setSubmitModalOpen(true)}
                       >
                         <Plus aria-hidden="true" />
-                        <span>إيداع طعن جديد</span>
+                        <span>{t("objections.op_btn_new")}</span>
                       </button>
                     </div>
                   </td>
@@ -396,12 +404,12 @@ export function OperatorObjectionsView() {
                     <td>
                       <span className="op-mono text-xs">{item.tender_reference}</span>
                     </td>
-                    <td className="text-xs">{TYPE_LABELS[item.objection_type] || item.objection_type}</td>
+                    <td className="text-xs">{getTypeLabel(item.objection_type, t)}</td>
                     <td>
                       <div className="flex max-w-[220px] flex-wrap gap-1">
                         {item.grounds.slice(0, 2).map((ground, index) => (
                           <span key={index} className="op-chip text-[10px]">
-                            {GROUND_LABELS[ground] || ground}
+                            {getGroundLabel(ground, t)}
                           </span>
                         ))}
                         {item.grounds.length > 2 && (
@@ -433,7 +441,7 @@ export function OperatorObjectionsView() {
                           className="op-btn op-btn-outline op-btn-sm"
                         >
                           <Eye aria-hidden="true" />
-                          <span>{fetchingDetail ? 'جارٍ التحميل...' : 'عرض الملف'}</span>
+                          <span>{fetchingDetail ? t('common.loading') : t('objections.auth_btn_view_details')}</span>
                         </button>
                       </div>
                     </td>

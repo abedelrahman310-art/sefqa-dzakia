@@ -16,15 +16,15 @@ export function DevShell() {
             className="inline-flex items-center gap-2 text-sm text-[var(--ink-600)] hover:text-[var(--official-700)] transition-colors"
           >
             <BackArrow className="w-4 h-4" />
-            <span>العودة للرئيسية</span>
+            <span>{t('dev.back_home')}</span>
           </Link>
         </header>
 
         <main className="space-y-4">
           <div className="p-6 bg-white rounded-xl border border-[var(--color-border-subtle)] shadow-xs">
-            <h2 className="text-xl font-bold mb-2 text-[var(--ink-900)]">بيئة التطوير والاختبار</h2>
+            <h2 className="text-xl font-bold mb-2 text-[var(--ink-900)]">{t('dev.env_title')}</h2>
             <p className="text-[var(--ink-600)] text-sm leading-relaxed">
-              هذه الصفحة مخصصة لوضع التطوير لاختبار مكونات المنصة ودعم الاتجاهين والترجمة.
+              {t('dev.env_desc')}
             </p>
           </div>
         </main>

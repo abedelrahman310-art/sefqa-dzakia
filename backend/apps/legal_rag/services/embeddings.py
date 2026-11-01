@@ -1,6 +1,8 @@
 import hashlib
 import logging
 import math
+import os
+import sys
 from typing import List
 
 logger = logging.getLogger(__name__)
@@ -12,6 +14,20 @@ _model_instance = None
 _model_failed = False
 
 
+def _neural_embeddings_disabled() -> bool:
+    """
+    تعطيل تحميل النموذج العصبي في بيئات الاختبار أو عند طلب ذلك صراحةً.
+
+    الاختبارات تعتمد على المولد الحتمي المحلي (fallback) لضمان السرعة وعدم
+    الاعتماد على الشبكة أو على توافق مكتبات Python مع بيئة التشغيل.
+    في الإنتاج يبقى النموذج العصبي مفعّلاً ما لم يُضبط المتغير صراحةً.
+    """
+    value = os.environ.get("SAFAQAT_DISABLE_NEURAL_EMBEDDINGS", "").strip().lower()
+    if value in {"1", "true", "yes", "on"}:
+        return True
+    return "pytest" in sys.modules
+
+
 def get_sentence_transformer():
     """تحميل وحفظ نسخة مفردة من نموذج التضمين متعدد اللغات (Singleton)"""
     global _model_instance, _model_failed
@@ -19,6 +35,9 @@ def get_sentence_transformer():
         return None
     if _model_instance is not None:
         return _model_instance
+    if _neural_embeddings_disabled():
+        logger.info("تم تعطيل نموذج التضمين العصبي في بيئة الاختبار؛ سيُستخدم المولد الحتمي المحلي.")
+        return None
 
     try:
         from sentence_transformers import SentenceTransformer

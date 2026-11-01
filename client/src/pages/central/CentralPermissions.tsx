@@ -38,11 +38,8 @@ import {
 import { TableState, formatDateTime, formatNumber } from './centralUi';
 
 /**
- * صلاحيات المراقبة وسجل التدقيق القانوني.
- *
- * سجل التدقيق يُقرأ من GET /api/audit/logs/ (غير قابل للتعديل أو الحذف في الخادم).
- * إدارة حسابات المراقبين ومنح دور central_admin تتم من لوحة الإدارة المحمية
- * `/admin/` لأنها عملية إدارية حساسة لا تُنجَز من واجهة API عامة.
+ * Central permissions & audit log oversight.
+ * Audit logs are read directly from GET /api/audit/logs/ (immutable on the backend).
  */
 
 const PAGE_SIZE = 15;
@@ -58,7 +55,7 @@ interface ReviewerActivity {
   firstActivity: number;
 }
 
-function buildReviewers(logs: CentralAuditLogRow[]): ReviewerActivity[] {
+function buildReviewers(logs: CentralAuditLogRow[], unknownAccountLabel: string): ReviewerActivity[] {
   const buckets = new Map<
     string,
     {
@@ -79,7 +76,7 @@ function buildReviewers(logs: CentralAuditLogRow[]): ReviewerActivity[] {
     const safeTimestamp = Number.isNaN(timestamp) ? 0 : timestamp;
 
     const current = buckets.get(key) ?? {
-      name: name || 'حساب غير معروف',
+      name: name || unknownAccountLabel,
       email: email || '—',
       count: 0,
       actions: new Set<string>(),
@@ -110,14 +107,17 @@ function buildReviewers(logs: CentralAuditLogRow[]): ReviewerActivity[] {
 }
 
 export function CentralPermissions() {
-  const { dir } = useI18n();
+  const { dir, t } = useI18n();
   const { data, loading, error, reload } = useCentralResource(fetchCentralAuditLogs);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterResource, setFilterResource] = useState('all');
   const [page, setPage] = useState(1);
 
   const logs = useMemo(() => data ?? [], [data]);
-  const reviewers = useMemo(() => buildReviewers(logs), [logs]);
+  const reviewers = useMemo(
+    () => buildReviewers(logs, t('central.permissions.unknown_account')),
+    [logs, t],
+  );
 
   const stats = useMemo(() => {
     const now = Date.now();
@@ -152,74 +152,72 @@ export function CentralPermissions() {
   const currentPage = Math.min(page, totalPages);
   const pageRows = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
+  const PrevIcon = dir === 'rtl' ? ChevronRight : ChevronLeft;
+  const NextIcon = dir === 'rtl' ? ChevronLeft : ChevronRight;
+
   return (
     <div className="space-y-4" dir={dir}>
       <PageHeader
-        title="الصلاحيات وسجل التدقيق"
+        title={t('central.permissions.title')}
         titleClassName="text-xl font-bold"
-        description="إدارة حسابات المراقبين ومتابعة سجل التدقيق القانوني غير القابل للتعديل: كل عملية حساسة في المنصة تُختم ببصمة رقمية ولا يمكن تعديلها أو حذفها."
+        description={t('central.permissions.description')}
         actions={
           <Button
             variant="outline"
             size="sm"
             onClick={reload}
             disabled={loading}
-            className="text-xs h-8"
+            className="text-xs h-8 gap-1.5"
           >
             <RefreshCw className="size-3.5" aria-hidden="true" />
-            تحديث السجل
+            {t('central.permissions.refresh')}
           </Button>
         }
       />
 
       <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
         <KpiCard
-          eyebrow="سجلات التدقيق"
+          eyebrow={t('central.permissions.kpi_audit_logs')}
           value={formatNumber(stats.total)}
           icon={History}
           accent="navy"
-          description="سجلات محفوظة وغير قابلة للتعديل"
+          description={t('central.permissions.kpi_audit_logs_sub')}
         />
         <KpiCard
-          eyebrow="حسابات نشطة في السجل"
+          eyebrow={t('central.permissions.kpi_active_accounts')}
           value={formatNumber(stats.reviewers)}
           icon={Users}
           accent="emerald"
-          description="حسابات نفّذت عمليات مسجّلة"
+          description={t('central.permissions.kpi_active_accounts_sub')}
         />
         <KpiCard
-          eyebrow="عمليات آخر 24 ساعة"
+          eyebrow={t('central.permissions.kpi_last_24h')}
           value={formatNumber(stats.last24h)}
           icon={Activity}
           accent="gold"
-          description="نشاط رقابي حديث"
+          description={t('central.permissions.kpi_last_24h_sub')}
         />
         <KpiCard
-          eyebrow="أنواع العمليات"
+          eyebrow={t('central.permissions.kpi_action_types')}
           value={formatNumber(stats.actionTypes)}
           icon={Fingerprint}
           accent="red"
-          description="تصنيفات عمليات مختلفة مسجّلة"
+          description={t('central.permissions.kpi_action_types_sub')}
         />
       </div>
 
       <div className="flex items-start gap-2 rounded-lg border border-gray-200 bg-white p-2.5 text-xs leading-relaxed text-[var(--ink-700)] shadow-sm">
         <Lock className="mt-0.5 size-4 shrink-0 text-[var(--stamp-green-700)]" aria-hidden="true" />
-        <p>
-          إنشاء حسابات المراقبين ومنح دور <span className="font-mono">central_admin</span> عملية
-          إدارية حساسة تُنجَز من لوحة الإدارة المحمية <span className="font-mono">/admin/</span>{' '}
-          عبر مسؤول النظام، ولا توجد نقطة API عامة للتحكم في الحسابات — وهذا قيد أمني مقصود. هذا
-          الفضاء يعرض الحسابات التي نفّذت عمليات فعلية في سجل التدقيق.
-        </p>
+        <p dangerouslySetInnerHTML={{ __html: t('central.permissions.security_notice') }} />
       </div>
 
       <Card className="bg-white shadow-sm border-gray-200">
         <CardHeader className="border-b border-gray-200 pb-3">
           <CardTitle className="text-base font-bold text-[var(--ink-900)]">
-            حسابات المراقبة النشطة
+            {t('central.permissions.active_reviewers_title')}
           </CardTitle>
           <CardDescription className="mt-0.5 text-xs text-[var(--ink-500)]">
-            مستخرجة من سجل التدقيق الفعلي — عدد العمليات وآخر نشاط لكل حساب
+            {t('central.permissions.active_reviewers_subtitle')}
           </CardDescription>
         </CardHeader>
 
@@ -227,12 +225,12 @@ export function CentralPermissions() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="min-w-[200px]">الحساب</TableHead>
-                <TableHead className="min-w-[200px]">البريد الإلكتروني</TableHead>
-                <TableHead className="text-center">العمليات المسجّلة</TableHead>
-                <TableHead className="text-center">أنواع العمليات</TableHead>
-                <TableHead className="text-center">أول نشاط</TableHead>
-                <TableHead className="text-center">آخر نشاط</TableHead>
+                <TableHead className="min-w-[200px]">{t('central.permissions.col_account')}</TableHead>
+                <TableHead className="min-w-[200px]">{t('central.permissions.col_email')}</TableHead>
+                <TableHead className="text-center">{t('central.permissions.col_ops_count')}</TableHead>
+                <TableHead className="text-center">{t('central.permissions.col_ops_types')}</TableHead>
+                <TableHead className="text-center">{t('central.permissions.col_first_action')}</TableHead>
+                <TableHead className="text-center">{t('central.permissions.col_last_action')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -241,7 +239,7 @@ export function CentralPermissions() {
                 loading={loading && !data}
                 error={error}
                 empty={!loading && reviewers.length === 0}
-                emptyLabel="لا توجد عمليات مسجّلة بعد، وبالتالي لا توجد حسابات مراقبة نشطة."
+                emptyLabel={t('central.permissions.empty_reviewers')}
                 onRetry={reload}
               >
                 {reviewers.map((reviewer) => (
@@ -286,10 +284,10 @@ export function CentralPermissions() {
         <CardHeader className="flex flex-col gap-3 border-b border-gray-200 pb-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <CardTitle className="text-base font-bold text-[var(--ink-900)]">
-              سجل التدقيق القانوني (AuditLog)
+              {t('central.permissions.audit_log_title')}
             </CardTitle>
             <CardDescription className="mt-0.5 text-xs text-gray-500">
-              السجلات مختومة ببصمة SHA-256 وغير قابلة للتعديل أو الحذف
+              {t('central.permissions.audit_log_subtitle')}
             </CardDescription>
           </div>
 
@@ -301,13 +299,13 @@ export function CentralPermissions() {
               />
               <input
                 type="text"
-                placeholder="بحث في العمليات أو المستخدمين…"
+                placeholder={t('central.permissions.search_placeholder')}
                 value={searchQuery}
                 onChange={(event) => {
                   setSearchQuery(event.target.value);
                   setPage(1);
                 }}
-                aria-label="بحث في سجل التدقيق"
+                aria-label={t('central.permissions.search_aria')}
                 className="ps-8 pe-3 py-1 text-xs h-8 rounded-lg border border-gray-200 bg-white text-[var(--ink-900)] focus:outline-none focus:ring-1 focus:ring-[var(--stamp-green-700)]"
               />
             </div>
@@ -318,10 +316,10 @@ export function CentralPermissions() {
                 setFilterResource(event.target.value);
                 setPage(1);
               }}
-              aria-label="تصفية حسب نوع الكيان"
+              aria-label={t('central.permissions.filter_entity_aria')}
               className="px-2.5 py-1 text-xs h-8 rounded-lg border border-gray-200 bg-white text-[var(--ink-900)] focus:outline-none focus:ring-1 focus:ring-[var(--stamp-green-700)]"
             >
-              <option value="all">كل الكيانات</option>
+              <option value="all">{t('central.permissions.all_entities')}</option>
               {resourceTypes.map((resource) => (
                 <option key={resource} value={resource}>
                   {resource}
@@ -335,12 +333,12 @@ export function CentralPermissions() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="min-w-[140px] text-xs">ختم الوقت</TableHead>
-                <TableHead className="min-w-[170px] text-xs">المستخدم</TableHead>
-                <TableHead className="min-w-[150px] text-xs">العملية</TableHead>
-                <TableHead className="min-w-[130px] text-xs">الكيان</TableHead>
-                <TableHead className="min-w-[280px] text-xs">البيان</TableHead>
-                <TableHead className="min-w-[110px] text-xs">البصمة</TableHead>
+                <TableHead className="min-w-[140px] text-xs">{t('central.permissions.col_timestamp')}</TableHead>
+                <TableHead className="min-w-[170px] text-xs">{t('central.permissions.col_user')}</TableHead>
+                <TableHead className="min-w-[150px] text-xs">{t('central.permissions.col_action')}</TableHead>
+                <TableHead className="min-w-[130px] text-xs">{t('central.permissions.col_entity')}</TableHead>
+                <TableHead className="min-w-[280px] text-xs">{t('central.permissions.col_description')}</TableHead>
+                <TableHead className="min-w-[110px] text-xs">{t('central.permissions.col_hash')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -349,7 +347,7 @@ export function CentralPermissions() {
                 loading={loading && !data}
                 error={error}
                 empty={!loading && pageRows.length === 0}
-                emptyLabel="لا توجد سجلات تدقيق مطابقة للبحث أو التصفية الحالية."
+                emptyLabel={t('central.permissions.empty_logs')}
                 onRetry={reload}
               >
                 {pageRows.map((log) => (
@@ -358,7 +356,9 @@ export function CentralPermissions() {
                       {formatDateTime(log.timestamp)}
                     </TableCell>
                     <TableCell className="text-xs font-semibold text-[var(--ink-900)] py-2.5">
-                      <div className="truncate">{log.user_name || log.user_email || 'حساب محذوف'}</div>
+                      <div className="truncate">
+                        {log.user_name || log.user_email || t('central.permissions.deleted_account')}
+                      </div>
                       <div className="font-mono text-xs font-normal text-[var(--ink-500)]">
                         {log.user_email || '—'}
                       </div>
@@ -388,8 +388,12 @@ export function CentralPermissions() {
 
           <div className="flex flex-wrap items-center justify-between gap-2 border-t border-gray-200 px-4 py-2.5 text-xs text-[var(--ink-500)]">
             <span>
-              عرض {formatNumber(pageRows.length)} من أصل {formatNumber(filtered.length)} سجلاً — صفحة{' '}
-              {formatNumber(currentPage)} من {formatNumber(totalPages)}
+              {t('central.permissions.pagination_showing', {
+                count: formatNumber(pageRows.length),
+                total: formatNumber(filtered.length),
+                page: formatNumber(currentPage),
+                pages: formatNumber(totalPages),
+              })}
             </span>
             <div className="flex items-center gap-1">
               <Button
@@ -397,20 +401,20 @@ export function CentralPermissions() {
                 size="sm"
                 onClick={() => setPage((current) => Math.max(1, current - 1))}
                 disabled={currentPage <= 1}
-                className="h-7 px-2 text-xs"
+                className="h-7 px-2 text-xs gap-1"
               >
-                <ChevronRight className="size-3" aria-hidden="true" />
-                السابق
+                <PrevIcon className="size-3" aria-hidden="true" />
+                {t('central.permissions.prev')}
               </Button>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
                 disabled={currentPage >= totalPages}
-                className="h-7 px-2 text-xs"
+                className="h-7 px-2 text-xs gap-1"
               >
-                التالي
-                <ChevronLeft className="size-3" aria-hidden="true" />
+                {t('central.permissions.next')}
+                <NextIcon className="size-3" aria-hidden="true" />
               </Button>
             </div>
           </div>

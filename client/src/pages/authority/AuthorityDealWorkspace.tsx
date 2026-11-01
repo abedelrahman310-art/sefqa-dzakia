@@ -62,14 +62,11 @@ import type {
   ProcurementDealApi,
 } from '@/lib/procurementApiTypes';
 import { ExecutionTracker } from '@/features/execution/components/ExecutionTracker';
+import { useI18n } from '@/i18n';
+import i18n from '@/lib/i18n';
+import { getTemplatePresets } from '@/lib/dealWorkspacePresets';
 
-const CONTRACT_STATUS_LABELS: Record<string, string> = {
-  CONTRACT_SIGNED: 'موقع ومبرم',
-  signed: 'موقع',
-  active: 'قيد التنفيذ',
-  completed: 'منجز ومستلم',
-  terminated: 'مفسوخ تعاقدياً',
-};
+// Contract status labels mapped dynamically via getContractStatusLabel
 
 const getApiErrorMessage = (err: unknown, fallback: string): string => {
   const response = (err as { response?: { data?: unknown } })?.response;
@@ -89,18 +86,18 @@ const getApiErrorMessage = (err: unknown, fallback: string): string => {
   return fallback;
 };
 
-const formatContractDate = (value: string | null | undefined): string => {
+const formatContractDate = (value: string | null | undefined, lang: string = 'ar'): string => {
   if (!value) return '—';
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleDateString('ar-DZ', { dateStyle: 'medium' });
+  return date.toLocaleDateString(lang === 'fr' ? 'fr-DZ' : 'ar-DZ', { dateStyle: 'medium' });
 };
 
-const formatContractAmount = (value: string | null | undefined): string => {
+const formatContractAmount = (value: string | null | undefined, lang: string = 'ar', dzdLabel: string = i18n.t('common.dzd')): string => {
   if (value === null || value === undefined || value === '') return '—';
   const amount = Number(value);
   if (!Number.isFinite(amount)) return '—';
-  return `${amount.toLocaleString('ar-DZ', { maximumFractionDigits: 2 })} دج`;
+  return `${amount.toLocaleString(lang === 'fr' ? 'fr-DZ' : 'ar-DZ', { maximumFractionDigits: 2 })} ${dzdLabel}`;
 };
 
 // ─── Interfaces ─────────────────────────────────────────────────────────────
@@ -180,98 +177,39 @@ const SECTION_KEYS = [
   'evaluation_criteria',
 ] as const;
 
-const SECTION_TITLES: Record<string, string> = {
-  general_provisions: 'الأحكام العامة وموضوع الصفقة',
-  administrative: 'الملف الإداري وشروط المشاركة',
-  technical_specs: 'المواصفات التقنية وجدول الأسعار',
-  financial_terms: 'الشروط المالية والضمانات',
-  evaluation_criteria: 'معايير التقييم ومنهجية الاختيار',
-};
+// Section titles mapped dynamically via getSectionTitle
 
-// Regulatory Standard Presets (Local Templates - Clearly designated as "اقتراح من قالب")
-const TEMPLATE_PRESETS: Record<
-  TemplateType,
-  {
-    descriptionProposal: string;
-    adminGeneral: string;
-    adminRules: string;
-    techDetails: string;
-    techWarranty: string;
-    finTerms: string;
-    finScoring: string;
-  }
-> = {
-  works: {
-    descriptionProposal:
-      'إنجاز أشغال تهيئة وبناء وفق المواصفات الفنية الوطنية، بما يشمل كافة أعمال الهندسة المدنية والمطابقة لمعايير السلامة الإنشائية ومقاييس البناء الجزائرية المعتمدة.',
-    adminGeneral:
-      'تحدد هذه الصفقة العمومية شروط وكيفيات إنجاز الأشغال، طبقاً لأحكام القانون رقم 23-12 المؤرخ في 5 أوت 2023 المتعلق بالقواعد العامة للصفقات العمومية والمرسوم الرئاسي رقم 15-247.',
-    adminRules:
-      'يتكون الملف الإداري وجوباً من: التصريح بالترشح، التصريح بالنزاهة، شهادة التأهيل والتصنيف المهنيين بالدرجة المطلوبة للنشاط، والشهادات الجبائية وشبه الجبائية المحدثة.',
-    techDetails:
-      'تنفذ الأشغال طبقاً لدفتر الشروط والمواصفات الفنية المعتمدة من المعهد الجزائري للتقييس (IANOR). يلتزم المقاول بتقديم مخطط تنفيذي وبرنامج زمني دقيق في أجل 15 يوماً من إشعار البدء.',
-    techWarranty:
-      'فترة الضمان محددة بسنة واحدة (12 شهراً) تبدأ من تاريخ الاستلام المؤقت للأشغال دون تحفظات، مع التزام المقاول بإصلاح كل عيب يظهر خلال هذه الفترة.',
-    finTerms:
-      'يتم الدفع بواسطة حوالات مصرفية على أساس وضعيات الأشغال الشهرية المنجزة فعلياً. يتم اقتطاع كفالة حسن التنفيذ بنسبة 5% وتسترجع عند الاستلام النهائي.',
-    finScoring:
-      'تقييم العروض التقنية على أساس معايير موضوعية معلنة: الكفاءات والوسائل البشرية (30ن)، العتاد والمعدات (30ن)، المراجع المهنية لمشاريع مماثلة (30ن)، والمنهجية والجدول الزمني (10ن). يسند المشروع للعرض المؤهل تقنياً صاحب السعر الأقل.',
-  },
-  supplies: {
-    descriptionProposal:
-      'اقتناء وتوريد وتثبيت التجهيزات المحددة مع الضمان وخدمة ما بعد البيع والفحص الأولي بمخازن المصلحة المتعاقدة.',
-    adminGeneral:
-      'موضوع هذه الصفقة هو اقتناء وتوريد التجهيزات موضوع الطلب بما يشمل الفحص والتسليم بمخازن المصلحة المتعاقدة وفق القانون 23-12.',
-    adminRules:
-      'يحتوي الملف الإداري على: التصريح بالترشح والنزاهة، شهادة الموزع المعتمد عند الاقتضاء، السجل التجاري الإلكتروني، والوضعية الجبائية السارية.',
-    techDetails:
-      'يجب أن تكون التجهيزات الموردة أصلية جديدة وغير مجددة، مصحوبة ببطاقات البيانات الفنية وشهادات المنشأ والمطابقة.',
-    techWarranty:
-      'الضمان الأدنى المطلوب هو 24 شهراً يشمل قطع الغيار الأصلية والصيانة في موقع الاستغلال مع التزام التدخل السريع.',
-    finTerms:
-      'الدفع يتم بعد الاستلام النهائي والتشغيل التجريبي للمعدات وتحرير محضر المطابقة التامة من لجنة الاستلام المختصة.',
-    finScoring:
-      'العرض المالي الأقل ثمناً من بين العروض التقنية المقبولة والمطابقة للمواصفات الفنية المحددة بدفتر الشروط.',
-  },
-  services: {
-    descriptionProposal:
-      'أداء خدمات الصيانة والنظافة أو التأمين والحراسة المتخصصة لصالح مرافق ومقرات المصلحة المتعاقدة بضمان جودة الأداء واستمرارية المرفق.',
-    adminGeneral:
-      'تحدد هذه الصفقة شروط أداء الخدمات المتخصصة لصالح مقرات ومرافق المصلحة المتعاقدة وفق أحكام القانون رقم 23-12.',
-    adminRules:
-      'تقديم التصريح بالترشح والنزاهة، رخصة النشاط من السلطات المختصة، إثبات تسوية اشتراكات الضمان الاجتماعي، والمراجع المهنية للسنوات الثلاث الأخيرة.',
-    techDetails:
-      'تنفيذ الخدمات وفق ميثاق الجودة والسلامة المهنية، وتوفير طاقم مؤهل ومجهز بمعدات السلامة مع تعيين مشرف دائم للتنسيق اليومي.',
-    techWarranty:
-      'التزام باستمرارية الخدمة والتعويض الفوري لأي نقص أو عطل خلال مدة التعاقد.',
-    finTerms:
-      'دفع المستحقات على أساس فواتير مؤشرة وجداول متابعة الحضور والتقارير الدورية المعتمدة.',
-    finScoring:
-      'المفاضلة بين أحسن عرض اقتصادي من حيث جودة التسيير ونسبة التأطير والخبرة والملاءمة السعرية.',
-  },
-  studies: {
-    descriptionProposal:
-      'إنجاز الدراسات التقنية والمعمارية والمتابعة الميدانية الدورية لأشغال الورشة وفق المعايير الفنية والتنظيمية.',
-    adminGeneral:
-      'تهدف هذه الصفقة إلى إنجاز الدراسات والمتابعة الميدانية لإنجاز المشروع وفق المعايير الفنية والقانون 23-12.',
-    adminRules:
-      'اعتماد مهندس معماري أو مكتب دراسات معتمد، التصريح بالنزاهة والترشح، وجدول المراجع المهنية لمشاريع مماثلة.',
-    techDetails:
-      'إعداد المخططات الهندسية وملف طلب الرخص ودفتر الشروط التفصيلي ومتابعة الورشة حتى الاستلام النهائي.',
-    techWarranty:
-      'مسؤولية عشرية تعاقدية وفق القانون المدني الجزائري عن كل عيب هيكلي أو تصميمي.',
-    finTerms:
-      'الدفع على مراحل إنجاز الدراسة: عند المصادقة على الدراسة الأولية، ملف التنفيذ، والمتابعة الميدانية.',
-    finScoring:
-      'التقييم التقني والمالي المشترك (مفاضلة بين الجودة والنوعية والسعر).',
-  },
-};
+// Presets loaded dynamically via getTemplatePresets(lang)
 
 export interface AuthorityDealWorkspaceProps {
   initialTab?: 'basics' | 'specs' | 'documents';
 }
 
 export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspaceProps) {
+  const { t, lang, dir } = useI18n();
+  const templatePresets = getTemplatePresets(lang);
+
+  const getContractStatusLabel = (status: string): string => {
+    switch (status) {
+      case 'CONTRACT_SIGNED': return t('authority.workspace.contract_signed_concluded');
+      case 'signed': return t('authority.workspace.contract_signed');
+      case 'active': return t('authority.workspace.contract_active');
+      case 'completed': return t('authority.workspace.contract_completed');
+      case 'terminated': return t('authority.workspace.contract_terminated');
+      default: return status;
+    }
+  };
+
+  const getSectionTitle = (sectionKey: string): string => {
+    switch (sectionKey) {
+      case 'general_provisions': return t('authority.workspace.sec_general_provisions');
+      case 'administrative': return t('authority.workspace.sec_administrative');
+      case 'technical_specs': return t('authority.workspace.sec_technical_specs');
+      case 'financial_terms': return t('authority.workspace.sec_financial_terms');
+      case 'evaluation_criteria': return t('authority.workspace.sec_evaluation_criteria');
+      default: return sectionKey;
+    }
+  };
   const [, setLocation] = useLocation();
   const [, params] = useRoute('/authority/deals/:id');
   const [, draftsEditParams] = useRoute('/authority/drafts/:id/edit');
@@ -310,7 +248,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
   const [wilaya, setWilaya] = useState(defaultWilaya);
   const [budget, setBudget] = useState('');
   const [taxRegime, setTaxRegime] = useState<'ttc' | 'ht'>('ttc');
-  const [duration, setDuration] = useState('06 أشهر');
+  const [duration, setDuration] = useState(t('authority.workspace.duration_default'));
   const [boqItems, setBoqItems] = useState<BoqItem[]>([]);
   const [showSyncBudgetConfirm, setShowSyncBudgetConfirm] = useState(false);
 
@@ -456,7 +394,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
           setBoqItems(specs.technical_requirements.items);
         } else {
           setBoqItems([
-            { id: '1', name: 'بند أولي يحدد حسب موضوع الصفقة', unit: 'وحدة', quantity: 1, unitPrice: 0 },
+            { id: '1', name: t('authority.workspace.initial_boq_item'), unit: t('authority.workspace.unit_item'), quantity: 1, unitPrice: 0 },
           ]);
         }
 
@@ -468,15 +406,15 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
             clauseCode: 'CLAUSE-01',
             sectionKey: 'general_provisions',
             sortOrder: 1,
-            title: SECTION_TITLES.general_provisions,
-            content: specs.administrative_clauses?.general || TEMPLATE_PRESETS[tType].adminGeneral,
+            title: getSectionTitle('general_provisions'),
+            content: specs.administrative_clauses?.general || templatePresets[tType].adminGeneral,
             status: 'verified',
             isMandatory: true,
             provenance: [
               {
                 id: 'p-1',
                 sourceType: 'standard_decree',
-                sourceLabel: 'القانون 23-12 (المادتان 5 و27)',
+                sourceLabel: t('authority.workspace.source_law_23_12_5_27'),
                 verificationStatus: 'verified_statutory',
               },
             ],
@@ -489,15 +427,15 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
             clauseCode: 'CLAUSE-02',
             sectionKey: 'administrative',
             sortOrder: 2,
-            title: SECTION_TITLES.administrative,
-            content: specs.administrative_clauses?.rules || TEMPLATE_PRESETS[tType].adminRules,
+            title: getSectionTitle('administrative'),
+            content: specs.administrative_clauses?.rules || templatePresets[tType].adminRules,
             status: 'verified',
             isMandatory: true,
             provenance: [
               {
                 id: 'p-2',
                 sourceType: 'standard_decree',
-                sourceLabel: 'القانون 23-12 (المادة 67: ملف الترشح والنزاهة)',
+                sourceLabel: t('authority.workspace.source_law_23_12_67'),
                 verificationStatus: 'verified_statutory',
               },
             ],
@@ -510,15 +448,15 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
             clauseCode: 'CLAUSE-03',
             sectionKey: 'technical_specs',
             sortOrder: 3,
-            title: SECTION_TITLES.technical_specs,
-            content: specs.technical_requirements?.details || TEMPLATE_PRESETS[tType].techDetails,
+            title: getSectionTitle('technical_specs'),
+            content: specs.technical_requirements?.details || templatePresets[tType].techDetails,
             status: 'verified',
             isMandatory: true,
             provenance: [
               {
                 id: 'p-3',
                 sourceType: 'standard_decree',
-                sourceLabel: 'المواصفات التقنية والمقاييس الوطنية (IANOR)',
+                sourceLabel: t('authority.workspace.source_ianor'),
                 verificationStatus: 'template_standard',
               },
             ],
@@ -531,15 +469,15 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
             clauseCode: 'CLAUSE-04',
             sectionKey: 'financial_terms',
             sortOrder: 4,
-            title: SECTION_TITLES.financial_terms,
-            content: specs.financial_criteria?.terms || TEMPLATE_PRESETS[tType].finTerms,
+            title: getSectionTitle('financial_terms'),
+            content: specs.financial_criteria?.terms || templatePresets[tType].finTerms,
             status: 'verified',
             isMandatory: true,
             provenance: [
               {
                 id: 'p-4',
                 sourceType: 'standard_decree',
-                sourceLabel: 'المرسوم الرئاسي 15-247 (المادة 125: التأمينات والضمانات)',
+                sourceLabel: t('authority.workspace.source_decree_15_247_125'),
                 verificationStatus: 'verified_statutory',
               },
             ],
@@ -552,15 +490,15 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
             clauseCode: 'CLAUSE-05',
             sectionKey: 'evaluation_criteria',
             sortOrder: 5,
-            title: SECTION_TITLES.evaluation_criteria,
-            content: specs.financial_criteria?.scoring || TEMPLATE_PRESETS[tType].finScoring,
+            title: getSectionTitle('evaluation_criteria'),
+            content: specs.financial_criteria?.scoring || templatePresets[tType].finScoring,
             status: 'verified',
             isMandatory: true,
             provenance: [
               {
                 id: 'p-5',
                 sourceType: 'standard_decree',
-                sourceLabel: 'القانون 23-12 (معايير الاختيار الموضوعية)',
+                sourceLabel: t('authority.workspace.source_law_23_12_criteria'),
                 verificationStatus: 'verified_statutory',
               },
             ],
@@ -577,8 +515,8 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
             clauseId: 'clause-2',
             requirementCode: 'REQ-ADM-01',
             requirementType: 'mandatory_document',
-            positionReference: 'ملف الترشح الإداري',
-            description: 'تقديم التصريح بالترشح والتصريح بالنزاهة مُمضيين ومؤرخين من صاحب العرض.',
+            positionReference: t('authority.workspace.pos_admin_dossier'),
+            description: t('authority.workspace.req_declaration_candidacy_integrity'),
             isDisqualifying: true,
           },
           {
@@ -586,15 +524,15 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
             clauseId: 'clause-4',
             requirementCode: 'REQ-FIN-01',
             requirementType: 'bank_guarantee',
-            positionReference: 'الشروط المالية',
-            description: 'تقديم كفالة التعهد أو حسن التنفيذ من بنك جزائري معتمد عند الاقتضاء.',
+            positionReference: t('authority.workspace.sec_financial_terms'),
+            description: t('authority.workspace.req_guarantee_bank'),
             isDisqualifying: false,
           },
         ]);
       }
     } catch (err: any) {
       console.error('Failed to load deal:', err);
-      toast.error('تعذر جلب ملف الصفقة أو ليس لديك الصلاحية للاطلاع عليه.');
+      toast.error(t('authority.workspace.toast_fetch_error'));
       setLocation('/authority/deals');
     } finally {
       setLoading(false);
@@ -630,7 +568,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
       } catch (err: unknown) {
         if (cancelled) return;
         setContractError(
-          getApiErrorMessage(err, 'تعذر تحميل بيانات العقد المبرم لهذه الصفقة.'),
+          getApiErrorMessage(err, t('authority.workspace.contract_load_error')),
         );
       } finally {
         if (!cancelled) setContractLoading(false);
@@ -663,17 +601,17 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
               current_stage: data.current_stage,
               stage_display:
                 data.current_stage === 9
-                  ? '09 - إبرام العقد'
+                  ? t('authority.workspace.contract_stage_09')
                   : previous.stage_display,
             }
           : previous,
       );
-      setContractSuccess('تم توليد العقد بنجاح');
-      toast.success('تم توليد العقد بنجاح');
+      setContractSuccess(t('authority.workspace.contract_gen_success'));
+      toast.success(t('authority.workspace.contract_gen_success'));
     } catch (err: unknown) {
       const message = getApiErrorMessage(
         err,
-        'تعذر توليد العقد. يرجى التأكد من وجود عرض فائز أو مقيم ومعتمد.',
+        t('authority.workspace.contract_gen_error'),
       );
       setContractError(message);
       toast.error(message);
@@ -689,7 +627,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
     );
 
     if (!currentContract || !hasPdf) {
-      setContractError('نسخة PDF من العقد غير متاحة حالياً.');
+      setContractError(t('authority.workspace.contract_pdf_unavailable'));
       return;
     }
 
@@ -706,7 +644,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
         filename,
       );
     } catch (err: unknown) {
-      const message = getApiErrorMessage(err, 'تعذر تحميل نسخة العقد. يرجى المحاولة مجدداً.');
+      const message = getApiErrorMessage(err, t('authority.workspace.contract_pdf_error'));
       setContractError(message);
       toast.error(message);
     } finally {
@@ -717,7 +655,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
   // ─── Actions for Tab 1: Deal Basics ───────────────────────────────────────
   const handleSaveBasics = async () => {
     if (!title.trim()) {
-      toast.error('عنوان الصفقة إلزامي.');
+      toast.error(t('authority.workspace.toast_title_required'));
       return;
     }
     setSavingBasics(true);
@@ -756,10 +694,10 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
           },
         });
       }
-      toast.success('تم حفظ بيانات الصفقة وطريقة الإبرام بنجاح.');
+      toast.success(t('authority.workspace.toast_basics_saved'));
       await fetchDealData();
     } catch (err: any) {
-      toast.error(err?.response?.data?.detail || 'تعذر حفظ البيانات.');
+      toast.error(err?.response?.data?.detail || t('authority.workspace.toast_basics_save_error'));
     } finally {
       setSavingBasics(false);
     }
@@ -768,7 +706,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
   // Procedure change handlers with impact alert
   const handleRequestProcedureChange = (method?: ProcurementMethod, form?: ProcurementForm) => {
     if (isFrozen) {
-      toast.warning('لا يمكن تغيير إجراءات الإبرام بعد تجميد واعتماد دفتر الشروط.');
+      toast.warning(t('authority.workspace.toast_cannot_change_frozen_method'));
       return;
     }
     setPendingProcedureChange({ method, form });
@@ -795,105 +733,112 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
 
     setShowProcedureChangeWarning(false);
     setPendingProcedureChange(null);
-    toast.info('تم تحديث مسار الإبرام ومواءمة قائمة وثائق المتعامل الإلزامية.');
+    toast.info(t('authority.workspace.toast_method_updated'));
   };
 
-  // 1. Tool: اشرح طريقة الإبرام
+  // 1. Tool: Explain Procurement Method
   const handleExplainProcurementMethod = () => {
     setActiveAssistantTool('method_explain');
   };
 
-  // 2. Tool: ساعدني في اختيار القالب
+  // 2. Tool: Help Select Template
   const handleRecommendTemplate = () => {
     setActiveAssistantTool('template_advisor');
   };
 
-  // 3. Tool: استكمل المسودة من بيانات الصفقة
+  // 3. Tool: Complete Draft from Deal Data
   const handleAutofillDraftFromDeal = () => {
     const wilayaObj = ALGERIA_69_WILAYAS.find((w) => w.code === wilaya);
     const wilayaName = wilayaObj ? `${wilayaObj.code} - ${wilayaObj.ar}` : wilaya;
-    const formattedBudget = budget ? `${parseFloat(budget).toLocaleString('ar-DZ')} دج` : 'حسب الميزانية المعتمدة';
+    const formattedBudget = budget ? `${parseFloat(budget).toLocaleString(lang === 'fr' ? 'fr-DZ' : 'ar-DZ')} ${t('common.dzd')}` : t('authority.workspace.budget_as_approved');
 
-    const enrichedGeneral = `تحدد هذه الصفقة العمومية شروط وكيفيات تنفيذ العملية المعنونة: "${title.trim() || 'مشروع الصفقة'}" على مستوى ولاية: ${wilayaName}، لمدة إنجاز مقدرة بـ ${duration} وبغلاف مالي تقديري قدره ${formattedBudget} (TTC)، وذلك طبقاً لأحكام القانون رقم 23-12 المؤرخ في 5 أوت 2023 المحدد للقواعد العامة للصفقات العمومية والمرسوم الرئاسي رقم 15-247.\n\nطريقة الإبرام المعتمدة: ${METHOD_LABELS[procurementMethod].ar} (${FORM_LABELS[procurementForm].ar}).`;
+    const enrichedGeneral = t('authority.workspace.default_clause_general', {
+      title: title.trim() || t('authority.workspace.default_deal_title'),
+      wilaya: wilayaName,
+      duration,
+      budget: formattedBudget,
+      method: lang === 'fr' ? (METHOD_LABELS[procurementMethod]?.fr || METHOD_LABELS[procurementMethod]?.ar) : METHOD_LABELS[procurementMethod]?.ar,
+      form: lang === 'fr' ? (FORM_LABELS[procurementForm]?.fr || FORM_LABELS[procurementForm]?.ar) : FORM_LABELS[procurementForm]?.ar,
+    });
 
     setAiProposalPreview({
       type: 'specs_template',
       targetKey: 'general_provisions',
-      title: 'استكمال صياغة مسودة دفتر الشروط من بيانات الصفقة',
+      title: t('authority.workspace.draft_complete_title'),
       text: enrichedGeneral,
       sourceNotice:
-        'صياغة مستندة إلى بيانات عنوان الصفقة والولاية والمدة والميزانية وطريقة الإبرام وفق أحكام القانون 23-12.',
+        t('authority.workspace.draft_complete_desc'),
     });
   };
 
-  // 4. Tool: راجع المعلومات الناقصة (Audit Checklist)
+  // 4. Tool: Review Missing Info (Audit Checklist)
   const handleRunGapAudit = () => {
     setActiveAssistantTool('gap_analysis');
     const gaps = [
       {
         id: 'title',
-        name: 'عنوان وموضوع الصفقة',
+        name: t('authority.workspace.field_title'),
         status: title.trim().length > 5 ? 'complete' : 'missing',
-        message: title.trim().length > 5 ? 'العنوان محدد وواضح.' : 'عنوان الصفقة فارغ أو قصير جداً.',
+        message: title.trim().length > 5 ? t('authority.workspace.checklist_title_ok') : t('authority.workspace.checklist_title_empty'),
         tab: 'basics',
       },
       {
         id: 'budget',
-        name: 'الميزانية التقديرية (TTC)',
+        name: t('authority.workspace.checklist_budget_name'),
         status: budget && parseFloat(budget) > 0 ? 'complete' : 'missing',
-        message: budget && parseFloat(budget) > 0 ? `${parseFloat(budget).toLocaleString('ar-DZ')} دج` : 'الميزانية التقديرية غير محددة.',
+        message: budget && parseFloat(budget) > 0 ? `${parseFloat(budget).toLocaleString(lang === 'fr' ? 'fr-DZ' : 'ar-DZ')} ${t('common.dzd')}` : t('authority.workspace.checklist_budget_unset'),
         tab: 'basics',
       },
       {
         id: 'boq',
-        name: 'جدول الكميات والأسعار (B.O.Q)',
+        name: t('authority.workspace.checklist_boq_name'),
         status: boqItems.length > 0 && boqTotal > 0 ? 'complete' : 'warning',
-        message: boqTotal > 0 ? `${boqItems.length} بنود بمجموع ${boqTotal.toLocaleString('ar-DZ')} دج` : 'لم يتم تحديد أسعار البنود بجدول الكميات.',
+        message: boqTotal > 0 ? t('authority.workspace.checklist_boq_summary', { count: boqItems.length, total: boqTotal.toLocaleString(lang === 'fr' ? 'fr-DZ' : 'ar-DZ') }) : t('authority.workspace.checklist_boq_empty'),
         tab: 'basics',
       },
       {
         id: 'method',
-        name: 'طريقة وشكل الإبرام',
+        name: t('authority.workspace.checklist_method_name'),
         status: procurementMethod && procurementForm ? 'complete' : 'missing',
         message: `${METHOD_LABELS[procurementMethod].ar} — ${FORM_LABELS[procurementForm].ar}`,
         tab: 'basics',
       },
       {
         id: 'justification',
-        name: 'أسانيد وتبرير الإجراء',
+        name: t('authority.workspace.checklist_justif_name'),
         status: !isJustificationRequired(procurementForm) || procedureJustification.trim().length > 10 ? 'complete' : 'missing',
         message: !isJustificationRequired(procurementForm)
-          ? 'غير مطلوبة للشكل المفتوح العام.'
+          ? t('authority.workspace.checklist_justif_not_required')
           : procedureJustification.trim().length > 10
-          ? 'تم تدوين السند القانوني والمبررات.'
-          : 'يتطلب هذا الإجراء تسبيب مبرراته وسنده القانوني وجوباً.',
+          ? t('authority.workspace.checklist_justif_recorded')
+          : t('authority.workspace.checklist_justif_required'),
         tab: 'basics',
       },
       {
         id: 'template',
-        name: 'قالب دفتر الشروط المعتمد',
+        name: t('authority.workspace.checklist_template_name'),
         status: templateId || isManualDraft ? 'complete' : 'warning',
         message: templateId
-          ? `قالب: ${CAHIER_TEMPLATES_LIBRARY.find((t) => t.id === templateId)?.title || templateId}`
+          ? `${t('authority.workspace.template_prefix')}: ${CAHIER_TEMPLATES_LIBRARY.find((t) => t.id === templateId)?.title || templateId}`
           : isManualDraft
-          ? 'مسودة يدوية مخصصة'
-          : 'لم يتم ربط قالب نموذجي مراجع.',
+          ? t('authority.workspace.manual_custom_draft')
+          : t('authority.workspace.checklist_template_not_linked'),
         tab: 'specs',
       },
       {
         id: 'operator_docs',
-        name: 'ملف وثائق المتعامل الاقتصادي',
+        name: t('authority.workspace.checklist_operator_docs_name'),
         status: operatorDocuments.length > 0 ? 'complete' : 'missing',
-        message: `${operatorDocuments.length} وثيقة مطلوبة مقسمة على الأظرفة الثلاثة.`,
+        message: t('authority.workspace.checklist_docs_msg', { count: operatorDocuments.length }),
         tab: 'documents',
       },
       {
         id: 'clauses',
-        name: 'بنود دفتر الشروط الخمسة',
+        name: t('authority.workspace.checklist_clauses_name'),
         status: clauses.every((c) => c.content && c.content.trim().length > 20) ? 'complete' : 'warning',
         message: clauses.every((c) => c.content && c.content.trim().length > 20)
-          ? 'جميع البنود محررة ومكتملة.'
-          : 'بعض البنود تحتوي على نصوص افتراضية موجزة.',
+          ? t('authority.workspace.checklist_clauses_complete')
+          : t('authority.workspace.checklist_clauses_partial'),
         tab: 'specs',
       },
     ];
@@ -905,14 +850,14 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
     if (boqTotal > 0) {
       setBudget(String(boqTotal));
       setShowSyncBudgetConfirm(false);
-      toast.success(`تم تحديث الميزانية التقديرية لتصبح: ${boqTotal.toLocaleString('ar-DZ')} دج (TTC).`);
+      toast.success(t('authority.workspace.toast_budget_updated_val', { amount: boqTotal.toLocaleString(lang === 'fr' ? 'fr-DZ' : 'ar-DZ'), dzd: t('common.dzd') }));
     }
   };
 
   const handleAddBoqRow = () => {
     setBoqItems((prev) => [
       ...prev,
-      { id: `boq-${Date.now()}`, name: '', unit: 'وحدة', quantity: 1, unitPrice: 0 },
+      { id: `boq-${Date.now()}`, name: '', unit: t('authority.workspace.unit_item'), quantity: 1, unitPrice: 0 },
     ]);
   };
 
@@ -924,7 +869,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
 
   const handleRemoveBoqRow = (id: string) => {
     if (boqItems.length <= 1) {
-      toast.warning('يجب الإبقاء على بند واحد على الأقل.');
+      toast.warning(t('authority.workspace.toast_keep_one_item'));
       return;
     }
     setBoqItems((prev) => prev.filter((i) => i.id !== id));
@@ -933,7 +878,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
   // ─── Actions for Tab 2: Cahier Specs ──────────────────────────────────────
   const handleStartEditClause = (clause: Clause) => {
     if (isFrozen) {
-      toast.warning('لا يمكن تعديل بنود دفتر الشروط بعد التجميد والمصادقة.');
+      toast.warning(t('authority.workspace.toast_cannot_edit_frozen_clause'));
       return;
     }
     setEditingClauseId(clause.id);
@@ -943,7 +888,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
 
   const handleSaveClause = async (clause: Clause) => {
     if (!editedContent.trim()) {
-      toast.error('نص البند لا يمكن أن يكون فارغاً.');
+      toast.error(t('authority.workspace.toast_clause_text_required'));
       return;
     }
     setSavingClause(true);
@@ -990,7 +935,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                     actorId: user?.id || 'current_user',
                     previousContent: c.content,
                     proposedContent: editedContent,
-                    actionReason: editReason || 'تعديل صياغة البند بواسطة المصلحة المتعاقدة',
+                    actionReason: editReason || t('authority.workspace.audit_clause_edited_by_authority'),
                     createdAt: new Date().toISOString(),
                   },
                 ],
@@ -1001,9 +946,9 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
 
       setEditingClauseId(null);
       setContentChangedSinceCheck(true);
-      toast.success('تم حفظ تعديل البند بنجاح وتوثيقه في سجل الأحداث.');
+      toast.success(t('authority.workspace.toast_clause_saved'));
     } catch (err: any) {
-      toast.error(err?.response?.data?.detail || 'فشل حفظ البند.');
+      toast.error(err?.response?.data?.detail || t('authority.workspace.toast_clause_save_error'));
     } finally {
       setSavingClause(false);
     }
@@ -1018,10 +963,10 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
       setFrozenDigest(`SHA256-${specsId.slice(0, 8).toUpperCase()}-LEGAL-APPROVED`);
       setFrozenAt(new Date().toISOString());
       setShowFreezeModal(false);
-      toast.success('تم تجميد دفتر الشروط رقمياً بنجاح.');
+      toast.success(t('authority.workspace.toast_specs_frozen'));
       await fetchDealData();
     } catch (err: any) {
-      toast.error('تعذر تجميد دفتر الشروط.');
+      toast.error(t('authority.workspace.toast_specs_freeze_error'));
     } finally {
       setFreezing(false);
     }
@@ -1034,9 +979,9 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
     try {
       const filename = `Cahier_Specs_${deal?.reference_number || dealId}.pdf`;
       await downloadPdfBlob(`/procurements/deals/${dealId}/specs-pdf/`, filename);
-      toast.success('تم تنزيل دفتر الشروط بصيغة PDF بنجاح.');
+      toast.success(t('authority.workspace.toast_specs_pdf_success'));
     } catch {
-      toast.error('تعذر تصدير دفتر الشروط. تأكد من أن الدفتر معد ومصادق عليه.');
+      toast.error(t('authority.workspace.toast_specs_pdf_error'));
     } finally {
       setExportingPdf(false);
     }
@@ -1051,11 +996,11 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
         description: deal?.description || description,
       });
       setDocSummary(res.data.summary);
-      toast.success('تم إعداد الملخص الاستشاري بنجاح.');
+      toast.success(t('authority.workspace.toast_summary_prepared'));
     } catch {
       // Fallback
       setDocSummary(
-        `ملخص استشاري لملف الصفقة: ${title || deal?.title}. يهدف المشروع إلى تنفيذ الأعمال المحددة في نطاق الحاجة، ويتعين على المتنافسين استيفاء الشروط الإدارية والتقنية وإيداع العروض قبل انقضاء الأجل القانوني.`
+        t('authority.workspace.summary_proposal_text', { title: title || deal?.title || '' })
       );
     } finally {
       setSummarizingDoc(false);
@@ -1074,7 +1019,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
         category: templateType,
       });
       setPriceEstimateResult(res.data);
-      toast.success('تم استخراج مؤشرات أسعار السوق المرجعية.');
+      toast.success(t('authority.workspace.toast_market_price_extracted'));
     } catch (err) {
       setPriceEstimateResult({
         min_price: boqTotal > 0 ? boqTotal * 0.85 : 12000000,
@@ -1082,9 +1027,9 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
         avg_price: boqTotal > 0 ? boqTotal : 15000000,
         confidence_score: 82,
         reference_count: 5,
-        currency: 'دج',
+        currency: t('common.dzd'),
       });
-      toast.info('تم عرض مؤشرات تقديرية استرشادية من أسعار الصفقات المشابهة.');
+      toast.info(t('authority.workspace.toast_market_price_info'));
     } finally {
       setPriceEstimating(false);
     }
@@ -1105,20 +1050,20 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
       });
       setComplianceResult(res.data);
       setContentChangedSinceCheck(false);
-      toast.success('اكتمل فحص الامتثال القانوني بنجاح.');
+      toast.success(t('authority.workspace.toast_compliance_complete'));
     } catch {
       setComplianceResult({
         is_advisory: true,
-        statutory_reference: 'القانون 23-12 المؤرخ في 5 أوت 2023',
+        statutory_reference: t('authority.workspace.statutory_law_23_12_date'),
         legal_disclaimer:
-          'هذا التحليل استرشادي تقني مؤتمت، وتبقى السلطة التقديرية الحصرية لمسؤولي المصلحة المتعاقدة ولجنة الصفقات.',
+          t('authority.workspace.analysis_disclaimer'),
         preliminary_compliance_check: true,
         advisory_notes: [
           {
-            rule: 'المادة 67 - وثائق ملف الترشح',
+            rule: t('authority.workspace.rule_art_67'),
             severity: 'info',
-            message: 'تم التحقق من إدراج التصريح بالنزاهة والترشح ضمن الملف الإداري الإلزامي.',
-            recommendation: 'اعتماد النماذج الوزارية الصادرة عن وزارة المالية.',
+            message: t('authority.workspace.compliance_integrity_msg'),
+            recommendation: t('authority.workspace.compliance_integrity_rec'),
           },
         ],
       });
@@ -1129,7 +1074,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
   };
 
   const handleProposeTemplateClause = (sectionKey: string) => {
-    const preset = TEMPLATE_PRESETS[templateType];
+    const preset = templatePresets[templateType];
     const textMap: Record<string, string> = {
       general_provisions: preset.adminGeneral,
       administrative: preset.adminRules,
@@ -1141,10 +1086,10 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
     setAiProposalPreview({
       type: 'specs_template',
       targetKey: sectionKey,
-      title: `اقتراح صياغة من قالب نموذجي: ${SECTION_TITLES[sectionKey]}`,
+      title: t('authority.workspace.proposal_from_template_title', { section: getSectionTitle(sectionKey) }),
       text: textMap[sectionKey] || '',
       sourceNotice:
-        'اقتراح مستند إلى دفاتر الشروط النموذجية المعتمدة وفق القانون 23-12. (قالب محلي غير مولد بنموذج لغوي).',
+        t('authority.workspace.proposal_from_template_desc'),
     });
   };
 
@@ -1152,14 +1097,14 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
     if (!aiProposalPreview) return;
     if (aiProposalPreview.type === 'desc') {
       setDescription(aiProposalPreview.text);
-      toast.success('تم تحديث وصف الحاجة بالمقترح.');
+      toast.success(t('authority.workspace.toast_desc_proposal_applied'));
     } else if (aiProposalPreview.type === 'specs_template' && aiProposalPreview.targetKey) {
       const targetClause = clauses.find((c) => c.sectionKey === aiProposalPreview.targetKey);
       if (targetClause) {
         setEditingClauseId(targetClause.id);
         setEditedContent(aiProposalPreview.text);
-        setEditReason('تطبيق صياغة من قالب نموذجي معتمد');
-        toast.info('تم تحميل نص القالب في المحرر. يرجى مراجعته والنقر على "حفظ البند".');
+        setEditReason(t('authority.workspace.reason_applied_template'));
+        toast.info(t('authority.workspace.toast_tpl_clause_loaded'));
       }
     }
     setAiProposalPreview(null);
@@ -1167,15 +1112,15 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
 
   if (loading) {
     return (
-      <div className="py-24 flex flex-col items-center justify-center text-gray-500 space-y-3" dir="rtl">
+      <div className="py-24 flex flex-col items-center justify-center text-gray-500 space-y-3" dir={dir}>
         <div className="w-9 h-9 border-3 border-emerald-600 border-t-transparent rounded-full animate-spin" />
-        <span className="text-sm font-medium">جاري فتح ملف الصفقة الموحد...</span>
+        <span className="text-sm font-medium">{t('authority.workspace.loading')}</span>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto pb-16" dir="rtl">
+    <div className="space-y-6 max-w-7xl mx-auto pb-16" dir={dir}>
       {/* ─── 1. Header Banner & Context ───────────────────────────────────── */}
       <section className="bg-white border border-[#D5DDEA] rounded-2xl p-6 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div className="space-y-1">
@@ -1185,7 +1130,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
               size="sm"
               onClick={() => setLocation('/authority/deals')}
               className="p-1.5 h-auto text-gray-600 hover:text-navy-900 hover:bg-gray-100 rounded-lg"
-              title="العودة إلى قائمة الصفقات"
+              title={t('authority.workspace.nav_back_to_deals')}
             >
               <ArrowRight className="w-5 h-5" />
             </Button>
@@ -1193,25 +1138,19 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
               {deal?.reference_number || 'DZ-2026-REF'}
             </span>
             <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200">
-              {deal?.stage_display || `المرحلة ${deal?.current_stage || 1}`}
+              {deal?.stage_display || `${t('authority.workspace.stage_prefix')} ${deal?.current_stage || 1}`}
             </span>
             {isFrozen ? (
               <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center gap-1">
-                <Lock className="w-3 h-3 text-emerald-600" />
-                دفتر شروط مجمّد ومصادق
-              </span>
+                <Lock className="w-3 h-3 text-emerald-600" />{t('authority.workspace.frozen_approved_badge')}</span>
             ) : (
-              <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-800 border border-blue-200">
-                مسودة قيد الإعداد والتحضير
-              </span>
+              <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-800 border border-blue-200">{t('authority.workspace.drafting_badge')}</span>
             )}
           </div>
           <h1 className="text-xl md:text-2xl font-extrabold text-navy-900 tracking-tight">
-            {deal?.title || title || 'ملف صفقة عمومية'}
+            {deal?.title || title || t('authority.workspace.deal_default_title')}
           </h1>
-          <p className="text-xs text-gray-500">
-            ملف الصفقة الموحد: إدارة البيانات، جدول الكميات، بنود دفتر الشروط وسلسلة الإسناد، والوثائق والسندات.
-          </p>
+          <p className="text-xs text-gray-500">{t('authority.workspace.header_unified_desc')}</p>
         </div>
 
         {/* Top Controls */}
@@ -1227,7 +1166,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
               ) : (
                 <FileSignature className="w-4 h-4" />
               )}
-              <span>{generatingContract ? 'جاري توليد العقد...' : 'توليد العقد'}</span>
+              <span>{generatingContract ? t('authority.workspace.contract_generating') : t('authority.workspace.contract_btn_generate')}</span>
             </Button>
           )}
 
@@ -1243,7 +1182,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
               ) : (
                 <Download className="w-4 h-4 text-emerald-600" />
               )}
-              <span>{downloadingContract ? 'جاري التحميل...' : 'تحميل العقد'}</span>
+              <span>{downloadingContract ? t('authority.workspace.contract_downloading') : t('authority.workspace.btn_download_contract')}</span>
             </Button>
           )}
 
@@ -1252,10 +1191,10 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
             onClick={handleExportPdf}
             disabled={exportingPdf}
             className="border-[#D5DDEA] text-emerald-800 hover:bg-emerald-50 rounded-xl text-xs font-bold flex items-center gap-1.5"
-            title="تصدير دفتر الشروط بصيغة PDF قابلة للطباعة والأرشفة"
+            title={t('authority.workspace.export_pdf_tooltip')}
           >
             <Download className="w-4 h-4 text-emerald-600" />
-            <span>{exportingPdf ? 'جاري التصدير...' : 'تصدير دفتر الشروط (PDF)'}</span>
+            <span>{exportingPdf ? t('authority.workspace.exporting_pdf') : t('authority.workspace.export_pdf_btn')}</span>
           </Button>
 
           <Button
@@ -1268,7 +1207,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
             }`}
           >
             <Sparkles className="w-3.5 h-3.5 text-navy-700" />
-            <span>{isAssistantOpen ? 'إخفاء المساعد' : 'مساعد إعداد الصفقة'}</span>
+            <span>{isAssistantOpen ? t('authority.workspace.assistant_hide') : t('authority.workspace.assistant_show')}</span>
           </Button>
         </div>
       </section>
@@ -1279,16 +1218,12 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
           <div className="flex flex-col gap-2 border-b border-[#E5EBF4] pb-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h2 className="flex items-center gap-2 text-base font-extrabold text-navy-900">
-                <FileSignature className="w-5 h-5 text-emerald-700" />
-                العقد والتنفيذ
-              </h2>
-              <p className="mt-1 text-xs text-gray-500">
-                متابعة العقد المبرم ومراحل تنفيذ الصفقة وتقارير الإنجاز المرفوعة.
-              </p>
+                <FileSignature className="w-5 h-5 text-emerald-700" />{t('authority.workspace.contract_card_title')}</h2>
+              <p className="mt-1 text-xs text-gray-500">{t('authority.workspace.contract_card_desc')}</p>
             </div>
             {contract && (
               <span className="inline-flex w-fit items-center rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[11px] font-bold text-emerald-800">
-                {CONTRACT_STATUS_LABELS[contract.status] || contract.status || 'موقع'}
+                {getContractStatusLabel(contract.status) || contract.status || t('authority.workspace.contract_signed')}
               </span>
             )}
           </div>
@@ -1308,7 +1243,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
           )}
 
           {contractLoading ? (
-            <div className="space-y-3" aria-busy="true" aria-label="جارٍ تحميل بيانات العقد">
+            <div className="space-y-3" aria-busy="true" aria-label={t('authority.workspace.contract_loading_aria')}>
               <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
                 {[0, 1, 2, 3].map((item) => (
                   <div key={item} className="h-16 animate-pulse rounded-xl bg-slate-100" />
@@ -1320,25 +1255,25 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
             <div className="space-y-4">
               <div className="grid grid-cols-1 gap-3 rounded-xl border border-[#E5EBF4] bg-slate-50/50 p-4 text-xs md:grid-cols-4">
                 <div>
-                  <span className="block text-[10px] font-bold text-gray-500">رقم العقد</span>
+                  <span className="block text-[10px] font-bold text-gray-500">{t('authority.workspace.contract_number')}</span>
                   <span className="mt-0.5 block font-mono font-extrabold text-navy-900">
                     {contract.contract_number || '—'}
                   </span>
                 </div>
                 <div>
-                  <span className="block text-[10px] font-bold text-gray-500">تاريخ الأرشفة</span>
+                  <span className="block text-[10px] font-bold text-gray-500">{t('authority.workspace.contract_archived_date')}</span>
                   <span className="mt-0.5 block font-bold text-navy-900">
                     {formatContractDate(contract.signed_at)}
                   </span>
                 </div>
                 <div>
-                  <span className="block text-[10px] font-bold text-gray-500">مبلغ العقد</span>
+                  <span className="block text-[10px] font-bold text-gray-500">{t('authority.workspace.contract_amount')}</span>
                   <span className="mt-0.5 block font-bold text-emerald-800">
                     {formatContractAmount(contract.amount)}
                   </span>
                 </div>
                 <div>
-                  <span className="block text-[10px] font-bold text-gray-500">المتعامل المتعاقد</span>
+                  <span className="block text-[10px] font-bold text-gray-500">{t('authority.workspace.contract_operator')}</span>
                   <span className="mt-0.5 block font-bold text-navy-900">
                     {contract.operator_name || '—'}
                   </span>
@@ -1347,7 +1282,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
 
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <p className="m-0 text-[11px] text-gray-500">
-                  الصفقة: <span className="font-mono font-bold text-navy-900">{contract.deal_reference || deal?.reference_number || '—'}</span>
+                  {t('authority.workspace.contract_deal_ref_label')}: <span className="font-mono font-bold text-navy-900">{contract.deal_reference || deal?.reference_number || '—'}</span>
                 </p>
                 <Button
                   variant="outline"
@@ -1361,7 +1296,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                   ) : (
                     <Download className="w-3.5 h-3.5" />
                   )}
-                  <span>{downloadingContract ? 'جاري التحميل...' : 'تحميل العقد PDF'}</span>
+                  <span>{downloadingContract ? t('authority.workspace.contract_downloading') : t('authority.workspace.contract_btn_download')}</span>
                 </Button>
               </div>
 
@@ -1370,12 +1305,9 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
           ) : (
             <div className="rounded-xl border border-dashed border-[#D5DDEA] bg-slate-50/50 p-6 text-center">
               <FileSignature className="mx-auto h-8 w-8 text-slate-300" />
-              <h3 className="mt-2 text-sm font-extrabold text-navy-900">
-                لم يتم توليد العقد بعد
-              </h3>
+              <h3 className="mt-2 text-sm font-extrabold text-navy-900">{t('authority.workspace.contract_not_generated')}</h3>
               <p className="mx-auto mt-1 max-w-xl text-xs leading-relaxed text-gray-500">
-                يتاح توليد العقد بعد اعتماد الإسناد وتحديد المتعامل الفائز. سيتم إنشاء
-                نسخة PDF رسمية وربطها بمراحل التنفيذ.
+                {t('authority.workspace.contract_not_generated_desc')}
               </p>
               <Button
                 onClick={() => void handleGenerateContract()}
@@ -1387,7 +1319,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                 ) : (
                   <FileSignature className="w-4 h-4" />
                 )}
-                <span>{generatingContract ? 'جاري توليد العقد...' : 'توليد العقد'}</span>
+                <span>{generatingContract ? t('authority.workspace.contract_generating') : t('authority.workspace.contract_btn_generate')}</span>
               </Button>
             </div>
           )}
@@ -1406,7 +1338,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
           }`}
         >
           <Briefcase className="w-4 h-4" />
-          <span>1. بيانات الصفقة والاحتياجات</span>
+          <span>{t('authority.workspace.tab_basics')}</span>
         </button>
 
         <button
@@ -1419,7 +1351,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
           }`}
         >
           <BookOpen className="w-4 h-4" />
-          <span>2. دفتر الشروط وسلسلة الإسناد (سند)</span>
+          <span>{t('authority.workspace.tab_specs')}</span>
         </button>
 
         <button
@@ -1432,7 +1364,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
           }`}
         >
           <Paperclip className="w-4 h-4" />
-          <span>3. الوثائق والسندات والضمانات</span>
+          <span>{t('authority.workspace.tab_documents')}</span>
         </button>
       </div>
 
@@ -1441,17 +1373,15 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
         {/* Main Content Pane */}
         <main className={`${isAssistantOpen ? 'lg:col-span-8' : 'lg:col-span-12'} space-y-6 transition-all`}>
           {/* ══════════════════════════════════════════════════════════════════
-              TAB 1: بيانات الصفقة والاحتياجات (Deal Basics)
+              TAB 1: Deal Basics & Needs
               ══════════════════════════════════════════════════════════════════ */}
           {activeTab === 'basics' && (
             <div className="space-y-6">
               <section className="bg-white border border-[#D5DDEA] rounded-2xl p-6 shadow-sm space-y-6">
                 <div className="flex items-center justify-between border-b border-[#E5EBF4] pb-4">
                   <div>
-                    <h2 className="text-base font-bold text-navy-900">بيانات المشروع والتخطيط المسبق</h2>
-                    <p className="text-xs text-gray-500 mt-0.5">
-                      تحديد الاحتياجات وموقع التنفيذ والميزانية التقديرية وفق المادة 27 من القانون 23-12.
-                    </p>
+                    <h2 className="text-base font-bold text-navy-900">{t('authority.workspace.basics_title')}</h2>
+                    <p className="text-xs text-gray-500 mt-0.5">{t('authority.workspace.basics_subtitle')}</p>
                   </div>
                   <Button
                     onClick={handleSaveBasics}
@@ -1459,13 +1389,13 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                     className="bg-navy-900 hover:bg-navy-800 text-white rounded-xl text-xs font-bold px-4 py-2 flex items-center gap-1.5"
                   >
                     <Save className="w-3.5 h-3.5" />
-                    <span>{savingBasics ? 'جاري الحفظ...' : 'حفظ التعديلات'}</span>
+                    <span>{savingBasics ? t('authority.workspace.btn_saving_basics') : t('authority.workspace.btn_save_basics')}</span>
                   </Button>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   <div className="md:col-span-2 space-y-1.5">
-                    <label className="text-xs font-bold text-gray-700 block">عنوان وموضوع الصفقة</label>
+                    <label className="text-xs font-bold text-gray-700 block">{t('authority.workspace.field_title')}</label>
                     <Input
                       value={title}
                       onChange={(e) => setTitle(e.target.value)}
@@ -1474,7 +1404,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-gray-700 block">طبيعة وصنف الصفقة</label>
+                    <label className="text-xs font-bold text-gray-700 block">{t('authority.workspace.field_nature')}</label>
                     <select
                       value={procurementNature}
                       onChange={(e) => {
@@ -1488,15 +1418,15 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                       }}
                       className="w-full text-xs rounded-xl border border-[#D5DDEA] p-2.5 bg-white text-gray-800"
                     >
-                      <option value="works">أشغال (بناء، ترميم، هندسة مدنية)</option>
-                      <option value="supplies">لوازم (اقتناء مواد، معدات، وتجهيزات)</option>
-                      <option value="services">خدمات (صيانة، نظافة، أمن، نقل)</option>
-                      <option value="studies">دراسات (استشارات، هندسة معمارية ومتابعة)</option>
+                      <option value="works">{t('authority.workspace.nature_works')}</option>
+                      <option value="supplies">{t('authority.workspace.nature_supplies')}</option>
+                      <option value="services">{t('authority.workspace.nature_services')}</option>
+                      <option value="studies">{t('authority.workspace.nature_studies')}</option>
                     </select>
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-gray-700 block">ولاية موقع التنفيذ</label>
+                    <label className="text-xs font-bold text-gray-700 block">{t('authority.workspace.field_wilaya')}</label>
                     <select
                       value={wilaya}
                       onChange={(e) => setWilaya(e.target.value)}
@@ -1511,9 +1441,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-gray-700 block">
-                      الميزانية التقديرية (دج)
-                    </label>
+                    <label className="text-xs font-bold text-gray-700 block">{t('authority.workspace.field_budget')}</label>
                     <div className="relative">
                       <Input
                         type="number"
@@ -1521,13 +1449,11 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                         onChange={(e) => setBudget(e.target.value)}
                         className="rounded-xl border-[#D5DDEA] pe-10"
                       />
-                      <span className="absolute end-3 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-400">
-                        دج
-                      </span>
+                      <span className="absolute end-3 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-400">{t('common.dzd')}</span>
                     </div>
                     {/* Explicit Tax Regime Selector (HT vs TTC) */}
                     <div className="flex items-center gap-3 pt-1 text-xs">
-                      <span className="font-semibold text-gray-500 text-[11px]">النظام الجبائي:</span>
+                      <span className="font-semibold text-gray-500 text-[11px]">{t('authority.workspace.tax_system')}</span>
                       <label className="flex items-center gap-1 cursor-pointer">
                         <input
                           type="radio"
@@ -1537,7 +1463,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                           onChange={() => setTaxRegime('ttc')}
                           className="text-navy-900 focus:ring-navy-500"
                         />
-                        <span className="text-[11px] font-bold text-gray-700">شامل للرسوم (TTC)</span>
+                        <span className="text-[11px] font-bold text-gray-700">{t('authority.workspace.tax_ttc')}</span>
                       </label>
                       <label className="flex items-center gap-1 cursor-pointer">
                         <input
@@ -1548,15 +1474,13 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                           onChange={() => setTaxRegime('ht')}
                           className="text-navy-900 focus:ring-navy-500"
                         />
-                        <span className="text-[11px] font-bold text-gray-700">خارج الرسوم (HT)</span>
+                        <span className="text-[11px] font-bold text-gray-700">{t('authority.workspace.tax_ht')}</span>
                       </label>
                     </div>
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-gray-700 block">
-                      مدة الإنجاز أو التسليم المقترحة
-                    </label>
+                    <label className="text-xs font-bold text-gray-700 block">{t('authority.workspace.field_duration')}</label>
                     <Input
                       value={duration}
                       onChange={(e) => setDuration(e.target.value)}
@@ -1565,7 +1489,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                   </div>
 
                   <div className="md:col-span-2 space-y-1.5">
-                    <label className="text-xs font-bold text-gray-700 block">نطاق الحاجة ووصف المشروع</label>
+                    <label className="text-xs font-bold text-gray-700 block">{t('authority.workspace.field_description')}</label>
                     <Textarea
                       rows={3}
                       value={description}
@@ -1580,12 +1504,8 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                   <div className="flex items-center justify-between">
                     <div>
                       <h3 className="text-sm font-bold text-navy-900 flex items-center gap-1.5">
-                        <Scale className="w-4 h-4 text-emerald-600" />
-                        طريقة وشكل الإبرام (القانون رقم 23-12)
-                      </h3>
-                      <p className="text-[11px] text-gray-500">
-                        تحديد المسار الإجرائي طبقاً للمواد 29 و39-49 من القانون رقم 23-12 والمرسوم 15-247.
-                      </p>
+                        <Scale className="w-4 h-4 text-emerald-600" />{t('authority.workspace.proc_method_title')}</h3>
+                      <p className="text-[11px] text-gray-500">{t('authority.workspace.proc_method_subtitle')}</p>
                     </div>
                     <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-navy-50 text-navy-800 border border-navy-100">
                       {METHOD_LABELS[procurementMethod].ar} — {FORM_LABELS[procurementForm].ar}
@@ -1595,7 +1515,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {/* Method */}
                     <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-gray-700 block">طريقة الإبرام</label>
+                      <label className="text-xs font-bold text-gray-700 block">{t('authority.workspace.field_method')}</label>
                       <select
                         value={procurementMethod}
                         onChange={(e) => {
@@ -1604,14 +1524,14 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                         }}
                         className="w-full text-xs rounded-xl border border-[#D5DDEA] p-2.5 bg-white text-gray-800"
                       >
-                        <option value="open_tender">طلب العروض (Appel d&apos;offres)</option>
-                        <option value="negotiated_procedure">الإجراء التفاوضي (Procédure négociée)</option>
+                        <option value="open_tender">{t('authority.workspace.opt_open_tender')}</option>
+                        <option value="negotiated_procedure">{t('authority.workspace.method_negotiated')}</option>
                       </select>
                     </div>
 
                     {/* Form */}
                     <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-gray-700 block">شكل الإجراء</label>
+                      <label className="text-xs font-bold text-gray-700 block">{t('authority.workspace.field_form')}</label>
                       <select
                         value={procurementForm}
                         onChange={(e) => {
@@ -1630,7 +1550,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
 
                     {/* Scope */}
                     <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-gray-700 block">مجال المنافسة</label>
+                      <label className="text-xs font-bold text-gray-700 block">{t('authority.workspace.field_scope')}</label>
                       {isCompetitionScopeApplicable(procurementMethod, procurementForm) ? (
                         <select
                           value={competitionScope}
@@ -1643,9 +1563,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                           </option>
                         </select>
                       ) : (
-                        <div className="text-xs rounded-xl border border-dashed border-gray-300 p-2.5 bg-gray-50 text-gray-500">
-                          غير منطبق (إجراء تفاوضي مباشر)
-                        </div>
+                        <div className="text-xs rounded-xl border border-dashed border-gray-300 p-2.5 bg-gray-50 text-gray-500">{t('authority.workspace.scope_not_applicable')}</div>
                       )}
                     </div>
                   </div>
@@ -1655,40 +1573,38 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                     <div className="p-4 rounded-xl border border-amber-200 bg-amber-50/60 space-y-3">
                       <div className="flex items-center gap-2">
                         <AlertTriangle className="w-4 h-4 text-amber-700" />
-                        <h4 className="text-xs font-bold text-amber-950">
-                          أسانيد ومبررات اختيار شكل الإبرام الاستثنائي / غير المفتوح
-                        </h4>
+                        <h4 className="text-xs font-bold text-amber-950">{t('authority.workspace.justif_section_title')}</h4>
                       </div>
                       <p className="text-[11px] text-amber-800 leading-relaxed">
-                        وفقاً للقانون 23-12، يلتزم مسؤولو المصلحة بتدوين السند القانوني الصريح ومبررات اللجوء لهذا الإجراء في ملف الصفقة تمهيداً لعرضه على لجنة الصفقات المختصة.
+                        {t('authority.workspace.justif_section_desc')}
                       </p>
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <div className="space-y-1">
-                          <label className="text-[11px] font-bold text-gray-700 block">السند القانوني المعتمد</label>
+                          <label className="text-[11px] font-bold text-gray-700 block">{t('authority.workspace.field_statutory_basis')}</label>
                           <Input
                             value={statutoryBasis}
                             onChange={(e) => setStatutoryBasis(e.target.value)}
-                            placeholder="مثال: المادة 48 من القانون 23-12 (حالة الاحتكار / الاستعجال الملح)"
+                            placeholder={t('authority.workspace.field_statutory_basis_placeholder')}
                             className="text-xs rounded-xl border-amber-200 bg-white"
                           />
                         </div>
                         <div className="space-y-1">
-                          <label className="text-[11px] font-bold text-gray-700 block">مرجع الوثائق الثبوتية والتقارير</label>
+                          <label className="text-[11px] font-bold text-gray-700 block">{t('authority.workspace.field_docs_ref')}</label>
                           <Input
                             value={supportingDocsRef}
                             onChange={(e) => setSupportingDocsRef(e.target.value)}
-                            placeholder="مثال: تقرير المبررات التقنية رقم 14/2026 ومحضر عدم الجدوى السابق"
+                            placeholder={t('authority.workspace.field_docs_ref_placeholder')}
                             className="text-xs rounded-xl border-amber-200 bg-white"
                           />
                         </div>
                         <div className="md:col-span-2 space-y-1">
-                          <label className="text-[11px] font-bold text-gray-700 block">تقرير التعليل والمبررات الموضوعية</label>
+                          <label className="text-[11px] font-bold text-gray-700 block">{t('authority.workspace.field_justif_report')}</label>
                           <Textarea
                             rows={2}
                             value={procedureJustification}
                             onChange={(e) => setProcedureJustification(e.target.value)}
-                            placeholder="بيان الأسباب والظروف الواقعية والتقنية التي استدعت اعتماد هذا الإجراء..."
+                            placeholder={t('authority.workspace.field_justif_report_placeholder')}
                             className="text-xs rounded-xl border-amber-200 bg-white"
                           />
                         </div>
@@ -1702,10 +1618,10 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                   <div className="bg-amber-50/80 border border-amber-200 rounded-xl p-3.5 flex items-center justify-between gap-3 text-xs">
                     <div className="space-y-0.5">
                       <p className="font-bold text-amber-950">
-                        مجموع جدول الكميات الحالي يبلغ: {boqTotal.toLocaleString('ar-DZ')} دج (TTC)
+                        {t('authority.workspace.boq_total_current', { amount: boqTotal.toLocaleString(lang === 'fr' ? 'fr-DZ' : 'ar-DZ'), dzd: t('common.dzd') })}
                       </p>
                       <p className="text-amber-800 text-[11px]">
-                        الميزانية المسجلة حالياً: {budget ? `${parseFloat(budget).toLocaleString('ar-DZ')} دج` : 'غير محددة'}.
+                        {t('authority.workspace.boq_current_registered', { amount: budget ? `${parseFloat(budget).toLocaleString(lang === 'fr' ? 'fr-DZ' : 'ar-DZ')} ${t('common.dzd')}` : t('authority.workspace.boq_alert_unspecified') })}
                       </p>
                     </div>
                     <Button
@@ -1713,9 +1629,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                       size="sm"
                       onClick={() => setShowSyncBudgetConfirm(true)}
                       className="bg-amber-700 hover:bg-amber-800 text-white rounded-lg text-xs font-bold px-3 shrink-0"
-                    >
-                      تحديث الميزانية بالمجموع
-                    </Button>
+                    >{t('authority.workspace.boq_alert_btn_update')}</Button>
                   </div>
                 )}
 
@@ -1723,10 +1637,8 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                 <div className="space-y-3 pt-3 border-t border-[#E5EBF4]">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h3 className="text-sm font-bold text-navy-900">جدول الكميات والأسعار التقديرية (B.O.Q)</h3>
-                      <p className="text-[11px] text-gray-500">
-                        بيان تفصيلي بالبنود والكميات التقديرية لدعم الدقة في احتساب الكلفة.
-                      </p>
+                      <h3 className="text-sm font-bold text-navy-900">{t('authority.workspace.boq_title')}</h3>
+                      <p className="text-[11px] text-gray-500">{t('authority.workspace.boq_subtitle')}</p>
                     </div>
                     <Button
                       type="button"
@@ -1735,9 +1647,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                       onClick={handleAddBoqRow}
                       className="border-[#D5DDEA] text-xs font-bold rounded-xl"
                     >
-                      <Plus className="w-3.5 h-3.5 me-1" />
-                      إضافة بند
-                    </Button>
+                      <Plus className="w-3.5 h-3.5 me-1" />{t('authority.workspace.boq_btn_add')}</Button>
                   </div>
 
                   <div className="border border-[#D5DDEA] rounded-xl overflow-hidden bg-white">
@@ -1746,12 +1656,12 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                         <thead>
                           <tr className="bg-gray-50 border-b border-[#D5DDEA] text-gray-600 font-bold">
                             <th className="py-2.5 px-3 w-10 text-center">#</th>
-                            <th className="py-2.5 px-3">البيان</th>
-                            <th className="py-2.5 px-3 w-24">الوحدة</th>
-                            <th className="py-2.5 px-3 w-20">الكمية</th>
-                            <th className="py-2.5 px-3 w-32">السعر الأحادي (دج)</th>
-                            <th className="py-2.5 px-3 w-32 text-end">الإجمالي (دج)</th>
-                            <th className="py-2.5 px-2 w-10 text-center">حذف</th>
+                            <th className="py-2.5 px-3">{t('authority.workspace.boq_th_desc')}</th>
+                            <th className="py-2.5 px-3 w-24">{t('authority.workspace.boq_th_unit')}</th>
+                            <th className="py-2.5 px-3 w-20">{t('authority.workspace.boq_th_qty')}</th>
+                            <th className="py-2.5 px-3 w-32">{t('authority.workspace.boq_th_price')}</th>
+                            <th className="py-2.5 px-3 w-32 text-end">{t('authority.workspace.boq_th_total')}</th>
+                            <th className="py-2.5 px-2 w-10 text-center">{t('authority.workspace.boq_th_delete')}</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100">
@@ -1764,7 +1674,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                                   <Input
                                     value={item.name}
                                     onChange={(e) => handleUpdateBoqRow(item.id, 'name', e.target.value)}
-                                    placeholder="وصف البند..."
+                                    placeholder={t('authority.workspace.boq_item_placeholder')}
                                     className="h-7 text-xs rounded-lg"
                                   />
                                 </td>
@@ -1774,12 +1684,12 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                                     onChange={(e) => handleUpdateBoqRow(item.id, 'unit', e.target.value)}
                                     className="h-7 w-full text-xs rounded-lg border border-gray-200 px-1 bg-white"
                                   >
-                                    <option value="وحدة">وحدة</option>
-                                    <option value="م²">م²</option>
-                                    <option value="م³">م³</option>
-                                    <option value="م.ط">م.ط</option>
-                                    <option value="حصة">حصة</option>
-                                    <option value="شهر">شهر</option>
+                                    <option value={t('authority.workspace.unit_item')}>{t('authority.workspace.unit_item')}</option>
+                                    <option value={t('authority.workspace.unit_sqm')}>{t('authority.workspace.unit_sqm')}</option>
+                                    <option value={t('authority.workspace.unit_cum')}>{t('authority.workspace.unit_cum')}</option>
+                                    <option value={t('authority.workspace.unit_lm')}>{t('authority.workspace.unit_lm')}</option>
+                                    <option value={t('authority.workspace.unit_lot')}>{t('authority.workspace.unit_lot')}</option>
+                                    <option value={t('authority.workspace.unit_month')}>{t('authority.workspace.unit_month')}</option>
                                   </select>
                                 </td>
                                 <td className="py-2 px-3">
@@ -1805,7 +1715,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                                   />
                                 </td>
                                 <td className="py-2 px-3 text-end font-mono font-bold text-navy-900">
-                                  {subtotal.toLocaleString('ar-DZ')} دج
+                                  {subtotal.toLocaleString(lang === 'fr' ? 'fr-DZ' : 'ar-DZ')} {t('common.dzd')}
                                 </td>
                                 <td className="py-2 px-2 text-center">
                                   <button
@@ -1822,11 +1732,9 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                         </tbody>
                         <tfoot>
                           <tr className="bg-gray-50 border-t-2 border-[#D5DDEA] text-xs font-bold">
-                            <td colSpan={5} className="py-2.5 px-3 text-end text-gray-700">
-                              مجموع جدول الكميات التقديري:
-                            </td>
+                            <td colSpan={5} className="py-2.5 px-3 text-end text-gray-700">{t('authority.workspace.boq_total_label')}</td>
                             <td className="py-2.5 px-3 text-end font-mono text-emerald-800 font-bold">
-                              {boqTotal.toLocaleString('ar-DZ')} دج
+                              {boqTotal.toLocaleString(lang === 'fr' ? 'fr-DZ' : 'ar-DZ')} {t('common.dzd')}
                             </td>
                             <td></td>
                           </tr>
@@ -1840,7 +1748,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
           )}
 
           {/* ══════════════════════════════════════════════════════════════════
-              TAB 2: دفتر الشروط وسلسلة الإسناد (Cahier Specs & Sanad)
+              TAB 2: Cahier Specs & Sanad
               ══════════════════════════════════════════════════════════════════ */}
           {activeTab === 'specs' && (
             <div className="space-y-6">
@@ -1856,11 +1764,11 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                         {templateId
                           ? CAHIER_TEMPLATES_LIBRARY.find((t) => t.id === templateId)?.title || templateId
                           : isManualDraft
-                          ? 'مسودة حرة محررة يدوياً'
-                          : 'دفتر شروط نموذجي معتمد'}
+                          ? t('authority.workspace.manual_draft_badge')
+                          : t('authority.workspace.approved_template_badge')}
                       </span>
                       <span className="font-mono text-[10px] font-bold px-2 py-0.5 rounded bg-gray-100 text-gray-700">
-                        الإصدار {templateVersion}
+                        {t('authority.workspace.version_prefix', { version: templateVersion })}
                       </span>
                       {templateId && (
                         <span
@@ -1873,12 +1781,12 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                           <Award className="w-3 h-3" />
                           {TEMPLATE_STATUS_LABELS[
                             CAHIER_TEMPLATES_LIBRARY.find((t) => t.id === templateId)?.status || 'internal_advisory'
-                          ]?.ar || 'قالب داخلي استرشادي — يحتاج مراجعة'}
+                          ]?.ar || t('authority.workspace.template_status_fallback')}
                         </span>
                       )}
                     </div>
                     <p className="text-[11px] text-gray-500 mt-0.5">
-                      السند الإجرائي: {METHOD_LABELS[procurementMethod].ar} — {FORM_LABELS[procurementForm].ar} ({NATURE_LABELS[procurementNature].ar})
+                      {t('authority.workspace.procedural_basis')}: {lang === 'fr' ? (METHOD_LABELS[procurementMethod]?.fr || METHOD_LABELS[procurementMethod]?.ar) : METHOD_LABELS[procurementMethod]?.ar} — {lang === 'fr' ? (FORM_LABELS[procurementForm]?.fr || FORM_LABELS[procurementForm]?.ar) : FORM_LABELS[procurementForm]?.ar} ({lang === 'fr' ? (NATURE_LABELS[procurementNature]?.fr || NATURE_LABELS[procurementNature]?.ar) : NATURE_LABELS[procurementNature]?.ar})
                     </p>
                   </div>
                 </div>
@@ -1889,9 +1797,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                     size="sm"
                     onClick={() => setActiveTab('basics')}
                     className="text-xs border-[#D5DDEA] text-gray-700 rounded-xl"
-                  >
-                    تغيير طريقة الإبرام
-                  </Button>
+                  >{t('authority.workspace.btn_change_method')}</Button>
                 </div>
               </div>
 
@@ -1903,16 +1809,14 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                       <ShieldCheck className="w-5 h-5" />
                     </div>
                     <div>
-                      <p className="font-bold text-emerald-900 text-sm">
-                        دفتر الشروط مؤشر ومجمّد رقمياً
-                      </p>
+                      <p className="font-bold text-emerald-900 text-sm">{t('authority.workspace.frozen_banner_title')}</p>
                       <p className="font-mono text-[11px] text-emerald-800">
-                        بصمة التجميد: {frozenDigest}
+                        {t('authority.workspace.badge_frozen_digest', { digest: frozenDigest })}
                       </p>
                     </div>
                   </div>
                   <span className="text-[11px] text-emerald-700">
-                    تاريخ الاعتماد: {new Date(frozenAt || '').toLocaleDateString('ar-DZ')}
+                    {t('authority.workspace.badge_frozen_date', { date: new Date(frozenAt || '').toLocaleDateString(lang === 'fr' ? 'fr-DZ' : 'ar-DZ') })}
                   </span>
                 </div>
               )}
@@ -1932,7 +1836,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                           : 'bg-white text-gray-700 hover:bg-gray-100 border border-[#D5DDEA]'
                       }`}
                     >
-                      {SECTION_TITLES[key]}
+                      {getSectionTitle(key)}
                     </button>
                   );
                 })}
@@ -1947,7 +1851,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                   }`}
                 >
                   <CheckCircle2 className="w-3.5 h-3.5" />
-                  <span>المتطلبات الإلزامية ({requirements.length})</span>
+                  <span>{t('authority.workspace.tab_reqs_count', { count: requirements.length })}</span>
                 </button>
               </div>
 
@@ -1955,12 +1859,8 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
               {activeSection === 'requirements' ? (
                 <div className="bg-white border border-[#D5DDEA] rounded-2xl p-6 shadow-sm space-y-4">
                   <div className="flex items-center justify-between border-b border-gray-100 pb-3">
-                    <h3 className="text-sm font-bold text-navy-900">
-                      شبكة المتطلبات الإلزامية المستخرجة رقمياً
-                    </h3>
-                    <span className="text-[11px] text-gray-500">
-                      تُستخرج تلقائياً لتمكين الفحص الآلي لعروض المتعاملين
-                    </span>
+                    <h3 className="text-sm font-bold text-navy-900">{t('authority.workspace.reqs_grid_title')}</h3>
+                    <span className="text-[11px] text-gray-500">{t('authority.workspace.reqs_grid_subtitle')}</span>
                   </div>
 
                   <div className="space-y-3">
@@ -1974,9 +1874,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                             {req.requirementCode}
                           </span>
                           {req.isDisqualifying && (
-                            <span className="px-2 py-0.5 bg-red-100 text-red-800 border border-red-200 rounded font-bold text-[10px]">
-                              إقصائي في حال عدم التقديم
-                            </span>
+                            <span className="px-2 py-0.5 bg-red-100 text-red-800 border border-red-200 rounded font-bold text-[10px]">{t('authority.workspace.disqualifying_badge')}</span>
                           )}
                         </div>
                         <p className="font-semibold text-gray-900">{req.positionReference}</p>
@@ -2005,9 +1903,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                                 {clause.clauseCode}
                               </span>
                               <h3 className="text-sm font-bold text-navy-900">{clause.title}</h3>
-                              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-navy-50 text-navy-800 border border-navy-100">
-                                بند تعاقدي ملزم
-                              </span>
+                              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-navy-50 text-navy-800 border border-navy-100">{t('authority.workspace.binding_clause_badge')}</span>
                             </div>
 
                             {/* Sanad / Provenance Badges */}
@@ -2031,7 +1927,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                                   className="text-gray-500 hover:text-navy-900 flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-gray-100"
                                 >
                                   <History className="w-3 h-3" />
-                                  <span>سجل التعديلات ({clause.events.length})</span>
+                                  <span>{t('authority.workspace.tab_audit_count', { count: clause.events.length })}</span>
                                 </button>
                               )}
                             </div>
@@ -2048,7 +1944,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                               />
                               <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2">
                                 <Input
-                                  placeholder="مبرر التعديل (إلزامي للتوثيق في سجل التدقيق)..."
+                                  placeholder={t('authority.workspace.edit_reason_placeholder')}
                                   value={editReason}
                                   onChange={(e) => setEditReason(e.target.value)}
                                   className="text-xs rounded-xl h-8 flex-1"
@@ -2059,16 +1955,14 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                                     size="sm"
                                     onClick={() => setEditingClauseId(null)}
                                     className="rounded-xl text-xs"
-                                  >
-                                    إلغاء
-                                  </Button>
+                                  >{t('authority.workspace.btn_modal_cancel')}</Button>
                                   <Button
                                     size="sm"
                                     disabled={savingClause}
                                     onClick={() => handleSaveClause(clause)}
                                     className="bg-navy-900 hover:bg-navy-800 text-white rounded-xl text-xs font-bold"
                                   >
-                                    {savingClause ? 'جاري الحفظ...' : 'حفظ البند'}
+                                    {savingClause ? t('authority.workspace.btn_saving_basics') : t('authority.workspace.btn_save_clause')}
                                   </Button>
                                 </div>
                               </div>
@@ -2087,7 +1981,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                                     className="text-xs text-emerald-700 hover:underline font-bold flex items-center gap-1"
                                   >
                                     <Sparkles className="w-3 h-3 text-emerald-600" />
-                                    <span>اقتراح من قالب نموذجي</span>
+                                    <span>{t('authority.workspace.tpl_proposal_badge')}</span>
                                   </button>
 
                                   <Button
@@ -2095,9 +1989,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                                     size="sm"
                                     onClick={() => handleStartEditClause(clause)}
                                     className="text-xs border-[#D5DDEA] text-navy-800 hover:bg-navy-50 rounded-xl font-bold"
-                                  >
-                                    تعديل نص البند
-                                  </Button>
+                                  >{t('authority.workspace.btn_edit_clause')}</Button>
                                 </div>
                               )}
                             </div>
@@ -2106,7 +1998,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                           {/* Clause Event History Drawer */}
                           {isHistoryOpen && clause.events.length > 0 && (
                             <div className="bg-gray-50 rounded-xl p-3 border border-gray-200 text-xs space-y-2">
-                              <p className="font-bold text-gray-800">سجل الأحداث والتعديلات:</p>
+                              <p className="font-bold text-gray-800">{t('authority.workspace.events_log_title')}</p>
                               {clause.events.map((ev) => (
                                 <div
                                   key={ev.id}
@@ -2130,19 +2022,15 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
               {!isFrozen && (
                 <div className="bg-white border border-[#D5DDEA] rounded-2xl p-5 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                   <div className="space-y-1">
-                    <h4 className="text-xs font-bold text-navy-900">
-                      اعتماد وتجميد دفتر الشروط رقمياً
-                    </h4>
-                    <p className="text-[11px] text-gray-500">
-                      عند التجميد، يتم توليد بصمة توثيق رقمية وقفل التعديل تمهيداً لعرضه على لجنة الصفقات.
-                    </p>
+                    <h4 className="text-xs font-bold text-navy-900">{t('authority.workspace.freeze_card_title')}</h4>
+                    <p className="text-[11px] text-gray-500">{t('authority.workspace.freeze_card_desc')}</p>
                   </div>
                   <Button
                     onClick={() => setShowFreezeModal(true)}
                     className="bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-bold px-4 py-2 flex items-center gap-1.5"
                   >
                     <Lock className="w-3.5 h-3.5" />
-                    <span>تجميد دفتر الشروط للاعتماد</span>
+                    <span>{t('authority.workspace.btn_freeze_specs')}</span>
                   </Button>
                 </div>
               )}
@@ -2150,24 +2038,20 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
           )}
 
           {/* ══════════════════════════════════════════════════════════════════
-              TAB 3: الوثائق والسندات والضمانات (Documents, Deeds & Sanad)
+              TAB 3: Documents, Deeds & Sanad
               ══════════════════════════════════════════════════════════════════ */}
           {activeTab === 'documents' && (
             <div className="space-y-6">
-              {/* Operator Dynamic Documents Dossier (ملف وثائق المتعامل الاقتصادي) */}
+              {/* Operator Dynamic Documents Dossier */}
               <section className="bg-white border border-[#D5DDEA] rounded-2xl p-6 shadow-sm space-y-4">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-100 pb-3">
                   <div>
                     <h2 className="text-base font-bold text-navy-900 flex items-center gap-2">
-                      <Layers className="w-4 h-4 text-emerald-600" />
-                      ملف وثائق المتعامل الاقتصادي المطلوبة
-                    </h2>
-                    <p className="text-xs text-gray-500">
-                      قائمة الوثائق المشترطة في دفتر الشروط وموزعة على الأظرفة الثلاثة (الترشح، التقني، المالي) وفق المادة 67 من القانون 23-12.
-                    </p>
+                      <Layers className="w-4 h-4 text-emerald-600" />{t('authority.workspace.operator_dossier_title')}</h2>
+                    <p className="text-xs text-gray-500">{t('authority.workspace.operator_dossier_desc')}</p>
                   </div>
                   <span className="text-xs font-bold px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 self-start sm:self-auto">
-                    {operatorDocuments.length} وثيقة مطلوبة
+                    {t('authority.workspace.operator_docs_count', { count: operatorDocuments.length })}
                   </span>
                 </div>
 
@@ -2178,12 +2062,12 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                       <thead>
                         <tr className="bg-gray-50 border-b border-[#D5DDEA] text-gray-600 font-bold">
                           <th className="py-2.5 px-3 w-10 text-center">#</th>
-                          <th className="py-2.5 px-3">الوثيقة المطلوبة</th>
-                          <th className="py-2.5 px-3 w-28">الظرف / الوعاء</th>
-                          <th className="py-2.5 px-3 w-36">السند المرجعي</th>
-                          <th className="py-2.5 px-3 w-28 text-center">الصفة التشريعية</th>
-                          <th className="py-2.5 px-3 w-28 text-center">الأثر عند الإغفال</th>
-                          <th className="py-2.5 px-2 w-12 text-center">إجراء</th>
+                          <th className="py-2.5 px-3">{t('authority.workspace.th_doc_name')}</th>
+                          <th className="py-2.5 px-3 w-28">{t('authority.workspace.th_doc_envelope')}</th>
+                          <th className="py-2.5 px-3 w-36">{t('authority.workspace.th_doc_basis')}</th>
+                          <th className="py-2.5 px-3 w-28 text-center">{t('authority.workspace.th_doc_statutory')}</th>
+                          <th className="py-2.5 px-3 w-28 text-center">{t('authority.workspace.th_doc_impact')}</th>
+                          <th className="py-2.5 px-2 w-12 text-center">{t('authority.workspace.th_doc_action')}</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-100">
@@ -2207,35 +2091,27 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                                 }`}
                               >
                                 {doc.category === 'candidacy' || doc.category === ('candidature' as any)
-                                  ? 'ملف الترشح'
+                                  ? t('authority.workspace.envelope_candidature')
                                   : doc.category === 'technical'
-                                  ? 'العرض التقني'
-                                  : 'العرض المالي'}
+                                  ? t('authority.workspace.envelope_technical')
+                                  : t('authority.workspace.envelope_financial')}
                               </span>
                             </td>
                             <td className="py-2.5 px-3 font-mono text-[11px] text-gray-600">
-                              {doc.statutoryRef || doc.statutoryBasis || 'المادة 67 من القانون 23-12'}
+                              {doc.statutoryRef || doc.statutoryBasis || t('authority.workspace.doc_statutory_default')}
                             </td>
                             <td className="py-2.5 px-3 text-center">
                               {doc.isStatutory ? (
-                                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-navy-50 text-navy-800 border border-navy-200 whitespace-nowrap">
-                                  إلزامية بنص القانون
-                                </span>
+                                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-navy-50 text-navy-800 border border-navy-200 whitespace-nowrap">{t('authority.workspace.doc_statutory_badge')}</span>
                               ) : (
-                                <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-gray-100 text-gray-600 whitespace-nowrap">
-                                  تقديرية للمصلحة
-                                </span>
+                                <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-gray-100 text-gray-600 whitespace-nowrap">{t('authority.workspace.doc_discretionary_badge')}</span>
                               )}
                             </td>
                             <td className="py-2.5 px-3 text-center">
                               {doc.isDisqualifying ? (
-                                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-50 text-red-700 border border-red-200">
-                                  إقصائي
-                                </span>
+                                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-50 text-red-700 border border-red-200">{t('authority.workspace.impact_disqualifying')}</span>
                               ) : (
-                                <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-gray-100 text-gray-600">
-                                  استكمالي
-                                </span>
+                                <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-gray-100 text-gray-600">{t('authority.workspace.impact_supplementary')}</span>
                               )}
                             </td>
                             <td className="py-2.5 px-2 text-center">
@@ -2244,11 +2120,11 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                                   type="button"
                                   onClick={() => {
                                     toast.error(
-                                      `لا يمكن حذف وثيقة «${doc.titleAr || doc.name}»؛ فهي مشترطة وجوباً بنص المادة 67 من القانون 23-12.`
+                                      t('authority.workspace.cannot_delete_mandatory_doc', { name: doc.titleAr || doc.name })
                                     );
                                   }}
                                   className="text-gray-300 hover:text-amber-600 p-1 rounded cursor-not-allowed inline-flex items-center justify-center"
-                                  title="وثيقة قانونية إلزامية لا يمكن حذفها بنص المادة 67"
+                                  title={t('authority.workspace.statutory_delete_tooltip')}
                                 >
                                   <Lock className="w-3.5 h-3.5 text-gray-400" />
                                 </button>
@@ -2257,10 +2133,10 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                                   type="button"
                                   onClick={() => {
                                     setOperatorDocuments((prev) => prev.filter((d) => (d.id || d.code) !== (doc.id || doc.code)));
-                                    toast.info(`تم حذف الوثيقة التقديرية: ${doc.titleAr || doc.name}`);
+                                    toast.info(t('authority.workspace.deleted_discretionary_doc', { name: doc.titleAr || doc.name }));
                                   }}
                                   className="text-gray-400 hover:text-red-600 p-1 rounded inline-flex items-center justify-center"
-                                  title="حذف الوثيقة التقديرية"
+                                  title={t('authority.workspace.discretionary_delete_tooltip')}
                                 >
                                   <Trash2 className="w-3.5 h-3.5" />
                                 </button>
@@ -2278,7 +2154,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                   <Input
                     value={newCustomDocName}
                     onChange={(e) => setNewCustomDocName(e.target.value)}
-                    placeholder="إضافة وثيقة مطلوبة جديدة (مثال: شهادة زيارة الموقع)..."
+                    placeholder={t('authority.workspace.add_doc_placeholder')}
                     className="rounded-xl border-gray-200 text-xs flex-1 bg-white"
                   />
                   <select
@@ -2286,9 +2162,9 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                     onChange={(e) => setNewCustomDocCategory(e.target.value as any)}
                     className="rounded-xl border border-gray-200 text-xs p-2 bg-white"
                   >
-                    <option value="candidature">ملف الترشح</option>
-                    <option value="technical">العرض التقني</option>
-                    <option value="financial">العرض المالي</option>
+                    <option value="candidature">{t('authority.workspace.envelope_candidature')}</option>
+                    <option value="technical">{t('authority.workspace.envelope_technical')}</option>
+                    <option value="financial">{t('authority.workspace.envelope_financial')}</option>
                   </select>
                   <label className="flex items-center gap-1.5 text-xs text-gray-700 whitespace-nowrap px-1 cursor-pointer">
                     <input
@@ -2297,14 +2173,14 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                       onChange={(e) => setNewCustomDocDisqualifying(e.target.checked)}
                       className="rounded border-gray-300 text-red-600"
                     />
-                    <span>إقصائي</span>
+                    <span>{t('authority.workspace.impact_disqualifying')}</span>
                   </label>
                   <Button
                     type="button"
                     size="sm"
                     onClick={() => {
                       if (!newCustomDocName.trim()) {
-                        toast.error('يرجى كتابة تسمية الوثيقة.');
+                        toast.error(t('authority.workspace.toast_doc_title_required'));
                         return;
                       }
                       const newDoc: OperatorDocumentRequirement = {
@@ -2316,18 +2192,16 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                         isMandatory: newCustomDocDisqualifying,
                         isDisqualifying: newCustomDocDisqualifying,
                         isStatutory: false,
-                        statutoryBasis: 'متطلب تقديري خاص بالمصلحة المتعاقدة',
-                        statutoryRef: 'دفتر الشروط (تقديري)',
+                        statutoryBasis: t('authority.workspace.statutory_basis_discretionary'),
+                        statutoryRef: t('authority.workspace.statutory_ref_estimated'),
                       };
                       setOperatorDocuments((prev) => [...prev, newDoc]);
                       setNewCustomDocName('');
-                      toast.success('تمت إضافة الوثيقة إلى ملف المتطلبات.');
+                      toast.success(t('authority.workspace.toast_doc_added'));
                     }}
                     className="bg-navy-900 hover:bg-navy-800 text-white rounded-xl text-xs font-bold shrink-0"
                   >
-                    <Plus className="w-3.5 h-3.5 me-1" />
-                    إضافة وثيقة
-                  </Button>
+                    <Plus className="w-3.5 h-3.5 me-1" />{t('authority.workspace.btn_add_doc')}</Button>
                 </div>
               </section>
 
@@ -2335,10 +2209,8 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
               <section className="bg-white border border-[#D5DDEA] rounded-2xl p-6 shadow-sm space-y-4">
                 <div className="flex items-center justify-between border-b border-gray-100 pb-3">
                   <div>
-                    <h2 className="text-base font-bold text-navy-900">وثائق وسندات هذه الصفقة</h2>
-                    <p className="text-xs text-gray-500">
-                      الوثائق الرسمية المستخرجة والمحاضر والسندات المالية والتعاقدية.
-                    </p>
+                    <h2 className="text-base font-bold text-navy-900">{t('authority.workspace.deal_docs_title')}</h2>
+                    <p className="text-xs text-gray-500">{t('authority.workspace.deal_docs_desc')}</p>
                   </div>
                   <Button
                     variant="outline"
@@ -2348,7 +2220,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                     className="border-emerald-300 text-emerald-800 hover:bg-emerald-50 rounded-xl text-xs font-bold flex items-center gap-1.5"
                   >
                     <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
-                    <span>{summarizingDoc ? 'جاري التلخيص...' : 'تلخيص ملف الصفقة (AI)'}</span>
+                    <span>{summarizingDoc ? t('authority.workspace.summarizing_ai') : t('authority.workspace.btn_summarize_ai')}</span>
                   </Button>
                 </div>
 
@@ -2357,9 +2229,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                   <div className="bg-emerald-50/70 border border-emerald-200 rounded-xl p-4 text-xs space-y-2">
                     <div className="flex items-center justify-between">
                       <span className="font-bold text-emerald-950 flex items-center gap-1.5">
-                        <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
-                        ملخص تنفيذي استشاري لدفتر الشروط
-                      </span>
+                        <Sparkles className="w-3.5 h-3.5 text-emerald-600" />{t('authority.workspace.executive_summary_title')}</span>
                       <button
                         type="button"
                         onClick={() => setDocSummary(null)}
@@ -2369,9 +2239,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                       </button>
                     </div>
                     <p className="text-emerald-900 leading-relaxed font-normal">{docSummary}</p>
-                    <p className="text-[10px] text-emerald-700 pt-1">
-                      مسودة استشارية تخضع لسلطة التقدير والتحقق البشري لمسؤولي المصلحة المتعاقدة.
-                    </p>
+                    <p className="text-[10px] text-emerald-700 pt-1">{t('authority.workspace.executive_summary_disclaimer')}</p>
                   </div>
                 )}
 
@@ -2383,12 +2251,10 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                         <FileText className="w-5 h-5" />
                       </div>
                       <div className="space-y-1">
-                        <p className="font-bold text-gray-900">دفتر الشروط والمواصفات (PDF)</p>
-                        <p className="text-gray-500 text-[11px]">
-                          النسخة الرسمية القابلة للطباعة والأرشفة
-                        </p>
+                        <p className="font-bold text-gray-900">{t('authority.workspace.doc_specs_pdf_title')}</p>
+                        <p className="text-gray-500 text-[11px]">{t('authority.workspace.doc_specs_pdf_desc')}</p>
                         <span className="inline-block text-[10px] font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded">
-                          {isFrozen ? 'نسخة مجمّدة معتمدة' : 'مسودة قيد الإعداد'}
+                          {isFrozen ? t('authority.workspace.doc_specs_frozen_badge') : t('authority.workspace.doc_specs_draft_badge')}
                         </span>
                       </div>
                     </div>
@@ -2398,9 +2264,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                       disabled={exportingPdf}
                       className="bg-navy-900 hover:bg-navy-800 text-white rounded-xl text-xs font-bold shrink-0"
                     >
-                      <Download className="w-3.5 h-3.5 me-1" />
-                      تنزيل PDF
-                    </Button>
+                      <Download className="w-3.5 h-3.5 me-1" />{t('authority.workspace.btn_download_pdf')}</Button>
                   </div>
 
                   {/* Doc 2: Bank Guarantees / Sanad */}
@@ -2410,13 +2274,9 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                         <ShieldCheck className="w-5 h-5" />
                       </div>
                       <div className="space-y-1">
-                        <p className="font-bold text-gray-900">سندات وكفالات الضمان البنكي</p>
-                        <p className="text-gray-500 text-[11px]">
-                          كفالة حسن التنفيذ وكفالة التعهد (المادة 125 من المرسوم 15-247)
-                        </p>
-                        <span className="inline-block text-[10px] font-bold text-blue-800 bg-blue-100 px-2 py-0.5 rounded">
-                          محددة بنسبة 5% من مبلغ الصفقة
-                        </span>
+                        <p className="font-bold text-gray-900">{t('authority.workspace.doc_bank_guarantee_title')}</p>
+                        <p className="text-gray-500 text-[11px]">{t('authority.workspace.doc_bank_guarantee_desc')}</p>
+                        <span className="inline-block text-[10px] font-bold text-blue-800 bg-blue-100 px-2 py-0.5 rounded">{t('authority.workspace.doc_bank_guarantee_ratio')}</span>
                       </div>
                     </div>
                   </div>
@@ -2426,45 +2286,41 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
               {/* General Reference Documents (Standalone Unattached Documents) */}
               <section className="bg-white border border-[#D5DDEA] rounded-2xl p-6 shadow-sm space-y-4">
                 <div className="border-b border-gray-100 pb-3">
-                  <h2 className="text-base font-bold text-navy-900">
-                    الوثائق والسندات العامة والتنظيمية
-                  </h2>
-                  <p className="text-xs text-gray-500">
-                    نماذج رسمية غير مقيدة بصفقة معينة صادرة عن وزارة المالية واللجنة المختصة بالصفقات العمومية.
-                  </p>
+                  <h2 className="text-base font-bold text-navy-900">{t('authority.workspace.general_docs_title')}</h2>
+                  <p className="text-xs text-gray-500">{t('authority.workspace.general_docs_desc')}</p>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
                   <div className="p-3.5 rounded-xl border border-gray-200 flex items-center justify-between">
                     <div>
-                      <p className="font-bold text-gray-900">نموذج دفتر الشروط للأشغال العامة</p>
-                      <p className="text-gray-500 text-[11px]">دفتر الشروط النموذجي وفق المرسوم 15-247</p>
+                      <p className="font-bold text-gray-900">{t('authority.workspace.doc1_title')}</p>
+                      <p className="text-gray-500 text-[11px]">{t('authority.workspace.doc1_desc')}</p>
                     </div>
-                    <span className="text-gray-400 font-mono text-[11px]">قرار وزاري</span>
+                    <span className="text-gray-400 font-mono text-[11px]">{t('authority.workspace.doc1_tag')}</span>
                   </div>
 
                   <div className="p-3.5 rounded-xl border border-gray-200 flex items-center justify-between">
                     <div>
-                      <p className="font-bold text-gray-900">نموذج التصريح بالنزاهة والترشح</p>
-                      <p className="text-gray-500 text-[11px]">الاستمارة الموحدة طبقاً للمادة 67 من القانون 23-12</p>
+                      <p className="font-bold text-gray-900">{t('authority.workspace.doc2_title')}</p>
+                      <p className="text-gray-500 text-[11px]">{t('authority.workspace.doc2_desc')}</p>
                     </div>
-                    <span className="text-gray-400 font-mono text-[11px]">نموذج رسمي</span>
+                    <span className="text-gray-400 font-mono text-[11px]">{t('authority.workspace.doc2_tag')}</span>
                   </div>
 
                   <div className="p-3.5 rounded-xl border border-gray-200 flex items-center justify-between">
                     <div>
-                      <p className="font-bold text-gray-900">دليل إجراءات الصفقات العمومية</p>
-                      <p className="text-gray-500 text-[11px]">مرجع عملي للمصالح المتعاقدة</p>
+                      <p className="font-bold text-gray-900">{t('authority.workspace.doc3_title')}</p>
+                      <p className="text-gray-500 text-[11px]">{t('authority.workspace.doc3_desc')}</p>
                     </div>
-                    <span className="text-gray-400 font-mono text-[11px]">دليل استرشادي</span>
+                    <span className="text-gray-400 font-mono text-[11px]">{t('authority.workspace.doc3_tag')}</span>
                   </div>
 
                   <div className="p-3.5 rounded-xl border border-gray-200 flex items-center justify-between">
                     <div>
-                      <p className="font-bold text-gray-900">جدول نسب كفالات الضمان المصرفي</p>
-                      <p className="text-gray-500 text-[11px]">شروط قبول السندات والضمانات البنكية المعتمدة</p>
+                      <p className="font-bold text-gray-900">{t('authority.workspace.doc4_title')}</p>
+                      <p className="text-gray-500 text-[11px]">{t('authority.workspace.doc4_desc')}</p>
                     </div>
-                    <span className="text-gray-400 font-mono text-[11px]">منشور تنظيمي</span>
+                    <span className="text-gray-400 font-mono text-[11px]">{t('authority.workspace.doc4_tag')}</span>
                   </div>
                 </div>
               </section>
@@ -2484,9 +2340,9 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                   <Sparkles className="w-4 h-4 text-navy-700" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-navy-900 text-sm">مساعد إعداد الصفقة</h3>
+                  <h3 className="font-bold text-navy-900 text-sm">{t('authority.workspace.assistant_show')}</h3>
                   <p className="text-[11px] text-gray-500 truncate max-w-[200px]">
-                    الصفقة: {title || deal?.title || 'مسودة صفقة'}
+                    {t('authority.workspace.assistant_deal_title', { title: title || deal?.title || t('authority.workspace.default_deal_title') })}
                   </p>
                 </div>
               </div>
@@ -2494,7 +2350,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                 type="button"
                 onClick={() => setIsAssistantOpen(false)}
                 className="text-gray-400 hover:text-gray-600 p-1"
-                title="إخفاء لوحة المساعد"
+                title={t('authority.workspace.assistant_hide_panel')}
               >
                 <PanelRightClose className="w-4 h-4" />
               </button>
@@ -2504,16 +2360,14 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
             <div className="bg-amber-50/70 border border-amber-200 rounded-xl p-3 text-[11px] text-amber-900 space-y-1">
               <p className="font-bold flex items-center gap-1.5">
                 <HelpCircle className="w-3.5 h-3.5 text-amber-700" />
-                <span>مساعدة استشارية — راجع المقترحات قبل إدراجها</span>
+                <span>{t('authority.workspace.assistant_advisory_badge')}</span>
               </p>
-              <p className="text-amber-800 text-[10px] leading-relaxed">
-                الخدمات الاستشارية مؤتمتة وتقنية، ولا تمثل بديلاً عن السلطة التقديرية لمسؤولي المصلحة وفق القانون 23-12.
-              </p>
+              <p className="text-amber-800 text-[10px] leading-relaxed">{t('authority.workspace.assistant_advisory_desc')}</p>
             </div>
 
             {/* 4 Canonical AI Assistant Services Bar */}
             <div className="space-y-2">
-              <span className="text-xs font-bold text-gray-700 block">الخدمات الاستشارية الذكية:</span>
+              <span className="text-xs font-bold text-gray-700 block">{t('authority.workspace.assistant_services_title')}</span>
               <div className="grid grid-cols-2 gap-2 text-xs">
                 <Button
                   type="button"
@@ -2527,7 +2381,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                   }`}
                 >
                   <Scale className="w-4 h-4 text-emerald-600" />
-                  <span>اشرح طريقة الإبرام</span>
+                  <span>{t('authority.workspace.tool_explain_method')}</span>
                 </Button>
 
                 <Button
@@ -2542,7 +2396,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                   }`}
                 >
                   <FileCode2 className="w-4 h-4 text-emerald-600" />
-                  <span>ساعدني في اختيار القالب</span>
+                  <span>{t('authority.workspace.tool_choose_template')}</span>
                 </Button>
 
                 <Button
@@ -2553,7 +2407,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                   className="rounded-xl text-[11px] font-bold h-auto py-2 px-2 flex flex-col items-center justify-center text-center gap-1 border border-gray-200 text-navy-900 hover:bg-navy-50"
                 >
                   <Sparkles className="w-4 h-4 text-emerald-600" />
-                  <span>استكمل المسودة</span>
+                  <span>{t('authority.workspace.tool_enrich_draft')}</span>
                 </Button>
 
                 <Button
@@ -2568,7 +2422,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                   }`}
                 >
                   <CheckSquare className="w-4 h-4 text-emerald-600" />
-                  <span>راجع المعلومات الناقصة</span>
+                  <span>{t('authority.workspace.tool_audit_checklist')}</span>
                 </Button>
               </div>
             </div>
@@ -2578,9 +2432,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
               <div className="bg-navy-50/70 border border-navy-200 rounded-xl p-3.5 text-xs space-y-2.5">
                 <div className="flex items-center justify-between">
                   <span className="font-bold text-navy-950 flex items-center gap-1.5">
-                    <Scale className="w-4 h-4 text-emerald-600" />
-                    الأساس القانوني لطريقة وشكل الإبرام
-                  </span>
+                    <Scale className="w-4 h-4 text-emerald-600" />{t('authority.workspace.tool_legal_basis_title')}</span>
                   <button
                     type="button"
                     onClick={() => setActiveAssistantTool(null)}
@@ -2592,39 +2444,27 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
 
                 <div className="space-y-1.5 text-gray-700 text-[11px] leading-relaxed">
                   <p>
-                    <strong>الإجراء المعتمد:</strong> {METHOD_LABELS[procurementMethod].ar} — {FORM_LABELS[procurementForm].ar}
+                    <strong>{t('authority.workspace.assistant_approved_proc')}</strong> {METHOD_LABELS[procurementMethod].ar} — {FORM_LABELS[procurementForm].ar}
                   </p>
                   <p>
-                    <strong>السند التشريعي:</strong> القانون رقم 23-12 (المواد 29، 39، 40-49) والمرسوم الرئاسي رقم 15-247.
+                    <strong>{t('authority.workspace.assistant_statutory_basis')}</strong>
                   </p>
                   <div className="bg-white p-2.5 rounded-lg border border-navy-100 space-y-1 text-[11px]">
                     {procurementMethod === 'open_tender' ? (
                       procurementForm === 'open' ? (
-                        <p>
-                          طلب العروض المفتوح هو الإجراء المبدئي العام لضمان أوسع منافسة وتكافؤ فرص. لا يستلزم تبريراً استثنائياً، ويتطلب النشر الإلزامي في BOMOP ويوميتين وطنيتين.
-                        </p>
+                        <p>{t('authority.workspace.method_exp_open')}</p>
                       ) : procurementForm === 'open_with_min_capacity' ? (
-                        <p>
-                          يشترط قدرات دنيا تقنية ومالية موضوعية معلنة مسبقاً في دفتر الشروط (المادة 41). يُفحص ظرف الترشح قبل فتح العروض التقنية والمالية.
-                        </p>
+                        <p>{t('authority.workspace.method_exp_open_min')}</p>
                       ) : procurementForm === 'restricted' ? (
-                        <p>
-                          طلب عروض محدود (المادة 42) يقتصر على المتعهدين المؤهلين مسبقاً. يستوجب تبرير أسباب حصر المنافسة وربطها بالتعقيد التقني للعملية.
-                        </p>
+                        <p>{t('authority.workspace.method_exp_restricted')}</p>
                       ) : (
-                        <p>
-                          المسابقة (المادة 43 من القانون 23-12 والمادة 44 من المرسوم 15-247) شكل خاص من طلب العروض يُخصص للدراسات المعمارية والمشاريع الفكرية والتهيئة العمرانية.
-                        </p>
+                        <p>{t('authority.workspace.method_exp_contest')}</p>
                       )
                     ) : (
                       procurementForm === 'direct' ? (
-                        <p className="text-red-900 font-medium">
-                          الإجراء التفاوضي المباشر (المادة 48) استثنائي ومقيد بحالات حصرية: الاحتكار التقني، الاستعجال الملح غير المتوقع، أو الأمن والدفاع الوطني. يستلزم تقريراً معللاً وسنداً قانونياً مسبقاً.
-                        </p>
+                        <p className="text-red-900 font-medium">{t('authority.workspace.method_exp_direct_neg')}</p>
                       ) : (
-                        <p>
-                          الإجراء التفاوضي بعد الاستشارة (المادتان 46 و47) يُلجأ إليه بعد إعلان عدم جدوى طلب العروض أو في الحالات المحددة صراحة في القانون.
-                        </p>
+                        <p>{t('authority.workspace.method_exp_after_consult_neg')}</p>
                       )
                     )}
                   </div>
@@ -2636,15 +2476,13 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                     onClick={() => {
                       setStatutoryBasis(
                         procurementMethod === 'negotiated_procedure'
-                          ? 'المادة 48 من القانون رقم 23-12 المؤرخ في 5 أوت 2023'
-                          : 'المادتان 41 و42 من القانون رقم 23-12'
+                          ? t('authority.workspace.legal_ref_art_48')
+                          : t('authority.workspace.legal_ref_art_41_42')
                       );
-                      toast.success('تم نسخ السند القانوني إلى حقل الأساس القانوني.');
+                      toast.success(t('authority.workspace.toast_legal_basis_copied'));
                     }}
                     className="w-full text-xs font-bold bg-navy-900 hover:bg-navy-800 text-white rounded-lg"
-                  >
-                    نسخ السند القانوني المقترح إلى الحقول
-                  </Button>
+                  >{t('authority.workspace.btn_copy_legal_basis')}</Button>
                 )}
               </div>
             )}
@@ -2654,9 +2492,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
               <div className="bg-emerald-50/70 border border-emerald-200 rounded-xl p-3.5 text-xs space-y-2.5">
                 <div className="flex items-center justify-between">
                   <span className="font-bold text-emerald-950 flex items-center gap-1.5">
-                    <FileCode2 className="w-4 h-4 text-emerald-600" />
-                    ترشيح القالب النموذجي المعتمد
-                  </span>
+                    <FileCode2 className="w-4 h-4 text-emerald-600" />{t('authority.workspace.tool_recommend_tpl_title')}</span>
                   <button
                     type="button"
                     onClick={() => setActiveAssistantTool(null)}
@@ -2668,48 +2504,44 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
 
                 <div className="space-y-1.5 text-gray-700 text-[11px]">
                   <p>
-                    <strong>طبيعة الحاجة:</strong> {NATURE_LABELS[procurementNature].ar}
+                    <strong>{t('authority.workspace.nature_of_need')}:</strong> {lang === 'fr' ? (NATURE_LABELS[procurementNature]?.fr || NATURE_LABELS[procurementNature]?.ar) : NATURE_LABELS[procurementNature]?.ar}
                   </p>
                   {getCompatibleTemplates(procurementNature).length > 0 ? (
-                    getCompatibleTemplates(procurementNature).slice(0, 1).map((t) => (
-                      <div key={t.id} className="bg-white p-3 rounded-lg border border-emerald-200 space-y-1.5">
+                    getCompatibleTemplates(procurementNature).slice(0, 1).map((tpl) => (
+                      <div key={tpl.id} className="bg-white p-3 rounded-lg border border-emerald-200 space-y-1.5">
                         <div className="flex items-center justify-between">
-                          <p className="font-bold text-navy-900">{t.title}</p>
+                          <p className="font-bold text-navy-900">{tpl.title}</p>
                           <span className="text-[10px] font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded">
-                            {t.status === 'approved_official' ? 'معتمد رسمياً' : 'قيد المراجعة'}
+                            {tpl.status === 'approved_official' ? t('authority.workspace.template_status_approved') : t('authority.workspace.template_status_review')}
                           </span>
                         </div>
                         <p className="text-gray-600 text-[11px]">
-                          {t.usageLimits || t.sourceReference}
+                          {tpl.usageLimits || tpl.sourceReference}
                         </p>
-                        <p className="text-gray-500 font-mono text-[10px]">{t.sourceReference}</p>
+                        <p className="text-gray-500 font-mono text-[10px]">{tpl.sourceReference}</p>
                         <Button
                           size="sm"
                           onClick={() => {
-                            setTemplateId(t.id);
-                            setTemplateVersion(t.version);
+                            setTemplateId(tpl.id);
+                            setTemplateVersion(tpl.version);
                             setIsManualDraft(false);
                             // Set dynamic operator documents
                             const dynamicDocs = getDynamicOperatorRequirements(
                               procurementNature,
                               procurementMethod,
                               procurementForm,
-                              t.id
+                              tpl.id
                             );
                             setOperatorDocuments(dynamicDocs);
                             setActiveAssistantTool(null);
-                            toast.success(`تم تطبيق القالب النموذجي: ${t.title}`);
+                            toast.success(t('authority.workspace.template_applied_toast', { title: tpl.title }));
                           }}
                           className="w-full text-xs font-bold bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg mt-1"
-                        >
-                          تطبيق هذا القالب على ملف الصفقة
-                        </Button>
+                        >{t('authority.workspace.btn_apply_tpl')}</Button>
                       </div>
                     ))
                   ) : (
-                    <div className="bg-white p-3 rounded-lg border border-gray-200 text-center text-gray-500">
-                      لا يوجد قالب مراجع مطابق لهذه الاختيارات حالياً.
-                    </div>
+                    <div className="bg-white p-3 rounded-lg border border-gray-200 text-center text-gray-500">{t('authority.workspace.tool_no_matching_tpl')}</div>
                   )}
                 </div>
               </div>
@@ -2720,9 +2552,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
               <div className="bg-white border border-gray-200 rounded-xl p-3.5 text-xs space-y-2.5">
                 <div className="flex items-center justify-between border-b border-gray-100 pb-2">
                   <span className="font-bold text-navy-900 flex items-center gap-1.5">
-                    <CheckSquare className="w-4 h-4 text-emerald-600" />
-                    تدقيق النواقص والجاهزية القانونية
-                  </span>
+                    <CheckSquare className="w-4 h-4 text-emerald-600" />{t('authority.workspace.tool_audit_title')}</span>
                   <button
                     type="button"
                     onClick={() => setActiveAssistantTool(null)}
@@ -2763,9 +2593,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                           setActiveAssistantTool(null);
                         }}
                         className="text-[10px] font-bold p-1 h-auto text-navy-800 hover:underline shrink-0"
-                      >
-                        انتقال
-                      </Button>
+                      >{t('authority.workspace.tool_btn_jump')}</Button>
                     </div>
                   ))}
                 </div>
@@ -2775,33 +2603,31 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
             {/* Context Tool Cards depending on activeTab */}
             {activeTab === 'basics' && (
               <div className="space-y-4">
-                <div className="text-xs font-bold text-gray-700">الأدوات التقديرية لبيانات الصفقة:</div>
+                <div className="text-xs font-bold text-gray-700">{t('authority.workspace.tools_basics_section')}</div>
 
                 {/* Tool: Market Price Estimator */}
                 <div className="p-3.5 rounded-xl border border-gray-200 bg-gray-50/60 space-y-2 text-xs">
-                  <span className="font-bold text-gray-900 block">تقدير أسعار السوق المرجعية</span>
-                  <p className="text-gray-600 text-[11px]">
-                    استخراج مؤشرات الكلفة التقديرية بناءً على قاعدة أسعار السوق والولاية عبر API.
-                  </p>
+                  <span className="font-bold text-gray-900 block">{t('authority.workspace.tool_market_price_title')}</span>
+                  <p className="text-gray-600 text-[11px]">{t('authority.workspace.tool_market_price_desc')}</p>
                   <Button
                     size="sm"
                     disabled={priceEstimating}
                     onClick={handleEstimateMarketPrice}
                     className="w-full text-xs font-bold bg-navy-900 hover:bg-navy-800 text-white"
                   >
-                    {priceEstimating ? 'جاري التحليل...' : 'تقدير السعر المرجعي'}
+                    {priceEstimating ? t('authority.workspace.estimating_price') : t('authority.workspace.btn_estimate_price')}
                   </Button>
 
                   {priceEstimateResult && (
                     <div className="bg-white rounded-lg p-2.5 border border-navy-100 text-[11px] space-y-1">
                       <div className="flex justify-between">
-                        <span className="text-gray-500">متوسط السعر:</span>
+                        <span className="text-gray-500">{t('authority.workspace.label_avg_price')}</span>
                         <span className="font-bold font-mono text-emerald-800">
-                          {priceEstimateResult.avg_price?.toLocaleString('ar-DZ')} دج
+                          {priceEstimateResult.avg_price?.toLocaleString(lang === 'fr' ? 'fr-DZ' : 'ar-DZ')} {t('common.dzd')}
                         </span>
                       </div>
                       <div className="flex justify-between text-gray-500">
-                        <span>مستوى الثقة:</span>
+                        <span>{t('authority.workspace.label_confidence')}</span>
                         <span>{priceEstimateResult.confidence_score}%</span>
                       </div>
                     </div>
@@ -2812,34 +2638,32 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
 
             {activeTab === 'specs' && (
               <div className="space-y-4">
-                <div className="text-xs font-bold text-gray-700">الأدوات المدعومة لدفتر الشروط:</div>
+                <div className="text-xs font-bold text-gray-700">{t('authority.workspace.tools_specs_section')}</div>
 
                 {/* Outdated analysis warning */}
                 {contentChangedSinceCheck && (
                   <div className="bg-amber-100 border border-amber-300 rounded-xl p-2.5 text-[11px] text-amber-900 flex items-start gap-2">
                     <AlertTriangle className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
-                    <span>تم تعديل بنود بعد الفحص الأخير. يُرجى إعادة فحص الامتثال لتحديث النتائج.</span>
+                    <span>{t('authority.workspace.compliance_modified_alert')}</span>
                   </div>
                 )}
 
                 {/* Tool 1: Compliance Check */}
                 <div className="p-3.5 rounded-xl border border-gray-200 bg-gray-50/60 space-y-2 text-xs">
-                  <span className="font-bold text-gray-900 block">مراجعة النواقص والامتثال القانوني</span>
-                  <p className="text-gray-600 text-[11px]">
-                    فحص آلي للقواعد القانونية (آجال الإيداع، الشفافية، معايير التنقيط) وفق القانون 23-12.
-                  </p>
+                  <span className="font-bold text-gray-900 block">{t('authority.workspace.tool_compliance_title')}</span>
+                  <p className="text-gray-600 text-[11px]">{t('authority.workspace.tool_compliance_desc')}</p>
                   <Button
                     size="sm"
                     disabled={complianceChecking}
                     onClick={handleRunComplianceCheck}
                     className="w-full text-xs font-bold bg-navy-900 hover:bg-navy-800 text-white"
                   >
-                    {complianceChecking ? 'جاري الفحص القانوني...' : 'فحص الامتثال القانوني'}
+                    {complianceChecking ? t('authority.workspace.running_compliance') : t('authority.workspace.btn_run_compliance')}
                   </Button>
 
                   {complianceResult && (
                     <div className="bg-white rounded-lg p-2.5 border border-navy-100 text-[11px] space-y-1.5">
-                      <p className="font-bold text-navy-900">نتائج الفحص:</p>
+                      <p className="font-bold text-navy-900">{t('authority.workspace.compliance_results_title')}</p>
                       {complianceResult.advisory_notes?.map((n: any, i: number) => (
                         <div key={i} className="text-gray-700 border-b border-gray-100 pb-1 last:border-0">
                           <span className="font-bold text-navy-800">{n.rule}:</span> {n.message}
@@ -2851,17 +2675,15 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
 
                 {/* Tool 2: Template Presets by Section */}
                 <div className="p-3.5 rounded-xl border border-gray-200 bg-gray-50/60 space-y-2 text-xs">
-                  <span className="font-bold text-gray-900 block">اقتراح من قالب نموذجي</span>
-                  <p className="text-gray-600 text-[11px]">
-                    تحميل صياغة جاهزة للقسم الحالي من دفاتر الشروط الصادرة بقرارات وزارية.
-                  </p>
+                  <span className="font-bold text-gray-900 block">{t('authority.workspace.tpl_proposal_badge')}</span>
+                  <p className="text-gray-600 text-[11px]">{t('authority.workspace.tool_preset_desc')}</p>
                   <Button
                     size="sm"
                     variant="outline"
                     onClick={() => handleProposeTemplateClause(activeSection)}
                     className="w-full text-xs font-bold border-[#D5DDEA] text-navy-800 hover:bg-navy-50"
                   >
-                    تحميل قالب {SECTION_TITLES[activeSection] || 'القسم'}
+                    {t('authority.workspace.tool_btn_load_template', { section: getSectionTitle(activeSection) || t('authority.workspace.default_section') })}
                   </Button>
                 </div>
               </div>
@@ -2869,12 +2691,12 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
 
             {activeTab === 'documents' && (
               <div className="space-y-4">
-                <div className="text-xs font-bold text-gray-700">الأدوات المدعومة للوثائق والسندات:</div>
+                <div className="text-xs font-bold text-gray-700">{t('authority.workspace.tools_docs_section')}</div>
 
                 <div className="p-3.5 rounded-xl border border-gray-200 bg-gray-50/60 space-y-2 text-xs">
-                  <span className="font-bold text-gray-900 block">تلخيص الوثيقة المختارة (AI)</span>
+                  <span className="font-bold text-gray-900 block">{t('authority.workspace.tool_doc_summary_title')}</span>
                   <p className="text-gray-600 text-[11px]">
-                    يستدعي خدمة `/api/ai/summarize/` لاستخراج أهم المتطلبات الإلزامية في ملخص تنفيذي.
+                    {t('authority.workspace.tool_summary_desc')}
                   </p>
                   <Button
                     size="sm"
@@ -2882,7 +2704,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                     onClick={handleSummarizeDoc}
                     className="w-full text-xs font-bold bg-navy-900 hover:bg-navy-800 text-white"
                   >
-                    {summarizingDoc ? 'جاري التلخيص...' : 'توليد الملخص التنفيذي'}
+                    {summarizingDoc ? t('authority.workspace.summarizing_ai') : t('authority.workspace.btn_generate_summary')}
                   </Button>
                 </div>
               </div>
@@ -2895,42 +2717,34 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
       {showSyncBudgetConfirm && (
         <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 shadow-xl border border-gray-100">
-            <h3 className="font-bold text-navy-900 text-base">
-              تأكيد تحديث الميزانية التقديرية
-            </h3>
+            <h3 className="font-bold text-navy-900 text-base">{t('authority.workspace.modal_budget_title')}</h3>
             <div className="bg-gray-50 p-4 rounded-xl space-y-2 text-xs text-gray-700 border border-gray-200">
               <div className="flex justify-between">
-                <span>الميزانية الحالية:</span>
+                <span>{t('authority.workspace.modal_current_budget_label')}</span>
                 <span className="font-mono font-bold text-gray-600">
-                  {budget ? `${parseFloat(budget).toLocaleString('ar-DZ')} دج` : 'غير محددة'}
+                  {budget ? `${parseFloat(budget).toLocaleString(lang === 'fr' ? 'fr-DZ' : 'ar-DZ')} ${t('common.dzd')}` : t('authority.workspace.boq_alert_unspecified')}
                 </span>
               </div>
               <div className="flex justify-between border-t border-gray-200 pt-1.5">
-                <span>المجموع الجديد المحسوب من جدول الكميات:</span>
+                <span>{t('authority.workspace.modal_boq_total_label')}</span>
                 <span className="font-mono font-bold text-emerald-800">
-                  {boqTotal.toLocaleString('ar-DZ')} دج
+                  {boqTotal.toLocaleString(lang === 'fr' ? 'fr-DZ' : 'ar-DZ')} {t('common.dzd')}
                 </span>
               </div>
             </div>
-            <p className="text-[11px] text-gray-500">
-              سيتم استبدال قيمة الميزانية التقديرية بالقيمة المحسوبة مع حفظ التعديل في بيانات الصفقة.
-            </p>
+            <p className="text-[11px] text-gray-500">{t('authority.workspace.modal_budget_desc')}</p>
             <div className="flex justify-end gap-2 pt-2">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setShowSyncBudgetConfirm(false)}
                 className="rounded-xl text-xs"
-              >
-                إلغاء
-              </Button>
+              >{t('authority.workspace.btn_modal_cancel')}</Button>
               <Button
                 size="sm"
                 onClick={handleConfirmSyncBudget}
                 className="bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-bold"
-              >
-                تأكيد التحديث
-              </Button>
+              >{t('authority.workspace.modal_budget_confirm')}</Button>
             </div>
           </div>
         </div>
@@ -2944,12 +2758,10 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
               <div className="p-2 rounded-xl bg-amber-50 text-amber-700">
                 <AlertTriangle className="w-5 h-5" />
               </div>
-              <h3 className="font-bold text-navy-900 text-base">
-                تأكيد تجميد دفتر الشروط رقمياً
-              </h3>
+              <h3 className="font-bold text-navy-900 text-base">{t('authority.workspace.modal_freeze_title')}</h3>
             </div>
             <p className="text-xs text-gray-600 leading-relaxed bg-amber-50/50 p-3 rounded-xl border border-amber-200">
-              تجميد دفتر الشروط يمنع أي تعديل لاحق على النصوص والبنود، ويولّد بصمة رقمية ملزمة للاعتماد تمهيداً لعرضه على لجنة الصفقات المختصة.
+              {t('authority.workspace.modal_freeze_desc')}
             </p>
             <div className="flex justify-end gap-2 pt-2">
               <Button
@@ -2958,16 +2770,14 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                 disabled={freezing}
                 onClick={() => setShowFreezeModal(false)}
                 className="rounded-xl text-xs"
-              >
-                إلغاء
-              </Button>
+              >{t('authority.workspace.btn_modal_cancel')}</Button>
               <Button
                 size="sm"
                 disabled={freezing}
                 onClick={handleFreezeSpecs}
                 className="bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-bold"
               >
-                {freezing ? 'جاري التجميد...' : 'نعم، تجميد الدفتر'}
+                {freezing ? t('authority.workspace.freezing_status') : t('authority.workspace.modal_freeze_confirm')}
               </Button>
             </div>
           </div>
@@ -2977,21 +2787,19 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
       {/* ─── Modal: Procedure Change Warning ──────────────────────────────── */}
       {showProcedureChangeWarning && (
         <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 shadow-xl border border-gray-100" dir="rtl">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 shadow-xl border border-gray-100" dir={dir}>
             <div className="flex items-center gap-2">
               <div className="p-2 rounded-xl bg-amber-50 text-amber-700">
                 <AlertTriangle className="w-5 h-5" />
               </div>
-              <h3 className="font-bold text-navy-900 text-base">
-                تنبيه: تغيير طريقة أو شكل الإبرام
-              </h3>
+              <h3 className="font-bold text-navy-900 text-base">{t('authority.workspace.modal_change_method_title')}</h3>
             </div>
             <div className="text-xs text-gray-700 leading-relaxed bg-amber-50/50 p-3.5 rounded-xl border border-amber-200 space-y-2">
               <p className="font-bold text-amber-950">
-                تغيير طريقة أو شكل الإبرام يؤثر مباشرة على الأساس القانوني، شروط المشاركة، وملف وثائق المتعامل الإلزامية.
+                {t('authority.workspace.modal_change_method_desc')}
               </p>
               <p className="text-amber-800 text-[11px]">
-                عند التأكيد، ستتم مواءمة قائمة وثائق المتعامل تلقائياً وفق الإجراء الجديد، وتنبيهك في حال استلزم الإجراء الجديد تسبيباً أو مبررات قانونية مسبقة.
+                {t('authority.workspace.modal_change_method_warning')}
               </p>
             </div>
             <div className="flex justify-end gap-2 pt-2">
@@ -3003,16 +2811,12 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                   setPendingProcedureChange(null);
                 }}
                 className="rounded-xl text-xs"
-              >
-                إلغاء والتراجع
-              </Button>
+              >{t('authority.workspace.modal_change_method_cancel')}</Button>
               <Button
                 size="sm"
                 onClick={handleConfirmProcedureChange}
                 className="bg-navy-900 hover:bg-navy-800 text-white rounded-xl text-xs font-bold"
-              >
-                تأكيد التغيير والمواءمة
-              </Button>
+              >{t('authority.workspace.modal_change_method_confirm')}</Button>
             </div>
           </div>
         </div>
@@ -3042,16 +2846,12 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                 size="sm"
                 onClick={() => setAiProposalPreview(null)}
                 className="rounded-xl text-xs"
-              >
-                رفض وتجاهل
-              </Button>
+              >{t('authority.workspace.modal_proposal_reject')}</Button>
               <Button
                 size="sm"
                 onClick={handleApplyAiProposal}
                 className="bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-bold"
-              >
-                قبول وتطبيق المقترح
-              </Button>
+              >{t('authority.workspace.modal_proposal_accept')}</Button>
             </div>
           </div>
         </div>

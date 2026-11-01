@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useLocation } from 'wouter';
-import { useI18n } from '@/i18n';
 import {
   Bell,
   CheckCheck,
@@ -15,6 +14,7 @@ import {
   Clock,
 } from 'lucide-react';
 import { api } from '@/lib/api';
+import { useI18n, type TranslationKey } from '@/i18n';
 
 export interface NotificationDropdownProps {
   /** Optional custom button class name to adapt to different topbar styles */
@@ -51,7 +51,11 @@ interface NormalizedNotification {
   type: string;
 }
 
-function formatRelativeTime(dateString?: string, lang: 'ar' | 'fr' = 'ar'): string {
+function formatRelativeTime(
+  dateString: string | undefined,
+  t: (key: TranslationKey, options?: Record<string, unknown>) => string,
+  lang: 'ar' | 'fr',
+): string {
   if (!dateString) return '';
   const date = new Date(dateString);
   if (isNaN(date.getTime())) return '';
@@ -61,31 +65,33 @@ function formatRelativeTime(dateString?: string, lang: 'ar' | 'fr' = 'ar'): stri
   const diffHours = Math.floor(diffMin / 60);
   const diffDays = Math.floor(diffHours / 24);
 
-  const isFr = lang === 'fr';
+  if (diffSec < 45) return t('notifications.now');
+  if (diffMin < 60) return t('notifications.minutes_ago', { n: diffMin });
+  if (diffHours < 24) return t('notifications.hours_ago', { n: diffHours });
+  if (diffDays === 1) return t('notifications.yesterday');
+  if (diffDays < 7) return t('notifications.days_ago', { n: diffDays });
 
-  if (diffSec < 45) return isFr ? "À l'instant" : 'الآن';
-  if (diffMin < 60) return isFr ? `Il y a ${diffMin} min` : `منذ ${diffMin} دقيقة`;
-  if (diffHours < 24) return isFr ? `Il y a ${diffHours} h` : `منذ ${diffHours} س`;
-  if (diffDays === 1) return isFr ? 'Hier' : 'أمس';
-  if (diffDays < 7) return isFr ? `Il y a ${diffDays} j` : `منذ ${diffDays} أ`;
-  return date.toLocaleDateString(isFr ? 'fr-DZ' : 'ar-DZ', { month: 'short', day: 'numeric' });
+  return date.toLocaleDateString(lang === 'fr' ? 'fr-DZ' : 'ar-DZ', {
+    month: 'short',
+    day: 'numeric',
+  });
 }
 
 function getNotificationIcon(type?: string) {
   const t = String(type || '').toLowerCase();
-  if (t.includes('contract') || t.includes('عقد')) {
+  if (t.includes('contract') || t.includes('\u0639\u0642\u062f')) {
     return <ScrollText className="size-4 text-emerald-600 shrink-0" />;
   }
-  if (t.includes('award') || t.includes('منح') || t.includes('إسناد')) {
+  if (t.includes('award') || t.includes('\u0645\u0646\u062d') || t.includes('\u0625\u0633\u0646\u0627\u062f')) {
     return <CheckCircle2 className="size-4 text-[#047857] shrink-0" />;
   }
-  if (t.includes('opening') || t.includes('session') || t.includes('فتح')) {
+  if (t.includes('opening') || t.includes('session') || t.includes('\u0641\u062a\u062d')) {
     return <Calendar className="size-4 text-[#0f3154] shrink-0" />;
   }
-  if (t.includes('reject') || t.includes('رفض')) {
+  if (t.includes('reject') || t.includes('\u0631\u0641\u0636')) {
     return <AlertCircle className="size-4 text-[#B42318] shrink-0" />;
   }
-  if (t.includes('deal') || t.includes('صفقة')) {
+  if (t.includes('deal') || t.includes('\u0635\u0641\u0642\u0629')) {
     return <FileText className="size-4 text-sky-600 shrink-0" />;
   }
   return <Bell className="size-4 text-[#0f3154] shrink-0" />;
@@ -96,13 +102,11 @@ export function NotificationDropdown({
   allNotificationsHref,
   iconSize = 20,
 }: NotificationDropdownProps) {
-  const { lang, dir } = useI18n();
+  const { t, lang, dir } = useI18n();
   const [isOpen, setIsOpen] = useState(false);
   const [currentLocation, setLocation] = useLocation();
   const dropdownRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
-
-  const isFr = lang === 'fr';
 
   // Determine full notifications view path based on route if not provided
   const targetAllHref =
@@ -139,7 +143,7 @@ export function NotificationDropdown({
 
   const notifications: NormalizedNotification[] = rawList.map((item) => ({
     id: String(item.id),
-    title: item.title || item.message || (isFr ? 'Nouvelle notification' : 'إشعار جديد'),
+    title: item.title || item.message || t('notifications.new_item'),
     text: item.text || item.message || '',
     linkHref: item.link_href || item.linkHref || '',
     isRead: Boolean(item.is_read ?? item.isRead ?? false),
@@ -231,10 +235,12 @@ export function NotificationDropdown({
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
         className={buttonClassName || defaultButtonClass}
-        title={isFr ? 'Notifications et alertes' : 'الإشعارات والتنبيهات'}
-        aria-label={`${isFr ? 'Notifications' : 'الإشعارات'} ${
-          unreadCount > 0 ? `(${unreadCount} ${isFr ? 'non lues' : 'غير مقروء'})` : ''
-        }`}
+        title={t('notifications.bell_title')}
+        aria-label={
+          unreadCount > 0
+            ? t('notifications.aria_unread', { n: unreadCount })
+            : t('notifications.aria')
+        }
         aria-haspopup="dialog"
         aria-expanded={isOpen}
       >
@@ -260,7 +266,7 @@ export function NotificationDropdown({
         <div
           dir={dir}
           role="region"
-          aria-label={isFr ? 'Liste des notifications' : 'قائمة الإشعارات'}
+          aria-label={t('notifications.list')}
           className={`absolute z-50 mt-2 ${
             dir === 'rtl' ? 'end-0 start-auto' : 'start-0 end-auto sm:start-auto sm:end-0'
           } w-80 sm:w-96 max-w-[calc(100vw-1.5rem)] bg-white rounded-xl shadow-xl shadow-slate-900/10 border border-slate-200 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150 font-sans`}
@@ -269,11 +275,11 @@ export function NotificationDropdown({
           <div className="px-4 py-3 bg-slate-50/80 border-b border-slate-100 flex items-center justify-between gap-2">
             <div className="flex items-center gap-2">
               <span className="text-sm font-bold text-slate-800">
-                {isFr ? 'Notifications' : 'الإشعارات'}
+                {t('notifications.title')}
               </span>
               {unreadCount > 0 && (
                 <span className="px-1.5 py-0.5 rounded-full text-[11px] font-bold bg-[#047857]/10 text-[#047857]">
-                  {unreadCount} {isFr ? 'nouvelles' : 'جديد'}
+                  {unreadCount} {t('notifications.new')}
                 </span>
               )}
             </div>
@@ -290,7 +296,7 @@ export function NotificationDropdown({
                 ) : (
                   <CheckCheck className="size-3.5" />
                 )}
-                <span>{isFr ? 'Tout marquer comme lu' : 'تعليم الكل كمقروء'}</span>
+                <span>{t('notifications.mark_all_read')}</span>
               </button>
             )}
           </div>
@@ -301,7 +307,7 @@ export function NotificationDropdown({
               <div className="py-8 flex flex-col items-center justify-center text-slate-400 gap-2">
                 <Loader2 className="size-5 animate-spin text-[#047857]" />
                 <span className="text-xs">
-                  {isFr ? 'Chargement des notifications...' : 'جاري تحميل الإشعارات...'}
+                  {t('notifications.loading')}
                 </span>
               </div>
             ) : latestFive.length === 0 ? (
@@ -310,12 +316,10 @@ export function NotificationDropdown({
                   <Bell className="size-5" />
                 </div>
                 <p className="text-xs font-bold text-slate-700">
-                  {isFr ? 'Aucune nouvelle notification' : 'لا توجد إشعارات جديدة'}
+                  {t('notifications.empty_title')}
                 </p>
                 <p className="text-[11px] text-slate-400 mt-0.5">
-                  {isFr
-                    ? 'Les alertes relatives aux marchés, offres et délais apparaîtront ici.'
-                    : 'ستظهر هنا التنبيهات المتعلقة بالصفقات، العروض، والمواعيد القانونية.'}
+                  {t('notifications.empty_desc')}
                 </p>
               </div>
             ) : (
@@ -356,7 +360,7 @@ export function NotificationDropdown({
                       {!notif.isRead && (
                         <span
                           className="size-2 rounded-full bg-[#047857] shrink-0"
-                          title={isFr ? 'Notification non lue' : 'إشعار غير مقروء'}
+                          title={t('notifications.unread')}
                         />
                       )}
                     </div>
@@ -369,12 +373,12 @@ export function NotificationDropdown({
 
                     <div className="flex items-center gap-1.5 text-[10px] text-slate-400">
                       <Clock className="size-3 shrink-0" />
-                      <span>{formatRelativeTime(notif.createdAt, lang)}</span>
+                      <span>{formatRelativeTime(notif.createdAt, t, lang)}</span>
                       {notif.linkHref && (
                         <>
                           <span className="text-slate-300">·</span>
                           <span className="text-xs text-[#047857] group-hover:underline flex items-center gap-0.5">
-                            <span>{isFr ? 'Voir détails' : 'عرض التفاصيل'}</span>
+                            <span>{t('notifications.view_details')}</span>
                             <ExternalLink className="size-2.5" />
                           </span>
                         </>
@@ -396,7 +400,7 @@ export function NotificationDropdown({
               }}
               className="w-full py-1.5 px-3 rounded-lg text-xs font-bold text-[#0f3154] hover:text-[#047857] hover:bg-white transition-colors cursor-pointer border-0 bg-transparent"
             >
-              {isFr ? 'Voir toutes les notifications' : 'عرض جميع الإشعارات'}
+              {t('notifications.view_all')}
             </button>
           </div>
         </div>

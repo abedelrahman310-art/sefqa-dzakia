@@ -1,5 +1,6 @@
 import { Sparkles, X, AlertTriangle, ShieldCheck, ArrowUpRight, BellRing } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useI18n } from '@/i18n';
 
 export interface WilayaDetail {
   code: string;
@@ -27,6 +28,7 @@ export function WilayaDetailCard({
   onViewTenders,
   onNotifyAuthority,
 }: Props) {
+  const { t } = useI18n();
   const hasWarnings = wilaya.warnings > 0;
 
   return (
@@ -36,7 +38,7 @@ export function WilayaDetailCard({
         <div>
           <div className="flex items-center gap-2">
             <span className="inline-flex items-center justify-center px-2 py-0.5 rounded text-xs font-mono font-bold bg-gray-50 text-gray-600 border border-gray-200">
-              ولاية {wilaya.code}
+              {t('central.ui.wilaya_code', { code: wilaya.code })}
             </span>
             {wilaya.nameFr && (
               <span className="text-xs text-gray-500 font-sans">
@@ -82,17 +84,17 @@ export function WilayaDetailCard({
                 className="w-2 h-2 rounded-full animate-pulse"
                 style={{ backgroundColor: wilaya.risk_color || '#DC2626' }}
               />
-              {wilaya.risk_level === 'critical' && 'شبهات رقابية حرجة (Critical)'}
-              {wilaya.risk_level === 'high' && 'شبهات رقابية عالية (High)'}
-              {wilaya.risk_level === 'medium' && 'شبهات رقابية متوسطة (Medium)'}
-              {wilaya.risk_level === 'low' && 'نشاط نظامي متوافق (Low)'}
+              {wilaya.risk_level === 'critical' && t('central.ui.risk_critical')}
+              {wilaya.risk_level === 'high' && t('central.ui.risk_high')}
+              {wilaya.risk_level === 'medium' && t('central.ui.risk_medium')}
+              {wilaya.risk_level === 'low' && t('central.ui.risk_low')}
             </span>
           )}
         </div>
         <button
           onClick={onClose}
           type="button"
-          aria-label="إغلاق"
+          aria-label={t('central.ui.close')}
           className="w-8 h-8 rounded-lg flex items-center justify-center text-[var(--ink-500)] hover:text-[var(--ink-900)] hover:bg-[var(--paper-100)] transition-colors"
         >
           <X className="w-4 h-4" />
@@ -102,14 +104,14 @@ export function WilayaDetailCard({
       {/* Stats Grid */}
       <div className="grid grid-cols-3 gap-3 mb-4">
         <div className="bg-gray-50 border border-gray-200 rounded-xl p-3 text-center">
-          <span className="block text-sm text-gray-500 mb-1">الصفقات</span>
+          <span className="block text-sm text-gray-500 mb-1">{t('central.ui.tenders')}</span>
           <span className="block text-xl font-bold text-[var(--ink-900)] font-mono">
             {wilaya.tenders_count}
           </span>
         </div>
 
         <div className="bg-gray-50 border border-gray-200 rounded-xl p-3 text-center">
-          <span className="block text-sm text-gray-500 mb-1">مليار دج</span>
+          <span className="block text-sm text-gray-500 mb-1">{t('central.ui.billion_dzd')}</span>
           <span className="block text-xl font-bold text-[var(--stamp-green-700)] font-mono">
             {wilaya.budget}
           </span>
@@ -122,7 +124,7 @@ export function WilayaDetailCard({
               : 'bg-gray-50 border-gray-200 text-[var(--ink-900)]'
           }`}
         >
-          <span className="block text-sm opacity-80 mb-1">الشبهات</span>
+          <span className="block text-sm opacity-80 mb-1">{t('central.ui.suspicions')}</span>
           <div className="flex items-center justify-center gap-1">
             {hasWarnings && <AlertTriangle className="w-4 h-4 text-rose-600 animate-pulse" />}
             <span
@@ -142,12 +144,12 @@ export function WilayaDetailCard({
           <div className="flex items-center gap-1.5">
             <Sparkles className="w-4 h-4 text-[var(--ai-text)] ai-sparkle" />
             <h4 className="text-sm font-bold text-[var(--ai-text-strong)]">
-              تحليل الذكاء الاصطناعي
+              {t('central.ui.ai_analysis')}
             </h4>
             <span className="ai-badge">AI</span>
           </div>
           <span className="text-xs text-[var(--ai-text)]/80 font-medium">
-            استشاري فقط
+            {t('central.ui.advisory_only')}
           </span>
         </div>
 
@@ -156,7 +158,7 @@ export function WilayaDetailCard({
             <>
               <p className="font-semibold text-rose-800 flex items-center gap-1.5">
                 <AlertTriangle className="w-4 h-4 text-rose-600 flex-none" />
-                رصد {wilaya.warnings} حالات اشتباه إجرائي تستدعي الفحص الرقابي.
+                {t('central.ui.detected_suspicions', { count: wilaya.warnings })}
               </p>
               <ul className="list-disc list-inside space-y-1 text-sm text-[var(--ink-700)] ps-1">
                 {wilaya.warningDetails && wilaya.warningDetails.length > 0 ? (
@@ -164,14 +166,14 @@ export function WilayaDetailCard({
                     <li key={idx}>{detail}</li>
                   ))
                 ) : (
-                  <li>شبهة مسجلة تستدعي المراجعة الرقابية.</li>
+                  <li>{t('central.ui.registered_suspicion')}</li>
                 )}
               </ul>
             </>
           ) : (
             <p className="flex items-center gap-1.5 text-emerald-800 font-medium">
               <ShieldCheck className="w-4 h-4 text-emerald-600 flex-none" />
-              لم تُرصد شبهات مرتبطة بهذه الولاية في التحليل الاستشاري الحالي.
+              {t('central.ui.no_suspicions')}
             </p>
           )}
         </div>
@@ -183,7 +185,7 @@ export function WilayaDetailCard({
           className="flex-1 bg-[var(--stamp-green-700)] hover:bg-[var(--stamp-green-900)] text-white text-sm h-10 gap-1.5"
           onClick={() => onViewTenders?.(wilaya.code)}
         >
-          <span>عرض كل الصفقات</span>
+          <span>{t('central.ui.view_all_deals')}</span>
           <ArrowUpRight className="w-4 h-4" />
         </Button>
 
@@ -194,7 +196,7 @@ export function WilayaDetailCard({
             onClick={() => onNotifyAuthority(wilaya.code)}
           >
             <BellRing className="w-4 h-4 text-[var(--stamp-gold-700)]" />
-            <span>إخطار المصلحة</span>
+            <span>{t('central.ui.notify_authority')}</span>
           </Button>
         )}
       </div>

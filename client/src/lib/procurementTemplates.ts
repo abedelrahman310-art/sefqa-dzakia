@@ -56,76 +56,89 @@ export interface CahierTemplate {
 
 // ─── تسميات المراجع الرسمية ──────────────────────────────────────────────────
 
-export const NATURE_LABELS: Record<ProcurementNature, { ar: string; desc: string }> = {
+export const NATURE_LABELS: Record<ProcurementNature, { ar: string; fr: string; desc: string }> = {
   works: {
     ar: 'أشغال',
+    fr: 'Travaux',
     desc: 'بناء، ترميم، صيانة، منشآت كبرى وهندسة مدنية (المادة 29 من القانون 23-12)',
   },
   supplies: {
     ar: 'لوازم',
+    fr: 'Fournitures',
     desc: 'اقتناء، إيجار، أو توريد عتاد ومواد وتجهيزات (المادة 29 من القانون 23-12)',
   },
   studies: {
     ar: 'دراسات',
+    fr: 'Études',
     desc: 'هندسة معمارية، استشارات، مكاتب دراسات وخبرات (المادة 29 من القانون 23-12)',
   },
   services: {
     ar: 'خدمات',
+    fr: 'Services',
     desc: 'صيانة، نظافة، أمن، حراسة، نقل، إيواء وتأمين (المادة 29 من القانون 23-12)',
   },
 };
 
-export const METHOD_LABELS: Record<string, { ar: string; desc: string; legalRef: string }> = {
+export const METHOD_LABELS: Record<string, { ar: string; fr: string; desc: string; legalRef: string }> = {
   call_for_tenders: {
     ar: 'طلب العروض',
+    fr: "Appel d'offres",
     desc: 'القاعدة العامة لتكريس المنافسة وتكافؤ الفرص والشفافية في إبرام الصفقات العمومية.',
     legalRef: 'المادة 39 وما بعدها من القانون 23-12 والمادة 39 من المرسوم الرئاسي 15-247',
   },
   open_tender: {
     ar: 'طلب العروض',
+    fr: "Appel d'offres",
     desc: 'القاعدة العامة لتكريس المنافسة وتكافؤ الفرص والشفافية في إبرام الصفقات العمومية.',
     legalRef: 'المادة 39 وما بعدها من القانون 23-12 والمادة 39 من المرسوم الرئاسي 15-247',
   },
   negotiated_procedure: {
     ar: 'الإجراء التفاوضي',
+    fr: 'Procédure négociée',
     desc: 'طريقة استثنائية لإبرام الصفقة بالتفاوض مع شريك أو عدة شركاء متعاقدين في الحالات المحددة قانوناً.',
     legalRef: 'المادة 47 وما بعدها من القانون 23-12 والمادة 49 من المرسوم الرئاسي 15-247',
   },
 };
 
-export const FORM_LABELS: Record<ProcurementForm, { ar: string; desc: string; method: ProcurementMethod; legalRef: string }> = {
+export const FORM_LABELS: Record<ProcurementForm, { ar: string; fr: string; desc: string; method: ProcurementMethod; legalRef: string }> = {
   open: {
     ar: 'مفتوح',
+    fr: 'Ouvert',
     desc: 'إجراء يتيح لكل مترشح يستوفي الشروط القانونية تقديم عرضه دون قيد أولي.',
     method: 'call_for_tenders',
     legalRef: 'المادة 40 من القانون 23-12 والمادة 40 من المرسوم 15-247',
   },
   open_with_min_capacity: {
     ar: 'مفتوح مع اشتراط قدرات دنيا',
+    fr: 'Ouvert avec capacités minimales',
     desc: 'إجراء متاح لجميع المتنافسين الذين يستوفون شروطاً دنيا معلنة مسبقاً تتعلق بالقدرات التقنية أو المالية أو المهنية.',
     method: 'call_for_tenders',
     legalRef: 'المادة 41 من القانون 23-12 والمادة 41 من المرسوم 15-247',
   },
   restricted: {
     ar: 'محدود',
+    fr: 'Restreint',
     desc: 'إجراء يقتصر فيه تقديم العروض على المترشحين الذين تم انتقاؤهم مسبقاً وفق معايير موضوعية.',
     method: 'call_for_tenders',
     legalRef: 'المادة 42 من القانون 23-12 والمادة 42 من المرسوم 15-247',
   },
   competition: {
     ar: 'مسابقة',
+    fr: 'Concours',
     desc: 'شكل من أشكال طلب العروض يُلجأ إليه عندما تقتضي دوافع تقنية أو جمالية أو مالية خاصة إجراء أبحاث خاصة (خاصة في صفقات الدراسات والهندسة المعمارية).',
     method: 'call_for_tenders',
     legalRef: 'المادة 43 من القانون 23-12 والمادة 44 من المرسوم 15-247',
   },
   direct: {
     ar: 'مباشر (بدون دعوة للمنافسة)',
+    fr: 'Direct (sans mise en concurrence)',
     desc: 'إبرام الصفقة مع متعامل وحيد في حالات الاحتكار التقني الحصري، التكنولوجيا الفريدة، أو الاستعجال الملح غير المتوقع.',
     method: 'negotiated_procedure',
     legalRef: 'المادة 48 من القانون 23-12 والمادة 49 من المرسوم 15-247',
   },
   after_consultation: {
     ar: 'بعد الاستشارة',
+    fr: 'Après consultation',
     desc: 'التفاوض مع متعاملين بعد استشارة شروطهم في حالات عدم الجدوى أو الصفقات ذات الخصوصية الاستثنائية.',
     method: 'negotiated_procedure',
     legalRef: 'المادة 49 من القانون 23-12 والمادة 51 من المرسوم 15-247',

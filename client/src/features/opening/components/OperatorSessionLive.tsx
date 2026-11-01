@@ -32,7 +32,7 @@ export function OperatorSessionLive({ sessionId, params }: OperatorSessionLivePr
   const routeParams = useParams<{ id: string }>();
   const id = sessionId || params?.id || routeParams.id;
   const [, setLocation] = useLocation();
-  const { t, dir } = useI18n();
+  const { t, lang, dir } = useI18n();
 
   const { data: session, isLoading, error } = useOpeningSession(id || null);
   const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
@@ -44,7 +44,7 @@ export function OperatorSessionLive({ sessionId, params }: OperatorSessionLivePr
       const filename = `PV_Opening_${session.tender_reference || session.id}.pdf`;
       await downloadPdfBlob(`/procurements/sessions/${session.id}/pdf/`, filename);
     } catch {
-      alert("تعذر تنزيل محضر الجلسة PDF. يرجى إعادة المحاولة لاحقاً.");
+      alert(t("opening.op_download_pdf_error"));
     } finally {
       setIsDownloadingPdf(false);
     }
@@ -74,16 +74,16 @@ export function OperatorSessionLive({ sessionId, params }: OperatorSessionLivePr
   if (error || !session) {
     return (
       <Card className="p-8 text-center space-y-4 border-red-200 bg-red-50 text-red-900">
-        <h3 className="text-base font-bold">تعذر فتح تفاصيل الجلسة</h3>
+        <h3 className="text-base font-bold">{t("opening.op_load_details_error")}</h3>
         <p className="text-xs text-red-700">
-          قد تكون الجلسة غير موجودة أو أن حسابك لا يملك تصريح الحضور لهذه الصفقة.
+          {t("opening.op_details_unauthorized")}
         </p>
         <Button
           variant="outline"
           onClick={() => setLocation("/operator/opening-sessions")}
           className="rounded-xl text-xs"
         >
-          العودة لقائمة الجلسات
+          {t("opening.op_back_to_list")}
         </Button>
       </Card>
     );
@@ -109,7 +109,7 @@ export function OperatorSessionLive({ sessionId, params }: OperatorSessionLivePr
           className="gap-2 rounded-xl text-xs font-semibold hover:bg-slate-100 text-slate-700"
         >
           <ArrowIcon className="w-4 h-4" />
-          <span>العودة لجلسات الفتح</span>
+          <span>{t("opening.op_back_breadcrumb")}</span>
         </Button>
 
         {/* Law 18-07 Privacy Badge */}
@@ -161,7 +161,7 @@ export function OperatorSessionLive({ sessionId, params }: OperatorSessionLivePr
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold border border-white/20 shadow-sm"
               >
                 <FileText className="w-3.5 h-3.5" />
-                <span>{isDownloadingPdf ? "جاري التوليد..." : "تحميل المحضر (PDF)"}</span>
+                <span>{isDownloadingPdf ? t("opening.generating") : t("opening.download_minutes_pdf")}</span>
               </Button>
 
               {session.stream_url && (
@@ -172,7 +172,7 @@ export function OperatorSessionLive({ sessionId, params }: OperatorSessionLivePr
                   className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-colors shadow-sm"
                 >
                   <Video className="w-4 h-4" />
-                  <span>رابط البث المرئي المباشر</span>
+                  <span>{t("opening.op_stream_link")}</span>
                 </a>
               )}
             </div>
@@ -191,12 +191,12 @@ export function OperatorSessionLive({ sessionId, params }: OperatorSessionLivePr
               )}
               <span className="flex items-center gap-1.5">
                 <Clock className="w-3.5 h-3.5 text-emerald-400" />
-                <span>الموعد: {new Date(session.scheduled_at).toLocaleString("ar-DZ")}</span>
+                <span>{t("opening.op_scheduled_date", { date: new Date(session.scheduled_at).toLocaleString(lang === "fr" ? "fr-DZ" : "ar-DZ") })}</span>
               </span>
               {session.authority_name && (
                 <span className="flex items-center gap-1.5">
                   <Building2 className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>المصلحة المتعاقدة: {session.authority_name}</span>
+                  <span>{t("opening.op_authority_name", { name: session.authority_name })}</span>
                 </span>
               )}
             </div>
@@ -210,11 +210,11 @@ export function OperatorSessionLive({ sessionId, params }: OperatorSessionLivePr
           <div className="flex items-center justify-between text-xs">
             <div className="flex items-center gap-2">
               <span className="font-bold text-navy-900 text-sm">
-                مستوى تقدم فتح أظرفة العروض
+                {t("opening.op_progress_title")}
               </span>
               {isLive && (
                 <span className="text-[11px] text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full font-semibold">
-                  تحديث تلقائي كل 3 ثوان ⟳
+                  {t("opening.op_auto_refresh")}
                 </span>
               )}
             </div>
@@ -251,7 +251,7 @@ export function OperatorSessionLive({ sessionId, params }: OperatorSessionLivePr
             {t("opening.waiting_start")}
           </h3>
           <p className="text-xs text-blue-800 max-w-md mx-auto leading-relaxed">
-            تم تسجيل حضورك الافتراضي في جلسة فتح الأظرفة. سيتم بث مبالغ العروض المعلنة وقرارات القبول المبدئي تباعاً بمجرد افتتاح الجلسة من قبل المصلحة المتعاقدة.
+            {t("opening.op_attendance_confirmed")}
           </p>
         </Card>
       )}
@@ -262,20 +262,20 @@ export function OperatorSessionLive({ sessionId, params }: OperatorSessionLivePr
           <div className="space-y-0.5">
             <h2 className="text-base font-bold text-navy-900 flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-emerald-600" />
-              <span>وقائع فتح الأظرفة المُعلنة</span>
+              <span>{t("opening.op_announced_events_title")}</span>
             </h2>
             <p className="text-xs text-muted-foreground">
-              يتم إعلان مبالغ العروض علناً وفق المادة 72 من المرسوم الرئاسي 15-247 مع حجب الهويات التجارية للمنافسين احتراماً للقانون 18-07.
+              {t("opening.op_legal_privacy_notice")}
             </p>
           </div>
           <span className="text-xs bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-mono font-bold px-3 py-1 rounded-full border">
-            {session.events?.length || 0} أحداث مسجلة
+            {t("opening.op_events_registered", { count: session.events?.length || 0 })}
           </span>
         </div>
 
         {(!session.events || session.events.length === 0) && !isScheduled && (
           <Card className="p-8 text-center text-muted-foreground text-xs border-dashed">
-            لم يتم تسجيل أي ظرف مفتوح حتى الآن في هذه الجلسة.
+            {t("opening.op_no_events_yet")}
           </Card>
         )}
 
@@ -315,13 +315,13 @@ export function OperatorSessionLive({ sessionId, params }: OperatorSessionLivePr
                           }`}
                         >
                           {isMyOffer
-                            ? `${t("opening.your_offer")} (المتعامل الاقتصادي الحالي)`
+                            ? t("opening.op_your_offer_full", { label: t("opening.your_offer") })
                             : event.operator_label || t("opening.competitor")}
                         </strong>
 
                         {isMyOffer && (
                           <Badge className="bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] px-2 py-0">
-                            عرضك المودع
+                            {t("opening.op_your_submitted_offer")}
                           </Badge>
                         )}
 
@@ -331,7 +331,7 @@ export function OperatorSessionLive({ sessionId, params }: OperatorSessionLivePr
                             className="border-emerald-300 bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300 text-[10px] gap-1"
                           >
                             <Check className="w-3 h-3 text-emerald-600" />
-                            <span>مقبول مبدئياً</span>
+                            <span>{t("opening.op_status_accepted_preliminary")}</span>
                           </Badge>
                         ) : (
                           <Badge
@@ -339,7 +339,7 @@ export function OperatorSessionLive({ sessionId, params }: OperatorSessionLivePr
                             className="text-[10px] gap-1"
                           >
                             <XCircle className="w-3 h-3" />
-                            <span>مرفوض لعدم المطابقة</span>
+                            <span>{t("opening.op_status_rejected_noncompliant")}</span>
                           </Badge>
                         )}
                       </div>
@@ -367,7 +367,7 @@ export function OperatorSessionLive({ sessionId, params }: OperatorSessionLivePr
                         }`}
                       >
                         {event.announced_price != null
-                          ? `${Number(event.announced_price).toLocaleString("ar-DZ")} دج`
+                          ? `${Number(event.announced_price).toLocaleString(lang === "fr" ? "fr-DZ" : "ar-DZ")} ${t("common.dzd")}`
                           : "—"}
                       </div>
                     </div>

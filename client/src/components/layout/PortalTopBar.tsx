@@ -45,11 +45,11 @@ export function PortalTopBar({
   pulseColor = 'var(--color-success-500, var(--stamp-green-500))',
   showLogout = false,
 }: PortalTopBarProps) {
-  const { lang, setLang, t } = useI18n();
+  const { lang, setLang, t, dir } = useI18n();
   const { user, logout } = useAuth();
   const [pathname, setLocation] = useLocation();
 
-  const orgName = user?.organizationName || user?.displayName || t('portal.default_org');
+  const orgName = user?.organizationName || user?.displayName || t('common.organization');
 
   // Hide on configured routes (e.g. interactive full-screen maps)
   if (hiddenOnRoutes.includes(pathname)) {
@@ -72,7 +72,7 @@ export function PortalTopBar({
     <header
       className="portal-topbar"
       role="banner"
-      dir={lang === 'ar' ? 'rtl' : 'ltr'}
+      dir={dir}
       style={{ '--portal-pulse-color': pulseColor } as React.CSSProperties}
     >
       {/* 1. RTL Start: الشعار واسم المنصة المعتمد */}
@@ -82,7 +82,7 @@ export function PortalTopBar({
             <Check className="w-4 h-4 stroke-[3]" />
           </div>
           <span className="tracking-tight font-extrabold text-[var(--ink-900)] text-sm">
-            {t('portal.brand')}
+            {t('common.brand')}
           </span>
         </div>
       </div>
@@ -107,7 +107,7 @@ export function PortalTopBar({
           title={t('common.change_language')}
         >
           <Languages className="w-4 h-4 text-gray-700 shrink-0" aria-hidden="true" />
-          <span className="text-xs font-bold text-gray-800">{lang === 'ar' ? 'FR' : 'عربي'}</span>
+          <span className="text-xs font-bold text-gray-800">{t('common.lang_switch_short')}</span>
         </button>
 
         {/* 1. المساعد الذكي — أخضر ومميز */}

@@ -51,7 +51,7 @@ interface EvaluationFormState {
   saving?: boolean;
 }
 
-/** استجابة /api/authority/analyze-prices/ — وكيل تحليل الأسعار المالي للعروض. */
+/** Response from /api/authority/analyze-prices/ */
 interface PriceOfferAnalysisApi {
   offer_id: string;
   operator_name: string;
@@ -90,18 +90,6 @@ interface PriceAnalysisApi {
   disclaimer: string;
 }
 
-const priceFormatter = new Intl.NumberFormat('ar-DZ-u-nu-latn', { maximumFractionDigits: 0 });
-
-const formatPrice = (value: number | null | undefined) =>
-  value === null || value === undefined ? '—' : `${priceFormatter.format(Math.round(value))} دج`;
-
-const EVALUATION_STATUS_LABELS: Record<OfferEvaluationStatusApi, string> = {
-  pending: 'قيد الانتظار',
-  admitted: 'مقبول',
-  evaluated: 'مُقيّم',
-  rejected: 'مرفوض',
-};
-
 const getApiErrorMessage = (err: unknown, fallback: string) => {
   if (axios.isAxiosError(err)) {
     const data = err.response?.data as { error?: string; detail?: string } | undefined;
@@ -114,7 +102,7 @@ export function EvaluationWorkspace() {
   const params = useParams<{ id?: string; tenderId?: string }>();
   const id = params.id || params.tenderId;
   const [, setLocation] = useLocation();
-  const { t, dir } = useI18n();
+  const { t, lang, dir } = useI18n();
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -122,7 +110,7 @@ export function EvaluationWorkspace() {
   const [deal, setDeal] = useState<EvaluationOpportunityApi | null>(null);
   const [offers, setOffers] = useState<EvaluationOfferApi[]>([]);
 
-  // التحليل المالي الذكي (استشاري)
+  // Smart Price Analysis (Advisory)
   const [priceModalOpen, setPriceModalOpen] = useState(false);
   const [priceLoading, setPriceLoading] = useState(false);
   const [priceError, setPriceError] = useState('');
@@ -139,6 +127,24 @@ export function EvaluationWorkspace() {
   const [awardSuccess, setAwardSuccess] = useState<ConcludeEvaluationResponseApi | null>(null);
 
   const ArrowIcon = dir === 'rtl' ? ArrowRight : ArrowLeft;
+
+  const formatPrice = (value: number | null | undefined) => {
+    if (value === null || value === undefined) return '—';
+    const formatter = new Intl.NumberFormat(lang === 'ar' ? 'ar-DZ-u-nu-latn' : 'fr-FR', {
+      maximumFractionDigits: 0,
+    });
+    return `${formatter.format(Math.round(value))} ${t('common.dzd')}`;
+  };
+
+  const getStatusLabel = (status: OfferEvaluationStatusApi) => {
+    const map: Record<OfferEvaluationStatusApi, string> = {
+      pending: t('authority.eval.status.pending'),
+      admitted: t('authority.eval.status.admitted'),
+      evaluated: t('authority.eval.status.evaluated'),
+      rejected: t('authority.eval.status.rejected'),
+    };
+    return map[status] || status;
+  };
 
   const loadData = async () => {
     if (!id) {
@@ -179,7 +185,7 @@ export function EvaluationWorkspace() {
         setWinningOfferId(firstEligible.id);
       }
     } catch (err: unknown) {
-      setError(getApiErrorMessage(err, 'حدث خطأ أثناء تحميل فضاء التقييم'));
+      setError(getApiErrorMessage(err, t('authority.eval.fetch_error')));
     } finally {
       setLoading(false);
     }
@@ -202,7 +208,7 @@ export function EvaluationWorkspace() {
       });
       setPriceData(data);
     } catch (err: unknown) {
-      setPriceError(getApiErrorMessage(err, 'تعذر إجراء التحليل المالي للعروض.'));
+      setPriceError(getApiErrorMessage(err, t('authority.eval.price_error')));
     } finally {
       setPriceLoading(false);
     }
@@ -213,7 +219,7 @@ export function EvaluationWorkspace() {
     if (!form) return;
 
     if (form.evaluationStatus === 'rejected' && !form.rejectionReason.trim()) {
-      setError('يرجى تحديد سبب الإقصاء/عدم المطابقة وفق دفتر الشروط.');
+      setError(t('authority.eval.rejection_reason_req'));
       return;
     }
 
@@ -269,13 +275,10 @@ export function EvaluationWorkspace() {
         },
       }));
 
-      setSuccess(
-        `${data.message || 'تم حفظ تقييم العرض بنجاح.'} حالة العرض الآن: ${
-          EVALUATION_STATUS_LABELS[nextStatus]
-        }.`
-      );
+      const baseSuccessMsg = data.message || t('authority.eval.save_success');
+      setSuccess(`${baseSuccessMsg} ${t('authority.eval.save_status_prefix', { status: getStatusLabel(nextStatus) })}`);
     } catch (err: unknown) {
-      setError(getApiErrorMessage(err, 'حدث خطأ أثناء حفظ التقييم'));
+      setError(getApiErrorMessage(err, t('authority.eval.save_error')));
     } finally {
       setEvalForms((prev) => ({
         ...prev,
@@ -287,7 +290,7 @@ export function EvaluationWorkspace() {
   const handleConcludeAward = async () => {
     if (!id) return;
     if (!winningOfferId) {
-      setError('يرجى اختيار العرض الفائز المقترح للمنح المؤقت.');
+      setError(t('authority.eval.award_select_req'));
       return;
     }
 
@@ -316,9 +319,9 @@ export function EvaluationWorkspace() {
             : offer
         )
       );
-      setSuccess(data.message || 'تم اعتماد التقييم النهائي للجنة والمنح المؤقت بنجاح.');
+      setSuccess(data.message || t('authority.eval.award_success'));
     } catch (err: unknown) {
-      setError(getApiErrorMessage(err, 'حدث خطأ أثناء اعتماد المنح المؤقت'));
+      setError(getApiErrorMessage(err, t('authority.eval.award_error')));
     } finally {
       setAwarding(false);
     }
@@ -328,7 +331,7 @@ export function EvaluationWorkspace() {
     return (
       <div className="py-24 flex flex-col items-center justify-center text-muted-foreground space-y-2">
         <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-        <span className="text-sm">جاري فتح فضاء فحص وتقييم العروض...</span>
+        <span className="text-sm">{t('authority.eval.loading')}</span>
       </div>
     );
   }
@@ -342,14 +345,14 @@ export function EvaluationWorkspace() {
             <span>{t('authority.nav.evaluation')}</span>
           </div>
           <p className="text-sm text-muted-foreground">
-            تتطلب ورشة فحص وتقييم العروض تحديد الصفقة المستهدفة وفقاً للإجراءات القانونية. يرجى اختيار الصفقة من قائمة الصفقات للبدء في تقييم العروض المقبولة.
+            {t('authority.eval.no_deal_selected')}
           </p>
           <Button
             variant="default"
             className="rounded-xl text-xs"
             onClick={() => setLocation('/authority/drafts')}
           >
-            الانتقال إلى الصفقات والمسودات
+            {t('authority.eval.go_to_deals')}
           </Button>
         </div>
       </div>
@@ -388,7 +391,7 @@ export function EvaluationWorkspace() {
             {t('lifecycle.eval.title')}
           </h2>
           <p className="text-xs text-navy-100">
-            الصفقة: <span className="font-bold text-white">{deal?.title}</span>
+            {t('authority.eval.deal_label')} <span className="font-bold text-white">{deal?.title}</span>
           </p>
         </div>
 
@@ -398,9 +401,9 @@ export function EvaluationWorkspace() {
             <Trophy className="w-5 h-5" />
           </div>
           <div>
-            <div className="text-[11px] text-navy-100">مرحلة التقييم</div>
+            <div className="text-[11px] text-navy-100">{t('authority.eval.eval_stage_label')}</div>
             <div className="text-sm font-black text-white">
-              {isAwardConcluded ? 'تم المنح المؤقت' : 'فحص العروض والترتيب'}
+              {isAwardConcluded ? t('authority.eval.awarded_status') : t('authority.eval.examining_status')}
             </div>
           </div>
         </div>
@@ -427,7 +430,7 @@ export function EvaluationWorkspace() {
             <span>{t('lifecycle.eval.award_notice')}</span>
           </div>
           <p className="text-xs text-emerald-900 leading-relaxed font-medium">
-            تم اعتماد التقييم النهائي للجنة والمنح المؤقت للصفقة رسمياً، وتمت ترقية الصفقة إلى مرحلة الإسناد والطعون.
+            {t('authority.eval.awarded_banner')}
           </p>
           <div className="text-xs font-mono bg-white/80 p-3 rounded-xl border border-emerald-200 space-y-1">
             {awardSuccess?.message && (
@@ -435,7 +438,7 @@ export function EvaluationWorkspace() {
             )}
             {awardSuccess?.winningOfferId && (
               <div className="break-all text-slate-700">
-                العرض الفائز:{' '}
+                {t('authority.eval.winning_offer_label')}{' '}
                 <strong className="text-emerald-900">
                   {winningOffer?.bidderName || awardSuccess.winningOfferId}
                 </strong>
@@ -454,7 +457,7 @@ export function EvaluationWorkspace() {
           </h3>
           <div className="flex items-center gap-3">
             <span className="text-xs text-muted-foreground">
-              {offers.length} عروض قيد الدراسة
+              {t('authority.eval.offers_under_study', { count: offers.length })}
             </span>
             <Button
               type="button"
@@ -464,7 +467,7 @@ export function EvaluationWorkspace() {
               className="gap-1.5 rounded-xl bg-navy-900 text-xs font-bold text-white hover:bg-navy-800"
             >
               <Sparkles className="w-4 h-4" aria-hidden="true" />
-              التحليل المالي الذكي
+              {t('authority.eval.smart_price_analysis')}
             </Button>
           </div>
         </div>
@@ -487,6 +490,10 @@ export function EvaluationWorkspace() {
                 ? 'bg-blue-50 text-blue-700 border-blue-200'
                 : 'bg-amber-50 text-amber-800 border-amber-200';
 
+            const formattedOfferAmount = offer.financialAmount
+              ? `${Number(offer.financialAmount).toLocaleString()} ${t('common.dzd')}`
+              : '—';
+
             return (
               <div
                 key={offer.id}
@@ -504,12 +511,12 @@ export function EvaluationWorkspace() {
                         <span
                           className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${statusBadgeClass}`}
                         >
-                          {EVALUATION_STATUS_LABELS[offer.evaluationStatus]}
+                          {getStatusLabel(offer.evaluationStatus)}
                         </span>
                       </div>
                       <div className="text-xs text-muted-foreground flex items-center gap-2 mt-0.5">
-                        <span>مبلغ العرض: <strong className="text-navy-900 font-mono">{offer.financialAmount ? Number(offer.financialAmount).toLocaleString() + ' دج' : '—'}</strong></span>
-                        <span>· مدة الإنجاز: {offer.durationDays ? `${offer.durationDays} يوم` : '—'}</span>
+                        <span>{t('authority.eval.offer_amount_label')} <strong className="text-navy-900 font-mono">{formattedOfferAmount}</strong></span>
+                        <span>· {t('authority.eval.duration_label')} {offer.durationDays ? t('authority.eval.duration_days', { days: offer.durationDays }) : '—'}</span>
                       </div>
                     </div>
                   </div>
@@ -526,7 +533,7 @@ export function EvaluationWorkspace() {
                         {t('lifecycle.eval.download_doc')}
                       </a>
                     ) : (
-                      <span className="text-xs text-muted-foreground">لا يوجد ملف مرفق</span>
+                      <span className="text-xs text-muted-foreground">{t('authority.eval.no_attachment')}</span>
                     )}
                   </div>
                 </div>
@@ -534,7 +541,7 @@ export function EvaluationWorkspace() {
                 {/* Evaluation Form for this Offer */}
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 pt-1">
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-semibold">قرار المطابقة والقبول</Label>
+                    <Label className="text-xs font-semibold">{t('authority.eval.conformity_decision')}</Label>
                     <div className="flex items-center gap-2">
                       <Button
                         type="button"
@@ -586,13 +593,13 @@ export function EvaluationWorkspace() {
                           [offer.id]: { ...prev[offer.id], technicalScore: e.target.value },
                         }))
                       }
-                      placeholder="مثال: 85 (وفق شبكة التنقيط)"
+                      placeholder={t('authority.eval.score_tech_placeholder')}
                       className="text-xs rounded-xl"
                     />
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-semibold">العلامة المالية</Label>
+                    <Label className="text-xs font-semibold">{t('authority.eval.financial_score_label')}</Label>
                     <Input
                       type="number"
                       min="0"
@@ -606,7 +613,7 @@ export function EvaluationWorkspace() {
                           [offer.id]: { ...prev[offer.id], financialScore: e.target.value },
                         }))
                       }
-                      placeholder="مثال: 90 (وفق معايير التقييم المالي)"
+                      placeholder={t('authority.eval.score_fin_placeholder')}
                       className="text-xs rounded-xl"
                     />
                   </div>
@@ -621,7 +628,7 @@ export function EvaluationWorkspace() {
                           [offer.id]: { ...prev[offer.id], rejectionReason: e.target.value },
                         }))
                       }
-                      placeholder="إلزامي في حال الإقصاء أو عدم المطابقة"
+                      placeholder={t('authority.eval.rejection_placeholder')}
                       className="text-xs rounded-xl"
                       disabled={
                         form.saving ||
@@ -641,7 +648,7 @@ export function EvaluationWorkspace() {
                           [offer.id]: { ...prev[offer.id], evaluatorNotes: e.target.value },
                         }))
                       }
-                      placeholder="تفاصيل التقييم التقني والمالي، المؤهلات، التحفظات..."
+                      placeholder={t('authority.eval.notes_placeholder')}
                       className="text-xs rounded-xl"
                       rows={2}
                       disabled={form.saving || isAwardConcluded}
@@ -661,7 +668,7 @@ export function EvaluationWorkspace() {
                       ) : (
                         <FileCheck className="w-4 h-4" />
                       )}
-                      {form.saving ? 'جاري حفظ التقييم...' : t('lifecycle.eval.save_eval')}
+                      {form.saving ? t('authority.eval.saving_eval') : t('lifecycle.eval.save_eval')}
                     </Button>
                   </div>
                 </div>
@@ -679,13 +686,13 @@ export function EvaluationWorkspace() {
             {t('lifecycle.eval.financial')}
           </h3>
           <span className="text-xs text-muted-foreground">
-            {admittedOffers.length} عروض مقبولة مؤهلة للمنح
+            {t('authority.eval.admitted_count', { count: admittedOffers.length })}
           </span>
         </div>
 
         {admittedOffers.length === 0 ? (
           <div className="p-6 border border-dashed border-border rounded-xl text-center text-xs text-muted-foreground">
-            لم يتم قبول أي عرض بعد في التقييم التقني. يرجى إتمام فحص وتأهيل العروض أولاً.
+            {t('authority.eval.no_admitted_offers')}
           </div>
         ) : (
           <div className="space-y-4">
@@ -693,13 +700,13 @@ export function EvaluationWorkspace() {
               <table className="w-full text-xs text-start border-collapse">
                 <thead>
                   <tr className="border-b border-border bg-muted/40 text-navy-900">
-                    <th className="p-3 font-bold">الترتيب</th>
-                    <th className="p-3 font-bold">المتعامل الاقتصادي</th>
-                    <th className="p-3 font-bold">العلامة التقنية</th>
-                    <th className="p-3 font-bold">العلامة المالية</th>
-                    <th className="p-3 font-bold">المبلغ المقترح (دج)</th>
-                    <th className="p-3 font-bold">مدة الإنجاز</th>
-                    <th className="p-3 font-bold">الحالة</th>
+                    <th className="p-3 font-bold text-start">{t('authority.eval.col_rank')}</th>
+                    <th className="p-3 font-bold text-start">{t('authority.eval.col_operator')}</th>
+                    <th className="p-3 font-bold text-start">{t('authority.eval.col_score_tech')}</th>
+                    <th className="p-3 font-bold text-start">{t('authority.eval.col_score_fin')}</th>
+                    <th className="p-3 font-bold text-start">{t('authority.eval.col_proposed_amount')}</th>
+                    <th className="p-3 font-bold text-start">{t('authority.eval.col_duration')}</th>
+                    <th className="p-3 font-bold text-start">{t('authority.eval.col_status')}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
@@ -714,10 +721,10 @@ export function EvaluationWorkspace() {
                         <td className="p-3 font-mono">{item.financialScore || '—'} / 100</td>
                         <td className="p-3 font-mono font-bold text-emerald-800">
                           {item.financialAmount
-                            ? Number(item.financialAmount).toLocaleString() + ' دج'
+                            ? `${Number(item.financialAmount).toLocaleString()} ${t('common.dzd')}`
                             : '—'}
                         </td>
-                        <td className="p-3 text-muted-foreground">{item.durationDays ? `${item.durationDays} يوم` : '—'}</td>
+                        <td className="p-3 text-muted-foreground">{item.durationDays ? t('authority.eval.duration_days', { days: item.durationDays }) : '—'}</td>
                         <td className="p-3">
                           <span
                             className={`px-2 py-0.5 rounded text-[10px] font-bold border ${
@@ -726,7 +733,7 @@ export function EvaluationWorkspace() {
                                 : 'bg-blue-50 text-blue-800 border-blue-200'
                             }`}
                           >
-                            {EVALUATION_STATUS_LABELS[item.evaluationStatus]}
+                            {getStatusLabel(item.evaluationStatus)}
                           </span>
                         </td>
                       </tr>
@@ -752,17 +759,17 @@ export function EvaluationWorkspace() {
                       disabled={awarding}
                       className="w-full text-xs rounded-xl border border-input bg-background px-3 py-2"
                     >
-                      <option value="">-- اختر العارض الفائز المقترح --</option>
+                      <option value="">{t('authority.eval.select_winner_placeholder')}</option>
                       {admittedOffers.map((o) => (
                         <option key={o.id} value={o.id}>
-                          {o.bidderName} ({o.financialAmount ? Number(o.financialAmount).toLocaleString() + ' دج' : ''})
+                          {o.bidderName} ({o.financialAmount ? `${Number(o.financialAmount).toLocaleString()} ${t('common.dzd')}` : ''})
                         </option>
                       ))}
                     </select>
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-semibold">طريقة اختيار العرض *</Label>
+                    <Label className="text-xs font-semibold">{t('authority.eval.selection_method_label')}</Label>
                     <select
                       value={awardMethod}
                       onChange={(e) =>
@@ -777,11 +784,11 @@ export function EvaluationWorkspace() {
                   </div>
 
                   <div className="sm:col-span-2 space-y-1.5">
-                    <Label className="text-xs font-semibold">ملاحظات ومبررات اقتراح المنح</Label>
+                    <Label className="text-xs font-semibold">{t('authority.eval.selection_justification_label')}</Label>
                     <Textarea
                       value={awardNotes}
                       onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setAwardNotes(e.target.value)}
-                      placeholder="مبررات الاختيار وفق دفتر الشروط والنتائج التقنية والمالية..."
+                      placeholder={t('authority.eval.selection_justification_placeholder')}
                       className="text-xs rounded-xl"
                       rows={2}
                       disabled={awarding}
@@ -800,7 +807,7 @@ export function EvaluationWorkspace() {
                   ) : (
                     <Trophy className="w-4 h-4" />
                   )}
-                  {awarding ? 'جاري اعتماد التقييم النهائي...' : t('lifecycle.eval.conclude_btn')}
+                  {awarding ? t('authority.eval.concluding_status') : t('lifecycle.eval.conclude_btn')}
                 </Button>
               </div>
             )}
@@ -808,30 +815,30 @@ export function EvaluationWorkspace() {
         )}
       </section>
 
-      {/* التحليل المالي الذكي — نافذة استشارية */}
+      {/* Smart Price Analysis Dialog */}
       <Dialog open={priceModalOpen} onOpenChange={setPriceModalOpen}>
         <DialogContent className="max-h-[88vh] max-w-2xl overflow-y-auto" dir={dir}>
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-lg font-bold">
               <Sparkles className="h-5 w-5 text-navy-900" aria-hidden="true" />
-              التحليل المالي الذكي
+              {t('authority.eval.smart_price_analysis')}
             </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground">
               {priceData
                 ? `${priceData.deal_reference} — ${priceData.deal_title}`
                 : deal
                   ? `${deal.reference} — ${deal.title}`
-                  : 'مقارنة أسعار العروض بالمرجع السعري للصفقة.'}
+                  : t('authority.eval.smart_analysis_desc')}
             </DialogDescription>
           </DialogHeader>
 
           {priceLoading ? (
             <div className="flex flex-col items-center justify-center gap-3 py-12 text-xs text-muted-foreground">
               <Loader2 className="h-8 w-8 animate-spin text-navy-900" aria-hidden="true" />
-              جاري تحليل أسعار العروض…
+              {t('authority.eval.smart_analyzing')}
             </div>
           ) : priceError ? (
-            <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-xs font-semibold leading-relaxed text-red-700">
+            <div className="rounded-xl border border-destructive/20 bg-destructive/10 p-4 text-xs font-semibold leading-relaxed text-destructive">
               {priceError}
             </div>
           ) : priceData ? (
@@ -847,7 +854,7 @@ export function EvaluationWorkspace() {
                 </div>
                 <div className="rounded-xl border border-border bg-muted/30 p-2.5 text-center">
                   <span className="block text-[10px] font-bold text-muted-foreground">
-                    متوسط العروض
+                    {t('authority.eval.average_offers')}
                   </span>
                   <span className="mt-1 block text-xs sm:text-sm font-extrabold text-navy-900">
                     {formatPrice(priceData.average ?? priceData.summary.average_amount)}
@@ -855,7 +862,7 @@ export function EvaluationWorkspace() {
                 </div>
                 <div className="rounded-xl border border-border bg-muted/30 p-2.5 text-center">
                   <span className="block text-[10px] font-bold text-muted-foreground">
-                    الانحراف المعياري
+                    {t('authority.eval.std_deviation')}
                   </span>
                   <span className="mt-1 block text-xs sm:text-sm font-extrabold text-navy-900 font-mono">
                     {formatPrice(priceData.standard_deviation ?? priceData.summary.standard_deviation)}
@@ -863,11 +870,11 @@ export function EvaluationWorkspace() {
                 </div>
                 <div className="rounded-xl border border-border bg-muted/30 p-2.5 text-center">
                   <span className="block text-[10px] font-bold text-muted-foreground">
-                    عروض غير عادية
+                    {t('authority.eval.abnormal_offers')}
                   </span>
                   <span
                     className={`mt-1 block text-xs sm:text-sm font-extrabold ${
-                      (priceData.summary.outliers_count || 0) > 0 ? 'text-red-600' : 'text-emerald-600'
+                      (priceData.summary.outliers_count || 0) > 0 ? 'text-destructive' : 'text-emerald-600'
                     }`}
                   >
                     {priceData.summary.outliers_count || 0}
@@ -876,12 +883,12 @@ export function EvaluationWorkspace() {
               </div>
 
               <p className="text-[11px] text-muted-foreground">
-                عتبة الانحراف المعتمدة للتصنيف: ±{priceData.threshold_percent}% عن المرجع.
+                {t('authority.eval.threshold_desc', { percent: priceData.threshold_percent })}
               </p>
 
               {priceData.offers.length === 0 ? (
                 <p className="py-6 text-center text-xs text-muted-foreground">
-                  لا توجد عروض مالية مودعة في هذه الصفقة بعد.
+                  {t('authority.eval.no_financial_offers')}
                 </p>
               ) : (
                 <div className="space-y-3">
@@ -899,14 +906,14 @@ export function EvaluationWorkspace() {
                           : 'border-slate-200 bg-slate-50 text-slate-600';
 
                     const statusLabel = isAbnormallyLow
-                      ? 'عرض منخفض بصفة غير عادية'
+                      ? t('authority.eval.price_anomaly.abnormally_low')
                       : isAbnormallyHigh
-                        ? 'عرض مرتفع بصفة غير عادية'
+                        ? t('authority.eval.price_anomaly.abnormally_high')
                         : offer.status === 'normal'
-                          ? 'سعر طبيعي'
+                          ? t('authority.eval.price_anomaly.normal')
                           : isOutlier
-                            ? 'سعر شاذ'
-                            : 'غير محدد';
+                            ? t('authority.eval.price_anomaly.outlier')
+                            : t('authority.eval.price_anomaly.indeterminate');
 
                     return (
                       <div
@@ -930,7 +937,7 @@ export function EvaluationWorkspace() {
                           </span>
                           <span
                             className={`inline-flex items-center gap-1 font-bold ${
-                              isOutlier ? (isAbnormallyLow ? 'text-amber-700' : 'text-red-600') : 'text-emerald-600'
+                              isOutlier ? (isAbnormallyLow ? 'text-amber-700' : 'text-destructive') : 'text-emerald-600'
                             }`}
                           >
                             {deviation !== null && deviation < 0 ? (
@@ -949,7 +956,7 @@ export function EvaluationWorkspace() {
                             {offer.warnings.map((w, wIdx) => (
                               <div
                                 key={wIdx}
-                                className="flex items-start gap-1.5 text-[11px] font-semibold text-red-700 bg-red-50/80 border border-red-200/80 rounded-lg p-1.5"
+                                className="flex items-start gap-1.5 text-[11px] font-semibold text-destructive bg-destructive/10 border border-destructive/20 rounded-lg p-1.5"
                               >
                                 <AlertCircle className="h-3.5 w-3.5 shrink-0 mt-0.5" />
                                 <span>{w}</span>
@@ -959,7 +966,7 @@ export function EvaluationWorkspace() {
                         )}
 
                         <p className="rounded-lg border border-blue-100 bg-blue-50/60 p-2 text-[11px] leading-relaxed text-navy-950 font-medium">
-                          <span className="font-bold text-navy-900 block mb-0.5">توصية التحليل الذكي:</span>
+                          <span className="font-bold text-navy-900 block mb-0.5">{t('authority.eval.smart_recommendation_label')}</span>
                           {offer.ai_recommendation || offer.recommendation}
                         </p>
                       </div>
@@ -970,7 +977,7 @@ export function EvaluationWorkspace() {
 
               <div className="flex items-start gap-2 rounded-xl border border-blue-200 bg-blue-50 p-3 text-[11px] font-semibold leading-relaxed text-blue-800">
                 <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-                <span>هذا التحليل استشاري فقط، والقرار النهائي يعود للجنة التقييم.</span>
+                <span>{t('authority.eval.advisory_disclaimer')}</span>
               </div>
             </div>
           ) : null}

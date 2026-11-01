@@ -41,28 +41,28 @@ export function SuitabilityModal({ opportunityId, onClose }: Props) {
         return (
           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
             <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-            <span>مطابق</span>
+            <span>{t('operator.suitability.status_matched')}</span>
           </span>
         );
       case 'neutral_cross_wilaya':
         return (
           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-slate-50 text-slate-800 border border-slate-200">
             <MapPin className="w-3.5 h-3.5 text-slate-600" />
-            <span>خارج ولاية المقر</span>
+            <span>{t('operator.suitability.status_outside_wilaya')}</span>
           </span>
         );
       case 'mismatched':
         return (
           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-rose-50 text-rose-800 border border-rose-200">
             <XCircle className="w-3.5 h-3.5 text-rose-600" />
-            <span>غير مطابق</span>
+            <span>{t('operator.suitability.status_mismatched')}</span>
           </span>
         );
       default:
         return (
           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
             <HelpCircle className="w-3.5 h-3.5 text-amber-600" />
-            <span>غير محدد</span>
+            <span>{t('operator.suitability.status_undefined')}</span>
           </span>
         );
     }
@@ -80,7 +80,7 @@ export function SuitabilityModal({ opportunityId, onClose }: Props) {
               </strong>
             </div>
             <span className="text-[11px] bg-emerald-100/70 text-emerald-900 px-2 py-0.5 rounded font-semibold">
-              تطابق رئيسي
+              {t('operator.suitability.badge_main_match')}
             </span>
           </div>
         );
@@ -94,7 +94,7 @@ export function SuitabilityModal({ opportunityId, onClose }: Props) {
               </strong>
             </div>
             <span className="text-[11px] bg-amber-100/70 text-amber-900 px-2 py-0.5 rounded font-semibold">
-              تقاطع جزئي
+              {t('operator.suitability.badge_partial')}
             </span>
           </div>
         );
@@ -108,7 +108,7 @@ export function SuitabilityModal({ opportunityId, onClose }: Props) {
               </strong>
             </div>
             <span className="text-[11px] bg-blue-100/70 text-blue-900 px-2 py-0.5 rounded font-semibold">
-              يتطلب مراجعة الدفتر
+              {t('operator.suitability.badge_review_needed')}
             </span>
           </div>
         );
@@ -122,7 +122,7 @@ export function SuitabilityModal({ opportunityId, onClose }: Props) {
               </strong>
             </div>
             <span className="text-[11px] bg-slate-200 text-slate-800 px-2 py-0.5 rounded font-semibold">
-              لا يظهر تقاطع مباشر
+              {t('operator.suitability.badge_no_direct_match')}
             </span>
           </div>
         );
@@ -148,10 +148,10 @@ export function SuitabilityModal({ opportunityId, onClose }: Props) {
         </div>
 
         {loading ? (
-          <div className="py-12 text-center text-muted-foreground text-sm">جاري تحليل الملاءمة الأولية...</div>
+          <div className="py-12 text-center text-muted-foreground text-sm">{t('operator.suitability.loading')}</div>
         ) : error || !data ? (
           <div className="p-4 bg-destructive/10 text-destructive rounded-xl text-xs font-bold">
-            تعذر جلب تفاصيل الملاءمة لهذه الفرصة.
+            {t('operator.suitability.error')}
           </div>
         ) : (
           <div className="space-y-5 pt-2">
@@ -166,7 +166,7 @@ export function SuitabilityModal({ opportunityId, onClose }: Props) {
 
             {/* Criteria Breakdown Grid */}
             <div className="space-y-3">
-              <h4 className="text-xs font-bold text-navy-900">مصفوفة الشروط المقارنة:</h4>
+              <h4 className="text-xs font-bold text-navy-900">{t('operator.suitability.matrix_title')}</h4>
 
               <div className="grid grid-cols-1 gap-2.5">
                 {/* Sector */}
@@ -174,7 +174,7 @@ export function SuitabilityModal({ opportunityId, onClose }: Props) {
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-navy-900 flex items-center gap-1.5">
                       <Building2 className="w-3.5 h-3.5 text-primary" />
-                      <span>القطاع الرئيسي</span>
+                      <span>{t('operator.suitability.main_sector')}</span>
                     </span>
                     {renderStatusBadge(data.suitability.criteria.sector.status)}
                   </div>
@@ -188,7 +188,7 @@ export function SuitabilityModal({ opportunityId, onClose }: Props) {
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-navy-900 flex items-center gap-1.5">
                       <MapPin className="w-3.5 h-3.5 text-primary" />
-                      <span>النطاق الجغرافي وموقع التنفيذ</span>
+                      <span>{t('operator.suitability.geo_scope')}</span>
                     </span>
                     {renderStatusBadge(data.suitability.criteria.location.status)}
                   </div>
@@ -202,7 +202,7 @@ export function SuitabilityModal({ opportunityId, onClose }: Props) {
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-navy-900 flex items-center gap-1.5">
                       <Layers className="w-3.5 h-3.5 text-primary" />
-                      <span>رموز الأنشطة التجارية (CNRC)</span>
+                      <span>{t('operator.suitability.cnrc_codes')}</span>
                     </span>
                     {renderStatusBadge(data.suitability.criteria.activity.status)}
                   </div>
@@ -211,7 +211,7 @@ export function SuitabilityModal({ opportunityId, onClose }: Props) {
                   </p>
                   {data.suitability.criteria.activity.matchedCodes?.length > 0 && (
                     <div className="flex items-center gap-1.5 flex-wrap pt-1">
-                      <span className="text-[11px] font-semibold text-emerald-800">الرموز المشتركة:</span>
+                      <span className="text-[11px] font-semibold text-emerald-800">{t('operator.suitability.shared_codes')}</span>
                       {data.suitability.criteria.activity.matchedCodes.map((code: string) => (
                         <span key={code} className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-900 font-mono text-[10px] font-bold">
                           {code}
@@ -226,7 +226,7 @@ export function SuitabilityModal({ opportunityId, onClose }: Props) {
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-navy-900 flex items-center gap-1.5">
                       <Award className="w-3.5 h-3.5 text-primary" />
-                      <span>درجة التأهيل والتصنيف المهني</span>
+                      <span>{t('operator.suitability.qualification_grade')}</span>
                     </span>
                     {renderStatusBadge(data.suitability.criteria.qualification.status)}
                   </div>
@@ -242,7 +242,7 @@ export function SuitabilityModal({ opportunityId, onClose }: Props) {
               <div className="bg-amber-50 border border-amber-200 rounded-xl p-3.5 space-y-1.5">
                 <strong className="text-xs font-bold text-amber-900 flex items-center gap-1.5">
                   <AlertTriangle className="w-3.5 h-3.5 text-amber-700" />
-                  <span>تنبيهات التدقيق والمراجعة البشرية:</span>
+                  <span>{t('operator.suitability.audit_alerts')}</span>
                 </strong>
                 <ul className="list-disc list-inside text-[11px] text-amber-800 space-y-1">
                   {data.suitability.verificationAlerts.map((alert: string, idx: number) => (
@@ -265,7 +265,7 @@ export function SuitabilityModal({ opportunityId, onClose }: Props) {
 
             <div className="pt-2 flex justify-end">
               <Button variant="outline" size="sm" onClick={onClose} className="text-xs">
-                إغلاق
+                {t('common.close')}
               </Button>
             </div>
           </div>

@@ -32,8 +32,8 @@ export interface OpeningEvent {
   notes: string;
   created_at: string;
   is_my_offer?: boolean;
-  operator_display?: string; // للـ authority فقط
-  operator_label?: string; // من الباك إند
+  operator_display?: string; // for authority only
+  operator_label?: string; // from backend
   offer_id?: string;
 }
 

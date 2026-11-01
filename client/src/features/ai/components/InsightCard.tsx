@@ -25,6 +25,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
+import { useI18n } from '@/i18n';
 
 interface InsightCardProps {
   insight: AIInsight;
@@ -32,74 +33,62 @@ interface InsightCardProps {
   isResolving?: boolean;
 }
 
-const CATEGORY_CONFIG: Record<
-  InsightCategory,
-  { label: string; icon: React.ElementType; color: string }
-> = {
-  fraud_suspicion: {
-    label: 'شبهة فساد وتواطؤ',
-    icon: ShieldAlert,
-    color: 'text-rose-600',
-  },
-  price_anomaly: {
-    label: 'شذوذ في الأسعار',
-    icon: TrendingUp,
-    color: 'text-orange-600',
-  },
-  delay: {
-    label: 'تأخير إجرائي',
-    icon: Clock,
-    color: 'text-amber-600',
-  },
-  compliance: {
-    label: 'عدم امتثال نظامي',
-    icon: CheckCircle,
-    color: 'text-purple-600',
-  },
-  pattern: {
-    label: 'نمط تكرار مشبوه',
-    icon: Activity,
-    color: 'text-indigo-600',
-  },
-  recommendation: {
-    label: 'توصية تدقيق استباقية',
-    icon: Lightbulb,
-    color: 'text-emerald-600',
-  },
+const CATEGORY_ICONS: Record<InsightCategory, { icon: React.ElementType; color: string }> = {
+  fraud_suspicion: { icon: ShieldAlert, color: 'text-rose-600' },
+  price_anomaly: { icon: TrendingUp, color: 'text-orange-600' },
+  delay: { icon: Clock, color: 'text-amber-600' },
+  compliance: { icon: CheckCircle, color: 'text-purple-600' },
+  pattern: { icon: Activity, color: 'text-indigo-600' },
+  recommendation: { icon: Lightbulb, color: 'text-emerald-600' },
 };
 
-const SEVERITY_CONFIG: Record<
-  SeverityLevel,
-  { label: string; badgeClass: string; cardClass: string }
-> = {
+const SEVERITY_STYLES: Record<SeverityLevel, { badgeClass: string; cardClass: string }> = {
   critical: {
-    label: 'حرجة',
     badgeClass: 'bg-rose-100 text-rose-800 border-rose-300 font-bold',
     cardClass: 'bg-rose-50/40 border-rose-300 hover:border-rose-400',
   },
   high: {
-    label: 'عالية',
     badgeClass: 'bg-orange-100 text-orange-800 border-orange-300 font-bold',
     cardClass: 'bg-orange-50/40 border-orange-300 hover:border-orange-400',
   },
   medium: {
-    label: 'متوسطة',
     badgeClass: 'bg-amber-100 text-amber-800 border-amber-300 font-semibold',
     cardClass: 'bg-amber-50/40 border-amber-300 hover:border-amber-400',
   },
   low: {
-    label: 'منخفضة',
     badgeClass: 'bg-blue-100 text-blue-800 border-blue-300 font-semibold',
     cardClass: 'bg-blue-50/40 border-blue-300 hover:border-blue-400',
   },
   info: {
-    label: 'إرشادية',
     badgeClass: 'bg-slate-100 text-slate-800 border-slate-300 font-medium',
     cardClass: 'bg-slate-50/40 border-slate-300 hover:border-slate-400',
   },
 };
 
-function formatRelativeTime(dateString: string): string {
+const getCategoryLabel = (cat: InsightCategory, t: (k: string, v?: any) => string): string => {
+  switch (cat) {
+    case 'fraud_suspicion': return t('ai.cat_fraud_collusion');
+    case 'price_anomaly': return t('ai.cat_price_anomaly');
+    case 'delay': return t('ai.cat_procedural_delay');
+    case 'compliance': return t('ai.cat_non_compliance');
+    case 'pattern': return t('ai.cat_suspicious_pattern');
+    case 'recommendation': return t('ai.cat_proactive_audit');
+    default: return t('ai.cat_proactive_audit');
+  }
+};
+
+const getSeverityLabel = (sev: SeverityLevel, t: (k: string, v?: any) => string): string => {
+  switch (sev) {
+    case 'critical': return t('ai.severity.critical');
+    case 'high': return t('ai.severity.high');
+    case 'medium': return t('ai.severity.medium');
+    case 'low': return t('ai.severity.low');
+    case 'info': return t('ai.severity.info');
+    default: return t('ai.severity.info');
+  }
+};
+
+function formatRelativeTime(dateString: string, t: (k: string, v?: any) => string): string {
   try {
     const date = new Date(dateString);
     const now = new Date();
@@ -107,14 +96,14 @@ function formatRelativeTime(dateString: string): string {
       (now.getTime() - date.getTime()) / (1000 * 60 * 60)
     );
 
-    if (diffHours < 1) return 'منذ دقائق معدودة';
-    if (diffHours === 1) return 'منذ ساعة واحدة';
-    if (diffHours === 2) return 'منذ ساعتين';
-    if (diffHours <= 10) return `منذ ${diffHours} ساعات`;
-    if (diffHours < 24) return `منذ ${diffHours} ساعة`;
+    if (diffHours < 1) return t('ai.time_few_minutes');
+    if (diffHours === 1) return t('ai.time_one_hour');
+    if (diffHours === 2) return t('ai.time_two_hours');
+    if (diffHours <= 10) return t('ai.time_hours', { count: diffHours });
+    if (diffHours < 24) return t('ai.time_hours', { count: diffHours });
     const diffDays = Math.floor(diffHours / 24);
-    if (diffDays === 1) return 'منذ يوم واحد';
-    return `منذ ${diffDays} أيام`;
+    if (diffDays === 1) return t('ai.time_one_day');
+    return t('ai.time_days', { count: diffDays });
   } catch {
     return dateString;
   }
@@ -125,14 +114,17 @@ export function InsightCard({
   onResolve,
   isResolving = false,
 }: InsightCardProps) {
+  const { t, dir } = useI18n();
   const [isExpanded, setIsExpanded] = useState(false);
   const [resolveDialogOpen, setResolveDialogOpen] = useState(false);
   const [notes, setNotes] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
 
-  const catMeta = CATEGORY_CONFIG[insight.category] || CATEGORY_CONFIG.recommendation;
-  const sevMeta = SEVERITY_CONFIG[insight.severity] || SEVERITY_CONFIG.info;
+  const catMeta = CATEGORY_ICONS[insight.category] || CATEGORY_ICONS.recommendation;
+  const sevMeta = SEVERITY_STYLES[insight.severity] || SEVERITY_STYLES.info;
   const CategoryIcon = catMeta.icon;
+  const categoryLabel = getCategoryLabel(insight.category, t);
+  const severityLabel = getSeverityLabel(insight.severity, t);
 
   const handleOpenResolve = () => {
     setNotes('');
@@ -142,7 +134,7 @@ export function InsightCard({
 
   const handleSubmitResolve = () => {
     if (notes.trim().length < 10) {
-      setErrorMsg('يجب كتابة مبرر أو ملاحظات معالجة لا تقل عن 10 أحرف (إلزامي للتدقيق القانوني).');
+      setErrorMsg(t('ai.err_notes_min_length'));
       return;
     }
     setErrorMsg('');
@@ -162,36 +154,36 @@ export function InsightCard({
             <span
               className={`px-2.5 py-0.5 rounded-full text-xs border ${sevMeta.badgeClass}`}
             >
-              {sevMeta.label}
+              {severityLabel}
             </span>
 
             {/* Category */}
             <span className="flex items-center gap-1.5 text-xs font-bold text-navy-900 bg-background/80 px-2.5 py-0.5 rounded-full border border-border/80">
               <CategoryIcon className={`w-3.5 h-3.5 ${catMeta.color}`} />
-              <span>{catMeta.label}</span>
+              <span>{categoryLabel}</span>
             </span>
 
             {/* Statutory Advisory Badge */}
             <span
               className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-900 border border-amber-300 inline-flex items-center gap-1"
-              title="مبدأ القانون 23-12: الذكاء الاصطناعي أداة مساعدة ورقابية استشارية ولا يتخذ قرارات تلقائية"
+              title={t('ai.advisory_legal_principle')}
             >
               <AlertTriangle className="w-2.5 h-2.5 text-amber-700" />
-              <span>استشاري فقط</span>
+              <span>{t('ai.advisory_badge')}</span>
             </span>
           </div>
 
           {/* Time & Confidence */}
           <div className="flex items-center gap-3 text-xs text-muted-foreground self-start sm:self-auto">
             <span className="text-[11px] font-medium">
-              {formatRelativeTime(insight.generated_at)}
+              {formatRelativeTime(insight.generated_at, t)}
             </span>
 
             <div
               className="flex items-center gap-1.5 bg-background/90 px-2 py-0.5 rounded-md border text-[11px] font-bold text-navy-900"
-              title="مستوى الثقة الإحصائي للمؤشر"
+              title={t('ai.confidence_metric_title')}
             >
-              <span>الثقة:</span>
+              <span>{t('ai.price_confidence')}</span>
               <span className="text-emerald-700 font-black">
                 {Math.round(insight.confidence * 100)}%
               </span>
@@ -217,7 +209,7 @@ export function InsightCard({
               {insight.recommendation && (
                 <div className="p-3 rounded-xl bg-background border border-border/80 text-xs">
                   <span className="font-bold text-navy-900 block mb-1">
-                    🎯 الإجراء المقترح للمفتش:
+                    {t('ai.proposed_action_title')}
                   </span>
                   <p className="text-navy-950">{insight.recommendation}</p>
                 </div>
@@ -230,7 +222,7 @@ export function InsightCard({
                     key={idx}
                     className="px-2 py-0.5 rounded-md bg-muted text-navy-900 font-mono font-bold"
                   >
-                    صفقة: {tRef}
+                    {t('ai.deal_ref')}: {tRef}
                   </span>
                 ))}
                 {insight.related_authorities?.map((auth, idx) => (
@@ -238,7 +230,7 @@ export function InsightCard({
                     key={idx}
                     className="px-2 py-0.5 rounded-md bg-muted text-navy-800 font-medium"
                   >
-                    مصلحة: {auth}
+                    {t('ai.authority_ref')}: {auth}
                   </span>
                 ))}
                 {insight.related_operators?.map((op, idx) => (
@@ -246,7 +238,7 @@ export function InsightCard({
                     key={idx}
                     className="px-2 py-0.5 rounded-md bg-muted text-navy-800 font-medium"
                   >
-                    متعامل: {op}
+                    {t('ai.operator_ref')}: {op}
                   </span>
                 ))}
               </div>
@@ -263,12 +255,12 @@ export function InsightCard({
             {isExpanded ? (
               <>
                 <ChevronUp className="w-3.5 h-3.5" />
-                <span>إخفاء التفاصيل</span>
+                <span>{t('common.hide_details')}</span>
               </>
             ) : (
               <>
                 <ChevronDown className="w-3.5 h-3.5" />
-                <span>عرض التفاصيل والتوصيات</span>
+                <span>{t('ai.show_details_recommendations')}</span>
               </>
             )}
           </button>
@@ -279,7 +271,7 @@ export function InsightCard({
                 href={insight.action_url}
                 className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-xs font-semibold border border-border bg-background hover:bg-muted text-navy-900 transition-colors"
               >
-                <span>معاينة الصفقة</span>
+                <span>{t('ai.preview_deal')}</span>
                 <ExternalLink className="w-3 h-3" />
               </a>
             )}
@@ -292,7 +284,7 @@ export function InsightCard({
               className="h-7 px-3 text-xs font-bold border-navy-300 hover:bg-navy-900 hover:text-white transition-colors"
             >
               <CheckSquare className="w-3 h-3 ms-1" />
-              <span>تحديد كمعالج</span>
+              <span>{t('ai.resolve')}</span>
             </Button>
           </div>
         </div>
@@ -300,14 +292,14 @@ export function InsightCard({
 
       {/* Mandatory Human Resolve Dialog */}
       <Dialog open={resolveDialogOpen} onOpenChange={setResolveDialogOpen}>
-        <DialogContent className="sm:max-w-md" dir="rtl">
+        <DialogContent className="sm:max-w-md" dir={dir}>
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-navy-900">
               <FileCheck2 className="w-5 h-5 text-emerald-600" />
-              <span>معالجة التوصية الرقابية وإغلاقها</span>
+              <span>{t('ai.resolve_modal_title')}</span>
             </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground pt-1">
-              التوصية: <span className="font-bold text-navy-900">{insight.title}</span>
+              {t('ai.recommendation_label')}: <span className="font-bold text-navy-900">{insight.title}</span>
             </DialogDescription>
           </DialogHeader>
 
@@ -316,27 +308,26 @@ export function InsightCard({
             <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-xs space-y-1">
               <div className="flex items-center gap-1.5 font-bold text-amber-900">
                 <ShieldCheck className="w-4 h-4 text-amber-700" />
-                <span>توثيق قانوني إلزامي (Audit Trail):</span>
+                <span>{t('ai.audit_trail_mandatory')}</span>
               </div>
               <p className="text-amber-800 text-[11px] leading-relaxed">
-                سيُسجَّل هذا الإجراء مع هويتك وتاريخه في سجل التدقيق الرقمي غير القابل للتعديل
-                تطبيقاً للمرسوم 15-247 والقانون 23-12.
+                {t('ai.audit_trail_notice')}
               </p>
             </div>
 
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-navy-900 block">
-                ملاحظات ومبررات المعالجة البشرية <span className="text-rose-500">*</span>
+                {t('ai.human_notes_label')} <span className="text-rose-500">*</span>
               </label>
               <Textarea
                 rows={4}
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                placeholder="اكتب الإجراء المتخذ (مثال: تم تدقيق الأسعار ومقارنتها مع الصفقات المماثلة وتبين مطابقتها للأسعار المرجعية...)"
+                placeholder={t('ai.notes_placeholder')}
                 className="text-xs resize-none"
               />
               <span className="text-[10px] text-muted-foreground block text-end">
-                {notes.length} / 10 أحرف كحد أدنى
+                {notes.length} / {t('ai.min_chars_suffix')}
               </span>
             </div>
 
@@ -354,7 +345,7 @@ export function InsightCard({
               size="sm"
               onClick={() => setResolveDialogOpen(false)}
             >
-              إلغاء
+              {t('common.cancel')}
             </Button>
             <Button
               type="button"
@@ -363,7 +354,7 @@ export function InsightCard({
               onClick={handleSubmitResolve}
               className="bg-navy-900 text-white hover:bg-navy-800"
             >
-              {isResolving ? 'جاري الحفظ...' : 'تأكيد المعالجة وإغلاق التوصية'}
+              {isResolving ? t('common.saving') : t('ai.confirm_resolution')}
             </Button>
           </DialogFooter>
         </DialogContent>

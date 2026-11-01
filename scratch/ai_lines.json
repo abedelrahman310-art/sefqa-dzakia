@@ -1,0 +1,492 @@
+{
+  "client/src/features/ai\\components\\AIChatAssistant.tsx": [
+    {
+      "line": 24,
+      "text": "  'كم عدد الصفقات المتأخرة حالياً؟',"
+    },
+    {
+      "line": 25,
+      "text": "  'ما هي أبرز المخاطر المرصودة في المنصة؟',"
+    },
+    {
+      "line": 26,
+      "text": "  'أعطني تقريراً عن ولاية وهران',"
+    },
+    {
+      "line": 27,
+      "text": "  'هل توجد شبهات تواطؤ بين متعاملين محددين؟',"
+    },
+    {
+      "line": 36,
+      "text": "        'مرحباً بك في المساعد الرقابي الذكي لمنصة صفقات ذكية. يمكنك سؤالي عن الصفقات، مؤشرات المخاطر، التنبيهات الإجرائية، أو التفسيرات المتعلقة بالمرسوم 15-247 والقانون 23-12.',"
+    },
+    {
+      "line": 38,
+      "text": "      sources: ['قواعد بيانات الصفقات الوطنية', 'القانون 23-12', 'المرسوم 15-247'],"
+    },
+    {
+      "line": 88,
+      "text": "              'تعذر إتمام التحليل والاستجابة في الوقت الحالي. يرجى إعادة المحاولة لاحقاً.',"
+    },
+    {
+      "line": 103,
+      "text": "          'تم بدء محادثة جديدة. يمكنك طرح أي استفسار رقابي أو إحصائي حول صفقات المنصة.',"
+    },
+    {
+      "line": 119,
+      "text": "          <span className=\"hidden md:inline\">اسأل AI</span>"
+    },
+    {
+      "line": 120,
+      "text": "          {/* مؤشر الاتصال */}"
+    },
+    {
+      "line": 140,
+      "text": "                    المساعد الرقابي الذكي"
+    },
+    {
+      "line": 143,
+      "text": "                    الإدارة المركزية — الرقابة الوطنية"
+    },
+    {
+      "line": 153,
+      "text": "                title=\"محادثة جديدة\""
+    },
+    {
+      "line": 163,
+      "text": "                إجابات استشارية مؤتمتة — القرار النهائي للمفتش (قانون 23-12)."
+    },
+    {
+      "line": 207,
+      "text": "                        <span>المصادر المعتمدة:</span>"
+    },
+    {
+      "line": 233,
+      "text": "                  <span>جاري التحليل والمطابقة الإجرائية...</span>"
+    },
+    {
+      "line": 269,
+      "text": "                placeholder=\"اسأل عن أي صفقة، مؤشر، أو إجراء...\""
+    }
+  ],
+  "client/src/features/ai\\components\\AIHealthBadge.tsx": [
+    {
+      "line": 18,
+      "text": "        <span>فحص الذكاء الاصطناعي...</span>"
+    },
+    {
+      "line": 34,
+      "text": "        title={`محرك AI: ${provider} (${isAvailable ? 'متصل' : 'غير متصل'})`}"
+    },
+    {
+      "line": 68,
+      "text": "          {isAvailable ? 'متصل' : 'غير متصل'}"
+    }
+  ],
+  "client/src/features/ai\\components\\AIInsightsPanel.tsx": [
+    {
+      "line": 68,
+      "text": "              التوصيات الذكية للرقابة الوطنية (AI Insights)"
+    },
+    {
+      "line": 75,
+      "text": "              توصيات استشارية فقط — القرار النهائي للمفتش البشري وفقاً للقانون 23-12."
+    },
+    {
+      "line": 88,
+      "text": "            title=\"تحديث البيانات\""
+    },
+    {
+      "line": 93,
+      "text": "            <span>تحديث</span>"
+    },
+    {
+      "line": 105,
+      "text": "                ? 'جاري التحليل والتوليد...'"
+    },
+    {
+      "line": 106,
+      "text": "                : 'توليد توصيات جديدة'}"
+    },
+    {
+      "line": 122,
+      "text": "          <span>الكل</span>"
+    },
+    {
+      "line": 137,
+      "text": "          <span>حرجة</span>"
+    },
+    {
+      "line": 151,
+      "text": "          <span>عالية</span>"
+    },
+    {
+      "line": 165,
+      "text": "          <span>متوسطة</span>"
+    },
+    {
+      "line": 179,
+      "text": "          <span>منخفضة</span>"
+    },
+    {
+      "line": 220,
+      "text": "              لا توجد توصيات نشطة في هذا المستوى"
+    },
+    {
+      "line": 223,
+      "text": "              مؤشرات المنصة تظهر التزاماً إجرائياً، أو تمت معالجة كافة التوصيات السابقة."
+    },
+    {
+      "line": 234,
+      "text": "            <span>تشغيل فحص جديد</span>"
+    },
+    {
+      "line": 262,
+      "text": "                    <span>توصيات ذات خطورة حرجة ({groupedInsights.critical.length})</span>"
+    },
+    {
+      "line": 282,
+      "text": "                    <span>توصيات ذات أولوية عالية ({groupedInsights.high.length})</span>"
+    },
+    {
+      "line": 303,
+      "text": "                      <span>توصيات متوسطة ({groupedInsights.medium.length})</span>"
+    },
+    {
+      "line": 309,
+      "text": "                      <span>{collapseMedium ? 'عرض' : 'طي'}</span>"
+    },
+    {
+      "line": 339,
+      "text": "                        توصيات منخفضة وإرشادية ("
+    },
+    {
+      "line": 347,
+      "text": "                      <span>{collapseLow ? 'عرض' : 'طي'}</span>"
+    }
+  ],
+  "client/src/features/ai\\components\\AIPriceAssistant.tsx": [
+    {
+      "line": 240,
+      "text": "                  {formatMoney(estimate.estimated_min)} — {formatMoney(estimate.estimated_max)} دج"
+    },
+    {
+      "line": 247,
+      "text": "                  {t('ai.price_unit')} {formatMoney(estimate.unit_price)} دج/{estimate.unit}"
+    },
+    {
+      "line": 315,
+      "text": "      {/* Confirmation Dialog (التحسين 3) */}"
+    },
+    {
+      "line": 335,
+      "text": "              {formatMoney(estimate.estimated_avg)} دج"
+    }
+  ],
+  "client/src/features/ai\\components\\InsightCard.tsx": [
+    {
+      "line": 40,
+      "text": "    label: 'شبهة فساد وتواطؤ',"
+    },
+    {
+      "line": 45,
+      "text": "    label: 'شذوذ في الأسعار',"
+    },
+    {
+      "line": 50,
+      "text": "    label: 'تأخير إجرائي',"
+    },
+    {
+      "line": 55,
+      "text": "    label: 'عدم امتثال نظامي',"
+    },
+    {
+      "line": 60,
+      "text": "    label: 'نمط تكرار مشبوه',"
+    },
+    {
+      "line": 65,
+      "text": "    label: 'توصية تدقيق استباقية',"
+    },
+    {
+      "line": 76,
+      "text": "    label: 'حرجة',"
+    },
+    {
+      "line": 81,
+      "text": "    label: 'عالية',"
+    },
+    {
+      "line": 86,
+      "text": "    label: 'متوسطة',"
+    },
+    {
+      "line": 91,
+      "text": "    label: 'منخفضة',"
+    },
+    {
+      "line": 96,
+      "text": "    label: 'إرشادية',"
+    },
+    {
+      "line": 110,
+      "text": "    if (diffHours < 1) return 'منذ دقائق معدودة';"
+    },
+    {
+      "line": 111,
+      "text": "    if (diffHours === 1) return 'منذ ساعة واحدة';"
+    },
+    {
+      "line": 112,
+      "text": "    if (diffHours === 2) return 'منذ ساعتين';"
+    },
+    {
+      "line": 113,
+      "text": "    if (diffHours <= 10) return `منذ ${diffHours} ساعات`;"
+    },
+    {
+      "line": 114,
+      "text": "    if (diffHours < 24) return `منذ ${diffHours} ساعة`;"
+    },
+    {
+      "line": 116,
+      "text": "    if (diffDays === 1) return 'منذ يوم واحد';"
+    },
+    {
+      "line": 117,
+      "text": "    return `منذ ${diffDays} أيام`;"
+    },
+    {
+      "line": 145,
+      "text": "      setErrorMsg('يجب كتابة مبرر أو ملاحظات معالجة لا تقل عن 10 أحرف (إلزامي للتدقيق القانوني).');"
+    },
+    {
+      "line": 177,
+      "text": "              title=\"مبدأ القانون 23-12: الذكاء الاصطناعي أداة مساعدة ورقابية استشارية ولا يتخذ قرارات تلقائية\""
+    },
+    {
+      "line": 180,
+      "text": "              <span>استشاري فقط</span>"
+    },
+    {
+      "line": 192,
+      "text": "              title=\"مستوى الثقة الإحصائي للمؤشر\""
+    },
+    {
+      "line": 194,
+      "text": "              <span>الثقة:</span>"
+    },
+    {
+      "line": 220,
+      "text": "                    🎯 الإجراء المقترح للمفتش:"
+    },
+    {
+      "line": 233,
+      "text": "                    صفقة: {tRef}"
+    },
+    {
+      "line": 241,
+      "text": "                    مصلحة: {auth}"
+    },
+    {
+      "line": 249,
+      "text": "                    متعامل: {op}"
+    },
+    {
+      "line": 266,
+      "text": "                <span>إخفاء التفاصيل</span>"
+    },
+    {
+      "line": 271,
+      "text": "                <span>عرض التفاصيل والتوصيات</span>"
+    },
+    {
+      "line": 282,
+      "text": "                <span>معاينة الصفقة</span>"
+    },
+    {
+      "line": 295,
+      "text": "              <span>تحديد كمعالج</span>"
+    },
+    {
+      "line": 307,
+      "text": "              <span>معالجة التوصية الرقابية وإغلاقها</span>"
+    },
+    {
+      "line": 310,
+      "text": "              التوصية: <span className=\"font-bold text-navy-900\">{insight.title}</span>"
+    },
+    {
+      "line": 319,
+      "text": "                <span>توثيق قانوني إلزامي (Audit Trail):</span>"
+    },
+    {
+      "line": 322,
+      "text": "                سيُسجَّل هذا الإجراء مع هويتك وتاريخه في سجل التدقيق الرقمي غير القابل للتعديل"
+    },
+    {
+      "line": 323,
+      "text": "                تطبيقاً للمرسوم 15-247 والقانون 23-12."
+    },
+    {
+      "line": 329,
+      "text": "                ملاحظات ومبررات المعالجة البشرية <span className=\"text-rose-500\">*</span>"
+    },
+    {
+      "line": 335,
+      "text": "                placeholder=\"اكتب الإجراء المتخذ (مثال: تم تدقيق الأسعار ومقارنتها مع الصفقات المماثلة وتبين مطابقتها للأسعار المرجعية...)\""
+    },
+    {
+      "line": 339,
+      "text": "                {notes.length} / 10 أحرف كحد أدنى"
+    },
+    {
+      "line": 357,
+      "text": "              إلغاء"
+    },
+    {
+      "line": 366,
+      "text": "              {isResolving ? 'جاري الحفظ...' : 'تأكيد المعالجة وإغلاق التوصية'}"
+    }
+  ],
+  "client/src/features/ai\\components\\OperatorRecommendationsCard.tsx": [
+    {
+      "line": 139,
+      "text": "            <span>إعادة المحاولة</span>"
+    },
+    {
+      "line": 180,
+      "text": "            تحديث ملف المؤسسة"
+    },
+    {
+      "line": 223,
+      "text": "              title=\"تحديث التوصيات\""
+    },
+    {
+      "line": 243,
+      "text": "            <span className=\"font-bold text-navy-900\">الأشغال العمومية والبناء</span>"
+    },
+    {
+      "line": 247,
+      "text": "            <span className=\"font-bold text-navy-900\">الجزائر، البليدة، بومرداس</span>"
+    },
+    {
+      "line": 332,
+      "text": "            <span>يتم تحديث التوصيات دورياً بناءً على الصفقات المفتوحة حديثاً في القطاع</span>"
+    }
+  ],
+  "client/src/features/ai\\components\\SmartKpiBadge.tsx": [
+    {
+      "line": 29,
+      "text": "      title={`رصد ذكي (استشاري): ${message || ''}`}"
+    },
+    {
+      "line": 32,
+      "text": "      <span>{message ? message : `${value ?? ''} رصد AI`}</span>"
+    }
+  ],
+  "client/src/features/ai\\components\\SuspicionAlerts.tsx": [
+    {
+      "line": 34,
+      "text": "    label: 'مؤشرات التواطؤ (Bid Rigging)',"
+    },
+    {
+      "line": 40,
+      "text": "    label: 'التلاعب والأسعار غير الطبيعية',"
+    },
+    {
+      "line": 46,
+      "text": "    label: 'المنافسة الصورية والوهمية',"
+    },
+    {
+      "line": 52,
+      "text": "    label: 'تنازع المصالح والصلات المتقاطعة',"
+    },
+    {
+      "line": 90,
+      "text": "              الشبهات المكتشفة بالخوارزميات"
+    },
+    {
+      "line": 94,
+      "text": "            كشف الأنماط المشبوهة استناداً لبيانات العروض وتطابق الهويات."
+    },
+    {
+      "line": 99,
+      "text": "          {totalCount} مؤشر نشط"
+    },
+    {
+      "line": 107,
+      "text": "          مؤشرات احترازية استشارية تستوجب تحقيقاً تدقيقياً بشرياً وفقاً للقانون 23-12."
+    },
+    {
+      "line": 133,
+      "text": "            لا توجد مؤشرات شبهة مرصودة حالياً"
+    },
+    {
+      "line": 136,
+      "text": "            الفحص الدوري التلقائي لم يرصد تواطؤاً أو أسعاراً مشبوهة حتى الآن."
+    },
+    {
+      "line": 170,
+      "text": "                    {items.length} {items.length === 1 ? 'حالة' : 'حالات'}"
+    },
+    {
+      "line": 194,
+      "text": "                    <span>عرض التفاصيل ({items.length})</span>"
+    },
+    {
+      "line": 214,
+      "text": "                {selectedTypeForDialog ? TYPE_CONFIG[selectedTypeForDialog]?.label : 'الشبهات المرصودة'}"
+    },
+    {
+      "line": 218,
+      "text": "              {data?.statutory_reference || 'القانون 23-12 — مبدأ الشفافية والمنافسة الحرة'}"
+    },
+    {
+      "line": 232,
+      "text": "                      خطورة: {item.severity}"
+    },
+    {
+      "line": 241,
+      "text": "                      <span className=\"font-bold\">التوصية:</span> {item.recommendation}"
+    },
+    {
+      "line": 247,
+      "text": "                      المخالفة المحتملة: {item.statutory_violation}"
+    }
+  ],
+  "client/src/features/ai\\hooks\\useAI.ts": [
+    {
+      "line": 15,
+      "text": "    refetchInterval: 60000, // كل دقيقة"
+    },
+    {
+      "line": 23,
+      "text": "      toast.success(`تم توليد ${data.generated} توصية ذكية جديدة بنجاح`);"
+    },
+    {
+      "line": 28,
+      "text": "        err.response?.data?.detail || 'تعذر توليد التوصيات في الوقت الحالي'"
+    },
+    {
+      "line": 40,
+      "text": "      toast.success('تم توثيق المعالجة وتحديث سجل التدقيق بنجاح');"
+    },
+    {
+      "line": 47,
+      "text": "          'تعذر حفظ معالجة التوصية'"
+    },
+    {
+      "line": 57,
+      "text": "    refetchInterval: 120000, // كل دقيقتين"
+    },
+    {
+      "line": 82,
+      "text": "    staleTime: 300000, // 5 دقائق"
+    },
+    {
+      "line": 184,
+      "text": "    refetchInterval: 120000, // كل دقيقتين"
+    }
+  ]
+}

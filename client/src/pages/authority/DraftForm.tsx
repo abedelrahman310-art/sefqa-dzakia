@@ -30,7 +30,7 @@ export function DraftForm({ id }: { id?: string }) {
   const [status, setStatus] = useState<'draft' | 'published'>('draft');
   const [hasDoc, setHasDoc] = useState(false);
 
-  // Hook لتقدير الميزانية استرشادياً
+  // Hook for advisory budget estimation
   const priceEstimatePayload = useMemo(() => {
     if (!description || description.trim().length < 10) return null;
     return {
@@ -99,10 +99,10 @@ export function DraftForm({ id }: { id?: string }) {
 
       if (id) {
         await api.patch(`/procurements/deals/${id}/`, payload);
-        toast.success('تم تحديث الصفقة بنجاح');
+        toast.success(t('authority.drafts.update_success'));
       } else {
         await api.post('/procurements/deals/', payload);
-        toast.success('تم إنشاء الصفقة وحفظها بنجاح');
+        toast.success(t('authority.drafts.create_success'));
       }
 
       setLocation('/authority/drafts');
@@ -115,14 +115,14 @@ export function DraftForm({ id }: { id?: string }) {
 
   const handlePublish = async () => {
     if (!id) return;
-    if (!window.confirm('هل أنت متأكد من رغبتك في إتاحة هذه الصفقة ونشرها رسمياً للمنافسة؟')) {
+    if (!window.confirm(t('authority.drafts.publish_confirm'))) {
       return;
     }
     try {
       await api.patch(`/procurements/deals/${id}/`, {
         current_stage: 3,
       });
-      toast.success('تم نشر الصفقة بنجاح للمتعاملين');
+      toast.success(t('authority.drafts.publish_success'));
       setStatus('published');
       setLocation('/authority/drafts');
     } catch (err: any) {
@@ -136,7 +136,7 @@ export function DraftForm({ id }: { id?: string }) {
     return (
       <div className="py-24 flex flex-col items-center justify-center text-muted-foreground space-y-2">
         <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-        <span className="text-sm">جاري تحميل بيانات المسودة...</span>
+        <span className="text-sm">{t('authority.drafts.loading_single')}</span>
       </div>
     );
   }
@@ -156,7 +156,7 @@ export function DraftForm({ id }: { id?: string }) {
               <ArrowIcon className="w-4 h-4" />
             </Button>
             <span className="text-xs font-semibold text-navy-100">
-              {id ? (status === 'published' ? 'معاينة صفقة متاحة' : 'تعديل مسودة') : 'إنشاء مسودة صفقة جديدة'}
+              {id ? (status === 'published' ? t('authority.drafts.preview_published') : t('authority.drafts.edit_draft')) : t('authority.drafts.create_new')}
             </span>
           </div>
           <h2 className="text-xl md:text-2xl font-bold text-white">
@@ -164,8 +164,8 @@ export function DraftForm({ id }: { id?: string }) {
           </h2>
           <p className="text-xs text-navy-100">
             {status === 'published'
-              ? 'هذه الصفقة متاحة تجريبياً للمتعاملين؛ البيانات مجمّدة ولا يمكن تعديلها.'
-              : 'أدخل البيانات الأولية للعملية. يمكنك تعديلها أو إرفاق دفتر الشروط قبل الإتاحة.'}
+              ? t('authority.drafts.published_frozen_notice')
+              : t('authority.drafts.draft_initial_notice')}
           </p>
         </div>
 
@@ -211,17 +211,17 @@ export function DraftForm({ id }: { id?: string }) {
               minLength={3}
               maxLength={255}
               disabled={status === 'published'}
-              placeholder="مثال: اقتناء تجهيزات مكتبية للإدارة المركزية"
+              placeholder={t('authority.drafts.title_placeholder')}
               className="rounded-xl"
             />
             <span className="text-[11px] text-muted-foreground block">
-              عنوان واضح وموجز لعملية الشراء (3 أحرف على الأقل).
+              {t('authority.drafts.title_help')}
             </span>
           </div>
 
-          {/* Template Type & Wilaya Selection (التحسين 1 و 2) */}
+          {/* Template Type & Wilaya Selection */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* Template Type (القالب / نوع الصفقة) */}
+            {/* Template Type */}
             <div className="space-y-2 text-start">
               <label className="text-sm font-bold text-navy-900 block">
                 {t('ai.price_template')} <span className="text-destructive">*</span>
@@ -238,11 +238,11 @@ export function DraftForm({ id }: { id?: string }) {
                 <option value="studies">{t('ai.price_template_studies')}</option>
               </select>
               <span className="text-[11px] text-muted-foreground block">
-                نوع الصفقة وفق المادة 17 من القانون 23-12.
+                {t('authority.drafts.type_help')}
               </span>
             </div>
 
-            {/* Wilaya (مكان التنفيذ - 69 ولاية) */}
+            {/* Wilaya (58 wilayas) */}
             <div className="space-y-2 text-start">
               <label className="text-sm font-bold text-navy-900 block">
                 {t('ai.price_wilaya')} <span className="text-destructive">*</span>
@@ -255,12 +255,12 @@ export function DraftForm({ id }: { id?: string }) {
               >
                 {ALGERIA_69_WILAYAS.map((w) => (
                   <option key={w.code} value={w.code}>
-                    {w.code} - {w.ar} ({w.fr})
+                    {w.code} - {dir === 'rtl' ? w.ar : w.fr} ({dir === 'rtl' ? w.fr : w.ar})
                   </option>
                 ))}
               </select>
               <span className="text-[11px] text-muted-foreground block">
-                التقسيم الإداري الوطني (69 ولاية لسنة 2026).
+                {t('authority.drafts.wilaya_help')}
               </span>
             </div>
           </div>
@@ -279,14 +279,14 @@ export function DraftForm({ id }: { id?: string }) {
               maxLength={2000}
               rows={4}
               disabled={status === 'published'}
-              placeholder="صف موضوع الصفقة والكميات... يقوم الذكاء الاصطناعي بتقدير الميزانية استرشادياً"
+              placeholder={t('authority.drafts.desc_placeholder')}
             />
             <span className="text-[11px] text-muted-foreground block">
-              وصف تفصيلي لموضوع الحاجة والأهداف (5 أحرف على الأقل).
+              {t('authority.drafts.desc_help')}
             </span>
           </div>
 
-          {/* AI Price Assistant يظهر تلقائياً أثناء كتابة الوصف */}
+          {/* AI Price Assistant appears automatically while typing description */}
           {description.trim().length >= 10 && showPriceAssistant && (
             <AIPriceAssistant
               estimate={estimate}
@@ -312,14 +312,13 @@ export function DraftForm({ id }: { id?: string }) {
               value={budget}
               onChange={(e) => setBudget(e.target.value)}
               disabled={status === 'published'}
-              placeholder="مثال: 1500000"
+              placeholder="1500000"
               className="rounded-xl font-mono tabular-nums"
             />
             <span className="text-[11px] text-muted-foreground block">
-              الميزانية التقديرية بالدينار الجزائري (دج) — اختياري أو يُملأ تلقائياً من المساعد الذكي.
+              {t('authority.drafts.budget_help')}
             </span>
           </div>
-
 
           {/* Document Section */}
           {id && (
@@ -334,7 +333,7 @@ export function DraftForm({ id }: { id?: string }) {
                     <FileText className="w-5 h-5 text-muted-foreground" />
                     <div>
                       <span className="text-xs font-semibold block text-navy-900">
-                        وثيقة دفتر الشروط
+                        {t('authority.drafts.specs_doc_label')}
                       </span>
                       <span className="text-[11px] text-muted-foreground">
                         {t('drafts.doc.frozen')}
@@ -362,10 +361,10 @@ export function DraftForm({ id }: { id?: string }) {
                       </div>
                       <div>
                         <div className="text-xs font-bold text-navy-900">
-                          {hasDoc ? 'تحديث دفتر الشروط (PDF)' : 'رفع وثيقة دفتر الشروط (PDF)'}
+                          {hasDoc ? t('authority.drafts.update_pdf') : t('authority.drafts.upload_pdf')}
                         </div>
                         <div className="text-[11px] text-muted-foreground">
-                          صيغة PDF فقط، بحد أقصى 10 ميغابايت
+                          {t('authority.drafts.pdf_max_size')}
                         </div>
                       </div>
                     </div>
@@ -391,7 +390,7 @@ export function DraftForm({ id }: { id?: string }) {
                             });
                             if (!res.ok) {
                               const errData = await res.json().catch(() => ({}));
-                              throw new Error(errData.error || 'Upload failed');
+                              throw new Error(errData.error || t('authority.drafts.upload_failed'));
                             }
                             setHasDoc(true);
                             alert(t('drafts.doc.success'));
@@ -435,7 +434,7 @@ export function DraftForm({ id }: { id?: string }) {
                 disabled={submitting}
                 className="bg-navy-900 hover:bg-navy-800 text-white font-bold text-xs rounded-xl px-5"
               >
-                {submitting ? 'جاري الحفظ...' : t('drafts.btn.save')}
+                {submitting ? t('common.saving') : t('drafts.btn.save')}
               </Button>
             )}
           </div>

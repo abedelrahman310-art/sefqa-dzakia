@@ -141,8 +141,8 @@ export function toNumber(value: unknown): number {
   return 0;
 }
 
-/** استخراج رسالة خطأ مفهومة من استجابة الخادم. */
-export function extractApiMessage(error: unknown): string {
+/** استخراج رسالة خطأ مفهومة من استجابة الخادم مع دعم اللغتين (ar/fr). */
+export function extractApiMessage(error: unknown, fallbackMessage?: string): string {
   if (isRecord(error)) {
     const response = error.response;
     if (isRecord(response)) {
@@ -152,17 +152,32 @@ export function extractApiMessage(error: unknown): string {
         if (typeof detail === 'string' && detail.trim() !== '') return detail;
       }
       if (typeof response.status === 'number') {
-        if (response.status === 401) return 'انتهت صلاحية الجلسة. أعد تسجيل الدخول للمتابعة.';
-        if (response.status === 403) {
-          return 'هذه البيانات متاحة لحسابات الرقابة المركزية فقط (central_admin).';
+        const isFr = typeof document !== 'undefined' && document.documentElement.lang === 'fr';
+        if (response.status === 401) {
+          return isFr
+            ? 'Session expirée. Veuillez vous reconnecter.'
+            : 'انتهت صلاحية الجلسة. أعد تسجيل الدخول للمتابعة.';
         }
-        if (response.status === 404) return 'خدمة البيانات المطلوبة غير متوفرة على الخادم.';
-        return `تعذر تحميل البيانات من الخادم (رمز ${response.status}).`;
+        if (response.status === 403) {
+          return isFr
+            ? 'Ces données sont réservées aux comptes d’administration centrale (central_admin).'
+            : 'هذه البيانات متاحة لحسابات الرقابة المركزية فقط (central_admin).';
+        }
+        if (response.status === 404) {
+          return isFr
+            ? 'Le service de données demandé n’est pas disponible sur le serveur.'
+            : 'خدمة البيانات المطلوبة غير متوفرة على الخادم.';
+        }
+        return isFr
+          ? `Impossible de charger les données du serveur (code ${response.status}).`
+          : `تعذر تحميل البيانات من الخادم (رمز ${response.status}).`;
       }
     }
     if (typeof error.message === 'string' && error.message.trim() !== '') return error.message;
   }
-  return 'تعذر تحميل البيانات من الخادم.';
+  if (fallbackMessage) return fallbackMessage;
+  const isFr = typeof document !== 'undefined' && document.documentElement.lang === 'fr';
+  return isFr ? 'Impossible de charger les données du serveur.' : 'تعذر تحميل البيانات من الخادم.';
 }
 
 // ─── الطلبات ───────────────────────────────────────────────────────────────
@@ -183,8 +198,80 @@ export async function fetchCentralReports(): Promise<CentralReportsResponse> {
 }
 
 export async function fetchNationalDeals(): Promise<ProcurementDealApi[]> {
-  const { data } = await api.get<unknown>('/procurements/deals/');
+  const { data } = await api.get<unknown>('/central/deals/');
   return extractList<ProcurementDealApi>(data, ['results', 'deals']);
+}
+
+export interface CentralRealAuthority {
+  id: string;
+  name: string;
+  organization_name?: string;
+  display_name?: string;
+  email: string;
+  phone_number?: string;
+  wilaya: string;
+  wilaya_code: string;
+  wilaya_name_fr?: string;
+  deals_count: number;
+  active_deals_count: number;
+  completed_deals_count: number;
+  delayed_deals_count: number;
+  total_volume_dzd: number;
+  is_active: boolean;
+  created_at?: string | null;
+}
+
+export interface CentralRealOperator {
+  id: string;
+  name: string;
+  company_name?: string;
+  display_name?: string;
+  email: string;
+  phone_number?: string;
+  nif?: string;
+  nis?: string;
+  sector: string;
+  sector_display: string;
+  available_wilayas: string[];
+  offers_count: number;
+  wins_count: number;
+  awarded_count: number;
+  rejected_count: number;
+  contracts_count: number;
+  total_volume_dzd: number;
+  is_active: boolean;
+  created_at?: string | null;
+}
+
+export interface CentralRealDeal {
+  id: string;
+  reference_number: string;
+  title: string;
+  description: string;
+  authority_id?: string | null;
+  authority_name: string;
+  wilaya: string;
+  estimated_budget: number;
+  current_stage: number;
+  stage_display: string;
+  submission_deadline?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export async function fetchCentralAuthorities(): Promise<CentralRealAuthority[]> {
+  const { data } = await api.get<unknown>('/central/authorities/');
+  return extractList<CentralRealAuthority>(data, ['authorities', 'results']);
+}
+
+export async function fetchCentralOperators(): Promise<CentralRealOperator[]> {
+  const { data } = await api.get<unknown>('/central/operators/');
+  return extractList<CentralRealOperator>(data, ['operators', 'results']);
+}
+
+export async function fetchCentralDeals(): Promise<CentralRealDeal[]> {
+  const { data } = await api.get<unknown>('/central/deals/');
+  return extractList<CentralRealDeal>(data, ['deals', 'results']);
 }
 
 export async function fetchCentralObjections(): Promise<CentralObjectionRow[]> {

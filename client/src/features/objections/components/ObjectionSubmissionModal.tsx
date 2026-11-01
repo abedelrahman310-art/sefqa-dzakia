@@ -1,3 +1,4 @@
+import { useI18n } from "@/i18n";
 import React, { useState, useEffect } from 'react';
 import {
   Dialog,
@@ -19,7 +20,7 @@ import {
 import { toast } from 'sonner';
 import { objectionsApi } from '../api/objections';
 import type { ObjectionType, ObjectionGround, CreateObjectionPayload } from '../types';
-import { GROUND_LABELS, TYPE_LABELS } from '../types';
+import { getGroundLabel, getTypeLabel, GROUND_LABEL_KEYS } from '../types';
 
 interface ObjectionSubmissionModalProps {
   open: boolean;
@@ -32,6 +33,7 @@ export function ObjectionSubmissionModal({
   onOpenChange,
   onSuccess,
 }: ObjectionSubmissionModalProps) {
+  const { t, lang, dir } = useI18n();
   const [deals, setDeals] = useState<any[]>([]);
   const [loadingDeals, setLoadingDeals] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -54,7 +56,7 @@ export function ObjectionSubmissionModal({
           }
         })
         .catch(() => {
-          toast.error('تعذر جلب الصفقات المتاحة.');
+          toast.error(t('objections.submit_err_load_deals'));
         })
         .finally(() => setLoadingDeals(false));
     }
@@ -72,17 +74,17 @@ export function ObjectionSubmissionModal({
     e.preventDefault();
 
     if (!selectedTenderId) {
-      toast.error('يرجى اختيار الصفقة محل الطعن.');
+      toast.error(t('objections.submit_err_deal_required'));
       return;
     }
 
     if (selectedGrounds.length === 0) {
-      toast.error('يرجى اختيار سبب واحد للطعن على الأقل.');
+      toast.error(t('objections.submit_err_ground_required'));
       return;
     }
 
     if (description.trim().length < 20) {
-      toast.error('يرجى كتابة تفاصيل الطعن وأسبابه (20 حرفاً على الأقل).');
+      toast.error(t('objections.submit_err_desc_short'));
       return;
     }
 
@@ -96,13 +98,13 @@ export function ObjectionSubmissionModal({
       };
 
       await objectionsApi.create(payload);
-      toast.success('تم إيداع الطعن وتوثيقه بنجاح مع بصمة SHA-256.');
+      toast.success(t('objections.submit_toast_success'));
       setDescription('');
       setSelectedGrounds(['evaluation']);
       onOpenChange(false);
       onSuccess();
     } catch (err: any) {
-      const msg = err.response?.data?.detail || 'تعذر إيداع الطعن. يرجى مراجعة الشروط والآجال.';
+      const msg = err.response?.data?.detail || t('objections.submit_toast_error');
       toast.error(msg);
     } finally {
       setSubmitting(false);
@@ -116,10 +118,10 @@ export function ObjectionSubmissionModal({
           <DialogHeader className="border-b border-slate-200 pb-3">
             <DialogTitle className="text-lg font-bold text-slate-900 flex items-center gap-2">
               <ShieldAlert className="w-5 h-5 text-emerald-700" />
-              <span>إيداع طعن على قرار الإسناد المؤقت</span>
+              <span>{t("objections.submit_modal_title")}</span>
             </DialogTitle>
             <DialogDescription className="text-xs text-slate-500 mt-1">
-              المادة 72 من القانون 23-12: يجب إيداع الطعن خلال مهلة 10 أيام من تاريخ الإعلان، مع وجوب تقديم عرض مسبق في الصفقة.
+              {t("objections.submit_modal_desc")}
             </DialogDescription>
           </DialogHeader>
 
@@ -127,10 +129,10 @@ export function ObjectionSubmissionModal({
             {/* Tender Selection */}
             <div>
               <Label htmlFor="tender-select" className="text-xs font-bold text-slate-700 mb-1.5 block">
-                الصفقة المعنية بالطعن:
+                {t("objections.submit_deal_label")}
               </Label>
               {loadingDeals ? (
-                <div className="text-xs text-slate-400 py-2">جاري تحميل الصفقات...</div>
+                <div className="text-xs text-slate-400 py-2">{t("objections.submit_loading_deals")}</div>
               ) : deals.length > 0 ? (
                 <select
                   id="tender-select"
@@ -146,14 +148,14 @@ export function ObjectionSubmissionModal({
                 </select>
               ) : (
                 <div className="p-3 rounded-lg bg-amber-50 border border-amber-200 text-xs text-amber-800">
-                  لم يتم العثور على صفقات نشطة في مرحلة الإسناد المؤقت.
+                  {t("objections.submit_no_deals")}
                 </div>
               )}
             </div>
 
             {/* Objection Type */}
             <div>
-              <Label className="text-xs font-bold text-slate-700 mb-2 block">نوع الطعن:</Label>
+              <Label className="text-xs font-bold text-slate-700 mb-2 block">{t("objections.submit_type_label")}</Label>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {(['administrative', 'judicial'] as ObjectionType[]).map((type) => (
                   <button
@@ -166,11 +168,11 @@ export function ObjectionSubmissionModal({
                         : 'border-slate-200 hover:border-slate-300 bg-white'
                     }`}
                   >
-                    <div className="text-xs font-bold text-slate-900">{TYPE_LABELS[type]}</div>
+                    <div className="text-xs font-bold text-slate-900">{getTypeLabel(type, t)}</div>
                     <div className="text-[11px] text-slate-500 mt-1">
                       {type === 'administrative'
-                        ? 'أمام لجنة الصفقات العمومية للمصلحة المتعاقدة'
-                        : 'أمام المحكمة الإدارية المختصة إقليمياً'}
+                        ? t('objections.submit_type_committee_desc')
+                        : t('objections.submit_type_tribunal_desc')}
                     </div>
                   </button>
                 ))}
@@ -180,10 +182,10 @@ export function ObjectionSubmissionModal({
             {/* Grounds (Multiple selection) */}
             <div>
               <Label className="text-xs font-bold text-slate-700 mb-2 block">
-                أسباب وأوجه الطعن القانونية (اختر ما ينطبق):
+                {t("objections.submit_grounds_label")}
               </Label>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                {(Object.keys(GROUND_LABELS) as ObjectionGround[]).map((ground) => {
+                {(Object.keys(GROUND_LABEL_KEYS) as ObjectionGround[]).map((ground) => {
                   const isChecked = selectedGrounds.includes(ground);
                   return (
                     <button
@@ -196,7 +198,7 @@ export function ObjectionSubmissionModal({
                           : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
                       }`}
                     >
-                      <span>{GROUND_LABELS[ground]}</span>
+                      <span>{getGroundLabel(ground, t)}</span>
                       {isChecked && <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />}
                     </button>
                   );
@@ -207,20 +209,20 @@ export function ObjectionSubmissionModal({
             {/* Description */}
             <div>
               <Label htmlFor="desc-input" className="text-xs font-bold text-slate-700 mb-1.5 block">
-                شرح وتفاصيل أسباب الطعن والمآخذ الموضوعية:
+                {t("objections.submit_desc_label")}
               </Label>
               <Textarea
                 id="desc-input"
                 rows={4}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="بيّن بالتفصيل النقاط القانونية والتقنية أو المالية محل الاعتراض ومطابقتها لدفتر الشروط..."
+                placeholder={t("objections.submit_desc_placeholder")}
                 className="text-xs"
               />
               <div className="flex justify-between items-center text-[11px] text-slate-500 mt-1">
-                <span>يجب أن يتضمن الطعن وقائع واضحة قابلة للتدقيق.</span>
+                <span>{t("objections.submit_clear_facts_note")}</span>
                 <span className={description.trim().length < 20 ? 'text-amber-600 font-bold' : 'text-slate-400'}>
-                  {description.trim().length}/20 حرفاً
+                  {description.trim().length}/20 {t("objections.characters_count")}
                 </span>
               </div>
             </div>
@@ -234,7 +236,7 @@ export function ObjectionSubmissionModal({
               onClick={() => onOpenChange(false)}
               disabled={submitting}
             >
-              إلغاء
+              {t('common.cancel')}
             </Button>
             <Button
               type="submit"
@@ -245,12 +247,12 @@ export function ObjectionSubmissionModal({
               {submitting ? (
                 <>
                   <Loader2 className="w-3.5 h-3.5 animate-spin me-1.5" />
-                  جاري الإيداع والتوثيق...
+                  {t("objections.submit_btn_uploading")}
                 </>
               ) : (
                 <>
                   <Send className="w-3.5 h-3.5 me-1.5" />
-                  إيداع الطعن رسمياً
+                  {t("objections.submit_btn_confirm")}
                 </>
               )}
             </Button>

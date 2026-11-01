@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useI18n } from '@/i18n';
+import { useI18n, type TranslationKey } from '@/i18n';
 import { useLocation, useParams } from 'wouter';
 import {
   ArrowRight,
@@ -59,12 +59,12 @@ const CLAIM_BUTTON: Record<string, string> = {
   not_applicable: 'op-btn-slate',
 };
 
-const VERIFICATION_LABELS: Record<string, string> = {
-  pending: 'قيد التحقق',
-  needs_review: 'بحاجة إلى مراجعة',
-  verified: 'تم التحقق',
-  approved: 'مقبول',
-  rejected: 'مرفوض',
+const VERIFICATION_LABEL_KEYS: Record<string, TranslationKey> = {
+  pending: 'operator.req.verif.pending',
+  needs_review: 'operator.req.verif.needs_review',
+  verified: 'operator.req.verif.verified',
+  approved: 'operator.req.verif.approved',
+  rejected: 'operator.req.verif.rejected',
 };
 
 export function RequirementsResponse() {
@@ -288,7 +288,7 @@ export function RequirementsResponse() {
             <div>
               <div className="op-kpi-label">{t('operator.req.answered')}</div>
               <div className="op-kpi-value">
-                {answeredCount} من {totalCount}
+                {answeredCount} {t('common.of')} {totalCount}
               </div>
             </div>
             <div className="op-kpi-icon green">
@@ -409,7 +409,7 @@ export function RequirementsResponse() {
                   )}
                   <div className="text-[var(--op-muted)]">
                     {t('operator.req.verification')}:{' '}
-                    {VERIFICATION_LABELS[resp.verificationState] || resp.verificationState}
+                    {VERIFICATION_LABEL_KEYS[resp.verificationState] ? t(VERIFICATION_LABEL_KEYS[resp.verificationState]) : resp.verificationState}
                   </div>
                 </div>
               )}

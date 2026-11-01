@@ -39,8 +39,8 @@ import {
 import type { ProcurementDealApi } from '@/lib/procurementApiTypes';
 
 /**
- * السجل الوطني للصفقات — عرض دورة الحياة الكاملة في 12 مرحلة
- * بالاعتماد على بيانات الخادم (GET /api/procurements/deals/).
+ * National Deals Registry — 12 lifecycle stages oversight
+ * based on live server data (GET /api/procurements/deals/).
  */
 
 interface StageDefinition {
@@ -49,28 +49,25 @@ interface StageDefinition {
   short: string;
 }
 
-const STAGES: StageDefinition[] = [
-  { id: 1, label: 'التخطيط والاحتياج', short: 'التخطيط' },
-  { id: 2, label: 'إعداد دفتر الشروط', short: 'دفتر الشروط' },
-  { id: 3, label: 'نشر الإعلان', short: 'النشر' },
-  { id: 4, label: 'استفسارات المتعاملين', short: 'الاستفسارات' },
-  { id: 5, label: 'استلام العروض', short: 'استلام العروض' },
-  { id: 6, label: 'الفحص الإداري والفني والمالي', short: 'الفحص' },
-  { id: 7, label: 'التقييم والمقارنة', short: 'التقييم' },
-  { id: 8, label: 'الإسناد والطعون', short: 'الإسناد' },
-  { id: 9, label: 'إبرام العقد', short: 'العقد' },
-  { id: 10, label: 'التنفيذ والتعديلات', short: 'التنفيذ' },
-  { id: 11, label: 'الاستلام المؤقت والنهائي', short: 'الاستلام' },
-  { id: 12, label: 'الأداء والدفع والإغلاق', short: 'الإغلاق' },
-];
+function getStages(t: (key: string) => string): StageDefinition[] {
+  return [
+    { id: 1, label: t('central.deals.stage_1'), short: t('central.deals.stage_1_short') },
+    { id: 2, label: t('central.deals.stage_2'), short: t('central.deals.stage_2_short') },
+    { id: 3, label: t('central.deals.stage_3'), short: t('central.deals.stage_3_short') },
+    { id: 4, label: t('central.deals.stage_4'), short: t('central.deals.stage_4_short') },
+    { id: 5, label: t('central.deals.stage_5'), short: t('central.deals.stage_5_short') },
+    { id: 6, label: t('central.deals.stage_6'), short: t('central.deals.stage_6_short') },
+    { id: 7, label: t('central.deals.stage_7'), short: t('central.deals.stage_7_short') },
+    { id: 8, label: t('central.deals.stage_8'), short: t('central.deals.stage_8_short') },
+    { id: 9, label: t('central.deals.stage_9'), short: t('central.deals.stage_9_short') },
+    { id: 10, label: t('central.deals.stage_10'), short: t('central.deals.stage_10_short') },
+    { id: 11, label: t('central.deals.stage_11'), short: t('central.deals.stage_11_short') },
+    { id: 12, label: t('central.deals.stage_12'), short: t('central.deals.stage_12_short') },
+  ];
+}
 
 const CLOSED_STAGE = 12;
 
-function stageDefinition(stage: number): StageDefinition {
-  return STAGES.find((item) => item.id === stage) ?? STAGES[0];
-}
-
-/** تأخر الإيداع: تجاوز الأجل مع بقاء الصفقة في مراحل الاستلام/الفحص/الإسناد. */
 function isDelayed(deal: ProcurementDealApi, now: number): boolean {
   if (!deal.submission_deadline) return false;
   const deadline = new Date(deal.submission_deadline).getTime();
@@ -80,13 +77,14 @@ function isDelayed(deal: ProcurementDealApi, now: number): boolean {
 }
 
 export function CentralDeals() {
-  const { dir } = useI18n();
+  const { dir, t } = useI18n();
   const { data, loading, error, reload } = useCentralResource(fetchNationalDeals);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStage, setFilterStage] = useState('all');
   const [onlyDelayed, setOnlyDelayed] = useState(false);
 
   const now = useNow(60000);
+  const stages = useMemo(() => getStages(t), [t]);
   const deals = useMemo(() => data ?? [], [data]);
 
   const stats = useMemo(() => {
@@ -99,13 +97,13 @@ export function CentralDeals() {
     const delayed = deals.filter((deal) => isDelayed(deal, now)).length;
     const budget = deals.reduce((sum, deal) => sum + toNumber(deal.estimated_budget), 0);
 
-    const perStage = STAGES.map((stage) => {
+    const perStage = stages.map((stage) => {
       const count = deals.filter((deal) => toNumber(deal.current_stage) === stage.id).length;
       return { ...stage, count, share: total > 0 ? (count / total) * 100 : 0 };
     });
 
     return { total, active, closed, delayed, budget, perStage };
-  }, [deals, now]);
+  }, [deals, now, stages]);
 
   const filtered = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
@@ -128,64 +126,70 @@ export function CentralDeals() {
       );
   }, [deals, searchQuery, filterStage, onlyDelayed, now]);
 
+  const stageDefinition = (stage: number): StageDefinition => {
+    return stages.find((item) => item.id === stage) ?? stages[0];
+  };
+
   return (
     <div className="space-y-4" dir={dir}>
       <PageHeader
-        title="السجل الوطني للصفقات"
+        title={t('central.deals.title')}
         titleClassName="text-xl font-bold"
-        description="سجل موحّد لكل الصفقات العمومية مع مراحل دورة حياتها الاثنتي عشرة، من التخطيط والاحتياج إلى الأداء والدفع والإغلاق."
+        description={t('central.deals.description')}
         actions={
           <Button
             variant="outline"
             size="sm"
             onClick={reload}
             disabled={loading}
-            className="h-8 text-xs font-semibold"
+            className="h-8 text-xs font-semibold gap-1.5"
           >
             <RefreshCw className="size-3.5" aria-hidden="true" />
-            تحديث البيانات
+            {t('central.deals.refresh')}
           </Button>
         }
       />
 
       <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
         <KpiCard
-          eyebrow="إجمالي الصفقات"
+          eyebrow={t('central.deals.kpi_total')}
           value={formatNumber(stats.total)}
           icon={Briefcase}
           accent="navy"
-          description="صفقات مسجّلة في السجل الوطني"
+          description={t('central.deals.kpi_total_sub')}
         />
         <KpiCard
-          eyebrow="صفقات جارية"
+          eyebrow={t('central.deals.kpi_active')}
           value={formatNumber(stats.active)}
           icon={Activity}
           accent="emerald"
-          description={`منها ${formatNumber(stats.delayed)} صفقة متأخرة عن الأجل`}
+          description={t('central.deals.kpi_delayed_sub', {
+            count: formatNumber(stats.delayed),
+          })}
         />
         <KpiCard
-          eyebrow="صفقات مغلقة"
+          eyebrow={t('central.deals.kpi_closed')}
           value={formatNumber(stats.closed)}
           icon={CheckCircle2}
           accent="gold"
-          description="بلغت مرحلة الأداء والدفع والإغلاق"
+          description={t('central.deals.kpi_closed_sub')}
         />
         <KpiCard
-          eyebrow="الحجم الإجمالي"
+          eyebrow={t('central.deals.kpi_volume')}
           value={formatDZD(stats.budget)}
           icon={Wallet}
           accent="red"
-          description="مجموع الميزانيات التقديرية المسجّلة"
+          description={t('central.deals.kpi_volume_sub')}
         />
       </div>
 
       <Card className="bg-white shadow-xs border-gray-200">
         <CardHeader className="border-b border-gray-200 p-4 pb-3">
           <CardTitle className="text-base font-bold text-[var(--ink-900)]">
-            توزيع الصفقات على المراحل الـ 12
+            {t('central.deals.stages_distribution_title')}
           </CardTitle>
           <CardDescription className="mt-0.5 text-xs text-gray-500">
-            يُحتسب مباشرة من المرحلة الحالية لكل صفقة
+            {t('central.deals.stages_distribution_subtitle')}
           </CardDescription>
         </CardHeader>
         <CardContent className="p-4 pt-3.5">
@@ -226,10 +230,10 @@ export function CentralDeals() {
         <CardHeader className="flex flex-col gap-3 border-b border-gray-200 p-4 pb-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <CardTitle className="text-base font-bold text-[var(--ink-900)]">
-              الصفقات المسجّلة
+              {t('central.deals.registry_title')}
             </CardTitle>
             <CardDescription className="mt-0.5 text-xs text-[var(--ink-500)]">
-              مرحلة كل صفقة معروضة كمؤشر بصري على السلّم الكامل للمراحل الـ12
+              {t('central.deals.registry_subtitle')}
             </CardDescription>
           </div>
 
@@ -241,10 +245,10 @@ export function CentralDeals() {
               />
               <input
                 type="text"
-                placeholder="بحث بالمرجع أو العنوان أو المصلحة…"
+                placeholder={t('central.deals.search_placeholder')}
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
-                aria-label="بحث في الصفقات"
+                aria-label={t('central.deals.search_aria')}
                 className="ps-8 pe-3 py-1 text-xs rounded-lg border border-gray-200 bg-white text-[var(--ink-900)] focus:outline-none focus:ring-1 focus:ring-[var(--stamp-green-700)] h-8"
               />
             </div>
@@ -252,11 +256,11 @@ export function CentralDeals() {
             <select
               value={filterStage}
               onChange={(event) => setFilterStage(event.target.value)}
-              aria-label="تصفية حسب المرحلة"
+              aria-label={t('central.deals.filter_stage_aria')}
               className="px-2 py-1 text-xs rounded-lg border border-gray-200 bg-white text-[var(--ink-900)] focus:outline-none focus:ring-1 focus:ring-[var(--stamp-green-700)] h-8"
             >
-              <option value="all">كل المراحل</option>
-              {STAGES.map((stage) => (
+              <option value="all">{t('central.deals.all_stages')}</option>
+              {stages.map((stage) => (
                 <option key={stage.id} value={stage.id}>
                   {String(stage.id).padStart(2, '0')} — {stage.label}
                 </option>
@@ -270,7 +274,7 @@ export function CentralDeals() {
                 onChange={(event) => setOnlyDelayed(event.target.checked)}
                 className="size-3.5 accent-[var(--stamp-green-700)]"
               />
-              المتأخرة فقط
+              {t('central.deals.filter_delayed_only')}
             </label>
           </div>
         </CardHeader>
@@ -279,14 +283,14 @@ export function CentralDeals() {
           <Table>
             <TableHeader>
               <TableRow className="hover:bg-transparent">
-                <TableHead className="min-w-[110px] text-xs font-bold">المرجع</TableHead>
-                <TableHead className="min-w-[200px] text-xs font-bold">عنوان الصفقة</TableHead>
-                <TableHead className="text-xs font-bold">المصلحة المتعاقدة</TableHead>
-                <TableHead className="text-xs font-bold">الولاية</TableHead>
-                <TableHead className="text-end text-xs font-bold">الميزانية</TableHead>
-                <TableHead className="min-w-[170px] text-xs font-bold">المرحلة الحالية</TableHead>
-                <TableHead className="text-center text-xs font-bold">آخر أجل للإيداع</TableHead>
-                <TableHead className="text-center text-xs font-bold">التأخر</TableHead>
+                <TableHead className="min-w-[110px] text-xs font-bold">{t('central.deals.col_ref')}</TableHead>
+                <TableHead className="min-w-[200px] text-xs font-bold">{t('central.deals.col_title')}</TableHead>
+                <TableHead className="text-xs font-bold">{t('central.deals.col_authority')}</TableHead>
+                <TableHead className="text-xs font-bold">{t('central.deals.col_wilaya')}</TableHead>
+                <TableHead className="text-end text-xs font-bold">{t('central.deals.col_budget')}</TableHead>
+                <TableHead className="min-w-[170px] text-xs font-bold">{t('central.deals.col_stage')}</TableHead>
+                <TableHead className="text-center text-xs font-bold">{t('central.deals.col_deadline')}</TableHead>
+                <TableHead className="text-center text-xs font-bold">{t('central.deals.col_delay')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -295,7 +299,11 @@ export function CentralDeals() {
                 loading={loading && !data}
                 error={error}
                 empty={!loading && filtered.length === 0}
-                emptyLabel="لا توجد صفقات مطابقة للبحث أو التصفية الحالية."
+                emptyLabel={
+                  deals.length === 0
+                    ? t('central.deals.no_registered_deals')
+                    : t('central.deals.empty_deals')
+                }
                 onRetry={reload}
               >
                 {filtered.map((deal) => {
@@ -313,7 +321,7 @@ export function CentralDeals() {
                       <TableCell className="max-w-[280px] text-xs font-semibold text-[var(--ink-900)] py-2.5">
                         <div className="truncate">{deal.title || '—'}</div>
                         <div className="text-[11px] font-normal text-[var(--ink-500)]">
-                          أُنشئت في {formatDate(deal.created_at)}
+                          {t('central.deals.created_at', { date: formatDate(deal.created_at) })}
                         </div>
                       </TableCell>
                       <TableCell className="max-w-[200px] truncate text-xs text-[var(--ink-700)] py-2.5">
@@ -335,7 +343,7 @@ export function CentralDeals() {
                           </span>
                         </div>
                         <div className="mt-1 flex items-center gap-0.5" aria-hidden="true">
-                          {STAGES.map((item) => (
+                          {stages.map((item) => (
                             <span
                               key={item.id}
                               title={`${item.id}. ${item.label}`}
@@ -355,10 +363,10 @@ export function CentralDeals() {
                         {delayed ? (
                           <Badge className="bg-red-50 text-red-800 border-red-300 text-[10px] px-1.5 py-0.5">
                             <Clock className="size-2.5" aria-hidden="true" />
-                            متأخرة
+                            {t('central.deals.delayed')}
                           </Badge>
                         ) : (
-                          <span className="text-xs text-[var(--ink-500)]">داخل الأجل</span>
+                          <span className="text-xs text-[var(--ink-500)]">{t('central.deals.on_time')}</span>
                         )}
                       </TableCell>
                     </TableRow>
@@ -370,10 +378,15 @@ export function CentralDeals() {
 
           <div className="flex flex-wrap items-center justify-between gap-2 border-t border-gray-200 px-4 py-2.5 text-xs text-[var(--ink-500)]">
             <span>
-              عرض {formatNumber(filtered.length)} من أصل {formatNumber(stats.total)} صفقة
+              {t('central.deals.showing_count', {
+                count: formatNumber(filtered.length),
+                total: formatNumber(stats.total),
+              })}
             </span>
             <span className="font-mono">
-              {formatNumber(stats.delayed)} صفقة متأخرة عن الأجل القانوني
+              {t('central.deals.delayed_count', {
+                count: formatNumber(stats.delayed),
+              })}
             </span>
           </div>
         </CardContent>

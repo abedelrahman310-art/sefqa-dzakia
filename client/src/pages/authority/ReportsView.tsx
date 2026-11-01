@@ -18,12 +18,10 @@ import {
 import { PageHeader } from '@/shared/components';
 
 /**
- * تقارير المصلحة المتعاقدة — تُحسب من صفقاتها الحقيقية في الخادم
- * (GET /api/procurements/deals/) دون أي بيانات بديلة.
+ * Contracting Authority Reports — computed strictly from real server deals
+ * (GET /api/procurements/deals/) without mock fallbacks.
  *
- * التصدير: ملف CSV حقيقي من الصفوف المعروضة (لا يوجد تضليل بحالة نجاح وهمية)،
- * وتقرير PDF الوطني القابل للأرشفة متاح لحسابات الرقابة المركزية عبر
- * GET /api/central/reports/{id}/pdf/.
+ * Export: Authentic CSV generated from displayed rows.
  */
 
 interface DealRow {
@@ -50,12 +48,6 @@ interface AuthorityInsight {
   severity?: string;
 }
 
-const numberFormatter = new Intl.NumberFormat('ar-DZ-u-nu-latn', { maximumFractionDigits: 0 });
-const monthFormatter = new Intl.DateTimeFormat('ar-DZ-u-nu-latn', {
-  month: 'long',
-  year: 'numeric',
-});
-
 function toNumber(value: unknown): number {
   if (typeof value === 'number' && Number.isFinite(value)) return value;
   if (typeof value === 'string' && value.trim() !== '') {
@@ -65,14 +57,27 @@ function toNumber(value: unknown): number {
   return 0;
 }
 
-function formatDzd(value: number): string {
-  return `${numberFormatter.format(Math.round(value))} دج`;
-}
-
 export function ReportsView() {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const { user } = useAuth();
   const authorityId = user?.id ?? '';
+
+  const numberFormatter = useMemo(
+    () => new Intl.NumberFormat(lang === 'ar' ? 'ar-DZ-u-nu-latn' : 'fr-FR', { maximumFractionDigits: 0 }),
+    [lang]
+  );
+
+  const monthFormatter = useMemo(
+    () => new Intl.DateTimeFormat(lang === 'ar' ? 'ar-DZ-u-nu-latn' : 'fr-FR', {
+      month: 'long',
+      year: 'numeric',
+    }),
+    [lang]
+  );
+
+  const formatDzd = (value: number): string => {
+    return `${numberFormatter.format(Math.round(value))} ${t('common.dzd')}`;
+  };
 
   const [deals, setDeals] = useState<DealRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -105,7 +110,7 @@ export function ReportsView() {
     void loadDeals();
   }, [loadDeals]);
 
-  /** تجميع الصفقات في تقارير شهرية حقيقية. */
+  /** Aggregate deals into authentic monthly period reports */
   const periodReports = useMemo<PeriodReport[]>(() => {
     const buckets = new Map<string, PeriodReport>();
 
@@ -132,7 +137,7 @@ export function ReportsView() {
     }
 
     return Array.from(buckets.values()).sort((a, b) => b.key.localeCompare(a.key));
-  }, [deals]);
+  }, [deals, monthFormatter]);
 
   const availableYears = useMemo(() => {
     return Array.from(new Set(periodReports.map((report) => report.key.slice(0, 4)))).sort(
@@ -171,7 +176,7 @@ export function ReportsView() {
           []);
 
       if (list.length === 0) {
-        setAiError('لا توجد توصيات استشارية منشورة حالياً لهذه المصلحة.');
+        setAiError(t('authority.reports.no_insights'));
       } else {
         setInsights(list.slice(0, 3));
       }
@@ -182,11 +187,17 @@ export function ReportsView() {
     }
   };
 
-  /** تصدير حقيقي: ملف CSV من الصفوف المعروضة حالياً. */
+  /** Authentic CSV export from current filtered rows */
   const handleExportCsv = () => {
     if (filteredReports.length === 0) return;
 
-    const header = ['الفترة', 'عدد الصفقات', 'المكتملة', 'الجارية', 'الميزانية الإجمالية (دج)'];
+    const header = [
+      t('authority.reports.th_period'),
+      t('authority.reports.th_deals'),
+      t('authority.reports.th_completed'),
+      t('authority.reports.th_active'),
+      `${t('authority.reports.th_budget')} (${t('common.dzd')})`,
+    ];
     const rows = filteredReports.map((report) => [
       report.label,
       String(report.dealsCount),
@@ -209,13 +220,13 @@ export function ReportsView() {
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
       <PageHeader
-        eyebrow="فضاء المصلحة المتعاقدة"
+        eyebrow={t('authority.topbar.brand_sub')}
         title={t('authority.reports.title')}
         description={t('authority.reports.subtitle')}
         actions={
           <div className="flex items-center gap-2.5 flex-wrap">
             <Badge className="bg-amber-500/20 text-amber-700 border-amber-300 dark:text-amber-300 px-3 py-1 text-xs">
-              استشاري فقط
+              {t('authority.reports.advisory_only')}
             </Badge>
             <Button
               onClick={handleGenerateInsights}
@@ -223,7 +234,7 @@ export function ReportsView() {
               className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold gap-2 text-xs shadow-sm h-10 px-4"
             >
               <Sparkles className={`w-4 h-4 ${aiLoading ? 'animate-spin' : ''}`} />
-              <span>{aiLoading ? 'جاري التحليل...' : t('authority.reports.generate_ai')}</span>
+              <span>{aiLoading ? t('authority.reports.analyzing') : t('authority.reports.generate_ai')}</span>
             </Button>
           </div>
         }
@@ -233,7 +244,7 @@ export function ReportsView() {
         <div className="flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 p-4 text-xs text-amber-900">
           <AlertTriangle className="mt-0.5 w-4 h-4 shrink-0" aria-hidden="true" />
           <div>
-            <p className="font-bold">توصيات الذكاء الاصطناعي</p>
+            <p className="font-bold">{t('authority.reports.ai_recommendations')}</p>
             <p className="mt-1 leading-relaxed">{aiError}</p>
           </div>
         </div>
@@ -245,14 +256,14 @@ export function ReportsView() {
             <div className="flex items-center justify-between">
               <CardTitle className="text-base font-bold text-emerald-900 flex items-center gap-2">
                 <Sparkles className="w-4 h-4 text-emerald-600" />
-                <span>توصيات استشارية من الخادم</span>
+                <span>{t('authority.reports.insights_title')}</span>
               </CardTitle>
               <Badge variant="outline" className="border-emerald-300 text-emerald-800 text-[11px]">
-                استشاري فقط · لا يُغني عن قرار اللجنة
+                {t('authority.reports.insights_disclaimer')}
               </Badge>
             </div>
             <CardDescription className="text-xs text-emerald-700">
-              نصوص صادرة من محرك التحليل في الخادم، دون أي صياغة محلية.
+              {t('authority.reports.insights_desc')}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-2.5">
@@ -277,9 +288,9 @@ export function ReportsView() {
         <CardHeader className="pb-4">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
-              <CardTitle className="text-lg font-bold">تقارير النشاط الشهرية</CardTitle>
+              <CardTitle className="text-lg font-bold">{t('authority.reports.monthly_title')}</CardTitle>
               <CardDescription className="text-xs">
-                محسوبة من صفقات مصلحتك المسجّلة في المنصة
+                {t('authority.reports.monthly_desc')}
               </CardDescription>
             </div>
 
@@ -288,10 +299,10 @@ export function ReportsView() {
               <select
                 value={selectedYear}
                 onChange={(event) => setSelectedYear(event.target.value)}
-                aria-label="تصفية حسب السنة"
+                aria-label={t('authority.reports.filter_year')}
                 className="text-xs bg-background border border-input rounded-lg px-3 py-2 text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
               >
-                <option value="all">كل السنوات</option>
+                <option value="all">{t('authority.reports.all_years')}</option>
                 {availableYears.map((year) => (
                   <option key={year} value={year}>
                     {year}
@@ -306,7 +317,7 @@ export function ReportsView() {
                 className="text-xs gap-1.5 h-8 border-border hover:bg-muted"
               >
                 <Download className="w-3.5 h-3.5" aria-hidden="true" />
-                <span>تصدير CSV</span>
+                <span>{t('authority.reports.export_csv')}</span>
               </Button>
               <Button
                 variant="outline"
@@ -316,7 +327,7 @@ export function ReportsView() {
                 className="text-xs gap-1.5 h-8 border-border hover:bg-muted"
               >
                 <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} aria-hidden="true" />
-                <span>تحديث</span>
+                <span>{t('common.refresh')}</span>
               </Button>
             </div>
           </div>
@@ -335,7 +346,7 @@ export function ReportsView() {
                 onClick={() => void loadDeals()}
                 className="h-7 text-xs"
               >
-                إعادة المحاولة
+                {t('authority.audit.retry')}
               </Button>
             </div>
           )}
@@ -344,18 +355,18 @@ export function ReportsView() {
             <table className="w-full text-sm text-start border-collapse">
               <thead>
                 <tr className="border-b border-border bg-muted/40 text-muted-foreground text-xs">
-                  <th className="py-3 px-4 text-start font-bold">الفترة</th>
-                  <th className="py-3 px-4 text-start font-bold">عدد الصفقات</th>
-                  <th className="py-3 px-4 text-start font-bold">المكتملة</th>
-                  <th className="py-3 px-4 text-start font-bold">الجارية</th>
-                  <th className="py-3 px-4 text-start font-bold">الميزانية الإجمالية</th>
+                  <th className="py-3 px-4 text-start font-bold">{t('authority.reports.th_period')}</th>
+                  <th className="py-3 px-4 text-start font-bold">{t('authority.reports.th_deals')}</th>
+                  <th className="py-3 px-4 text-start font-bold">{t('authority.reports.th_completed')}</th>
+                  <th className="py-3 px-4 text-start font-bold">{t('authority.reports.th_active')}</th>
+                  <th className="py-3 px-4 text-start font-bold">{t('authority.reports.th_budget')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
                 {loading && (
                   <tr>
                     <td colSpan={5} className="py-10 text-center text-xs text-muted-foreground">
-                      جارٍ تحميل الصفقات من الخادم…
+                      {t('authority.reports.loading_deals')}
                     </td>
                   </tr>
                 )}
@@ -372,7 +383,7 @@ export function ReportsView() {
                         </div>
                       </td>
                       <td className="py-3.5 px-4 text-xs font-semibold">
-                        {numberFormatter.format(report.dealsCount)} صفقات
+                        {t('authority.reports.deals_count', { count: report.dealsCount })}
                       </td>
                       <td className="py-3.5 px-4 text-xs text-muted-foreground">
                         {numberFormatter.format(report.completedCount)}
@@ -392,8 +403,8 @@ export function ReportsView() {
           {!loading && !error && filteredReports.length === 0 && (
             <div className="py-12 text-center text-xs text-muted-foreground">
               {deals.length === 0
-                ? 'لا توجد صفقات مسجّلة باسم مصلحتك بعد، فلا توجد تقارير لعرضها.'
-                : 'لا توجد صفقات مطابقة للسنة المحددة.'}
+                ? t('authority.reports.empty_deals')
+                : t('authority.reports.empty_year')}
             </div>
           )}
 
@@ -401,10 +412,10 @@ export function ReportsView() {
             <div className="pt-4 mt-4 border-t border-border flex items-center justify-between text-xs text-muted-foreground">
               <span className="flex items-center gap-1.5">
                 <Calendar className="w-3.5 h-3.5" aria-hidden="true" />
-                {filteredReports.length} تقريراً شهرياً
+                {t('authority.reports.monthly_reports_count', { count: filteredReports.length })}
               </span>
               <span className="font-mono">
-                {numberFormatter.format(totals.deals)} صفقة · {formatDzd(totals.budget)}
+                {t('authority.reports.totals_summary', { count: totals.deals, budget: formatDzd(totals.budget) })}
               </span>
             </div>
           )}

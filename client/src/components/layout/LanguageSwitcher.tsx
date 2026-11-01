@@ -18,8 +18,8 @@ export function LanguageSwitcher({
     setLang(lang === 'ar' ? 'fr' : 'ar');
   };
 
-  const label = lang === 'ar' ? 'Français' : 'العربية';
-  const shortLabel = lang === 'ar' ? 'FR' : 'عربي';
+  const label = t('common.lang_switch_label');
+  const shortLabel = t('common.lang_switch_short');
 
   if (variant === 'minimal') {
     return (

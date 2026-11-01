@@ -1,3 +1,4 @@
+import { useI18n } from "@/i18n";
 import { useState, useEffect } from 'react';
 import {
   Gavel,
@@ -26,11 +27,12 @@ import {
 import { toast } from 'sonner';
 import { objectionsApi } from '../api/objections';
 import type { ObjectionListItem, ObjectionDetailItem } from '../types';
-import { GROUND_LABELS } from '../types';
+import { getGroundLabel } from '../types';
 import { ObjectionDecisionModal } from './ObjectionDecisionModal';
 import { ObjectionDetailModal } from './ObjectionDetailModal';
 
 export function AuthorityObjectionsView() {
+  const { t, lang, dir } = useI18n();
   const [objections, setObjections] = useState<ObjectionListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -51,7 +53,7 @@ export function AuthorityObjectionsView() {
       const data = await objectionsApi.list();
       setObjections(data || []);
     } catch (err) {
-      toast.error('تعذر تحميل قائمة الطعون الواردة للمصلحة المتعاقدة.');
+      toast.error(t('objections.auth_load_error'));
     } finally {
       setLoading(false);
     }
@@ -65,10 +67,10 @@ export function AuthorityObjectionsView() {
     setActionInProgress(id);
     try {
       await objectionsApi.startReview(id);
-      toast.success('تم تسجيل بدء دراسة الطعن وتوثيق الإجراء في سجل التدقيق.');
+      toast.success(t('objections.auth_start_review_success'));
       fetchObjections();
     } catch (err: any) {
-      toast.error(err.response?.data?.detail || 'تعذر بدء دراسة الطعن.');
+      toast.error(err.response?.data?.detail || t('objections.auth_start_review_error'));
     } finally {
       setActionInProgress(null);
     }
@@ -86,7 +88,7 @@ export function AuthorityObjectionsView() {
       setSelectedDetail(detail);
       setDetailModalOpen(true);
     } catch (err) {
-      toast.error('تعذر تحميل تفاصيل الطعن.');
+      toast.error(t('objections.auth_load_detail_error'));
     } finally {
       setFetchingDetail(false);
     }
@@ -95,17 +97,17 @@ export function AuthorityObjectionsView() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'submitted':
-        return <Badge className="bg-blue-50 text-blue-800 border-blue-200">جديد — مُودع</Badge>;
+        return <Badge className="bg-blue-50 text-blue-800 border-blue-200">{t("objections.badge_new_submitted")}</Badge>;
       case 'under_review':
-        return <Badge className="bg-amber-50 text-amber-800 border-amber-300">قيد الدراسة أمام اللجنة</Badge>;
+        return <Badge className="bg-amber-50 text-amber-800 border-amber-300">{t("objections.badge_under_review")}</Badge>;
       case 'accepted':
-        return <Badge className="bg-emerald-50 text-emerald-800 border-emerald-300">مقبول — إلغاء الإسناد</Badge>;
+        return <Badge className="bg-emerald-50 text-emerald-800 border-emerald-300">{t("objections.badge_accepted_cancel")}</Badge>;
       case 'rejected':
-        return <Badge className="bg-rose-50 text-rose-800 border-rose-300">مرفوض — تثبيت الإسناد</Badge>;
+        return <Badge className="bg-rose-50 text-rose-800 border-rose-300">{t("objections.badge_rejected_confirm")}</Badge>;
       case 'withdrawn':
-        return <Badge className="bg-slate-100 text-slate-700 border-slate-300">مسحوب من الطاعن</Badge>;
+        return <Badge className="bg-slate-100 text-slate-700 border-slate-300">{t("objections.badge_withdrawn_by_objector")}</Badge>;
       case 'escalated':
-        return <Badge className="bg-purple-50 text-purple-800 border-purple-200">مُحال للقضاء</Badge>;
+        return <Badge className="bg-purple-50 text-purple-800 border-purple-200">{t("objections.badge_escalated_judicial")}</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
@@ -140,11 +142,11 @@ export function AuthorityObjectionsView() {
               <Scale className="h-5 w-5" />
             </span>
             <h1 className="text-2xl font-bold tracking-tight text-foreground">
-              إدارة الطعون ونزاعات الإسناد المؤقت
+              {t("objections.auth_page_title")}
             </h1>
           </div>
           <p className="text-sm text-muted-foreground">
-            معالجة وفحص الطعون المودعة من قبل المتعاملين الاقتصاديين وفقاً للمادة 72 من القانون رقم 23-12.
+            {t("objections.auth_page_desc")}
           </p>
         </div>
 
@@ -156,7 +158,7 @@ export function AuthorityObjectionsView() {
           className="gap-2 self-start sm:self-auto"
         >
           <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-          تحديث السجل
+          {t("objections.auth_btn_refresh")}
         </Button>
       </div>
 
@@ -165,11 +167,11 @@ export function AuthorityObjectionsView() {
         <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
         <div className="text-sm leading-relaxed">
           <p className="font-semibold mb-1">
-            الأثر الواقف للطعن والمهل القانونية (المادة 72 من القانون 23-12):
+            {t("objections.auth_suspensive_title")}
           </p>
           <p className="text-xs text-amber-800 dark:text-amber-300">
-            تجمّد القرارات النهائية للإسناد تلقائياً فور تسجيل الطعن خلال أجل الـ 10 أيام من تاريخ إعلان المنح المؤقت.
-            تتولى لجنة الصفقات المختصة فحص أسباب الطعن وإصدار قرار معلل بقبول الطعن أو رفضه وتوثيق النتائج ببصمة رقمية في سجل التدقيق غير القابل للتعديل.
+            {t("objections.auth_suspensive_p1")}
+            {t("objections.auth_suspensive_p2")}
           </p>
         </div>
       </div>
@@ -179,20 +181,20 @@ export function AuthorityObjectionsView() {
         <Card className="border-border/60 shadow-sm">
           <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
             <CardTitle className="text-xs font-medium text-muted-foreground">
-              إجمالي الطعون الواردة
+              {t("objections.auth_stat_total")}
             </CardTitle>
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{totalCount}</div>
-            <p className="text-xs text-muted-foreground mt-1">مسجلة على صفقات المصلحة</p>
+            <p className="text-xs text-muted-foreground mt-1">{t("objections.auth_stat_total_sub")}</p>
           </CardContent>
         </Card>
 
         <Card className="border-border/60 shadow-sm">
           <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
             <CardTitle className="text-xs font-medium text-blue-700 dark:text-blue-400">
-              طعون جديدة (بحاجة لمعالجة)
+              {t("objections.auth_stat_new")}
             </CardTitle>
             <Clock className="h-4 w-4 text-blue-600" />
           </CardHeader>
@@ -200,14 +202,14 @@ export function AuthorityObjectionsView() {
             <div className="text-2xl font-bold text-blue-700 dark:text-blue-400">
               {submittedCount}
             </div>
-            <p className="text-xs text-muted-foreground mt-1">تتطلب إحالة للدراسة</p>
+            <p className="text-xs text-muted-foreground mt-1">{t("objections.auth_stat_new_sub")}</p>
           </CardContent>
         </Card>
 
         <Card className="border-border/60 shadow-sm">
           <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
             <CardTitle className="text-xs font-medium text-amber-700 dark:text-amber-400">
-              قيد الفحص والمداولة
+              {t("objections.auth_stat_under_review")}
             </CardTitle>
             <PlayCircle className="h-4 w-4 text-amber-600" />
           </CardHeader>
@@ -215,14 +217,14 @@ export function AuthorityObjectionsView() {
             <div className="text-2xl font-bold text-amber-700 dark:text-amber-400">
               {underReviewCount}
             </div>
-            <p className="text-xs text-muted-foreground mt-1">أمام لجنة فحص الصفقات</p>
+            <p className="text-xs text-muted-foreground mt-1">{t("objections.auth_stat_under_review_sub")}</p>
           </CardContent>
         </Card>
 
         <Card className="border-border/60 shadow-sm">
           <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
             <CardTitle className="text-xs font-medium text-emerald-700 dark:text-emerald-400">
-              طعون مفصول فيها
+              {t("objections.auth_stat_resolved")}
             </CardTitle>
             <Gavel className="h-4 w-4 text-emerald-600" />
           </CardHeader>
@@ -230,7 +232,7 @@ export function AuthorityObjectionsView() {
             <div className="text-2xl font-bold text-emerald-700 dark:text-emerald-400">
               {decidedCount}
             </div>
-            <p className="text-xs text-muted-foreground mt-1">قرارات مبررة وموثقة</p>
+            <p className="text-xs text-muted-foreground mt-1">{t("objections.auth_stat_resolved_sub")}</p>
           </CardContent>
         </Card>
       </div>
@@ -241,7 +243,7 @@ export function AuthorityObjectionsView() {
           <Search className="absolute start-3 top-2.5 h-4 w-4 text-muted-foreground" />
           <input
             type="text"
-            placeholder="بحث بالمرجع، عنوان الصفقة، أو الطاعن..."
+            placeholder={t("objections.auth_search_placeholder")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full ps-9 pe-3 py-1.5 text-sm rounded-lg border border-input bg-background focus:outline-none focus:ring-2 focus:ring-primary/20"
@@ -252,11 +254,11 @@ export function AuthorityObjectionsView() {
           <Filter className="h-4 w-4 text-muted-foreground flex-shrink-0" />
           <div className="flex gap-1">
             {[
-              { id: 'all', label: 'الكل' },
-              { id: 'submitted', label: 'مُودع' },
-              { id: 'under_review', label: 'قيد الدراسة' },
-              { id: 'accepted', label: 'مقبول' },
-              { id: 'rejected', label: 'مرفوض' },
+              { id: 'all', label: t('objections.filter_all_label') },
+              { id: 'submitted', label: t('objections.filter_submitted_label') },
+              { id: 'under_review', label: t('objections.filter_under_review_label') },
+              { id: 'accepted', label: t('objections.filter_accepted_label') },
+              { id: 'rejected', label: t('objections.filter_rejected_label') },
             ].map((f) => (
               <Button
                 key={f.id}
@@ -277,29 +279,29 @@ export function AuthorityObjectionsView() {
         {loading ? (
           <div className="p-12 text-center text-muted-foreground">
             <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-2 text-primary" />
-            <p className="text-sm">جاري جلب سجل الطعون الواردة...</p>
+            <p className="text-sm">{t("objections.auth_loading")}</p>
           </div>
         ) : filteredObjections.length === 0 ? (
           <div className="p-12 text-center text-muted-foreground">
             <FileText className="h-10 w-10 mx-auto mb-3 text-muted-foreground/40" />
-            <h3 className="text-base font-semibold text-foreground mb-1">لا توجد طعون مطابقة</h3>
+            <h3 className="text-base font-semibold text-foreground mb-1">{t("objections.auth_empty_filtered")}</h3>
             <p className="text-xs text-muted-foreground max-w-sm mx-auto">
               {searchQuery || statusFilter !== 'all'
-                ? 'لا توجد نتائج تطابق معايير البحث والفلترة المحددة.'
-                : 'لم يرد أي طعن على الصفقات التابعة لمصلحتكم المتعاقدة حتى الآن.'}
+                ? t('objections.auth_empty_filtered_desc')
+                : t('objections.auth_empty_desc')}
             </p>
           </div>
         ) : (
           <Table>
             <TableHeader>
               <TableRow className="bg-muted/40 hover:bg-muted/40">
-                <TableHead className="text-start font-semibold">مرجع الطعن</TableHead>
-                <TableHead className="text-start font-semibold">الصفقة المعنية</TableHead>
-                <TableHead className="text-start font-semibold">المتعامل الطاعن</TableHead>
-                <TableHead className="text-start font-semibold">أسباب الطعن</TableHead>
-                <TableHead className="text-start font-semibold">المهلة المتبقية</TableHead>
-                <TableHead className="text-start font-semibold">الحالة</TableHead>
-                <TableHead className="text-end font-semibold">الإجراءات</TableHead>
+                <TableHead className="text-start font-semibold">{t("objections.auth_table_ref")}</TableHead>
+                <TableHead className="text-start font-semibold">{t("objections.auth_table_deal")}</TableHead>
+                <TableHead className="text-start font-semibold">{t("objections.auth_table_objector")}</TableHead>
+                <TableHead className="text-start font-semibold">{t("objections.auth_table_ground")}</TableHead>
+                <TableHead className="text-start font-semibold">{t("objections.auth_table_deadline")}</TableHead>
+                <TableHead className="text-start font-semibold">{t("objections.auth_table_status")}</TableHead>
+                <TableHead className="text-end font-semibold">{t("objections.auth_table_actions")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -328,7 +330,7 @@ export function AuthorityObjectionsView() {
 
                     <TableCell>
                       <div className="text-sm font-medium text-foreground">
-                        {item.objector_name || 'متعامل مسجل'}
+                        {item.objector_name || t('objections.default_registered_operator')}
                       </div>
                       <div className="text-[11px] text-muted-foreground">
                         {item.submitted_at
@@ -345,7 +347,7 @@ export function AuthorityObjectionsView() {
                             variant="secondary"
                             className="text-[10px] px-1.5 py-0 font-normal"
                           >
-                            {GROUND_LABELS[g] || g}
+                            {getGroundLabel(g, t)}
                           </Badge>
                         ))}
                         {item.grounds && item.grounds.length > 2 && (
@@ -363,14 +365,14 @@ export function AuthorityObjectionsView() {
                             variant="outline"
                             className="border-emerald-300 text-emerald-800 bg-emerald-50 text-[11px]"
                           >
-                            متبقي {item.days_remaining} يوم
+                            {t('objections.days_remaining_label', { days: item.days_remaining })}
                           </Badge>
                         ) : (
                           <Badge
                             variant="outline"
                             className="border-rose-300 text-rose-800 bg-rose-50 text-[11px]"
                           >
-                            انقضت المهلة
+                            {t("objections.deadline_expired_badge")}
                           </Badge>
                         )}
                       </div>
@@ -390,7 +392,7 @@ export function AuthorityObjectionsView() {
                             disabled={actionInProgress === item.id}
                           >
                             <PlayCircle className="h-3.5 w-3.5" />
-                            بدء الدراسة
+                            {t('objections.auth_btn_start_review')}
                           </Button>
                         )}
 
@@ -402,7 +404,7 @@ export function AuthorityObjectionsView() {
                             onClick={() => handleOpenDecision(item)}
                           >
                             <Gavel className="h-3.5 w-3.5" />
-                            البت في الطعن
+                            {t('objections.auth_btn_decide')}
                           </Button>
                         )}
 
@@ -415,7 +417,7 @@ export function AuthorityObjectionsView() {
                           disabled={fetchingDetail}
                         >
                           <Eye className="h-3.5 w-3.5" />
-                          عرض
+                          {t('objections.auth_btn_view')}
                         </Button>
                       </div>
                     </TableCell>

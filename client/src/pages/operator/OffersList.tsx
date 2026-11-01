@@ -134,7 +134,7 @@ export function OffersList() {
               return {
                 id: String(deal.id || ''),
                 reference_number: String(deal.reference_number || ''),
-                title: String(deal.title || 'صفقة عمومية'),
+                title: String(deal.title || t('common.public_deal')),
                 authority_name: String(deal.authority_name || deal.authority_entity || ''),
               };
             })
@@ -161,7 +161,7 @@ export function OffersList() {
               offer.opportunity_title ||
               offer.deal_title ||
               deal?.title ||
-              'صفقة عمومية',
+              t('common.public_deal'),
           ),
           dealReference: String(
             offer.deal_reference || offer.dealReference || deal?.reference_number || '',
@@ -171,7 +171,7 @@ export function OffersList() {
               offer.authority_name ||
               offer.authority_entity ||
               deal?.authority_name ||
-              'المصلحة المتعاقدة',
+              t('common.contracting_authority'),
           ),
           financialOffer: formatAmount(offer.financialOffer ?? offer.financial_amount),
           status: String(offer.status || 'draft'),
@@ -288,7 +288,7 @@ export function OffersList() {
         </div>
       </div>
 
-      <section className="grid grid-cols-2 gap-3 lg:grid-cols-4" aria-label="مؤشرات العروض">
+      <section className="grid grid-cols-2 gap-3 lg:grid-cols-4" aria-label={t('operator.offers.kpi_aria')}>
         <div className="op-card flex items-center gap-3 p-4">
           <div className="flex size-10 items-center justify-center rounded-lg border border-[#ece7d6] bg-[#fdf6df] text-[#8a6e1c]">
             <FileText className="size-5" />
@@ -393,7 +393,7 @@ export function OffersList() {
       )}
 
       {loading ? (
-        <div className="space-y-3" aria-busy="true" aria-label="جارٍ تحميل العروض">
+        <div className="space-y-3" aria-busy="true" aria-label={t('operator.offers.loading_aria')}>
           {[0, 1, 2].map((item) => (
             <div key={item} className="op-card p-4">
               <div className="flex items-start gap-3">

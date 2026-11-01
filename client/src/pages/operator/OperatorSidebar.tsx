@@ -208,7 +208,7 @@ export function OperatorSidebar({ onCloseMobile, className }: OperatorSidebarPro
       {/* Institutional Legal Footprint */}
       <div className="p-3 border-t border-white/20 bg-black/10 flex-none">
         <div className="text-[10px] text-white/80 flex items-center justify-between px-1">
-          <span>{lang === 'ar' ? 'المرسوم الرئاسي 15-247' : 'Décret présidentiel 15-247'}</span>
+          <span>{t('operator.sidebar.decree')}</span>
           <span className="font-mono text-[9px] text-white/90">{dir.toUpperCase()} · 100dvh</span>
         </div>
       </div>

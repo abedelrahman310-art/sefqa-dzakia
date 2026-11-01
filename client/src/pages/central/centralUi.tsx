@@ -2,6 +2,7 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { Loader2, RefreshCw } from 'lucide-react';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
+import { useI18n } from '@/i18n';
 import {
   formatCurrency,
   formatDate as formatIntlDate,
@@ -12,11 +13,8 @@ import {
 } from '@/lib/format';
 
 /**
- * عناصر عرض مشتركة لفضاء الرقابة المركزية:
- * تنسيق الأرقام والتواريخ، مؤشرات النسب، وحالات الجداول (تحميل/خطأ/فراغ).
- *
- * التنسيق يمرّ عبر @/lib/format حتى يتبع لغة الواجهة الحالية (ar/fr) بدل
- * تثبيت ar-DZ في الثوابت.
+ * Shared UI elements for central oversight space:
+ * Number and date formatting, percentage meters, and table states (loading/error/empty).
  */
 
 export function formatNumber(value: number | null | undefined): string {
@@ -27,7 +25,7 @@ export function formatDecimal(value: number | null | undefined): string {
   return formatIntlDecimal(value);
 }
 
-/** المبالغ بالدينار الجزائري بصيغة موحّدة. */
+/** Unified DZD currency formatting. */
 export function formatDZD(value: number | null | undefined): string {
   return formatCurrency(value === null || value === undefined ? value : Math.round(value));
 }
@@ -44,7 +42,7 @@ export function formatDateTime(value: string | null | undefined): string {
   return formatIntlDateTime(value);
 }
 
-/** ساعة مشتركة تتحدّث دورياً — تُستعمل للعدّادات التنازلية دون مؤقّت لكل صف. */
+/** Shared clock updated periodically for countdown timers without creating a timer per row. */
 export function useNow(intervalMs = 30000): number {
   const [now, setNow] = useState(() => Date.now());
 
@@ -62,11 +60,32 @@ export interface CountdownState {
   label: string;
 }
 
-/** عدّاد تنازلي مقروء للمهل القانونية (أيام/ساعات/دقائق). */
+export interface CountdownOptions {
+  lang?: string;
+  expiredLabel?: string;
+  daysLabel?: string;
+  hoursLabel?: string;
+  minutesLabel?: string;
+  andLabel?: string;
+  lessThanMinuteLabel?: string;
+}
+
+/** Readable countdown timer for legal deadlines (days/hours/minutes). */
 export function formatCountdown(
   deadlineIso: string | null | undefined,
   now: number,
+  options: CountdownOptions | string = 'ar',
 ): CountdownState {
+  const opts: CountdownOptions = typeof options === 'string' ? { lang: options } : options;
+  const isFr = opts.lang === 'fr';
+
+  const expiredStr = opts.expiredLabel ?? (isFr ? 'Délai expiré' : 'انقضى الأجل');
+  const daysStr = opts.daysLabel ?? (isFr ? 'j' : 'يوم');
+  const hoursStr = opts.hoursLabel ?? (isFr ? 'h' : 'ساعة');
+  const minutesStr = opts.minutesLabel ?? (isFr ? 'min' : 'دقيقة');
+  const andStr = opts.andLabel ?? (isFr ? ' et ' : ' و');
+  const lessThanMinuteStr = opts.lessThanMinuteLabel ?? (isFr ? "Moins d'une minute" : 'أقل من دقيقة');
+
   if (!deadlineIso) return { expired: false, empty: true, label: '—' };
 
   const deadline = new Date(deadlineIso).getTime();
@@ -74,7 +93,7 @@ export function formatCountdown(
 
   const diff = deadline - now;
   if (diff <= 0) {
-    return { expired: true, empty: false, label: 'انقضى الأجل' };
+    return { expired: true, empty: false, label: expiredStr };
   }
 
   const totalMinutes = Math.floor(diff / 60000);
@@ -83,14 +102,14 @@ export function formatCountdown(
   const minutes = totalMinutes % 60;
 
   const parts: string[] = [];
-  if (days > 0) parts.push(`${formatNumber(days)} يوم`);
-  if (hours > 0) parts.push(`${formatNumber(hours)} ساعة`);
-  if (days === 0 && minutes > 0) parts.push(`${formatNumber(minutes)} دقيقة`);
+  if (days > 0) parts.push(`${formatNumber(days)} ${daysStr}`);
+  if (hours > 0) parts.push(`${formatNumber(hours)} ${hoursStr}`);
+  if (days === 0 && minutes > 0) parts.push(`${formatNumber(minutes)} ${minutesStr}`);
 
   return {
     expired: false,
     empty: false,
-    label: parts.length > 0 ? parts.join(' و') : 'أقل من دقيقة',
+    label: parts.length > 0 ? parts.join(andStr) : lessThanMinuteStr,
   };
 }
 
@@ -103,7 +122,7 @@ const meterColors: Record<Exclude<MeterTone, 'auto'>, string> = {
   navy: 'var(--official-700)',
 };
 
-/** شريط نسبة مع قيمة رقمية — يُستخدم لمؤشرات الالتزام والشفافية. */
+/** Percentage meter bar with numeric value. */
 export function Meter({
   value,
   tone = 'auto',
@@ -139,30 +158,36 @@ export function Meter({
 export interface TableStateProps {
   colSpan: number;
   loading?: boolean;
+  loadingLabel?: string;
   error?: string;
   empty?: boolean;
   emptyLabel?: string;
   onRetry?: () => void;
+  retryLabel?: string;
   children?: ReactNode;
 }
 
-/** صفّ موحّد يعرض حالة الجدول: تحميل، خطأ مع إعادة المحاولة، أو لا نتائج. */
+/** Standard row displaying table states: loading, error with retry, or empty results. */
 export function TableState({
   colSpan,
   loading = false,
+  loadingLabel,
   error = '',
   empty = false,
-  emptyLabel = 'لا توجد بيانات مطابقة للمعايير الحالية.',
+  emptyLabel,
   onRetry,
+  retryLabel,
   children,
 }: TableStateProps) {
+  const { t } = useI18n();
+
   if (loading) {
     return (
       <TableRow>
         <TableCell colSpan={colSpan} className="py-8 text-center">
           <span className="inline-flex items-center gap-2 text-xs font-medium text-[var(--ink-500)]">
             <Loader2 className="size-4 animate-spin" aria-hidden="true" />
-            جارٍ تحميل البيانات من الخادم…
+            {loadingLabel ?? t('central.ui.loading_data')}
           </span>
         </TableCell>
       </TableRow>
@@ -178,7 +203,7 @@ export function TableState({
             {onRetry && (
               <Button variant="outline" size="sm" onClick={onRetry} className="h-8 text-xs font-semibold">
                 <RefreshCw className="size-3.5" aria-hidden="true" />
-                إعادة المحاولة
+                {retryLabel ?? t('central.ui.retry')}
               </Button>
             )}
           </div>
@@ -194,7 +219,7 @@ export function TableState({
           colSpan={colSpan}
           className="py-8 text-center text-xs font-medium text-[var(--ink-500)]"
         >
-          {emptyLabel}
+          {emptyLabel ?? t('central.ui.no_matching_data')}
         </TableCell>
       </TableRow>
     );

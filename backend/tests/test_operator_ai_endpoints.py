@@ -30,6 +30,16 @@ def authority_user(db):
 
 
 @pytest.fixture
+def central_admin_user(db):
+    return CustomUser.objects.create_user(
+        email="central_admin_ai@safaqat.dz",
+        password="password123",
+        role="central_admin",
+        display_name="المفتش المركزي للرقابة",
+    )
+
+
+@pytest.fixture
 def ai_deal(authority_user):
     return ProcurementDeal.objects.create(
         reference_number="DZ-2026-AI-001",
@@ -93,6 +103,13 @@ def authority_client(authority_user):
     return client
 
 
+@pytest.fixture
+def central_admin_client(central_admin_user):
+    client = APIClient()
+    client.force_authenticate(user=central_admin_user)
+    return client
+
+
 @pytest.mark.django_db
 class TestOperatorLegalChat:
     def test_operator_gets_advisory_answer_and_conversation_is_persisted(
@@ -140,8 +157,19 @@ class TestOperatorLegalChat:
         conversation = AIConversation.objects.get(user=operator_user)
         assert conversation.messages.count() == 4
 
-    def test_non_operator_cannot_use_legal_chat(self, authority_client):
+    def test_authority_can_use_legal_chat(self, authority_client):
+        # المصلحة المتعاقدة مسموح لها استخدام المساعد القانوني للاستشارات وفق القانون 23-12
         response = authority_client.post(
+            "/api/ai/legal-chat/",
+            {"message": "ما هي حالات فسخ الصفقة على عاتق المتعامل؟"},
+            format="json",
+        )
+        assert response.status_code == 200
+        assert response.data["answer"]
+
+    def test_central_admin_cannot_use_legal_chat(self, central_admin_client):
+        # الإدارة المركزية مستبعدة صراحة لأن لديها أدوات رقابية مستقلة
+        response = central_admin_client.post(
             "/api/ai/legal-chat/",
             {"message": "ما هي آجال الطعن؟"},
             format="json",

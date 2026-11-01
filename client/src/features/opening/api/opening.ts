@@ -52,7 +52,7 @@ export const openingApi = {
       .post<OpeningSessionDetail>(`/procurements/sessions/${id}/end/`)
       .then((r) => r.data),
 
-  // إضافات مساعدة لإدارة الجلسة لدى المصلحة المتعاقدة
+  // Helper utilities for authority session management
   listTenders: () =>
     api.get<EligibleTender[]>("/procurements/deals/").then((r) => r.data),
 

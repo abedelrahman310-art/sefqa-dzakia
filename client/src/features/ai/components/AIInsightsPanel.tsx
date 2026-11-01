@@ -18,12 +18,14 @@ import { AIHealthBadge } from './AIHealthBadge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { SeverityLevel } from '../types';
+import { useI18n } from '@/i18n';
 
 interface AIInsightsPanelProps {
   className?: string;
 }
 
 export function AIInsightsPanel({ className = '' }: AIInsightsPanelProps) {
+  const { t } = useI18n();
   const [activeTab, setActiveTab] = useState<'all' | SeverityLevel>('all');
   const [collapseMedium, setCollapseMedium] = useState(false);
   const [collapseLow, setCollapseLow] = useState(true);
@@ -65,14 +67,14 @@ export function AIInsightsPanel({ className = '' }: AIInsightsPanelProps) {
               <Brain className="w-4 h-4" />
             </span>
             <h2 className="text-lg font-extrabold text-navy-900">
-              التوصيات الذكية للرقابة الوطنية (AI Insights)
+              {t('ai.insights_panel_title')}
             </h2>
             <AIHealthBadge compact />
           </div>
           <div className="flex items-center gap-1.5 text-xs text-amber-800 bg-amber-50/80 px-2.5 py-1 rounded-lg border border-amber-200/80 w-fit">
             <AlertTriangle className="w-3.5 h-3.5 shrink-0 text-amber-700" />
             <span className="font-semibold">
-              توصيات استشارية فقط — القرار النهائي للمفتش البشري وفقاً للقانون 23-12.
+              {t('ai.insights_advisory_note')}
             </span>
           </div>
         </div>
@@ -85,12 +87,12 @@ export function AIInsightsPanel({ className = '' }: AIInsightsPanelProps) {
             disabled={isFetching}
             onClick={() => refetch()}
             className="h-8 text-xs font-bold gap-1.5"
-            title="تحديث البيانات"
+            title={t('ai.refresh_title')}
           >
             <RefreshCw
               className={`w-3.5 h-3.5 ${isFetching ? 'animate-spin' : ''}`}
             />
-            <span>تحديث</span>
+            <span>{t('ai.refresh')}</span>
           </Button>
 
           <Button
@@ -102,8 +104,8 @@ export function AIInsightsPanel({ className = '' }: AIInsightsPanelProps) {
             <Sparkles className="w-3.5 h-3.5 text-gold-400" />
             <span>
               {generateMutation.isPending
-                ? 'جاري التحليل والتوليد...'
-                : 'توليد توصيات جديدة'}
+                ? t('ai.generating')
+                : t('ai.generate_new')}
             </span>
           </Button>
         </div>
@@ -119,7 +121,7 @@ export function AIInsightsPanel({ className = '' }: AIInsightsPanelProps) {
               : 'bg-muted/40 text-muted-foreground hover:bg-muted hover:text-navy-900'
           }`}
         >
-          <span>الكل</span>
+          <span>{t('common.all')}</span>
           <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-background/30">
             {insights.length}
           </span>
@@ -134,7 +136,7 @@ export function AIInsightsPanel({ className = '' }: AIInsightsPanelProps) {
           }`}
         >
           <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
-          <span>حرجة</span>
+          <span>{t('ai.severity.critical')}</span>
           <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-background/50">
             {groupedInsights.critical.length}
           </span>
@@ -148,7 +150,7 @@ export function AIInsightsPanel({ className = '' }: AIInsightsPanelProps) {
               : 'bg-orange-50 text-orange-800 hover:bg-orange-100 border border-orange-200'
           }`}
         >
-          <span>عالية</span>
+          <span>{t('ai.severity.high')}</span>
           <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-background/50">
             {groupedInsights.high.length}
           </span>
@@ -162,7 +164,7 @@ export function AIInsightsPanel({ className = '' }: AIInsightsPanelProps) {
               : 'bg-amber-50 text-amber-800 hover:bg-amber-100 border border-amber-200'
           }`}
         >
-          <span>متوسطة</span>
+          <span>{t('ai.severity.medium')}</span>
           <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-background/50">
             {groupedInsights.medium.length}
           </span>
@@ -176,7 +178,7 @@ export function AIInsightsPanel({ className = '' }: AIInsightsPanelProps) {
               : 'bg-blue-50 text-blue-800 hover:bg-blue-100 border border-blue-200'
           }`}
         >
-          <span>منخفضة</span>
+          <span>{t('ai.severity.low')}</span>
           <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-background/50">
             {groupedInsights.low.length}
           </span>
@@ -217,10 +219,10 @@ export function AIInsightsPanel({ className = '' }: AIInsightsPanelProps) {
           </div>
           <div className="space-y-1">
             <h4 className="text-sm font-bold text-navy-900">
-              لا توجد توصيات نشطة في هذا المستوى
+              {t('ai.insights_empty_title')}
             </h4>
             <p className="text-xs text-muted-foreground max-w-sm mx-auto">
-              مؤشرات المنصة تظهر التزاماً إجرائياً، أو تمت معالجة كافة التوصيات السابقة.
+              {t('ai.insights_empty_desc')}
             </p>
           </div>
           <Button
@@ -231,7 +233,7 @@ export function AIInsightsPanel({ className = '' }: AIInsightsPanelProps) {
             className="text-xs font-bold gap-1 mt-2"
           >
             <Sparkles className="w-3.5 h-3.5 text-gold-500" />
-            <span>تشغيل فحص جديد</span>
+            <span>{t('ai.run_new_scan')}</span>
           </Button>
         </div>
       )}
@@ -259,7 +261,7 @@ export function AIInsightsPanel({ className = '' }: AIInsightsPanelProps) {
                 <div className="space-y-2.5">
                   <div className="flex items-center gap-2 text-xs font-bold text-rose-800">
                     <span className="w-2.5 h-2.5 rounded-full bg-rose-600 animate-pulse" />
-                    <span>توصيات ذات خطورة حرجة ({groupedInsights.critical.length})</span>
+                    <span>{t('ai.critical_recommendations', { count: groupedInsights.critical.length })}</span>
                   </div>
                   <div className="space-y-2.5">
                     {groupedInsights.critical.map((insight) => (
@@ -279,7 +281,7 @@ export function AIInsightsPanel({ className = '' }: AIInsightsPanelProps) {
                 <div className="space-y-2.5">
                   <div className="flex items-center gap-2 text-xs font-bold text-orange-800">
                     <span className="w-2.5 h-2.5 rounded-full bg-orange-600" />
-                    <span>توصيات ذات أولوية عالية ({groupedInsights.high.length})</span>
+                    <span>{t('ai.high_recommendations', { count: groupedInsights.high.length })}</span>
                   </div>
                   <div className="space-y-2.5">
                     {groupedInsights.high.map((insight) => (
@@ -300,13 +302,13 @@ export function AIInsightsPanel({ className = '' }: AIInsightsPanelProps) {
                   <div className="flex items-center justify-between text-xs font-bold text-amber-800 bg-amber-50/60 p-2.5 rounded-xl border border-amber-200/80">
                     <div className="flex items-center gap-2">
                       <span className="w-2.5 h-2.5 rounded-full bg-amber-600" />
-                      <span>توصيات متوسطة ({groupedInsights.medium.length})</span>
+                      <span>{t('ai.medium_recommendations', { count: groupedInsights.medium.length })}</span>
                     </div>
                     <button
                       onClick={() => setCollapseMedium(!collapseMedium)}
                       className="inline-flex items-center gap-1 text-[11px] font-bold text-navy-800 hover:text-navy-950"
                     >
-                      <span>{collapseMedium ? 'عرض' : 'طي'}</span>
+                      <span>{collapseMedium ? t('common.show') : t('common.collapse')}</span>
                       {collapseMedium ? (
                         <ChevronDown className="w-3.5 h-3.5" />
                       ) : (
@@ -336,15 +338,14 @@ export function AIInsightsPanel({ className = '' }: AIInsightsPanelProps) {
                     <div className="flex items-center gap-2">
                       <span className="w-2.5 h-2.5 rounded-full bg-blue-600" />
                       <span>
-                        توصيات منخفضة وإرشادية (
-                        {groupedInsights.low.length + groupedInsights.info.length})
+                        {t('ai.low_recommendations', { count: groupedInsights.low.length + groupedInsights.info.length })}
                       </span>
                     </div>
                     <button
                       onClick={() => setCollapseLow(!collapseLow)}
                       className="inline-flex items-center gap-1 text-[11px] font-bold text-navy-800 hover:text-navy-950"
                     >
-                      <span>{collapseLow ? 'عرض' : 'طي'}</span>
+                      <span>{collapseLow ? t('common.show') : t('common.collapse')}</span>
                       {collapseLow ? (
                         <ChevronDown className="w-3.5 h-3.5" />
                       ) : (

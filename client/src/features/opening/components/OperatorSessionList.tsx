@@ -52,12 +52,11 @@ export function OperatorSessionList() {
         <div>
           <span className="op-chip gold mb-2">
             <Radio aria-hidden="true" />
-            <span>جلسات علنية</span>
+            <span>{t("opening.op_badge_public")}</span>
           </span>
           <h1>{t('opening.title')}</h1>
           <p>
-            متابعة جلسات فتح الأظرفة العلنية الخاصة بالصفقات المشارك فيها وفق المرسوم الرئاسي
-            15-247 والقانون 23-12.
+            {t("opening.op_list_desc")}
           </p>
         </div>
         <div className="op-page-actions">
@@ -95,7 +94,7 @@ export function OperatorSessionList() {
       {error && (
         <div className="op-alert error">
           <ShieldAlert aria-hidden="true" />
-          <span>تعذر تحميل قائمة جلسات فتح الأظرفة. يرجى إعادة المحاولة لاحقاً.</span>
+          <span>{t("opening.op_load_error")}</span>
         </div>
       )}
 
@@ -106,8 +105,7 @@ export function OperatorSessionList() {
           </div>
           <h3>{t('opening.no_sessions')}</h3>
           <p>
-            ستظهر هنا جلسات فتح الأظرفة المبرمجة والجارية حالياً للصفقات التي أودعت فيها
-            عروضك رسمياً.
+            {t("opening.op_empty_desc")}
           </p>
         </div>
       )}
@@ -168,7 +166,7 @@ export function OperatorSessionList() {
                     <div className="mb-1.5 flex items-center justify-between text-xs text-[var(--op-muted)]">
                       <span className="font-medium">{t('opening.opened_count')}</span>
                       <span className="op-mono font-bold text-[var(--op-ink)]">
-                        {session.opened_count} من {session.total_offers} ({progress}%)
+                        {t("opening.of_offers_count", { opened: session.opened_count, total: session.total_offers, pct: progress })}
                       </span>
                     </div>
                     <div className={`op-progress${isLive ? ' green' : isEnded ? ' slate' : ' blue'}`}>
@@ -184,7 +182,7 @@ export function OperatorSessionList() {
                         onClick={() => setLocation(`/operator/opening-sessions/${session.id}`)}
                       >
                         <PlayCircle aria-hidden="true" />
-                        <span>متابعة البث المباشر</span>
+                        <span>{t("opening.op_btn_watch_live")}</span>
                         <ArrowIcon aria-hidden="true" />
                       </button>
                     ) : isEnded ? (
@@ -194,7 +192,7 @@ export function OperatorSessionList() {
                         onClick={() => setLocation(`/operator/opening-sessions/${session.id}`)}
                       >
                         <FileCheck aria-hidden="true" />
-                        <span>عرض التسجيل والنتائج</span>
+                        <span>{t("opening.op_btn_view_results")}</span>
                         <ArrowIcon aria-hidden="true" />
                       </button>
                     ) : (
@@ -204,7 +202,7 @@ export function OperatorSessionList() {
                         onClick={() => setLocation(`/operator/opening-sessions/${session.id}`)}
                       >
                         <CheckCircle2 aria-hidden="true" />
-                        <span>تفاصيل الموعد</span>
+                        <span>{t("opening.op_btn_details")}</span>
                         <ArrowIcon aria-hidden="true" />
                       </button>
                     )}

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useI18n } from '@/i18n';
+import { useI18n, type TranslationKey } from '@/i18n';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { AlertCircle, CheckCircle, Building2, MapPin, Award, Layers } from 'lucide-react';
@@ -46,13 +46,13 @@ export function OperatorProfileView() {
       .filter((c) => c.length > 0);
 
     if (codes.length === 0) {
-      setErrorMsg('يجب إدخال رمز نشاط تجاري واحد على الأقل.');
+      setErrorMsg(t('operator.profile.err_activity_required'));
       setSaving(false);
       return;
     }
 
     if (!wilayaCode) {
-      setErrorMsg('يرجى تحديد ولاية المقر الاجتماعي للمؤسسة.');
+      setErrorMsg(t('operator.profile.err_wilaya_required'));
       setSaving(false);
       return;
     }
@@ -75,12 +75,12 @@ export function OperatorProfileView() {
 
       const data = await res.json();
       if (!res.ok) {
-        setErrorMsg(data.error || 'فشل حفظ الملف الشخصي');
+        setErrorMsg(data.error || t('operator.profile.err_save_failed'));
       } else {
         setSuccessMsg(t('operator.profile.saved_success'));
       }
     } catch {
-      setErrorMsg('حدث خطأ أثناء الاتصال بالخادم.');
+      setErrorMsg(t('operator.profile.err_server_conn'));
     } finally {
       setSaving(false);
     }
@@ -95,10 +95,8 @@ export function OperatorProfileView() {
       {/* 1. Page Header */}
       <div className="op-page-head">
         <div className="flex flex-col gap-0.5">
-          <h1>ملف المؤسسة</h1>
-          <p>
-            البيانات الأساسية لمؤسستك كما تظهر في ملف الترشح.
-          </p>
+          <h1>{t('operator.profile.title')}</h1>
+          <p>{t('operator.profile.subtitle')}</p>
         </div>
         <div className="op-page-actions">
           <button
@@ -107,7 +105,7 @@ export function OperatorProfileView() {
             disabled={saving}
             className="op-btn op-btn-gold"
           >
-            <span>{saving ? 'جاري الحفظ...' : 'حفظ البيانات'}</span>
+            <span>{saving ? t('operator.profile.saving') : t('operator.profile.save_btn')}</span>
           </button>
         </div>
       </div>
@@ -130,39 +128,39 @@ export function OperatorProfileView() {
       <form onSubmit={handleSubmit} className="op-card p-5">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="flex flex-col gap-1.5">
-            <label className="text-[16px] font-bold text-[#3a4555]">اسم المؤسسة</label>
+            <label className="text-[16px] font-bold text-[#3a4555]">{t('operator.profile.company_name')}</label>
             <input
               type="text"
-              placeholder="[اسم المؤسسة]"
+              placeholder={t('operator.profile.company_name_ph')}
               defaultValue=""
               className="h-[46px] px-3 rounded-[10px] border-[1.5px] border-[#d9d2bc] bg-white text-[#3a4555] text-[16px]"
             />
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-[16px] font-bold text-[#3a4555]">الشكل القانوني</label>
+            <label className="text-[16px] font-bold text-[#3a4555]">{t('operator.profile.legal_form')}</label>
             <select className="h-[46px] px-3 rounded-[10px] border-[1.5px] border-[#d9d2bc] bg-white text-[#3a4555] text-[16px]" defaultValue="sarl">
-              <option value="">اختر الشكل القانوني</option>
+              <option value="">{t('operator.profile.select_legal_form')}</option>
               <option value="eurl">EURL</option>
               <option value="sarl">SARL</option>
               <option value="spa">SPA</option>
               <option value="snc">SNC</option>
-              <option value="pp">شخص طبيعي</option>
+              <option value="pp">{t('operator.profile.legal_form_pp')}</option>
             </select>
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-[16px] font-bold text-[#3a4555]">رقم السجل التجاري</label>
+            <label className="text-[16px] font-bold text-[#3a4555]">{t('operator.profile.rc_number')}</label>
             <input
               type="text"
               dir="ltr"
-              placeholder="[رقم السجل التجاري]"
+              placeholder={t('operator.profile.rc_number_ph')}
               className="h-[46px] px-3 rounded-[10px] border-[1.5px] border-[#d9d2bc] bg-white text-[#3a4555] text-[16px] text-end"
             />
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-[16px] font-bold text-[#3a4555]">رقم التعريف الجبائي (NIF)</label>
+            <label className="text-[16px] font-bold text-[#3a4555]">{t('operator.profile.nif')}</label>
             <input
               type="text"
               dir="ltr"
@@ -172,7 +170,7 @@ export function OperatorProfileView() {
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-[16px] font-bold text-[#3a4555]">رقم التعريف الإحصائي (NIS)</label>
+            <label className="text-[16px] font-bold text-[#3a4555]">{t('operator.profile.nis')}</label>
             <input
               type="text"
               dir="ltr"
@@ -182,16 +180,16 @@ export function OperatorProfileView() {
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-[16px] font-bold text-[#3a4555]">العنوان</label>
+            <label className="text-[16px] font-bold text-[#3a4555]">{t('operator.profile.address')}</label>
             <input
               type="text"
-              placeholder="[عنوان المقر]"
+              placeholder={t('operator.profile.address_ph')}
               className="h-[46px] px-3 rounded-[10px] border-[1.5px] border-[#d9d2bc] bg-white text-[#3a4555] text-[16px]"
             />
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-[16px] font-bold text-[#3a4555]">البريد الإلكتروني للمؤسسة</label>
+            <label className="text-[16px] font-bold text-[#3a4555]">{t('operator.profile.email')}</label>
             <input
               type="email"
               dir="ltr"
@@ -201,11 +199,11 @@ export function OperatorProfileView() {
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-[16px] font-bold text-[#3a4555]">الهاتف</label>
+            <label className="text-[16px] font-bold text-[#3a4555]">{t('operator.profile.phone')}</label>
             <input
               type="tel"
               dir="ltr"
-              placeholder="[رقم الهاتف]"
+              placeholder={t('operator.profile.phone_ph')}
               className="h-[46px] px-3 rounded-[10px] border-[1.5px] border-[#d9d2bc] bg-white text-[#3a4555] text-[16px] text-end"
             />
           </div>
@@ -217,15 +215,15 @@ export function OperatorProfileView() {
         <div className="flex size-[52px] items-center justify-center rounded-full bg-[#fdf6df] text-[#8a6e1c]">
           <Building2 className="size-[26px]" strokeWidth={1.8} />
         </div>
-        <h3 className="mt-1">لم تُرفق أي وثيقة رسمية بعد</h3>
+        <h3 className="mt-1">{t('operator.profile.no_docs_title')}</h3>
         <p className="max-w-[460px]">
-          أرفق السجل التجاري وشهادات الوضعية الجبائية وشبه الجبائية والقانون الأساسي لتُستعمل في ملف الترشح.
+          {t('operator.profile.no_docs_desc')}
         </p>
         <button
           type="button"
           className="op-btn op-btn-outline mt-2"
         >
-          إرفاق وثيقة
+          {t('operator.profile.attach_doc_btn')}
         </button>
       </div>
 
@@ -243,12 +241,12 @@ export function OperatorProfileView() {
               onChange={(e) => setMainSector(e.target.value)}
               className="op-select w-full h-10 text-xs"
             >
-              <option value="construction_public_works">بناء وأشغال عمومية وري (BTPH)</option>
-              <option value="hydraulics">ري ومنشآت مائية</option>
-              <option value="it_telecom">إعلام آلي وتكنولوجيات واتصالات</option>
-              <option value="supplies">توريدات عامة واقتناء تجهيزات</option>
-              <option value="services">خدمات، نظافة، صيانة وحراسة</option>
-              <option value="studies_consulting">دراسات، هندسة واستشارات</option>
+              <option value="construction_public_works">{t('operator.profile.sector_btph')}</option>
+              <option value="hydraulics">{t('operator.profile.sector_hydraulics')}</option>
+              <option value="it_telecom">{t('operator.profile.sector_it')}</option>
+              <option value="supplies">{t('operator.profile.sector_supplies')}</option>
+              <option value="services">{t('operator.profile.sector_services')}</option>
+              <option value="studies_consulting">{t('operator.profile.sector_studies')}</option>
             </select>
           </div>
 
@@ -256,14 +254,14 @@ export function OperatorProfileView() {
           <div className="space-y-2">
             <label className="text-xs font-bold text-[var(--op-ink)] flex items-center gap-1.5">
               <MapPin className="w-3.5 h-3.5 text-primary" />
-              <span>{t('operator.profile.wilaya')} (السجل الإقليمي 2026-69W) *</span>
+              <span>{t('operator.profile.wilaya')} ({t('operator.profile.wilaya_registry_ref')}) *</span>
             </label>
             <select
               value={wilayaCode}
               onChange={(e) => setWilayaCode(e.target.value)}
               className="op-select w-full h-10 text-xs"
             >
-              <option value="">-- اختر ولاية المقر الاجتماعي --</option>
+              <option value="">{t('operator.profile.select_wilaya_ph')}</option>
               {REGISTRY_69W.units.map((unit) => (
                 <option key={unit.code} value={unit.code}>
                   {unit.code} - {lang === 'fr' ? unit.nameFr : unit.nameAr}
@@ -286,7 +284,7 @@ export function OperatorProfileView() {
               className="op-input h-10 text-xs"
             />
             <p className="text-xs text-muted-foreground">
-              أدخل رموز الأنشطة المعتمدة في السجل التجاري مفصولة بفواصل لمطابقتها مع دفاتر الشروط.
+              {t('operator.profile.cnrc_help')}
             </p>
           </div>
 
@@ -301,12 +299,15 @@ export function OperatorProfileView() {
               onChange={(e) => setQualificationLevel(e.target.value)}
               className="op-select w-full h-10 text-xs"
             >
-              <option value="">-- لا يوجد أو غير مشروط --</option>
-              {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((lvl) => (
-                <option key={lvl} value={String(lvl)}>
-                  الدرجة {lvl} ({lvl === 1 ? 'الأولى' : lvl === 2 ? 'الثانية' : lvl === 3 ? 'الثالثة' : lvl === 4 ? 'الرابعة' : lvl === 5 ? 'الخامسة' : `الدرجة ${lvl}`})
-                </option>
-              ))}
+              <option value="">{t('operator.profile.grade_none')}</option>
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((lvl) => {
+                const gradeKey = `operator.profile.grade_${lvl}` as TranslationKey;
+                return (
+                  <option key={lvl} value={String(lvl)}>
+                    {t(gradeKey)}
+                  </option>
+                );
+              })}
             </select>
           </div>
 
@@ -320,7 +321,7 @@ export function OperatorProfileView() {
               type="text"
               value={qualificationSector}
               onChange={(e) => setQualificationSector(e.target.value)}
-              placeholder="مثال: النشاط الرئيسي بناء، ري ثانوي"
+              placeholder={t('operator.profile.notes_ph')}
               className="op-input h-10 text-xs"
             />
           </div>

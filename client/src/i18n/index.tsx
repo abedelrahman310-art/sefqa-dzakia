@@ -19,7 +19,7 @@ export type Direction = 'rtl' | 'ltr';
 interface I18nContextProps {
   lang: Language;
   dir: Direction;
-  t: (key: TranslationKey) => string;
+  t: (key: string, options?: Record<string, unknown>) => string;
   setLang: (newLang: Language) => void;
 }
 
@@ -51,7 +51,8 @@ export const I18nProvider = ({ children }: { children: ReactNode }) => {
     void i18n.changeLanguage(newLang);
   };
 
-  const t = (key: TranslationKey): string => i18n.t(key);
+  const t = (key: string, options?: Record<string, unknown>): string =>
+    i18n.t(key as TranslationKey, options as never) as unknown as string;
 
   return (
     <I18nContext.Provider value={{ lang, dir, t, setLang }}>

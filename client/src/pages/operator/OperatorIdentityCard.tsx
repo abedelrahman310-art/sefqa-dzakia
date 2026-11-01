@@ -42,7 +42,7 @@ export function OperatorIdentityCard() {
 
   const displayName = user?.displayName?.trim() || user?.email || '';
   const organizationName = user?.organizationName?.trim() || '';
-  const avatarLetters = (organizationName || displayName || (lang === 'ar' ? 'ص' : 'S')).slice(0, 2);
+  const avatarLetters = (organizationName || displayName || t('operator.card.default_avatar_initial')).slice(0, 2);
 
   // Derive localized wilaya name if available
   let wilayaName = '';
@@ -56,11 +56,11 @@ export function OperatorIdentityCard() {
   // Derive sector label if present
   const sectorLabel = profile?.mainSector
     ? profile.mainSector === 'construction_public_works'
-      ? (lang === 'ar' ? 'البناء والأشغال العمومية والري' : 'Bâtiment et Travaux Publics')
+      ? t('operator.sector.btph')
       : profile.mainSector === 'services_studies'
-      ? (lang === 'ar' ? 'الخدمات والدراسات' : 'Services et Études')
+      ? t('operator.sector.services')
       : profile.mainSector === 'supplies'
-      ? (lang === 'ar' ? 'التوريدات واللوازم' : 'Fournitures')
+      ? t('operator.sector.supplies')
       : profile.mainSector
     : '';
 

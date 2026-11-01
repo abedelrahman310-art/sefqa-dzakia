@@ -48,29 +48,32 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import {
-  fetchCentralOffers,
+  fetchCentralOperators,
   fetchCentralExcludedOperators,
   createCentralExcludedOperator,
   deleteCentralExcludedOperator,
-  toNumber,
   useCentralResource,
-  type CentralOfferRow,
+  type CentralRealOperator,
   type CentralExcludedOperator,
 } from './centralApi';
 import { Meter, TableState, formatDZD, formatNumber, formatPercent } from './centralUi';
 
 /**
- * رقابة المتعاملين الاقتصاديين — حساب نسب الفوز والتكرار وكشف تركّز الإسناد،
- * مع إدارة القائمة السوداء السيادية للمتعاملين المقصيين وفق القانون 23-12 والمرسوم 15-247.
+ * Economic Operators Oversight — registered operators from DB (CustomUser role=operator),
+ * with sovereign exclusion blacklist management under Law 23-12 and Presidential Decree 15-247.
  */
 
-interface OperatorAggregate {
+interface OperatorDisplay {
   id: string;
   name: string;
+  companyName: string;
+  email: string;
+  nif: string;
+  sectorDisplay: string;
   offersCount: number;
   winsCount: number;
   rejectedCount: number;
-  dealsCount: number;
+  contractsCount: number;
   totalAmount: number;
   winRate: number;
   awardShare: number;
@@ -80,83 +83,14 @@ interface OperatorAggregate {
 const CONCENTRATION_SHARE_THRESHOLD = 40;
 const CONCENTRATION_MIN_WINS = 2;
 
-function aggregateOffers(offers: CentralOfferRow[]): OperatorAggregate[] {
-  const buckets = new Map<
-    string,
-    {
-      id: string;
-      name: string;
-      offersCount: number;
-      winsCount: number;
-      rejectedCount: number;
-      deals: Set<string>;
-      totalAmount: number;
-    }
-  >();
-
-  for (const offer of offers) {
-    const key = offer.operator || offer.operatorName || offer.operator_name || 'unknown';
-    const name = offer.operatorName || offer.operator_name || 'متعامل غير معروف';
-    const current = buckets.get(key) ?? {
-      id: key,
-      name,
-      offersCount: 0,
-      winsCount: 0,
-      rejectedCount: 0,
-      deals: new Set<string>(),
-      totalAmount: 0,
-    };
-
-    current.offersCount += 1;
-    if (offer.status === 'awarded') current.winsCount += 1;
-    if (offer.status === 'rejected') current.rejectedCount += 1;
-    if (offer.deal) current.deals.add(offer.deal);
-    current.totalAmount += toNumber(offer.financial_amount);
-    buckets.set(key, current);
-  }
-
-  const totalWins = Array.from(buckets.values()).reduce(
-    (sum, item) => sum + item.winsCount,
-    0,
-  );
-
-  return Array.from(buckets.values())
-    .map((item) => {
-      const awardShare = totalWins > 0 ? (item.winsCount / totalWins) * 100 : 0;
-      const winRate = item.offersCount > 0 ? (item.winsCount / item.offersCount) * 100 : 0;
-      return {
-        id: item.id,
-        name: item.name,
-        offersCount: item.offersCount,
-        winsCount: item.winsCount,
-        rejectedCount: item.rejectedCount,
-        dealsCount: item.deals.size,
-        totalAmount: item.totalAmount,
-        winRate,
-        awardShare,
-        concentrated:
-          item.winsCount >= CONCENTRATION_MIN_WINS &&
-          awardShare >= CONCENTRATION_SHARE_THRESHOLD,
-      };
-    })
-    .sort(
-      (a, b) =>
-        b.winsCount - a.winsCount ||
-        b.awardShare - a.awardShare ||
-        b.offersCount - a.offersCount,
-    );
-}
-
 export function CentralOperators() {
   const { t, lang, dir } = useI18n();
   const [activeTab, setActiveTab] = useState<'registered' | 'blacklist'>('registered');
 
-  // 1. مورد المتعاملين المسجلين والعروض
-  const { data, loading, error, reload } = useCentralResource(fetchCentralOffers);
+  const { data, loading, error, reload } = useCentralResource(fetchCentralOperators);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterConcentration, setFilterConcentration] = useState('all');
 
-  // 2. مورد القائمة السوداء
   const {
     data: excludedData,
     loading: excludedLoading,
@@ -165,14 +99,12 @@ export function CentralOperators() {
   } = useCentralResource(fetchCentralExcludedOperators);
   const [blacklistSearchQuery, setBlacklistSearchQuery] = useState('');
 
-  // 3. حالات النموذج والنوافذ المنبثقة
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
   const [itemToRevoke, setItemToRevoke] = useState<CentralExcludedOperator | null>(null);
   const [isRevoking, setIsRevoking] = useState(false);
 
-  // حقول نموذج الإقصاء
   const [formOperatorName, setFormOperatorName] = useState('');
   const [formNif, setFormNif] = useState('');
   const [formDecisionRef, setFormDecisionRef] = useState('');
@@ -180,13 +112,62 @@ export function CentralOperators() {
   const [formStartDate, setFormStartDate] = useState(new Date().toISOString().slice(0, 10));
   const [formEndDate, setFormEndDate] = useState('');
 
-  // الحسابات المشتقة للمتعاملين المسجلين
-  const offers = useMemo(() => data ?? [], [data]);
-  const operators = useMemo(() => aggregateOffers(offers), [offers]);
+  const rawOperators = useMemo(() => data ?? [], [data]);
 
-  const totalWins = operators.reduce((sum, item) => sum + item.winsCount, 0);
-  const topShare = operators.reduce((max, item) => Math.max(max, item.awardShare), 0);
-  const concentrated = operators.filter((item) => item.concentrated);
+  const totalWins = useMemo(
+    () => rawOperators.reduce((sum, item) => sum + (item.wins_count || item.awarded_count || 0), 0),
+    [rawOperators],
+  );
+
+  const totalOffers = useMemo(
+    () => rawOperators.reduce((sum, item) => sum + (item.offers_count || 0), 0),
+    [rawOperators],
+  );
+
+  const operators: OperatorDisplay[] = useMemo(() => {
+    return rawOperators
+      .map((op) => {
+        const winsCount = op.wins_count || op.awarded_count || 0;
+        const offersCount = op.offers_count || 0;
+        const rejectedCount = op.rejected_count || 0;
+        const awardShare = totalWins > 0 ? (winsCount / totalWins) * 100 : 0;
+        const winRate = offersCount > 0 ? (winsCount / offersCount) * 100 : 0;
+        const concentrated =
+          winsCount >= CONCENTRATION_MIN_WINS && awardShare >= CONCENTRATION_SHARE_THRESHOLD;
+
+        return {
+          id: op.id,
+          name: op.company_name || op.name || op.email,
+          companyName: op.company_name || op.name || '',
+          email: op.email,
+          nif: op.nif || '',
+          sectorDisplay: op.sector_display || '',
+          offersCount,
+          winsCount,
+          rejectedCount,
+          contractsCount: op.contracts_count || 0,
+          totalAmount: op.total_volume_dzd || 0,
+          winRate,
+          awardShare,
+          concentrated,
+        };
+      })
+      .sort(
+        (a, b) =>
+          b.winsCount - a.winsCount ||
+          b.awardShare - a.awardShare ||
+          b.offersCount - a.offersCount,
+      );
+  }, [rawOperators, totalWins]);
+
+  const topShare = useMemo(
+    () => operators.reduce((max, item) => Math.max(max, item.awardShare), 0),
+    [operators],
+  );
+  const concentrated = useMemo(
+    () => operators.filter((item) => item.concentrated),
+    [operators],
+  );
 
   const filtered = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
@@ -194,11 +175,15 @@ export function CentralOperators() {
       if (filterConcentration === 'concentrated' && !item.concentrated) return false;
       if (filterConcentration === 'competitive' && item.concentrated) return false;
       if (!query) return true;
-      return item.name.toLowerCase().includes(query);
+      return (
+        item.name.toLowerCase().includes(query) ||
+        item.email.toLowerCase().includes(query) ||
+        item.nif.toLowerCase().includes(query) ||
+        item.sectorDisplay.toLowerCase().includes(query)
+      );
     });
   }, [operators, searchQuery, filterConcentration]);
 
-  // الحسابات المشتقة للقائمة السوداء
   const excludedList = useMemo(() => excludedData ?? [], [excludedData]);
   const activeExclusionsCount = useMemo(
     () => excludedList.filter((item) => item.is_active).length,
@@ -241,11 +226,7 @@ export function CentralOperators() {
       !formReason.trim() ||
       !formStartDate
     ) {
-      setSubmitError(
-        lang === 'ar'
-          ? 'يرجى تعبئة كافة الحقول الإلزامية المطلوبة.'
-          : 'Veuillez renseigner tous les champs obligatoires.',
-      );
+      setSubmitError(t('central.operators.required_fields_error'));
       return;
     }
 
@@ -267,9 +248,7 @@ export function CentralOperators() {
       const msg =
         err instanceof Error
           ? err.message
-          : lang === 'ar'
-          ? 'تعذر حفظ قرار الإقصاء. يرجى التحقق من صحة البيانات.'
-          : "Échec de l'enregistrement de l'exclusion. Veuillez vérifier les données.";
+          : t('central.operators.save_error');
       setSubmitError(msg);
     } finally {
       setIsSubmitting(false);
@@ -284,7 +263,7 @@ export function CentralOperators() {
       setItemToRevoke(null);
       reloadExcluded();
     } catch {
-      // إبقاء النافذة في حالة الخطأ
+      // Keep modal open on error
     } finally {
       setIsRevoking(false);
     }
@@ -297,7 +276,7 @@ export function CentralOperators() {
         titleClassName="text-xl font-bold"
         description={
           activeTab === 'registered'
-            ? 'متابعة مشاركات الشركات ونسب فوزها المتكررة وحصتها من الإسنادات، لكشف حالات تركّز السوق واحتكار الصفقات العمومية.'
+            ? t('central.operators.registered_subtitle')
             : t('central.blacklist.subtitle')
         }
         actions={
@@ -331,7 +310,6 @@ export function CentralOperators() {
         }
       />
 
-      {/* التبويبات السيادية (Tabs) */}
       <div className="flex items-center gap-2 border-b border-gray-200 pb-2">
         <button
           type="button"
@@ -380,56 +358,60 @@ export function CentralOperators() {
         </button>
       </div>
 
-      {/* ─── تبويب المتعاملين المسجلين ─── */}
       {activeTab === 'registered' && (
         <>
           <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
             <KpiCard
-              eyebrow="متعاملون مشاركون"
+              eyebrow={t('central.operators.kpi_participating')}
               value={formatNumber(operators.length)}
               icon={Users}
               accent="navy"
-              description="متعاملون قدّموا عرضاً واحداً على الأقل"
+              description={t('central.operators.kpi_participating_sub')}
             />
             <KpiCard
-              eyebrow="إجمالي العروض"
-              value={formatNumber(offers.length)}
+              eyebrow={t('central.operators.kpi_total_offers')}
+              value={formatNumber(totalOffers)}
               icon={FileText}
               accent="emerald"
-              description="عروض مسجّلة في النظام"
+              description={t('central.operators.kpi_total_offers_sub')}
             />
             <KpiCard
-              eyebrow="إسنادات منجزة"
+              eyebrow={t('central.operators.kpi_awards_done')}
               value={formatNumber(totalWins)}
               icon={Trophy}
               accent="gold"
-              description="عروض بحالة «حائز على الصفقة»"
+              description={t('central.operators.kpi_awards_done_sub')}
             />
             <KpiCard
-              eyebrow="أعلى حصة إسناد"
+              eyebrow={t('central.operators.kpi_highest_share')}
               value={formatPercent(topShare)}
               icon={AlertOctagon}
               accent="red"
               description={
                 concentrated.length > 0
-                  ? `${formatNumber(concentrated.length)} متعامل فوق عتبة التركّز`
-                  : 'لا يوجد تركّز فوق العتبة الحالية'
+                  ? t('central.operators.kpi_concentrated_count', {
+                      count: formatNumber(concentrated.length),
+                    })
+                  : t('central.operators.kpi_no_concentration')
               }
             />
           </div>
 
           <AICard
-            title="قراءة استشارية لتركّز السوق"
+            title={t('central.operators.advisory_title')}
             subtitle={
               concentrated.length > 0
-                ? `${formatNumber(concentrated.length)} متعامل بحصة إسناد تتجاوز ${CONCENTRATION_SHARE_THRESHOLD}% وبإسنادين على الأقل`
-                : 'لا توجد مؤشرات تركّز تتجاوز العتبة المعتمدة حالياً'
+                ? t('central.operators.advisory_concentrated_summary', {
+                    count: formatNumber(concentrated.length),
+                    threshold: CONCENTRATION_SHARE_THRESHOLD,
+                  })
+                : t('central.operators.advisory_healthy_summary')
             }
           >
             {concentrated.length === 0 ? (
               <p className="flex items-center gap-2 text-xs text-[var(--color-text-secondary)]">
                 <ShieldAlert className="size-4" aria-hidden="true" />
-                توزيع الإسنادات الحالي لا يُظهر تركّزاً غير معتاد بين المتعاملين.
+                {t('central.operators.advisory_healthy_desc')}
               </p>
             ) : (
               <ul className="space-y-2">
@@ -442,10 +424,12 @@ export function CentralOperators() {
                     <div>
                       <div className="text-xs font-bold text-amber-950">{item.name}</div>
                       <p className="mt-0.5 text-xs leading-relaxed text-amber-900">
-                        {formatNumber(item.winsCount)} إسناد من أصل {formatNumber(totalWins)} (
-                        {formatPercent(item.awardShare)}) مقابل تقديم{' '}
-                        {formatNumber(item.offersCount)} عرضاً. التوصية: مراجعة شروط التأهيل وتنافسية
-                        دفاتر الشروط قبل أي إجراء، فالمؤشر استشاري ولا يشكّل إدانة.
+                        {t('central.operators.advisory_card_desc', {
+                          wins: formatNumber(item.winsCount),
+                          totalWins: formatNumber(totalWins),
+                          share: formatPercent(item.awardShare),
+                          offers: formatNumber(item.offersCount),
+                        })}
                       </p>
                     </div>
                   </li>
@@ -458,10 +442,10 @@ export function CentralOperators() {
             <CardHeader className="flex flex-col gap-3 border-b border-gray-200 pb-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <CardTitle className="text-base font-bold text-[var(--ink-900)]">
-                  نسب الفوز وتكرار الإسناد
+                  {t('central.operators.table_title')}
                 </CardTitle>
                 <CardDescription className="mt-0.5 text-xs text-gray-500">
-                  مؤشر التركّز يُحتسب من حصة كل متعامل من مجموع الإسنادات
+                  {t('central.operators.table_subtitle')}
                 </CardDescription>
               </div>
 
@@ -473,10 +457,10 @@ export function CentralOperators() {
                   />
                   <input
                     type="text"
-                    placeholder="بحث باسم المتعامل…"
+                    placeholder={t('central.operators.search_placeholder')}
                     value={searchQuery}
                     onChange={(event) => setSearchQuery(event.target.value)}
-                    aria-label="بحث في المتعاملين الاقتصاديين"
+                    aria-label={t('central.operators.search_aria')}
                     className="ps-8 pe-3 py-1 text-xs h-8 rounded-lg border border-gray-200 bg-white text-[var(--ink-900)] focus:outline-none focus:ring-1 focus:ring-[var(--stamp-green-700)]"
                   />
                 </div>
@@ -484,12 +468,12 @@ export function CentralOperators() {
                 <select
                   value={filterConcentration}
                   onChange={(event) => setFilterConcentration(event.target.value)}
-                  aria-label="تصفية حسب تركّز الإسناد"
+                  aria-label={t('central.operators.filter_concentration_aria')}
                   className="px-2.5 py-1 text-xs h-8 rounded-lg border border-gray-200 bg-white text-[var(--ink-900)] focus:outline-none focus:ring-1 focus:ring-[var(--stamp-green-700)]"
                 >
-                  <option value="all">كل المتعاملين</option>
-                  <option value="concentrated">تركّز مرتفع فقط</option>
-                  <option value="competitive">تنافسي فقط</option>
+                  <option value="all">{t('central.operators.all_operators')}</option>
+                  <option value="concentrated">{t('central.operators.high_concentration_only')}</option>
+                  <option value="competitive">{t('central.operators.competitive_only')}</option>
                 </select>
               </div>
             </CardHeader>
@@ -498,14 +482,14 @@ export function CentralOperators() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="min-w-[240px]">المتعامل الاقتصادي</TableHead>
-                    <TableHead className="text-center">العروض</TableHead>
-                    <TableHead className="text-center">الإسنادات</TableHead>
-                    <TableHead className="text-center">المرفوضة</TableHead>
-                    <TableHead className="text-center">نسبة الفوز</TableHead>
-                    <TableHead className="text-center">حصة الإسناد</TableHead>
-                    <TableHead className="text-end">حجم العروض</TableHead>
-                    <TableHead className="text-center">مؤشر التركّز</TableHead>
+                    <TableHead className="min-w-[240px]">{t('central.operators.col_operator')}</TableHead>
+                    <TableHead className="text-center">{t('central.operators.col_offers')}</TableHead>
+                    <TableHead className="text-center">{t('central.operators.col_wins')}</TableHead>
+                    <TableHead className="text-center">{t('central.operators.col_rejected')}</TableHead>
+                    <TableHead className="text-center">{t('central.operators.col_win_ratio')}</TableHead>
+                    <TableHead className="text-center">{t('central.operators.col_award_share')}</TableHead>
+                    <TableHead className="text-end">{t('central.operators.col_volume')}</TableHead>
+                    <TableHead className="text-center">{t('central.operators.col_concentration_index')}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -514,7 +498,11 @@ export function CentralOperators() {
                     loading={loading && !data}
                     error={error}
                     empty={!loading && filtered.length === 0}
-                    emptyLabel="لا توجد عروض مسجّلة مطابقة للبحث أو التصفية الحالية."
+                    emptyLabel={
+                      operators.length === 0
+                        ? t('central.operators.no_registered_operators')
+                        : t('central.operators.empty_operators')
+                    }
                     onRetry={reload}
                   >
                     {filtered.map((item) => (
@@ -522,7 +510,9 @@ export function CentralOperators() {
                         <TableCell className="text-xs font-semibold text-[var(--ink-900)] py-2.5">
                           <div className="truncate">{item.name}</div>
                           <div className="text-xs font-normal text-[var(--ink-500)]">
-                            مشارك في {formatNumber(item.dealsCount)} صفقة
+                            {item.nif ? `NIF: ${item.nif} · ` : ''}
+                            {item.email}
+                            {item.sectorDisplay ? ` · ${item.sectorDisplay}` : ''}
                           </div>
                         </TableCell>
                         <TableCell className="text-center font-mono text-xs font-bold text-[var(--ink-900)] py-2.5">
@@ -557,11 +547,11 @@ export function CentralOperators() {
                         <TableCell className="text-center py-2.5">
                           {item.concentrated ? (
                             <Badge className="bg-amber-50 text-amber-900 border-amber-300">
-                              تركّز مرتفع
+                              {t('central.operators.high_concentration')}
                             </Badge>
                           ) : (
                             <Badge variant="outline" className="text-[var(--ink-500)]">
-                              تنافسي
+                              {t('central.operators.competitive')}
                             </Badge>
                           )}
                         </TableCell>
@@ -573,48 +563,52 @@ export function CentralOperators() {
 
               <div className="flex flex-wrap items-center justify-between gap-2 border-t border-gray-200 px-4 py-2.5 text-xs text-[var(--ink-500)]">
                 <span>
-                  عرض {formatNumber(filtered.length)} من أصل {formatNumber(operators.length)} متعاملاً
-                  اقتصادياً
+                  {t('central.operators.showing_count', {
+                    count: formatNumber(filtered.length),
+                    total: formatNumber(operators.length),
+                  })}
                 </span>
-                <span>عتبة التركّز: {CONCENTRATION_SHARE_THRESHOLD}% من الإسنادات بإسنادين على الأقل</span>
+                <span>
+                  {t('central.operators.threshold_notice', {
+                    threshold: CONCENTRATION_SHARE_THRESHOLD,
+                  })}
+                </span>
               </div>
             </CardContent>
           </Card>
         </>
       )}
 
-      {/* ─── تبويب القائمة السوداء (المتعاملون المقصون) ─── */}
       {activeTab === 'blacklist' && (
         <div className="space-y-4">
-          {/* مؤشرات سريعة للقائمة السوداء */}
           <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
             <KpiCard
-              eyebrow="إجمالي المقصين"
+              eyebrow={t('central.operators.kpi_total_excluded')}
               value={formatNumber(excludedList.length)}
               icon={UserX}
               accent="red"
-              description="سجلات الإقصاء المسجلة في المنصة"
+              description={t('central.operators.kpi_total_excluded_sub')}
             />
             <KpiCard
-              eyebrow="إقصاءات سارية المفعول"
+              eyebrow={t('central.operators.kpi_active_exclusions')}
               value={formatNumber(activeExclusionsCount)}
               icon={FileWarning}
               accent="gold"
-              description="متعاملون محظورون من المشاركة حالياً"
+              description={t('central.operators.kpi_active_exclusions_sub')}
             />
             <KpiCard
-              eyebrow="إقصاءات غير محددة الأجل"
+              eyebrow={t('central.operators.kpi_permanent_exclusions')}
               value={formatNumber(permanentExclusionsCount)}
               icon={ShieldAlert}
               accent="navy"
-              description="إقصاء دائم أو بدون تاريخ انتهاء محدد"
+              description={t('central.operators.kpi_permanent_exclusions_sub')}
             />
             <KpiCard
-              eyebrow="التوثيق والتدقيق"
-              value="محصّن 100%"
+              eyebrow={t('central.operators.kpi_audit_fortified')}
+              value={t('central.operators.kpi_audit_fortified_val')}
               icon={Lock}
               accent="emerald"
-              description="موثق ببصمة رقمية SHA-256 في AuditLog"
+              description={t('central.operators.kpi_audit_fortified_sub')}
             />
           </div>
 
@@ -641,7 +635,7 @@ export function CentralOperators() {
                     placeholder={t('central.blacklist.search_placeholder')}
                     value={blacklistSearchQuery}
                     onChange={(event) => setBlacklistSearchQuery(event.target.value)}
-                    aria-label="بحث في القائمة السوداء"
+                    aria-label={t('central.blacklist.search_placeholder')}
                     className="ps-8 pe-3 py-1 text-xs h-8 rounded-lg border border-gray-200 bg-white text-[var(--ink-900)] focus:outline-none focus:ring-1 focus:ring-rose-700 w-64"
                   />
                 </div>
@@ -718,7 +712,7 @@ export function CentralOperators() {
                             </Badge>
                           ) : (
                             <Badge variant="outline" className="text-gray-500">
-                              منتهي
+                              {t('central.operators.status_expired')}
                             </Badge>
                           )}
                         </TableCell>
@@ -743,9 +737,12 @@ export function CentralOperators() {
 
               <div className="flex flex-wrap items-center justify-between gap-2 border-t border-gray-200 px-4 py-2.5 text-xs text-gray-500">
                 <span>
-                  عرض {formatNumber(filteredExcluded.length)} من أصل {formatNumber(excludedList.length)} مسجلاً في القائمة السوداء
+                  {t('central.operators.showing_excluded_count', {
+                    count: formatNumber(filteredExcluded.length),
+                    total: formatNumber(excludedList.length),
+                  })}
                 </span>
-                <span>المستند القانوني: المرسوم الرئاسي 15-247 (المادة 75) والقانون 23-12</span>
+                <span>{t('central.operators.legal_source_notice')}</span>
               </div>
             </CardContent>
           </Card>

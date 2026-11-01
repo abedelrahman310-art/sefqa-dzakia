@@ -366,6 +366,11 @@ class CahierSpecsViewSet(viewsets.ModelViewSet):
         if getattr(user, 'is_superuser', False) or getattr(user, 'is_staff', False) or getattr(user, 'role', None) == 'central_admin':
             return CahierSpecs.objects.all().select_related('deal')
         if getattr(user, 'role', None) == 'authority':
+            # للعمليات الكتابية نعيد الكائن كاملاً حتى يطبّق DRF صلاحية
+            # IsCahierAuthorityOwner ويعيد 403 بدل إخفاء الكائن بـ 404.
+            # أما القراءة فتبقى محصورة بدفاتر المصلحة نفسها.
+            if getattr(self, 'action', None) in ('update', 'partial_update', 'destroy'):
+                return CahierSpecs.objects.all().select_related('deal')
             return CahierSpecs.objects.filter(deal__authority=user).select_related('deal')
         return CahierSpecs.objects.filter(deal__current_stage__gte=3).select_related('deal')
 

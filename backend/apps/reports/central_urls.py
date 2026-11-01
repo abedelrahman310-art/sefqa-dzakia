@@ -7,6 +7,9 @@ from .central_views import (
     CentralSuspicionsView,
     CentralReportsView,
     CentralReportPdfView,
+    CentralAuthoritiesView,
+    CentralOperatorsView,
+    CentralDealsView,
 )
 
 excluded_router = DefaultRouter()
@@ -33,7 +36,19 @@ urlpatterns = [
     path('reports/<str:report_id>/pdf/', CentralReportPdfView.as_view(), name='central-report-pdf'),
     path('reports/<str:report_id>/pdf', CentralReportPdfView.as_view(), name='central-report-pdf-no-slash'),
 
-    # 6. القائمة السوداء للمتعاملين الاقتصاديين المقصيين (Excluded Operators API)
+    # 6. قائمة المصالح المتعاقدة الحقيقية (Real Authorities API)
+    path('authorities/', CentralAuthoritiesView.as_view(), name='central-authorities'),
+    path('authorities', CentralAuthoritiesView.as_view(), name='central-authorities-no-slash'),
+
+    # 7. قائمة المتعاملين الاقتصاديين الحقيقيين (Real Operators API)
+    path('operators/', CentralOperatorsView.as_view(), name='central-operators'),
+    path('operators', CentralOperatorsView.as_view(), name='central-operators-no-slash'),
+
+    # 8. السجل الوطني للصفقات الحقيقية (Real Deals API)
+    path('deals/', CentralDealsView.as_view(), name='central-deals'),
+    path('deals', CentralDealsView.as_view(), name='central-deals-no-slash'),
+
+    # 9. القائمة السوداء للمتعاملين الاقتصاديين المقصيين (Excluded Operators API)
     path('', include(excluded_router.urls)),
     path('excluded-operators', ExcludedOperatorViewSet.as_view({'get': 'list', 'post': 'create'}), name='central-excluded-operators-no-slash'),
     path('excluded-operators/<str:pk>', ExcludedOperatorViewSet.as_view({'get': 'retrieve', 'delete': 'destroy'}), name='central-excluded-operators-detail-no-slash'),

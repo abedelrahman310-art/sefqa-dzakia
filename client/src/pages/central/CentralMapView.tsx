@@ -75,25 +75,29 @@ const flattenSuspicions = (data: { suspicions?: Record<string, SuspicionItem[]> 
   return Object.values(data.suspicions).flat();
 };
 
-const formatCompactDzd = (amount: number, lang: 'ar' | 'fr' = 'ar') => {
+const formatCompactDzd = (
+  amount: number,
+  lang: 'ar' | 'fr' = 'ar',
+  t?: (key: string) => string,
+) => {
   const locale = lang === 'fr' ? 'fr-DZ' : 'ar-DZ';
   if (amount >= 1_000_000_000) {
     const formatted = (amount / 1_000_000_000).toLocaleString(locale, {
       maximumFractionDigits: 1,
     });
-    return lang === 'fr' ? `${formatted} Mrd DA` : `${formatted} مليار دج`;
+    return `${formatted} ${t ? t('central.ui.billion_dzd') : (lang === 'fr' ? 'Mrd DZD' : 'مليار دج')}`;
   }
   if (amount >= 1_000_000) {
     const formatted = (amount / 1_000_000).toLocaleString(locale, {
       maximumFractionDigits: 1,
     });
-    return lang === 'fr' ? `${formatted} M DA` : `${formatted} مليون دج`;
+    return `${formatted} ${t ? t('central.ui.million_dzd') : (lang === 'fr' ? 'M DZD' : 'مليون دج')}`;
   }
-  return lang === 'fr' ? `${amount.toLocaleString(locale)} DA` : `${amount.toLocaleString(locale)} دج`;
+  return `${amount.toLocaleString(locale)} ${t ? t('central.ui.dzd') : 'DZD'}`;
 };
 
 export function CentralMapView() {
-  const { lang, dir } = useI18n();
+  const { t, lang, dir } = useI18n();
   const [, setLocation] = useLocation();
   const [selectedWilaya, setSelectedWilaya] = useState<WilayaDetail | null>(null);
   const [hoveredWilayaName, setHoveredWilayaName] = useState<string | null>(null);
@@ -153,13 +157,13 @@ export function CentralMapView() {
       const status = (err as { response?: { status?: number } })?.response?.status;
       setError(
         status === 401 || status === 403
-          ? 'تعذر الوصول إلى سجل الصفقات. يرجى التحقق من صلاحيات الحساب.'
-          : 'تعذر تحميل بيانات الصفقات من السجل الوطني. يرجى المحاولة مجدداً.',
+          ? t('central.map_view.error_permission')
+          : t('central.map_view.error_load'),
       );
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     void loadDeals();
@@ -253,10 +257,10 @@ export function CentralMapView() {
     riskColor?: string,
   ) => {
     if (riskColor) return riskColor;
-    if (riskLevel === 'critical') return '#DC2626'; // أحمر قاني
-    if (riskLevel === 'high') return '#EA580C';     // برتقالي
-    if (riskLevel === 'medium') return '#EAB308';   // أصفر
-    if (riskLevel === 'low') return '#16A34A';      // أخضر
+    if (riskLevel === 'critical') return '#DC2626';
+    if (riskLevel === 'high') return '#EA580C';
+    if (riskLevel === 'medium') return '#EAB308';
+    if (riskLevel === 'low') return '#16A34A';
     if (warnings > 0) return '#DC2626';
     if (count <= 0) return '#D4DCE4';
     return '#16A34A';
@@ -359,14 +363,14 @@ export function CentralMapView() {
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
                 <h1 className="m-0 text-xl font-bold leading-tight text-[#24352E]">
-                  المرصد الجغرافي والرقابي
+                  {t('central.map_view.title')}
                 </h1>
                 <span className="inline-flex items-center gap-1 rounded-full border border-emerald-100 bg-emerald-50 px-2 py-0.5 text-xs font-bold text-emerald-700">
-                  تغطية 69 ولاية
+                  {t('central.map_view.coverage_count', { count: 58 })}
                 </span>
               </div>
               <p className="mt-0.5 hidden text-xs font-medium leading-relaxed text-gray-500 sm:block">
-                رصد تدفقات الصفقات العمومية والإنذار المبكر وفق القانون 23-12
+                {t('central.map_view.subtitle')}
               </p>
             </div>
           </div>
@@ -378,7 +382,7 @@ export function CentralMapView() {
                 onChange={setSearchQuery}
                 results={searchResults}
                 onSelect={(wilaya) => setSelectedWilaya(wilaya)}
-                placeholder="ابحث عن ولاية..."
+                placeholder={t('central.map_view.search_placeholder')}
               />
             </div>
 
@@ -392,7 +396,7 @@ export function CentralMapView() {
                     : 'text-gray-500 hover:bg-white/70 hover:text-gray-900'
                 }`}
               >
-                الكل (69)
+                {t('central.map_view.all_wilayas_tab', { count: 58 })}
               </button>
               <button
                 type="button"
@@ -404,7 +408,7 @@ export function CentralMapView() {
                 }`}
               >
                 <AlertTriangle className="size-3.5" />
-                <span>شبهات ({totalWarnings})</span>
+                <span>{t('central.map_view.warnings_tab', { count: totalWarnings })}</span>
               </button>
               <button
                 type="button"
@@ -415,7 +419,7 @@ export function CentralMapView() {
                     : 'text-gray-500 hover:bg-emerald-50/70 hover:text-emerald-700'
                 }`}
               >
-                نشاط عالٍ
+                {t('central.map_view.high_activity_tab')}
               </button>
               <button
                 type="button"
@@ -426,7 +430,7 @@ export function CentralMapView() {
                     : 'text-gray-500 hover:bg-emerald-50/70 hover:text-emerald-700'
                 }`}
               >
-                نشاط متوسط
+                {t('central.map_view.medium_activity_tab')}
               </button>
             </div>
 
@@ -434,18 +438,18 @@ export function CentralMapView() {
               type="button"
               onClick={() => setIsSidePanelOpen((value) => !value)}
               className="inline-flex h-10 items-center justify-center gap-1.5 rounded-full border border-gray-200 bg-white px-3.5 text-sm font-bold text-[#24352E] shadow-sm transition-colors hover:bg-gray-50"
-              title={isSidePanelOpen ? 'تصغير لوحة التحليل' : 'فتح لوحة التحليل'}
-              aria-label={isSidePanelOpen ? 'تصغير لوحة التحليل' : 'فتح لوحة التحليل'}
+              title={isSidePanelOpen ? t('central.map_view.collapse_panel') : t('central.map_view.expand_panel')}
+              aria-label={isSidePanelOpen ? t('central.map_view.collapse_panel') : t('central.map_view.expand_panel')}
             >
               {isSidePanelOpen ? (
                 <>
                   <PanelRightClose className="size-4 text-gray-500" />
-                  <span className="hidden 2xl:inline">طي اللوحة</span>
+                  <span className="hidden 2xl:inline">{t('central.map_view.collapse_panel')}</span>
                 </>
               ) : (
                 <>
                   <PanelRightOpen className="size-4 text-emerald-700" />
-                  <span className="hidden 2xl:inline">فتح لوحة التحليل</span>
+                  <span className="hidden 2xl:inline">{t('central.map_view.expand_panel')}</span>
                 </>
               )}
             </button>
@@ -459,7 +463,7 @@ export function CentralMapView() {
           {hoveredWilayaName && (
             <div className="absolute start-4 top-4 z-20 flex animate-in items-center gap-2 rounded-xl border border-gray-200 bg-white/95 px-3.5 py-2 text-sm shadow-sm backdrop-blur-md duration-150 fade-in">
               <span className="size-2 animate-pulse rounded-full bg-[#167354]" />
-              <span className="font-medium text-gray-500">الولاية المحددة:</span>
+              <span className="font-medium text-gray-500">{t('central.map_view.selected_wilaya_label')}</span>
               <strong className="font-black text-[#24352E]">{hoveredWilayaName}</strong>
             </div>
           )}
@@ -482,7 +486,7 @@ export function CentralMapView() {
             <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/55 backdrop-blur-[1px]">
               <div className="flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-bold text-[#24352E] shadow-sm">
                 <RefreshCw className="size-4 animate-spin text-[#167354]" />
-                <span>جارٍ تحميل الصفقات من السجل الوطني...</span>
+                <span>{t('central.map_view.loading_deals')}</span>
               </div>
             </div>
           )}
@@ -499,7 +503,7 @@ export function CentralMapView() {
                 onClick={() => void loadDeals()}
               >
                 <RefreshCw className="size-3.5" />
-                إعادة المحاولة
+                {t('central.map_view.retry')}
               </button>
             </div>
           )}
@@ -508,10 +512,10 @@ export function CentralMapView() {
             <div className="absolute left-1/2 top-1/2 z-20 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-gray-200 bg-white/95 p-4 text-center shadow-sm backdrop-blur-md">
               <FileText className="mx-auto mb-2 size-6 text-gray-500" />
               <h3 className="m-0 text-sm font-bold text-[#24352E]">
-                لا توجد صفقات مسجلة حالياً
+                {t('central.map_view.no_deals_title')}
               </h3>
               <p className="mb-0 mt-1 text-xs leading-relaxed text-gray-500">
-                ستظهر الولايات على الخريطة فور تسجيل صفقات حقيقية في السجل الوطني.
+                {t('central.map_view.no_deals_desc')}
               </p>
             </div>
           )}
@@ -530,8 +534,8 @@ export function CentralMapView() {
             <button
               type="button"
               onClick={handleZoomIn}
-              title="تكبير الخريطة"
-              aria-label="تكبير"
+              title={t('central.map_view.zoom_in')}
+              aria-label={t('central.map_view.zoom_in')}
               className="flex size-9 items-center justify-center rounded-xl text-[#24352E] transition-colors hover:bg-emerald-50 hover:text-emerald-700"
             >
               <Plus className="size-4" />
@@ -539,8 +543,8 @@ export function CentralMapView() {
             <button
               type="button"
               onClick={handleZoomOut}
-              title="تصغير الخريطة"
-              aria-label="تصغير"
+              title={t('central.map_view.zoom_out')}
+              aria-label={t('central.map_view.zoom_out')}
               className="flex size-9 items-center justify-center rounded-xl text-[#24352E] transition-colors hover:bg-emerald-50 hover:text-emerald-700"
             >
               <Minus className="size-4" />
@@ -548,8 +552,8 @@ export function CentralMapView() {
             <button
               type="button"
               onClick={handleZoomReset}
-              title="إعادة ضبط الحجم الأصلي"
-              aria-label="إعادة ضبط"
+              title={t('central.map_view.reset_zoom')}
+              aria-label={t('central.map_view.reset_zoom')}
               className="flex size-9 items-center justify-center rounded-xl text-[#24352E] transition-colors hover:bg-emerald-50 hover:text-emerald-700"
             >
               <RotateCcw className="size-4" />
@@ -559,8 +563,8 @@ export function CentralMapView() {
               type="button"
               onClick={() => void loadDeals()}
               disabled={loading}
-              title="تحديث بيانات السجل الوطني"
-              aria-label="تحديث بيانات السجل الوطني"
+              title={t('central.map_view.refresh_data')}
+              aria-label={t('central.map_view.refresh_data')}
               className="flex size-9 items-center justify-center rounded-xl text-[#24352E] transition-colors hover:bg-emerald-50 hover:text-emerald-700 disabled:cursor-not-allowed disabled:opacity-40"
             >
               <RefreshCw className={`size-4 ${loading ? 'animate-spin' : ''}`} />
@@ -572,11 +576,13 @@ export function CentralMapView() {
               <span className="size-2 rounded-full bg-[#167354]" />
               <span>
                 {lastUpdated
-                  ? `آخر تحديث من السجل الوطني: ${lastUpdated.toLocaleTimeString('ar-DZ', {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}`
-                  : 'بانتظار بيانات السجل الوطني'}
+                  ? t('central.map_view.last_update', {
+                      time: lastUpdated.toLocaleTimeString(lang === 'fr' ? 'fr-DZ' : 'ar-DZ', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      }),
+                    })
+                  : t('central.map_view.waiting_data')}
               </span>
             </div>
           )}
@@ -588,72 +594,72 @@ export function CentralMapView() {
               <div className="mb-2.5 flex items-center justify-between gap-2">
                 <span className="flex min-w-0 items-center gap-2 text-xs font-bold text-gray-600">
                   <TrendingUp className="size-4 shrink-0 text-[#167354]" />
-                  <span className="truncate">المؤشرات الوطنية التراكمية</span>
+                  <span className="truncate">{t('central.map_view.national_cumulative')}</span>
                 </span>
                 <span
                   className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-bold ${
                     loading ? 'bg-amber-50 text-amber-700' : 'bg-emerald-50 text-emerald-700'
                   }`}
                 >
-                  {loading ? 'جارٍ التحديث' : 'محدّث'}
+                  {loading ? t('central.map_view.updating') : t('central.map_view.updated')}
                 </span>
               </div>
 
               <div className="grid grid-cols-2 gap-2.5">
                 <div className="rounded-xl border border-gray-200 bg-gray-50 p-2.5">
                   <div className="mb-1 flex items-center justify-between gap-2 text-gray-500">
-                    <span className="text-xs font-bold">إجمالي الصفقات</span>
+                    <span className="text-xs font-bold">{t('central.map_view.total_deals')}</span>
                     <FileText className="size-3.5 shrink-0 text-[#167354]" />
                   </div>
                   <div className="font-mono text-xl font-black leading-tight text-[#24352E]">
-                    {deals.length.toLocaleString('ar-DZ')}
+                    {deals.length.toLocaleString(lang === 'fr' ? 'fr-DZ' : 'ar-DZ')}
                   </div>
                   <span className="mt-0.5 block text-xs font-semibold text-[#167354]">
-                    من السجل الوطني
+                    {t('central.map_view.from_national_registry')}
                   </span>
                 </div>
 
                 <div className="rounded-xl border border-gray-200 bg-gray-50 p-2.5">
                   <div className="mb-1 flex items-center justify-between gap-2 text-gray-500">
-                    <span className="text-xs font-bold">الحجم المالي</span>
+                    <span className="text-xs font-bold">{t('central.map_view.financial_volume')}</span>
                     <Coins className="size-3.5 shrink-0 text-[#2563EB]" />
                   </div>
                   <div
                     className="truncate font-mono text-lg font-black leading-tight text-[#24352E]"
-                    title={formatCompactDzd(totalBudgetDzd, lang)}
+                    title={formatCompactDzd(totalBudgetDzd, lang, t)}
                   >
-                    {formatCompactDzd(totalBudgetDzd, lang)}
+                    {formatCompactDzd(totalBudgetDzd, lang, t)}
                   </div>
                   <span className="mt-0.5 block text-xs font-semibold text-[#2563EB]">
-                    الميزانيات التقديرية
+                    {t('central.map_view.estimated_budgets')}
                   </span>
                 </div>
 
                 <div className="rounded-xl border border-gray-200 bg-gray-50 p-2.5">
                   <div className="mb-1 flex items-center justify-between gap-2 text-gray-500">
-                    <span className="text-xs font-bold">الولايات النشطة</span>
+                    <span className="text-xs font-bold">{t('central.map_view.active_wilayas')}</span>
                     <MapPin className="size-3.5 shrink-0 text-[#167354]" />
                   </div>
                   <div className="font-mono text-xl font-black leading-tight text-[#24352E]">
                     {activeWilayas.toLocaleString(lang === 'fr' ? 'fr-DZ' : 'ar-DZ')}{' '}
-                    <span className="text-xs font-bold text-gray-500">ولاية</span>
+                    <span className="text-xs font-bold text-gray-500">{t('central.map_view.wilaya_unit')}</span>
                   </div>
                   <span className="mt-0.5 block text-xs font-semibold text-gray-500">
-                    ذات صفقات مسجلة
+                    {t('central.map_view.with_deals')}
                   </span>
                 </div>
 
                 <div className="rounded-xl border border-rose-100 bg-rose-50 p-2.5">
                   <div className="mb-1 flex items-center justify-between gap-2 text-rose-700">
-                    <span className="text-xs font-bold">شبهات مرصودة</span>
+                    <span className="text-xs font-bold">{t('central.map_view.suspicions_detected')}</span>
                     <AlertTriangle className="size-3.5 shrink-0 text-rose-600" />
                   </div>
                   <div className="font-mono text-xl font-black leading-tight text-rose-700">
-                    {totalWarnings.toLocaleString('ar-DZ')}{' '}
-                    <span className="text-xs font-bold text-rose-600">حالة</span>
+                    {totalWarnings.toLocaleString(lang === 'fr' ? 'fr-DZ' : 'ar-DZ')}{' '}
+                    <span className="text-xs font-bold text-rose-600">{t('central.map_view.case_unit')}</span>
                   </div>
                   <span className="mt-0.5 block text-xs font-semibold text-rose-600">
-                    تحليل استشاري
+                    {t('central.map_view.advisory_analysis')}
                   </span>
                 </div>
               </div>
@@ -664,7 +670,7 @@ export function CentralMapView() {
                 <div className="flex min-w-0 items-center gap-2">
                   <Sparkles className="size-4 shrink-0 text-[#167354]" />
                   <span className="truncate text-xs font-bold text-[#24352E]">
-                    رادار الذكاء الاصطناعي الاستباقي
+                    {t('central.map_view.radar_title')}
                   </span>
                 </div>
                 <span className="shrink-0 rounded-full bg-emerald-50 px-2 py-0.5 font-mono text-[11px] font-bold text-emerald-700">
@@ -680,12 +686,12 @@ export function CentralMapView() {
                   </div>
                 ) : suspicionsError ? (
                   <div className="rounded-xl border border-rose-200 bg-rose-50 p-2.5 text-xs font-semibold leading-relaxed text-rose-800">
-                    تعذر تحميل نتائج التحليل الاستشاري حالياً.
+                    {t('central.map_view.radar_error')}
                   </div>
                 ) : flaggedWilayas.length === 0 ? (
                   <div className="flex items-start gap-2 rounded-xl border border-emerald-200 bg-emerald-50 p-2.5 text-xs font-semibold leading-relaxed text-emerald-900">
                     <Sparkles className="mt-0.5 size-3.5 shrink-0" />
-                    <span>لا توجد شبهات مرتبطة بصفقات الولايات في التحليل الحالي.</span>
+                    <span>{t('central.map_view.no_suspicions')}</span>
                   </div>
                 ) : (
                   flaggedWilayas.slice(0, 2).map((wilaya) => (
@@ -703,11 +709,11 @@ export function CentralMapView() {
                           </span>
                         </span>
                         <span className="shrink-0 rounded-full bg-rose-50 px-2 py-0.5 font-mono text-[11px] font-bold text-rose-700">
-                          {wilaya.warnings} تنبيهات
+                          {t('central.map_view.warnings_count', { count: wilaya.warnings })}
                         </span>
                       </div>
                       <p className="m-0 line-clamp-2 text-xs font-medium leading-relaxed text-gray-500">
-                        {wilaya.warningDetails?.[0] || 'شبهة مسجلة تستدعي المراجعة الرقابية.'}
+                        {wilaya.warningDetails?.[0] || t('central.map_view.default_warning')}
                       </p>
                     </button>
                   ))
@@ -718,16 +724,16 @@ export function CentralMapView() {
             <section className="rounded-2xl border border-gray-200 bg-white p-3.5 shadow-sm">
               <div className="mb-2.5 flex items-center justify-between gap-2">
                 <span className="text-xs font-bold text-gray-600">
-                  أعلى الولايات نشاطاً في الصفقات
+                  {t('central.map_view.top_active_wilayas')}
                 </span>
                 <span className="shrink-0 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-bold text-emerald-700">
-                  ترتيب وطني
+                  {t('central.map_view.national_ranking')}
                 </span>
               </div>
 
               {topWilayas.length === 0 ? (
                 <p className="m-0 rounded-xl border border-dashed border-gray-200 p-2.5 text-center text-xs font-semibold leading-relaxed text-gray-500">
-                  لا توجد ولايات ذات صفقات مسجلة بعد.
+                  {t('central.map_view.no_active_wilayas')}
                 </p>
               ) : (
                 <div className="space-y-1.5">
@@ -756,7 +762,7 @@ export function CentralMapView() {
                               {wilaya.budget.toLocaleString(lang === 'fr' ? 'fr-DZ' : 'ar-DZ', {
                                 maximumFractionDigits: 1,
                               })}{' '}
-                              {lang === 'fr' ? 'Mrd DA' : 'مليار دج'}
+                              {t('central.ui.billion_dzd')}
                             </span>
                           </div>
                         </div>
@@ -764,11 +770,11 @@ export function CentralMapView() {
                         <div className="flex shrink-0 items-center gap-1.5">
                           {wilaya.warnings > 0 && (
                             <span className="rounded-full border border-rose-200 bg-rose-50 px-1.5 py-0.5 font-mono text-[11px] font-bold text-rose-700">
-                              {wilaya.warnings} شبهة
+                              {t('central.map_view.suspicion_count', { count: wilaya.warnings })}
                             </span>
                           )}
                           <span className="rounded-full border border-emerald-200 bg-emerald-50 px-1.5 py-0.5 font-mono text-[11px] font-black text-emerald-700">
-                            {wilaya.tenders_count} صفقة
+                            {t('central.map_view.deals_count', { count: wilaya.tenders_count })}
                           </span>
                           <ChevronRight className="size-3.5 text-gray-400 rtl:rotate-180" />
                         </div>
@@ -781,24 +787,24 @@ export function CentralMapView() {
 
             <section className="rounded-2xl border border-gray-200 bg-white p-3.5 shadow-sm">
               <span className="mb-2 block text-xs font-bold text-gray-600">
-                دليل التدرج الحراري للخريطة
+                {t('central.map_view.legend_title')}
               </span>
               <div className="grid grid-cols-2 gap-2 text-xs">
                 <div className="flex items-center gap-2 leading-relaxed">
                   <span className="size-2.5 shrink-0 rounded bg-[#1B4332]" />
-                  <span className="font-medium text-[#24352E]">نشاط عالٍ</span>
+                  <span className="font-medium text-[#24352E]">{t('central.map_view.legend_high')}</span>
                 </div>
                 <div className="flex items-center gap-2 leading-relaxed">
                   <span className="size-2.5 shrink-0 rounded bg-[#2D6A4F]" />
-                  <span className="font-medium text-[#24352E]">نشاط متوسط</span>
+                  <span className="font-medium text-[#24352E]">{t('central.map_view.legend_medium')}</span>
                 </div>
                 <div className="flex items-center gap-2 leading-relaxed">
                   <span className="size-2.5 shrink-0 rounded bg-[#74C69D]" />
-                  <span className="font-medium text-[#24352E]">نشاط منخفض</span>
+                  <span className="font-medium text-[#24352E]">{t('central.map_view.legend_low')}</span>
                 </div>
                 <div className="flex items-center gap-2 leading-relaxed">
                   <span className="size-2.5 shrink-0 animate-pulse rounded bg-[#B02A2A]" />
-                  <span className="font-bold text-rose-700">شبهات مرصودة</span>
+                  <span className="font-bold text-rose-700">{t('central.map_view.legend_suspicions')}</span>
                 </div>
               </div>
             </section>

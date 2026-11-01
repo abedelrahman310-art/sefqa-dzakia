@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useLocation, useParams } from 'wouter';
-import { useI18n } from '@/i18n';
+import { useI18n, type TranslationKey } from '@/i18n';
 import { api } from '@/lib/api';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { analyzeTender } from '@/features/ai/api/ai';
@@ -49,19 +49,19 @@ const SEVERITY_STYLES: Record<TenderAnalysisSeverity, string> = {
   low: 'border-sky-200 bg-sky-50 text-sky-950',
 };
 
-const SEVERITY_LABELS: Record<TenderAnalysisSeverity, string> = {
-  high: 'أولوية عالية',
-  medium: 'انتباه',
-  low: 'ملاحظة',
+const SEVERITY_LABEL_KEYS: Record<TenderAnalysisSeverity, TranslationKey> = {
+  high: 'operator.opp.severity_high',
+  medium: 'operator.opp.severity_medium',
+  low: 'operator.opp.severity_low',
 };
 
-const getAnalysisErrorMessage = (err: unknown): string => {
+const getAnalysisErrorMessage = (err: unknown, t: (k: TranslationKey) => string): string => {
   if (typeof err === 'object' && err !== null) {
     const detail = (err as { response?: { data?: { detail?: unknown } } }).response?.data?.detail;
     if (typeof detail === 'string' && detail.trim()) return detail;
   }
   if (err instanceof Error && err.message) return err.message;
-  return 'تعذر إتمام تحليل دفتر الشروط. يرجى المحاولة مجدداً.';
+  return t('operator.opp.analysis_error');
 };
 
 export function OpportunityDetails() {
@@ -121,7 +121,7 @@ export function OpportunityDetails() {
       const result = await analyzeTender(id);
       setAnalysis(result);
     } catch (err) {
-      const message = getAnalysisErrorMessage(err);
+      const message = getAnalysisErrorMessage(err, t);
       setAnalysisError(message);
       toast.error(message);
     } finally {
@@ -146,7 +146,7 @@ export function OpportunityDetails() {
       <div className="op-page">
         <div className="op-alert error">
           <AlertTriangle aria-hidden="true" />
-          <span>الفرصة غير متوفرة أو تم سحبها.</span>
+          <span>{t('operator.opp.not_found')}</span>
         </div>
         <div>
           <button
@@ -155,7 +155,7 @@ export function OpportunityDetails() {
             onClick={() => setLocation('/operator/deals')}
           >
             <ArrowIcon aria-hidden="true" />
-            <span>العودة للصفقات</span>
+            <span>{t('operator.opp.back_to_deals')}</span>
           </button>
         </div>
       </div>
@@ -188,7 +188,7 @@ export function OpportunityDetails() {
             ) : (
               <Sparkles aria-hidden="true" />
             )}
-            <span>{analysisLoading ? 'جارٍ تحليل دفتر الشروط...' : 'تحليل ذكي لدفتر الشروط'}</span>
+            <span>{analysisLoading ? t('operator.opp.analyzing_specs') : t('operator.opp.smart_analysis')}</span>
           </button>
           <button
             type="button"
@@ -196,7 +196,7 @@ export function OpportunityDetails() {
             onClick={() => setLocation('/operator/deals')}
           >
             <ArrowIcon aria-hidden="true" />
-            <span>العودة لقائمة الصفقات</span>
+            <span>{t('operator.opp.back_to_deals')}</span>
           </button>
         </div>
       </div>
@@ -205,7 +205,7 @@ export function OpportunityDetails() {
         <div className="op-card-head">
           <h2 id="opportunity-details-title" className="flex items-center gap-2">
             <FileText className="size-4 text-[var(--op-gold)]" aria-hidden="true" />
-            <span>تفاصيل وموضوع الصفقة</span>
+            <span>{t('operator.opp.details_and_subject')}</span>
           </h2>
         </div>
 
@@ -218,7 +218,7 @@ export function OpportunityDetails() {
             <div className="rounded-xl border border-[var(--op-line)] bg-[var(--op-surface-2)] p-4">
               <dt className="flex items-center gap-1.5 text-xs text-[var(--op-muted)]">
                 <Building className="size-3.5" aria-hidden="true" />
-                <span>المصلحة المتعاقدة</span>
+                <span>{t('operator.opp.contracting_authority')}</span>
               </dt>
               <dd className="mt-1 text-sm font-bold text-[var(--op-ink)]">{opp.authorityName}</dd>
             </div>
@@ -229,7 +229,7 @@ export function OpportunityDetails() {
                 <span>{t('opps.budget')}</span>
               </dt>
               <dd className="op-mono mt-1 text-sm font-bold text-[var(--op-ink)]">
-                {opp.estimatedBudget || 'غير محدد'}
+                {opp.estimatedBudget || t('operator.opp.not_specified')}
               </dd>
             </div>
           </dl>
@@ -238,11 +238,10 @@ export function OpportunityDetails() {
             <AlertTriangle aria-hidden="true" />
             <div>
               <strong className="mb-1 block text-sm font-bold">
-                تنبيه تنزيل وثائق دفتر الشروط:
+                {t('operator.opp.download_alert_title')}
               </strong>
               <p>
-                {t('doc.download_suspended')}. وفقاً للقواعد المعتمدة، لا يُتاح تنزيل دفتر الشروط
-                للمتعاملين إلا بعد إتمام والتحقق من عملية الدفع خادمياً.
+                {t('doc.download_suspended')}. {t('operator.opp.download_suspended_rule')}
               </p>
             </div>
           </div>
@@ -288,13 +287,13 @@ export function OpportunityDetails() {
             <DialogHeader>
               <span className="op-chip gold mb-2 w-fit">
                 <Sparkles aria-hidden="true" />
-                <span>تحليل استشاري آلي</span>
+                <span>{t('operator.opp.advisory_analysis')}</span>
               </span>
               <DialogTitle className="text-lg font-extrabold text-[var(--op-ink)]">
-                تحليل ذكي لدفتر الشروط
+                {t('operator.opp.smart_analysis')}
               </DialogTitle>
               <DialogDescription className="text-xs leading-relaxed text-[var(--op-muted)]">
-                قراءة منظمة للشروط الإدارية والتقنية والمالية، مع إبراز المتطلبات ونقاط الانتباه.
+                {t('operator.opp.advisory_desc')}
               </DialogDescription>
             </DialogHeader>
           </div>
@@ -306,9 +305,9 @@ export function OpportunityDetails() {
                   <Loader2 className="size-6 animate-spin" aria-hidden="true" />
                 </span>
                 <div>
-                  <p className="text-sm font-bold text-[var(--op-ink)]">جارٍ تحليل دفتر الشروط...</p>
+                  <p className="text-sm font-bold text-[var(--op-ink)]">{t('operator.opp.analyzing_specs')}</p>
                   <p className="mt-1 text-xs text-[var(--op-muted)]">
-                    نراجع البيانات الإدارية والفنية والمالية المتاحة للصفقة.
+                    {t('operator.opp.analyzing_reviewing_data')}
                   </p>
                 </div>
               </div>
@@ -316,7 +315,7 @@ export function OpportunityDetails() {
               <div className="op-alert error">
                 <AlertTriangle aria-hidden="true" />
                 <div>
-                  <strong className="mb-1 block text-sm font-bold">تعذر إتمام التحليل</strong>
+                  <strong className="mb-1 block text-sm font-bold">{t('operator.opp.analysis_failed')}</strong>
                   <p>{analysisError}</p>
                   <button
                     type="button"
@@ -324,7 +323,7 @@ export function OpportunityDetails() {
                     onClick={() => void handleAnalyzeTender()}
                   >
                     <RefreshCw aria-hidden="true" />
-                    <span>إعادة المحاولة</span>
+                    <span>{t('operator.opp.retry')}</span>
                   </button>
                 </div>
               </div>
@@ -356,9 +355,9 @@ export function OpportunityDetails() {
                     {analysis.summary}
                   </p>
                   <div className="mt-3 flex flex-wrap gap-1.5">
-                    <span className="op-chip green">تحليل استشاري</span>
+                    <span className="op-chip green">{t('operator.opp.chip_advisory')}</span>
                     <span className="op-chip gold">{analysis.statutory_reference}</span>
-                    <span className="op-chip">يتطلب مراجعة بشرية</span>
+                    <span className="op-chip">{t('operator.opp.chip_human_review')}</span>
                   </div>
                 </div>
 
@@ -368,7 +367,7 @@ export function OpportunityDetails() {
                     className="mb-3 flex items-center gap-2 text-sm font-extrabold text-[var(--op-ink)]"
                   >
                     <CheckCircle2 className="size-4 text-emerald-600" aria-hidden="true" />
-                    <span>المتطلبات الرئيسية</span>
+                    <span>{t('operator.opp.key_requirements')}</span>
                   </h3>
                   <div className="space-y-2.5">
                     {analysis.key_requirements.map((requirement, index) => (
@@ -396,12 +395,11 @@ export function OpportunityDetails() {
                     className="mb-3 flex items-center gap-2 text-sm font-extrabold text-[var(--op-ink)]"
                   >
                     <AlertTriangle className="size-4 text-amber-600" aria-hidden="true" />
-                    <span>نقاط الانتباه</span>
+                    <span>{t('operator.opp.attention_points')}</span>
                   </h3>
                   {analysis.points_of_attention.length === 0 ? (
                     <p className="rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-xs text-emerald-900">
-                      لم تُرصد نقاط انتباه جوهرية في البيانات المتاحة. تبقى مراجعة دفتر الشروط
-                      والإعلان ضرورية.
+                      {t('operator.opp.no_critical_points')}
                     </p>
                   ) : (
                     <div className="space-y-2.5">
@@ -414,7 +412,7 @@ export function OpportunityDetails() {
                         >
                           <div className="flex flex-wrap items-center gap-2">
                             <span className="rounded-full border border-black/10 bg-white/60 px-2 py-0.5 text-[10px] font-bold">
-                              {SEVERITY_LABELS[point.severity] || 'ملاحظة'}
+                              {SEVERITY_LABEL_KEYS[point.severity] ? t(SEVERITY_LABEL_KEYS[point.severity]) : t('operator.opp.severity_low')}
                             </span>
                             <h4 className="text-xs font-bold">{point.title}</h4>
                           </div>
@@ -431,7 +429,7 @@ export function OpportunityDetails() {
                     className="mb-3 flex items-center gap-2 text-sm font-extrabold text-[var(--op-ink)]"
                   >
                     <Sparkles className="size-4 text-[var(--op-gold)]" aria-hidden="true" />
-                    <span>توصيات عملية</span>
+                    <span>{t('operator.opp.practical_recommendations')}</span>
                   </h3>
                   <ul className="space-y-2 rounded-xl border border-[var(--op-line)] bg-[var(--op-surface-2)] p-4">
                     {analysis.recommendations.map((recommendation, index) => (
@@ -452,7 +450,7 @@ export function OpportunityDetails() {
                 <section className="rounded-xl border border-[var(--op-line)] bg-white p-4">
                   <h3 className="mb-2 flex items-center gap-2 text-sm font-extrabold text-[var(--op-ink)]">
                     <BookOpen className="size-4 text-[var(--op-gold)]" aria-hidden="true" />
-                    <span>مراجع قانونية</span>
+                    <span>{t('operator.opp.legal_references')}</span>
                   </h3>
                   <ul className="space-y-1.5 text-[11px] leading-relaxed text-[var(--op-muted)]">
                     {analysis.legal_references.map((reference) => (
@@ -470,10 +468,9 @@ export function OpportunityDetails() {
                 <div className="op-alert warning">
                   <ShieldCheck aria-hidden="true" />
                   <div>
-                    <strong className="mb-1 block text-xs font-bold">إخلاء مسؤولية</strong>
+                    <strong className="mb-1 block text-xs font-bold">{t('operator.opp.disclaimer_title')}</strong>
                     <p className="text-[11px] leading-relaxed">
-                      هذا التحليل استشاري آلي ولا يُعد قراراً إدارياً أو تقييماً رسمياً للعرض.
-                      المرجع الملزم هو دفتر الشروط والإعلان والقرارات الصادرة عن الجهة المختصة.
+                      {t('operator.opp.disclaimer_text')}
                     </p>
                   </div>
                 </div>
@@ -490,11 +487,11 @@ export function OpportunityDetails() {
                 disabled={analysisLoading}
               >
                 <RefreshCw aria-hidden="true" />
-                <span>إعادة التحليل</span>
+                <span>{t('operator.opp.reanalyze')}</span>
               </Button>
             ) : null}
             <Button type="button" onClick={() => setAnalysisOpen(false)}>
-              إغلاق
+              {t('common.close')}
             </Button>
           </DialogFooter>
         </DialogContent>

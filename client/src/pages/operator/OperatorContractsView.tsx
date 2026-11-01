@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useLocation } from 'wouter';
-import { useI18n } from '@/i18n';
+import { useI18n, type TranslationKey } from '@/i18n';
 import { api } from '@/lib/api';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { downloadPdfBlob } from '@/lib/pdfDownloader';
@@ -23,17 +23,17 @@ interface OperatorContractsViewProps {
   dealId?: string;
 }
 
-const CONTRACT_STATUS_LABELS: Record<string, string> = {
-  CONTRACT_SIGNED: 'موقع ومبرم',
-  signed: 'موقع',
-  signed_operator: 'موقع من المتعامل',
-  signed_authority: 'موقع من المصلحة',
-  approved_control: 'مؤشر من هيئة الرقابة',
-  notified: 'مبلّغ ببداية الخدمة',
-  active: 'قيد التنفيذ',
-  completed: 'منجز ومستلم',
-  terminated: 'مفسوخ تعاقدياً',
-  draft: 'مسودة',
+const CONTRACT_STATUS_KEYS: Record<string, TranslationKey> = {
+  CONTRACT_SIGNED: 'operator.contracts.status_signed_concluded',
+  signed: 'operator.contracts.status_signed',
+  signed_operator: 'operator.contracts.status_signed_operator',
+  signed_authority: 'operator.contracts.status_signed_authority',
+  approved_control: 'operator.contracts.status_approved_control',
+  notified: 'operator.contracts.status_notified',
+  active: 'operator.contracts.status_active',
+  completed: 'operator.contracts.status_completed',
+  terminated: 'operator.contracts.status_terminated',
+  draft: 'operator.contracts.status_draft',
 };
 
 const asRecord = (value: unknown): Record<string, unknown> =>
@@ -67,7 +67,7 @@ const getApiErrorMessage = (err: unknown, fallback: string): string => {
 };
 
 export function OperatorContractsView({ dealId }: OperatorContractsViewProps) {
-  const { lang, dir } = useI18n();
+  const { t, lang, dir } = useI18n();
   const [, setLocation] = useLocation();
 
   const [contracts, setContracts] = useState<ProcurementContractApi[]>([]);
@@ -99,13 +99,13 @@ export function OperatorContractsView({ dealId }: OperatorContractsViewProps) {
       setError(
         getApiErrorMessage(
           err,
-          'تعذر تحميل العقود المؤرشفة. يرجى التحقق من الاتصال والمحاولة مجدداً.',
+          t('operator.contracts.err_load'),
         ),
       );
     } finally {
       setLoading(false);
     }
-  }, [dealId]);
+  }, [dealId, t]);
 
   useEffect(() => {
     void loadContracts();
@@ -113,7 +113,7 @@ export function OperatorContractsView({ dealId }: OperatorContractsViewProps) {
 
   const handleDownload = async (contract: ProcurementContractApi) => {
     if (!contract.contract_pdf_url && !contract.contract_pdf) {
-      setDownloadError('نسخة PDF من هذا العقد غير متاحة حالياً.');
+      setDownloadError(t('operator.contracts.err_pdf_unavailable'));
       return;
     }
 
@@ -125,7 +125,7 @@ export function OperatorContractsView({ dealId }: OperatorContractsViewProps) {
       await downloadPdfBlob(`/procurements/contracts/${contract.id}/download/`, filename);
     } catch (err: unknown) {
       setDownloadError(
-        getApiErrorMessage(err, 'تعذر تحميل نسخة العقد. يرجى المحاولة مجدداً.'),
+        getApiErrorMessage(err, t('operator.contracts.err_download')),
       );
     } finally {
       setDownloadingId(null);
@@ -136,11 +136,8 @@ export function OperatorContractsView({ dealId }: OperatorContractsViewProps) {
     <div className="op-page" dir={dir}>
       <div className="op-page-head">
         <div>
-          <h1>العقود والتنفيذ</h1>
-          <p>
-            راجع العقود المؤرشفة، حمّل نسخة PDF، وتابع مراحل تنفيذ الصفقات وارفع تقارير
-            الإنجاز.
-          </p>
+          <h1>{t('operator.contracts.title')}</h1>
+          <p>{t('operator.contracts.subtitle')}</p>
         </div>
         <div className="op-page-actions">
           {dealId && (
@@ -150,7 +147,7 @@ export function OperatorContractsView({ dealId }: OperatorContractsViewProps) {
               onClick={() => setLocation('/operator/contracts')}
             >
               <FileSignature aria-hidden="true" />
-              <span>كل العقود</span>
+              <span>{t('operator.contracts.all_contracts')}</span>
             </button>
           )}
           <button
@@ -160,7 +157,7 @@ export function OperatorContractsView({ dealId }: OperatorContractsViewProps) {
             disabled={loading}
           >
             <RefreshCw className={loading ? 'animate-spin' : undefined} aria-hidden="true" />
-            <span>{loading ? 'جاري التحديث...' : 'تحديث'}</span>
+            <span>{loading ? t('operator.contracts.updating') : t('operator.contracts.refresh')}</span>
           </button>
         </div>
       </div>
@@ -176,7 +173,7 @@ export function OperatorContractsView({ dealId }: OperatorContractsViewProps) {
               onClick={() => void loadContracts()}
             >
               <RefreshCw aria-hidden="true" />
-              <span>إعادة المحاولة</span>
+              <span>{t('operator.contracts.retry')}</span>
             </button>
           </div>
         </div>
@@ -190,7 +187,7 @@ export function OperatorContractsView({ dealId }: OperatorContractsViewProps) {
       )}
 
       {loading ? (
-        <div className="space-y-3" aria-busy="true" aria-label="جارٍ تحميل العقود">
+        <div className="space-y-3" aria-busy="true" aria-label={t('operator.contracts.loading_aria')}>
           {[0, 1].map((item) => (
             <div key={item} className="op-card p-4">
               <div className="flex items-start gap-3">
@@ -211,20 +208,20 @@ export function OperatorContractsView({ dealId }: OperatorContractsViewProps) {
           </div>
           <h3>
             {dealId
-              ? 'لم يتم توليد العقد لهذه الصفقة بعد'
-              : 'لا توجد عقود مؤرشفة بعد'}
+              ? t('operator.contracts.empty_deal')
+              : t('operator.contracts.empty_all')}
           </h3>
           <p>
             {dealId
-              ? 'ستظهر هنا تفاصيل العقد المؤرشف ومراحل التنفيذ فور توليده من المصلحة المتعاقدة.'
-              : 'ستظهر هنا العقود التي تبرمها المصلحة المتعاقدة مع مؤسستكم بعد اعتماد الإسناد النهائي.'}
+              ? t('operator.contracts.empty_deal_desc')
+              : t('operator.contracts.empty_all_desc')}
           </p>
           <button
             type="button"
             className="op-btn op-btn-outline"
             onClick={() => setLocation('/operator/offers')}
           >
-            العودة إلى العروض
+            {t('operator.contracts.back_to_offers')}
           </button>
         </div>
       ) : (
@@ -233,7 +230,9 @@ export function OperatorContractsView({ dealId }: OperatorContractsViewProps) {
             const isSelected = selectedDealId === contract.deal;
             const isDownloading = downloadingId === contract.id;
             const statusLabel =
-              CONTRACT_STATUS_LABELS[contract.status] || contract.status || 'موقع';
+              CONTRACT_STATUS_KEYS[contract.status]
+                ? t(CONTRACT_STATUS_KEYS[contract.status])
+                : (contract.status || t('operator.contracts.status_signed'));
 
             return (
               <section key={contract.id} className="op-card p-4 space-y-4">
@@ -245,7 +244,7 @@ export function OperatorContractsView({ dealId }: OperatorContractsViewProps) {
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
                         <h2 className="m-0 text-sm font-extrabold text-[#3a4555]">
-                          {contract.deal_title || 'عقد صفقة عمومية'}
+                          {contract.deal_title || t('operator.contracts.deal_fallback')}
                         </h2>
                         <span className="op-chip green">{statusLabel}</span>
                       </div>
@@ -255,7 +254,7 @@ export function OperatorContractsView({ dealId }: OperatorContractsViewProps) {
                         </span>
                         <span className="inline-flex items-center gap-1">
                           <ShieldCheck className="size-3.5" />
-                          رقم العقد: {contract.contract_number || '—'}
+                          {t('operator.contracts.contract_number_label')}{contract.contract_number || '—'}
                         </span>
                       </div>
                     </div>
@@ -273,7 +272,7 @@ export function OperatorContractsView({ dealId }: OperatorContractsViewProps) {
                       ) : (
                         <Download aria-hidden="true" />
                       )}
-                      <span>{isDownloading ? 'جاري التحميل...' : 'تحميل العقد PDF'}</span>
+                      <span>{isDownloading ? t('operator.contracts.downloading') : t('operator.contracts.download_pdf')}</span>
                     </button>
                     <button
                       type="button"
@@ -285,7 +284,7 @@ export function OperatorContractsView({ dealId }: OperatorContractsViewProps) {
                       }
                     >
                       <Building2 aria-hidden="true" />
-                      <span>{isSelected ? 'إخفاء مراحل التنفيذ' : 'متابعة التنفيذ'}</span>
+                      <span>{isSelected ? t('operator.contracts.hide_milestones') : t('operator.contracts.track_execution')}</span>
                     </button>
                   </div>
                 </div>
@@ -293,7 +292,7 @@ export function OperatorContractsView({ dealId }: OperatorContractsViewProps) {
                 <div className="grid grid-cols-1 gap-3 rounded-xl border border-[#f3efdf] bg-[#fffdf5] p-3 text-xs sm:grid-cols-3">
                   <div>
                     <span className="block text-[10px] font-bold text-[#8a6e1c]">
-                      تاريخ الأرشفة
+                      {t('operator.contracts.archive_date')}
                     </span>
                     <span className="mt-0.5 inline-flex items-center gap-1 font-bold text-[#3a4555]">
                       <Calendar className="size-3.5" />
@@ -302,7 +301,7 @@ export function OperatorContractsView({ dealId }: OperatorContractsViewProps) {
                   </div>
                   <div>
                     <span className="block text-[10px] font-bold text-[#8a6e1c]">
-                      مبلغ العقد
+                      {t('operator.contracts.contract_amount')}
                     </span>
                     <span className="mt-0.5 inline-flex items-center gap-1 font-bold text-[#3a4555]">
                       <Banknote className="size-3.5" />
@@ -311,19 +310,18 @@ export function OperatorContractsView({ dealId }: OperatorContractsViewProps) {
                   </div>
                   <div>
                     <span className="block text-[10px] font-bold text-[#8a6e1c]">
-                      المتعامل المتعاقد
+                      {t('operator.contracts.contractor_label')}
                     </span>
                     <span className="mt-0.5 inline-flex items-center gap-1 font-bold text-[#3a4555]">
                       <CheckCircle2 className="size-3.5 text-emerald-600" />
-                      {contract.operator_name || 'مؤسستكم'}
+                      {contract.operator_name || t('operator.contracts.your_company')}
                     </span>
                   </div>
                 </div>
 
                 {!contract.contract_pdf_url && !contract.contract_pdf && (
                   <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] text-amber-900">
-                    تم تسجيل العقد، لكن نسخة PDF لم تُرفع بعد. يمكنك متابعة مراحل التنفيذ
-                    أدناه.
+                    {t('operator.contracts.no_pdf_notice')}
                   </p>
                 )}
 

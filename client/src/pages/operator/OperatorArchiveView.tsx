@@ -106,7 +106,7 @@ export function OperatorArchiveView() {
         <div>
           <span className="op-chip gold mb-2">
             <Archive aria-hidden="true" />
-            <span>{t('nav.operator.archive')} — {lang === 'ar' ? 'السجل الرقمي الموثق' : 'Registre numérique certifié'}</span>
+            <span>{t('nav.operator.archive')} — {t('operator.archive.certified_record')}</span>
           </span>
           <h1>{t('operator.archive.title')}</h1>
           <p>{t('operator.archive.subtitle')}</p>
@@ -118,14 +118,14 @@ export function OperatorArchiveView() {
             onClick={() => setLocation('/operator')}
           >
             <ArrowRight className="rtl:rotate-180" aria-hidden="true" />
-            <span>{lang === 'ar' ? 'العودة إلى مساحة العمل' : "Retour à l'espace de travail"}</span>
+            <span>{t('operator.archive.back_workspace')}</span>
           </button>
         </div>
       </div>
 
       <section className="op-card" aria-labelledby="archive-workspace-title">
         <div className="op-card-head">
-          <div className="op-tabs" role="tablist" aria-label={lang === 'ar' ? 'أقسام الأرشيف' : "Sections d'archives"}>
+          <div className="op-tabs" role="tablist" aria-label={t('operator.archive.sections_aria')}>
             <button
               type="button"
               role="tab"
@@ -164,8 +164,8 @@ export function OperatorArchiveView() {
               }
               aria-label={
                 activeTab === 'deals'
-                  ? (lang === 'ar' ? 'بحث في الصفقات المؤرشفة' : 'Rechercher dans les marchés archivés')
-                  : (lang === 'ar' ? 'بحث في العروض المؤرشفة' : 'Rechercher dans les offres archivées')
+                  ? t('operator.archive.search_deals_aria')
+                  : t('operator.archive.search_offers_aria')
               }
             />
           </div>
@@ -192,12 +192,8 @@ export function OperatorArchiveView() {
               </h4>
               <p>
                 {searchQuery
-                  ? (lang === 'ar'
-                      ? 'جرّب تعديل كلمات البحث أو إلغاء التصفية للعودة إلى كافة السجلات.'
-                      : 'Essayez de modifier les mots-clés ou de réinitialiser le filtre.')
-                  : (lang === 'ar'
-                      ? 'ستظهر هنا السجلات المؤرشفة فور توفرها في حساب مؤسستك.'
-                      : 'Les dossiers archivés apparaîtront ici dès leur disponibilité.')}
+                  ? t('operator.archive.empty_search_hint')
+                  : t('operator.archive.empty_default_hint')}
               </p>
               {searchQuery && (
                 <button
@@ -205,7 +201,7 @@ export function OperatorArchiveView() {
                   className="op-btn op-btn-outline op-btn-sm mt-2"
                   onClick={() => setSearchQuery('')}
                 >
-                  {lang === 'ar' ? 'إلغاء التصفية' : 'Réinitialiser le filtre'}
+                  {t('operator.archive.reset_filter')}
                 </button>
               )}
             </div>

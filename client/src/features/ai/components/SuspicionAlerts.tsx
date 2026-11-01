@@ -21,6 +21,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { SuspicionItem } from '../types';
+import { useI18n } from '@/i18n';
 
 interface SuspicionAlertsProps {
   className?: string;
@@ -28,35 +29,42 @@ interface SuspicionAlertsProps {
 
 const TYPE_CONFIG: Record<
   string,
-  { label: string; icon: ElementType; colorClass: string; badgeClass: string }
+  { icon: ElementType; colorClass: string; badgeClass: string }
 > = {
   bid_rigging: {
-    label: 'مؤشرات التواطؤ (Bid Rigging)',
     icon: Target,
     colorClass: 'text-rose-600',
     badgeClass: 'bg-rose-50 text-rose-800 border-rose-200',
   },
   price_manipulation: {
-    label: 'التلاعب والأسعار غير الطبيعية',
     icon: BadgePercent,
     colorClass: 'text-orange-600',
     badgeClass: 'bg-orange-50 text-orange-800 border-orange-200',
   },
   phantom_competition: {
-    label: 'المنافسة الصورية والوهمية',
     icon: Ghost,
     colorClass: 'text-purple-600',
     badgeClass: 'bg-purple-50 text-purple-800 border-purple-200',
   },
   conflict_of_interest: {
-    label: 'تنازع المصالح والصلات المتقاطعة',
     icon: Scale,
     colorClass: 'text-indigo-600',
     badgeClass: 'bg-indigo-50 text-indigo-800 border-indigo-200',
   },
 };
 
+const getTypeLabel = (type: string, t: (k: string, v?: any) => string): string => {
+  switch (type) {
+    case 'bid_rigging': return t('ai.suspicion_bid_rigging');
+    case 'price_manipulation': return t('ai.suspicion_price_manipulation');
+    case 'phantom_competition': return t('ai.suspicion_fictitious_bids');
+    case 'conflict_of_interest': return t('ai.suspicion_conflict_interest');
+    default: return t('ai.observed_suspicions');
+  }
+};
+
 export function SuspicionAlerts({ className = '' }: SuspicionAlertsProps) {
+  const { t, dir } = useI18n();
   const { data, isLoading } = useSuspicions();
   const [selectedTypeForDialog, setSelectedTypeForDialog] = useState<string | null>(null);
 
@@ -87,16 +95,16 @@ export function SuspicionAlerts({ className = '' }: SuspicionAlertsProps) {
               <ShieldAlert className="w-4 h-4" />
             </span>
             <h2 className="text-base font-extrabold text-navy-900">
-              الشبهات المكتشفة بالخوارزميات
+              {t('ai.suspicions_detected_title')}
             </h2>
           </div>
           <p className="text-[11px] text-muted-foreground">
-            كشف الأنماط المشبوهة استناداً لبيانات العروض وتطابق الهويات.
+            {t('ai.suspicions_detected_desc')}
           </p>
         </div>
 
         <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-rose-100 text-rose-800 border border-rose-300">
-          {totalCount} مؤشر نشط
+          {totalCount} {t('ai.active_indicators')}
         </span>
       </div>
 
@@ -104,7 +112,7 @@ export function SuspicionAlerts({ className = '' }: SuspicionAlertsProps) {
       <div className="p-2.5 rounded-xl bg-amber-50/70 border border-amber-200/80 text-[11px] text-amber-900 flex items-center gap-1.5 font-medium">
         <AlertTriangle className="w-3.5 h-3.5 text-amber-700 shrink-0" />
         <span>
-          مؤشرات احترازية استشارية تستوجب تحقيقاً تدقيقياً بشرياً وفقاً للقانون 23-12.
+          {t('ai.suspicions_disclaimer')}
         </span>
       </div>
 
@@ -130,10 +138,10 @@ export function SuspicionAlerts({ className = '' }: SuspicionAlertsProps) {
             <CheckCircle2 className="w-5 h-5" />
           </div>
           <h4 className="text-xs font-bold text-navy-900">
-            لا توجد مؤشرات شبهة مرصودة حالياً
+            {t('ai.no_suspicions_title')}
           </h4>
           <p className="text-[11px] text-muted-foreground">
-            الفحص الدوري التلقائي لم يرصد تواطؤاً أو أسعاراً مشبوهة حتى الآن.
+            {t('ai.no_suspicions_desc')}
           </p>
         </div>
       )}
@@ -160,14 +168,14 @@ export function SuspicionAlerts({ className = '' }: SuspicionAlertsProps) {
                   <div className="flex items-center gap-2">
                     <Icon className={`w-4 h-4 ${config.colorClass}`} />
                     <span className="text-xs font-extrabold text-navy-900">
-                      {config.label}
+                      {getTypeLabel(typeKey, t)}
                     </span>
                   </div>
 
                   <span
                     className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${config.badgeClass}`}
                   >
-                    {items.length} {items.length === 1 ? 'حالة' : 'حالات'}
+                    {items.length} {items.length === 1 ? t('ai.single_case') : t('ai.multiple_cases')}
                   </span>
                 </div>
 
@@ -191,7 +199,7 @@ export function SuspicionAlerts({ className = '' }: SuspicionAlertsProps) {
                     onClick={() => setSelectedTypeForDialog(typeKey)}
                     className="h-6 text-[11px] font-bold text-navy-800 hover:text-navy-950 p-1"
                   >
-                    <span>عرض التفاصيل ({items.length})</span>
+                    <span>{t('ai.view_details_count', { count: items.length })}</span>
                     <ChevronLeft className="w-3 h-3 ms-0.5" />
                   </Button>
                 </div>
@@ -206,16 +214,16 @@ export function SuspicionAlerts({ className = '' }: SuspicionAlertsProps) {
         open={Boolean(selectedTypeForDialog)}
         onOpenChange={(open) => !open && setSelectedTypeForDialog(null)}
       >
-        <DialogContent className="sm:max-w-xl max-h-[80vh] overflow-y-auto" dir="rtl">
+        <DialogContent className="sm:max-w-xl max-h-[80vh] overflow-y-auto" dir={dir}>
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-navy-900">
               <ShieldAlert className="w-5 h-5 text-rose-600" />
               <span>
-                {selectedTypeForDialog ? TYPE_CONFIG[selectedTypeForDialog]?.label : 'الشبهات المرصودة'}
+                {selectedTypeForDialog ? getTypeLabel(selectedTypeForDialog, t) : t('ai.observed_suspicions')}
               </span>
             </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground pt-1">
-              {data?.statutory_reference || 'القانون 23-12 — مبدأ الشفافية والمنافسة الحرة'}
+              {data?.statutory_reference || t('ai.statutory_reference_default')}
             </DialogDescription>
           </DialogHeader>
 
@@ -229,7 +237,7 @@ export function SuspicionAlerts({ className = '' }: SuspicionAlertsProps) {
                   <div className="flex items-center justify-between">
                     <span className="font-bold text-navy-900">{item.title}</span>
                     <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-50 text-rose-800 border border-rose-200">
-                      خطورة: {item.severity}
+                      {t('ai.severity_label')}: {item.severity}
                     </span>
                   </div>
                   <p className="text-muted-foreground leading-relaxed text-[11px]">
@@ -238,13 +246,13 @@ export function SuspicionAlerts({ className = '' }: SuspicionAlertsProps) {
 
                   {item.recommendation && (
                     <div className="p-2 rounded-lg bg-muted/40 text-[11px] text-navy-950">
-                      <span className="font-bold">التوصية:</span> {item.recommendation}
+                      <span className="font-bold">{t('ai.recommendation_prefix')}:</span> {item.recommendation}
                     </div>
                   )}
 
                   {item.statutory_violation && (
                     <p className="text-[10px] text-amber-800 font-semibold">
-                      المخالفة المحتملة: {item.statutory_violation}
+                      {t('ai.potential_violation')}: {item.statutory_violation}
                     </p>
                   )}
                 </div>

@@ -1,4 +1,5 @@
 import { Sparkles } from 'lucide-react';
+import { useI18n } from '@/i18n';
 
 interface SmartKpiBadgeProps {
   alert?: 'critical' | 'high' | 'medium' | 'low';
@@ -13,6 +14,7 @@ export function SmartKpiBadge({
   message,
   className = '',
 }: SmartKpiBadgeProps) {
+  const { t } = useI18n();
   // If no value or zero and no message, return null
   if (value === undefined && !message) return null;
 
@@ -26,10 +28,10 @@ export function SmartKpiBadge({
   return (
     <div
       className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] border shadow-2xs ${colorStyles} ${className}`}
-      title={`رصد ذكي (استشاري): ${message || ''}`}
+      title={`${t('ai.smart_detection_advisory')}: ${message || ''}`}
     >
       <Sparkles className="w-2.5 h-2.5 shrink-0" />
-      <span>{message ? message : `${value ?? ''} رصد AI`}</span>
+      <span>{message ? message : `${value ?? ''} ${t('ai.smart_detection_suffix')}`}</span>
     </div>
   );
 }

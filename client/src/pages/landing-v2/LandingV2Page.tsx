@@ -9,7 +9,6 @@ import logoCss from '@/components/ui/logo.css?inline';
 import fr from '@/locales/fr.json';
 
 const frTranslations = fr as unknown as Record<string, string>;
-const LANDING_TITLE = 'صفقات ذكية | المنصة الذكية';
 
 /** يوحّد المسافات كما في جرد النصوص الأصلي (194 نصاً). */
 function normalizeText(value: string): string {
@@ -115,7 +114,7 @@ export function LandingV2Page() {
 
     const shadow = host.shadowRoot ?? host.attachShadow({ mode: 'open' });
     const previousTitle = document.title;
-    document.title = LANDING_TITLE;
+    document.title = t('landing.page_title');
 
     const fontLink = document.createElement('link');
     fontLink.rel = 'stylesheet';
@@ -230,7 +229,7 @@ export function LandingV2Page() {
       attributeOriginalsRef.current,
       storyIntroOriginalsRef.current,
     );
-    document.title = lang === 'fr' ? frTranslations['landing.page_title'] : LANDING_TITLE;
+    document.title = lang === 'fr' ? frTranslations['landing.page_title'] : t('landing.page_title');
 
     const langBtn = root.querySelector<HTMLButtonElement>('#landing-lang-btn');
     if (langBtn) {

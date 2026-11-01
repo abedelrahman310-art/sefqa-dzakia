@@ -26,6 +26,7 @@ if (typeof window !== 'undefined') {
 }
 
 export function usePWAInstall() {
+  const { t } = useI18n();
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(globalDeferredPrompt);
   const [isStandalone, setIsStandalone] = useState(false);
 
@@ -51,7 +52,7 @@ export function usePWAInstall() {
       if (isStandalone) {
         return;
       }
-      alert('لتثبيت المنصة كتطبيق على سطح المكتب: اضغط على أيقونة التثبيت ⊕ في شريط العنوان أعلى المتصفح.');
+      alert(t('pwa.install_help'));
       return;
     }
 
@@ -187,7 +188,7 @@ export function PWAInstallPrompt() {
             transition-colors
             -mt-1 -me-1 p-1 rounded-lg hover:bg-[var(--paper-100)]
           "
-          aria-label="إغلاق التنبيه"
+          aria-label={t('pwa.dismiss_aria')}
         >
           <X className="size-4" />
         </button>

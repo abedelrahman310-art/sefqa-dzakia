@@ -97,6 +97,9 @@ class TestCentralHawkEyeEndpoints:
             "/api/central/dashboard/",
             "/api/central/suspicions/",
             "/api/central/reports/",
+            "/api/central/authorities/",
+            "/api/central/operators/",
+            "/api/central/deals/",
         ]
         for url in endpoints:
             response = self.client.get(url)
@@ -111,6 +114,9 @@ class TestCentralHawkEyeEndpoints:
             "/api/central/dashboard/",
             "/api/central/suspicions/",
             "/api/central/reports/",
+            "/api/central/authorities/",
+            "/api/central/operators/",
+            "/api/central/deals/",
         ]
         for url in endpoints:
             response = self.client.get(url)
@@ -207,3 +213,60 @@ class TestCentralHawkEyeEndpoints:
         assert "status" in auth_perf
         assert 0.0 <= auth_perf["compliance_rate"] <= 100.0
         assert 0.0 <= auth_perf["transparency_score"] <= 100.0
+
+    def test_central_authorities_api_real_data(self):
+        """اختبار مسار المصالح لجلب المستخدمين الحقيقيين فقط برتبة authority دون أي بيانات وهمية"""
+        self.client.force_authenticate(user=self.central_admin)
+        response = self.client.get("/api/central/authorities/")
+
+        assert response.status_code == 200
+        data = response.data
+        authorities = data.get("authorities", data.get("results", []))
+        assert len(authorities) == CustomUser.objects.filter(role="authority").count()
+        auth_emails = [a["email"] for a in authorities]
+        assert self.authority.email in auth_emails
+        assert self.operator.email not in auth_emails
+        assert self.central_admin.email not in auth_emails
+
+    def test_central_operators_api_real_data(self):
+        """اختبار مسار المتعاملين لجلب المستخدمين الحقيقيين فقط برتبة operator دون أي بيانات وهمية"""
+        self.client.force_authenticate(user=self.central_admin)
+        response = self.client.get("/api/central/operators/")
+
+        assert response.status_code == 200
+        data = response.data
+        operators = data.get("operators", data.get("results", []))
+        assert len(operators) == CustomUser.objects.filter(role="operator").count()
+        op_emails = [o["email"] for o in operators]
+        assert self.operator.email in op_emails
+        assert self.authority.email not in op_emails
+        assert self.central_admin.email not in op_emails
+
+    def test_central_deals_api_real_data(self):
+        """اختبار مسار الصفقات المركزية لجلب الصفقات الحقيقية فقط من جدول الصفقات"""
+        self.client.force_authenticate(user=self.central_admin)
+        response = self.client.get("/api/central/deals/")
+
+        assert response.status_code == 200
+        data = response.data
+        deals = data.get("deals", data.get("results", []))
+        assert len(deals) == ProcurementDeal.objects.count()
+        refs = [d["reference_number"] for d in deals]
+        assert self.deal_algiers_1.reference_number in refs
+        assert self.deal_oran.reference_number in refs
+
+    def test_seed_command_refuses_production_without_flag(self):
+        """التحقق من أن أوامر الـ seed ترفض العمل تلقائياً في بيئة الإنتاج إلا براية صريحة"""
+        from django.conf import settings
+        from django.core.management import call_command
+        from django.core.management.base import CommandError
+
+        original_debug = settings.DEBUG
+        try:
+            settings.DEBUG = False
+            with pytest.raises(CommandError, match="DEBUG=False"):
+                call_command("seed_central_demo")
+            with pytest.raises(CommandError, match="DEBUG=False"):
+                call_command("seed_procurement_data")
+        finally:
+            settings.DEBUG = original_debug

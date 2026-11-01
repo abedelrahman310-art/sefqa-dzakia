@@ -1,5 +1,6 @@
 import React from 'react';
 import { Sparkles } from 'lucide-react';
+import { useI18n } from '@/i18n';
 
 export interface AICardProps {
   title: string;
@@ -9,6 +10,7 @@ export interface AICardProps {
 }
 
 export function AICard({ title, subtitle, children, actions }: AICardProps) {
+  const { t } = useI18n();
   return (
     <div className="ai-card">
       <div className="flex items-start justify-between mb-4 relative z-10">
@@ -23,7 +25,7 @@ export function AICard({ title, subtitle, children, actions }: AICardProps) {
           )}
         </div>
         <span className="badge badge-amber inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold">
-          ⚠️ استشاري فقط
+          ⚠️ {t('ai.advisory_badge')}
         </span>
       </div>
       <div className="relative z-10">{children}</div>

@@ -39,6 +39,17 @@ def authority_user(db):
 
 
 @pytest.fixture
+def central_admin_user(db):
+    return User.objects.create_user(
+        email="central.rag@safaqat.dz",
+        password="ValidPassword123!",
+        role="central_admin",
+        organization_name="المفتشية العامة للرقابة",
+        display_name="المفتش المركزي",
+    )
+
+
+@pytest.fixture
 def seed_legal_articles(db):
     """تهيئة مواد قانونية مرجعية للاختبارات السريعة"""
     articles_data = [
@@ -166,9 +177,15 @@ class TestLegalRagApiEndpoint:
         response = client.post("/api/ai/legal-chat/", {"question": "سؤال عام"})
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
-    def test_non_operator_role_is_forbidden(self, authority_user):
+    def test_authority_user_is_allowed(self, authority_user):
         client = APIClient()
         client.force_authenticate(user=authority_user)
+        response = client.post("/api/ai/legal-chat/", {"question": "سؤال عام"})
+        assert response.status_code == status.HTTP_200_OK
+
+    def test_central_admin_role_is_forbidden(self, central_admin_user):
+        client = APIClient()
+        client.force_authenticate(user=central_admin_user)
         response = client.post("/api/ai/legal-chat/", {"question": "سؤال عام"})
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
@@ -211,7 +228,10 @@ class TestLegalRagApiEndpoint:
 class TestIngestLegalDocsCommand:
     """اختبار أمر الإدارة ingest_legal_docs"""
 
+    @pytest.mark.timeout(180)
     def test_ingest_legal_docs_command_executes_cleanly(self):
+        # استخراج النصوص من ملفي PDF الرسميين يستغرق ~40 ثانية على Python 3.14،
+        # وقد يتجاوز حد 60 ثانية تحت حمل تشغيل المجموعة الكاملة.
         call_command("ingest_legal_docs", max_articles=5)
         # التأكد من حفظ المواد في قاعدة البيانات
         total_count = LegalArticle.objects.count()

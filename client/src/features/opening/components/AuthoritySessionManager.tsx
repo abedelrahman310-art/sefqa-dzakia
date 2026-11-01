@@ -64,7 +64,7 @@ export function AuthoritySessionManager() {
     const isoString = tomorrow.toISOString().slice(0, 16);
 
     setScheduledAt(isoString);
-    setLocationText("قاعة الاجتماعات الرسمية - الطابق الأول");
+    setLocationText(t("opening.default_location_meeting_room"));
     setStreamUrl("");
     if (tenders && tenders.length > 0 && !selectedTenderId) {
       setSelectedTenderId(tenders[0].id);
@@ -133,7 +133,7 @@ export function AuthoritySessionManager() {
             </h1>
           </div>
           <p className="text-xs text-muted-foreground mt-1">
-            إدارة جلسات فتح الأظرفة العلنية للصفقات، استدعاء المتعهدين، وتسجيل وقائع وقرارات القبول المبدئي وفق القانون 23-12.
+            {t("opening.manager_desc_extended")}
           </p>
         </div>
 
@@ -177,7 +177,7 @@ export function AuthoritySessionManager() {
               {t("opening.no_sessions")}
             </h3>
             <p className="text-xs text-muted-foreground max-w-md mx-auto">
-              لم تتم برمجة أي جلسة فتح أظرفة بعد. يمكنك برمجة جلسة فتح جديدة وربطها بإحدى الصفقات المطروحة.
+              {t("opening.empty_manager_sessions")}
             </p>
           </div>
           <Button
@@ -269,7 +269,7 @@ export function AuthoritySessionManager() {
                       className="bg-navy-900 hover:bg-navy-800 text-white font-bold text-xs gap-2 rounded-xl"
                     >
                       <Sliders className="w-3.5 h-3.5" />
-                      <span>إدارة الجلسة / لوحة التحكم</span>
+                      <span>{t("opening.btn_manage_session_panel")}</span>
                       <ArrowIcon className="w-3.5 h-3.5" />
                     </Button>
                   </div>
@@ -289,7 +289,7 @@ export function AuthoritySessionManager() {
                 {t("opening.schedule_new")}
               </DialogTitle>
               <DialogDescription className="text-xs text-muted-foreground">
-                حدد الصفقة وموعد ومكان انعقاد جلسة فتح الأظرفة العلنية.
+                {t("opening.modal_schedule_desc")}
               </DialogDescription>
             </DialogHeader>
 
@@ -297,7 +297,7 @@ export function AuthoritySessionManager() {
               {/* Tender Select */}
               <div className="space-y-1.5">
                 <Label htmlFor="tender" className="text-xs font-semibold">
-                  الصفقة المعنية *
+                  {t("opening.field_deal_id")}
                 </Label>
                 {tendersLoading ? (
                   <Skeleton className="h-9 w-full rounded-xl" />
@@ -309,7 +309,7 @@ export function AuthoritySessionManager() {
                     required
                     className="w-full rounded-xl border border-input bg-background px-3 py-2 text-xs ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
                   >
-                    <option value="">-- اختر صفقة من القائمة --</option>
+                    <option value="">{t("opening.opt_select_deal")}</option>
                     {tenders.map((tender) => (
                       <option key={tender.id} value={tender.id}>
                         {tender.reference_number || tender.reference
@@ -322,7 +322,7 @@ export function AuthoritySessionManager() {
                 ) : (
                   <Input
                     id="tender"
-                    placeholder="معرّف الصفقة (UUID)"
+                    placeholder={t("opening.placeholder_deal_uuid")}
                     value={selectedTenderId}
                     onChange={(e) => setSelectedTenderId(e.target.value)}
                     required
@@ -334,7 +334,7 @@ export function AuthoritySessionManager() {
               {/* Scheduled Date */}
               <div className="space-y-1.5">
                 <Label htmlFor="scheduled_at" className="text-xs font-semibold">
-                  تاريخ وساعة الجلسة *
+                  {t("opening.field_datetime")}
                 </Label>
                 <Input
                   id="scheduled_at"
@@ -349,11 +349,11 @@ export function AuthoritySessionManager() {
               {/* Location */}
               <div className="space-y-1.5">
                 <Label htmlFor="location" className="text-xs font-semibold">
-                  مكان انعقاد الجلسة *
+                  {t("opening.field_location")}
                 </Label>
                 <Input
                   id="location"
-                  placeholder="مثال: قاعة الاجتماعات الكبرى - مقر الولاية"
+                  placeholder={t("opening.placeholder_location_example")}
                   value={locationText}
                   onChange={(e) => setLocationText(e.target.value)}
                   required
@@ -364,7 +364,7 @@ export function AuthoritySessionManager() {
               {/* Stream URL */}
               <div className="space-y-1.5">
                 <Label htmlFor="stream_url" className="text-xs font-semibold">
-                  رابط البث المرئي المباشر (اختياري)
+                  {t("opening.field_stream_url")}
                 </Label>
                 <Input
                   id="stream_url"
@@ -384,14 +384,14 @@ export function AuthoritySessionManager() {
                 onClick={() => setIsDialogOpen(false)}
                 className="rounded-xl text-xs"
               >
-                إلغاء
+                {t("common.cancel")}
               </Button>
               <Button
                 type="submit"
                 disabled={scheduleMutation.isPending}
                 className="bg-navy-900 hover:bg-navy-800 text-white font-bold text-xs rounded-xl"
               >
-                {scheduleMutation.isPending ? "جاري البرمجة..." : "تأكيد وبرمجة الجلسة"}
+                {scheduleMutation.isPending ? t("opening.scheduling") : t("opening.btn_confirm_schedule")}
               </Button>
             </DialogFooter>
           </form>

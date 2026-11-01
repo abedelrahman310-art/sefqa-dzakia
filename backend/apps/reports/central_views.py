@@ -319,14 +319,14 @@ class CentralDashboardView(APIView):
         ).distinct().count()
 
         # 3. عدد المصالح النشطة (المصالح المتعاقدة التي لديها صفقات نشطة حالياً)
-        active_authorities_count = CustomUser.objects.filter(
-            role="authority",
-            created_deals__current_stage__lt=12,
-        ).distinct().count()
-
         total_authorities_count = CustomUser.objects.filter(role="authority").count()
+        active_authorities_count = ProcurementDeal.objects.filter(current_stage__lt=12).values("authority_id").distinct().count()
 
-        # 4. إجمالي الإنذارات التي أطلقها الذكاء الاصطناعي
+        # 4. عدد المتعاملين الاقتصاديين المسجلين في النظام
+        total_operators_count = CustomUser.objects.filter(role="operator").count()
+        active_operators_count = BidOffer.objects.values("operator_id").distinct().count()
+
+        # 5. إجمالي الإنذارات التي أطلقها الذكاء الاصطناعي
         suspicions_by_type = get_all_suspicions()
         total_suspicions_count = sum(len(v) for v in suspicions_by_type.values())
         active_insights_count = AIInsight.objects.filter(is_resolved=False).count()
@@ -340,6 +340,7 @@ class CentralDashboardView(APIView):
         total_contracted_amount_dzd = float(
             Contract.objects.aggregate(Sum("signed_amount"))["signed_amount__sum"] or 0
         )
+        total_bids = BidOffer.objects.count()
 
         # توزيع المراحل
         stages_data = list(
@@ -385,10 +386,13 @@ class CentralDashboardView(APIView):
             "pending_visa_count": pending_visa_count,
             "active_authorities_count": active_authorities_count,
             "total_authorities_count": total_authorities_count,
+            "total_operators_count": total_operators_count,
+            "active_operators_count": active_operators_count,
             "total_ai_alarms": total_ai_alarms,
             "total_suspicions_count": total_suspicions_count,
             "active_insights_count": active_insights_count,
             "total_deals": total_deals,
+            "total_bids": total_bids,
             "total_budget_dzd": total_budget_dzd,
             "total_contracts": total_contracts,
             "total_contracted_amount_dzd": total_contracted_amount_dzd,
@@ -762,3 +766,188 @@ class CentralReportPdfView(APIView):
         response["X-Report-Id"] = report_id
         response["X-Report-Checksum"] = sha256_hash
         return response
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 6. قائمة المصالح المتعاقدة الحقيقية (Real Authorities API)
+# ─────────────────────────────────────────────────────────────────────────────
+class CentralAuthoritiesView(APIView):
+    """
+    GET /api/central/authorities/
+    استرجاع قائمة المصالح المتعاقدة الحقيقية المسجلة في جدول المستخدمين (CustomUser.objects.filter(role='authority')).
+    لا تتضمن أي بيانات وهمية أو مصالح افتراضية.
+    مقتصرة على الإدارة المركزية والرقابة السيادية (central_admin/superuser).
+    """
+    permission_classes = [IsCentralAdminUser]
+
+    def get(self, request):
+        authorities = (
+            CustomUser.objects.filter(role="authority")
+            .order_by("organization_name", "email")
+        )
+        now = timezone.now()
+
+        results = []
+        for auth in authorities:
+            deals_qs = ProcurementDeal.objects.filter(authority=auth)
+            deals_count = deals_qs.count()
+            active_deals = deals_qs.filter(current_stage__gte=1, current_stage__lt=12).count()
+            completed_deals = deals_qs.filter(current_stage=12).count()
+            delayed_deals = deals_qs.filter(
+                submission_deadline__lt=now,
+                current_stage__gte=3,
+                current_stage__lte=8,
+            ).count()
+            budget_sum = deals_qs.aggregate(Sum("estimated_budget"))["estimated_budget__sum"] or Decimal("0")
+
+            first_deal = deals_qs.first()
+            wilaya_code, wilaya_ar, wilaya_fr = normalize_wilaya(first_deal.wilaya if first_deal else "")
+
+            results.append({
+                "id": str(auth.id),
+                "name": auth.organization_name or auth.display_name or auth.email,
+                "organization_name": auth.organization_name,
+                "display_name": auth.display_name,
+                "email": auth.email,
+                "phone_number": getattr(auth, "phone_number", "") or "",
+                "wilaya": wilaya_ar,
+                "wilaya_code": wilaya_code,
+                "wilaya_name_fr": wilaya_fr,
+                "deals_count": deals_count,
+                "active_deals_count": active_deals,
+                "completed_deals_count": completed_deals,
+                "delayed_deals_count": delayed_deals,
+                "total_volume_dzd": float(budget_sum),
+                "is_active": auth.is_active,
+                "created_at": auth.date_joined.isoformat() if hasattr(auth, "date_joined") and auth.date_joined else None,
+            })
+
+        return Response({
+            "count": len(results),
+            "results": results,
+            "authorities": results,
+        })
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 7. قائمة المتعاملين الاقتصاديين الحقيقيين (Real Operators API)
+# ─────────────────────────────────────────────────────────────────────────────
+class CentralOperatorsView(APIView):
+    """
+    GET /api/central/operators/
+    استرجاع قائمة المتعاملين الاقتصاديين الحقيقيين المسجلين في جدول المستخدمين (CustomUser.objects.filter(role='operator')).
+    لا تتضمن أي بيانات وهمية.
+    مقتصرة على الإدارة المركزية والرقابة السيادية (central_admin/superuser).
+    """
+    permission_classes = [IsCentralAdminUser]
+
+    def get(self, request):
+        operators = (
+            CustomUser.objects.filter(role="operator")
+            .select_related("operator_profile")
+            .order_by("organization_name", "email")
+        )
+
+        results = []
+        for op in operators:
+            profile = getattr(op, "operator_profile", None)
+            offers_qs = BidOffer.objects.filter(operator=op)
+            offers_count = offers_qs.count()
+            awarded_count = offers_qs.filter(status="awarded").count()
+            rejected_count = offers_qs.filter(status="rejected").count()
+            contracts_qs = Contract.objects.filter(awarded_operator=op)
+            contracts_count = contracts_qs.count()
+            contracted_volume = float(
+                contracts_qs.aggregate(Sum("signed_amount"))["signed_amount__sum"] or 0
+            )
+            company_name = op.organization_name or op.display_name or op.email
+
+            results.append({
+                "id": str(op.id),
+                "name": company_name,
+                "company_name": company_name,
+                "organization_name": op.organization_name,
+                "display_name": op.display_name,
+                "email": op.email,
+                "phone_number": getattr(op, "phone_number", "") or "",
+                "nif": getattr(op, "nif", "") or "",
+                "nis": getattr(op, "nis", "") or "",
+                "sector": profile.sector if profile else "any",
+                "sector_display": profile.get_sector_display() if profile and hasattr(profile, "get_sector_display") else "متعدد القطاعات",
+                "available_wilayas": profile.available_wilayas if profile else [],
+                "offers_count": offers_count,
+                "wins_count": awarded_count,
+                "awarded_count": awarded_count,
+                "rejected_count": rejected_count,
+                "contracts_count": contracts_count,
+                "total_volume_dzd": contracted_volume,
+                "is_active": op.is_active,
+                "created_at": op.date_joined.isoformat() if hasattr(op, "date_joined") and op.date_joined else None,
+            })
+
+        return Response({
+            "count": len(results),
+            "results": results,
+            "operators": results,
+        })
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 8. السجل الوطني للصفقات الحقيقية (Real Deals API)
+# ─────────────────────────────────────────────────────────────────────────────
+class CentralDealsView(APIView):
+    """
+    GET /api/central/deals/
+    استرجاع الصفقات العمومية الحقيقية فقط المسجلة في جدول صفقات المنصة (ProcurementDeal.objects.all()).
+    مقتصرة على الإدارة المركزية والرقابة السيادية (central_admin/superuser).
+    """
+    permission_classes = [IsCentralAdminUser]
+
+    def get(self, request):
+        deals_qs = ProcurementDeal.objects.all().select_related("authority").order_by("-created_at")
+
+        # تصفيات اختيارية
+        wilaya = request.query_params.get("wilaya")
+        if wilaya:
+            deals_qs = deals_qs.filter(Q(wilaya__icontains=wilaya))
+
+        stage = request.query_params.get("stage")
+        if stage and stage.isdigit():
+            deals_qs = deals_qs.filter(current_stage=int(stage))
+
+        search = request.query_params.get("search") or request.query_params.get("q")
+        if search:
+            deals_qs = deals_qs.filter(
+                Q(title__icontains=search)
+                | Q(reference_number__icontains=search)
+                | Q(description__icontains=search)
+                | Q(authority__organization_name__icontains=search)
+            )
+
+        results = []
+        for d in deals_qs:
+            results.append({
+                "id": str(d.id),
+                "reference_number": d.reference_number,
+                "title": d.title,
+                "description": d.description,
+                "authority_id": str(d.authority_id) if d.authority_id else None,
+                "authority_name": (
+                    d.authority.organization_name
+                    or d.authority.display_name
+                    or d.authority.email
+                ) if d.authority else "المصلحة المتعاقدة",
+                "wilaya": d.wilaya or "غير محددة",
+                "estimated_budget": float(d.estimated_budget or 0),
+                "current_stage": d.current_stage,
+                "stage_display": d.get_current_stage_display(),
+                "submission_deadline": d.submission_deadline.isoformat() if d.submission_deadline else None,
+                "created_at": d.created_at.isoformat(),
+                "updated_at": d.updated_at.isoformat(),
+            })
+
+        return Response({
+            "count": len(results),
+            "results": results,
+            "deals": results,
+        })

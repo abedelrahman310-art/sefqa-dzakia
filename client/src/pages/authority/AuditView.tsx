@@ -27,7 +27,7 @@ interface AuditItem {
 }
 
 export function AuditView() {
-  const { t } = useI18n();
+  const { t, lang, dir } = useI18n();
   const [logs, setLogs] = useState<AuditItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -45,7 +45,7 @@ export function AuditView() {
       const items = Array.isArray(data) ? data : data.results || [];
       setLogs(items);
     } catch (err: any) {
-      setError(err?.response?.data?.detail || 'تعذر تحميل سجلات التدقيق من الخادم.');
+      setError(err?.response?.data?.detail || t('authority.audit.load_error'));
       setLogs([]);
     } finally {
       setLoading(false);
@@ -91,10 +91,10 @@ export function AuditView() {
         <div className="space-y-1.5">
           <div className="flex items-center gap-2">
             <span className="text-xs font-semibold text-navy-100">
-              صفقات ذكية · نظام التتبع والرقابة القانونية
+              {t('authority.audit.tagline')}
             </span>
             <Badge variant="outline" className="text-[11px] bg-white/10 text-white border-white/20">
-              قانون 23-12
+              {t('authority.audit.law_badge')}
             </Badge>
           </div>
           <h1 className="text-xl md:text-2xl font-bold text-white">
@@ -118,7 +118,7 @@ export function AuditView() {
             className="text-white border-white/20 bg-white/10 hover:bg-white/20 text-xs gap-1.5"
           >
             <RotateCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
-            <span>تحديث السجل</span>
+            <span>{t('authority.audit.refresh')}</span>
           </Button>
         </div>
       </section>
@@ -130,10 +130,10 @@ export function AuditView() {
             <div>
               <CardTitle className="text-lg font-bold flex items-center gap-2">
                 <Shield className="w-5 h-5 text-primary" />
-                <span>سجلات الأرشفة وبصمات التحقق</span>
+                <span>{t('authority.audit.card_title')}</span>
               </CardTitle>
               <CardDescription className="text-xs">
-                كل عملية مسجلة مصحوبة ببصمة تحقق (Hash) فريدة، وتُحفظ في سجل التدقيق لأغراض الأرشفة والمراجعة.
+                {t('authority.audit.card_desc')}
               </CardDescription>
             </div>
 
@@ -148,11 +148,11 @@ export function AuditView() {
                 }}
                 className="text-xs bg-background border border-input rounded-lg px-3 py-2 text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
               >
-                <option value="all">جميع الإجراءات</option>
-                <option value="SESSION">جلسات الفتح</option>
-                <option value="PV">محاضر الفتح والتقييم</option>
-                <option value="COMMITTEE">تعيين اللجان</option>
-                <option value="TENDER">إعلانات الصفقات</option>
+                <option value="all">{t('authority.audit.filter_all')}</option>
+                <option value="SESSION">{t('authority.audit.filter_session')}</option>
+                <option value="PV">{t('authority.audit.filter_pv')}</option>
+                <option value="COMMITTEE">{t('authority.audit.filter_committee')}</option>
+                <option value="TENDER">{t('authority.audit.filter_tender')}</option>
               </select>
             </div>
           </div>
@@ -163,7 +163,7 @@ export function AuditView() {
             <div className="mb-4 p-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-lg text-xs flex items-center justify-between">
               <span>{error}</span>
               <Button size="sm" variant="outline" onClick={loadAuditLogs} className="h-7 text-xs">
-                إعادة المحاولة
+                {t('authority.audit.retry')}
               </Button>
             </div>
           )}
@@ -171,11 +171,11 @@ export function AuditView() {
             <table className="w-full text-sm text-start border-collapse">
               <thead>
                 <tr className="border-b border-border bg-muted/40 text-muted-foreground text-xs">
-                  <th className="py-3 px-4 text-start font-bold">الوقت والتاريخ</th>
-                  <th className="py-3 px-4 text-start font-bold">الإجراء</th>
-                  <th className="py-3 px-4 text-start font-bold">المستخدم</th>
-                  <th className="py-3 px-4 text-start font-bold">بصمة التحقق (SHA-256)</th>
-                  <th className="py-3 px-4 text-center font-bold">حالة الأرشفة</th>
+                  <th className="py-3 px-4 text-start font-bold">{t('authority.audit.th_time')}</th>
+                  <th className="py-3 px-4 text-start font-bold">{t('authority.audit.th_action')}</th>
+                  <th className="py-3 px-4 text-start font-bold">{t('authority.audit.th_user')}</th>
+                  <th className="py-3 px-4 text-start font-bold">{t('authority.audit.th_checksum')}</th>
+                  <th className="py-3 px-4 text-center font-bold">{t('authority.audit.th_status')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
@@ -188,7 +188,7 @@ export function AuditView() {
                     <tr key={log.id} className="hover:bg-muted/30 transition-colors">
                       {/* Timestamp */}
                       <td className="py-3.5 px-4 text-xs font-mono text-muted-foreground">
-                        {new Date(log.timestamp).toLocaleString('ar-DZ')}
+                        {new Date(log.timestamp).toLocaleString(lang === 'ar' ? 'ar-DZ' : 'fr-FR')}
                       </td>
 
                       {/* Action */}
@@ -206,7 +206,7 @@ export function AuditView() {
                       {/* User */}
                       <td className="py-3.5 px-4 text-xs">
                         <div className="font-semibold text-foreground">
-                          {log.user_name || log.user_email || 'مستخدم النظام'}
+                          {log.user_name || log.user_email || t('authority.audit.default_user')}
                         </div>
                         {log.user_email && (
                           <div className="text-[11px] text-muted-foreground">{log.user_email}</div>
@@ -224,7 +224,7 @@ export function AuditView() {
                             size="sm"
                             onClick={() => handleCopyChecksum(log.id, log.checksum)}
                             disabled={!log.checksum}
-                            title="نسخ البصمة الكاملة"
+                            title={t('authority.audit.copy_tooltip')}
                             className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground"
                           >
                             {copiedId === log.id ? (
@@ -240,7 +240,7 @@ export function AuditView() {
                       <td className="py-3.5 px-4 text-center">
                         <div className="inline-flex items-center gap-1.5 text-emerald-700 text-xs font-bold bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full">
                           <Archive className="w-3.5 h-3.5" />
-                          <span>مؤرشف</span>
+                          <span>{t('authority.audit.archived_badge')}</span>
                         </div>
                       </td>
                     </tr>
@@ -252,13 +252,13 @@ export function AuditView() {
 
           {filteredLogs.length === 0 && !error && !loading && (
             <div className="py-12 text-center text-muted-foreground text-xs">
-              لا توجد سجلات تدقيق مسجلة ضمن التصنيف المختار.
+              {t('authority.audit.empty')}
             </div>
           )}
 
           {loading && (
             <div className="py-12 text-center text-muted-foreground text-xs">
-              جارٍ تحميل سجلات التدقيق من الخادم…
+              {t('authority.audit.loading')}
             </div>
           )}
 
@@ -266,7 +266,7 @@ export function AuditView() {
           {totalPages > 1 && (
             <div className="pt-4 flex items-center justify-between border-t border-border mt-4 text-xs">
               <span className="text-muted-foreground">
-                الصفحة {currentPage} من {totalPages} ({filteredLogs.length} سجل إجمالي)
+                {t('authority.audit.pagination_info', { current: currentPage, total: totalPages, count: filteredLogs.length })}
               </span>
               <div className="flex items-center gap-2">
                 <Button
@@ -276,8 +276,8 @@ export function AuditView() {
                   onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                   className="h-8 text-xs gap-1"
                 >
-                  <ChevronRight className="w-3.5 h-3.5" />
-                  <span>السابق</span>
+                  {dir === 'rtl' ? <ChevronRight className="w-3.5 h-3.5" /> : <ChevronLeft className="w-3.5 h-3.5" />}
+                  <span>{t('authority.audit.prev')}</span>
                 </Button>
                 <Button
                   variant="outline"
@@ -286,8 +286,8 @@ export function AuditView() {
                   onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                   className="h-8 text-xs gap-1"
                 >
-                  <span>التالي</span>
-                  <ChevronLeft className="w-3.5 h-3.5" />
+                  <span>{t('authority.audit.next')}</span>
+                  {dir === 'rtl' ? <ChevronLeft className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
                 </Button>
               </div>
             </div>

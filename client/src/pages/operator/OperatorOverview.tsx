@@ -107,7 +107,7 @@ export function OperatorOverview() {
           const rawStatus = String(o.status || 'draft') as OfferStatus;
           return {
             id: String(o.id),
-            title: o.deal_title || o.opportunity_title || 'عرض على صفقة عمومية',
+            title: o.deal_title || o.opportunity_title || t('operator.overview.deal_fallback'),
             status: OFFER_STATUSES.includes(rawStatus) ? rawStatus : 'draft',
             updatedAt: o.updated_at || o.created_at || new Date().toISOString(),
           };
@@ -159,10 +159,10 @@ export function OperatorOverview() {
   const recentOffers = offers.slice(0, 4);
 
   const offerChartData = [
-    { key: 'draft', label: 'مسودات', value: draftsCount, color: '#c9a227' },
-    { key: 'evaluation', label: 'قيد التقييم', value: underEvaluationCount, color: '#2f80ed' },
-    { key: 'awarded', label: 'فائزة', value: awardedCount, color: '#0ea968' },
-    { key: 'rejected', label: 'مرفوضة', value: rejectedCount, color: '#e63946' },
+    { key: 'draft', label: t('operator.overview.chart_drafts'), value: draftsCount, color: '#c9a227' },
+    { key: 'evaluation', label: t('operator.overview.chart_eval'), value: underEvaluationCount, color: '#2f80ed' },
+    { key: 'awarded', label: t('operator.overview.chart_awarded'), value: awardedCount, color: '#0ea968' },
+    { key: 'rejected', label: t('operator.overview.chart_rejected'), value: rejectedCount, color: '#e63946' },
   ];
   const offerChartTotal = offerChartData.reduce((sum, item) => sum + item.value, 0);
   const offerChartGradient = (() => {
@@ -179,7 +179,11 @@ export function OperatorOverview() {
       });
     return `conic-gradient(${segments.join(', ')})`; /* taste-skill-ignore */
   })();
-  const offerChartSummary = `مسودات ${draftsCount}، قيد التقييم ${underEvaluationCount}، فائزة ${awardedCount}، مرفوضة ${rejectedCount}`;
+  const offerChartSummary = t('operator.overview.chart_summary_text')
+    .replace('{drafts}', String(draftsCount))
+    .replace('{eval}', String(underEvaluationCount))
+    .replace('{awarded}', String(awardedCount))
+    .replace('{rejected}', String(rejectedCount));
 
   const formatDate = (value: string) => intlFormatDate(value, lang);
 
@@ -192,8 +196,8 @@ export function OperatorOverview() {
     <div className="op-page" dir={dir}>
       <div className="op-page-head">
         <div>
-          <h1>مساحة العمل</h1>
-          <p>نظرة سريعة على الصفقات المتاحة، عروضك، وجاهزية مشاركتك.</p>
+          <h1>{t('operator.overview.title')}</h1>
+          <p>{t('operator.overview.subtitle')}</p>
         </div>
         <div className="op-page-actions">
           <button
@@ -202,7 +206,7 @@ export function OperatorOverview() {
             onClick={() => setLocation('/operator/deals')}
           >
             <Search aria-hidden="true" />
-            <span>استكشف الصفقات</span>
+            <span>{t('operator.overview.btn_explore_deals')}</span>
           </button>
           <button
             type="button"
@@ -210,26 +214,26 @@ export function OperatorOverview() {
             onClick={() => setLocation('/operator/offers')}
           >
             <ClipboardCheck aria-hidden="true" />
-            <span>إدارة العروض</span>
+            <span>{t('operator.overview.btn_manage_offers')}</span>
           </button>
         </div>
       </div>
 
-      <section className="op-kpi-grid" aria-label="مؤشرات سريعة">
+      <section className="op-kpi-grid" aria-label={t('operator.overview.kpi_aria')}>
         <article className="op-kpi">
           <div className="op-kpi-icon gold">
             <Search aria-hidden="true" />
           </div>
-          <div className="op-kpi-label">صفقات متاحة</div>
+          <div className="op-kpi-label">{t('operator.overview.kpi_avail_deals')}</div>
           <div className={`op-kpi-value${loading || opportunities.length === 0 ? ' empty' : ''}`}>
             {kpiValue(opportunities.length)}
           </div>
           <div className="op-kpi-sub">
             {loading
-              ? 'جاري تحميل البيانات...'
+              ? t('operator.overview.kpi_avail_loading')
               : opportunities.length > 0
-                ? 'منشورة ومفتوحة للتقديم'
-                : 'لم تُنشر صفقات بعد'}
+                ? t('operator.overview.kpi_avail_published')
+                : t('operator.overview.kpi_avail_none')}
           </div>
         </article>
 
@@ -237,16 +241,16 @@ export function OperatorOverview() {
           <div className="op-kpi-icon blue">
             <FileText aria-hidden="true" />
           </div>
-          <div className="op-kpi-label">عروضي المقدمة</div>
+          <div className="op-kpi-label">{t('operator.overview.kpi_my_offers')}</div>
           <div className={`op-kpi-value${loading || submittedCount === 0 ? ' empty' : ''}`}>
             {kpiValue(submittedCount)}
           </div>
           <div className="op-kpi-sub">
             {loading
-              ? 'جاري تحميل البيانات...'
+              ? t('operator.overview.kpi_avail_loading')
               : submittedCount > 0
-                ? 'عروض مودعة رسمياً'
-                : 'لم تقدّم أي عرض بعد'}
+                ? t('operator.overview.kpi_offers_submitted')
+                : t('operator.overview.kpi_offers_none')}
           </div>
         </article>
 
@@ -254,16 +258,16 @@ export function OperatorOverview() {
           <div className="op-kpi-icon green">
             <Clock aria-hidden="true" />
           </div>
-          <div className="op-kpi-label">مسودات قيد الإعداد</div>
+          <div className="op-kpi-label">{t('operator.overview.kpi_drafts')}</div>
           <div className={`op-kpi-value${loading || draftsCount === 0 ? ' empty' : ''}`}>
             {kpiValue(draftsCount)}
           </div>
           <div className="op-kpi-sub">
             {loading
-              ? 'جاري تحميل البيانات...'
+              ? t('operator.overview.kpi_avail_loading')
               : draftsCount > 0
-                ? 'يمكنك استكمالها في أي وقت'
-                : 'لا توجد مسودات محفوظة'}
+                ? t('operator.overview.kpi_drafts_hint')
+                : t('operator.overview.kpi_drafts_none')}
           </div>
         </article>
 
@@ -271,16 +275,16 @@ export function OperatorOverview() {
           <div className="op-kpi-icon rose">
             <ClipboardCheck aria-hidden="true" />
           </div>
-          <div className="op-kpi-label">إجمالي مشاركاتي</div>
+          <div className="op-kpi-label">{t('operator.overview.kpi_total_participations')}</div>
           <div className={`op-kpi-value${loading || offers.length === 0 ? ' empty' : ''}`}>
             {kpiValue(offers.length)}
           </div>
           <div className="op-kpi-sub">
             {loading
-              ? 'جاري تحميل البيانات...'
+              ? t('operator.overview.kpi_avail_loading')
               : offers.length > 0
-                ? 'مسودات وعروض مودعة'
-                : 'لا توجد مشاركات مسجلة'}
+                ? t('operator.overview.kpi_participations_hint')
+                : t('operator.overview.kpi_participations_none')}
           </div>
         </article>
       </section>
@@ -288,13 +292,13 @@ export function OperatorOverview() {
       <div className="op-grid-2">
         <section className="op-card" aria-labelledby="latest-opportunities-title">
           <div className="op-card-head">
-            <h3 id="latest-opportunities-title">آخر الفرص المتاحة</h3>
+            <h3 id="latest-opportunities-title">{t('operator.overview.section_latest_opps')}</h3>
             <button
               type="button"
               className="op-btn op-btn-ghost op-btn-sm"
               onClick={() => setLocation('/operator/deals')}
             >
-              عرض الكل
+              {t('operator.overview.btn_view_all')}
               <ChevronLeft aria-hidden="true" />
             </button>
           </div>
@@ -309,13 +313,13 @@ export function OperatorOverview() {
               <div className="op-empty-chart">
                 <Search aria-hidden="true" />
                 <h4>{t('overview.discovery.empty')}</h4>
-                <p>ستظهر الصفقات المنشورة هنا فور توفرها</p>
+                <p>{t('operator.overview.empty_opps_desc')}</p>
                 <button
                   type="button"
                   className="op-btn op-btn-ghost op-btn-sm mt-2"
                   onClick={() => setLocation('/operator/deals')}
                 >
-                  تصفح الصفقات
+                  {t('operator.overview.btn_browse_deals')}
                 </button>
               </div>
             ) : (
@@ -334,7 +338,7 @@ export function OperatorOverview() {
                             <>
                               <span aria-hidden="true">·</span>
                               <Calendar aria-hidden="true" className="size-3.5" />
-                              <span>آخر أجل {formatDate(opp.submissionDeadline)}</span>
+                              <span>{t('operator.overview.deadline_prefix')} {formatDate(opp.submissionDeadline)}</span>
                             </>
                           )}
                         </span>
@@ -353,8 +357,8 @@ export function OperatorOverview() {
 
         <section className="op-card" aria-labelledby="offers-status-title">
           <div className="op-card-head">
-            <h3 id="offers-status-title">حالة عروضي</h3>
-            <span className="op-card-tag">رسم بياني</span>
+            <h3 id="offers-status-title">{t('operator.overview.section_offers_status')}</h3>
+            <span className="op-card-tag">{t('operator.overview.badge_chart')}</span>
           </div>
           <div className="op-card-body">
             {loading ? (
@@ -362,14 +366,14 @@ export function OperatorOverview() {
             ) : offers.length === 0 ? (
               <div className="op-empty-chart">
                 <FileText aria-hidden="true" />
-                <h4>لا توجد بيانات لعرضها</h4>
-                <p>سيظهر التوزيع بعد تقديم عروض</p>
+                <h4>{t('operator.overview.empty_chart_title')}</h4>
+                <p>{t('operator.overview.empty_chart_desc')}</p>
                 <button
                   type="button"
                   className="op-btn op-btn-ghost op-btn-sm mt-2"
                   onClick={() => setLocation('/operator/offers')}
                 >
-                  إعداد عرض
+                  {t('operator.overview.btn_prepare_offer')}
                 </button>
               </div>
             ) : (
@@ -385,7 +389,7 @@ export function OperatorOverview() {
                       {offers.length}
                     </span>
                     <span className="mt-1 text-[10px] font-bold text-[var(--op-muted)]">
-                      إجمالي العروض
+                      {t('operator.overview.total_offers_label')}
                     </span>
                   </div>
                 </div>
@@ -416,8 +420,7 @@ export function OperatorOverview() {
                     </div>
                   ))}
                   <p className="pt-1 text-[11px] leading-relaxed text-[var(--op-muted)]">
-                    يشمل «قيد التقييم» العروض المودعة والمقبولة إدارياً والتي تم تقييمها ولم تصدر
-                    بشأنها نتيجة نهائية بعد.
+                    {t('operator.overview.eval_note')}
                   </p>
                 </div>
               </div>
@@ -430,15 +433,15 @@ export function OperatorOverview() {
         <div className="op-card-head">
           <div className="flex flex-wrap items-center gap-2">
             <Sparkles className="size-4 text-[var(--op-gold)]" aria-hidden="true" />
-            <h3 id="recommended-deals-title">الصفقات المقترحة لك</h3>
-            <span className="op-card-tag">مطابقة حسب ملف مؤسستك</span>
+            <h3 id="recommended-deals-title">{t('operator.overview.section_recommended')}</h3>
+            <span className="op-card-tag">{t('operator.overview.badge_matched')}</span>
           </div>
           <button
             type="button"
             className="op-btn op-btn-ghost op-btn-sm"
             onClick={() => setLocation('/operator/deals')}
           >
-            عرض الكل
+            {t('operator.overview.btn_view_all')}
             <ChevronLeft aria-hidden="true" />
           </button>
         </div>
@@ -458,28 +461,28 @@ export function OperatorOverview() {
             <div className="op-alert error" role="alert">
               <AlertTriangle aria-hidden="true" />
               <div className="flex flex-1 flex-wrap items-center justify-between gap-3">
-                <span>تعذر تحميل الصفقات المقترحة حالياً. يمكنك تصفح كل الصفقات المتاحة.</span>
+                <span>{t('operator.overview.err_recommended')}</span>
                 <button
                   type="button"
                   className="op-btn op-btn-outline op-btn-sm"
                   onClick={() => setRecommendedRefreshKey((value) => value + 1)}
                 >
                   <RefreshCw aria-hidden="true" />
-                  <span>إعادة المحاولة</span>
+                  <span>{t('operator.overview.btn_retry')}</span>
                 </button>
               </div>
             </div>
           ) : recommendedDeals.length === 0 ? (
             <div className="op-empty-chart">
               <Sparkles aria-hidden="true" />
-              <h4>لا توجد صفقات مقترحة حالياً</h4>
-              <p>أكمل ملف مؤسستك (القطاع والولاية) لتحصل على مطابقة أدق.</p>
+              <h4>{t('operator.overview.empty_rec_title')}</h4>
+              <p>{t('operator.overview.empty_rec_desc')}</p>
               <button
                 type="button"
                 className="op-btn op-btn-ghost op-btn-sm mt-2"
                 onClick={() => setLocation('/operator/profile')}
               >
-                تحديث ملف المؤسسة
+                {t('operator.overview.btn_update_profile')}
               </button>
             </div>
           ) : (
@@ -495,9 +498,9 @@ export function OperatorOverview() {
                     className="flex h-full flex-col rounded-xl border border-[var(--op-line)] bg-[var(--op-surface-2)] p-4 transition hover:-translate-y-0.5 hover:border-[var(--op-gold-line)] hover:shadow-[var(--op-shadow-md)]"
                   >
                     <div className="flex items-center justify-between gap-2">
-                      <span className="op-chip green">{matchScore}% توافق</span>
+                      <span className="op-chip green">{matchScore}% {t('operator.overview.match_suffix')}</span>
                       <span className="text-[11px] font-bold text-[var(--op-muted)]">
-                        {deal.match_level_display || 'مقترحة'}
+                        {deal.match_level_display || t('operator.overview.match_level_proposed')}
                       </span>
                     </div>
                     <h4 className="mt-3 line-clamp-2 text-sm font-extrabold leading-snug text-[var(--op-ink)]">
@@ -509,7 +512,7 @@ export function OperatorOverview() {
                     <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-[var(--op-muted)]">
                       <span className="inline-flex items-center gap-1">
                         <Building2 className="size-3.5" aria-hidden="true" />
-                        <span className="truncate">{deal.authority_name || 'مصلحة متعاقدة'}</span>
+                        <span className="truncate">{deal.authority_name || t('operator.overview.authority_fallback')}</span>
                       </span>
                       {deal.wilaya && (
                         <span className="inline-flex items-center gap-1">
@@ -537,7 +540,7 @@ export function OperatorOverview() {
                       </p>
                     )}
                     <span className="mt-auto inline-flex items-center gap-1 pt-3 text-[11px] font-bold text-[var(--op-gold-dark)]">
-                      معاينة الصفقة
+                      {t('operator.overview.btn_preview_deal')}
                       <ArrowUpRight className="size-3.5" aria-hidden="true" />
                     </span>
                   </Link>
@@ -551,7 +554,7 @@ export function OperatorOverview() {
       <div className="op-grid-2">
         <section className="op-card" aria-labelledby="recent-activity-title">
           <div className="op-card-head">
-            <h3 id="recent-activity-title">آخر النشاطات</h3>
+            <h3 id="recent-activity-title">{t('operator.overview.section_recent_activity')}</h3>
           </div>
           <div className="op-card-body">
             {loading ? (
@@ -563,8 +566,8 @@ export function OperatorOverview() {
             ) : recentOffers.length === 0 ? (
               <div className="op-empty-chart min-h-[190px]">
                 <Clock aria-hidden="true" />
-                <h4>لا يوجد نشاط بعد</h4>
-                <p>ستظهر هنا آخر إجراءاتك على المنصة</p>
+                <h4>{t('operator.overview.empty_activity_title')}</h4>
+                <p>{t('operator.overview.empty_activity_desc')}</p>
               </div>
             ) : (
               <div className="op-list">
@@ -580,7 +583,7 @@ export function OperatorOverview() {
                       <span
                         className={`op-chip ${offer.status === 'submitted' ? 'green' : 'gold'}`}
                       >
-                        {offer.status === 'submitted' ? 'مودع' : 'مسودة'}
+                        {offer.status === 'submitted' ? t('operator.overview.status_submitted') : t('operator.overview.status_draft')}
                       </span>
                     </a>
                   </Link>
@@ -592,17 +595,17 @@ export function OperatorOverview() {
 
         <section className="op-card" aria-labelledby="quick-links-title">
           <div className="op-card-head">
-            <h3 id="quick-links-title">روابط سريعة</h3>
+            <h3 id="quick-links-title">{t('operator.overview.section_quick_links')}</h3>
           </div>
           <div className="op-card-body">
             <div className="op-list">
               {[
-                { href: '/operator/deals', label: 'الإعلانات وفرص الصفقات', icon: Megaphone },
-                { href: '/operator/smart-specs', label: 'دفاتر الشروط', icon: BookOpen },
-                { href: '/operator/offers', label: 'إدارة العروض', icon: ClipboardCheck },
-                { href: '/operator/objections', label: 'الطعون والتظلمات', icon: Scale },
-                { href: '/operator/profile', label: 'ملف المؤسسة', icon: Building2 },
-                { href: '/operator/archive', label: 'الأرشيف', icon: Archive },
+                { href: '/operator/deals', label: t('operator.overview.link_deals'), icon: Megaphone },
+                { href: '/operator/smart-specs', label: t('operator.overview.link_specs'), icon: BookOpen },
+                { href: '/operator/offers', label: t('operator.overview.link_offers'), icon: ClipboardCheck },
+                { href: '/operator/objections', label: t('operator.overview.link_objections'), icon: Scale },
+                { href: '/operator/profile', label: t('operator.overview.link_profile'), icon: Building2 },
+                { href: '/operator/archive', label: t('operator.overview.link_archive'), icon: Archive },
               ].map((item) => {
                 const Icon = item.icon;
                 return (

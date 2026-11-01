@@ -37,50 +37,45 @@ import {
 import { TableState, formatDZD, formatDate, formatNumber, formatPercent } from './centralUi';
 
 /**
- * التقارير الوطنية الموحدة — كتالوج التقارير المولّد من الخادم
- * (GET /api/central/reports/) مع مؤشرات الحصيلة الوطنية.
- *
- * التصدير: تحميل التقرير المحدد بصيغة PDF من الخادم عبر
- * GET /api/central/reports/{report_id}/pdf/
+ * Consolidated National Reports — generated catalog from GET /api/central/reports/
+ * with national summary indicators and PDF export.
  */
 
-const TYPE_LABELS: Record<string, string> = {
-  monthly: 'تقرير شهري',
-  quarterly: 'حصيلة ثلاثية',
-  annual: 'تقرير سنوي',
-  sector: 'تقرير قطاعي',
-};
-
-const STATUS_META: Record<string, { label: string; className: string }> = {
-  ready: {
-    label: 'جاهز',
-    className: 'bg-emerald-50 text-emerald-800 border-emerald-300',
-  },
-  archived: {
-    label: 'مؤرشف',
-    className: 'bg-slate-50 text-slate-700 border-slate-300',
-  },
-  draft: {
-    label: 'مسودة',
-    className: 'bg-amber-50 text-amber-800 border-amber-300',
-  },
-};
-
-function typeLabel(type: string): string {
-  return TYPE_LABELS[type] ?? type;
+function getTypeLabel(type: string, t: (key: string) => string): string {
+  const map: Record<string, string> = {
+    monthly: t('central.reports.type_monthly'),
+    quarterly: t('central.reports.type_quarterly'),
+    annual: t('central.reports.type_annual'),
+    sector: t('central.reports.type_sector'),
+  };
+  return map[type] ?? type;
 }
 
-function statusMeta(status: string) {
+function getStatusMeta(status: string, t: (key: string) => string) {
+  const map: Record<string, { label: string; className: string }> = {
+    ready: {
+      label: t('central.reports.status_ready'),
+      className: 'bg-emerald-50 text-emerald-800 border-emerald-300',
+    },
+    archived: {
+      label: t('central.reports.status_archived'),
+      className: 'bg-slate-50 text-slate-700 border-slate-300',
+    },
+    draft: {
+      label: t('central.reports.status_draft'),
+      className: 'bg-amber-50 text-amber-800 border-amber-300',
+    },
+  };
   return (
-    STATUS_META[status] ?? {
-      label: status || 'غير محدّد',
+    map[status] ?? {
+      label: status || t('central.reports.status_unspecified'),
       className: 'bg-slate-50 text-slate-700 border-slate-300',
     }
   );
 }
 
 export function CentralReports() {
-  const { dir } = useI18n();
+  const { dir, t } = useI18n();
   const { data, loading, error, reload } = useCentralResource(fetchCentralReports);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState('all');
@@ -108,14 +103,9 @@ export function CentralReports() {
     });
   }, [reports, searchQuery, filterType]);
 
-  /**
-   * تحميل ملف PDF من الخادم عبر نقطة النهاية المعتمدة.
-   * نستخدم عميل api حتى يُضاف Access Token ويُجدَّد تلقائياً عند 401.
-   * GET /api/central/reports/{report_id}/pdf/
-   */
   const downloadReportPdf = async (reportId: string) => {
     if (!reportId) {
-      toast.error('لا يوجد تقرير محدد للتصدير.');
+      toast.error(t('central.reports.no_report_selected'));
       return;
     }
 
@@ -134,7 +124,7 @@ export function CentralReports() {
       a.click();
       document.body.removeChild(a);
       window.setTimeout(() => window.URL.revokeObjectURL(url), 1000);
-      toast.success('تم تحميل التقرير بصيغة PDF.');
+      toast.success(t('central.reports.pdf_downloaded'));
     } catch (err) {
       toast.error(extractApiErrorMessage(err));
     } finally {
@@ -145,7 +135,7 @@ export function CentralReports() {
   const handleExportPdf = () => {
     const targetId = filtered[0]?.id;
     if (!targetId) {
-      toast.error('لا توجد تقارير مطابقة للتصدير.');
+      toast.error(t('central.reports.no_matching_reports'));
       return;
     }
     void downloadReportPdf(targetId);
@@ -154,9 +144,9 @@ export function CentralReports() {
   return (
     <div className="space-y-4" dir={dir}>
       <PageHeader
-        title="التقارير الوطنية الموحدة"
+        title={t('central.reports.title')}
         titleClassName="text-xl font-bold"
-        description="كتالوج التقارير الوطنية المولّدة من الخادم مع مؤشرات الحصيلة الشاملة والشفافية."
+        description={t('central.reports.description')}
         actions={
           <div className="flex items-center gap-2 print:hidden">
             <Button
@@ -164,10 +154,10 @@ export function CentralReports() {
               size="sm"
               onClick={reload}
               disabled={loading}
-              className="text-xs h-8"
+              className="text-xs h-8 gap-1.5"
             >
               <RefreshCw className="size-3.5" aria-hidden="true" />
-              تحديث
+              {t('central.reports.refresh')}
             </Button>
             <Button
               size="sm"
@@ -176,7 +166,7 @@ export function CentralReports() {
               className="gap-1.5 bg-[#0f3154] text-xs font-bold text-white hover:bg-[#0b2743] h-8"
             >
               <Download className="size-3.5" aria-hidden="true" />
-              {exporting ? 'جاري التحميل…' : 'تحميل تقرير PDF'}
+              {exporting ? t('central.reports.downloading') : t('central.reports.download_pdf')}
             </Button>
           </div>
         }
@@ -184,16 +174,18 @@ export function CentralReports() {
 
       <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
         <KpiCard
-          eyebrow="إجمالي الصفقات"
+          eyebrow={t('central.reports.kpi_total_deals')}
           value={formatNumber(summary?.total_deals ?? 0)}
           valueClassName="font-sans text-xl font-bold"
           descriptionClassName="text-xs text-gray-500"
           icon={FileText}
           accent="navy"
-          description={`${formatNumber(summary?.total_authorities ?? 0)} مصلحة متعاقدة مشمولة`}
+          description={t('central.reports.kpi_authorities_covered', {
+            count: formatNumber(summary?.total_authorities ?? 0),
+          })}
         />
         <KpiCard
-          eyebrow="الحجم المالي الوطني"
+          eyebrow={t('central.reports.kpi_national_volume')}
           value=""
           valueClassName="font-sans"
           valueContent={
@@ -201,31 +193,31 @@ export function CentralReports() {
               <span className="text-xl font-bold leading-none">
                 {formatNumber(Math.round(summary?.total_volume_dzd ?? 0))}
               </span>
-              <span className="text-xs font-semibold text-gray-500">دج</span>
+              <span className="text-xs font-semibold text-gray-500">{t('central.ui.dzd')}</span>
             </span>
           }
           descriptionClassName="text-xs text-gray-500"
           icon={Wallet}
           accent="emerald"
-          description="مجموع الميزانيات التقديرية المسجّلة"
+          description={t('central.reports.kpi_national_volume_sub')}
         />
         <KpiCard
-          eyebrow="متوسط الالتزام بالآجال"
+          eyebrow={t('central.reports.kpi_avg_punctuality')}
           value={formatPercent(summary?.average_compliance_rate ?? 0)}
           valueClassName="font-sans text-xl font-bold"
           descriptionClassName="text-xs text-gray-500"
           icon={TrendingUp}
           accent="gold"
-          description="متوسط وطني على كل المصالح"
+          description={t('central.reports.kpi_avg_punctuality_sub')}
         />
         <KpiCard
-          eyebrow="متوسط مؤشر الشفافية"
+          eyebrow={t('central.reports.kpi_avg_transparency')}
           value={formatPercent(summary?.average_transparency_rate ?? 0)}
           valueClassName="font-sans text-xl font-bold"
           descriptionClassName="text-xs text-gray-500"
           icon={ShieldCheck}
           accent="red"
-          description="دفاتر شروط مؤشّرة وجلسات فتح علنية"
+          description={t('central.reports.kpi_avg_transparency_sub')}
         />
       </div>
 
@@ -233,10 +225,10 @@ export function CentralReports() {
         <CardHeader className="flex flex-col gap-3 border-b border-gray-200 pb-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <CardTitle className="text-base font-bold text-[var(--ink-900)]">
-              كتالوج التقارير الوطنية
+              {t('central.reports.catalog_title')}
             </CardTitle>
             <CardDescription className="mt-0.5 text-xs text-gray-500">
-              تقارير دورية مولّدة آلياً من بيانات الصفقات والرقابة
+              {t('central.reports.catalog_subtitle')}
             </CardDescription>
           </div>
 
@@ -248,10 +240,10 @@ export function CentralReports() {
               />
               <input
                 type="text"
-                placeholder="بحث في التقارير…"
+                placeholder={t('central.reports.search_placeholder')}
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
-                aria-label="بحث في التقارير الوطنية"
+                aria-label={t('central.reports.search_aria')}
                 className="h-8 w-full ps-8 pe-3 text-xs leading-none rounded-lg border border-gray-200 bg-white text-[var(--ink-900)] placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-[#0f3154] sm:w-64"
               />
             </div>
@@ -259,13 +251,13 @@ export function CentralReports() {
             <select
               value={filterType}
               onChange={(event) => setFilterType(event.target.value)}
-              aria-label="تصفية حسب نوع التقرير"
+              aria-label={t('central.reports.filter_type_aria')}
               className="h-8 px-2.5 text-xs leading-none rounded-lg border border-gray-200 bg-white text-[var(--ink-900)] focus:outline-none focus:ring-1 focus:ring-[#0f3154]"
             >
-              <option value="all">كل الأنواع</option>
+              <option value="all">{t('central.reports.all_types')}</option>
               {reportTypes.map((type) => (
                 <option key={type} value={type}>
-                  {typeLabel(type)}
+                  {getTypeLabel(type, t)}
                 </option>
               ))}
             </select>
@@ -277,20 +269,20 @@ export function CentralReports() {
             <TableHeader>
               <TableRow>
                 <TableHead className="min-w-[150px] whitespace-nowrap text-xs">
-                  معرّف التقرير
+                  {t('central.reports.col_id')}
                 </TableHead>
-                <TableHead className="min-w-[260px] text-xs">عنوان التقرير</TableHead>
-                <TableHead className="whitespace-nowrap text-xs">النوع</TableHead>
-                <TableHead className="whitespace-nowrap text-xs">الفترة</TableHead>
-                <TableHead className="min-w-[160px] text-xs">النطاق</TableHead>
-                <TableHead className="whitespace-nowrap text-center text-xs">تاريخ التوليد</TableHead>
-                <TableHead className="whitespace-nowrap text-center text-xs">الصفقات</TableHead>
-                <TableHead className="whitespace-nowrap text-end text-xs">الحجم المالي</TableHead>
-                <TableHead className="whitespace-nowrap text-center text-xs">الالتزام</TableHead>
-                <TableHead className="whitespace-nowrap text-center text-xs">الشفافية</TableHead>
-                <TableHead className="whitespace-nowrap text-xs">الحالة</TableHead>
+                <TableHead className="min-w-[260px] text-xs">{t('central.reports.col_title')}</TableHead>
+                <TableHead className="whitespace-nowrap text-xs">{t('central.reports.col_type')}</TableHead>
+                <TableHead className="whitespace-nowrap text-xs">{t('central.reports.col_period')}</TableHead>
+                <TableHead className="min-w-[160px] text-xs">{t('central.reports.col_scope')}</TableHead>
+                <TableHead className="whitespace-nowrap text-center text-xs">{t('central.reports.col_gen_date')}</TableHead>
+                <TableHead className="whitespace-nowrap text-center text-xs">{t('central.reports.col_deals')}</TableHead>
+                <TableHead className="whitespace-nowrap text-end text-xs">{t('central.reports.col_volume')}</TableHead>
+                <TableHead className="whitespace-nowrap text-center text-xs">{t('central.reports.col_compliance')}</TableHead>
+                <TableHead className="whitespace-nowrap text-center text-xs">{t('central.reports.col_transparency')}</TableHead>
+                <TableHead className="whitespace-nowrap text-xs">{t('central.reports.col_status')}</TableHead>
                 <TableHead className="whitespace-nowrap text-center text-xs print:hidden">
-                  التحميل
+                  {t('central.reports.col_download')}
                 </TableHead>
               </TableRow>
             </TableHeader>
@@ -300,11 +292,11 @@ export function CentralReports() {
                 loading={loading && !data}
                 error={error}
                 empty={!loading && filtered.length === 0}
-                emptyLabel="لا توجد تقارير مطابقة للبحث أو التصفية الحالية."
+                emptyLabel={t('central.reports.empty_reports')}
                 onRetry={reload}
               >
                 {filtered.map((report: CentralReportCatalogItem) => {
-                  const meta = statusMeta(report.status);
+                  const meta = getStatusMeta(report.status, t);
                   return (
                     <TableRow
                       key={report.id}
@@ -317,7 +309,7 @@ export function CentralReports() {
                         <span className="line-clamp-2">{report.title}</span>
                       </TableCell>
                       <TableCell className="whitespace-nowrap text-xs text-[var(--ink-700)] py-2.5">
-                        {typeLabel(report.type)}
+                        {getTypeLabel(report.type, t)}
                       </TableCell>
                       <TableCell className="whitespace-nowrap text-xs text-[var(--ink-700)] py-2.5">
                         {report.period || '—'}
@@ -350,7 +342,7 @@ export function CentralReports() {
                           onClick={() => void downloadReportPdf(report.id)}
                           disabled={exporting}
                           className="h-7 gap-1 text-xs font-semibold text-[#0f3154] hover:bg-slate-100"
-                          title="تحميل التقرير بصيغة PDF"
+                          title={t('central.reports.download_tooltip')}
                         >
                           <Download className="size-3" />
                           <span>PDF</span>
@@ -365,10 +357,13 @@ export function CentralReports() {
 
           <div className="flex flex-wrap items-center justify-between gap-2 border-t border-gray-200 px-4 py-2.5 text-xs text-gray-500">
             <span>
-              عرض {formatNumber(filtered.length)} من أصل {formatNumber(reports.length)} تقريراً
+              {t('central.reports.summary_footer', {
+                count: formatNumber(filtered.length),
+                total: formatNumber(reports.length),
+              })}
             </span>
             <span className="print:hidden">
-              زر التحميل في الأعلى يعرض أول تقرير مطابق؛ ويمكنك تحميل أي تقرير مباشرة من عمود PDF.
+              {t('central.reports.download_notice')}
             </span>
           </div>
         </CardContent>

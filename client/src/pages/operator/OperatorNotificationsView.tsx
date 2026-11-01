@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useI18n } from '@/i18n';
+import { useI18n, type TranslationKey } from '@/i18n';
 import {
   Bell,
   CheckCircle2,
@@ -41,11 +41,11 @@ const TYPE_ICONS = {
   contract: ScrollText,
 };
 
-const TAB_LABELS: Record<NotificationTab, { ar: string; fr: string }> = {
-  all: { ar: 'الكل', fr: 'Tout' },
-  unread: { ar: 'غير مقروء', fr: 'Non lus' },
-  deals: { ar: 'صفقات', fr: 'Marchés' },
-  contracts: { ar: 'عقود', fr: 'Contrats' },
+const TAB_LABEL_KEYS: Record<NotificationTab, TranslationKey> = {
+  all: 'operator.notif.tab_all',
+  unread: 'operator.notif.tab_unread',
+  deals: 'operator.notif.tab_deals',
+  contracts: 'operator.notif.tab_contracts',
 };
 
 const asRecord = (value: unknown): Record<string, unknown> =>
@@ -138,8 +138,8 @@ const normalizeNotification = (raw: unknown, index: number): NotificationItem =>
   return {
     id: String(item.id ?? item.uuid ?? `notification-${index}`),
     type: normalizeType(item.type ?? item.notification_type ?? item.category ?? item.kind),
-    titleAr: titleAr || descAr || 'إشعار',
-    titleFr: titleFr || titleAr || descFr || 'Notification',
+    titleAr: titleAr || descAr || '',
+    titleFr: titleFr || titleAr || descFr || '',
     descAr,
     descFr,
     date: pickString(item.created_at, item.createdAt, item.date, item.timestamp, item.sent_at),
@@ -192,28 +192,16 @@ export function OperatorNotificationsView() {
     } catch (err: unknown) {
       const status = (err as { response?: { status?: number } })?.response?.status;
       if (status === 401) {
-        setError(
-          lang === 'ar'
-            ? 'انتهت جلسة الدخول. يرجى تسجيل الدخول مجدداً لعرض الإشعارات.'
-            : 'Votre session a expiré. Veuillez vous reconnecter.',
-        );
+        setError(t('operator.notif.err_session_expired'));
       } else if (status === 404) {
-        setError(
-          lang === 'ar'
-            ? 'خدمة الإشعارات غير متاحة حالياً. يرجى المحاولة لاحقاً.'
-            : "Le service de notifications n'est pas disponible pour le moment.",
-        );
+        setError(t('operator.notif.err_unavailable'));
       } else {
-        setError(
-          lang === 'ar'
-            ? 'تعذر تحميل الإشعارات. يرجى التحقق من الاتصال والمحاولة مجدداً.'
-            : 'Impossible de charger les notifications. Veuillez réessayer.',
-        );
+        setError(t('operator.notif.err_load_failed'));
       }
     } finally {
       setLoading(false);
     }
-  }, [lang]);
+  }, [t]);
 
   useEffect(() => {
     void loadNotifications();
@@ -231,16 +219,12 @@ export function OperatorNotificationsView() {
           ),
         );
       } catch {
-        setMarkError(
-          lang === 'ar'
-            ? 'تعذر تعليم الإشعار كمقروء. يرجى المحاولة مجدداً.'
-            : 'Impossible de marquer la notification comme lue. Veuillez réessayer.',
-        );
+        setMarkError(t('operator.notif.err_mark_failed'));
       } finally {
         setMarkingId(null);
       }
     },
-    [lang],
+    [t],
   );
 
   const markAllAsRead = useCallback(async () => {
@@ -252,15 +236,11 @@ export function OperatorNotificationsView() {
         previous.map((notification) => ({ ...notification, isRead: true })),
       );
     } catch {
-      setMarkError(
-        lang === 'ar'
-          ? 'تعذر تعليم جميع الإشعارات كمقروءة. يرجى المحاولة مجدداً.'
-          : 'Impossible de marquer toutes les notifications comme lues.',
-      );
+      setMarkError(t('operator.notif.err_mark_all_failed'));
     } finally {
       setMarkingAll(false);
     }
-  }, [lang]);
+  }, [t]);
 
   const unreadCount = notifications.filter((item) => !item.isRead).length;
   const dealCount = notifications.filter((item) => classifyNotification(item) === 'deals').length;
@@ -303,17 +283,11 @@ export function OperatorNotificationsView() {
 
   const emptyMessage =
     activeTab === 'unread'
-      ? lang === 'ar'
-        ? 'لا توجد إشعارات غير مقروءة.'
-        : 'Aucune notification non lue.'
+      ? t('operator.notif.empty_unread')
       : activeTab === 'deals'
-        ? lang === 'ar'
-          ? 'لا توجد إشعارات مرتبطة بالصفقات حالياً.'
-          : 'Aucune notification liée aux marchés.'
+        ? t('operator.notif.empty_deals')
         : activeTab === 'contracts'
-          ? lang === 'ar'
-            ? 'لا توجد إشعارات مرتبطة بالعقود أو التنفيذ حالياً.'
-            : 'Aucune notification liée aux contrats ou à l’exécution.'
+          ? t('operator.notif.empty_contracts')
           : t('operator.notifications.empty');
 
   return (
@@ -336,7 +310,7 @@ export function OperatorNotificationsView() {
               ) : (
                 <CheckCheck aria-hidden="true" />
               )}
-              <span>{lang === 'ar' ? 'تعليم الكل كمقروء' : 'Tout marquer comme lu'}</span>
+              <span>{t('operator.notif.mark_all_read')}</span>
             </button>
           )}
           <button
@@ -346,13 +320,13 @@ export function OperatorNotificationsView() {
             disabled={loading}
           >
             <RefreshCw className={loading ? 'animate-spin' : undefined} aria-hidden="true" />
-            <span>{lang === 'ar' ? 'تحديث' : 'Actualiser'}</span>
+            <span>{t('operator.notif.refresh')}</span>
           </button>
         </div>
       </div>
 
-      <div className="op-tabs" role="tablist" aria-label="تصنيفات الإشعارات">
-        {(Object.keys(TAB_LABELS) as NotificationTab[]).map((tab) => (
+      <div className="op-tabs" role="tablist" aria-label={t('operator.notif.categories_aria')}>
+        {(Object.keys(TAB_LABEL_KEYS) as NotificationTab[]).map((tab) => (
           <button
             key={tab}
             type="button"
@@ -361,7 +335,7 @@ export function OperatorNotificationsView() {
             className={`op-tab ${activeTab === tab ? 'active' : ''}`}
             onClick={() => setActiveTab(tab)}
           >
-            <span>{TAB_LABELS[tab][lang === 'ar' ? 'ar' : 'fr']}</span>
+            <span>{t(TAB_LABEL_KEYS[tab])}</span>
             <span className="archive-count">{tabCounts[tab]}</span>
           </button>
         ))}
@@ -375,7 +349,7 @@ export function OperatorNotificationsView() {
       )}
 
       {loading ? (
-        <div className="op-card" aria-busy="true" aria-label="جارٍ تحميل الإشعارات">
+        <div className="op-card" aria-busy="true" aria-label={t('operator.notif.loading_aria')}>
           <div className="op-card-body space-y-4">
             {[0, 1, 2].map((item) => (
               <div
@@ -403,7 +377,7 @@ export function OperatorNotificationsView() {
               onClick={() => void loadNotifications()}
             >
               <RefreshCw aria-hidden="true" />
-              <span>{lang === 'ar' ? 'إعادة المحاولة' : 'Réessayer'}</span>
+              <span>{t('operator.notif.retry')}</span>
             </button>
           </div>
         </div>
@@ -413,23 +387,19 @@ export function OperatorNotificationsView() {
             <Bell aria-hidden="true" />
           </div>
           <h3>{emptyMessage}</h3>
-          <p>
-            {lang === 'ar'
-              ? 'ستظهر هنا كافة الإشعارات الإجرائية فور صدورها من المصالح المتعاقدة أو جلسات التقييم.'
-              : 'Toutes les notifications procédurales des services contractants apparaîtront ici.'}
-          </p>
+          <p>{t('operator.notif.empty_default_hint')}</p>
         </div>
       ) : (
         <div className="op-card">
           <div className="op-card-head">
-            <h2>{lang === 'ar' ? 'الإشعارات' : 'Notifications'}</h2>
+            <h2>{t('nav.operator.notifications')}</h2>
             <span className="op-card-tag">
-              {unreadCount} {lang === 'ar' ? 'غير مقروء' : 'non lues'}
+              {unreadCount} {t('operator.notif.unread_count_label')}
             </span>
           </div>
           <div className="op-card-body py-1">
             {filteredNotifications.map((item) => {
-              const title = lang === 'ar' ? item.titleAr : item.titleFr;
+              const title = (lang === 'ar' ? item.titleAr : item.titleFr) || t('operator.notif.fallback_title');
               const desc = lang === 'ar' ? item.descAr : item.descFr;
               const Icon = TYPE_ICONS[item.type] || Clock;
 
@@ -453,7 +423,7 @@ export function OperatorNotificationsView() {
                       <div className="flex flex-wrap items-center gap-2">
                         <h3 className="m-0 text-sm font-bold text-[var(--op-ink)]">{title}</h3>
                         {!item.isRead && (
-                          <span className="op-chip gold">{lang === 'ar' ? 'جديد' : 'Nouveau'}</span>
+                          <span className="op-chip gold">{t('operator.notif.chip_new')}</span>
                         )}
                       </div>
                       {desc && (
@@ -480,7 +450,7 @@ export function OperatorNotificationsView() {
                         ) : (
                           <CheckCheck aria-hidden="true" />
                         )}
-                        <span>{lang === 'ar' ? 'تعليم كمقروء' : 'Marquer comme lu'}</span>
+                        <span>{t('operator.notif.mark_read')}</span>
                       </button>
                     )}
                     {item.linkHref && (
@@ -489,7 +459,7 @@ export function OperatorNotificationsView() {
                         className="op-btn op-btn-outline op-btn-sm"
                         onClick={() => handleOpenNotification(item)}
                       >
-                        <span>{lang === 'ar' ? 'معاينة' : 'Voir'}</span>
+                        <span>{t('operator.notif.view_action')}</span>
                         <ArrowIcon aria-hidden="true" />
                       </button>
                     )}

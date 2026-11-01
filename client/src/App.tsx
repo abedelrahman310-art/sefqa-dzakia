@@ -14,9 +14,11 @@ import { FAQPage } from './pages/legal/FAQPage';
 import { AccessibilityPage } from './pages/legal/AccessibilityPage';
 import { AISubscriptionPage } from './pages/pricing/AISubscriptionPage';
 import { PWAInstallPrompt } from '@/shared/components/PWAInstallPrompt';
+import { useI18n } from '@/i18n';
 
 export function App() {
   const isDev = import.meta.env.DEV;
+  const { t } = useI18n();
 
   return (
     <>
@@ -61,7 +63,7 @@ export function App() {
 
       <Route>
         <div className="flex items-center justify-center min-h-screen">
-          <h1 className="text-2xl font-bold text-destructive">404 - الصفحة غير موجودة</h1>
+          <h1 className="text-2xl font-bold text-destructive">{t('common.page_not_found')}</h1>
         </div>
       </Route>
     </Switch>

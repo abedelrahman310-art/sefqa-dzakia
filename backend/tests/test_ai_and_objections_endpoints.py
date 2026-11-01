@@ -8,6 +8,8 @@ from reportlab.pdfgen import canvas
 from apps.users.models import CustomUser
 from apps.procurements.models import ProcurementDeal, CahierSpecs
 from apps.bids.models import BidOffer
+from apps.legal_rag.models import LegalArticle
+from apps.legal_rag.services.embeddings import generate_embedding
 from apps.contracts.models import (
     AwardObjection,
     ObjectionStatus,
@@ -87,8 +89,27 @@ def generate_sample_pdf_bytes():
     return buffer.getvalue()
 
 
+@pytest.fixture
+def legal_article_72(db):
+    """يزرع المادة 72 حتى يعمل RAG في قاعدة الاختبار الفارغة."""
+    content = (
+        "يحق لكل متعهد يشارك في طلب عروض ويحتج على قرار الإسناد المؤقت للصفقة "
+        "أن يرفع طعناً إدارياً مسبقاً أمام لجنة الصفقات المختصة في أجل أقصاه "
+        "عشرة (10) أيام ابتداءً من تاريخ نشر إشعار الإسناد المؤقت."
+    )
+    return LegalArticle.objects.create(
+        law_source="القانون رقم 23-12",
+        article_number="المادة 72",
+        title="الطعن الإداري المسبق في الإسناد المؤقت",
+        content=content,
+        embedding=generate_embedding(
+            f"القانون رقم 23-12 المادة 72 الطعن الإداري المسبق في الإسناد المؤقت {content}"
+        ),
+    )
+
+
 @pytest.mark.django_db
-def test_ai_legal_chat_endpoint(auth_setup):
+def test_ai_legal_chat_endpoint(auth_setup, legal_article_72):
     client = auth_setup["client"]
 
     response = client.post(

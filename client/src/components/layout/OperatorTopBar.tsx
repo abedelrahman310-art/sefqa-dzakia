@@ -104,7 +104,7 @@ export function OperatorTopBar({
           title={t('common.change_language')}
           aria-label={t('common.change_language')}
         >
-          {lang === 'ar' ? 'FR' : 'عربي'}
+          {t('common.lang_switch_short')}
         </button>
 
         <Link href="/operator/assistant">
