@@ -1,10 +1,12 @@
-# Python
+﻿# Python
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
 env/
+venv/
+.venv/
 build/
 develop-eggs/
 dist/
@@ -25,18 +27,36 @@ var/
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
-
-# Environment variables
-.env
-.env.heroku
-.env.development
-
-# Static and Media
 staticfiles/
 media/
-public/
 
-# OS generated files
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+*.bak
+*.key
+*.pem
+*.p12
+*.pfx
+*.crt
+credentials.json
+secrets/
+
+# Node.js
+node_modules/
+client/node_modules/
+shared/node_modules/
+client/.vite/
+client/dist/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Editors and OS
+.vscode/
+.idea/
 .DS_Store
 .DS_Store?
 ._*
