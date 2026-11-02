@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import axios from 'axios';
 import { useLocation, useParams } from 'wouter';
 import { useI18n } from '@/i18n';
@@ -17,6 +17,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { EvaluationMatrixTable, type EvaluationMatrixOffer } from '@/features/evaluation/EvaluationMatrixTable';
 import {
   Dialog,
   DialogContent,
@@ -118,6 +119,27 @@ export function EvaluationWorkspace() {
 
   // Per-offer form edits
   const [evalForms, setEvalForms] = useState<Record<string, EvaluationFormState>>({});
+  const [viewMode, setViewMode] = useState<'matrix' | 'cards'>('matrix');
+
+  const matrixOffers: EvaluationMatrixOffer[] = useMemo(() => {
+    return offers.map((o) => {
+      const techScoreNum = parseFloat(evalForms[o.id]?.technicalScore || o.technicalScore || '0') || 0;
+      const finAmountNum = o.financialAmount ? Number(o.financialAmount) : 0;
+      const formStatus = evalForms[o.id]?.evaluationStatus || o.evaluationStatus;
+      const statusMapped: 'pending' | 'accepted' | 'rejected' | 'abnormally_low' =
+        formStatus === 'rejected' ? 'rejected' : formStatus === 'evaluated' ? 'accepted' : 'pending';
+
+      return {
+        id: o.id,
+        operatorName: o.bidderName,
+        technicalScore: techScoreNum,
+        financialAmount: finAmountNum,
+        isCandidacyCompliant: formStatus !== 'rejected',
+        status: statusMapped,
+        rejectionReason: evalForms[o.id]?.rejectionReason || o.rejectionReason || undefined,
+      };
+    });
+  }, [offers, evalForms]);
 
   // Provisional award form
   const [winningOfferId, setWinningOfferId] = useState('');
@@ -450,11 +472,42 @@ export function EvaluationWorkspace() {
 
       {/* Offers Evaluation Section */}
       <section className="space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-border">
-          <h3 className="text-base font-bold text-navy-900 flex items-center gap-2">
-            <CheckSquare className="w-5 h-5 text-primary" />
-            {t('lifecycle.eval.candidature_tech')}
-          </h3>
+        <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-border">
+          <div className="flex items-center gap-3 flex-wrap">
+            <h3 className="text-base font-bold text-navy-900 flex items-center gap-2">
+              <CheckSquare className="w-5 h-5 text-primary" />
+              {t('lifecycle.eval.candidature_tech')}
+            </h3>
+
+            {/* View Mode Switcher */}
+            <div className="flex items-center gap-1 bg-muted/60 p-1 rounded-xl border border-border">
+              <button
+                type="button"
+                onClick={() => setViewMode('matrix')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+                  viewMode === 'matrix'
+                    ? 'bg-navy-900 text-white shadow-sm'
+                    : 'text-muted-foreground hover:text-navy-900'
+                }`}
+              >
+                <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
+                <span>مصفوفة الترتيب والتقييم الذكي (COP Matrix)</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode('cards')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+                  viewMode === 'cards'
+                    ? 'bg-navy-900 text-white shadow-sm'
+                    : 'text-muted-foreground hover:text-navy-900'
+                }`}
+              >
+                <CheckSquare className="w-3.5 h-3.5" />
+                <span>الاستمارات الفردية ({offers.length})</span>
+              </button>
+            </div>
+          </div>
+
           <div className="flex items-center gap-3">
             <span className="text-xs text-muted-foreground">
               {t('authority.eval.offers_under_study', { count: offers.length })}
@@ -744,7 +797,7 @@ export function EvaluationWorkspace() {
 
             {/* Provisional Award Form */}
             {!isAwardConcluded && (
-              <div className="p-5 bg-navy-50/50 border border-navy-100 rounded-xl space-y-4 mt-4">
+              <div id="provisional-award-section" className="p-5 bg-navy-50/50 border border-navy-100 rounded-xl space-y-4 mt-4">
                 <h4 className="text-xs font-bold text-navy-900 flex items-center gap-2">
                   <BadgeCheck className="w-4 h-4 text-emerald-700" />
                   {t('lifecycle.eval.conclude_btn')}

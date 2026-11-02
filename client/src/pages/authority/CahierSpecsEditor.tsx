@@ -17,6 +17,8 @@ import {
   FileText,
 } from 'lucide-react';
 import { downloadPdfBlob } from '@/lib/pdfDownloader';
+import { ClauseLinterWidget } from '@/features/specs/ClauseLinterWidget';
+import { SmartSpecsGeneratorModal, type GeneratedSpecsClause } from '@/features/specs/SmartSpecsGeneratorModal';
 
 // Removed LegalNode
 
@@ -130,6 +132,73 @@ export function CahierSpecsEditor({ draftId }: CahierSpecsEditorProps) {
   const [freezing, setFreezing] = useState(false);
   const [showFreezeConfirm, setShowFreezeConfirm] = useState(false);
   const [isExportingPdf, setIsExportingPdf] = useState(false);
+  const [showSpecsGenerator, setShowSpecsGenerator] = useState(false);
+
+  const handleApplyGeneratedSpecs = async (generated: GeneratedSpecsClause[]) => {
+    const genGeneral = generated.find((c) => c.sectionKey === 'general_provisions')?.content || '';
+    const genRules = generated.find((c) => c.sectionKey === 'administrative')?.content || '';
+    const genTech = generated.find((c) => c.sectionKey === 'technical_specs')?.content || '';
+    const genFin = generated.find((c) => c.sectionKey === 'financial_terms')?.content || '';
+    const genEval = generated.find((c) => c.sectionKey === 'evaluation_criteria')?.content || '';
+
+    const payload = {
+      deal: draftId,
+      administrative_clauses: {
+        general: genGeneral,
+        rules: genRules,
+      },
+      technical_requirements: {
+        details: genTech,
+      },
+      financial_criteria: {
+        terms: genFin,
+        scoring: genEval,
+      },
+    };
+
+    try {
+      setLoading(true);
+      if (cahier?.id) {
+        await api.patch(`/procurements/specs/${cahier.id}/`, payload);
+      } else {
+        await api.post('/procurements/specs/', payload);
+      }
+      setShowSpecsGenerator(false);
+      await fetchCahierData();
+    } catch (err: any) {
+      alert(err?.response?.data?.detail || err?.message || 'فشل تطبيق دفتر الشروط المولد');
+      setLoading(false);
+    }
+  };
+
+  const handleQuickFixClause = async (clauseId: string, fixedContent: string) => {
+    const target = clauses.find((c) => c.id === clauseId);
+    if (!target) return;
+
+    setClauses((prev) =>
+      prev.map((c) => (c.id === clauseId ? { ...c, content: fixedContent } : c))
+    );
+
+    if (cahier?.id) {
+      let payload: any = {};
+      if (target.sectionKey === 'general_provisions') {
+        payload = { administrative_clauses: { general: fixedContent } };
+      } else if (target.sectionKey === 'administrative') {
+        payload = { administrative_clauses: { rules: fixedContent } };
+      } else if (target.sectionKey === 'technical_specs') {
+        payload = { technical_requirements: { details: fixedContent } };
+      } else if (target.sectionKey === 'financial_terms') {
+        payload = { financial_criteria: { terms: fixedContent } };
+      } else if (target.sectionKey === 'evaluation_criteria') {
+        payload = { financial_criteria: { scoring: fixedContent } };
+      }
+      try {
+        await api.patch(`/procurements/specs/${cahier.id}/`, payload);
+      } catch (err) {
+        console.error('Failed to auto-save quick fix', err);
+      }
+    }
+  };
 
   const handleExportPdf = async () => {
     if (!draftId) return;
@@ -378,13 +447,22 @@ export function CahierSpecsEditor({ draftId }: CahierSpecsEditorProps) {
             </ul>
           </div>
 
-          <Button
-            onClick={handleInitCahier}
-            className="bg-navy-900 hover:bg-navy-800 text-white font-bold px-8 py-3 rounded-xl shadow transition-colors inline-flex items-center gap-2"
-          >
-            <Sparkles className="w-4 h-4 text-gold-400" />
-            <span>{t('specs.init_cahier')}</span>
-          </Button>
+          <div className="flex items-center justify-center gap-3 flex-wrap">
+            <Button
+              onClick={() => setShowSpecsGenerator(true)}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-3 rounded-xl shadow transition-colors inline-flex items-center gap-2"
+            >
+              <Sparkles className="w-4 h-4 text-emerald-100" />
+              <span>توليد دفتر شروط ذكي ومطابق قانونياً (AI Generator)</span>
+            </Button>
+            <Button
+              variant="outline"
+              onClick={handleInitCahier}
+              className="font-bold px-6 py-3 rounded-xl border-border inline-flex items-center gap-2"
+            >
+              <span>{t('specs.init_cahier')}</span>
+            </Button>
+          </div>
         </div>
       </div>
     );
@@ -429,6 +507,16 @@ export function CahierSpecsEditor({ draftId }: CahierSpecsEditorProps) {
 
         {/* Top Actions: PDF Export & Freeze */}
         <div className="flex items-center gap-2.5 flex-wrap self-start sm:self-auto">
+          {!isFrozen && (
+            <Button
+              onClick={() => setShowSpecsGenerator(true)}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-sm flex items-center gap-1.5"
+            >
+              <Sparkles className="w-4 h-4 text-emerald-100" />
+              <span>توليد ذكي (AI Generator)</span>
+            </Button>
+          )}
+
           <Button
             variant="outline"
             onClick={handleExportPdf}
@@ -733,6 +821,20 @@ export function CahierSpecsEditor({ draftId }: CahierSpecsEditorProps) {
                     </div>
                   )}
 
+                  {/* Anti-Discriminatory Clause Linter */}
+                  <div className="pt-2">
+                    <ClauseLinterWidget
+                      content={isEditing ? editedContent : clause.content}
+                      onApplyFix={(fixedText) => {
+                        if (isEditing) {
+                          setEditedContent(fixedText);
+                        } else {
+                          handleQuickFixClause(clause.id, fixedText);
+                        }
+                      }}
+                    />
+                  </div>
+
                   {/* Competition Stress Findings (if any) */}
                   {hasStress && (
                     <div className="space-y-2 pt-1">
@@ -864,6 +966,12 @@ export function CahierSpecsEditor({ draftId }: CahierSpecsEditorProps) {
           )}
         </div>
       )}
+      {/* Smart Specs Generator Modal */}
+      <SmartSpecsGeneratorModal
+        isOpen={showSpecsGenerator}
+        onClose={() => setShowSpecsGenerator(false)}
+        onApplyGeneratedClauses={handleApplyGeneratedSpecs}
+      />
     </div>
   );
 }
