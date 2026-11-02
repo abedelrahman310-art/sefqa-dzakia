@@ -12,6 +12,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { GPSFieldVerificationModal, type GPSVerificationRecord } from '@/features/field/GPSFieldVerificationModal';
+import { VoiceDictationButton } from '@/features/voice/VoiceDictationButton';
+import { MapPin } from 'lucide-react';
 import {
   AlertCircle,
   AlertTriangle,
@@ -152,6 +155,7 @@ export function ExecutionTracker({ dealId, role, className = '' }: ExecutionTrac
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [reportForms, setReportForms] = useState<Record<string, ReportFormState>>({});
+  const [gpsModalMilestone, setGpsModalMilestone] = useState<MilestoneApi | null>(null);
   const [expandedReports, setExpandedReports] = useState<Record<string, boolean>>({});
 
   const loadMilestones = useCallback(async () => {
@@ -545,9 +549,21 @@ export function ExecutionTracker({ dealId, role, className = '' }: ExecutionTrac
 
                   {role === 'operator' && (
                     <div className="rounded-xl border border-emerald-100 bg-emerald-50/40 p-3.5 space-y-3">
-                      <div className="flex items-center gap-2 text-xs font-extrabold text-emerald-900">
-                        <Upload className="h-4 w-4" />
-                        {t('authority.execution.upload_report_title')}
+                      <div className="flex items-center justify-between gap-2 pb-1 border-b border-emerald-200">
+                        <div className="flex items-center gap-2 text-xs font-extrabold text-emerald-900">
+                          <Upload className="h-4 w-4" />
+                          {t('authority.execution.upload_report_title')}
+                        </div>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setGpsModalMilestone(milestone)}
+                          className="h-7 text-[11px] rounded-lg border-emerald-300 text-emerald-900 bg-emerald-50 hover:bg-emerald-100 font-bold gap-1"
+                        >
+                          <MapPin className="h-3 w-3 text-emerald-700" />
+                          <span>توثيق ميداني بالبصمة الجغرافية (GPS Verify)</span>
+                        </Button>
                       </div>
 
                       <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
@@ -670,6 +686,22 @@ export function ExecutionTracker({ dealId, role, className = '' }: ExecutionTrac
             );
           })}
         </ol>
+      )}
+      {gpsModalMilestone && (
+        <GPSFieldVerificationModal
+          isOpen={Boolean(gpsModalMilestone)}
+          onClose={() => setGpsModalMilestone(null)}
+          dealTitle={dealTitle || ''}
+          dealReference={dealId}
+          milestoneTitle={gpsModalMilestone.title}
+          onSaveVerification={(rec) => {
+            updateReportForm(gpsModalMilestone.id, {
+              reportText: (reportForms[gpsModalMilestone.id]?.reportText ? reportForms[gpsModalMilestone.id]?.reportText + '\n\n' : '') +
+                `[توثيق ميداني GPS معتمد]: إحداثيات (Lat: ${rec.latitude.toFixed(6)}, Lng: ${rec.longitude.toFixed(6)} ±${rec.accuracy}م) - البصمة: ${rec.sha256Digest.slice(0, 16)}...` +
+                (rec.observations ? ` - الملاحظات: ${rec.observations}` : ''),
+            });
+          }}
+        />
       )}
     </section>
   );

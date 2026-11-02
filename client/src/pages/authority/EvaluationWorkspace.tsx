@@ -18,6 +18,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { EvaluationMatrixTable, type EvaluationMatrixOffer } from '@/features/evaluation/EvaluationMatrixTable';
+import { VoiceDictationButton } from '@/features/voice/VoiceDictationButton';
 import {
   Dialog,
   DialogContent,
@@ -692,7 +693,20 @@ export function EvaluationWorkspace() {
                   </div>
 
                   <div className="md:col-span-2 xl:col-span-4 space-y-1.5">
-                    <Label className="text-xs font-semibold">{t('lifecycle.eval.notes')}</Label>
+                    <div className="flex items-center justify-between">
+                      <Label className="text-xs font-semibold">{t('lifecycle.eval.notes')}</Label>
+                      <VoiceDictationButton
+                        onTranscript={(spoken) => {
+                          setEvalForms((prev) => ({
+                            ...prev,
+                            [offer.id]: {
+                              ...prev[offer.id],
+                              evaluatorNotes: (prev[offer.id]?.evaluatorNotes ? prev[offer.id].evaluatorNotes + ' ' : '') + spoken,
+                            },
+                          }));
+                        }}
+                      />
+                    </div>
                     <Textarea
                       value={form.evaluatorNotes}
                       onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>

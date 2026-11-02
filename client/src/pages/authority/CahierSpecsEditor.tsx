@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { downloadPdfBlob } from '@/lib/pdfDownloader';
 import { ClauseLinterWidget } from '@/features/specs/ClauseLinterWidget';
+import { VoiceDictationButton } from '@/features/voice/VoiceDictationButton';
 import { SmartSpecsGeneratorModal, type GeneratedSpecsClause } from '@/features/specs/SmartSpecsGeneratorModal';
 
 // Removed LegalNode
@@ -767,6 +768,14 @@ export function CahierSpecsEditor({ draftId }: CahierSpecsEditorProps) {
                   {/* Clause Content Area */}
                   {isEditing ? (
                     <div className="space-y-3">
+                      <div className="flex items-center justify-between pb-1">
+                        <span className="text-[11px] font-bold text-navy-900">تعديل البند (مع إمكانية الإملاء الصوتي):</span>
+                        <VoiceDictationButton
+                          onTranscript={(spoken) => {
+                            setEditedContent((prev) => (prev ? prev + ' ' + spoken : spoken));
+                          }}
+                        />
+                      </div>
                       <Textarea
                         value={editedContent}
                         onChange={(e) => setEditedContent(e.target.value)}

@@ -9,7 +9,9 @@ import {
   Languages,
   LogOut,
   Sparkles,
+  Mic,
 } from 'lucide-react';
+import { VoiceCopilotWidget } from '@/features/voice/VoiceCopilotWidget';
 import { useI18n } from '@/i18n';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { useLocation } from 'wouter';
@@ -48,6 +50,7 @@ export function PortalTopBar({
   const { lang, setLang, t, dir } = useI18n();
   const { user, logout } = useAuth();
   const [pathname, setLocation] = useLocation();
+  const [voiceCopilotOpen, setVoiceCopilotOpen] = React.useState(false);
 
   const orgName = user?.organizationName || user?.displayName || t('common.organization');
 
@@ -108,6 +111,17 @@ export function PortalTopBar({
         >
           <Languages className="w-4 h-4 text-gray-700 shrink-0" aria-hidden="true" />
           <span className="text-xs font-bold text-gray-800">{t('common.lang_switch_short')}</span>
+        </button>
+
+        {/* المساعد الصوتي السيادي (Voice Copilot) */}
+        <button
+          type="button"
+          onClick={() => setVoiceCopilotOpen(true)}
+          className="portal-topbar__icon-btn bg-emerald-50 hover:bg-emerald-600 text-emerald-800 hover:text-white transition-colors"
+          aria-label="المساعد الصوتي السيادي (Voice Copilot)"
+          title="المساعد الصوتي السيادي (Voice Copilot)"
+        >
+          <Mic className="w-4 h-4 shrink-0 text-emerald-700 hover:text-white" aria-hidden="true" />
         </button>
 
         {/* 1. المساعد الذكي — أخضر ومميز */}
@@ -185,6 +199,7 @@ export function PortalTopBar({
           </button>
         )}
       </div>
+      <VoiceCopilotWidget isOpen={voiceCopilotOpen} onClose={() => setVoiceCopilotOpen(false)} />
     </header>
   );
 }
