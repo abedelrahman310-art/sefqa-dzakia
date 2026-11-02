@@ -233,79 +233,10 @@ const getErrorMessage = (err: unknown, fallback = 'Operation failed. Please try 
 
 const formatAmount = (value: string): string => formatDzd(value);
 
+import { BidComplianceShield } from '@/features/compliance/BidComplianceShield';
+
 function ComplianceResultPanel({ result }: { result: ComplianceResult }) {
-  const { t } = useI18n();
-  const missingDocuments = Array.isArray(result.missing_documents) ? result.missing_documents : [];
-  const advisoryNotes = Array.isArray(result.advisory_notes) ? result.advisory_notes : [];
-
-  return (
-    <div className="space-y-3" role="status" aria-live="polite">
-      <div className={`op-alert ${result.is_compliant ? 'success' : 'warning'}`}>
-        {result.is_compliant ? (
-          <CheckCircle2 aria-hidden="true" />
-        ) : (
-          <AlertTriangle aria-hidden="true" />
-        )}
-        <div>
-          <strong className="block text-sm">
-            {result.is_compliant
-              ? t('operator.form.comp_success')
-              : `${t('operator.form.comp_missing')} (${result.missing_count})`}
-          </strong>
-          <p className="mt-1 text-xs">
-            {t('operator.form.comp_score_summary')
-              .replace('{score}', String(result.compliance_score))
-              .replace('{submitted}', String(result.submitted_count))
-              .replace('{total}', String(result.total_required))}
-          </p>
-        </div>
-      </div>
-
-      {missingDocuments.length > 0 && (
-        <div className="overflow-hidden rounded-xl border border-[var(--op-line)]">
-          <div className="flex items-center gap-2 border-b border-[var(--op-line-2)] bg-[var(--op-surface-2)] px-4 py-2.5 text-xs font-extrabold text-[var(--op-ink)]">
-            <ListChecks className="size-4 text-[var(--op-gold-dark)]" aria-hidden="true" />
-            <span>{t('operator.form.missing_docs_label')}</span>
-          </div>
-          <ul className="divide-y divide-[var(--op-line-2)]">
-            {missingDocuments.map((document) => (
-              <li key={document.code} className="px-4 py-3">
-                <div className="flex flex-wrap items-center gap-2">
-                  <strong className="text-xs text-[var(--op-ink)]">{document.name}</strong>
-                  {document.is_mandatory && <span className="op-chip red">{t('operator.form.chip_mandatory')}</span>}
-                </div>
-                {document.category && (
-                  <p className="mt-1 text-xs font-semibold text-[var(--op-muted)]">
-                    {document.category}
-                    {document.legal_ref ? ` — ${document.legal_ref}` : ''}
-                  </p>
-                )}
-                {document.description && (
-                  <p className="mt-1 text-xs leading-relaxed text-[var(--op-text)]">
-                    {document.description}
-                  </p>
-                )}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      {advisoryNotes.length > 0 && (
-        <ul className="space-y-1 rounded-xl border border-[var(--op-line-2)] bg-[var(--op-surface-2)] p-3 text-xs leading-relaxed text-[var(--op-text)]">
-          {advisoryNotes.map((note) => (
-            <li key={note} className="flex items-start gap-2">
-              <Info
-                className="mt-0.5 size-3.5 shrink-0 text-[var(--op-gold-dark)]"
-                aria-hidden="true"
-              />
-              <span>{note}</span>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
-  );
+  return <BidComplianceShield data={result} />;
 }
 
 const fetchOffersList = async (): Promise<unknown[]> => {
