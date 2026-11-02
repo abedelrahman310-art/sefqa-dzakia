@@ -37,6 +37,8 @@ if not SECRET_KEY:
 raw_allowed_hosts = os.environ.get('DJANGO_ALLOWED_HOSTS')
 if raw_allowed_hosts:
     ALLOWED_HOSTS = [h.strip() for h in raw_allowed_hosts.split(',') if h.strip()]
+elif 'RENDER' in os.environ:
+    ALLOWED_HOSTS = ['.onrender.com', 'localhost', '127.0.0.1']
 elif DEBUG or IS_TESTING:
     ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'testserver']
 else:
@@ -138,16 +140,26 @@ if IS_TESTING or DB_ENGINE in ('sqlite', 'sqlite3'):
         }
     }
 else:
-    db_name = os.environ.get('POSTGRES_DB')
-    db_user = os.environ.get('POSTGRES_USER')
-    db_password = os.environ.get('POSTGRES_PASSWORD')
-    db_host = os.environ.get('POSTGRES_HOST')
-    db_port = os.environ.get('POSTGRES_PORT', '5432')
+    database_url = os.environ.get('DATABASE_URL')
+    if database_url:
+        import urllib.parse
+        url = urllib.parse.urlparse(database_url)
+        db_name = url.path.lstrip('/')
+        db_user = url.username
+        db_password = url.password
+        db_host = url.hostname
+        db_port = str(url.port or 5432)
+    else:
+        db_name = os.environ.get('POSTGRES_DB')
+        db_user = os.environ.get('POSTGRES_USER')
+        db_password = os.environ.get('POSTGRES_PASSWORD')
+        db_host = os.environ.get('POSTGRES_HOST')
+        db_port = os.environ.get('POSTGRES_PORT', '5432')
 
     if not DEBUG:
         if not (db_name and db_user and db_password and db_host):
             raise ImproperlyConfigured(
-                "POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD, and POSTGRES_HOST must all be configured via environment variables in production."
+                "Database configuration is missing. Provide DATABASE_URL or POSTGRES_* environment variables."
             )
 
     DATABASES = {

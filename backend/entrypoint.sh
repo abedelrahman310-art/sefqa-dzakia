@@ -27,5 +27,7 @@ python manage.py migrate --noinput
 echo "Collecting static files..."
 python manage.py collectstatic --noinput --clear || true
 
-echo "=== Starting Daphne ASGI Server ==="
-exec daphne -b 0.0.0.0 -p 8000 safaqat_core.asgi:application
+# Dynamic PORT assignment (crucial for Render, Railway, Docker)
+PORT="${PORT:-8000}"
+echo "=== Starting Daphne ASGI Server on port $PORT ==="
+exec daphne -b 0.0.0.0 -p "$PORT" safaqat_core.asgi:application

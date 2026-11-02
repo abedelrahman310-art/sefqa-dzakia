@@ -10,15 +10,17 @@ export const TOKEN_REFRESHED_EVENT = 'safaqat:token-refreshed';
 
 type RetryableRequestConfig = InternalAxiosRequestConfig & { _retry?: boolean };
 
+const apiBaseUrl = (import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}/api` : '/api').replace(/\/+$/, '');
+
 export const api = axios.create({
-  baseURL: '/api',
+  baseURL: apiBaseUrl,
 });
 
 /**
  * عميل منفصل لتجديد التوكن: لا يمر عبر اعتراضات api حتى لا يدخل في حلقة 401.
  */
 const refreshClient = axios.create({
-  baseURL: '/api',
+  baseURL: apiBaseUrl,
 });
 
 let refreshPromise: Promise<string | null> | null = null;
