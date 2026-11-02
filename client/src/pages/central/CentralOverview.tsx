@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
 import { api } from '@/lib/api';
 import { useI18n } from '@/i18n';
+import { useLocation } from 'wouter';
 import { formatCurrency } from '@/lib/format';
 import { AlertTriangle, FileText } from 'lucide-react';
 
 export function CentralOverview() {
   const { t, lang, dir } = useI18n();
+  const [, setLocation] = useLocation();
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -67,11 +69,11 @@ export function CentralOverview() {
           <span className="text-xs text-slate-500 mt-0.5 block truncate">{t('central.dashboard.kpi_pending_visa_sub')}</span>
         </div>
 
-        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 hover:border-rose-300 transition-colors">
+        <div onClick={() => setLocation('/central/integrity')} className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 hover:border-rose-400 transition-all cursor-pointer group">
           <h3 className="text-xs font-semibold text-slate-600 truncate">{t('central.dashboard.kpi_ai_alarms')}</h3>
           <p className="text-2xl font-bold text-rose-600 mt-1 tabular-nums">{data.total_ai_alarms ?? 0}</p>
-          <span className="text-xs text-slate-500 mt-0.5 block truncate">
-            {data.total_suspicions_count ?? 0} {t('central.dashboard.kpi_ai_alarms_sub')}
+          <span className="text-xs text-rose-600 font-bold mt-1 flex items-center gap-1 group-hover:underline">
+            فتح رادار النزاهة والرقابة ←
           </span>
         </div>
 
@@ -85,6 +87,34 @@ export function CentralOverview() {
             })}
           </span>
         </div>
+      </div>
+
+
+      {/* بانر رادار النزاهة والتنبؤ بتعثر المشاريع */}
+      <div className="bg-gradient-to-r from-navy-950 via-slate-900 to-navy-900 rounded-2xl p-4 text-white border border-navy-800 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-rose-500/20 text-rose-400 border border-rose-500/30 flex items-center justify-center shrink-0">
+            <AlertTriangle className="w-5 h-5" />
+          </div>
+          <div>
+            <h4 className="text-sm font-extrabold text-white flex items-center gap-2">
+              <span>رادار النزاهة والتنبؤ بتعثر المشاريع (AI Sovereign Integrity)</span>
+              <span className="text-xs px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30 font-bold">
+                تحديث فوري
+              </span>
+            </h4>
+            <p className="text-xs text-slate-300 mt-0.5">
+              رصد مؤشرات التواطؤ، تدوير العطاءات، تجزئة الصفقات، وتحليل مخاطر توقف الورشات في 69 ولاية.
+            </p>
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={() => setLocation('/central/integrity')}
+          className="px-4 py-2 bg-rose-700 hover:bg-rose-800 text-white font-bold text-xs rounded-xl shadow transition-colors shrink-0 whitespace-nowrap self-stretch md:self-auto text-center"
+        >
+          الانتقال لرادار الرقابة والنزاهة
+        </button>
       </div>
 
       {/* الإنذارات العاجلة وأحدث الصفقات */}

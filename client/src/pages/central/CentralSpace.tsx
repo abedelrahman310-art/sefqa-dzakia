@@ -10,6 +10,7 @@ import { CentralOperators } from './CentralOperators';
 import { CentralAppeals } from './CentralAppeals';
 import { CentralReports } from './CentralReports';
 import { CentralPermissions } from './CentralPermissions';
+import { CentralIntegrityView } from './CentralIntegrityView';
 import { OperatorNotificationsView } from '@/pages/operator/OperatorNotificationsView';
 import { PortalNotFound } from '@/components/common/PortalNotFound';
 import CentralAdminTopBar from '@/components/layout/CentralAdminTopBar';
@@ -45,6 +46,7 @@ export function CentralSpace() {
   const [isAppealsActive] = useRoute('/central/appeals');
   const [isReportsActive] = useRoute('/central/reports');
   const [isPermissionsActive] = useRoute('/central/permissions');
+  const [isIntegrityActive] = useRoute('/central/integrity');
 
   const navItems = [
     {
@@ -97,6 +99,13 @@ export function CentralSpace() {
       isActive: isReportsActive,
     },
     {
+      id: 'integrity',
+      label: 'رادار الرقابة والنزاهة (AI Anti-Fraud)',
+      href: '/central/integrity',
+      icon: Shield,
+      isActive: isIntegrityActive,
+    },
+    {
       id: 'permissions',
       label: t('nav.central.permissions'),
       href: '/central/permissions',
@@ -135,6 +144,7 @@ export function CentralSpace() {
         <Route path="/central/operators" component={CentralOperators} />
         <Route path="/central/appeals" component={CentralAppeals} />
         <Route path="/central/reports" component={CentralReports} />
+        <Route path="/central/integrity" component={CentralIntegrityView} />
         <Route path="/central/permissions" component={CentralPermissions} />
         <Route path="/central/notifications" component={OperatorNotificationsView} />
         <Route path="/central/overview" component={CentralOverview} />

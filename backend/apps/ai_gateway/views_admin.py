@@ -19,6 +19,7 @@ from .permissions import IsAdminCenter, IsAuthorityOrAdmin
 from .throttles import AIChatThrottle, AIInsightsThrottle
 from .services.central_insights import generate_central_insights, generate_authority_insights
 from .services.suspicion_detector import get_all_suspicions
+from .services.project_risk_predictor import compute_project_delay_risks
 from .services.admin_assistant import chat_with_admin
 from .services.smart_alerts import generate_smart_alerts
 from .services.llm_client import get_llm_client
@@ -334,3 +335,16 @@ class OperatorRecommendationsView(APIView):
             )
 
 
+
+
+class ProjectDelayRiskView(APIView):
+    """
+    GET /api/ai/central/project-risks/
+    مؤشر التنبؤ المبكر بتعثر وتوقف المشاريع العمومية (Project Risk & Delay Predictor):
+    تحليل الارتباط بين أوامر الخدمة ODS، الملاحق التعاقدية Avenants، ووضعيات الدفع بالخزينة.
+    """
+    permission_classes = [IsAdminCenter]
+
+    def get(self, request):
+        data = compute_project_delay_risks()
+        return Response(data)

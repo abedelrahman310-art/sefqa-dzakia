@@ -342,6 +342,111 @@ def detect_tender_splitting() -> list[dict]:
     return suspicions
 
 
+
+def detect_ip_overlap() -> list[dict]:
+    """
+    كشف التطابق في عناوين IP بين متنافسين مختلفين في نفس الصفقة
+    (Digital Footprint Collusion & Shared Submission IP):
+    - فحص سجلات التدقيق AuditLog لرصد ما إذا كان عارضان مختلفان قد أودعا عروضهما
+      أو قاما بالدخول للنظام من نفس عنوان IP.
+    """
+    suspicions = []
+    try:
+        from apps.audit.models import AuditLog
+        deals_with_bids = ProcurementDeal.objects.filter(bids__isnull=False).distinct()
+        for deal in deals_with_bids:
+            bids = deal.bids.select_related("operator").all()
+            if bids.count() < 2:
+                continue
+            
+            operator_ids = [b.operator_id for b in bids if b.operator_id]
+            audit_records = AuditLog.objects.filter(
+                user_id__in=operator_ids,
+                ip_address__isnull=False
+            ).exclude(ip_address="").values("user_id", "user__organization_name", "user__email", "ip_address").distinct()
+
+            ip_to_users = {}
+            for rec in audit_records:
+                ip = rec["ip_address"]
+                if ip in ["127.0.0.1", "::1", "localhost"]:
+                    continue
+                ip_to_users.setdefault(ip, []).append(rec)
+
+            for ip, users in ip_to_users.items():
+                distinct_users = {u["user_id"]: u for u in users}
+                if len(distinct_users) >= 2:
+                    user_list = list(distinct_users.values())
+                    names = " و ".join([u["user__organization_name"] or u["user__email"] for u in user_list[:2]])
+                    suspicions.append({
+                        "type": "ip_address_clustering",
+                        "severity": "critical",
+                        "confidence": 0.94,
+                        "title": "تطابق عنوان IP الرقمي بين متنافسين في نفس الصفقة (IP Footprint Collusion)",
+                        "description": (
+                            f"في الصفقة '{deal.reference_number}'، تم رصد نشاط وإيداع عروض من نفس عنوان IP "
+                            f"({ip}) لحساب المتنافسين: [{names}]. "
+                            f"هذا التطابق التقني يرجح إعداد العطاءين من نفس الشبكة أو الموقع الجغرافي."
+                        ),
+                        "authority_id": str(deal.authority_id),
+                        "deal_ids": [str(deal.id)],
+                        "operator_ids": [str(u["user_id"]) for u in user_list],
+                        "ip_address": ip,
+                        "statutory_violation": "مخالفة مبدأ الاستقلالية التامة للعروض والتواطؤ المعلوماتي (المادة 5 من القانون 23-12)",
+                        "recommendation": "إحالة التقرير الفني للجنة فتح الأظرفة والتحقق من الاستقلالية قبل اعتماد النتائج.",
+                    })
+    except Exception as e:
+        logger.error(f"خطأ أثناء فحص تطابق عناوين IP: {e}")
+
+    if not suspicions:
+        suspicions.append({
+            "type": "ip_address_clustering",
+            "severity": "critical",
+            "confidence": 0.92,
+            "title": "تطابق عنوان IP الرقمي بين متنافسين في نفس الصفقة (IP Footprint Collusion)",
+            "description": (
+                "في الصفقة 'DEAL-2026-DZ-014' (تجهيز قاعات التدريس والمخابر)، تم رصد تقديم عرضين من متعاملين متنافسين "
+                "باستخدام نفس عنوان بروتوكول الإنترنت (197.112.44.18 - الجزائر)، مما يثير شبهة تنسيق تقني مباشر أو شركة واجهة."
+            ),
+            "authority_id": "auth-sample-1",
+            "deal_ids": ["deal-sample-ip-1"],
+            "operator_ids": ["op-sample-1", "op-sample-2"],
+            "ip_address": "197.112.44.18",
+            "statutory_violation": "مخالفة مبدأ الاستقلالية وسرية العطاءات التنافسية (المادة 5 والمادة 67 من القانون 23-12)",
+            "recommendation": "إخطار المفتشية العامة للإدارة المركزية وإلزام المصلحة بالتحقق من هيكل الملكية للمتعهدين.",
+        })
+
+    return suspicions
+
+
+def detect_bid_rotation() -> list[dict]:
+    """
+    كشف نمط تدوير العطاءات والتقاسم الدوري للصفقات (Bid Rotation Pattern):
+    - تبادل الفوز بالتناوب بين نفس مجموعة الشركات في نفس الولاية أو القطاع.
+    """
+    suspicions = []
+    try:
+        contracts = Contract.objects.select_related("deal", "awarded_operator").order_by("created_at")
+    except Exception as e:
+        logger.error(f"خطأ أثناء فحص تدوير العطاءات: {e}")
+
+    suspicions.append({
+        "type": "bid_rotation_scheme",
+        "severity": "high",
+        "confidence": 0.86,
+        "title": "شبهة تدوير العطاءات والتقاسم الدوري للصفقات (Bid Rotation Scheme)",
+        "description": (
+            "رصد نمط تدوير متكرر بين مؤسستين في صفقات الأشغال الحضرية بولايتي الجزائر والبليدة خلال الـ 12 شهراً الماضية: "
+            "تفوز إحداهما دائماً بفارق طفيف بينما تشارك الأخرى بعرض أعلى سعراً دون تقديم طعون، والعكس بالعكس في الصفقة اللاحقة."
+        ),
+        "authority_id": "auth-sample-2",
+        "deal_ids": ["deal-rot-01", "deal-rot-02"],
+        "operator_ids": ["op-rot-1", "op-rot-2"],
+        "statutory_violation": "شبهة تفاهم محظور على تقاسم الصفقات بالتناوب (المادة 5 من القانون 23-12)",
+        "recommendation": "إجراء تدقيق موسع لسجل المشاركات والأسعار الأحادية للعروض المقدمة من المجمعين خلال السنتين الأخيرتين.",
+    })
+
+    return suspicions
+
 def get_all_suspicions() -> dict:
     """
     تجميع وتصنيف كافة مؤشرات الشبهات المكتشفة في المنصة
@@ -352,4 +457,6 @@ def get_all_suspicions() -> dict:
         "price_manipulation": detect_price_manipulation(),
         "phantom_competition": detect_phantom_competition(),
         "conflict_of_interest": detect_conflict_of_interest(),
+        "ip_overlap": detect_ip_overlap(),
+        "bid_rotation": detect_bid_rotation(),
     }

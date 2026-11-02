@@ -16,6 +16,7 @@ from .views_admin import (
     AuthorityInsightsView,
     PriceEstimateView,
     OperatorRecommendationsView,
+    ProjectDelayRiskView,
 )
 
 urlpatterns = [
@@ -33,6 +34,7 @@ urlpatterns = [
     path("central/insights/generate/", GenerateInsightsView.as_view(), name="ai-generate-insights"),
     path("central/insights/<uuid:pk>/resolve/", ResolveInsightView.as_view(), name="ai-resolve-insight"),
     path("central/suspicions/", SuspicionsView.as_view(), name="ai-central-suspicions"),
+    path("central/project-risks/", ProjectDelayRiskView.as_view(), name="ai-central-project-risks"),
     path("central/chat/", AdminChatView.as_view(), name="ai-central-chat"),
     path("central/alerts/", SmartAlertsView.as_view(), name="ai-central-alerts"),
     path("health/", AIHealthView.as_view(), name="ai-health"),
