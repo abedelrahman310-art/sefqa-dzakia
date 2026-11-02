@@ -23,6 +23,10 @@ fi
 echo "Applying database migrations..."
 python manage.py migrate --noinput
 
+# Seed institutional demo accounts (idempotent)
+echo "Ensuring institutional demo accounts exist..."
+python manage.py seed_procurement_data --allow-production || true
+
 # Collect Static Files
 echo "Collecting static files..."
 python manage.py collectstatic --noinput --clear || true

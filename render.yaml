@@ -64,3 +64,5 @@ services:
     envVars:
       - key: VITE_API_URL
         value: "https://safaqat-backend.onrender.com"
+      - key: VITE_ENABLE_DEMO_LOGIN
+        value: "true"
