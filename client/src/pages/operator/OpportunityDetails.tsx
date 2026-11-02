@@ -338,7 +338,7 @@ export function OpportunityDetails() {
                       <h3 className="text-sm font-extrabold text-[var(--op-ink)]">
                         {analysis.deal.title}
                       </h3>
-                      <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-[var(--op-muted)]">
+                      <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-[var(--op-muted)]">
                         <span className="op-mono">{analysis.deal.reference}</span>
                         <span aria-hidden="true">·</span>
                         <span>{analysis.deal.authority}</span>
@@ -376,7 +376,7 @@ export function OpportunityDetails() {
                         className="rounded-xl border border-[var(--op-line)] bg-white p-3"
                       >
                         <div className="flex flex-wrap items-center gap-2">
-                          <span className="op-chip text-[10px]">{requirement.category}</span>
+                          <span className="op-chip text-xs">{requirement.category}</span>
                           <h4 className="text-xs font-bold text-[var(--op-ink)]">
                             {requirement.title}
                           </h4>
@@ -411,7 +411,7 @@ export function OpportunityDetails() {
                           }`}
                         >
                           <div className="flex flex-wrap items-center gap-2">
-                            <span className="rounded-full border border-black/10 bg-white/60 px-2 py-0.5 text-[10px] font-bold">
+                            <span className="rounded-full border border-black/10 bg-white/60 px-2 py-0.5 text-xs font-bold">
                               {SEVERITY_LABEL_KEYS[point.severity] ? t(SEVERITY_LABEL_KEYS[point.severity]) : t('operator.opp.severity_low')}
                             </span>
                             <h4 className="text-xs font-bold">{point.title}</h4>
@@ -452,7 +452,7 @@ export function OpportunityDetails() {
                     <BookOpen className="size-4 text-[var(--op-gold)]" aria-hidden="true" />
                     <span>{t('operator.opp.legal_references')}</span>
                   </h3>
-                  <ul className="space-y-1.5 text-[11px] leading-relaxed text-[var(--op-muted)]">
+                  <ul className="space-y-1.5 text-xs leading-relaxed text-[var(--op-muted)]">
                     {analysis.legal_references.map((reference) => (
                       <li key={reference} className="flex items-start gap-2">
                         <span
@@ -469,7 +469,7 @@ export function OpportunityDetails() {
                   <ShieldCheck aria-hidden="true" />
                   <div>
                     <strong className="mb-1 block text-xs font-bold">{t('operator.opp.disclaimer_title')}</strong>
-                    <p className="text-[11px] leading-relaxed">
+                    <p className="text-xs leading-relaxed">
                       {t('operator.opp.disclaimer_text')}
                     </p>
                   </div>

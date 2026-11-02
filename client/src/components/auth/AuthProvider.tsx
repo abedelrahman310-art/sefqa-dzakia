@@ -107,20 +107,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (cancelled) return;
       }
 
-      if (activeToken) {
-        let res = await fetch('/api/auth/me/', {
-          headers: { Authorization: `Bearer ${activeToken}` },
+      const requestMe = (token: string) =>
+        fetch('/api/auth/me/', {
+          headers: { Authorization: `Bearer ${token}` },
         });
+      const isTransient = (response: Response) =>
+        response.status === 429 || response.status >= 500;
+
+      if (activeToken) {
+        let res = await requestMe(activeToken);
 
         if (res.status === 401) {
           const renewedToken = await refreshAccessToken();
           if (cancelled) return;
           if (renewedToken) {
             activeToken = renewedToken;
-            res = await fetch('/api/auth/me/', {
-              headers: { Authorization: `Bearer ${renewedToken}` },
-            });
+            res = await requestMe(renewedToken);
           }
+        }
+
+        // إعادة محاولة قصيرة عند 429 أو 5xx بدل إسقاط الجلسة فوراً.
+        for (let attempt = 0; attempt < 2 && isTransient(res); attempt += 1) {
+          await new Promise((resolve) => setTimeout(resolve, 1000 * (attempt + 1)));
+          if (cancelled) return;
+          activeToken = localStorage.getItem(ACCESS_TOKEN_KEY) || activeToken;
+          res = await requestMe(activeToken);
         }
 
         if (res.ok) {
@@ -133,9 +144,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             return;
           }
         }
+
+        if (isTransient(res)) {
+          // الخادم متاح لكنه مشغول: لا نملك دوراً موثوقاً الآن، لكن نحافظ
+          // على الرموز كي يستعيد المستخدم جلسته عند عودة الخدمة.
+          if (cancelled) return;
+          setToken(activeToken);
+          setStatus('unauthenticated');
+          return;
+        }
       }
 
       if (cancelled) return;
+      // إذا بقي رمز تجديد فشل تجديده لسبب عابر فلا نمحو الجلسة.
+      if (!activeToken && localStorage.getItem(REFRESH_TOKEN_KEY)) {
+        setStatus('unauthenticated');
+        return;
+      }
       // رفض الخادم الجلسة أو لم يُرجع دوراً صالحاً → جلسة غير صالحة.
       clearAuthSession();
       setToken(null);

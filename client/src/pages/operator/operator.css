@@ -37,7 +37,7 @@
   height: 100vh;
   height: 100dvh;
   overflow: hidden;
-  direction: rtl;
+  direction: inherit;
   background: #ffffff;
   color: var(--op-text);
   font-family: "Cairo", "Segoe UI", Tahoma, sans-serif;
@@ -516,7 +516,7 @@
   flex-direction: column;
   font-family: "Cairo", "Segoe UI", Tahoma, sans-serif;
   color: #ffffff !important;
-  direction: rtl;
+  direction: inherit;
 }
 
 .op-sheet .op-brand {

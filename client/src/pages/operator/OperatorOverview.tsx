@@ -299,7 +299,7 @@ export function OperatorOverview() {
               onClick={() => setLocation('/operator/deals')}
             >
               {t('operator.overview.btn_view_all')}
-              <ChevronLeft aria-hidden="true" />
+              <ChevronLeft className="rtl:rotate-180" aria-hidden="true" />
             </button>
           </div>
           <div className="op-card-body">
@@ -388,7 +388,7 @@ export function OperatorOverview() {
                     <span className="text-3xl font-extrabold leading-none text-[var(--op-ink)]">
                       {offers.length}
                     </span>
-                    <span className="mt-1 text-[10px] font-bold text-[var(--op-muted)]">
+                    <span className="mt-1 text-xs font-bold text-[var(--op-muted)]">
                       {t('operator.overview.total_offers_label')}
                     </span>
                   </div>
@@ -419,7 +419,7 @@ export function OperatorOverview() {
                       </div>
                     </div>
                   ))}
-                  <p className="pt-1 text-[11px] leading-relaxed text-[var(--op-muted)]">
+                  <p className="pt-1 text-xs leading-relaxed text-[var(--op-muted)]">
                     {t('operator.overview.eval_note')}
                   </p>
                 </div>
@@ -442,7 +442,7 @@ export function OperatorOverview() {
             onClick={() => setLocation('/operator/deals')}
           >
             {t('operator.overview.btn_view_all')}
-            <ChevronLeft aria-hidden="true" />
+            <ChevronLeft className="rtl:rotate-180" aria-hidden="true" />
           </button>
         </div>
         <div className="op-card-body">
@@ -499,17 +499,17 @@ export function OperatorOverview() {
                   >
                     <div className="flex items-center justify-between gap-2">
                       <span className="op-chip green">{matchScore}% {t('operator.overview.match_suffix')}</span>
-                      <span className="text-[11px] font-bold text-[var(--op-muted)]">
+                      <span className="text-xs font-bold text-[var(--op-muted)]">
                         {deal.match_level_display || t('operator.overview.match_level_proposed')}
                       </span>
                     </div>
                     <h4 className="mt-3 line-clamp-2 text-sm font-extrabold leading-snug text-[var(--op-ink)]">
                       {deal.title}
                     </h4>
-                    <p className="mt-1 font-mono text-[11px] text-[var(--op-muted)]">
+                    <p className="mt-1 font-mono text-xs text-[var(--op-muted)]">
                       {deal.reference_number}
                     </p>
-                    <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-[var(--op-muted)]">
+                    <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[var(--op-muted)]">
                       <span className="inline-flex items-center gap-1">
                         <Building2 className="size-3.5" aria-hidden="true" />
                         <span className="truncate">{deal.authority_name || t('operator.overview.authority_fallback')}</span>
@@ -528,18 +528,18 @@ export function OperatorOverview() {
                       )}
                     </div>
                     {reasons.length > 0 && (
-                      <p className="mt-3 flex items-start gap-1.5 text-[11px] font-semibold text-emerald-800">
+                      <p className="mt-3 flex items-start gap-1.5 text-xs font-semibold text-emerald-800">
                         <CheckCircle2 className="mt-0.5 size-3.5 shrink-0" aria-hidden="true" />
                         <span className="line-clamp-2">{reasons[0]}</span>
                       </p>
                     )}
                     {warnings.length > 0 && (
-                      <p className="mt-1.5 flex items-start gap-1.5 text-[11px] font-semibold text-amber-800">
+                      <p className="mt-1.5 flex items-start gap-1.5 text-xs font-semibold text-amber-800">
                         <AlertTriangle className="mt-0.5 size-3.5 shrink-0" aria-hidden="true" />
                         <span className="line-clamp-2">{warnings[0]}</span>
                       </p>
                     )}
-                    <span className="mt-auto inline-flex items-center gap-1 pt-3 text-[11px] font-bold text-[var(--op-gold-dark)]">
+                    <span className="mt-auto inline-flex items-center gap-1 pt-3 text-xs font-bold text-[var(--op-gold-dark)]">
                       {t('operator.overview.btn_preview_deal')}
                       <ArrowUpRight className="size-3.5" aria-hidden="true" />
                     </span>

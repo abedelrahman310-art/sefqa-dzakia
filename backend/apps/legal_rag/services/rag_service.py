@@ -59,8 +59,31 @@ def search_top_articles(query: str, top_k: int = 3) -> List[Tuple[LegalArticle, 
     return scored[:top_k]
 
 
-def build_rag_system_prompt() -> str:
+def normalize_rag_language(value: Any = None) -> str:
+    """توحيد لغة الطلب إلى العربية أو الفرنسية، مع العربية كافتراضي."""
+    if isinstance(value, str) and value.strip().lower().startswith("fr"):
+        return "fr"
+    return "ar"
+
+
+def build_rag_system_prompt(language: str = "ar") -> str:
     """أمر النظام الصارم للمساعد القانوني المدعوم بـ RAG لمنصة صفقات ذكية"""
+    if normalize_rag_language(language) == "fr":
+        return (
+            "Vous êtes un assistant juridique automatisé de la plateforme algérienne « Safaqat Dzakia ».\n"
+            "Votre mission est de répondre aux questions des opérateurs économiques uniquement à partir du contexte juridique fourni.\n\n"
+            "Règles strictes :\n"
+            "1. N'inventez aucun article de loi. Si la réponse ne figure pas dans le texte fourni, dites clairement : « Aucune réponse explicite n'a été trouvée dans les textes disponibles. »\n"
+            "2. Vous devez citer le numéro de l'article juridique (par exemple : article 70) dans votre réponse.\n"
+            "3. Utilisez un français juridique formel et accessible ; répondez en français.\n"
+            "4. Ne donnez pas de conseils juridiques personnels (par exemple : « je vous conseille de poursuivre l'administration »), mentionnez uniquement ce que prévoit la loi.\n"
+            "5. Principe zéro papier et numérisation intégrale :\n"
+            "   - La plateforme « Safaqat Dzakia » est un système national entièrement numérique et sans papier, régi par la loi 23-12 et le décret présidentiel 15-247.\n"
+            "   - Le dépôt des offres s'effectue exclusivement en ligne (téléversement numérique séparé du dossier de candidature et de l'offre technique, chiffrement de l'offre financière en AES-256 jusqu'à la séance d'ouverture publique numérique).\n"
+            "   - Ne conseillez jamais à l'opérateur de préparer ou de déposer des enveloppes papier, et n'employez pas des expressions comme « trois enveloppes » ou « enveloppes séparées dans une enveloppe extérieure anonyme ».\n"
+            "   - Les documents officiels délivrés par les organismes publics (registre de commerce, NIF, attestations fiscales, CNAS/CASNOS, casier judiciaire) sont vérifiés par interconnexion gouvernementale automatique et ne sont pas exigés en version papier."
+        )
+
     return (
         "أنت مساعد قانوني آلي لمنصة \"صفقات ذكية\" الجزائرية.\n"
         "مهمتك الإجابة على أسئلة المتعاملين الاقتصاديين بناءً على السياق القانوني المرفق فقط.\n\n"
@@ -77,19 +100,48 @@ def build_rag_system_prompt() -> str:
     )
 
 
-def build_rag_user_prompt(user_question: str, retrieved_articles: List[Tuple[LegalArticle, float]]) -> str:
+def build_rag_user_prompt(
+    user_question: str,
+    retrieved_articles: List[Tuple[LegalArticle, float]],
+    language: str = "ar",
+) -> str:
     """بناء رسالة المستخدم المرفقة بسياق المواد القانونية المسترجعة"""
+    is_french = normalize_rag_language(language) == "fr"
     context_parts = []
     for idx, (art, _) in enumerate(retrieved_articles, 1):
-        context_parts.append(
-            f"--- المادة [{idx}] ---\n"
-            f"المصدر: {art.law_source}\n"
-            f"رقم المادة: {art.article_number}\n"
-            f"الموضوع: {art.title or 'أحكام عامة'}\n"
-            f"النص:\n{art.content.strip()}"
+        if is_french:
+            context_parts.append(
+                f"--- Article [{idx}] ---\n"
+                f"Source : {art.law_source}\n"
+                f"Numéro d'article : {art.article_number}\n"
+                f"Objet : {art.title or 'Dispositions générales'}\n"
+                f"Texte :\n{art.content.strip()}"
+            )
+        else:
+            context_parts.append(
+                f"--- المادة [{idx}] ---\n"
+                f"المصدر: {art.law_source}\n"
+                f"رقم المادة: {art.article_number}\n"
+                f"الموضوع: {art.title or 'أحكام عامة'}\n"
+                f"النص:\n{art.content.strip()}"
+            )
+
+    if context_parts:
+        context_str = "\n\n".join(context_parts)
+    else:
+        context_str = (
+            "Aucun texte juridique pertinent n'a été retrouvé."
+            if is_french
+            else "لا توجد نصوص قانونية مسترجعة."
         )
 
-    context_str = "\n\n".join(context_parts) if context_parts else "لا توجد نصوص قانونية مسترجعة."
+    if is_french:
+        return (
+            f"Contexte juridique (textes des articles retrouvés) :\n"
+            f"{context_str}\n\n"
+            f"Question de l'opérateur :\n"
+            f"{user_question}"
+        )
 
     return (
         f"السياق القانوني (نصوص المواد المسترجعة):\n"
@@ -106,13 +158,38 @@ def extract_mentioned_articles(text: str) -> List[str]:
     return list(dict.fromkeys(matches))
 
 
-def synthesize_local_rag_fallback(user_question: str, retrieved_articles: List[Tuple[LegalArticle, float]]) -> str:
+def synthesize_local_rag_fallback(
+    user_question: str,
+    retrieved_articles: List[Tuple[LegalArticle, float]],
+    language: str = "ar",
+) -> str:
     """
     توليد إجابة قانونية استرجاعية موثوقة عند غياب مفاتيح الـ LLM الخارجية أو انقطاع الاتصال.
     تقوم بتقديم خلاصات ونصوص المواد المسترجعة بأسلوب قانوني منظم وفق القواعد الصارمة.
     """
+    is_french = normalize_rag_language(language) == "fr"
+
     if not retrieved_articles:
-        return "لا توجد إجابة صريحة في النصوص المتاحة."
+        return (
+            "Aucune réponse explicite n'a été trouvée dans les textes disponibles."
+            if is_french
+            else "لا توجد إجابة صريحة في النصوص المتاحة."
+        )
+
+    if is_french:
+        response_lines = [
+            "Sur la base des articles juridiques extraits de la réglementation des marchés publics (loi 23-12 et décret 15-247) :\n"
+        ]
+        for idx, (art, _) in enumerate(retrieved_articles, 1):
+            clean_content = art.content.strip()
+            response_lines.append(
+                f"📌 **{art.article_number} ({art.law_source})** :\n"
+                f"> {clean_content}\n"
+            )
+        response_lines.append(
+            "Rappel : ces informations sont extraites exclusivement des textes des articles cités ci-dessus, sans interprétation ni conseil personnel."
+        )
+        return "\n".join(response_lines)
 
     response_lines = [
         "استناداً إلى المواد القانونية المسترجعة من المنظومة التشريعية للصفقات العمومية (القانون 23-12 والمرسوم 15-247):\n"

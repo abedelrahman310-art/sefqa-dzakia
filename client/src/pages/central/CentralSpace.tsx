@@ -1,4 +1,6 @@
+import { useEffect } from 'react';
 import { useI18n } from '@/i18n';
+import i18n from '@/lib/i18n';
 import { Route, Switch, useRoute, useLocation } from 'wouter';
 import { CentralOverview } from './CentralOverview';
 import { CentralMapView } from './CentralMapView';
@@ -25,8 +27,12 @@ import {
 } from 'lucide-react';
 
 export function CentralSpace() {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const [location] = useLocation();
+
+  useEffect(() => {
+    document.title = i18n.t('common.central_mobile_title');
+  }, [lang]);
 
   // Route matchers for active highlighting
   const [isDashboardActive] = useRoute('/central/dashboard');

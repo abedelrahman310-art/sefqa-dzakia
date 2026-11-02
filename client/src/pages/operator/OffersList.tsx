@@ -449,7 +449,7 @@ export function OffersList() {
                           {offer.opportunityTitle}
                         </h3>
                         <span
-                          className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-bold whitespace-nowrap ${statusMeta.className}`}
+                          className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-bold whitespace-nowrap ${statusMeta.className}`}
                         >
                           {statusMeta.label}
                         </span>
@@ -467,7 +467,7 @@ export function OffersList() {
                         </span>
                       </div>
 
-                      <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-[#5d6b7e]">
+                      <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-[#5d6b7e]">
                         <span className="inline-flex items-center gap-1 whitespace-nowrap">
                           <Calendar className="size-3.5" />
                           {isDraft
@@ -494,7 +494,7 @@ export function OffersList() {
 
                   <div className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-t border-[#f3efdf] pt-3 lg:border-0 lg:pt-0">
                     <div className="text-start">
-                      <span className="block text-[10px] font-bold text-[#5d6b7e] whitespace-nowrap">
+                      <span className="block text-xs font-bold text-[#5d6b7e] whitespace-nowrap">
                         {t('operator.offers.financial_amount')}
                       </span>
                       <span className="block text-sm font-extrabold text-[#3a4555] whitespace-nowrap">

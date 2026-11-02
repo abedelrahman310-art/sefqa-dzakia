@@ -117,7 +117,7 @@ export function CentralOverview() {
                         ? formatCurrency(deal.estimated_budget, lang)
                         : '—'}
                     </span>
-                    <span className="mt-0.5 block text-[11px] font-semibold text-sky-600 whitespace-nowrap">
+                    <span className="mt-0.5 block text-xs font-semibold text-sky-600 whitespace-nowrap">
                       {deal.stage_display}
                     </span>
                   </div>
@@ -144,7 +144,7 @@ export function CentralOverview() {
                     <span className="text-xs font-semibold leading-snug text-rose-900">
                       {alarm.title}
                     </span>
-                    <span className="shrink-0 rounded-full bg-rose-200/70 px-1.5 py-0.5 text-[10px] font-bold uppercase text-rose-900 whitespace-nowrap">
+                    <span className="shrink-0 rounded-full bg-rose-200/70 px-1.5 py-0.5 text-xs font-bold uppercase text-rose-900 whitespace-nowrap">
                       {alarm.severity}
                     </span>
                   </div>

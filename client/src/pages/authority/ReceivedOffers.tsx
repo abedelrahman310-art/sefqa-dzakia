@@ -150,8 +150,8 @@ export function ReceivedOffers() {
             <Lock className="w-5 h-5" />
           </div>
           <div>
-            <div className="text-[11px] text-navy-100">{t('received.total')}</div>
-            <div className="text-2xl font-black text-white">{offersCount}</div>
+            <div className="text-xs text-navy-100">{t('received.total')}</div>
+            <div className="text-2xl font-bold text-white">{offersCount}</div>
           </div>
         </div>
       </section>
@@ -167,7 +167,7 @@ export function ReceivedOffers() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <h4 className="text-xs font-bold text-navy-900">{t('authority.offers.current_stage_title')}</h4>
-            <p className="text-[11px] text-muted-foreground mt-0.5">
+            <p className="text-xs text-muted-foreground mt-0.5">
               {opp.status === 'published' && t('authority.offers.stage_desc.published')}
               {opp.status === 'submission_closed' && t('authority.offers.stage_desc.submission_closed')}
               {opp.status === 'opening_in_progress' && t('authority.offers.stage_desc.opening_in_progress')}
@@ -281,7 +281,7 @@ export function ReceivedOffers() {
                       <span className="font-mono font-bold text-navy-900 text-sm">
                         #OFF-{offer.id.slice(0, 8).toUpperCase()}
                       </span>
-                      <span className="text-[11px] bg-emerald-50 text-emerald-800 border border-emerald-200 font-semibold px-2 py-0.5 rounded-full flex items-center gap-1">
+                      <span className="text-xs bg-emerald-50 text-emerald-800 border border-emerald-200 font-semibold px-2 py-0.5 rounded-full flex items-center gap-1">
                         <Lock className="w-3 h-3 text-emerald-700" />
                         {t('received.status_sealed')}
                       </span>

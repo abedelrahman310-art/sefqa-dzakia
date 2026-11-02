@@ -156,8 +156,8 @@ export function DealCommitteeManager() {
             <ShieldCheck className="w-5 h-5" />
           </div>
           <div>
-            <div className="text-[11px] text-navy-100">{t('lifecycle.opening.quorum')}</div>
-            <div className="text-sm font-black text-white">
+            <div className="text-xs text-navy-100">{t('lifecycle.opening.quorum')}</div>
+            <div className="text-sm font-bold text-white">
               {isQuorumReady ? (
                 <span className="text-emerald-300 flex items-center gap-1">
                   <CheckCircle2 className="w-3.5 h-3.5" />
@@ -207,7 +207,7 @@ export function DealCommitteeManager() {
               <div className="border border-dashed border-border rounded-xl p-8 text-center text-muted-foreground text-xs space-y-2">
                 <Users className="w-8 h-8 mx-auto text-muted-foreground/50" />
                 <p>{t('authority.committee.empty_title')}</p>
-                <p className="text-[11px]">{t('authority.committee.empty_desc')}</p>
+                <p className="text-xs">{t('authority.committee.empty_desc')}</p>
               </div>
             ) : (
               <div className="space-y-3">
@@ -224,7 +224,7 @@ export function DealCommitteeManager() {
                         <div className="flex items-center gap-2">
                           <span className="font-bold text-navy-900 text-sm">{(m as any).displayName || m.fullName}</span>
                           <span
-                            className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                            className={`text-xs font-bold px-2 py-0.5 rounded-full border ${
                               m.role === 'president'
                                 ? 'bg-amber-50 text-amber-900 border-amber-200'
                                 : m.role === 'secretary'

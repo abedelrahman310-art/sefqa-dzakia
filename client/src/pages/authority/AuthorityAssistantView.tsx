@@ -27,8 +27,14 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 
-// Sentinel string from backend RAG engine when no explicit answer is found
-const NO_LEGAL_ANSWER_TEXT = '\u0644\u0627 \u062a\u0648\u062c\u062f \u0625\u062c\u0627\u0628\u0629 \u0635\u0631\u064a\u062d\u0629 \u0641\u064a \u0627\u0644\u0646\u0635\u0648\u0635 \u0627\u0644\u0645\u062a\u0627\u062d\u0629';
+// Sentinel strings from backend RAG engine when no explicit answer is found
+const NO_LEGAL_ANSWER_MARKERS = [
+  '\u0644\u0627 \u062a\u0648\u062c\u062f \u0625\u062c\u0627\u0628\u0629 \u0635\u0631\u064a\u062d\u0629 \u0641\u064a \u0627\u0644\u0646\u0635\u0648\u0635 \u0627\u0644\u0645\u062a\u0627\u062d\u0629',
+  'Aucune réponse explicite',
+];
+
+const containsNoLegalAnswer = (content: string): boolean =>
+  NO_LEGAL_ANSWER_MARKERS.some((marker) => content.includes(marker));
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -137,7 +143,7 @@ const getErrorMessage = (err: unknown, fallback: string): string => {
 };
 
 export function AuthorityAssistantView() {
-  const { t, dir } = useI18n();
+  const { t, dir, lang } = useI18n();
 
   const welcomeMessage: ChatMessage = useMemo(
     () => ({
@@ -203,7 +209,7 @@ export function AuthorityAssistantView() {
     setSending(true);
 
     try {
-      const data = await operatorLegalChat(conversationId, query);
+      const data = await operatorLegalChat(conversationId, query, lang);
       if (data.conversation_id) setConversationId(data.conversation_id);
 
       const rawArticles = data.legal_articles ?? data.retrieved_articles ?? [];
@@ -214,7 +220,7 @@ export function AuthorityAssistantView() {
 
       const contentText = data.reply || data.answer || '';
       const noLegalAnswer =
-        contentText.includes(NO_LEGAL_ANSWER_TEXT) ||
+        containsNoLegalAnswer(contentText) ||
         data.found_in_law === false ||
         data.no_answer === true;
 
@@ -321,7 +327,7 @@ export function AuthorityAssistantView() {
             <ShieldCheck className="size-4 text-emerald-600" />
             <span>{t('authority.assistant.chat_header')}</span>
           </div>
-          <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-medium">
+          <span className="text-xs px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-medium">
             {t('authority.assistant.law_decree_badge')}
           </span>
         </div>
@@ -357,7 +363,7 @@ export function AuthorityAssistantView() {
                   {/* Cited Articles */}
                   {!isUser && message.legal_articles && message.legal_articles.length > 0 && (
                     <div className="pt-2 border-t border-gray-100 space-y-1.5">
-                      <div className="text-[11px] font-semibold text-gray-500 flex items-center gap-1.5">
+                      <div className="text-xs font-semibold text-gray-500 flex items-center gap-1.5">
                         <BookOpen className="size-3 text-emerald-600" />
                         <span>{t('authority.assistant.articles_adopted')}</span>
                       </div>
@@ -379,7 +385,7 @@ export function AuthorityAssistantView() {
 
                   {/* Advisory Notice */}
                   {!isUser && (
-                    <div className="text-[11px] text-gray-600 pt-1 flex items-center gap-1">
+                    <div className="text-xs text-gray-600 pt-1 flex items-center gap-1">
                       <AlertCircle className="size-3 shrink-0 text-amber-500" />
                       <span>{t('authority.assistant.disclaimer')}</span>
                     </div>

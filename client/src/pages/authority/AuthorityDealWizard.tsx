@@ -615,7 +615,7 @@ export function AuthorityDealWizard() {
               className="p-1.5 h-auto text-gray-600 hover:text-navy-900 hover:bg-gray-100 rounded-lg"
               title={t('authority.wizard.nav_back_to_deals')}
             >
-              <ArrowRight className="w-5 h-5" />
+              <ArrowRight className="w-5 h-5 rtl:rotate-180" />
             </Button>
             <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-navy-50 text-navy-800 border border-navy-100">
               {referenceNumber || t('authority.wizard.new_deal_ref')}
@@ -699,7 +699,7 @@ export function AuthorityDealWizard() {
                   <div className="min-w-0">
                     <p className="text-xs md:text-sm font-bold truncate">{s.title}</p>
                     <p
-                      className={`text-[11px] truncate ${
+                      className={`text-xs truncate ${
                         isActive ? 'text-gray-300' : isPassed ? 'text-emerald-700' : 'text-gray-400'
                       }`}
                     >
@@ -744,7 +744,7 @@ export function AuthorityDealWizard() {
                   </p>
                 </div>
               </div>
-              <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
+              <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
                 {t('authority.wizard.s1_auto_data')}
               </span>
             </div>
@@ -772,14 +772,14 @@ export function AuthorityDealWizard() {
                 <select
                   value={procurementNature}
                   onChange={(e) => setProcurementNature(e.target.value as ProcurementNature)}
-                  className="w-full text-sm rounded-xl border border-[#D5DDEA] p-2.5 bg-white text-gray-800 focus:outline-none focus:border-navy-500"
+                  className="w-full h-10 px-3 text-sm rounded-lg border border-slate-300 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 >
                   <option value="works">{t('authority.wizard.s1_nature_works')}</option>
                   <option value="supplies">{t('authority.wizard.s1_nature_supplies')}</option>
                   <option value="studies">{t('authority.wizard.s1_nature_studies')}</option>
                   <option value="services">{t('authority.wizard.s1_nature_services')}</option>
                 </select>
-                <p className="text-[11px] text-gray-500">
+                <p className="text-xs text-gray-500">
                   {NATURE_LABELS[procurementNature].desc}
                 </p>
               </div>
@@ -792,7 +792,7 @@ export function AuthorityDealWizard() {
                 <select
                   value={wilaya}
                   onChange={(e) => setWilaya(e.target.value)}
-                  className="w-full text-sm rounded-xl border border-[#D5DDEA] p-2.5 bg-white text-gray-800 focus:outline-none focus:border-navy-500"
+                  className="w-full h-10 px-3 text-sm rounded-lg border border-slate-300 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 >
                   {ALGERIA_69_WILAYAS.map((w) => (
                     <option key={w.code} value={w.code}>
@@ -819,7 +819,7 @@ export function AuthorityDealWizard() {
                     {t('common.dzd')}
                   </span>
                 </div>
-                <div className="flex items-center justify-between text-[11px] text-gray-500 pt-0.5">
+                <div className="flex items-center justify-between text-xs text-gray-500 pt-0.5">
                   <div className="flex items-center gap-3">
                     <span className="font-semibold text-gray-600">{t('authority.wizard.s1_tax_system')}</span>
                     <label className="flex items-center gap-1 cursor-pointer">
@@ -831,7 +831,7 @@ export function AuthorityDealWizard() {
                         onChange={() => setTaxRegime('ttc')}
                         className="text-navy-900 focus:ring-navy-500"
                       />
-                      <span className="text-[11px] font-bold text-gray-700">{t('authority.wizard.s1_ttc')}</span>
+                      <span className="text-xs font-bold text-gray-700">{t('authority.wizard.s1_ttc')}</span>
                     </label>
                     <label className="flex items-center gap-1 cursor-pointer">
                       <input
@@ -842,7 +842,7 @@ export function AuthorityDealWizard() {
                         onChange={() => setTaxRegime('ht')}
                         className="text-navy-900 focus:ring-navy-500"
                       />
-                      <span className="text-[11px] font-bold text-gray-700">{t('authority.wizard.s1_ht')}</span>
+                      <span className="text-xs font-bold text-gray-700">{t('authority.wizard.s1_ht')}</span>
                     </label>
                   </div>
                   {boqTotal > 0 && (
@@ -900,7 +900,7 @@ export function AuthorityDealWizard() {
               className="bg-navy-900 hover:bg-navy-800 text-white font-bold px-6 py-2.5 rounded-xl shadow-sm text-sm flex items-center gap-2"
             >
               <span>{t('authority.wizard.s1_btn_next')}</span>
-              <ChevronLeft className="w-4 h-4" />
+              <ChevronLeft className="w-4 h-4 rtl:rotate-180" />
             </Button>
           </div>
         </div>
@@ -931,12 +931,12 @@ export function AuthorityDealWizard() {
                 <select
                   value={procurementMethod}
                   onChange={(e) => handleMethodChange(e.target.value as ProcurementMethod)}
-                  className="w-full text-sm rounded-xl border border-[#D5DDEA] p-2.5 bg-white text-gray-800 focus:outline-none focus:border-navy-500 font-semibold"
+                  className="w-full h-10 px-3 text-sm rounded-lg border border-slate-300 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-semibold"
                 >
                   <option value="call_for_tenders">{t('authority.wizard.s2_method_tenders')}</option>
                   <option value="negotiated_procedure">{t('authority.wizard.s2_method_negotiated')}</option>
                 </select>
-                <p className="text-[11px] text-gray-500 leading-tight">
+                <p className="text-xs text-gray-500 leading-tight">
                   {METHOD_LABELS[procurementMethod].desc}
                 </p>
               </div>
@@ -949,7 +949,7 @@ export function AuthorityDealWizard() {
                 <select
                   value={procurementForm}
                   onChange={(e) => setProcurementForm(e.target.value as ProcurementForm)}
-                  className="w-full text-sm rounded-xl border border-[#D5DDEA] p-2.5 bg-white text-gray-800 focus:outline-none focus:border-navy-500 font-semibold"
+                  className="w-full h-10 px-3 text-sm rounded-lg border border-slate-300 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-semibold"
                 >
                   {compatibleForms.map((f) => (
                     <option key={f} value={f}>
@@ -957,7 +957,7 @@ export function AuthorityDealWizard() {
                     </option>
                   ))}
                 </select>
-                <p className="text-[11px] text-gray-500 leading-tight">
+                <p className="text-xs text-gray-500 leading-tight">
                   {FORM_LABELS[procurementForm].desc}
                 </p>
               </div>
@@ -971,12 +971,12 @@ export function AuthorityDealWizard() {
                   <select
                     value={competitionScope}
                     onChange={(e) => setCompetitionScope(e.target.value as CompetitionScope)}
-                    className="w-full text-sm rounded-xl border border-[#D5DDEA] p-2.5 bg-white text-gray-800 focus:outline-none focus:border-navy-500"
+                    className="w-full h-10 px-3 text-sm rounded-lg border border-slate-300 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   >
                     <option value="national">{t('authority.wizard.s2_scope_national')}</option>
                     <option value="national_and_international">{t('authority.wizard.s2_scope_national_international')}</option>
                   </select>
-                  <p className="text-[11px] text-gray-500 leading-tight">
+                  <p className="text-xs text-gray-500 leading-tight">
                     {t('authority.wizard.s2_scope_art81')}
                   </p>
                 </div>
@@ -999,13 +999,13 @@ export function AuthorityDealWizard() {
                     {t('authority.wizard.s2_record_justif_title', { form: getFormLabel(procurementForm) })}
                   </h3>
                 </div>
-                <p className="text-[11px] text-amber-800 leading-relaxed">
+                <p className="text-xs text-amber-800 leading-relaxed">
                   {t('authority.wizard.s2_record_justif_desc')}
                 </p>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="md:col-span-2 space-y-1">
-                    <label className="text-[11px] font-bold text-amber-900 block">
+                    <label className="text-xs font-bold text-amber-900 block">
                       {t('authority.wizard.s2_justif_motive_label')} <span className="text-red-500">*</span>
                     </label>
                     <Textarea
@@ -1018,7 +1018,7 @@ export function AuthorityDealWizard() {
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-[11px] font-bold text-amber-900 block">{t('authority.wizard.s2_statutory_basis_label')}</label>
+                    <label className="text-xs font-bold text-amber-900 block">{t('authority.wizard.s2_statutory_basis_label')}</label>
                     <Input
                       placeholder={FORM_LABELS[procurementForm].legalRef}
                       value={statutoryBasis}
@@ -1028,7 +1028,7 @@ export function AuthorityDealWizard() {
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-[11px] font-bold text-amber-900 block">
+                    <label className="text-xs font-bold text-amber-900 block">
                       {t('authority.wizard.s2_supporting_docs_label')}
                     </label>
                     <Input
@@ -1050,7 +1050,7 @@ export function AuthorityDealWizard() {
                     <BookOpen className="w-4 h-4 text-navy-700" />
                     <span>{t('authority.wizard.s2_templates_lib_title')}</span>
                   </h3>
-                  <p className="text-[11px] text-gray-500 mt-0.5">
+                  <p className="text-xs text-gray-500 mt-0.5">
                     {t('authority.wizard.s2_templates_lib_desc', { nature: getNatureLabel(procurementNature), form: getFormLabel(procurementForm) })}
                   </p>
                 </div>
@@ -1073,7 +1073,7 @@ export function AuthorityDealWizard() {
                     <p className="text-xs font-bold text-gray-700">
                       {t('authority.wizard.s2_no_matching_tpl')}
                     </p>
-                    <p className="text-[11px] text-gray-500 leading-relaxed">
+                    <p className="text-xs text-gray-500 leading-relaxed">
                       {t('authority.wizard.s2_no_matching_tpl_desc')}
                     </p>
                   </div>
@@ -1102,13 +1102,13 @@ export function AuthorityDealWizard() {
                           <div className="flex items-center gap-2 flex-wrap">
                             <span className="font-bold text-sm text-navy-900">{tpl.title}</span>
                             <span
-                              className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                              className={`text-xs font-bold px-2 py-0.5 rounded-full border ${
                                 TEMPLATE_STATUS_LABELS[tpl.status]?.badgeClass || 'bg-amber-50 text-amber-800 border-amber-300'
                               }`}
                             >
                               TEMPLATE_STATUS_LABELS[tpl.status]?.ar || 'Modèle indicatif'
                             </span>
-                            <span className="text-[10px] font-mono text-gray-500 bg-gray-100 px-2 py-0.5 rounded">
+                            <span className="text-xs font-mono text-gray-500 bg-gray-100 px-2 py-0.5 rounded">
                               {t('authority.wizard.s2_tpl_version', { version: tpl.version, date: tpl.revisionDate })}
                             </span>
                           </div>
@@ -1117,7 +1117,7 @@ export function AuthorityDealWizard() {
                             {t('authority.wizard.s2_tpl_source', { source: tpl.sourceReference })}
                           </p>
 
-                          <div className="flex items-center gap-2 text-[11px] text-gray-500 flex-wrap">
+                          <div className="flex items-center gap-2 text-xs text-gray-500 flex-wrap">
                             <span>{t('authority.wizard.s2_tpl_required_docs', { count: tpl.requiredDocuments.length })}</span>
                             <span>•</span>
                             <span className="text-navy-800 font-medium">{tpl.usageLimits}</span>
@@ -1186,7 +1186,7 @@ export function AuthorityDealWizard() {
               className="bg-navy-900 hover:bg-navy-800 text-white font-bold px-6 py-2.5 rounded-xl shadow-sm text-sm flex items-center gap-2"
             >
               <span>{t('authority.wizard.s2_btn_next')}</span>
-              <ChevronLeft className="w-4 h-4" />
+              <ChevronLeft className="w-4 h-4 rtl:rotate-180" />
             </Button>
           </div>
         </div>
@@ -1236,7 +1236,7 @@ export function AuthorityDealWizard() {
                   </button>
                 </div>
                 {complianceResult.advisory_notes?.map((n: any, idx: number) => (
-                  <div key={idx} className="bg-white p-2.5 rounded-lg border border-navy-100 text-[11px]">
+                  <div key={idx} className="bg-white p-2.5 rounded-lg border border-navy-100 text-xs">
                     <span className="font-bold text-navy-900">{n.rule}:</span> {n.message}
                   </div>
                 ))}
@@ -1287,7 +1287,7 @@ export function AuthorityDealWizard() {
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-sm font-bold text-navy-900">{t('authority.wizard.s3_boq_title')}</h3>
-                  <p className="text-[11px] text-gray-500">
+                  <p className="text-xs text-gray-500">
                     {t('authority.wizard.s3_boq_desc', { total: boqTotal.toLocaleString(lang === 'ar' ? 'ar-DZ' : 'fr-FR') })}
                   </p>
                 </div>
@@ -1307,34 +1307,34 @@ export function AuthorityDealWizard() {
                 <table className="w-full text-start text-xs border-collapse">
                   <thead>
                     <tr className="bg-gray-50 border-b border-gray-200 font-bold text-gray-600">
-                      <th className="py-2 px-3 w-10 text-center">#</th>
-                      <th className="py-2 px-3">{t('authority.wizard.s3_boq_th_desc')}</th>
-                      <th className="py-2 px-3 w-24">{t('authority.wizard.s3_boq_th_unit')}</th>
-                      <th className="py-2 px-3 w-20">{t('authority.wizard.s3_boq_th_qty')}</th>
-                      <th className="py-2 px-3 w-32">{t('authority.wizard.s3_boq_th_price')}</th>
-                      <th className="py-2 px-3 w-32 text-end">{t('authority.wizard.s3_boq_th_total')}</th>
-                      <th className="py-2 px-2 w-10 text-center">{t('authority.wizard.s3_boq_th_delete')}</th>
+                      <th className="px-4 py-4 w-10 text-center">#</th>
+                      <th className="px-4 py-4">{t('authority.wizard.s3_boq_th_desc')}</th>
+                      <th className="px-4 py-4 w-24">{t('authority.wizard.s3_boq_th_unit')}</th>
+                      <th className="px-4 py-4 w-20">{t('authority.wizard.s3_boq_th_qty')}</th>
+                      <th className="px-4 py-4 w-32">{t('authority.wizard.s3_boq_th_price')}</th>
+                      <th className="px-4 py-4 w-32 text-end">{t('authority.wizard.s3_boq_th_total')}</th>
+                      <th className="px-4 py-4 w-10 text-center">{t('authority.wizard.s3_boq_th_delete')}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
                     {boqItems.map((item, idx) => (
                       <tr key={item.id}>
-                        <td className="py-2 px-3 text-center text-gray-400">{idx + 1}</td>
-                        <td className="py-2 px-3">
+                        <td className="px-4 py-3 text-center text-gray-400">{idx + 1}</td>
+                        <td className="px-4 py-3">
                           <Input
                             value={item.name}
                             onChange={(e) => handleUpdateBoqRow(item.id, 'name', e.target.value)}
                             className="h-7 text-xs rounded-lg"
                           />
                         </td>
-                        <td className="py-2 px-3">
+                        <td className="px-4 py-3">
                           <Input
                             value={item.unit}
                             onChange={(e) => handleUpdateBoqRow(item.id, 'unit', e.target.value)}
                             className="h-7 text-xs rounded-lg"
                           />
                         </td>
-                        <td className="py-2 px-3">
+                        <td className="px-4 py-3">
                           <Input
                             type="number"
                             min={1}
@@ -1345,7 +1345,7 @@ export function AuthorityDealWizard() {
                             className="h-7 text-xs rounded-lg text-center"
                           />
                         </td>
-                        <td className="py-2 px-3">
+                        <td className="px-4 py-3">
                           <Input
                             type="number"
                             min={0}
@@ -1356,10 +1356,10 @@ export function AuthorityDealWizard() {
                             className="h-7 text-xs rounded-lg text-end font-mono"
                           />
                         </td>
-                        <td className="py-2 px-3 text-end font-mono font-bold text-navy-900">
+                        <td className="px-4 py-3 text-end font-mono font-bold text-navy-900">
                           {((item.quantity || 0) * (item.unitPrice || 0)).toLocaleString(lang === 'ar' ? 'ar-DZ' : 'fr-FR')} {t('common.dzd')}
                         </td>
-                        <td className="py-2 px-2 text-center">
+                        <td className="px-4 py-3 text-center">
                           <button
                             type="button"
                             onClick={() => handleRemoveBoqRow(item.id)}
@@ -1382,7 +1382,7 @@ export function AuthorityDealWizard() {
                   <h3 className="text-sm font-bold text-navy-900">
                     {t('authority.wizard.s3_sec_docs')}
                   </h3>
-                  <p className="text-[11px] text-gray-500">
+                  <p className="text-xs text-gray-500">
                     {t('authority.wizard.s3_sec_docs_desc')}
                   </p>
                 </div>
@@ -1396,23 +1396,23 @@ export function AuthorityDealWizard() {
                   >
                     <div className="space-y-1">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-mono text-[10px] font-bold px-1.5 py-0.5 rounded bg-gray-200 text-gray-700">
+                        <span className="font-mono text-xs font-bold px-1.5 py-0.5 rounded bg-gray-200 text-gray-700">
                           {doc.code}
                         </span>
                         <span className="font-bold text-navy-900">{doc.name}</span>
                         {doc.isStatutory ? (
-                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-navy-50 text-navy-800 border border-navy-200">
+                          <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-navy-50 text-navy-800 border border-navy-200">
                             {t('authority.wizard.s3_doc_statutory')}
                           </span>
                         ) : (
-                          <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-gray-100 text-gray-600">
+                          <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
                             {t('authority.wizard.s3_doc_discretionary')}
                           </span>
                         )}
                       </div>
-                      <p className="text-[11px] text-muted-foreground">{t('authority.wizard.s3_doc_basis', { basis: doc.statutoryBasis })}</p>
+                      <p className="text-xs text-muted-foreground">{t('authority.wizard.s3_doc_basis', { basis: doc.statutoryBasis })}</p>
                       {doc.conditionNotes && (
-                        <p className="text-[10px] text-amber-800 bg-amber-50 px-2 py-0.5 rounded border border-amber-200/60">
+                        <p className="text-xs text-amber-800 bg-amber-50 px-2 py-0.5 rounded border border-amber-200/60">
                           {t('authority.wizard.s3_doc_cond', { cond: doc.conditionNotes })}
                         </p>
                       )}
@@ -1474,7 +1474,7 @@ export function AuthorityDealWizard() {
               className="bg-navy-900 hover:bg-navy-800 text-white font-bold px-6 py-2.5 rounded-xl shadow-sm text-sm flex items-center gap-2"
             >
               <span>{t('authority.wizard.s3_btn_next')}</span>
-              <ChevronLeft className="w-4 h-4" />
+              <ChevronLeft className="w-4 h-4 rtl:rotate-180" />
             </Button>
           </div>
         </div>
@@ -1611,7 +1611,7 @@ export function AuthorityDealWizard() {
               <ShieldCheck className="w-5 h-5 text-amber-700 shrink-0 mt-0.5" />
               <div className="space-y-1">
                 <p className="font-bold">{t('authority.wizard.s4_visa_warning_title')}</p>
-                <p className="text-amber-800 leading-relaxed text-[11px]">
+                <p className="text-amber-800 leading-relaxed text-xs">
                   {t('authority.wizard.s4_visa_warning_desc')}
                 </p>
               </div>
@@ -1718,7 +1718,7 @@ export function AuthorityDealWizard() {
                   {previewingTemplate.requiredDocuments.map((doc) => (
                     <div
                       key={doc.code}
-                      className="p-2 rounded-lg border border-gray-200 bg-white flex justify-between items-center text-[11px]"
+                      className="p-2 rounded-lg border border-gray-200 bg-white flex justify-between items-center text-xs"
                     >
                       <span className="font-semibold text-gray-800">{doc.name}</span>
                       <span className="text-gray-400">{doc.statutoryBasis}</span>

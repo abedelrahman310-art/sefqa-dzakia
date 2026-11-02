@@ -13,7 +13,7 @@ export function OperatorPaymentsView() {
             <h1 className="text-xl sm:text-2xl font-extrabold text-navy-900 dark:text-slate-100">
               {t('operator.payments.title')}
             </h1>
-            <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200 dark:border-amber-800 flex items-center gap-1">
+            <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200 dark:border-amber-800 flex items-center gap-1">
               <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
               {t('operator.payments.epay_badge')}
             </span>

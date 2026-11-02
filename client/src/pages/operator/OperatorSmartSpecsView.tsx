@@ -68,6 +68,14 @@ interface AnalysisResult {
   is_advisory?: boolean;
 }
 
+type AnalysisSection = {
+  key: string;
+  title: string;
+  icon: typeof Clock3;
+  tone: 'default' | 'warning' | 'success' | 'info';
+  items: string[];
+};
+
 interface MissingDocument {
   code?: string;
   name?: string;
@@ -281,14 +289,8 @@ export function OperatorSmartSpecsView() {
     }
   };
 
-  const analysisSections: Array<{
-    key: string;
-    title: string;
-    icon: typeof Clock3;
-    tone: 'default' | 'warning' | 'success' | 'info';
-    items: string[];
-  }> = analysis
-    ? [
+  const analysisSections: AnalysisSection[] = analysis
+    ? ([
         {
           key: 'deadlines',
           title: t('operator.specs.card_deadlines'),
@@ -331,7 +333,7 @@ export function OperatorSmartSpecsView() {
           tone: 'success',
           items: asTextList(analysis.recommendations),
         },
-      ].filter((section) => section.items.length > 0)
+      ] satisfies AnalysisSection[]).filter((section) => section.items.length > 0)
     : [];
 
   const hasAnalysisContent =
@@ -471,7 +473,7 @@ export function OperatorSmartSpecsView() {
                 {/* Card Header Chips */}
                 <div className="mb-3.5 flex items-start justify-between gap-2">
                   <span
-                    className="inline-flex items-center gap-1.5 rounded-full border border-amber-300/60 bg-amber-50/80 px-2.5 py-1 font-mono text-[11px] font-bold text-amber-900 shadow-xs backdrop-blur-sm"
+                    className="inline-flex items-center gap-1.5 rounded-full border border-amber-300/60 bg-amber-50/80 px-2.5 py-1 font-mono text-xs font-bold text-amber-900 shadow-xs backdrop-blur-sm"
                     title={t('operator.specs.chip_ref_title')}
                   >
                     <span className="size-1.5 rounded-full bg-amber-500" />
@@ -480,7 +482,7 @@ export function OperatorSmartSpecsView() {
 
                   <Badge
                     variant="outline"
-                    className={`rounded-full px-2.5 py-0.5 text-[11px] font-semibold backdrop-blur-sm transition-all ${
+                    className={`rounded-full px-2.5 py-0.5 text-xs font-semibold backdrop-blur-sm transition-all ${
                       spec.specsValidated
                         ? 'border-emerald-300/80 bg-emerald-50/80 text-emerald-800 shadow-xs'
                         : 'border-amber-300/80 bg-amber-50/80 text-amber-800 shadow-xs'
@@ -703,7 +705,7 @@ export function OperatorSmartSpecsView() {
               })}
 
               {/* Sovereign & Zero-Paper Disclaimer */}
-              <p className="flex items-start gap-2 rounded-2xl border border-slate-200/80 bg-slate-50/80 p-3.5 text-[11px] sm:text-xs leading-relaxed text-slate-500 backdrop-blur-sm">
+              <p className="flex items-start gap-2 rounded-2xl border border-slate-200/80 bg-slate-50/80 p-3.5 text-xs sm:text-xs leading-relaxed text-slate-500 backdrop-blur-sm">
                 <AlertTriangle className="mt-0.5 size-3.5 shrink-0 text-slate-400" aria-hidden="true" />
                 <span>
                   {t('operator.specs.modal_ai_disclaimer')}
@@ -812,7 +814,7 @@ export function OperatorSmartSpecsView() {
                         <p className="font-bold text-rose-950">
                           {doc.name ?? doc.code ?? t('operator.specs.modal_comp_doc_fallback')}
                         </p>
-                        <div className="mt-1 flex flex-wrap items-center gap-2 text-[11px] text-slate-500">
+                        <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-500">
                           {doc.category && <span>{doc.category}</span>}
                           {doc.legal_ref && (
                             <span className="rounded-full bg-slate-100 px-2 py-0.5 font-mono text-slate-600">

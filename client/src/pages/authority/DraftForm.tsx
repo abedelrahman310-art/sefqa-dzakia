@@ -214,7 +214,7 @@ export function DraftForm({ id }: { id?: string }) {
               placeholder={t('authority.drafts.title_placeholder')}
               className="rounded-xl"
             />
-            <span className="text-[11px] text-muted-foreground block">
+            <span className="text-xs text-muted-foreground block">
               {t('authority.drafts.title_help')}
             </span>
           </div>
@@ -237,7 +237,7 @@ export function DraftForm({ id }: { id?: string }) {
                 <option value="services">{t('ai.price_template_services')}</option>
                 <option value="studies">{t('ai.price_template_studies')}</option>
               </select>
-              <span className="text-[11px] text-muted-foreground block">
+              <span className="text-xs text-muted-foreground block">
                 {t('authority.drafts.type_help')}
               </span>
             </div>
@@ -259,7 +259,7 @@ export function DraftForm({ id }: { id?: string }) {
                   </option>
                 ))}
               </select>
-              <span className="text-[11px] text-muted-foreground block">
+              <span className="text-xs text-muted-foreground block">
                 {t('authority.drafts.wilaya_help')}
               </span>
             </div>
@@ -281,7 +281,7 @@ export function DraftForm({ id }: { id?: string }) {
               disabled={status === 'published'}
               placeholder={t('authority.drafts.desc_placeholder')}
             />
-            <span className="text-[11px] text-muted-foreground block">
+            <span className="text-xs text-muted-foreground block">
               {t('authority.drafts.desc_help')}
             </span>
           </div>
@@ -315,7 +315,7 @@ export function DraftForm({ id }: { id?: string }) {
               placeholder="1500000"
               className="rounded-xl font-mono tabular-nums"
             />
-            <span className="text-[11px] text-muted-foreground block">
+            <span className="text-xs text-muted-foreground block">
               {t('authority.drafts.budget_help')}
             </span>
           </div>
@@ -335,7 +335,7 @@ export function DraftForm({ id }: { id?: string }) {
                       <span className="text-xs font-semibold block text-navy-900">
                         {t('authority.drafts.specs_doc_label')}
                       </span>
-                      <span className="text-[11px] text-muted-foreground">
+                      <span className="text-xs text-muted-foreground">
                         {t('drafts.doc.frozen')}
                       </span>
                     </div>
@@ -363,7 +363,7 @@ export function DraftForm({ id }: { id?: string }) {
                         <div className="text-xs font-bold text-navy-900">
                           {hasDoc ? t('authority.drafts.update_pdf') : t('authority.drafts.upload_pdf')}
                         </div>
-                        <div className="text-[11px] text-muted-foreground">
+                        <div className="text-xs text-muted-foreground">
                           {t('authority.drafts.pdf_max_size')}
                         </div>
                       </div>

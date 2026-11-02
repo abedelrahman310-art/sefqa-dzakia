@@ -1,5 +1,7 @@
-import { Route, Switch, useRoute } from 'wouter';
+import { useEffect } from 'react';
+import { Redirect, Route, Switch, useRoute } from 'wouter';
 import { useI18n } from '@/i18n';
+import i18n from '@/lib/i18n';
 import { OperatorOverview } from './OperatorOverview';
 import { OperatorOpportunities } from './OperatorOpportunities';
 import { OpportunityDetails } from './OpportunityDetails';
@@ -29,7 +31,12 @@ import {
 } from 'lucide-react';
 
 export function OperatorSpace() {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
+
+  useEffect(() => {
+    document.title = i18n.t('common.operator_mobile_title');
+  }, [lang]);
+
   // Route matchers for active highlighting
   const [isOverviewActive] = useRoute('/operator');
   const [isOverviewAliasActive] = useRoute('/operator/overview');
@@ -116,6 +123,9 @@ export function OperatorSpace() {
         </Route>
         <Route path="/operator/opportunities/:id" component={OpportunityDetails} />
         <Route path="/operator/offers" component={OffersList} />
+        <Route path="/operator/offers/new">
+          <Redirect to="/operator/opportunities" />
+        </Route>
         <Route path="/operator/offers/:id">
           {(params) => <OfferForm offerId={params.id} />}
         </Route>

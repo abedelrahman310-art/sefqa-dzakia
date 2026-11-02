@@ -50,7 +50,7 @@ export function OperatorHeader({
             <span className="text-xs font-bold text-navy-900 dark:text-slate-100 tracking-tight">
               {t('brand.title')}
             </span>
-            <span className="text-[10px] text-muted-foreground font-medium mt-0.5">
+            <span className="text-xs text-muted-foreground font-medium mt-0.5">
               {t('operator.header.portal_badge')}
             </span>
           </div>
@@ -82,7 +82,7 @@ export function OperatorHeader({
           <Bell className="w-3.5 h-3.5 flex-none" />
           <span className="hidden md:inline">{t('header.tools.notifications')}</span>
           {unreadNotificationsCount > 0 && (
-            <span className="absolute -top-1 -end-1 bg-amber-500 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center ring-2 ring-white dark:ring-slate-900">
+            <span className="absolute -top-1 -end-1 bg-amber-500 text-white text-xs font-bold rounded-full w-4 h-4 flex items-center justify-center ring-2 ring-white dark:ring-slate-900">
               {unreadNotificationsCount}
             </span>
           )}

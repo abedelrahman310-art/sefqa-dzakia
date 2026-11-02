@@ -1,5 +1,7 @@
+import { useEffect } from 'react';
 import { useI18n } from '@/i18n';
-import { Route, Switch, useRoute } from 'wouter';
+import i18n from '@/lib/i18n';
+import { Redirect, Route, Switch, useRoute } from 'wouter';
 import { AuthorityOverview } from './AuthorityOverview';
 import { AuthorityDealsList } from './AuthorityDealsList';
 import { AuthorityDealWizard } from './AuthorityDealWizard';
@@ -31,7 +33,11 @@ import {
 } from 'lucide-react';
 
 export function AuthoritySpace() {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
+
+  useEffect(() => {
+    document.title = i18n.t('common.authority_mobile_title');
+  }, [lang]);
 
   // Route matchers for active highlighting
   const [isOverviewActive] = useRoute('/authority');
@@ -165,6 +171,9 @@ export function AuthoritySpace() {
         <Route path="/authority/opportunities/:id/evaluation" component={EvaluationWorkspace} />
         <Route path="/authority/opening-sessions/:id" component={AuthoritySessionControl} />
         <Route path="/authority/opening-sessions" component={AuthoritySessionManager} />
+        <Route path="/authority/dashboard">
+          <Redirect to="/authority/overview" />
+        </Route>
         <Route path="/authority/overview" component={AuthorityOverview} />
         <Route path="/authority" component={AuthorityOverview} />
         <Route>

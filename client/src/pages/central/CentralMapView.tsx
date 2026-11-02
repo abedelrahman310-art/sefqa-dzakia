@@ -464,7 +464,7 @@ export function CentralMapView() {
             <div className="absolute start-4 top-4 z-20 flex animate-in items-center gap-2 rounded-xl border border-gray-200 bg-white/95 px-3.5 py-2 text-sm shadow-sm backdrop-blur-md duration-150 fade-in">
               <span className="size-2 animate-pulse rounded-full bg-[#167354]" />
               <span className="font-medium text-gray-500">{t('central.map_view.selected_wilaya_label')}</span>
-              <strong className="font-black text-[#24352E]">{hoveredWilayaName}</strong>
+              <strong className="font-bold text-[#24352E]">{hoveredWilayaName}</strong>
             </div>
           )}
 
@@ -611,7 +611,7 @@ export function CentralMapView() {
                     <span className="text-xs font-bold">{t('central.map_view.total_deals')}</span>
                     <FileText className="size-3.5 shrink-0 text-[#167354]" />
                   </div>
-                  <div className="font-mono text-xl font-black leading-tight text-[#24352E]">
+                  <div className="font-mono text-xl font-bold leading-tight text-[#24352E]">
                     {deals.length.toLocaleString(lang === 'fr' ? 'fr-DZ' : 'ar-DZ')}
                   </div>
                   <span className="mt-0.5 block text-xs font-semibold text-[#167354]">
@@ -625,7 +625,7 @@ export function CentralMapView() {
                     <Coins className="size-3.5 shrink-0 text-[#2563EB]" />
                   </div>
                   <div
-                    className="truncate font-mono text-lg font-black leading-tight text-[#24352E]"
+                    className="truncate font-mono text-lg font-bold leading-tight text-[#24352E]"
                     title={formatCompactDzd(totalBudgetDzd, lang, t)}
                   >
                     {formatCompactDzd(totalBudgetDzd, lang, t)}
@@ -640,7 +640,7 @@ export function CentralMapView() {
                     <span className="text-xs font-bold">{t('central.map_view.active_wilayas')}</span>
                     <MapPin className="size-3.5 shrink-0 text-[#167354]" />
                   </div>
-                  <div className="font-mono text-xl font-black leading-tight text-[#24352E]">
+                  <div className="font-mono text-xl font-bold leading-tight text-[#24352E]">
                     {activeWilayas.toLocaleString(lang === 'fr' ? 'fr-DZ' : 'ar-DZ')}{' '}
                     <span className="text-xs font-bold text-gray-500">{t('central.map_view.wilaya_unit')}</span>
                   </div>
@@ -654,7 +654,7 @@ export function CentralMapView() {
                     <span className="text-xs font-bold">{t('central.map_view.suspicions_detected')}</span>
                     <AlertTriangle className="size-3.5 shrink-0 text-rose-600" />
                   </div>
-                  <div className="font-mono text-xl font-black leading-tight text-rose-700">
+                  <div className="font-mono text-xl font-bold leading-tight text-rose-700">
                     {totalWarnings.toLocaleString(lang === 'fr' ? 'fr-DZ' : 'ar-DZ')}{' '}
                     <span className="text-xs font-bold text-rose-600">{t('central.map_view.case_unit')}</span>
                   </div>
@@ -673,7 +673,7 @@ export function CentralMapView() {
                     {t('central.map_view.radar_title')}
                   </span>
                 </div>
-                <span className="shrink-0 rounded-full bg-emerald-50 px-2 py-0.5 font-mono text-[11px] font-bold text-emerald-700">
+                <span className="shrink-0 rounded-full bg-emerald-50 px-2 py-0.5 font-mono text-xs font-bold text-emerald-700">
                   AI Monitor
                 </span>
               </div>
@@ -708,7 +708,7 @@ export function CentralMapView() {
                             {wilaya.name} ({wilaya.code})
                           </span>
                         </span>
-                        <span className="shrink-0 rounded-full bg-rose-50 px-2 py-0.5 font-mono text-[11px] font-bold text-rose-700">
+                        <span className="shrink-0 rounded-full bg-rose-50 px-2 py-0.5 font-mono text-xs font-bold text-rose-700">
                           {t('central.map_view.warnings_count', { count: wilaya.warnings })}
                         </span>
                       </div>
@@ -726,7 +726,7 @@ export function CentralMapView() {
                 <span className="text-xs font-bold text-gray-600">
                   {t('central.map_view.top_active_wilayas')}
                 </span>
-                <span className="shrink-0 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-bold text-emerald-700">
+                <span className="shrink-0 rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-bold text-emerald-700">
                   {t('central.map_view.national_ranking')}
                 </span>
               </div>
@@ -751,7 +751,7 @@ export function CentralMapView() {
                         }`}
                       >
                         <div className="flex min-w-0 items-center gap-2">
-                          <span className="flex size-6 shrink-0 items-center justify-center rounded-lg border border-gray-200 bg-gray-50 font-mono text-[11px] font-black text-gray-500">
+                          <span className="flex size-6 shrink-0 items-center justify-center rounded-lg border border-gray-200 bg-gray-50 font-mono text-xs font-bold text-gray-500">
                             {index + 1}
                           </span>
                           <div className="min-w-0 truncate">
@@ -769,11 +769,11 @@ export function CentralMapView() {
 
                         <div className="flex shrink-0 items-center gap-1.5">
                           {wilaya.warnings > 0 && (
-                            <span className="rounded-full border border-rose-200 bg-rose-50 px-1.5 py-0.5 font-mono text-[11px] font-bold text-rose-700">
+                            <span className="rounded-full border border-rose-200 bg-rose-50 px-1.5 py-0.5 font-mono text-xs font-bold text-rose-700">
                               {t('central.map_view.suspicion_count', { count: wilaya.warnings })}
                             </span>
                           )}
-                          <span className="rounded-full border border-emerald-200 bg-emerald-50 px-1.5 py-0.5 font-mono text-[11px] font-black text-emerald-700">
+                          <span className="rounded-full border border-emerald-200 bg-emerald-50 px-1.5 py-0.5 font-mono text-xs font-bold text-emerald-700">
                             {t('central.map_view.deals_count', { count: wilaya.tenders_count })}
                           </span>
                           <ChevronRight className="size-3.5 text-gray-400 rtl:rotate-180" />

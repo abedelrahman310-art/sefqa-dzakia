@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useI18n, type TranslationKey } from '@/i18n';
 import { useLocation, useParams } from 'wouter';
 import {
-  ArrowRight,
+  ArrowLeft,
   CheckCircle2,
   AlertTriangle,
   ShieldCheck,
@@ -195,7 +195,7 @@ export function RequirementsResponse() {
             className="op-btn op-btn-outline"
             onClick={() => setLocation('/operator/deals')}
           >
-            <ArrowRight aria-hidden="true" />
+            <ArrowLeft className="rtl:rotate-180" aria-hidden="true" />
             <span>{t('operator.req.back')}</span>
           </button>
         </div>
@@ -221,7 +221,7 @@ export function RequirementsResponse() {
               className="op-btn op-btn-outline"
               onClick={() => setLocation(`/operator/opportunities/${oppId}`)}
             >
-              <ArrowRight aria-hidden="true" />
+              <ArrowLeft className="rtl:rotate-180" aria-hidden="true" />
               <span>{t('operator.req.back')}</span>
             </button>
           </div>
@@ -264,7 +264,7 @@ export function RequirementsResponse() {
             className="op-btn op-btn-outline"
             onClick={() => setLocation(`/operator/opportunities/${oppId}`)}
           >
-            <ArrowRight aria-hidden="true" />
+            <ArrowLeft className="rtl:rotate-180" aria-hidden="true" />
             <span>{t('operator.req.back')}</span>
           </button>
         </div>
@@ -388,7 +388,7 @@ export function RequirementsResponse() {
               <p className="text-xs leading-relaxed text-[var(--op-text)]">{req.description}</p>
 
               {resp && !isEditing && (
-                <div className="space-y-1 rounded-xl border border-[var(--op-line)] bg-[var(--op-surface-2)] p-3 text-[11px]">
+                <div className="space-y-1 rounded-xl border border-[var(--op-line)] bg-[var(--op-surface-2)] p-3 text-xs">
                   {resp.evidenceLocation && (
                     <div>
                       <span className="text-[var(--op-muted)]">

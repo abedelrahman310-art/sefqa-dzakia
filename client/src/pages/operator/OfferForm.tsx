@@ -247,7 +247,7 @@ function ComplianceResultPanel({ result }: { result: ComplianceResult }) {
           <AlertTriangle aria-hidden="true" />
         )}
         <div>
-          <strong className="block text-[13px]">
+          <strong className="block text-sm">
             {result.is_compliant
               ? t('operator.form.comp_success')
               : `${t('operator.form.comp_missing')} (${result.missing_count})`}
@@ -275,13 +275,13 @@ function ComplianceResultPanel({ result }: { result: ComplianceResult }) {
                   {document.is_mandatory && <span className="op-chip red">{t('operator.form.chip_mandatory')}</span>}
                 </div>
                 {document.category && (
-                  <p className="mt-1 text-[11px] font-semibold text-[var(--op-muted)]">
+                  <p className="mt-1 text-xs font-semibold text-[var(--op-muted)]">
                     {document.category}
                     {document.legal_ref ? ` — ${document.legal_ref}` : ''}
                   </p>
                 )}
                 {document.description && (
-                  <p className="mt-1 text-[11px] leading-relaxed text-[var(--op-text)]">
+                  <p className="mt-1 text-xs leading-relaxed text-[var(--op-text)]">
                     {document.description}
                   </p>
                 )}
@@ -292,7 +292,7 @@ function ComplianceResultPanel({ result }: { result: ComplianceResult }) {
       )}
 
       {advisoryNotes.length > 0 && (
-        <ul className="space-y-1 rounded-xl border border-[var(--op-line-2)] bg-[var(--op-surface-2)] p-3 text-[11px] leading-relaxed text-[var(--op-text)]">
+        <ul className="space-y-1 rounded-xl border border-[var(--op-line-2)] bg-[var(--op-surface-2)] p-3 text-xs leading-relaxed text-[var(--op-text)]">
           {advisoryNotes.map((note) => (
             <li key={note} className="flex items-start gap-2">
               <Info
@@ -896,7 +896,7 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
                           <div className="flex items-center gap-2">
                             <span className="size-2 rounded-full bg-rose-500" />
                             <strong className="text-slate-800">{doc.name}</strong>
-                            <span className="rounded bg-rose-100 px-1.5 py-0.5 text-[10px] font-bold text-rose-700">
+                            <span className="rounded bg-rose-100 px-1.5 py-0.5 text-xs font-bold text-rose-700">
                               {t('operator.form.doc_expired')} {doc.expiry_date ? `(${doc.expiry_date})` : ''}
                             </span>
                           </div>
@@ -906,7 +906,7 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
                             className="inline-flex items-center gap-1 rounded-lg bg-rose-600 hover:bg-rose-700 px-3 py-1 text-xs font-bold text-white transition-colors cursor-pointer"
                           >
                             <span>{t('operator.form.btn_update_doc_now')}</span>
-                            <ArrowLeft className="size-3" />
+                            <ArrowLeft className="size-3 rtl:rotate-180" />
                           </button>
                         </li>
                       ))}
@@ -915,7 +915,7 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
                           <div className="flex items-center gap-2">
                             <span className="size-2 rounded-full bg-amber-500" />
                             <strong className="text-slate-800">{doc.name}</strong>
-                            <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold text-amber-700">
+                            <span className="rounded bg-amber-100 px-1.5 py-0.5 text-xs font-bold text-amber-700">
                               {t('operator.form.doc_missing_in_file')}
                             </span>
                           </div>
@@ -925,7 +925,7 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
                             className="inline-flex items-center gap-1 rounded-lg bg-[#0A2540] hover:bg-[#1e3a8a] px-3 py-1 text-xs font-bold text-white transition-colors cursor-pointer"
                           >
                             <span>{t('operator.form.btn_update_doc_now')}</span>
-                            <ArrowLeft className="size-3" />
+                            <ArrowLeft className="size-3 rtl:rotate-180" />
                           </button>
                         </li>
                       ))}
@@ -942,7 +942,7 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
                   <strong className="text-xs font-bold text-emerald-900">
                     {t('operator.form.docs_valid_title')}
                   </strong>
-                  <p className="text-[11px] text-emerald-700">
+                  <p className="text-xs text-emerald-700">
                     {t('operator.form.docs_valid_desc')}
                   </p>
                 </div>
@@ -959,7 +959,7 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
         <div className="op-alert success">
           <ShieldCheck aria-hidden="true" />
           <div>
-            <strong className="block text-[13px]">{t('offers.status.submitted')}</strong>
+            <strong className="block text-sm">{t('offers.status.submitted')}</strong>
             <span>{t('offers.msg.frozen')}</span>
           </div>
         </div>
@@ -1013,7 +1013,7 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
                     <strong className="block text-xs font-extrabold text-[var(--op-ink)]">
                       {wizardStep.title}
                     </strong>
-                    <span className="block text-[11px] text-[var(--op-muted)]">
+                    <span className="block text-xs text-[var(--op-muted)]">
                       {wizardStep.hint}
                     </span>
                   </span>
@@ -1221,7 +1221,7 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
 
                                 {severeWarning && referencePrice !== null && (
                                   <div
-                                    className={`mt-1.5 flex items-start gap-1.5 rounded-lg border px-2 py-1.5 text-[10.5px] leading-relaxed ${
+                                    className={`mt-1.5 flex items-start gap-1.5 rounded-lg border px-2 py-1.5 text-xs leading-relaxed ${
                                       severeWarning === 'low'
                                         ? 'border-rose-200 bg-rose-50 text-rose-800'
                                         : 'border-amber-200 bg-amber-50 text-amber-900'
@@ -1241,7 +1241,7 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
                                 {!severeWarning &&
                                   referencePrice !== null &&
                                   referencePrice !== undefined && (
-                                    <div className="mt-1.5 flex flex-wrap items-center gap-1 text-[10.5px] text-[var(--op-muted)]">
+                                    <div className="mt-1.5 flex flex-wrap items-center gap-1 text-xs text-[var(--op-muted)]">
                                       <Info className="size-3" aria-hidden="true" />
                                       <span>{t('operator.form.ref_price_label')}{formatDzd(referencePrice, lang)}</span>
                                       {check?.result?.deviation_percent !== null &&
@@ -1259,13 +1259,13 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
                                   !check.loading &&
                                   !check.error &&
                                   referencePrice === null && (
-                                    <div className="mt-1.5 text-[10.5px] text-[var(--op-muted)]">
+                                    <div className="mt-1.5 text-xs text-[var(--op-muted)]">
                                       {t('operator.form.no_ref_price_item')}
                                     </div>
                                   )}
 
                                 {check?.error && (
-                                  <div className="mt-1.5 text-[10.5px] text-[var(--op-red)]">
+                                  <div className="mt-1.5 text-xs text-[var(--op-red)]">
                                     {check.error}
                                   </div>
                                 )}
@@ -1535,7 +1535,7 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
                     />
                     <div className="text-xs font-bold text-slate-800">
                       <span>{t('operator.form.crypto_checkbox_label')}</span>
-                      <p className="mt-0.5 text-[11px] font-normal text-slate-500">
+                      <p className="mt-0.5 text-xs font-normal text-slate-500">
                         {t('operator.form.crypto_declaration_text')}
                       </p>
                     </div>
@@ -1563,7 +1563,7 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
               onClick={() => setStep((step - 1) as WizardStep)}
               disabled={isBusy || complianceLoading}
             >
-              <ArrowRight aria-hidden="true" />
+              <ArrowRight className="rtl:rotate-180" aria-hidden="true" />
               <span>{t('operator.form.btn_back')}</span>
             </button>
           )}
@@ -1576,7 +1576,7 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
               disabled={isBusy}
             >
               <span>{t('operator.form.btn_next')}</span>
-              <ArrowLeft aria-hidden="true" />
+              <ArrowLeft className="rtl:rotate-180" aria-hidden="true" />
             </button>
           )}
 
@@ -1590,7 +1590,7 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
               {complianceLoading ? (
                 <Loader2 className="size-4 animate-spin" aria-hidden="true" />
               ) : (
-                <ArrowLeft aria-hidden="true" />
+                <ArrowLeft className="rtl:rotate-180" aria-hidden="true" />
               )}
               <span>{complianceLoading ? t('operator.form.comp_checking') : t('operator.form.btn_proceed_review')}</span>
             </button>

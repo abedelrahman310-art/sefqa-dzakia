@@ -15,7 +15,7 @@ from django.core.exceptions import PermissionDenied
 from django.utils import timezone
 from rest_framework.test import APIClient
 
-from apps.users.models import CustomUser
+from apps.users.models import CustomUser, OperatorProfile
 from apps.procurements.models import ProcurementDeal, OpeningSession, OpeningEvent
 from apps.bids.models import BidOffer
 from apps.audit.models import AuditLog
@@ -55,6 +55,18 @@ def demo_users(db):
             organization_name="شركة تجريبية 3",
         ),
     }
+
+    # المتعاملون في هذه الاختبارات يمتلكون الوثائق الإدارية الأساسية سارية
+    # المفعول، حتى يصل الاختبار إلى منطق الإيداع بدل التوقف عند قفل الوثائق.
+    for key in ("op1", "op2", "op3"):
+        OperatorProfile.objects.create(
+            user=users[key],
+            extra_data={
+                "tax_clearance_status": "valid",
+                "social_clearance_status": "valid",
+            },
+        )
+
     return users
 
 

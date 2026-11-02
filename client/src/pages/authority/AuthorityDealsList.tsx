@@ -134,7 +134,7 @@ export function AuthorityDealsList({ initialView = 'deals' }: AuthorityDealsList
     const stageLabel = getStageName(stage);
     if (stage === 1) {
       return (
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-800 border border-amber-200">
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200">
           <Clock className="size-3 text-amber-600 shrink-0" />
           <span>{stageNum} — {stageLabel}</span>
         </span>
@@ -142,7 +142,7 @@ export function AuthorityDealsList({ initialView = 'deals' }: AuthorityDealsList
     }
     if (stage === 2) {
       return (
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-blue-50 text-blue-800 border border-blue-200">
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-800 border border-blue-200">
           <FileText className="size-3 text-blue-600 shrink-0" />
           <span>{stageNum} — {stageLabel}</span>
         </span>
@@ -150,14 +150,14 @@ export function AuthorityDealsList({ initialView = 'deals' }: AuthorityDealsList
     }
     if (stage >= 3 && stage <= 7) {
       return (
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">
           <CheckCircle2 className="size-3 text-emerald-600 shrink-0" />
           <span>{stageNum} — {stageLabel}</span>
         </span>
       );
     }
     return (
-      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-blue-50 text-blue-900 border border-blue-200">
+      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-900 border border-blue-200">
         <FileCheck2 className="size-3 text-blue-700 shrink-0" />
         <span>{stageNum} — {stageLabel}</span>
       </span>
@@ -377,11 +377,11 @@ export function AuthorityDealsList({ initialView = 'deals' }: AuthorityDealsList
                 <table className="w-full text-start border-collapse text-xs">
                   <thead>
                     <tr className="border-b border-border bg-muted/50 text-xs font-bold text-muted-foreground">
-                      <th className="py-2.5 px-4 text-start">{t('authority.deals.col_ref_title')}</th>
-                      <th className="py-2.5 px-4 text-start">{t('authority.deals.col_wilaya_budget')}</th>
-                      <th className="py-2.5 px-4 text-start">{t('authority.deals.col_stage')}</th>
-                      <th className="py-2.5 px-4 text-start">{t('authority.deals.col_updated')}</th>
-                      <th className="py-2.5 px-4 text-end">{t('authority.deals.col_actions')}</th>
+                      <th className="px-4 py-4 text-start">{t('authority.deals.col_ref_title')}</th>
+                      <th className="px-4 py-4 text-start">{t('authority.deals.col_wilaya_budget')}</th>
+                      <th className="px-4 py-4 text-start">{t('authority.deals.col_stage')}</th>
+                      <th className="px-4 py-4 text-start">{t('authority.deals.col_updated')}</th>
+                      <th className="px-4 py-4 text-end">{t('authority.deals.col_actions')}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border/60">
@@ -397,19 +397,19 @@ export function AuthorityDealsList({ initialView = 'deals' }: AuthorityDealsList
                           className="hover:bg-muted/40 transition-colors group cursor-pointer"
                           onClick={() => setLocation(`/authority/deals/${deal.id}`)}
                         >
-                          <td className="py-2.5 px-4">
+                          <td className="px-4 py-3">
                             <div className="space-y-1 max-w-lg">
                               <div className="flex items-center gap-1.5 flex-wrap">
-                                <span className="font-mono text-[11px] font-semibold px-2 py-0.5 rounded bg-muted text-muted-foreground border border-border">
+                                <span className="font-mono text-xs font-semibold px-2 py-0.5 rounded bg-muted text-muted-foreground border border-border">
                                   {deal.reference_number || t('authority.deals.draft_numbering')}
                                 </span>
                                 {natureLabel && (
-                                  <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
+                                  <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
                                     {natureLabel}
                                   </span>
                                 )}
                                 {clauses?.procurement_method && (
-                                  <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-navy-50 text-navy-800 border border-navy-100">
+                                  <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-navy-50 text-navy-800 border border-navy-100">
                                     {methodLabel}
                                     {formLabel ? ` (${formLabel})` : ''}
                                   </span>
@@ -419,27 +419,27 @@ export function AuthorityDealsList({ initialView = 'deals' }: AuthorityDealsList
                                 {deal.title}
                               </p>
                               {deal.description && (
-                                <p className="text-[11px] text-muted-foreground line-clamp-1 mt-0.5">{deal.description}</p>
+                                <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">{deal.description}</p>
                               )}
                             </div>
                           </td>
 
-                          <td className="py-2.5 px-4 whitespace-nowrap">
+                          <td className="px-4 py-3 whitespace-nowrap">
                             {renderBudget(deal.estimated_budget)}
-                            <div className="text-[11px] text-muted-foreground mt-0.5">
+                            <div className="text-xs text-muted-foreground mt-0.5">
                               {deal.wilaya ? t('authority.deals.wilaya_prefix', { wilaya: deal.wilaya }) : t('authority.deals.wilaya_unset')}
                             </div>
                           </td>
 
-                          <td className="py-2.5 px-4 whitespace-nowrap">
+                          <td className="px-4 py-3 whitespace-nowrap">
                             {getStageBadge(deal.current_stage)}
                           </td>
 
-                          <td className="py-2.5 px-4 whitespace-nowrap text-xs text-muted-foreground font-mono">
+                          <td className="px-4 py-3 whitespace-nowrap text-xs text-muted-foreground font-mono">
                             {formatDate(deal.updated_at || deal.created_at)}
                           </td>
 
-                          <td className="py-2.5 px-4 whitespace-nowrap text-end" onClick={(e) => e.stopPropagation()}>
+                          <td className="px-4 py-3 whitespace-nowrap text-end" onClick={(e) => e.stopPropagation()}>
                             <div className="flex items-center justify-end gap-1.5">
                               <Button
                                 variant="ghost"
@@ -458,7 +458,7 @@ export function AuthorityDealsList({ initialView = 'deals' }: AuthorityDealsList
                                 className="h-8 px-3 rounded-lg bg-navy-900 hover:bg-navy-800 text-white font-semibold text-xs flex items-center gap-1.5 shrink-0 transition-colors"
                               >
                                 <span>{t('authority.deals.open_deal_file')}</span>
-                                <ChevronRight className={`size-3 shrink-0 ${dir === 'rtl' ? 'rotate-180' : ''}`} />
+                                <ChevronRight className="size-3 shrink-0 rtl:rotate-180" />
                               </Button>
                             </div>
                           </td>
@@ -526,7 +526,7 @@ export function AuthorityDealsList({ initialView = 'deals' }: AuthorityDealsList
                     className="bg-navy-900 hover:bg-navy-800 text-white rounded-xl text-xs font-bold flex items-center gap-1"
                   >
                     <span>{t('authority.deals.open_cahier')}</span>
-                    <ChevronRight className={`w-3.5 h-3.5 ${dir === 'rtl' ? 'rotate-180' : ''}`} />
+                    <ChevronRight className="w-3.5 h-3.5 rtl:rotate-180" />
                   </Button>
                 </div>
               </div>
@@ -550,53 +550,53 @@ export function AuthorityDealsList({ initialView = 'deals' }: AuthorityDealsList
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
             <div className="p-4 rounded-xl border border-border bg-muted/30 space-y-2">
               <span className="font-bold text-navy-900 text-sm block">{t('authority.deals.doc1_title')}</span>
-              <p className="text-muted-foreground text-[11px] leading-relaxed">
+              <p className="text-muted-foreground text-xs leading-relaxed">
                 {t('authority.deals.doc1_desc')}
               </p>
               <div className="pt-2 flex items-center gap-2">
-                <span className="px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200 text-[10px] font-bold">
+                <span className="px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-bold">
                   {t('authority.deals.doc1_badge')}
                 </span>
-                <span className="text-muted-foreground text-[11px]">{t('authority.deals.doc1_source')}</span>
+                <span className="text-muted-foreground text-xs">{t('authority.deals.doc1_source')}</span>
               </div>
             </div>
 
             <div className="p-4 rounded-xl border border-border bg-muted/30 space-y-2">
               <span className="font-bold text-navy-900 text-sm block">{t('authority.deals.doc2_title')}</span>
-              <p className="text-muted-foreground text-[11px] leading-relaxed">
+              <p className="text-muted-foreground text-xs leading-relaxed">
                 {t('authority.deals.doc2_desc')}
               </p>
               <div className="pt-2 flex items-center gap-2">
-                <span className="px-2 py-0.5 rounded bg-blue-50 text-blue-800 border border-blue-200 text-[10px] font-bold">
+                <span className="px-2 py-0.5 rounded bg-blue-50 text-blue-800 border border-blue-200 text-xs font-bold">
                   {t('authority.deals.doc2_badge')}
                 </span>
-                <span className="text-muted-foreground text-[11px]">{t('authority.deals.doc2_source')}</span>
+                <span className="text-muted-foreground text-xs">{t('authority.deals.doc2_source')}</span>
               </div>
             </div>
 
             <div className="p-4 rounded-xl border border-border bg-muted/30 space-y-2">
               <span className="font-bold text-navy-900 text-sm block">{t('authority.deals.doc3_title')}</span>
-              <p className="text-muted-foreground text-[11px] leading-relaxed">
+              <p className="text-muted-foreground text-xs leading-relaxed">
                 {t('authority.deals.doc3_desc')}
               </p>
               <div className="pt-2 flex items-center gap-2">
-                <span className="px-2 py-0.5 rounded bg-blue-50 text-blue-800 border border-blue-200 text-[10px] font-bold">
+                <span className="px-2 py-0.5 rounded bg-blue-50 text-blue-800 border border-blue-200 text-xs font-bold">
                   {t('authority.deals.doc3_badge')}
                 </span>
-                <span className="text-muted-foreground text-[11px]">{t('authority.deals.doc3_source')}</span>
+                <span className="text-muted-foreground text-xs">{t('authority.deals.doc3_source')}</span>
               </div>
             </div>
 
             <div className="p-4 rounded-xl border border-border bg-muted/30 space-y-2">
               <span className="font-bold text-navy-900 text-sm block">{t('authority.deals.doc4_title')}</span>
-              <p className="text-muted-foreground text-[11px] leading-relaxed">
+              <p className="text-muted-foreground text-xs leading-relaxed">
                 {t('authority.deals.doc4_desc')}
               </p>
               <div className="pt-2 flex items-center gap-2">
-                <span className="px-2 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200 text-[10px] font-bold">
+                <span className="px-2 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200 text-xs font-bold">
                   {t('authority.deals.doc4_badge')}
                 </span>
-                <span className="text-muted-foreground text-[11px]">{t('authority.deals.doc4_source')}</span>
+                <span className="text-muted-foreground text-xs">{t('authority.deals.doc4_source')}</span>
               </div>
             </div>
           </div>

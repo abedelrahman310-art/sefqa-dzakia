@@ -136,7 +136,7 @@ export function OperatorSettingsView() {
           <div className="op-card-body">
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div className="rounded-xl border border-[var(--op-line-2)] bg-[var(--op-surface-2)] p-4">
-                <span className="mb-1 flex items-center gap-1.5 text-[11px] font-bold text-[var(--op-muted)]">
+                <span className="mb-1 flex items-center gap-1.5 text-xs font-bold text-[var(--op-muted)]">
                   <Building2 className="size-3.5" aria-hidden="true" />
                   {t('operator.settings.org_name')}
                 </span>
@@ -144,7 +144,7 @@ export function OperatorSettingsView() {
               </div>
 
               <div className="rounded-xl border border-[var(--op-line-2)] bg-[var(--op-surface-2)] p-4">
-                <span className="mb-1 flex items-center gap-1.5 text-[11px] font-bold text-[var(--op-muted)]">
+                <span className="mb-1 flex items-center gap-1.5 text-xs font-bold text-[var(--op-muted)]">
                   <Mail className="size-3.5" aria-hidden="true" />
                   {t('operator.settings.email')}
                 </span>
@@ -152,7 +152,7 @@ export function OperatorSettingsView() {
               </div>
 
               <div className="rounded-xl border border-[var(--op-line-2)] bg-[var(--op-surface-2)] p-4">
-                <span className="mb-1 flex items-center gap-1.5 text-[11px] font-bold text-[var(--op-muted)]">
+                <span className="mb-1 flex items-center gap-1.5 text-xs font-bold text-[var(--op-muted)]">
                   <BadgeCheck className="size-3.5" aria-hidden="true" />
                   {t('operator.settings.role')}
                 </span>
@@ -163,7 +163,7 @@ export function OperatorSettingsView() {
               </div>
 
               <div className="flex flex-col justify-between gap-2 rounded-xl border border-[var(--op-line-2)] bg-[var(--op-surface-2)] p-4">
-                <span className="text-[11px] font-bold text-[var(--op-muted)]">{t('operator.settings.qualification_box')}</span>
+                <span className="text-xs font-bold text-[var(--op-muted)]">{t('operator.settings.qualification_box')}</span>
                 <button
                   type="button"
                   className="op-btn op-btn-ghost op-btn-sm self-start"

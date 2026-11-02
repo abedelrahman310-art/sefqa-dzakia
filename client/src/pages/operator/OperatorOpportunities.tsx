@@ -373,7 +373,7 @@ export function OperatorOpportunities() {
                         <div className="line-clamp-1 font-bold text-[var(--op-ink)]" title={opp.title}>
                           {opp.title}
                         </div>
-                        <div className="mt-0.5 line-clamp-1 text-[11.5px] text-[var(--op-muted)]">
+                        <div className="mt-0.5 line-clamp-1 text-xs text-[var(--op-muted)]">
                           {opp.description || '—'}
                         </div>
                       </div>
@@ -444,7 +444,7 @@ export function OperatorOpportunities() {
         </div>
       </section>
 
-      <p className="text-[11px] text-[var(--op-muted)]">
+      <p className="text-xs text-[var(--op-muted)]">
         {t('operator.opportunities.docs_notice')}
       </p>
 

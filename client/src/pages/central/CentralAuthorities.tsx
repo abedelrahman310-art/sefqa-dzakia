@@ -388,7 +388,7 @@ export function CentralAuthorities() {
           {selectedAuth && (
             <div className="space-y-4">
               <SheetHeader className="space-y-1 border-b border-gray-200 pb-3 text-start">
-                <span className="text-[11px] font-semibold text-slate-500">
+                <span className="text-xs font-semibold text-slate-500">
                   {t('central.authorities.drawer_badge')}
                 </span>
                 <SheetTitle className="text-base font-bold text-[var(--ink-900)]">

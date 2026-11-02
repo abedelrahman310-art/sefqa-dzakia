@@ -468,13 +468,13 @@ export function CahierSpecsEditor({ draftId }: CahierSpecsEditorProps) {
               <div className="font-extrabold text-emerald-900 text-sm">
                 {t('specs.frozen_success_title')}
               </div>
-              <div className="font-mono text-[11px] text-emerald-800 break-all">
+              <div className="font-mono text-xs text-emerald-800 break-all">
                 {t('specs.frozen_digest_label')}:{' '}
                 <span className="font-bold select-all">{cahier.frozenDigest}</span>
               </div>
             </div>
           </div>
-          <div className="text-end text-[11px] text-emerald-700 shrink-0">
+          <div className="text-end text-xs text-emerald-700 shrink-0">
             {cahier.frozenAt && new Date(cahier.frozenAt).toLocaleString()}
           </div>
         </div>
@@ -534,7 +534,7 @@ export function CahierSpecsEditor({ draftId }: CahierSpecsEditorProps) {
             >
               <span>{t(`specs.section.${key}` as any)}</span>
               <span
-                className={`text-[10px] px-1.5 py-0.5 rounded-full ${
+                className={`text-xs px-1.5 py-0.5 rounded-full ${
                   isActive ? 'bg-navy-800 text-gold-300' : 'bg-muted text-muted-foreground'
                 }`}
               >
@@ -557,7 +557,7 @@ export function CahierSpecsEditor({ draftId }: CahierSpecsEditorProps) {
           <CheckCircle2 className="w-3.5 h-3.5" />
           <span>{t('specs.requirements.title')}</span>
           <span
-            className={`text-[10px] px-1.5 py-0.5 rounded-full ${
+            className={`text-xs px-1.5 py-0.5 rounded-full ${
               activeSection === 'requirements'
                 ? 'bg-emerald-900 text-white'
                 : 'bg-emerald-100 text-emerald-800'
@@ -638,7 +638,7 @@ export function CahierSpecsEditor({ draftId }: CahierSpecsEditorProps) {
                       </span>
                       <h4 className="text-sm font-bold text-navy-900">{clause.title}</h4>
                       {clause.isMandatory && (
-                        <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-navy-50 text-navy-800 border border-navy-200">
+                        <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-navy-50 text-navy-800 border border-navy-200">
                           {t('specs.mandatory_clause')}
                         </span>
                       )}
@@ -649,7 +649,7 @@ export function CahierSpecsEditor({ draftId }: CahierSpecsEditorProps) {
                       {clause.provenance.map((prov) => (
                         <span
                           key={prov.id}
-                          className={`text-[11px] font-medium px-2.5 py-1 rounded-lg border flex items-center gap-1.5 ${
+                          className={`text-xs font-medium px-2.5 py-1 rounded-lg border flex items-center gap-1.5 ${
                             prov.verificationStatus === 'verified_statutory'
                               ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
                               : prov.verificationStatus === 'template_standard'
@@ -668,7 +668,7 @@ export function CahierSpecsEditor({ draftId }: CahierSpecsEditorProps) {
                         onClick={() =>
                           setExpandedHistoryClauseId(isHistoryOpen ? null : clause.id)
                         }
-                        className="text-[11px] text-muted-foreground hover:text-navy-900 flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-muted/50 transition-colors"
+                        className="text-xs text-muted-foreground hover:text-navy-900 flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-muted/50 transition-colors"
                       >
                         <History className="w-3 h-3" />
                         <span>({clause.events.length})</span>
@@ -775,7 +775,7 @@ export function CahierSpecsEditor({ draftId }: CahierSpecsEditorProps) {
                                     setJustifyingFindingId(finding.id);
                                     setJustificationText(finding.humanJustification || '');
                                   }}
-                                  className="text-[11px] h-7 px-2 border-amber-300 text-amber-900 hover:bg-amber-100 shrink-0"
+                                  className="text-xs h-7 px-2 border-amber-300 text-amber-900 hover:bg-amber-100 shrink-0"
                                 >
                                   {t('specs.stress.justify_btn')}
                                 </Button>
@@ -797,7 +797,7 @@ export function CahierSpecsEditor({ draftId }: CahierSpecsEditorProps) {
                                   variant="ghost"
                                   size="sm"
                                   onClick={() => setJustifyingFindingId(null)}
-                                  className="text-[11px] h-7"
+                                  className="text-xs h-7"
                                 >
                                   {t('common.cancel')}
                                 </Button>
@@ -805,7 +805,7 @@ export function CahierSpecsEditor({ draftId }: CahierSpecsEditorProps) {
                                   size="sm"
                                   disabled={savingJustification}
                                   onClick={() => handleSaveJustification(clause.id, finding.id)}
-                                  className="bg-amber-700 hover:bg-amber-800 text-white text-[11px] h-7 px-3 font-bold"
+                                  className="bg-amber-700 hover:bg-amber-800 text-white text-xs h-7 px-3 font-bold"
                                 >
                                   {savingJustification ? t('specs.saving_justification') : t('specs.justify_save_btn')}
                                 </Button>
@@ -814,7 +814,7 @@ export function CahierSpecsEditor({ draftId }: CahierSpecsEditorProps) {
                           )}
 
                           {finding.humanJustification && (
-                            <div className="text-[11px] text-amber-900 bg-white/70 p-2 rounded border border-amber-200/80">
+                            <div className="text-xs text-amber-900 bg-white/70 p-2 rounded border border-amber-200/80">
                               <span className="font-bold">{t('specs.justification_recorded')} </span>
                               <span>{finding.humanJustification}</span>
                             </div>
@@ -827,14 +827,14 @@ export function CahierSpecsEditor({ draftId }: CahierSpecsEditorProps) {
                   {/* Lifecycle Event History (if open) */}
                   {isHistoryOpen && (
                     <div className="p-3 bg-muted/40 rounded-xl border border-border/60 space-y-2 text-xs">
-                      <div className="font-bold text-navy-900 flex items-center gap-1.5 text-[11px]">
+                      <div className="font-bold text-navy-900 flex items-center gap-1.5 text-xs">
                         <History className="w-3.5 h-3.5 text-navy-700" />
                         <span>{t('specs.history.title')}</span>
                       </div>
                       <div className="space-y-2 divide-y divide-border/40">
                         {clause.events.map((ev) => (
                           <div key={ev.id} className="pt-2 first:pt-0 space-y-1">
-                            <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+                            <div className="flex items-center justify-between text-xs text-muted-foreground">
                               <span className="font-semibold text-navy-800">
                                 {t('specs.by_actor', {
                                   type: ev.eventType,
@@ -844,12 +844,12 @@ export function CahierSpecsEditor({ draftId }: CahierSpecsEditorProps) {
                               <span>{new Date(ev.createdAt).toLocaleString()}</span>
                             </div>
                             {ev.actionReason && (
-                              <p className="text-[11px] text-navy-900 italic">
+                              <p className="text-xs text-navy-900 italic">
                                 {t('specs.reason_label')} {ev.actionReason}
                               </p>
                             )}
                             {ev.previousContent && (
-                              <div className="text-[10px] text-muted-foreground line-through">
+                              <div className="text-xs text-muted-foreground line-through">
                                 {t('specs.previous_text')} {ev.previousContent}
                               </div>
                             )}

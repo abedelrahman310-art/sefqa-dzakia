@@ -24,11 +24,13 @@ export const operatorRecommendations = (limit = 10): Promise<RecommendationsResp
 export const operatorLegalChat = (
   conversationId: string | null | undefined,
   message: string,
+  language?: string,
 ): Promise<ChatResponse> =>
   api
     .post<ChatResponse>('/ai/legal-chat/', {
       conversation_id: conversationId || undefined,
       message,
+      language,
     })
     .then((r) => r.data);
 

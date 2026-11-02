@@ -39,28 +39,28 @@ export function SuitabilityModal({ opportunityId, onClose }: Props) {
     switch (status) {
       case 'matched':
         return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
             <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
             <span>{t('operator.suitability.status_matched')}</span>
           </span>
         );
       case 'neutral_cross_wilaya':
         return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-slate-50 text-slate-800 border border-slate-200">
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-slate-50 text-slate-800 border border-slate-200">
             <MapPin className="w-3.5 h-3.5 text-slate-600" />
             <span>{t('operator.suitability.status_outside_wilaya')}</span>
           </span>
         );
       case 'mismatched':
         return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-rose-50 text-rose-800 border border-rose-200">
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-50 text-rose-800 border border-rose-200">
             <XCircle className="w-3.5 h-3.5 text-rose-600" />
             <span>{t('operator.suitability.status_mismatched')}</span>
           </span>
         );
       default:
         return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200">
             <HelpCircle className="w-3.5 h-3.5 text-amber-600" />
             <span>{t('operator.suitability.status_undefined')}</span>
           </span>
@@ -79,7 +79,7 @@ export function SuitabilityModal({ opportunityId, onClose }: Props) {
                 {t('operator.suitability.signal_relevant')}
               </strong>
             </div>
-            <span className="text-[11px] bg-emerald-100/70 text-emerald-900 px-2 py-0.5 rounded font-semibold">
+            <span className="text-xs bg-emerald-100/70 text-emerald-900 px-2 py-0.5 rounded font-semibold">
               {t('operator.suitability.badge_main_match')}
             </span>
           </div>
@@ -93,7 +93,7 @@ export function SuitabilityModal({ opportunityId, onClose }: Props) {
                 {t('operator.suitability.signal_partial')}
               </strong>
             </div>
-            <span className="text-[11px] bg-amber-100/70 text-amber-900 px-2 py-0.5 rounded font-semibold">
+            <span className="text-xs bg-amber-100/70 text-amber-900 px-2 py-0.5 rounded font-semibold">
               {t('operator.suitability.badge_partial')}
             </span>
           </div>
@@ -107,7 +107,7 @@ export function SuitabilityModal({ opportunityId, onClose }: Props) {
                 {t('operator.suitability.signal_unclassified')}
               </strong>
             </div>
-            <span className="text-[11px] bg-blue-100/70 text-blue-900 px-2 py-0.5 rounded font-semibold">
+            <span className="text-xs bg-blue-100/70 text-blue-900 px-2 py-0.5 rounded font-semibold">
               {t('operator.suitability.badge_review_needed')}
             </span>
           </div>
@@ -121,7 +121,7 @@ export function SuitabilityModal({ opportunityId, onClose }: Props) {
                 {t('operator.suitability.signal_neutral')}
               </strong>
             </div>
-            <span className="text-[11px] bg-slate-200 text-slate-800 px-2 py-0.5 rounded font-semibold">
+            <span className="text-xs bg-slate-200 text-slate-800 px-2 py-0.5 rounded font-semibold">
               {t('operator.suitability.badge_no_direct_match')}
             </span>
           </div>
@@ -157,7 +157,7 @@ export function SuitabilityModal({ opportunityId, onClose }: Props) {
           <div className="space-y-5 pt-2">
             {/* Opportunity Brief */}
             <div className="bg-muted/30 border border-border rounded-xl p-4 space-y-1">
-              <span className="text-[11px] text-muted-foreground block">{data.opportunity.authorityName}</span>
+              <span className="text-xs text-muted-foreground block">{data.opportunity.authorityName}</span>
               <h3 className="text-sm font-extrabold text-navy-900 leading-snug">{data.opportunity.title}</h3>
             </div>
 
@@ -211,9 +211,9 @@ export function SuitabilityModal({ opportunityId, onClose }: Props) {
                   </p>
                   {data.suitability.criteria.activity.matchedCodes?.length > 0 && (
                     <div className="flex items-center gap-1.5 flex-wrap pt-1">
-                      <span className="text-[11px] font-semibold text-emerald-800">{t('operator.suitability.shared_codes')}</span>
+                      <span className="text-xs font-semibold text-emerald-800">{t('operator.suitability.shared_codes')}</span>
                       {data.suitability.criteria.activity.matchedCodes.map((code: string) => (
-                        <span key={code} className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-900 font-mono text-[10px] font-bold">
+                        <span key={code} className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-900 font-mono text-xs font-bold">
                           {code}
                         </span>
                       ))}
@@ -244,7 +244,7 @@ export function SuitabilityModal({ opportunityId, onClose }: Props) {
                   <AlertTriangle className="w-3.5 h-3.5 text-amber-700" />
                   <span>{t('operator.suitability.audit_alerts')}</span>
                 </strong>
-                <ul className="list-disc list-inside text-[11px] text-amber-800 space-y-1">
+                <ul className="list-disc list-inside text-xs text-amber-800 space-y-1">
                   {data.suitability.verificationAlerts.map((alert: string, idx: number) => (
                     <li key={idx}>{alert}</li>
                   ))}
@@ -253,7 +253,7 @@ export function SuitabilityModal({ opportunityId, onClose }: Props) {
             )}
 
             {/* Mandatory Regulatory Disclaimer */}
-            <div className="border border-border bg-muted/40 rounded-xl p-3.5 flex items-start gap-2.5 text-[11px] text-muted-foreground leading-relaxed">
+            <div className="border border-border bg-muted/40 rounded-xl p-3.5 flex items-start gap-2.5 text-xs text-muted-foreground leading-relaxed">
               <ShieldAlert className="w-4 h-4 text-navy-800 flex-none mt-0.5" />
               <div>
                 <strong className="block font-bold text-navy-900 mb-0.5">

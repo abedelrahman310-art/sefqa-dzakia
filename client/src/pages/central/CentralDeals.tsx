@@ -217,7 +217,7 @@ export function CentralDeals() {
                     style={{ width: `${Math.min(100, stage.share)}%` }}
                   />
                 </div>
-                <div className="mt-1 font-mono text-[11px] text-[var(--ink-500)]">
+                <div className="mt-1 font-mono text-xs text-[var(--ink-500)]">
                   {formatPercent(stage.share)}
                 </div>
               </div>
@@ -315,27 +315,27 @@ export function CentralDeals() {
                       key={deal.id}
                       className="transition-colors hover:bg-slate-50/70 text-xs"
                     >
-                      <TableCell className="font-mono text-xs font-bold text-[var(--ink-900)] py-2.5">
+                      <TableCell className="font-mono text-xs font-bold text-[var(--ink-900)]">
                         {deal.reference_number || '—'}
                       </TableCell>
-                      <TableCell className="max-w-[280px] text-xs font-semibold text-[var(--ink-900)] py-2.5">
+                      <TableCell className="max-w-[280px] text-xs font-semibold text-[var(--ink-900)]">
                         <div className="truncate">{deal.title || '—'}</div>
-                        <div className="text-[11px] font-normal text-[var(--ink-500)]">
+                        <div className="text-xs font-normal text-[var(--ink-500)]">
                           {t('central.deals.created_at', { date: formatDate(deal.created_at) })}
                         </div>
                       </TableCell>
-                      <TableCell className="max-w-[200px] truncate text-xs text-[var(--ink-700)] py-2.5">
+                      <TableCell className="max-w-[200px] truncate text-xs text-[var(--ink-700)]">
                         {deal.authority_name || deal.authority_entity || '—'}
                       </TableCell>
-                      <TableCell className="text-xs text-[var(--ink-700)] py-2.5">
+                      <TableCell className="text-xs text-[var(--ink-700)]">
                         {deal.wilaya || '—'}
                       </TableCell>
-                      <TableCell className="text-end font-mono text-xs font-semibold tabular-nums text-[var(--ink-900)] py-2.5">
+                      <TableCell className="text-end font-mono text-xs font-semibold tabular-nums text-[var(--ink-900)]">
                         {formatDZD(toNumber(deal.estimated_budget))}
                       </TableCell>
-                      <TableCell className="py-2.5">
+                      <TableCell>
                         <div className="flex items-center gap-1.5">
-                          <Badge className="bg-[var(--paper-100)] text-[var(--ink-900)] border-gray-200 font-mono text-[10px] px-1.5 py-0">
+                          <Badge className="bg-[var(--paper-100)] text-[var(--ink-900)] border-gray-200 font-mono text-xs px-1.5 py-0">
                             {String(stage).padStart(2, '0')}
                           </Badge>
                           <span className="truncate text-xs font-semibold text-[var(--ink-700)]">
@@ -356,12 +356,12 @@ export function CentralDeals() {
                           ))}
                         </div>
                       </TableCell>
-                      <TableCell className="text-center font-mono text-xs text-[var(--ink-700)] py-2.5">
+                      <TableCell className="text-center font-mono text-xs text-[var(--ink-700)]">
                         {formatDate(deal.submission_deadline)}
                       </TableCell>
-                      <TableCell className="text-center py-2.5">
+                      <TableCell className="text-center">
                         {delayed ? (
-                          <Badge className="bg-red-50 text-red-800 border-red-300 text-[10px] px-1.5 py-0.5">
+                          <Badge className="bg-red-50 text-red-800 border-red-300 text-xs px-1.5 py-0.5">
                             <Clock className="size-2.5" aria-hidden="true" />
                             {t('central.deals.delayed')}
                           </Badge>

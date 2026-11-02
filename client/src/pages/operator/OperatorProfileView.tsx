@@ -128,18 +128,18 @@ export function OperatorProfileView() {
       <form onSubmit={handleSubmit} className="op-card p-5">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="flex flex-col gap-1.5">
-            <label className="text-[16px] font-bold text-[#3a4555]">{t('operator.profile.company_name')}</label>
+            <label className="text-sm font-semibold text-slate-800">{t('operator.profile.company_name')}</label>
             <input
               type="text"
               placeholder={t('operator.profile.company_name_ph')}
               defaultValue=""
-              className="h-[46px] px-3 rounded-[10px] border-[1.5px] border-[#d9d2bc] bg-white text-[#3a4555] text-[16px]"
+              className="h-10 px-3 rounded-lg border border-slate-300 bg-white text-slate-800 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
             />
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-[16px] font-bold text-[#3a4555]">{t('operator.profile.legal_form')}</label>
-            <select className="h-[46px] px-3 rounded-[10px] border-[1.5px] border-[#d9d2bc] bg-white text-[#3a4555] text-[16px]" defaultValue="sarl">
+            <label className="text-sm font-semibold text-slate-800">{t('operator.profile.legal_form')}</label>
+            <select className="h-10 px-3 rounded-lg border border-slate-300 bg-white text-slate-800 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" defaultValue="sarl">
               <option value="">{t('operator.profile.select_legal_form')}</option>
               <option value="eurl">EURL</option>
               <option value="sarl">SARL</option>
@@ -150,61 +150,61 @@ export function OperatorProfileView() {
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-[16px] font-bold text-[#3a4555]">{t('operator.profile.rc_number')}</label>
+            <label className="text-sm font-semibold text-slate-800">{t('operator.profile.rc_number')}</label>
             <input
               type="text"
               dir="ltr"
               placeholder={t('operator.profile.rc_number_ph')}
-              className="h-[46px] px-3 rounded-[10px] border-[1.5px] border-[#d9d2bc] bg-white text-[#3a4555] text-[16px] text-end"
+              className="h-10 px-3 rounded-lg border border-slate-300 bg-white text-slate-800 text-sm text-end focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
             />
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-[16px] font-bold text-[#3a4555]">{t('operator.profile.nif')}</label>
+            <label className="text-sm font-semibold text-slate-800">{t('operator.profile.nif')}</label>
             <input
               type="text"
               dir="ltr"
               placeholder="[NIF]"
-              className="h-[46px] px-3 rounded-[10px] border-[1.5px] border-[#d9d2bc] bg-white text-[#3a4555] text-[16px] text-end"
+              className="h-10 px-3 rounded-lg border border-slate-300 bg-white text-slate-800 text-sm text-end focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
             />
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-[16px] font-bold text-[#3a4555]">{t('operator.profile.nis')}</label>
+            <label className="text-sm font-semibold text-slate-800">{t('operator.profile.nis')}</label>
             <input
               type="text"
               dir="ltr"
               placeholder="[NIS]"
-              className="h-[46px] px-3 rounded-[10px] border-[1.5px] border-[#d9d2bc] bg-white text-[#3a4555] text-[16px] text-end"
+              className="h-10 px-3 rounded-lg border border-slate-300 bg-white text-slate-800 text-sm text-end focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
             />
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-[16px] font-bold text-[#3a4555]">{t('operator.profile.address')}</label>
+            <label className="text-sm font-semibold text-slate-800">{t('operator.profile.address')}</label>
             <input
               type="text"
               placeholder={t('operator.profile.address_ph')}
-              className="h-[46px] px-3 rounded-[10px] border-[1.5px] border-[#d9d2bc] bg-white text-[#3a4555] text-[16px]"
+              className="h-10 px-3 rounded-lg border border-slate-300 bg-white text-slate-800 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
             />
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-[16px] font-bold text-[#3a4555]">{t('operator.profile.email')}</label>
+            <label className="text-sm font-semibold text-slate-800">{t('operator.profile.email')}</label>
             <input
               type="email"
               dir="ltr"
               placeholder="name@company.dz"
-              className="h-[46px] px-3 rounded-[10px] border-[1.5px] border-[#d9d2bc] bg-white text-[#3a4555] text-[16px] text-end"
+              className="h-10 px-3 rounded-lg border border-slate-300 bg-white text-slate-800 text-sm text-end focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
             />
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-[16px] font-bold text-[#3a4555]">{t('operator.profile.phone')}</label>
+            <label className="text-sm font-semibold text-slate-800">{t('operator.profile.phone')}</label>
             <input
               type="tel"
               dir="ltr"
               placeholder={t('operator.profile.phone_ph')}
-              className="h-[46px] px-3 rounded-[10px] border-[1.5px] border-[#d9d2bc] bg-white text-[#3a4555] text-[16px] text-end"
+              className="h-10 px-3 rounded-lg border border-slate-300 bg-white text-slate-800 text-sm text-end focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
             />
           </div>
         </div>
@@ -212,7 +212,7 @@ export function OperatorProfileView() {
 
       {/* 3. Official Documents Empty State */}
       <div className="op-empty-chart min-h-[190px]">
-        <div className="flex size-[52px] items-center justify-center rounded-full bg-[#fdf6df] text-[#8a6e1c]">
+        <div className="flex size-12 items-center justify-center rounded-full bg-[#fdf6df] text-[#8a6e1c]">
           <Building2 className="size-[26px]" strokeWidth={1.8} />
         </div>
         <h3 className="mt-1">{t('operator.profile.no_docs_title')}</h3>

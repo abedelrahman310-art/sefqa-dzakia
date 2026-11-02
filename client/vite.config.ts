@@ -85,6 +85,35 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: {
+    chunkSizeWarningLimit: 600,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('react') || id.includes('wouter')) {
+              return 'vendor-react';
+            }
+            if (id.includes('@tanstack') || id.includes('axios')) {
+              return 'vendor-data';
+            }
+            if (id.includes('i18next')) {
+              return 'vendor-i18n';
+            }
+            if (id.includes('lucide-react')) {
+              return 'vendor-icons';
+            }
+            if (id.includes('@radix-ui') || id.includes('sonner')) {
+              return 'vendor-ui';
+            }
+          }
+          if (id.includes('/locales/') || id.includes('\\locales\\')) {
+            return 'locales';
+          }
+        },
+      },
+    },
+  },
   server: {
     host: true,
     port: 5173,

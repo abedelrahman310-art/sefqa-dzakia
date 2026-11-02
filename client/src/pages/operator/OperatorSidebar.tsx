@@ -123,7 +123,7 @@ export function OperatorSidebar({ onCloseMobile, className }: OperatorSidebarPro
     >
       {/* Navigation Group Header */}
       <div className="px-4 pt-4 pb-2">
-        <span className="text-[11px] font-semibold text-white/80">
+        <span className="text-xs font-semibold text-white/80">
           {t('topbar.account_label')}
         </span>
       </div>
@@ -158,7 +158,7 @@ export function OperatorSidebar({ onCloseMobile, className }: OperatorSidebarPro
               {item.badge !== undefined && (
                 <span
                   className={cn(
-                    'text-[10px] font-bold px-1.5 py-0.5 rounded-full flex-none',
+                    'text-xs font-bold px-1.5 py-0.5 rounded-full flex-none',
                     active
                       ? 'bg-navy-900/15 text-navy-900'
                       : 'bg-white/20 text-white'
@@ -207,9 +207,9 @@ export function OperatorSidebar({ onCloseMobile, className }: OperatorSidebarPro
 
       {/* Institutional Legal Footprint */}
       <div className="p-3 border-t border-white/20 bg-black/10 flex-none">
-        <div className="text-[10px] text-white/80 flex items-center justify-between px-1">
+        <div className="text-xs text-white/80 flex items-center justify-between px-1">
           <span>{t('operator.sidebar.decree')}</span>
-          <span className="font-mono text-[9px] text-white/90">{dir.toUpperCase()} · 100dvh</span>
+          <span className="font-mono text-xs text-white/90">{dir.toUpperCase()} · 100dvh</span>
         </div>
       </div>
     </aside>

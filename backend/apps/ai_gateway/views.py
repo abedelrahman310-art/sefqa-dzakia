@@ -256,6 +256,15 @@ class AILegalChatView(APIView):
 
     def post(self, request):
         # التحقق من الصلاحية يتم تلقائياً عبر CanUseAILegalChat (السماح لـ operator و authority و superuser)
+        from apps.legal_rag.services.rag_service import normalize_rag_language
+
+        requested_language = (
+            request.data.get('language')
+            or request.data.get('lang')
+            or request.headers.get('Accept-Language', '')
+        )
+        language = normalize_rag_language(requested_language)
+
         user_question = (
             request.data.get('question')
             or request.data.get('message')
@@ -265,7 +274,13 @@ class AILegalChatView(APIView):
 
         if not user_question:
             return Response(
-                {'error': 'يرجى تقديم سؤال قانوني للاستشارة.'},
+                {
+                    'error': (
+                        'Veuillez saisir une question juridique.'
+                        if language == 'fr'
+                        else 'يرجى تقديم سؤال قانوني للاستشارة.'
+                    )
+                },
                 status=status.HTTP_400_BAD_REQUEST
             )
 
@@ -305,8 +320,8 @@ class AILegalChatView(APIView):
         )
 
         # 2. بناء رسائل LLM مع الأمر الصارم والمواد المسترجعة
-        rag_system_prompt = build_rag_system_prompt()
-        rag_user_prompt = build_rag_user_prompt(clean_question, top_articles)
+        rag_system_prompt = build_rag_system_prompt(language)
+        rag_user_prompt = build_rag_user_prompt(clean_question, top_articles, language)
 
         history_msgs = list(
             conversation.messages.order_by("created_at").values("role", "content")
@@ -330,7 +345,7 @@ class AILegalChatView(APIView):
 
         # التراجع للمولد المحلي الذكي المستند حصراً للنصوص المسترجعة عند غياب المفاتيح أو فشل الاتصال
         if not reply:
-            reply = synthesize_local_rag_fallback(clean_question, top_articles)
+            reply = synthesize_local_rag_fallback(clean_question, top_articles, language)
             model_used = "safaqat-legal-rag (pgvector + Law 23-12 & Decree 15-247)"
 
         final_reply = sanitize_pii(reply).strip()
@@ -354,10 +369,28 @@ class AILegalChatView(APIView):
             retrieved_data.append(art_obj)
             legal_articles.append(art_obj)
 
-        sources = [
-            "القانون رقم 23-12 المؤرخ في 5 أوت 2023 المحدد للقواعد العامة للصفقات العمومية",
-            "المرسوم الرئاسي رقم 15-247 المتعلق بتنظيم الصفقات العمومية وتفويضات المرفق العام",
-        ]
+        if language == 'fr':
+            sources = [
+                "Loi n° 23-12 du 5 août 2023 fixant les règles générales des marchés publics",
+                "Décret présidentiel n° 15-247 relatif à la réglementation des marchés publics et aux délégations de service public",
+            ]
+            statutory_reference = 'Loi 23-12 et décret présidentiel 15-247'
+            disclaimer = (
+                "Cet avis est automatisé et repose exclusivement sur les textes de la loi 23-12 "
+                "et du décret présidentiel 15-247. Il relève de la compétence des commissions des "
+                "marchés compétentes et de la commission de révision des marchés publics conformément "
+                "à la loi 23-12."
+            )
+        else:
+            sources = [
+                "القانون رقم 23-12 المؤرخ في 5 أوت 2023 المحدد للقواعد العامة للصفقات العمومية",
+                "المرسوم الرئاسي رقم 15-247 المتعلق بتنظيم الصفقات العمومية وتفويضات المرفق العام",
+            ]
+            statutory_reference = 'القانون 23-12 والمرسوم الرئاسي 15-247'
+            disclaimer = (
+                'هذه الاستشارة آلية مستندة حصراً إلى نصوص القانون 23-12 والمرسوم الرئاسي 15-247، '
+                'وتخضع لسلطة لجان الصفقات المختصة ولجنة مراجعة الصفقات العمومية وفق القانون 23-12.'
+            )
 
         AIMessage.objects.create(
             conversation=conversation,
@@ -385,9 +418,11 @@ class AILegalChatView(APIView):
             'rag_enabled': True,
             'top_k': len(retrieved_data),
             'is_advisory': True,
+            'no_answer': len(retrieved_data) == 0,
+            'language': language,
             'human_verification_required': True,
-            'statutory_reference': 'القانون 23-12 والمرسوم الرئاسي 15-247',
-            'disclaimer': 'هذه الاستشارة آلية مستندة حصراً إلى نصوص القانون 23-12 والمرسوم الرئاسي 15-247، وتخضع لسلطة لجان الصفقات المختصة ولجنة مراجعة الصفقات العمومية وفق القانون 23-12.'
+            'statutory_reference': statutory_reference,
+            'disclaimer': disclaimer
         }, status=status.HTTP_200_OK)
 
 

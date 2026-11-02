@@ -401,8 +401,8 @@ export function EvaluationWorkspace() {
             <Trophy className="w-5 h-5" />
           </div>
           <div>
-            <div className="text-[11px] text-navy-100">{t('authority.eval.eval_stage_label')}</div>
-            <div className="text-sm font-black text-white">
+            <div className="text-xs text-navy-100">{t('authority.eval.eval_stage_label')}</div>
+            <div className="text-sm font-bold text-white">
               {isAwardConcluded ? t('authority.eval.awarded_status') : t('authority.eval.examining_status')}
             </div>
           </div>
@@ -509,7 +509,7 @@ export function EvaluationWorkspace() {
                       <div className="flex items-center gap-2 flex-wrap">
                         <h4 className="text-sm font-bold text-navy-900">{offer.bidderName}</h4>
                         <span
-                          className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${statusBadgeClass}`}
+                          className={`text-xs font-bold px-2 py-0.5 rounded-full border ${statusBadgeClass}`}
                         >
                           {getStatusLabel(offer.evaluationStatus)}
                         </span>
@@ -700,13 +700,13 @@ export function EvaluationWorkspace() {
               <table className="w-full text-xs text-start border-collapse">
                 <thead>
                   <tr className="border-b border-border bg-muted/40 text-navy-900">
-                    <th className="p-3 font-bold text-start">{t('authority.eval.col_rank')}</th>
-                    <th className="p-3 font-bold text-start">{t('authority.eval.col_operator')}</th>
-                    <th className="p-3 font-bold text-start">{t('authority.eval.col_score_tech')}</th>
-                    <th className="p-3 font-bold text-start">{t('authority.eval.col_score_fin')}</th>
-                    <th className="p-3 font-bold text-start">{t('authority.eval.col_proposed_amount')}</th>
-                    <th className="p-3 font-bold text-start">{t('authority.eval.col_duration')}</th>
-                    <th className="p-3 font-bold text-start">{t('authority.eval.col_status')}</th>
+                    <th className="px-4 py-4 font-bold text-start">{t('authority.eval.col_rank')}</th>
+                    <th className="px-4 py-4 font-bold text-start">{t('authority.eval.col_operator')}</th>
+                    <th className="px-4 py-4 font-bold text-start">{t('authority.eval.col_score_tech')}</th>
+                    <th className="px-4 py-4 font-bold text-start">{t('authority.eval.col_score_fin')}</th>
+                    <th className="px-4 py-4 font-bold text-start">{t('authority.eval.col_proposed_amount')}</th>
+                    <th className="px-4 py-4 font-bold text-start">{t('authority.eval.col_duration')}</th>
+                    <th className="px-4 py-4 font-bold text-start">{t('authority.eval.col_status')}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
@@ -715,19 +715,19 @@ export function EvaluationWorkspace() {
                     .sort((a, b) => Number(a.financialAmount || 0) - Number(b.financialAmount || 0))
                     .map((item, idx) => (
                       <tr key={item.id} className="hover:bg-muted/10">
-                        <td className="p-3 font-mono font-black text-amber-700">#{idx + 1}</td>
-                        <td className="p-3 font-bold text-navy-900">{item.bidderName}</td>
-                        <td className="p-3 font-mono">{item.technicalScore || '—'} / 100</td>
-                        <td className="p-3 font-mono">{item.financialScore || '—'} / 100</td>
-                        <td className="p-3 font-mono font-bold text-emerald-800">
+                        <td className="px-4 py-3 font-mono font-bold text-amber-700">#{idx + 1}</td>
+                        <td className="px-4 py-3 font-bold text-navy-900">{item.bidderName}</td>
+                        <td className="px-4 py-3 font-mono">{item.technicalScore || '—'} / 100</td>
+                        <td className="px-4 py-3 font-mono">{item.financialScore || '—'} / 100</td>
+                        <td className="px-4 py-3 font-mono font-bold text-emerald-800">
                           {item.financialAmount
                             ? `${Number(item.financialAmount).toLocaleString()} ${t('common.dzd')}`
                             : '—'}
                         </td>
-                        <td className="p-3 text-muted-foreground">{item.durationDays ? t('authority.eval.duration_days', { days: item.durationDays }) : '—'}</td>
-                        <td className="p-3">
+                        <td className="px-4 py-3 text-muted-foreground">{item.durationDays ? t('authority.eval.duration_days', { days: item.durationDays }) : '—'}</td>
+                        <td className="px-4 py-3">
                           <span
-                            className={`px-2 py-0.5 rounded text-[10px] font-bold border ${
+                            className={`px-2 py-0.5 rounded text-xs font-bold border ${
                               item.evaluationStatus === 'evaluated'
                                 ? 'bg-emerald-50 text-emerald-900 border-emerald-200'
                                 : 'bg-blue-50 text-blue-800 border-blue-200'
@@ -845,7 +845,7 @@ export function EvaluationWorkspace() {
             <div className="space-y-4 py-1">
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 <div className="rounded-xl border border-border bg-muted/30 p-2.5 text-center">
-                  <span className="block text-[10px] font-bold text-muted-foreground truncate">
+                  <span className="block text-xs font-bold text-muted-foreground truncate">
                     {priceData.baseline.source_label}
                   </span>
                   <span className="mt-1 block text-xs sm:text-sm font-extrabold text-navy-900">
@@ -853,7 +853,7 @@ export function EvaluationWorkspace() {
                   </span>
                 </div>
                 <div className="rounded-xl border border-border bg-muted/30 p-2.5 text-center">
-                  <span className="block text-[10px] font-bold text-muted-foreground">
+                  <span className="block text-xs font-bold text-muted-foreground">
                     {t('authority.eval.average_offers')}
                   </span>
                   <span className="mt-1 block text-xs sm:text-sm font-extrabold text-navy-900">
@@ -861,7 +861,7 @@ export function EvaluationWorkspace() {
                   </span>
                 </div>
                 <div className="rounded-xl border border-border bg-muted/30 p-2.5 text-center">
-                  <span className="block text-[10px] font-bold text-muted-foreground">
+                  <span className="block text-xs font-bold text-muted-foreground">
                     {t('authority.eval.std_deviation')}
                   </span>
                   <span className="mt-1 block text-xs sm:text-sm font-extrabold text-navy-900 font-mono">
@@ -869,7 +869,7 @@ export function EvaluationWorkspace() {
                   </span>
                 </div>
                 <div className="rounded-xl border border-border bg-muted/30 p-2.5 text-center">
-                  <span className="block text-[10px] font-bold text-muted-foreground">
+                  <span className="block text-xs font-bold text-muted-foreground">
                     {t('authority.eval.abnormal_offers')}
                   </span>
                   <span
@@ -882,7 +882,7 @@ export function EvaluationWorkspace() {
                 </div>
               </div>
 
-              <p className="text-[11px] text-muted-foreground">
+              <p className="text-xs text-muted-foreground">
                 {t('authority.eval.threshold_desc', { percent: priceData.threshold_percent })}
               </p>
 
@@ -925,7 +925,7 @@ export function EvaluationWorkspace() {
                             {offer.operator_name}
                           </span>
                           <span
-                            className={`rounded-full border px-2.5 py-0.5 text-[10px] font-bold ${badgeClass}`}
+                            className={`rounded-full border px-2.5 py-0.5 text-xs font-bold ${badgeClass}`}
                           >
                             {statusLabel}
                           </span>
@@ -956,7 +956,7 @@ export function EvaluationWorkspace() {
                             {offer.warnings.map((w, wIdx) => (
                               <div
                                 key={wIdx}
-                                className="flex items-start gap-1.5 text-[11px] font-semibold text-destructive bg-destructive/10 border border-destructive/20 rounded-lg p-1.5"
+                                className="flex items-start gap-1.5 text-xs font-semibold text-destructive bg-destructive/10 border border-destructive/20 rounded-lg p-1.5"
                               >
                                 <AlertCircle className="h-3.5 w-3.5 shrink-0 mt-0.5" />
                                 <span>{w}</span>
@@ -965,7 +965,7 @@ export function EvaluationWorkspace() {
                           </div>
                         )}
 
-                        <p className="rounded-lg border border-blue-100 bg-blue-50/60 p-2 text-[11px] leading-relaxed text-navy-950 font-medium">
+                        <p className="rounded-lg border border-blue-100 bg-blue-50/60 p-2 text-xs leading-relaxed text-navy-950 font-medium">
                           <span className="font-bold text-navy-900 block mb-0.5">{t('authority.eval.smart_recommendation_label')}</span>
                           {offer.ai_recommendation || offer.recommendation}
                         </p>
@@ -975,7 +975,7 @@ export function EvaluationWorkspace() {
                 </div>
               )}
 
-              <div className="flex items-start gap-2 rounded-xl border border-blue-200 bg-blue-50 p-3 text-[11px] font-semibold leading-relaxed text-blue-800">
+              <div className="flex items-start gap-2 rounded-xl border border-blue-200 bg-blue-50 p-3 text-xs font-semibold leading-relaxed text-blue-800">
                 <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
                 <span>{t('authority.eval.advisory_disclaimer')}</span>
               </div>

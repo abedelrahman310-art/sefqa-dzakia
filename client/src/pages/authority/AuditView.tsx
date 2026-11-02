@@ -93,7 +93,7 @@ export function AuditView() {
             <span className="text-xs font-semibold text-navy-100">
               {t('authority.audit.tagline')}
             </span>
-            <Badge variant="outline" className="text-[11px] bg-white/10 text-white border-white/20">
+            <Badge variant="outline" className="text-xs bg-white/10 text-white border-white/20">
               {t('authority.audit.law_badge')}
             </Badge>
           </div>
@@ -171,11 +171,11 @@ export function AuditView() {
             <table className="w-full text-sm text-start border-collapse">
               <thead>
                 <tr className="border-b border-border bg-muted/40 text-muted-foreground text-xs">
-                  <th className="py-3 px-4 text-start font-bold">{t('authority.audit.th_time')}</th>
-                  <th className="py-3 px-4 text-start font-bold">{t('authority.audit.th_action')}</th>
-                  <th className="py-3 px-4 text-start font-bold">{t('authority.audit.th_user')}</th>
-                  <th className="py-3 px-4 text-start font-bold">{t('authority.audit.th_checksum')}</th>
-                  <th className="py-3 px-4 text-center font-bold">{t('authority.audit.th_status')}</th>
+                  <th className="px-4 py-4 text-start font-bold">{t('authority.audit.th_time')}</th>
+                  <th className="px-4 py-4 text-start font-bold">{t('authority.audit.th_action')}</th>
+                  <th className="px-4 py-4 text-start font-bold">{t('authority.audit.th_user')}</th>
+                  <th className="px-4 py-4 text-start font-bold">{t('authority.audit.th_checksum')}</th>
+                  <th className="px-4 py-4 text-center font-bold">{t('authority.audit.th_status')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
@@ -187,16 +187,16 @@ export function AuditView() {
                   return (
                     <tr key={log.id} className="hover:bg-muted/30 transition-colors">
                       {/* Timestamp */}
-                      <td className="py-3.5 px-4 text-xs font-mono text-muted-foreground">
+                      <td className="px-4 py-3 text-xs font-mono text-muted-foreground">
                         {new Date(log.timestamp).toLocaleString(lang === 'ar' ? 'ar-DZ' : 'fr-FR')}
                       </td>
 
                       {/* Action */}
-                      <td className="py-3.5 px-4">
+                      <td className="px-4 py-3">
                         <div className="space-y-1">
                           {getActionBadge(log.action)}
                           {log.description && (
-                            <div className="text-[11px] text-muted-foreground max-w-xs truncate">
+                            <div className="text-xs text-muted-foreground max-w-xs truncate">
                               {log.description}
                             </div>
                           )}
@@ -204,17 +204,17 @@ export function AuditView() {
                       </td>
 
                       {/* User */}
-                      <td className="py-3.5 px-4 text-xs">
+                      <td className="px-4 py-3 text-xs">
                         <div className="font-semibold text-foreground">
                           {log.user_name || log.user_email || t('authority.audit.default_user')}
                         </div>
                         {log.user_email && (
-                          <div className="text-[11px] text-muted-foreground">{log.user_email}</div>
+                          <div className="text-xs text-muted-foreground">{log.user_email}</div>
                         )}
                       </td>
 
                       {/* SHA-256 with copy */}
-                      <td className="py-3.5 px-4">
+                      <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
                           <code className="text-xs font-mono tabular-nums bg-muted px-2 py-1 rounded text-foreground border border-border">
                             {truncatedChecksum}
@@ -237,7 +237,7 @@ export function AuditView() {
                       </td>
 
                       {/* Archive status */}
-                      <td className="py-3.5 px-4 text-center">
+                      <td className="px-4 py-3 text-center">
                         <div className="inline-flex items-center gap-1.5 text-emerald-700 text-xs font-bold bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full">
                           <Archive className="w-3.5 h-3.5" />
                           <span>{t('authority.audit.archived_badge')}</span>
@@ -276,7 +276,7 @@ export function AuditView() {
                   onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                   className="h-8 text-xs gap-1"
                 >
-                  {dir === 'rtl' ? <ChevronRight className="w-3.5 h-3.5" /> : <ChevronLeft className="w-3.5 h-3.5" />}
+                  <ChevronLeft className="w-3.5 h-3.5 rtl:rotate-180" />
                   <span>{t('authority.audit.prev')}</span>
                 </Button>
                 <Button
@@ -287,7 +287,7 @@ export function AuditView() {
                   className="h-8 text-xs gap-1"
                 >
                   <span>{t('authority.audit.next')}</span>
-                  {dir === 'rtl' ? <ChevronLeft className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
+                  <ChevronRight className="w-3.5 h-3.5 rtl:rotate-180" />
                 </Button>
               </div>
             </div>

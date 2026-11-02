@@ -323,7 +323,7 @@ export function CentralOperators() {
           <Users className="size-4" />
           <span>{t('central.operators.tab_registered')}</span>
           <span
-            className={`rounded-full px-2 py-0.5 text-[10px] font-mono font-bold ${
+            className={`rounded-full px-2 py-0.5 text-xs font-mono font-bold ${
               activeTab === 'registered'
                 ? 'bg-white/20 text-white'
                 : 'bg-gray-100 text-gray-600'
@@ -346,7 +346,7 @@ export function CentralOperators() {
           <span>{t('central.operators.tab_blacklist')}</span>
           {excludedList.length > 0 && (
             <span
-              className={`rounded-full px-2 py-0.5 text-[10px] font-mono font-bold ${
+              className={`rounded-full px-2 py-0.5 text-xs font-mono font-bold ${
                 activeTab === 'blacklist'
                   ? 'bg-white/20 text-white'
                   : 'bg-rose-100 text-rose-700'
@@ -722,7 +722,7 @@ export function CentralOperators() {
                             variant="outline"
                             size="sm"
                             onClick={() => setItemToRevoke(item)}
-                            className="h-7 px-2 text-[11px] font-bold text-rose-700 border-rose-200 hover:bg-rose-50 hover:text-rose-800 rounded-lg gap-1"
+                            className="h-7 px-2 text-xs font-bold text-rose-700 border-rose-200 hover:bg-rose-50 hover:text-rose-800 rounded-lg gap-1"
                             title={t('central.blacklist.revoke_button')}
                           >
                             <RotateCcw className="size-3" />
@@ -913,7 +913,7 @@ export function CentralOperators() {
                 <span className="font-bold text-gray-900">{itemToRevoke.operator_name}</span>
                 <span className="font-mono text-gray-500">NIF: {itemToRevoke.nif}</span>
               </div>
-              <div className="text-gray-500 font-mono text-[11px]">
+              <div className="text-gray-500 font-mono text-xs">
                 {t('central.blacklist.table_decision')}: {itemToRevoke.decision_reference}
               </div>
             </div>

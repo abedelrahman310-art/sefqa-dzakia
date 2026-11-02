@@ -1,14 +1,10 @@
-import { NeumorphicRegister } from '@/components/auth/NeumorphicRegister';
+import { UnifiedAuthPage } from './UnifiedAuthPage';
 
 /**
- * صفحة تسجيل المصلحة المتعاقدة — نسخة نمط Neumorphism الفاخر الموحدة.
- *
- * الحقول والتبويبات والمنطق مشتركة مع صفحة المتعامل الاقتصادي عبر
- * المكوّن NeumorphicRegister؛ هذه الصفحة تعلن الدور الابتدائي فقط
- * ويُستخدم useState داخلياً للتبديل بين (متعامل / مصلحة).
+ * صفحة تسجيل المصلحة المتعاقدة — مساحة المصادقة الموحدة لمنصة صفقات ذكية
  */
 export function AuthorityRegister() {
-  return <NeumorphicRegister initialRole="authority" />;
+  return <UnifiedAuthPage initialMode="authority" />;
 }
 
 export default AuthorityRegister;

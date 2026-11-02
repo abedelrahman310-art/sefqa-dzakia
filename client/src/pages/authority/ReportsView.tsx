@@ -258,7 +258,7 @@ export function ReportsView() {
                 <Sparkles className="w-4 h-4 text-emerald-600" />
                 <span>{t('authority.reports.insights_title')}</span>
               </CardTitle>
-              <Badge variant="outline" className="border-emerald-300 text-emerald-800 text-[11px]">
+              <Badge variant="outline" className="border-emerald-300 text-emerald-800 text-xs">
                 {t('authority.reports.insights_disclaimer')}
               </Badge>
             </div>

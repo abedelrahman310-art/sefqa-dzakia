@@ -430,7 +430,7 @@ export function OperatorNotificationsView() {
                         <p className="mt-1 text-xs leading-relaxed text-[var(--op-text)]">{desc}</p>
                       )}
                       {item.date && (
-                        <span className="mt-1 block text-[11px] text-[var(--op-muted)]">
+                        <span className="mt-1 block text-xs text-[var(--op-muted)]">
                           {formatNotificationDate(item.date, lang)}
                         </span>
                       )}

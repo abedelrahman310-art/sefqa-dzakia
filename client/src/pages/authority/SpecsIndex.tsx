@@ -83,7 +83,7 @@ export function SpecsIndex() {
                   <div className="flex items-center gap-2 flex-wrap">
                     <h4 className="text-sm font-bold text-navy-900">{draft.title}</h4>
                     <span
-                      className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${
+                      className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${
                         draft.status === 'published'
                           ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
                           : 'bg-navy-50 text-navy-800 border-navy-200'

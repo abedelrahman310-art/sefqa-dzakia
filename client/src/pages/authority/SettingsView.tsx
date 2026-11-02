@@ -86,7 +86,7 @@ export function SettingsView() {
             <span className="text-xs font-semibold text-navy-100">
               {t('authority.topbar.brand_sub')}
             </span>
-            <Badge variant="outline" className="text-[11px] bg-white/10 text-white border-white/20">
+            <Badge variant="outline" className="text-xs bg-white/10 text-white border-white/20">
               {t('authority.settings.badge_profile')}
             </Badge>
           </div>
@@ -232,7 +232,7 @@ export function SettingsView() {
             <div className="flex items-center justify-between p-3 rounded-xl border border-border bg-muted/20">
               <div className="space-y-0.5">
                 <div className="text-xs font-bold text-foreground">{t('authority.settings.notifs_inapp')}</div>
-                <div className="text-[11px] text-muted-foreground">{t('authority.settings.notifs_inapp_desc')}</div>
+                <div className="text-xs text-muted-foreground">{t('authority.settings.notifs_inapp_desc')}</div>
               </div>
               <button
                 type="button"
@@ -255,7 +255,7 @@ export function SettingsView() {
             <div className="flex items-center justify-between p-3 rounded-xl border border-border bg-muted/20">
               <div className="space-y-0.5">
                 <div className="text-xs font-bold text-foreground">{t('authority.settings.notifs_email')}</div>
-                <div className="text-[11px] text-muted-foreground">{t('authority.settings.notifs_email_desc')}</div>
+                <div className="text-xs text-muted-foreground">{t('authority.settings.notifs_email_desc')}</div>
               </div>
               <button
                 type="button"
@@ -308,7 +308,7 @@ export function SettingsView() {
                   </div>
                   <span className="text-xs">{t('authority.settings.lang_ar')}</span>
                 </div>
-                <Badge variant={lang === 'ar' ? 'default' : 'outline'} className="text-[10px]">
+                <Badge variant={lang === 'ar' ? 'default' : 'outline'} className="text-xs">
                   {t('authority.settings.lang_default')}
                 </Badge>
               </label>
@@ -332,7 +332,7 @@ export function SettingsView() {
                   </div>
                   <span className="text-xs">{t('authority.settings.lang_fr')}</span>
                 </div>
-                <Badge variant={lang === 'fr' ? 'default' : 'outline'} className="text-[10px]">
+                <Badge variant={lang === 'fr' ? 'default' : 'outline'} className="text-xs">
                   {t('authority.settings.lang_official')}
                 </Badge>
               </label>

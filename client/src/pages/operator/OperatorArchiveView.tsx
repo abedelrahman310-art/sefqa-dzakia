@@ -221,7 +221,7 @@ export function OperatorArchiveView() {
                       {opp.status === 'submission_closed' && (
                         <span className="op-chip gold">{t('operator.archive.closed_status')}</span>
                       )}
-                      <span className="inline-flex items-center gap-1 text-[11px] text-[var(--op-muted)]">
+                      <span className="inline-flex items-center gap-1 text-xs text-[var(--op-muted)]">
                         <Calendar className="size-3.5" aria-hidden="true" />
                         <span>{formatDate(opp.updatedAt, lang)}</span>
                       </span>
@@ -277,7 +277,7 @@ export function OperatorArchiveView() {
                       )}
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-2 text-[11px] text-[var(--op-muted)]">
+                    <div className="flex flex-wrap items-center gap-2 text-xs text-[var(--op-muted)]">
                       <span className="op-chip">{offer.authorityName}</span>
                       <span>
                         <strong className="font-bold text-[var(--op-ink)]">

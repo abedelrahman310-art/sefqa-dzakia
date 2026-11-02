@@ -83,8 +83,13 @@ export async function refreshAccessToken(): Promise<string | null> {
       }
 
       return data.access;
-    } catch {
-      if (generation === sessionGeneration) {
+    } catch (error) {
+      // لا نحذف الجلسة عند خطأ عابر (429/5xx/انقطاع الشبكة)؛ الحذف محصور
+      // في رفض رمز التجديد نفسه (400/401/403) حتى لا يخرج المستخدم بسبب
+      // ضغط مؤقت على الخادم.
+      const status = (error as AxiosError | undefined)?.response?.status;
+      const invalidRefresh = status === 400 || status === 401 || status === 403;
+      if (invalidRefresh && generation === sessionGeneration) {
         notifySessionExpired();
       }
       return null;

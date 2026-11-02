@@ -291,7 +291,7 @@ export function OperatorContractsView({ dealId }: OperatorContractsViewProps) {
 
                 <div className="grid grid-cols-1 gap-3 rounded-xl border border-[#f3efdf] bg-[#fffdf5] p-3 text-xs sm:grid-cols-3">
                   <div>
-                    <span className="block text-[10px] font-bold text-[#8a6e1c]">
+                    <span className="block text-xs font-bold text-[#8a6e1c]">
                       {t('operator.contracts.archive_date')}
                     </span>
                     <span className="mt-0.5 inline-flex items-center gap-1 font-bold text-[#3a4555]">
@@ -300,7 +300,7 @@ export function OperatorContractsView({ dealId }: OperatorContractsViewProps) {
                     </span>
                   </div>
                   <div>
-                    <span className="block text-[10px] font-bold text-[#8a6e1c]">
+                    <span className="block text-xs font-bold text-[#8a6e1c]">
                       {t('operator.contracts.contract_amount')}
                     </span>
                     <span className="mt-0.5 inline-flex items-center gap-1 font-bold text-[#3a4555]">
@@ -309,7 +309,7 @@ export function OperatorContractsView({ dealId }: OperatorContractsViewProps) {
                     </span>
                   </div>
                   <div>
-                    <span className="block text-[10px] font-bold text-[#8a6e1c]">
+                    <span className="block text-xs font-bold text-[#8a6e1c]">
                       {t('operator.contracts.contractor_label')}
                     </span>
                     <span className="mt-0.5 inline-flex items-center gap-1 font-bold text-[#3a4555]">
@@ -320,7 +320,7 @@ export function OperatorContractsView({ dealId }: OperatorContractsViewProps) {
                 </div>
 
                 {!contract.contract_pdf_url && !contract.contract_pdf && (
-                  <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] text-amber-900">
+                  <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
                     {t('operator.contracts.no_pdf_notice')}
                   </p>
                 )}

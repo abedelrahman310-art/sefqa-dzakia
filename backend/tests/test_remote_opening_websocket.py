@@ -23,6 +23,11 @@ def get_jwt_token(user):
     return str(refresh.access_token)
 
 
+async def get_jwt_token_async(user):
+    """إنشاء الرمز داخل خيط متزامن لأن for_user يكتب في قاعدة البيانات."""
+    return await database_sync_to_async(get_jwt_token)(user)
+
+
 @pytest.fixture
 def api_client():
     return APIClient()
@@ -256,7 +261,7 @@ class TestRemoteOpeningWebSocket:
     """5. التحقق من حماية اتصال WebSocket بالمصادقة (JWT) وشرط وجود SessionAccess"""
 
     async def test_websocket_connection_success_with_valid_session_access(self, opening_session, users):
-        token = get_jwt_token(users["op1"])
+        token = await get_jwt_token_async(users["op1"])
         communicator = WebsocketCommunicator(
             application,
             f"/ws/opening/sessions/{opening_session.id}/?token={token}",
@@ -285,7 +290,7 @@ class TestRemoteOpeningWebSocket:
 
     async def test_websocket_rejected_for_operator_without_session_access(self, opening_session, users):
         # متعامل اقتصادي مسجل بالمنصة لكنه لم يقدم عرضاً ولم يُمنح SessionAccess
-        token = get_jwt_token(users["op_no_access"])
+        token = await get_jwt_token_async(users["op_no_access"])
         communicator = WebsocketCommunicator(
             application,
             f"/ws/opening/sessions/{opening_session.id}/?token={token}",
@@ -297,7 +302,7 @@ class TestRemoteOpeningWebSocket:
         # تعطيل صلاحية المتعامل
         await SessionAccess.objects.filter(session=opening_session, operator=users["op1"]).aupdate(has_access=False)
 
-        token = get_jwt_token(users["op1"])
+        token = await get_jwt_token_async(users["op1"])
         communicator = WebsocketCommunicator(
             application,
             f"/ws/opening/sessions/{opening_session.id}/?token={token}",
@@ -307,7 +312,7 @@ class TestRemoteOpeningWebSocket:
 
     async def test_websocket_receives_live_envelope_broadcast(self, opening_session, users, offer):
         # 1. اتصال المتعامل المصرح له بالـ WebSocket
-        token = get_jwt_token(users["op1"])
+        token = await get_jwt_token_async(users["op1"])
         communicator = WebsocketCommunicator(
             application,
             f"/ws/opening/sessions/{opening_session.id}/?token={token}",

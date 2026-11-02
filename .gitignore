@@ -1,4 +1,4 @@
-﻿# Python
+# Python
 __pycache__/
 *.py[cod]
 *$py.class
@@ -67,3 +67,7 @@ Thumbs.db
 
 # Local shortcuts
 تشغيل_المنصة.bat
+
+# AI & Skill scratch
+.taste-skill/
+

@@ -1132,7 +1132,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
               className="p-1.5 h-auto text-gray-600 hover:text-navy-900 hover:bg-gray-100 rounded-lg"
               title={t('authority.workspace.nav_back_to_deals')}
             >
-              <ArrowRight className="w-5 h-5" />
+              <ArrowRight className="w-5 h-5 rtl:rotate-180" />
             </Button>
             <span className="font-mono text-xs font-bold px-2.5 py-0.5 rounded-full bg-navy-50 text-navy-800 border border-navy-100">
               {deal?.reference_number || 'DZ-2026-REF'}
@@ -1222,7 +1222,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
               <p className="mt-1 text-xs text-gray-500">{t('authority.workspace.contract_card_desc')}</p>
             </div>
             {contract && (
-              <span className="inline-flex w-fit items-center rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[11px] font-bold text-emerald-800">
+              <span className="inline-flex w-fit items-center rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-800">
                 {getContractStatusLabel(contract.status) || contract.status || t('authority.workspace.contract_signed')}
               </span>
             )}
@@ -1255,25 +1255,25 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
             <div className="space-y-4">
               <div className="grid grid-cols-1 gap-3 rounded-xl border border-[#E5EBF4] bg-slate-50/50 p-4 text-xs md:grid-cols-4">
                 <div>
-                  <span className="block text-[10px] font-bold text-gray-500">{t('authority.workspace.contract_number')}</span>
+                  <span className="block text-xs font-bold text-gray-500">{t('authority.workspace.contract_number')}</span>
                   <span className="mt-0.5 block font-mono font-extrabold text-navy-900">
                     {contract.contract_number || '—'}
                   </span>
                 </div>
                 <div>
-                  <span className="block text-[10px] font-bold text-gray-500">{t('authority.workspace.contract_archived_date')}</span>
+                  <span className="block text-xs font-bold text-gray-500">{t('authority.workspace.contract_archived_date')}</span>
                   <span className="mt-0.5 block font-bold text-navy-900">
                     {formatContractDate(contract.signed_at)}
                   </span>
                 </div>
                 <div>
-                  <span className="block text-[10px] font-bold text-gray-500">{t('authority.workspace.contract_amount')}</span>
+                  <span className="block text-xs font-bold text-gray-500">{t('authority.workspace.contract_amount')}</span>
                   <span className="mt-0.5 block font-bold text-emerald-800">
                     {formatContractAmount(contract.amount)}
                   </span>
                 </div>
                 <div>
-                  <span className="block text-[10px] font-bold text-gray-500">{t('authority.workspace.contract_operator')}</span>
+                  <span className="block text-xs font-bold text-gray-500">{t('authority.workspace.contract_operator')}</span>
                   <span className="mt-0.5 block font-bold text-navy-900">
                     {contract.operator_name || '—'}
                   </span>
@@ -1281,7 +1281,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
               </div>
 
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <p className="m-0 text-[11px] text-gray-500">
+                <p className="m-0 text-xs text-gray-500">
                   {t('authority.workspace.contract_deal_ref_label')}: <span className="font-mono font-bold text-navy-900">{contract.deal_reference || deal?.reference_number || '—'}</span>
                 </p>
                 <Button
@@ -1453,7 +1453,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                     </div>
                     {/* Explicit Tax Regime Selector (HT vs TTC) */}
                     <div className="flex items-center gap-3 pt-1 text-xs">
-                      <span className="font-semibold text-gray-500 text-[11px]">{t('authority.workspace.tax_system')}</span>
+                      <span className="font-semibold text-gray-500 text-xs">{t('authority.workspace.tax_system')}</span>
                       <label className="flex items-center gap-1 cursor-pointer">
                         <input
                           type="radio"
@@ -1463,7 +1463,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                           onChange={() => setTaxRegime('ttc')}
                           className="text-navy-900 focus:ring-navy-500"
                         />
-                        <span className="text-[11px] font-bold text-gray-700">{t('authority.workspace.tax_ttc')}</span>
+                        <span className="text-xs font-bold text-gray-700">{t('authority.workspace.tax_ttc')}</span>
                       </label>
                       <label className="flex items-center gap-1 cursor-pointer">
                         <input
@@ -1474,7 +1474,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                           onChange={() => setTaxRegime('ht')}
                           className="text-navy-900 focus:ring-navy-500"
                         />
-                        <span className="text-[11px] font-bold text-gray-700">{t('authority.workspace.tax_ht')}</span>
+                        <span className="text-xs font-bold text-gray-700">{t('authority.workspace.tax_ht')}</span>
                       </label>
                     </div>
                   </div>
@@ -1505,9 +1505,9 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                     <div>
                       <h3 className="text-sm font-bold text-navy-900 flex items-center gap-1.5">
                         <Scale className="w-4 h-4 text-emerald-600" />{t('authority.workspace.proc_method_title')}</h3>
-                      <p className="text-[11px] text-gray-500">{t('authority.workspace.proc_method_subtitle')}</p>
+                      <p className="text-xs text-gray-500">{t('authority.workspace.proc_method_subtitle')}</p>
                     </div>
-                    <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-navy-50 text-navy-800 border border-navy-100">
+                    <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-navy-50 text-navy-800 border border-navy-100">
                       {METHOD_LABELS[procurementMethod].ar} — {FORM_LABELS[procurementForm].ar}
                     </span>
                   </div>
@@ -1575,13 +1575,13 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                         <AlertTriangle className="w-4 h-4 text-amber-700" />
                         <h4 className="text-xs font-bold text-amber-950">{t('authority.workspace.justif_section_title')}</h4>
                       </div>
-                      <p className="text-[11px] text-amber-800 leading-relaxed">
+                      <p className="text-xs text-amber-800 leading-relaxed">
                         {t('authority.workspace.justif_section_desc')}
                       </p>
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <div className="space-y-1">
-                          <label className="text-[11px] font-bold text-gray-700 block">{t('authority.workspace.field_statutory_basis')}</label>
+                          <label className="text-xs font-bold text-gray-700 block">{t('authority.workspace.field_statutory_basis')}</label>
                           <Input
                             value={statutoryBasis}
                             onChange={(e) => setStatutoryBasis(e.target.value)}
@@ -1590,7 +1590,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                           />
                         </div>
                         <div className="space-y-1">
-                          <label className="text-[11px] font-bold text-gray-700 block">{t('authority.workspace.field_docs_ref')}</label>
+                          <label className="text-xs font-bold text-gray-700 block">{t('authority.workspace.field_docs_ref')}</label>
                           <Input
                             value={supportingDocsRef}
                             onChange={(e) => setSupportingDocsRef(e.target.value)}
@@ -1599,7 +1599,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                           />
                         </div>
                         <div className="md:col-span-2 space-y-1">
-                          <label className="text-[11px] font-bold text-gray-700 block">{t('authority.workspace.field_justif_report')}</label>
+                          <label className="text-xs font-bold text-gray-700 block">{t('authority.workspace.field_justif_report')}</label>
                           <Textarea
                             rows={2}
                             value={procedureJustification}
@@ -1620,7 +1620,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                       <p className="font-bold text-amber-950">
                         {t('authority.workspace.boq_total_current', { amount: boqTotal.toLocaleString(lang === 'fr' ? 'fr-DZ' : 'ar-DZ'), dzd: t('common.dzd') })}
                       </p>
-                      <p className="text-amber-800 text-[11px]">
+                      <p className="text-amber-800 text-xs">
                         {t('authority.workspace.boq_current_registered', { amount: budget ? `${parseFloat(budget).toLocaleString(lang === 'fr' ? 'fr-DZ' : 'ar-DZ')} ${t('common.dzd')}` : t('authority.workspace.boq_alert_unspecified') })}
                       </p>
                     </div>
@@ -1638,7 +1638,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                   <div className="flex items-center justify-between">
                     <div>
                       <h3 className="text-sm font-bold text-navy-900">{t('authority.workspace.boq_title')}</h3>
-                      <p className="text-[11px] text-gray-500">{t('authority.workspace.boq_subtitle')}</p>
+                      <p className="text-xs text-gray-500">{t('authority.workspace.boq_subtitle')}</p>
                     </div>
                     <Button
                       type="button"
@@ -1655,13 +1655,13 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                       <table className="w-full text-start text-xs border-collapse">
                         <thead>
                           <tr className="bg-gray-50 border-b border-[#D5DDEA] text-gray-600 font-bold">
-                            <th className="py-2.5 px-3 w-10 text-center">#</th>
-                            <th className="py-2.5 px-3">{t('authority.workspace.boq_th_desc')}</th>
-                            <th className="py-2.5 px-3 w-24">{t('authority.workspace.boq_th_unit')}</th>
-                            <th className="py-2.5 px-3 w-20">{t('authority.workspace.boq_th_qty')}</th>
-                            <th className="py-2.5 px-3 w-32">{t('authority.workspace.boq_th_price')}</th>
-                            <th className="py-2.5 px-3 w-32 text-end">{t('authority.workspace.boq_th_total')}</th>
-                            <th className="py-2.5 px-2 w-10 text-center">{t('authority.workspace.boq_th_delete')}</th>
+                            <th className="px-4 py-4 w-10 text-center">#</th>
+                            <th className="px-4 py-4">{t('authority.workspace.boq_th_desc')}</th>
+                            <th className="px-4 py-4 w-24">{t('authority.workspace.boq_th_unit')}</th>
+                            <th className="px-4 py-4 w-20">{t('authority.workspace.boq_th_qty')}</th>
+                            <th className="px-4 py-4 w-32">{t('authority.workspace.boq_th_price')}</th>
+                            <th className="px-4 py-4 w-32 text-end">{t('authority.workspace.boq_th_total')}</th>
+                            <th className="px-4 py-4 w-10 text-center">{t('authority.workspace.boq_th_delete')}</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100">
@@ -1669,8 +1669,8 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                             const subtotal = (item.quantity || 0) * (item.unitPrice || 0);
                             return (
                               <tr key={item.id} className="hover:bg-gray-50/50">
-                                <td className="py-2 px-3 text-center text-gray-400 font-bold">{idx + 1}</td>
-                                <td className="py-2 px-3">
+                                <td className="px-4 py-3 text-center text-gray-400 font-bold">{idx + 1}</td>
+                                <td className="px-4 py-3">
                                   <Input
                                     value={item.name}
                                     onChange={(e) => handleUpdateBoqRow(item.id, 'name', e.target.value)}
@@ -1678,7 +1678,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                                     className="h-7 text-xs rounded-lg"
                                   />
                                 </td>
-                                <td className="py-2 px-3">
+                                <td className="px-4 py-3">
                                   <select
                                     value={item.unit}
                                     onChange={(e) => handleUpdateBoqRow(item.id, 'unit', e.target.value)}
@@ -1692,7 +1692,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                                     <option value={t('authority.workspace.unit_month')}>{t('authority.workspace.unit_month')}</option>
                                   </select>
                                 </td>
-                                <td className="py-2 px-3">
+                                <td className="px-4 py-3">
                                   <Input
                                     type="number"
                                     min={1}
@@ -1703,7 +1703,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                                     className="h-7 text-xs rounded-lg text-center"
                                   />
                                 </td>
-                                <td className="py-2 px-3">
+                                <td className="px-4 py-3">
                                   <Input
                                     type="number"
                                     min={0}
@@ -1714,10 +1714,10 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                                     className="h-7 text-xs rounded-lg text-end font-mono"
                                   />
                                 </td>
-                                <td className="py-2 px-3 text-end font-mono font-bold text-navy-900">
+                                <td className="px-4 py-3 text-end font-mono font-bold text-navy-900">
                                   {subtotal.toLocaleString(lang === 'fr' ? 'fr-DZ' : 'ar-DZ')} {t('common.dzd')}
                                 </td>
-                                <td className="py-2 px-2 text-center">
+                                <td className="px-4 py-3 text-center">
                                   <button
                                     type="button"
                                     onClick={() => handleRemoveBoqRow(item.id)}
@@ -1732,8 +1732,8 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                         </tbody>
                         <tfoot>
                           <tr className="bg-gray-50 border-t-2 border-[#D5DDEA] text-xs font-bold">
-                            <td colSpan={5} className="py-2.5 px-3 text-end text-gray-700">{t('authority.workspace.boq_total_label')}</td>
-                            <td className="py-2.5 px-3 text-end font-mono text-emerald-800 font-bold">
+                            <td colSpan={5} className="px-4 py-3 text-end text-gray-700">{t('authority.workspace.boq_total_label')}</td>
+                            <td className="px-4 py-3 text-end font-mono text-emerald-800 font-bold">
                               {boqTotal.toLocaleString(lang === 'fr' ? 'fr-DZ' : 'ar-DZ')} {t('common.dzd')}
                             </td>
                             <td></td>
@@ -1767,12 +1767,12 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                           ? t('authority.workspace.manual_draft_badge')
                           : t('authority.workspace.approved_template_badge')}
                       </span>
-                      <span className="font-mono text-[10px] font-bold px-2 py-0.5 rounded bg-gray-100 text-gray-700">
+                      <span className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-gray-100 text-gray-700">
                         {t('authority.workspace.version_prefix', { version: templateVersion })}
                       </span>
                       {templateId && (
                         <span
-                          className={`text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 border ${
+                          className={`text-xs font-bold px-2 py-0.5 rounded-full flex items-center gap-1 border ${
                             TEMPLATE_STATUS_LABELS[
                               CAHIER_TEMPLATES_LIBRARY.find((t) => t.id === templateId)?.status || 'internal_advisory'
                             ]?.badgeClass || 'bg-amber-50 text-amber-800 border-amber-300'
@@ -1785,7 +1785,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                         </span>
                       )}
                     </div>
-                    <p className="text-[11px] text-gray-500 mt-0.5">
+                    <p className="text-xs text-gray-500 mt-0.5">
                       {t('authority.workspace.procedural_basis')}: {lang === 'fr' ? (METHOD_LABELS[procurementMethod]?.fr || METHOD_LABELS[procurementMethod]?.ar) : METHOD_LABELS[procurementMethod]?.ar} — {lang === 'fr' ? (FORM_LABELS[procurementForm]?.fr || FORM_LABELS[procurementForm]?.ar) : FORM_LABELS[procurementForm]?.ar} ({lang === 'fr' ? (NATURE_LABELS[procurementNature]?.fr || NATURE_LABELS[procurementNature]?.ar) : NATURE_LABELS[procurementNature]?.ar})
                     </p>
                   </div>
@@ -1810,12 +1810,12 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                     </div>
                     <div>
                       <p className="font-bold text-emerald-900 text-sm">{t('authority.workspace.frozen_banner_title')}</p>
-                      <p className="font-mono text-[11px] text-emerald-800">
+                      <p className="font-mono text-xs text-emerald-800">
                         {t('authority.workspace.badge_frozen_digest', { digest: frozenDigest })}
                       </p>
                     </div>
                   </div>
-                  <span className="text-[11px] text-emerald-700">
+                  <span className="text-xs text-emerald-700">
                     {t('authority.workspace.badge_frozen_date', { date: new Date(frozenAt || '').toLocaleDateString(lang === 'fr' ? 'fr-DZ' : 'ar-DZ') })}
                   </span>
                 </div>
@@ -1860,7 +1860,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                 <div className="bg-white border border-[#D5DDEA] rounded-2xl p-6 shadow-sm space-y-4">
                   <div className="flex items-center justify-between border-b border-gray-100 pb-3">
                     <h3 className="text-sm font-bold text-navy-900">{t('authority.workspace.reqs_grid_title')}</h3>
-                    <span className="text-[11px] text-gray-500">{t('authority.workspace.reqs_grid_subtitle')}</span>
+                    <span className="text-xs text-gray-500">{t('authority.workspace.reqs_grid_subtitle')}</span>
                   </div>
 
                   <div className="space-y-3">
@@ -1874,7 +1874,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                             {req.requirementCode}
                           </span>
                           {req.isDisqualifying && (
-                            <span className="px-2 py-0.5 bg-red-100 text-red-800 border border-red-200 rounded font-bold text-[10px]">{t('authority.workspace.disqualifying_badge')}</span>
+                            <span className="px-2 py-0.5 bg-red-100 text-red-800 border border-red-200 rounded font-bold text-xs">{t('authority.workspace.disqualifying_badge')}</span>
                           )}
                         </div>
                         <p className="font-semibold text-gray-900">{req.positionReference}</p>
@@ -1903,11 +1903,11 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                                 {clause.clauseCode}
                               </span>
                               <h3 className="text-sm font-bold text-navy-900">{clause.title}</h3>
-                              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-navy-50 text-navy-800 border border-navy-100">{t('authority.workspace.binding_clause_badge')}</span>
+                              <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-navy-50 text-navy-800 border border-navy-100">{t('authority.workspace.binding_clause_badge')}</span>
                             </div>
 
                             {/* Sanad / Provenance Badges */}
-                            <div className="flex items-center gap-2 flex-wrap text-[11px]">
+                            <div className="flex items-center gap-2 flex-wrap text-xs">
                               {clause.provenance.map((prov) => (
                                 <span
                                   key={prov.id}
@@ -2002,7 +2002,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                               {clause.events.map((ev) => (
                                 <div
                                   key={ev.id}
-                                  className="border-b border-gray-200/60 pb-1.5 last:border-0 text-[11px] text-gray-600"
+                                  className="border-b border-gray-200/60 pb-1.5 last:border-0 text-xs text-gray-600"
                                 >
                                   <span className="font-bold text-navy-900">
                                     {new Date(ev.createdAt).toLocaleString('ar-DZ')}:
@@ -2023,7 +2023,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                 <div className="bg-white border border-[#D5DDEA] rounded-2xl p-5 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                   <div className="space-y-1">
                     <h4 className="text-xs font-bold text-navy-900">{t('authority.workspace.freeze_card_title')}</h4>
-                    <p className="text-[11px] text-gray-500">{t('authority.workspace.freeze_card_desc')}</p>
+                    <p className="text-xs text-gray-500">{t('authority.workspace.freeze_card_desc')}</p>
                   </div>
                   <Button
                     onClick={() => setShowFreezeModal(true)}
@@ -2061,28 +2061,28 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                     <table className="w-full text-start text-xs border-collapse">
                       <thead>
                         <tr className="bg-gray-50 border-b border-[#D5DDEA] text-gray-600 font-bold">
-                          <th className="py-2.5 px-3 w-10 text-center">#</th>
-                          <th className="py-2.5 px-3">{t('authority.workspace.th_doc_name')}</th>
-                          <th className="py-2.5 px-3 w-28">{t('authority.workspace.th_doc_envelope')}</th>
-                          <th className="py-2.5 px-3 w-36">{t('authority.workspace.th_doc_basis')}</th>
-                          <th className="py-2.5 px-3 w-28 text-center">{t('authority.workspace.th_doc_statutory')}</th>
-                          <th className="py-2.5 px-3 w-28 text-center">{t('authority.workspace.th_doc_impact')}</th>
-                          <th className="py-2.5 px-2 w-12 text-center">{t('authority.workspace.th_doc_action')}</th>
+                          <th className="px-4 py-4 w-10 text-center">#</th>
+                          <th className="px-4 py-4">{t('authority.workspace.th_doc_name')}</th>
+                          <th className="px-4 py-4 w-28">{t('authority.workspace.th_doc_envelope')}</th>
+                          <th className="px-4 py-4 w-36">{t('authority.workspace.th_doc_basis')}</th>
+                          <th className="px-4 py-4 w-28 text-center">{t('authority.workspace.th_doc_statutory')}</th>
+                          <th className="px-4 py-4 w-28 text-center">{t('authority.workspace.th_doc_impact')}</th>
+                          <th className="px-4 py-4 w-12 text-center">{t('authority.workspace.th_doc_action')}</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-100">
                         {operatorDocuments.map((doc, idx) => (
                           <tr key={doc.id || doc.code} className="hover:bg-gray-50/50">
-                            <td className="py-2.5 px-3 text-center text-gray-400 font-bold">{idx + 1}</td>
-                            <td className="py-2.5 px-3">
+                            <td className="px-4 py-3 text-center text-gray-400 font-bold">{idx + 1}</td>
+                            <td className="px-4 py-3">
                               <p className="font-bold text-navy-900">{doc.titleAr || doc.name}</p>
                               {doc.descriptionAr && (
-                                <p className="text-[11px] text-gray-500">{doc.descriptionAr}</p>
+                                <p className="text-xs text-gray-500">{doc.descriptionAr}</p>
                               )}
                             </td>
-                            <td className="py-2.5 px-3">
+                            <td className="px-4 py-3">
                               <span
-                                className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                                className={`px-2 py-0.5 rounded text-xs font-bold ${
                                   doc.category === 'candidacy' || doc.category === ('candidature' as any)
                                     ? 'bg-slate-100 text-slate-800 border border-slate-300'
                                     : doc.category === 'technical'
@@ -2097,24 +2097,24 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                                   : t('authority.workspace.envelope_financial')}
                               </span>
                             </td>
-                            <td className="py-2.5 px-3 font-mono text-[11px] text-gray-600">
+                            <td className="px-4 py-3 font-mono text-xs text-gray-600">
                               {doc.statutoryRef || doc.statutoryBasis || t('authority.workspace.doc_statutory_default')}
                             </td>
-                            <td className="py-2.5 px-3 text-center">
+                            <td className="px-4 py-3 text-center">
                               {doc.isStatutory ? (
-                                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-navy-50 text-navy-800 border border-navy-200 whitespace-nowrap">{t('authority.workspace.doc_statutory_badge')}</span>
+                                <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-navy-50 text-navy-800 border border-navy-200 whitespace-nowrap">{t('authority.workspace.doc_statutory_badge')}</span>
                               ) : (
-                                <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-gray-100 text-gray-600 whitespace-nowrap">{t('authority.workspace.doc_discretionary_badge')}</span>
+                                <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600 whitespace-nowrap">{t('authority.workspace.doc_discretionary_badge')}</span>
                               )}
                             </td>
-                            <td className="py-2.5 px-3 text-center">
+                            <td className="px-4 py-3 text-center">
                               {doc.isDisqualifying ? (
-                                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-50 text-red-700 border border-red-200">{t('authority.workspace.impact_disqualifying')}</span>
+                                <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-red-50 text-red-700 border border-red-200">{t('authority.workspace.impact_disqualifying')}</span>
                               ) : (
-                                <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-gray-100 text-gray-600">{t('authority.workspace.impact_supplementary')}</span>
+                                <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-600">{t('authority.workspace.impact_supplementary')}</span>
                               )}
                             </td>
-                            <td className="py-2.5 px-2 text-center">
+                            <td className="px-4 py-3 text-center">
                               {doc.isStatutory ? (
                                 <button
                                   type="button"
@@ -2239,7 +2239,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                       </button>
                     </div>
                     <p className="text-emerald-900 leading-relaxed font-normal">{docSummary}</p>
-                    <p className="text-[10px] text-emerald-700 pt-1">{t('authority.workspace.executive_summary_disclaimer')}</p>
+                    <p className="text-xs text-emerald-700 pt-1">{t('authority.workspace.executive_summary_disclaimer')}</p>
                   </div>
                 )}
 
@@ -2252,8 +2252,8 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                       </div>
                       <div className="space-y-1">
                         <p className="font-bold text-gray-900">{t('authority.workspace.doc_specs_pdf_title')}</p>
-                        <p className="text-gray-500 text-[11px]">{t('authority.workspace.doc_specs_pdf_desc')}</p>
-                        <span className="inline-block text-[10px] font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded">
+                        <p className="text-gray-500 text-xs">{t('authority.workspace.doc_specs_pdf_desc')}</p>
+                        <span className="inline-block text-xs font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded">
                           {isFrozen ? t('authority.workspace.doc_specs_frozen_badge') : t('authority.workspace.doc_specs_draft_badge')}
                         </span>
                       </div>
@@ -2275,8 +2275,8 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                       </div>
                       <div className="space-y-1">
                         <p className="font-bold text-gray-900">{t('authority.workspace.doc_bank_guarantee_title')}</p>
-                        <p className="text-gray-500 text-[11px]">{t('authority.workspace.doc_bank_guarantee_desc')}</p>
-                        <span className="inline-block text-[10px] font-bold text-blue-800 bg-blue-100 px-2 py-0.5 rounded">{t('authority.workspace.doc_bank_guarantee_ratio')}</span>
+                        <p className="text-gray-500 text-xs">{t('authority.workspace.doc_bank_guarantee_desc')}</p>
+                        <span className="inline-block text-xs font-bold text-blue-800 bg-blue-100 px-2 py-0.5 rounded">{t('authority.workspace.doc_bank_guarantee_ratio')}</span>
                       </div>
                     </div>
                   </div>
@@ -2294,33 +2294,33 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                   <div className="p-3.5 rounded-xl border border-gray-200 flex items-center justify-between">
                     <div>
                       <p className="font-bold text-gray-900">{t('authority.workspace.doc1_title')}</p>
-                      <p className="text-gray-500 text-[11px]">{t('authority.workspace.doc1_desc')}</p>
+                      <p className="text-gray-500 text-xs">{t('authority.workspace.doc1_desc')}</p>
                     </div>
-                    <span className="text-gray-400 font-mono text-[11px]">{t('authority.workspace.doc1_tag')}</span>
+                    <span className="text-gray-400 font-mono text-xs">{t('authority.workspace.doc1_tag')}</span>
                   </div>
 
                   <div className="p-3.5 rounded-xl border border-gray-200 flex items-center justify-between">
                     <div>
                       <p className="font-bold text-gray-900">{t('authority.workspace.doc2_title')}</p>
-                      <p className="text-gray-500 text-[11px]">{t('authority.workspace.doc2_desc')}</p>
+                      <p className="text-gray-500 text-xs">{t('authority.workspace.doc2_desc')}</p>
                     </div>
-                    <span className="text-gray-400 font-mono text-[11px]">{t('authority.workspace.doc2_tag')}</span>
+                    <span className="text-gray-400 font-mono text-xs">{t('authority.workspace.doc2_tag')}</span>
                   </div>
 
                   <div className="p-3.5 rounded-xl border border-gray-200 flex items-center justify-between">
                     <div>
                       <p className="font-bold text-gray-900">{t('authority.workspace.doc3_title')}</p>
-                      <p className="text-gray-500 text-[11px]">{t('authority.workspace.doc3_desc')}</p>
+                      <p className="text-gray-500 text-xs">{t('authority.workspace.doc3_desc')}</p>
                     </div>
-                    <span className="text-gray-400 font-mono text-[11px]">{t('authority.workspace.doc3_tag')}</span>
+                    <span className="text-gray-400 font-mono text-xs">{t('authority.workspace.doc3_tag')}</span>
                   </div>
 
                   <div className="p-3.5 rounded-xl border border-gray-200 flex items-center justify-between">
                     <div>
                       <p className="font-bold text-gray-900">{t('authority.workspace.doc4_title')}</p>
-                      <p className="text-gray-500 text-[11px]">{t('authority.workspace.doc4_desc')}</p>
+                      <p className="text-gray-500 text-xs">{t('authority.workspace.doc4_desc')}</p>
                     </div>
-                    <span className="text-gray-400 font-mono text-[11px]">{t('authority.workspace.doc4_tag')}</span>
+                    <span className="text-gray-400 font-mono text-xs">{t('authority.workspace.doc4_tag')}</span>
                   </div>
                 </div>
               </section>
@@ -2341,7 +2341,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                 </div>
                 <div>
                   <h3 className="font-bold text-navy-900 text-sm">{t('authority.workspace.assistant_show')}</h3>
-                  <p className="text-[11px] text-gray-500 truncate max-w-[200px]">
+                  <p className="text-xs text-gray-500 truncate max-w-[200px]">
                     {t('authority.workspace.assistant_deal_title', { title: title || deal?.title || t('authority.workspace.default_deal_title') })}
                   </p>
                 </div>
@@ -2357,12 +2357,12 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
             </div>
 
             {/* Advisory Disclaimer */}
-            <div className="bg-amber-50/70 border border-amber-200 rounded-xl p-3 text-[11px] text-amber-900 space-y-1">
+            <div className="bg-amber-50/70 border border-amber-200 rounded-xl p-3 text-xs text-amber-900 space-y-1">
               <p className="font-bold flex items-center gap-1.5">
                 <HelpCircle className="w-3.5 h-3.5 text-amber-700" />
                 <span>{t('authority.workspace.assistant_advisory_badge')}</span>
               </p>
-              <p className="text-amber-800 text-[10px] leading-relaxed">{t('authority.workspace.assistant_advisory_desc')}</p>
+              <p className="text-amber-800 text-xs leading-relaxed">{t('authority.workspace.assistant_advisory_desc')}</p>
             </div>
 
             {/* 4 Canonical AI Assistant Services Bar */}
@@ -2374,7 +2374,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                   size="sm"
                   variant="outline"
                   onClick={handleExplainProcurementMethod}
-                  className={`rounded-xl text-[11px] font-bold h-auto py-2 px-2 flex flex-col items-center justify-center text-center gap-1 border transition-all ${
+                  className={`rounded-xl text-xs font-bold h-auto py-2 px-2 flex flex-col items-center justify-center text-center gap-1 border transition-all ${
                     activeAssistantTool === 'method_explain'
                       ? 'bg-navy-900 text-white border-navy-900'
                       : 'border-gray-200 text-navy-900 hover:bg-navy-50'
@@ -2389,7 +2389,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                   size="sm"
                   variant="outline"
                   onClick={handleRecommendTemplate}
-                  className={`rounded-xl text-[11px] font-bold h-auto py-2 px-2 flex flex-col items-center justify-center text-center gap-1 border transition-all ${
+                  className={`rounded-xl text-xs font-bold h-auto py-2 px-2 flex flex-col items-center justify-center text-center gap-1 border transition-all ${
                     activeAssistantTool === 'template_advisor'
                       ? 'bg-navy-900 text-white border-navy-900'
                       : 'border-gray-200 text-navy-900 hover:bg-navy-50'
@@ -2404,7 +2404,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                   size="sm"
                   variant="outline"
                   onClick={handleAutofillDraftFromDeal}
-                  className="rounded-xl text-[11px] font-bold h-auto py-2 px-2 flex flex-col items-center justify-center text-center gap-1 border border-gray-200 text-navy-900 hover:bg-navy-50"
+                  className="rounded-xl text-xs font-bold h-auto py-2 px-2 flex flex-col items-center justify-center text-center gap-1 border border-gray-200 text-navy-900 hover:bg-navy-50"
                 >
                   <Sparkles className="w-4 h-4 text-emerald-600" />
                   <span>{t('authority.workspace.tool_enrich_draft')}</span>
@@ -2415,7 +2415,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                   size="sm"
                   variant="outline"
                   onClick={handleRunGapAudit}
-                  className={`rounded-xl text-[11px] font-bold h-auto py-2 px-2 flex flex-col items-center justify-center text-center gap-1 border transition-all ${
+                  className={`rounded-xl text-xs font-bold h-auto py-2 px-2 flex flex-col items-center justify-center text-center gap-1 border transition-all ${
                     activeAssistantTool === 'gap_analysis'
                       ? 'bg-navy-900 text-white border-navy-900'
                       : 'border-gray-200 text-navy-900 hover:bg-navy-50'
@@ -2442,14 +2442,14 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                   </button>
                 </div>
 
-                <div className="space-y-1.5 text-gray-700 text-[11px] leading-relaxed">
+                <div className="space-y-1.5 text-gray-700 text-xs leading-relaxed">
                   <p>
                     <strong>{t('authority.workspace.assistant_approved_proc')}</strong> {METHOD_LABELS[procurementMethod].ar} — {FORM_LABELS[procurementForm].ar}
                   </p>
                   <p>
                     <strong>{t('authority.workspace.assistant_statutory_basis')}</strong>
                   </p>
-                  <div className="bg-white p-2.5 rounded-lg border border-navy-100 space-y-1 text-[11px]">
+                  <div className="bg-white p-2.5 rounded-lg border border-navy-100 space-y-1 text-xs">
                     {procurementMethod === 'open_tender' ? (
                       procurementForm === 'open' ? (
                         <p>{t('authority.workspace.method_exp_open')}</p>
@@ -2502,7 +2502,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                   </button>
                 </div>
 
-                <div className="space-y-1.5 text-gray-700 text-[11px]">
+                <div className="space-y-1.5 text-gray-700 text-xs">
                   <p>
                     <strong>{t('authority.workspace.nature_of_need')}:</strong> {lang === 'fr' ? (NATURE_LABELS[procurementNature]?.fr || NATURE_LABELS[procurementNature]?.ar) : NATURE_LABELS[procurementNature]?.ar}
                   </p>
@@ -2511,14 +2511,14 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                       <div key={tpl.id} className="bg-white p-3 rounded-lg border border-emerald-200 space-y-1.5">
                         <div className="flex items-center justify-between">
                           <p className="font-bold text-navy-900">{tpl.title}</p>
-                          <span className="text-[10px] font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded">
+                          <span className="text-xs font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded">
                             {tpl.status === 'approved_official' ? t('authority.workspace.template_status_approved') : t('authority.workspace.template_status_review')}
                           </span>
                         </div>
-                        <p className="text-gray-600 text-[11px]">
+                        <p className="text-gray-600 text-xs">
                           {tpl.usageLimits || tpl.sourceReference}
                         </p>
-                        <p className="text-gray-500 font-mono text-[10px]">{tpl.sourceReference}</p>
+                        <p className="text-gray-500 font-mono text-xs">{tpl.sourceReference}</p>
                         <Button
                           size="sm"
                           onClick={() => {
@@ -2566,7 +2566,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                   {gapAuditList.map((gap) => (
                     <div
                       key={gap.id}
-                      className={`p-2 rounded-lg border text-[11px] flex items-start justify-between gap-2 ${
+                      className={`p-2 rounded-lg border text-xs flex items-start justify-between gap-2 ${
                         gap.status === 'complete'
                           ? 'bg-emerald-50/50 border-emerald-200 text-emerald-950'
                           : gap.status === 'warning'
@@ -2583,7 +2583,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                           )}
                           <span>{gap.name}</span>
                         </p>
-                        <p className="text-gray-600 text-[10px]">{gap.message}</p>
+                        <p className="text-gray-600 text-xs">{gap.message}</p>
                       </div>
                       <Button
                         size="sm"
@@ -2592,7 +2592,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                           setActiveTab(gap.tab as any);
                           setActiveAssistantTool(null);
                         }}
-                        className="text-[10px] font-bold p-1 h-auto text-navy-800 hover:underline shrink-0"
+                        className="text-xs font-bold p-1 h-auto text-navy-800 hover:underline shrink-0"
                       >{t('authority.workspace.tool_btn_jump')}</Button>
                     </div>
                   ))}
@@ -2608,7 +2608,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                 {/* Tool: Market Price Estimator */}
                 <div className="p-3.5 rounded-xl border border-gray-200 bg-gray-50/60 space-y-2 text-xs">
                   <span className="font-bold text-gray-900 block">{t('authority.workspace.tool_market_price_title')}</span>
-                  <p className="text-gray-600 text-[11px]">{t('authority.workspace.tool_market_price_desc')}</p>
+                  <p className="text-gray-600 text-xs">{t('authority.workspace.tool_market_price_desc')}</p>
                   <Button
                     size="sm"
                     disabled={priceEstimating}
@@ -2619,7 +2619,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                   </Button>
 
                   {priceEstimateResult && (
-                    <div className="bg-white rounded-lg p-2.5 border border-navy-100 text-[11px] space-y-1">
+                    <div className="bg-white rounded-lg p-2.5 border border-navy-100 text-xs space-y-1">
                       <div className="flex justify-between">
                         <span className="text-gray-500">{t('authority.workspace.label_avg_price')}</span>
                         <span className="font-bold font-mono text-emerald-800">
@@ -2642,7 +2642,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
 
                 {/* Outdated analysis warning */}
                 {contentChangedSinceCheck && (
-                  <div className="bg-amber-100 border border-amber-300 rounded-xl p-2.5 text-[11px] text-amber-900 flex items-start gap-2">
+                  <div className="bg-amber-100 border border-amber-300 rounded-xl p-2.5 text-xs text-amber-900 flex items-start gap-2">
                     <AlertTriangle className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
                     <span>{t('authority.workspace.compliance_modified_alert')}</span>
                   </div>
@@ -2651,7 +2651,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                 {/* Tool 1: Compliance Check */}
                 <div className="p-3.5 rounded-xl border border-gray-200 bg-gray-50/60 space-y-2 text-xs">
                   <span className="font-bold text-gray-900 block">{t('authority.workspace.tool_compliance_title')}</span>
-                  <p className="text-gray-600 text-[11px]">{t('authority.workspace.tool_compliance_desc')}</p>
+                  <p className="text-gray-600 text-xs">{t('authority.workspace.tool_compliance_desc')}</p>
                   <Button
                     size="sm"
                     disabled={complianceChecking}
@@ -2662,7 +2662,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                   </Button>
 
                   {complianceResult && (
-                    <div className="bg-white rounded-lg p-2.5 border border-navy-100 text-[11px] space-y-1.5">
+                    <div className="bg-white rounded-lg p-2.5 border border-navy-100 text-xs space-y-1.5">
                       <p className="font-bold text-navy-900">{t('authority.workspace.compliance_results_title')}</p>
                       {complianceResult.advisory_notes?.map((n: any, i: number) => (
                         <div key={i} className="text-gray-700 border-b border-gray-100 pb-1 last:border-0">
@@ -2676,7 +2676,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                 {/* Tool 2: Template Presets by Section */}
                 <div className="p-3.5 rounded-xl border border-gray-200 bg-gray-50/60 space-y-2 text-xs">
                   <span className="font-bold text-gray-900 block">{t('authority.workspace.tpl_proposal_badge')}</span>
-                  <p className="text-gray-600 text-[11px]">{t('authority.workspace.tool_preset_desc')}</p>
+                  <p className="text-gray-600 text-xs">{t('authority.workspace.tool_preset_desc')}</p>
                   <Button
                     size="sm"
                     variant="outline"
@@ -2695,7 +2695,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
 
                 <div className="p-3.5 rounded-xl border border-gray-200 bg-gray-50/60 space-y-2 text-xs">
                   <span className="font-bold text-gray-900 block">{t('authority.workspace.tool_doc_summary_title')}</span>
-                  <p className="text-gray-600 text-[11px]">
+                  <p className="text-gray-600 text-xs">
                     {t('authority.workspace.tool_summary_desc')}
                   </p>
                   <Button
@@ -2732,7 +2732,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                 </span>
               </div>
             </div>
-            <p className="text-[11px] text-gray-500">{t('authority.workspace.modal_budget_desc')}</p>
+            <p className="text-xs text-gray-500">{t('authority.workspace.modal_budget_desc')}</p>
             <div className="flex justify-end gap-2 pt-2">
               <Button
                 variant="outline"
@@ -2798,7 +2798,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
               <p className="font-bold text-amber-950">
                 {t('authority.workspace.modal_change_method_desc')}
               </p>
-              <p className="text-amber-800 text-[11px]">
+              <p className="text-amber-800 text-xs">
                 {t('authority.workspace.modal_change_method_warning')}
               </p>
             </div>
@@ -2839,7 +2839,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
             <div className="text-xs text-gray-800 leading-relaxed bg-gray-50 p-3.5 rounded-xl border border-gray-200 whitespace-pre-wrap max-h-60 overflow-y-auto">
               {aiProposalPreview.text}
             </div>
-            <p className="text-[11px] text-emerald-800 font-semibold">{aiProposalPreview.sourceNotice}</p>
+            <p className="text-xs text-emerald-800 font-semibold">{aiProposalPreview.sourceNotice}</p>
             <div className="flex justify-end gap-2 pt-2">
               <Button
                 variant="outline"

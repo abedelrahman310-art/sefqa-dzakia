@@ -238,7 +238,7 @@ export function OperatorAssistantView() {
     setSending(true);
 
     try {
-      const data = await operatorLegalChat(conversationId, query);
+      const data = await operatorLegalChat(conversationId, query, lang);
       if (data.conversation_id) setConversationId(data.conversation_id);
 
       const rawArticles = data.legal_articles ?? data.retrieved_articles ?? [];
@@ -308,7 +308,7 @@ export function OperatorAssistantView() {
             <Sparkles className="size-3.5 text-blue-600" aria-hidden="true" />
             <span>{t('operator.assistant.badge_rag')}</span>
           </div>
-          <h1 className="text-2xl font-black text-[#0A2540] tracking-tight">
+          <h1 className="text-2xl font-bold text-[#0A2540] tracking-tight">
             {t('operator.assistant.title')}
           </h1>
           <p className="mt-1 text-xs sm:text-sm text-slate-500 max-w-2xl leading-relaxed">
@@ -343,13 +343,13 @@ export function OperatorAssistantView() {
               </span>
               <div>
                 <h2 className="text-sm font-extrabold text-[#0A2540]">{t('operator.assistant.chat_title')}</h2>
-                <p className="mt-0.5 flex items-center gap-1.5 text-[11px] text-slate-500 font-medium">
+                <p className="mt-0.5 flex items-center gap-1.5 text-xs text-slate-500 font-medium">
                   <span className="size-2 rounded-full bg-emerald-500 animate-pulse" aria-hidden="true" />
                   {t('operator.assistant.chat_subtitle')}
                 </p>
               </div>
             </div>
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-[11px] font-bold text-emerald-800">
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-xs font-bold text-emerald-800">
               <ShieldCheck className="size-3.5 text-emerald-600" aria-hidden="true" />
               <span>{t('operator.assistant.advisory_only')}</span>
             </span>
@@ -395,14 +395,14 @@ export function OperatorAssistantView() {
                         <span className="text-xs font-bold text-slate-800">
                           {t('operator.assistant.no_answer_title')}
                         </span>
-                        <span className="text-[10px] font-bold bg-slate-200 text-slate-700 px-2 py-0.5 rounded-md">
+                        <span className="text-xs font-bold bg-slate-200 text-slate-700 px-2 py-0.5 rounded-md">
                           {t('operator.assistant.no_answer_badge')}
                         </span>
                       </div>
                       <p className="text-xs sm:text-sm font-semibold text-slate-800 leading-relaxed whitespace-pre-wrap">
                         {message.content}
                       </p>
-                      <p className="text-[11px] text-slate-500 leading-normal border-t border-slate-200/80 pt-2">
+                      <p className="text-xs text-slate-500 leading-normal border-t border-slate-200/80 pt-2">
                         {t('operator.assistant.no_answer_note')}
                       </p>
                     </div>
@@ -420,7 +420,7 @@ export function OperatorAssistantView() {
                       {/* قسم: المرجع القانوني المستند إليه مع الشارات */}
                       {!isUser && message.legal_articles && message.legal_articles.length > 0 && (
                         <div className="mt-3.5 border-t border-slate-100 pt-2.5">
-                          <div className="flex items-center gap-1.5 text-[11px] font-bold text-[#0A2540]">
+                          <div className="flex items-center gap-1.5 text-xs font-bold text-[#0A2540]">
                             <Scale className="size-3.5 text-[#1e3a8a]" aria-hidden="true" />
                             <span>{t('operator.assistant.legal_reference')}</span>
                           </div>
@@ -430,7 +430,7 @@ export function OperatorAssistantView() {
                                 key={`${article.id ?? article.label}-${articleIndex}`}
                                 type="button"
                                 onClick={() => setSelectedArticle(article)}
-                                className="inline-flex items-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50/90 hover:bg-blue-100 px-2.5 py-1.5 text-[11px] font-bold text-[#1e3a8a] transition-all shadow-2xs hover:shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 cursor-pointer"
+                                className="inline-flex items-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50/90 hover:bg-blue-100 px-2.5 py-1.5 text-xs font-bold text-[#1e3a8a] transition-all shadow-2xs hover:shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 cursor-pointer"
                                 aria-label={t('operator.assistant.article_view_aria', { label: article.label })}
                               >
                                 <BookOpen className="size-3 text-[#1e3a8a]" aria-hidden="true" />
@@ -444,14 +444,14 @@ export function OperatorAssistantView() {
                       {/* المراجع العامة للاستئناس إن وجدت */}
                       {!isUser && message.sources && message.sources.length > 0 && (
                         <div className="mt-2.5 border-t border-slate-100 pt-2">
-                          <span className="text-[10px] font-bold text-slate-400 block mb-1">
+                          <span className="text-xs font-bold text-slate-400 block mb-1">
                             {t('operator.assistant.legislative_basis')}
                           </span>
                           <div className="flex flex-wrap gap-1.5">
                             {message.sources.map((source) => (
                               <span
                                 key={source}
-                                className="rounded-md border border-slate-200 bg-slate-50 px-2 py-0.5 text-[10px] text-slate-600"
+                                className="rounded-md border border-slate-200 bg-slate-50 px-2 py-0.5 text-xs text-slate-600"
                               >
                                 {source}
                               </span>
@@ -525,7 +525,7 @@ export function OperatorAssistantView() {
                 <span className="hidden sm:inline">{t('operator.assistant.send')}</span>
               </button>
             </form>
-            <p className="text-[10px] text-slate-400">
+            <p className="text-xs text-slate-400">
               {t('operator.assistant.disclaimer')}
             </p>
           </div>
@@ -548,7 +548,7 @@ export function OperatorAssistantView() {
                     </span>
                     <div>
                       <h3 className="text-xs font-bold text-[#0A2540]">{topic.title}</h3>
-                      <p className="mt-0.5 text-[11px] leading-relaxed text-slate-500">{topic.text}</p>
+                      <p className="mt-0.5 text-xs leading-relaxed text-slate-500">{topic.text}</p>
                     </div>
                   </div>
                 );
@@ -561,21 +561,21 @@ export function OperatorAssistantView() {
               <BookOpen className="size-4 text-blue-600" aria-hidden="true" />
               <span>{t('operator.assistant.references_title')}</span>
             </h2>
-            <div className="space-y-2 pt-3 text-[11px] leading-relaxed text-slate-600">
+            <div className="space-y-2 pt-3 text-xs leading-relaxed text-slate-600">
               <div className="p-2 rounded-lg bg-slate-50 border border-slate-100">
                 <span className="font-bold text-[#0A2540] block">{t('operator.assistant.law_23_12')}</span>
-                <span className="text-[10px] text-slate-500">{t('operator.assistant.law_23_12_desc')}</span>
+                <span className="text-xs text-slate-500">{t('operator.assistant.law_23_12_desc')}</span>
               </div>
               <div className="p-2 rounded-lg bg-slate-50 border border-slate-100">
                 <span className="font-bold text-[#0A2540] block">{t('operator.assistant.decree_15_247')}</span>
-                <span className="text-[10px] text-slate-500">{t('operator.assistant.decree_15_247_desc')}</span>
+                <span className="text-xs text-slate-500">{t('operator.assistant.decree_15_247_desc')}</span>
               </div>
             </div>
           </section>
 
           <div className="bg-amber-50/80 border border-amber-200 text-amber-900 rounded-2xl p-3.5 flex items-start gap-2.5 shadow-2xs">
             <AlertTriangle className="size-4 text-amber-700 shrink-0 mt-0.5" aria-hidden="true" />
-            <div className="text-[11px] leading-relaxed">
+            <div className="text-xs leading-relaxed">
               <strong className="block font-bold text-amber-900 mb-0.5">{t('operator.assistant.legal_notice_title')}</strong>
               {t('operator.assistant.legal_notice_text')}
             </div>
@@ -616,7 +616,7 @@ export function OperatorAssistantView() {
                 {t('operator.assistant.subject', { title: selectedArticle.title })}
               </p>
             )}
-            <DialogDescription className="text-start text-[11px] leading-relaxed text-slate-500">
+            <DialogDescription className="text-start text-xs leading-relaxed text-slate-500">
               {t('operator.assistant.modal_description')}
             </DialogDescription>
           </DialogHeader>
@@ -625,7 +625,7 @@ export function OperatorAssistantView() {
           <div className="max-h-[60vh] overflow-y-auto rounded-xl border border-blue-100 bg-blue-50/20 p-4 text-xs leading-loose text-slate-800">
             {selectedArticle?.content || selectedArticle?.text || selectedArticle?.legal_text ? (
               <div className="space-y-2">
-                <span className="inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100/70 text-[#1e3a8a] mb-1">
+                <span className="inline-block px-2 py-0.5 rounded text-xs font-bold bg-blue-100/70 text-[#1e3a8a] mb-1">
                   {t('operator.assistant.official_excerpt')}
                 </span>
                 <p className="whitespace-pre-wrap font-sans text-slate-800 leading-relaxed text-xs sm:text-sm">
@@ -640,7 +640,7 @@ export function OperatorAssistantView() {
           </div>
 
           <DialogFooter className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
-            <span className="text-[10px] text-slate-400 font-medium">
+            <span className="text-xs text-slate-400 font-medium">
               {t('operator.assistant.footer')}
             </span>
             <DialogClose asChild>
