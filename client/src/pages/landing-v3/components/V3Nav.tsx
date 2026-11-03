@@ -89,7 +89,7 @@ export const V3Nav: React.FC = () => {
           {/* Primary Action Button (Webflow Spec: #146ef5, 4px radius, 12px 16px padding, no border, no shadow) */}
           <Link
             href="/operator/deals"
-            className="inline-flex items-center justify-center gap-1.5 px-4 py-2 text-[14px] font-medium text-[#ffffff] bg-[#146ef5] hover:bg-[#1366e2] active:bg-[#115ccb] rounded-[4px] transition-colors cursor-pointer select-none"
+            className="hidden sm:inline-flex items-center justify-center gap-1.5 px-4 py-2 text-[14px] font-medium text-[#ffffff] bg-[#146ef5] hover:bg-[#1366e2] active:bg-[#115ccb] rounded-[4px] transition-colors cursor-pointer select-none"
           >
             <span>{isAr ? 'دخول المنصة' : 'Accéder'}</span>
             {isAr ? <ArrowLeft className="size-3.5" /> : <ArrowRight className="size-3.5" />}
@@ -120,11 +120,18 @@ export const V3Nav: React.FC = () => {
               {link.label}
             </a>
           ))}
-          <div className="pt-2 border-t border-[#d8d8d8]">
+          <div className="pt-2 border-t border-[#d8d8d8] space-y-2">
+            <Link
+              href="/operator/deals"
+              onClick={() => setMobileMenuOpen(false)}
+              className="block w-full text-center py-2.5 text-[14px] font-bold text-[#ffffff] bg-[#146ef5] hover:bg-[#1366e2] rounded-[4px] transition-colors"
+            >
+              {isAr ? 'دخول المنصة' : 'Accéder à la plateforme'}
+            </Link>
             <Link
               href="/login"
               onClick={() => setMobileMenuOpen(false)}
-              className="block w-full text-center py-2 text-[14px] font-medium text-[#ffffff] bg-[#146ef5] rounded-[4px]"
+              className="block w-full text-center py-2 text-[14px] font-medium text-[#080808] hover:bg-[#f0f0f0] rounded-[4px]"
             >
               {isAr ? 'تسجيل الدخول' : 'Connexion'}
             </Link>
