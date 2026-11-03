@@ -4028,5 +4028,22 @@
   "central.deals.avenantAlerts": "صفقات تجاوزت نسبة الملاحق",
   "operator.contracts.avenants_title": "الملاحق التعاقدية المعتمدة",
   "operator.contracts.no_avenants": "لا توجد ملاحق مسجلة لهذا العقد",
-  "operator.contracts.download_avenant_pdf": "تحميل نسخة الملحق (PDF)"
+  "operator.contracts.download_avenant_pdf": "تحميل نسخة الملحق (PDF)",
+  "execution.notices.title": "الاعذارات القانونية وإدارة التأخيرات",
+  "execution.notices.issue": "إصدار إعذار رسمي",
+  "execution.notices.type.delay": "تأخير في وتيرة التنفيذ",
+  "execution.notices.type.quality": "إخلال بالجودة والمواصفات",
+  "execution.notices.type.abandonment": "توقف غير مبرر للأشغال",
+  "execution.notices.type.non_compliance": "عدم الامتثال للأوامر المصلحية",
+  "execution.notices.status.active": "نشط (ضمن المهلة)",
+  "execution.notices.status.expired": "منتهي المهلة (غرامة مطبقة)",
+  "execution.notices.status.resolved": "تمت التسوية ورفع الإنذار",
+  "execution.notices.status.acknowledged": "مستلم ومقر به",
+  "execution.notices.countdown": "متبقي {count} يوماً",
+  "operator.notices.urgent": "تنبيه قانوني عاجل: لديك إعذار رسمي يستوجب الرد أو التدارك",
+  "operator.notices.acknowledge": "إقرار رسمي بالاستلام",
+  "operator.notices.submit_justification": "تقديم تبريرات ودفوعات",
+  "central.deals.noticesAlerts": "اعذارات قانونية وغرامات تأخير",
+  "central.deals.noticesTotal": "إجمالي الاعذارات الصادرة",
+  "central.deals.noticesExpired": "اعذارات منتهية المهلة"
 }

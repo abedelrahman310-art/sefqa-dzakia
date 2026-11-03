@@ -4028,5 +4028,22 @@
   "central.deals.avenantAlerts": "Marchés dépassant le seuil d’avenants",
   "operator.contracts.avenants_title": "Avenants contractuels approuvés",
   "operator.contracts.no_avenants": "Aucun avenant enregistré pour ce contrat",
-  "operator.contracts.download_avenant_pdf": "Télécharger l’avenant (PDF)"
+  "operator.contracts.download_avenant_pdf": "Télécharger l’avenant (PDF)",
+  "execution.notices.title": "Mises en demeure & retards",
+  "execution.notices.issue": "Émettre une mise en demeure",
+  "execution.notices.type.delay": "Retard d'exécution",
+  "execution.notices.type.quality": "Défaut de conformité et qualité",
+  "execution.notices.type.abandonment": "Abandon injustifié du chantier",
+  "execution.notices.type.non_compliance": "Non-respect des ordres de service",
+  "execution.notices.status.active": "Active (dans les délais)",
+  "execution.notices.status.expired": "Expirée (pénalités appliquées)",
+  "execution.notices.status.resolved": "Régularisée",
+  "execution.notices.status.acknowledged": "Accusé de réception confirmé",
+  "execution.notices.countdown": "Reste {count} jours",
+  "operator.notices.urgent": "Alerte juridique urgente : vous avez une mise en demeure requérant régularisation",
+  "operator.notices.acknowledge": "Confirmer l'accusé de réception",
+  "operator.notices.submit_justification": "Déposer des justifications",
+  "central.deals.noticesAlerts": "Mises en demeure & pénalités",
+  "central.deals.noticesTotal": "Total des mises en demeure",
+  "central.deals.noticesExpired": "Mises en demeure expirées"
 }

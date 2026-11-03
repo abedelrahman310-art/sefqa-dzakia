@@ -7,6 +7,7 @@ import { downloadPdfBlob } from '@/lib/pdfDownloader';
 import type { ProcurementContractApi } from '@/lib/procurementApiTypes';
 import { ExecutionTracker } from '@/features/execution/components/ExecutionTracker';
 import { AvenantsManager } from '@/features/execution/components/AvenantsManager';
+import { LegalNoticesManager } from '@/features/execution/components/LegalNoticesManager';
 import {
   AlertCircle,
   Banknote,
@@ -79,6 +80,7 @@ export function OperatorContractsView({ dealId }: OperatorContractsViewProps) {
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const [selectedDealId, setSelectedDealId] = useState(dealId || '');
   const [avenantDealId, setAvenantDealId] = useState<string>('');
+  const [noticesDealId, setNoticesDealId] = useState<string>('');
 
   const loadContracts = useCallback(async () => {
     setLoading(true);
@@ -290,6 +292,17 @@ export function OperatorContractsView({ dealId }: OperatorContractsViewProps) {
 
                     <button
                       type="button"
+                      className={`op-btn ${noticesDealId === contract.deal ? 'op-btn-slate' : 'op-btn-outline'}`}
+                      onClick={() =>
+                        setNoticesDealId((prev) => (prev === contract.deal ? '' : contract.deal))
+                      }
+                    >
+                      <AlertTriangle className="size-3.5 text-amber-600" aria-hidden="true" />
+                      <span>{t('execution.notices.title') || 'الاعذارات القانونية'}</span>
+                    </button>
+
+                    <button
+                      type="button"
                       className={`op-btn ${isSelected ? 'op-btn-slate' : 'op-btn-outline'}`}
                       onClick={() =>
                         setSelectedDealId((previous) =>
@@ -346,6 +359,17 @@ export function OperatorContractsView({ dealId }: OperatorContractsViewProps) {
                       dealReference={contract.deal_reference}
                       baseAmount={Number(contract.amount)}
                       readOnly={true}
+                    />
+                  </div>
+                )}
+
+                {noticesDealId === contract.deal && (
+                  <div className="pt-2">
+                    <LegalNoticesManager
+                      dealId={contract.deal}
+                      dealReference={contract.deal_reference}
+                      dealTitle={contract.deal_reference}
+                      userRole="operator"
                     />
                   </div>
                 )}

@@ -81,6 +81,17 @@ class ProcurementDeal(models.Model):
         total_amt = self.total_avenant_amount
         return float(round((total_amt / base) * 100, 2))
 
+    @property
+    def active_legal_notices_count(self) -> int:
+        """عدد الاعذارات القانونية النشطة أو المنتهية"""
+        return self.legal_notices.filter(status__in=['issued', 'acknowledged', 'expired']).count()
+
+    @property
+    def has_expired_notice(self) -> bool:
+        """هل توجد اعذارات قانونية منتهية المهلة مع تطبيق غرامات"""
+        return self.legal_notices.filter(status='expired').exists()
+
+
 
 class CahierSpecs(models.Model):
     """دفتر الشروط الذكي"""
@@ -558,3 +569,147 @@ class Avenant(models.Model):
 
 
 
+
+
+class LegalNotice(models.Model):
+    """
+    نموذج الإعذار القانوني (Mise en Demeure) وفق المرسوم الرئاسي 15-247 (المادتان 147 و148)
+    والقانون 23-12 (المادة 67 الخاصة بالتبليغ الإلكتروني والإخطارات الرسمية).
+    يمكّن المصلحة المتعاقدة من إخطار المتعامل المتأخر أو المخل بالتزاماته بمهلة قانونية (افتراضياً 15 يوماً)،
+    مع احتساب آلي لغرامات التأخير اليومية في حال انقضاء المهلة دون تسوية.
+    """
+    NOTICE_TYPES = (
+        ('delay', 'تأخر في وتيرة التنفيذ والإنجاز'),
+        ('quality', 'إخلال بمعايير الجودة والمواصفات التعاقدية'),
+        ('abandonment', 'توقف غير مبرر للورشة والأشغال'),
+        ('non_compliance', 'عدم الامتثال للأوامر المصلحية والتعليمات'),
+    )
+
+    STATUS_CHOICES = (
+        ('draft', 'مسودة قيد المراجعة'),
+        ('issued', 'مبلّغ رسمياً (نشط)'),
+        ('acknowledged', 'مستلم ومقر به من المتعامل'),
+        ('expired', 'منتهي المهلة (غرامة تأخير مفروضة)'),
+        ('resolved', 'تم تدارك الوضع وتسوية الإعذار'),
+    )
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    deal = models.ForeignKey(
+        ProcurementDeal,
+        on_delete=models.CASCADE,
+        related_name='legal_notices',
+        verbose_name='الصفقة المعنية'
+    )
+    reference = models.CharField('رقم الإعذار الرسمي', max_length=100)
+    notice_type = models.CharField('نوع الإعذار والمخالفة', max_length=30, choices=NOTICE_TYPES, default='delay')
+    reason = models.TextField('نص الإعذار والحيثيات القانونية والتقنية')
+    issued_date = models.DateField('تاريخ الإصدار والتبليغ', default=timezone.localdate)
+    legal_deadline_days = models.PositiveIntegerField('المهلة القانونية الممنوحة (بالأيام)', default=15)
+    status = models.CharField('وضعية الإعذار', max_length=30, choices=STATUS_CHOICES, default='issued')
+    penalty_amount = models.DecimalField('غرامة التأخير المحسوبة (دج)', max_digits=15, decimal_places=2, default=Decimal('0.00'))
+
+    # دفوعات ومبررات المتعامل
+    operator_justification = models.TextField('تبريرات ودفوعات المتعامل الاقتصادي', blank=True, default='')
+    operator_justification_file = models.FileField('ملف مبررات المتعامل (PDF)', upload_to='notices/justifications/%Y/%m/', null=True, blank=True)
+    justification_submitted_at = models.DateTimeField('تاريخ تقديم التبريرات', null=True, blank=True)
+
+    # أطراف التبليغ والتسوية
+    created_by = models.ForeignKey(
+        CustomUser,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='issued_legal_notices',
+        verbose_name='المحرر / المصلحة المتعاقدة'
+    )
+    acknowledged_at = models.DateTimeField('تاريخ الإقرار بالاستلام', null=True, blank=True)
+    acknowledged_by = models.ForeignKey(
+        CustomUser,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='acknowledged_legal_notices',
+        verbose_name='المتعامل المقر بالاستلام'
+    )
+    resolved_at = models.DateTimeField('تاريخ التسوية ورفع الإعذار', null=True, blank=True)
+    resolution_notes = models.TextField('ملاحظات المصلحة عند تسوية الإعذار', blank=True, default='')
+
+    # الوثيقة الرسمية
+    document_pdf = models.FileField('وثيقة الإعذار الرسمية (PDF)', upload_to='notices/official/%Y/%m/', null=True, blank=True)
+
+    created_at = models.DateTimeField('تاريخ الإنشاء', default=timezone.now)
+    updated_at = models.DateTimeField('تاريخ التحديث', auto_now=True)
+
+    class Meta:
+        verbose_name = 'إعذار قانوني'
+        verbose_name_plural = 'الاعذارات القانونية (Mises en Demeure)'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.reference} - {self.deal.reference_number} ({self.get_status_display()})"
+
+    @property
+    def deadline_date(self):
+        """تاريخ انقضاء المهلة القانونية للإعذار"""
+        if not self.issued_date:
+            return None
+        from datetime import timedelta
+        return self.issued_date + timedelta(days=self.legal_deadline_days)
+
+    @property
+    def days_remaining(self) -> int:
+        """عدد الأيام المتبقية قبل انقضاء المهلة القانونية"""
+        if self.status in ['resolved', 'draft']:
+            return 0
+        dl = self.deadline_date
+        if not dl:
+            return 0
+        today = timezone.localdate()
+        diff = (dl - today).days
+        return max(0, diff)
+
+    @property
+    def is_expired(self) -> bool:
+        """هل انقضت المهلة القانونية دون تسوية"""
+        if self.status == 'resolved':
+            return False
+        dl = self.deadline_date
+        if not dl:
+            return False
+        return timezone.localdate() > dl
+
+    def check_and_update_expiry_and_penalty(self) -> bool:
+        """
+        التحقق الآلي وتحديث حالة الإعذار واحتساب غرامة التأخير وفقاً للمادة 147 من المرسوم الرئاسي 15-247.
+        - نسبة الغرامة اليومية: 1/1000 من المبلغ الأصلي للصفقة لكل يوم تأخير بعد انقضاء المهلة.
+        - السقف القانوني الأقصى: 10% من المبلغ الأصلي للصفقة.
+        """
+        if self.status == 'resolved':
+            return False
+
+        today = timezone.localdate()
+        dl = self.deadline_date
+        if not dl:
+            return False
+
+        has_changed = False
+        if today > dl:
+            if self.status in ['issued', 'acknowledged']:
+                self.status = 'expired'
+                has_changed = True
+
+            delay_days = (today - dl).days
+            base_amt = self.deal.base_amount
+            if base_amt and base_amt > 0 and delay_days > 0:
+                daily_rate = base_amt / Decimal(1000)
+                calculated_penalty = daily_rate * Decimal(delay_days)
+                max_penalty = base_amt * Decimal('0.10')
+                new_penalty = min(calculated_penalty, max_penalty).quantize(Decimal('0.01'))
+                if new_penalty != self.penalty_amount:
+                    self.penalty_amount = new_penalty
+                    has_changed = True
+
+        if has_changed:
+            self.save(update_fields=['status', 'penalty_amount', 'updated_at'])
+            return True
+        return False

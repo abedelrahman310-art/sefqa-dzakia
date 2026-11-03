@@ -1,3 +1,4 @@
+from django.db import models
 from decimal import Decimal
 import logging
 from django.utils import timezone
@@ -20,6 +21,7 @@ from .models import (
     Milestone,
     MilestoneProgressReport,
     Avenant,
+    LegalNotice,
 )
 from .serializers import (
     ProcurementDealSerializer,
@@ -30,6 +32,7 @@ from .serializers import (
     MilestoneProgressReportSerializer,
     OfferSerializer,
     AvenantSerializer,
+    LegalNoticeSerializer,
 )
 
 logger = logging.getLogger(__name__)
@@ -1130,3 +1133,339 @@ class AvenantViewSet(viewsets.ModelViewSet):
             logger.error("تعذر إنشاء PDF للملحق %s: %s", avenant.id, e)
             return Response({'error': f'تعذر إنشاء ملف PDF للملحق: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
+
+class DealLegalNoticesView(views.APIView):
+    """
+    إدارة وعرض الاعذارات القانونية (Mises en Demeure) للصفقة:
+    - GET /api/execution/deals/{id}/notices/ أو /api/procurements/deals/{id}/notices/
+    - POST /api/execution/deals/{id}/notices/ أو /api/procurements/deals/{id}/notices/
+    """
+    permission_classes = [permissions.IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
+
+    def get(self, request, deal_id=None, pk=None):
+        target_id = deal_id or pk or request.query_params.get('deal')
+        deal = get_object_or_404(ProcurementDeal, pk=target_id)
+        user = request.user
+
+        # تدقيق الصلاحيات المؤسسية
+        if not user.is_staff and getattr(user, 'role', None) != 'central_admin':
+            if getattr(user, 'role', None) == 'authority' and deal.authority_id != user.id:
+                return Response({'error': 'لا تملك صلاحية استعراض اعذارات صفقة تابعة لجهة أخرى.'}, status=status.HTTP_403_FORBIDDEN)
+            if getattr(user, 'role', None) == 'operator':
+                is_contractor = False
+                if hasattr(deal, 'contract') and deal.contract and deal.contract.awarded_operator_id == user.id:
+                    is_contractor = True
+                elif deal.procurement_contracts.filter(operator=user).exists():
+                    is_contractor = True
+                elif deal.bids.filter(operator=user, status='awarded').exists():
+                    is_contractor = True
+                if not is_contractor:
+                    return Response({'error': 'غير مصرح بالاطلاع على اعذارات هذه الصفقة.'}, status=status.HTTP_403_FORBIDDEN)
+
+        notices = deal.legal_notices.all()
+        for n in notices:
+            try:
+                n.check_and_update_expiry_and_penalty()
+            except Exception:
+                pass
+
+        serializer = LegalNoticeSerializer(notices, many=True, context={'request': request})
+        return Response({
+            'deal_id': str(deal.id),
+            'deal_reference': deal.reference_number,
+            'deal_title': deal.title,
+            'active_notices_count': deal.active_legal_notices_count,
+            'has_expired_notice': deal.has_expired_notice,
+            'notices': serializer.data,
+        })
+
+    def post(self, request, deal_id=None, pk=None):
+        target_id = deal_id or pk or request.data.get('deal')
+        deal = get_object_or_404(ProcurementDeal, pk=target_id)
+        user = request.user
+
+        if not user.is_staff and getattr(user, 'role', None) not in ('authority', 'central_admin'):
+            return Response(
+                {'error': 'إصدار الاعذارات القانونية حصري للمصالح المتعاقدة المخولة قانوناً.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        if getattr(user, 'role', None) == 'authority' and deal.authority_id != user.id:
+            return Response(
+                {'error': 'لا تملك صلاحية إصدار إعذار لصفقة تابعة لجهة أخرى.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        data = request.data.copy() if hasattr(request.data, 'copy') else dict(request.data)
+        data['deal'] = str(deal.id)
+
+        if not data.get('reference'):
+            year = timezone.localdate().year
+            count = deal.legal_notices.count() + 1
+            ref_clean = str(deal.reference_number).replace('/', '-').strip()[-8:]
+            data['reference'] = f"MD-{year}-{ref_clean}-{count:02d}"
+
+        if not data.get('reason'):
+            return Response({'error': 'نص وحيثيات الإعذار القانوني إلزامية وفق المرسوم 15-247.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        deadline_days = int(data.get('legal_deadline_days') or 15)
+
+        notice = LegalNotice.objects.create(
+            deal=deal,
+            reference=data['reference'],
+            notice_type=data.get('notice_type', 'delay'),
+            reason=data['reason'],
+            issued_date=data.get('issued_date') or timezone.localdate(),
+            legal_deadline_days=deadline_days,
+            status='issued',
+            created_by=user,
+        )
+
+        if 'document_pdf' in request.FILES:
+            notice.document_pdf = request.FILES['document_pdf']
+            notice.save()
+
+        now = timezone.now()
+        ip = request.META.get('HTTP_X_FORWARDED_FOR') or request.META.get('REMOTE_ADDR')
+        if ip and ',' in ip:
+            ip = ip.split(',')[0].strip()
+
+        AuditLog.objects.create(
+            user=user,
+            action='LEGAL_NOTICE_ISSUED',
+            resource_type='LegalNotice',
+            resource_id=str(notice.id),
+            description=f"إصدار إعذار قانوني رقم '{notice.reference}' للصفقة {deal.reference_number} بمهلة {notice.legal_deadline_days} يوماً.",
+            changes={
+                'notice_id': str(notice.id),
+                'deal_id': str(deal.id),
+                'reference': notice.reference,
+                'notice_type': notice.notice_type,
+                'legal_deadline_days': notice.legal_deadline_days,
+                'issued_date': str(notice.issued_date),
+            },
+            ip_address=ip,
+            timestamp=now,
+        )
+
+        serializer = LegalNoticeSerializer(notice, context={'request': request})
+        return Response({
+            'message': f'تم إصدار الإعذار القانوني {notice.reference} بنجاح.',
+            'notice': serializer.data,
+        }, status=status.HTTP_201_CREATED)
+
+
+class LegalNoticeAcknowledgeView(views.APIView):
+    """
+    إقرار المتعامل الاقتصادي بالاستلام (Accusé de réception électronique)
+    - PATCH /api/execution/notices/{id}/acknowledge/
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def patch(self, request, pk):
+        notice = get_object_or_404(LegalNotice, pk=pk)
+        user = request.user
+
+        notice.status = 'acknowledged'
+        notice.acknowledged_at = timezone.now()
+        notice.acknowledged_by = user
+        notice.save()
+
+        now = timezone.now()
+        ip = request.META.get('HTTP_X_FORWARDED_FOR') or request.META.get('REMOTE_ADDR')
+        if ip and ',' in ip:
+            ip = ip.split(',')[0].strip()
+
+        AuditLog.objects.create(
+            user=user,
+            action='LEGAL_NOTICE_ACKNOWLEDGED',
+            resource_type='LegalNotice',
+            resource_id=str(notice.id),
+            description=f"إقرار رسمي باستلام الإعذار القانوني {notice.reference} من المتعامل {user.email}.",
+            changes={
+                'notice_id': str(notice.id),
+                'acknowledged_at': now.isoformat(),
+                'status': 'acknowledged',
+            },
+            ip_address=ip,
+            timestamp=now,
+        )
+
+        serializer = LegalNoticeSerializer(notice, context={'request': request})
+        return Response({
+            'message': 'تم تسجيل الإقرار الرسمي بالاستلام بنجاح وفق المادة 67 من القانون 23-12.',
+            'notice': serializer.data,
+        })
+
+
+class LegalNoticeResolveView(views.APIView):
+    """
+    تسوية الإعذار ورفع التنبيه بعد استدراك المتعامل للوضعية التعاقدية
+    - PATCH /api/execution/notices/{id}/resolve/
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def patch(self, request, pk):
+        notice = get_object_or_404(LegalNotice, pk=pk)
+        user = request.user
+        deal = notice.deal
+
+        if not user.is_staff and getattr(user, 'role', None) not in ('authority', 'central_admin'):
+            return Response({'error': 'المصلحة المتعاقدة فقط تملك صلاحية تسوية الإعذار.'}, status=status.HTTP_403_FORBIDDEN)
+        if getattr(user, 'role', None) == 'authority' and deal.authority_id != user.id:
+            return Response({'error': 'لا تملك صلاحية تسوية إعذار لصفقة جهة أخرى.'}, status=status.HTTP_403_FORBIDDEN)
+
+        notes = request.data.get('notes') or request.data.get('resolution_notes') or 'تم استدراك التأخر وتصحيح الوضعية التعاقدية ميدانياً.'
+        notice.status = 'resolved'
+        notice.resolved_at = timezone.now()
+        notice.resolution_notes = notes
+        notice.save()
+
+        now = timezone.now()
+        ip = request.META.get('HTTP_X_FORWARDED_FOR') or request.META.get('REMOTE_ADDR')
+        if ip and ',' in ip:
+            ip = ip.split(',')[0].strip()
+
+        AuditLog.objects.create(
+            user=user,
+            action='LEGAL_NOTICE_RESOLVED',
+            resource_type='LegalNotice',
+            resource_id=str(notice.id),
+            description=f"تسوية ورفع الإعذار القانوني {notice.reference} للصفقة {deal.reference_number}.",
+            changes={
+                'notice_id': str(notice.id),
+                'status': 'resolved',
+                'resolved_at': now.isoformat(),
+                'resolution_notes': notes,
+            },
+            ip_address=ip,
+            timestamp=now,
+        )
+
+        serializer = LegalNoticeSerializer(notice, context={'request': request})
+        return Response({
+            'message': f'تمت تسوية الإعذار {notice.reference} ورفع الإنذار بنجاح.',
+            'notice': serializer.data,
+        })
+
+
+class LegalNoticeSubmitJustificationView(views.APIView):
+    """
+    تقديم المتعامل الاقتصادي للتبريرات والمستندات الكتابية رداً على الإعذار
+    - POST /api/execution/notices/{id}/justification/
+    """
+    permission_classes = [permissions.IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
+
+    def post(self, request, pk):
+        notice = get_object_or_404(LegalNotice, pk=pk)
+        user = request.user
+
+        justification_text = request.data.get('justification') or request.data.get('operator_justification', '')
+        if not justification_text and 'operator_justification_file' not in request.FILES and 'file' not in request.FILES:
+            return Response({'error': 'يرجى تقديم مبررات كتابية أو إرفاق ملف تبريرات PDF.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if justification_text:
+            notice.operator_justification = justification_text
+
+        uploaded_file = request.FILES.get('operator_justification_file') or request.FILES.get('file')
+        if uploaded_file:
+            notice.operator_justification_file = uploaded_file
+
+        notice.justification_submitted_at = timezone.now()
+        notice.save()
+
+        now = timezone.now()
+        ip = request.META.get('HTTP_X_FORWARDED_FOR') or request.META.get('REMOTE_ADDR')
+        if ip and ',' in ip:
+            ip = ip.split(',')[0].strip()
+
+        AuditLog.objects.create(
+            user=user,
+            action='LEGAL_NOTICE_JUSTIFICATION_SUBMITTED',
+            resource_type='LegalNotice',
+            resource_id=str(notice.id),
+            description=f"تقديم تبريرات من المتعامل {user.email} بخصوص الإعذار القانوني {notice.reference}.",
+            changes={
+                'notice_id': str(notice.id),
+                'justification_submitted_at': now.isoformat(),
+            },
+            ip_address=ip,
+            timestamp=now,
+        )
+
+        serializer = LegalNoticeSerializer(notice, context={'request': request})
+        return Response({
+            'message': 'تم إرسال تبريراتكم للمصلحة المتعاقدة بنجاح وسيتم فحصها قانونياً.',
+            'notice': serializer.data,
+        })
+
+
+class LegalNoticePdfView(views.APIView):
+    """
+    تحميل وثيقة الإعذار الرسمية PDF
+    - GET /api/execution/notices/{id}/pdf/
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, pk):
+        notice = get_object_or_404(LegalNotice, pk=pk)
+        if notice.document_pdf:
+            return FileResponse(notice.document_pdf.open(), content_type='application/pdf')
+
+        try:
+            from .pdf_service import generate_legal_notice_pdf
+            pdf_bytes = generate_legal_notice_pdf(notice, request.user)
+            filename = f"MiseEnDemeure_{notice.reference}_{notice.deal.reference_number.replace('/', '_')}.pdf"
+            response = HttpResponse(pdf_bytes, content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename="{filename}"'
+            return response
+        except Exception as e:
+            logger.error("تعذر إنشاء PDF للإعذار %s: %s", notice.id, e)
+            return Response({'error': f'تعذر إنشاء وثيقة الإعذار PDF: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class LegalNoticeViewSet(viewsets.ModelViewSet):
+    """إدارة واستعراض كافة الاعذارات القانونية مع دعم الإجراءات الخاصة"""
+    queryset = LegalNotice.objects.all().select_related('deal')
+    serializer_class = LegalNoticeSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        deal_id = self.request.query_params.get('deal')
+        qs = LegalNotice.objects.all().select_related('deal')
+        if deal_id:
+            qs = qs.filter(deal_id=deal_id)
+        if user.is_staff or getattr(user, 'role', None) == 'central_admin':
+            return qs
+        if getattr(user, 'role', None) == 'authority':
+            return qs.filter(deal__authority=user)
+        if getattr(user, 'role', None) == 'operator':
+            return qs.filter(
+                models.Q(deal__contract__awarded_operator=user) |
+                models.Q(deal__procurement_contracts__operator=user) |
+                models.Q(deal__bids__operator=user, deal__bids__status='awarded')
+            ).distinct()
+        return qs.none()
+
+    @action(detail=True, methods=['patch'], url_path='acknowledge')
+    def acknowledge(self, request, pk=None):
+        view = LegalNoticeAcknowledgeView.as_view()
+        return view(request._request, pk=pk)
+
+    @action(detail=True, methods=['patch'], url_path='resolve')
+    def resolve(self, request, pk=None):
+        view = LegalNoticeResolveView.as_view()
+        return view(request._request, pk=pk)
+
+    @action(detail=True, methods=['post'], url_path='justification')
+    def submit_justification(self, request, pk=None):
+        view = LegalNoticeSubmitJustificationView.as_view()
+        return view(request._request, pk=pk)
+
+    @action(detail=True, methods=['get'], url_path='pdf')
+    def download_pdf(self, request, pk=None):
+        view = LegalNoticePdfView.as_view()
+        return view(request._request, pk=pk)

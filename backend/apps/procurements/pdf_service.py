@@ -288,6 +288,7 @@ def get_pdf_styles():
             alignment=1,
             textColor=colors.HexColor("#475569"),
         ),
+
         "StampBold": ParagraphStyle(
             "StampBold",
             parent=base_styles["Normal"],
@@ -298,7 +299,21 @@ def get_pdf_styles():
             textColor=colors.HexColor("#0f172a"),
         ),
     }
+
+    # Aliases for template compatibility
+    styles["RepubTitle"] = styles["HeaderRepublic"]
+    styles["MinistrySub"] = styles["HeaderSub"]
+    styles["SectionH2"] = styles["SectionHeading"]
+    styles["BodyNormal"] = styles["BodyText"]
+    styles["MetaText"] = styles["MetaValue"]
+    styles["MetaBold"] = styles["MetaLabel"]
+    styles["DocHeader"] = styles["DocTitle"]
+    styles["SubHeader"] = styles["DocSubtitle"]
+
     return styles
+
+build_safaqat_styles = get_pdf_styles
+
 
 
 # ==============================================================================
@@ -863,3 +878,149 @@ def generate_avenant_pdf(avenant, user=None) -> bytes:
     doc.build(story, canvasmaker=SafaqatNumberedCanvas)
     return buffer.getvalue()
 
+
+
+
+def generate_legal_notice_pdf(notice, user=None) -> bytes:
+    """
+    توليد وثيقة الإعذار القانوني الرسمي (Mise en Demeure Officielle) بصيغة PDF
+    وفقاً لأحكام المرسوم الرئاسي 15-247 (المادتان 147 و148) والقانون 23-12 (المادة 67).
+    """
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(
+        buffer,
+        pagesize=A4,
+        rightMargin=36,
+        leftMargin=36,
+        topMargin=36,
+        bottomMargin=40,
+        title=f"MiseEnDemeure_{notice.reference}",
+        author="Safaqat Dhakia Platform",
+    )
+
+    styles = get_pdf_styles()
+    deal = notice.deal
+    story = []
+
+    # 1. الترويسة الرسمية للجمهورية
+    story.append(Paragraph(ar("الجمهورية الجزائرية الديمقراطية الشعبية"), styles["HeaderRepublic"]))
+    story.append(Paragraph(ar("وزارة المالية — المنظومة الوطنية الرقمية للصفقات العمومية"), styles["HeaderSub"]))
+    auth_name = getattr(deal.authority, 'entity_name', None) or getattr(deal.authority, 'full_name', None) or 'المصلحة المتعاقدة'
+    story.append(Paragraph(ar(f"المصلحة المتعاقدة: {auth_name}"), styles["BodyBold"]))
+    story.append(Spacer(1, 10))
+
+    # 2. خط فاصل وعنوان الإعذار الرسمي
+    story.append(HRFlowable(width="100%", thickness=2, color=colors.HexColor("#991b1b"), spaceAfter=10))
+
+    banner_style = ParagraphStyle(
+        "NoticeBanner",
+        parent=styles["DocTitle"],
+        textColor=colors.HexColor("#991b1b"),
+        fontSize=15,
+        leading=20,
+    )
+    story.append(Paragraph(ar("إعــذار رسـمـي (MISE EN DEMEURE)"), banner_style))
+    story.append(Paragraph(
+        ar(f"رقم الإعذار: {notice.reference} — تبليغ رسمي لتدارك التأخر والإخلال بالالتزامات"),
+        styles["MetaValue"]
+    ))
+    story.append(Spacer(1, 10))
+
+    # 3. الأسانيد والمراجع القانونية الآمرة (فقرات منفصلة)
+    story.append(Paragraph(ar("• بمقتضى القانون رقم 23-12 المؤرخ في 5 أوت 2023 المحدد للقواعد العامة للصفقات العمومية، لا سيما المادة 67 (التبليغ الإلكتروني والإخطارات الرسمية)؛"), styles["MetaValue"]))
+    story.append(Paragraph(ar("• بمقتضى المرسوم الرئاسي رقم 15-247 المؤرخ في 16 سبتمبر 2015 المنظم للصفقات العمومية، لا سيما المادتين 147 و148 (آجال الإعذار، غرامات التأخير اليومية، والفسخ)؛"), styles["MetaValue"]))
+    story.append(Paragraph(ar("• وبناءً على أحكام دفتر الشروط والعقد المبرم والتقارير الميدانية المثبتة لمعاينة الورشة."), styles["MetaValue"]))
+    story.append(Spacer(1, 10))
+
+    # 4. جدول المعطيات والطرف المعني
+    operator_name = ""
+    try:
+        if hasattr(deal, 'contract') and deal.contract and deal.contract.awarded_operator:
+            op = deal.contract.awarded_operator
+            operator_name = getattr(op, 'company_name', None) or getattr(op, 'full_name', None) or op.email
+        elif deal.procurement_contracts.exists():
+            contract = deal.procurement_contracts.first()
+            if contract and contract.operator:
+                operator_name = getattr(contract.operator, 'company_name', None) or getattr(contract.operator, 'full_name', None) or contract.operator.email
+    except Exception:
+        pass
+    if not operator_name:
+        operator_name = "المتعامل الاقتصادي المتعاقد"
+
+    table_data = [
+        [Paragraph(ar("الصفقة العمومية المعنية:"), styles["MetaLabel"]), Paragraph(ar(f"{deal.reference_number} — {deal.title}"), styles["MetaValue"])],
+        [Paragraph(ar("المتعامل الموجه إليه الإعذار:"), styles["MetaLabel"]), Paragraph(ar(operator_name), styles["MetaValue"])],
+        [Paragraph(ar("طبيعة المخالفة المسجلة:"), styles["MetaLabel"]), Paragraph(ar(notice.get_notice_type_display()), styles["MetaValue"])],
+        [Paragraph(ar("تاريخ التبليغ الرسمي:"), styles["MetaLabel"]), Paragraph(ar(str(notice.issued_date)), styles["MetaValue"])],
+        [Paragraph(ar("المهلة القانونية الممنوحة:"), styles["MetaLabel"]), Paragraph(ar(f"{notice.legal_deadline_days} يوماً تقويمياً (تاريخ الانتهاء: {notice.deadline_date})"), styles["MetaValue"])],
+        [Paragraph(ar("الوضعية الحالية:"), styles["MetaLabel"]), Paragraph(ar(notice.get_status_display()), styles["MetaValue"])],
+    ]
+
+    info_table = Table(table_data, colWidths=[160, 363])
+    info_table.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (0, -1), colors.HexColor("#fef2f2")),
+        ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#fecaca")),
+        ("ALIGN", (0, 0), (-1, -1), "RIGHT"),
+        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+        ("TOPPADDING", (0, 0), (-1, -1), 5),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
+        ("LEFTPADDING", (0, 0), (-1, -1), 8),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 8),
+    ]))
+    story.append(info_table)
+    story.append(Spacer(1, 12))
+
+    # 5. الحيثيات ونص الإعذار الرسمي
+    story.append(Paragraph(ar("حيثيات الإعذار والوقائع المعاينة:"), styles["SectionHeading"]))
+    reason_lines = str(notice.reason).split('\n')
+    for r_line in reason_lines:
+        if r_line.strip():
+            story.append(Paragraph(ar(r_line.strip()), styles["BodyText"]))
+            story.append(Spacer(1, 2))
+    story.append(Spacer(1, 10))
+
+    # 6. التنبيه القانوني الصارم والآثار المترتبة
+    penalties_box_title = Paragraph(ar("الآثار القانونية والمالية المترتبة في حال عدم الامتثال:"), styles["StampBold"])
+    penalties_lines = [
+        Paragraph(ar(f"يُلزم المتعامل باتخاذ التدابير الفورية الكفيلة بتدارك التأخر خلال المهلة المحددة أعلاه ({notice.legal_deadline_days} يوماً)."), styles["StampText"]),
+        Paragraph(ar("وفي حال انقضاء هذه المهلة دون تسوية مقبولة:"), styles["StampText"]),
+        Paragraph(ar("1. تُطبّق تلقائياً غرامات التأخير اليومية بنسبة 1/1000 من المبلغ الإجمالي للصفقة لكل يوم تأخير وفق المادة 147 من المرسوم الرئاسي 15-247 (سقف 10%)."), styles["StampText"]),
+        Paragraph(ar("2. يحق للمصلحة المتعاقدة الشروع الفوري في إجراءات الفسخ التعاقدي على عاتق المتعامل (Résiliation aux torts exclusifs) وفق المادة 148."), styles["StampText"]),
+    ]
+    penalties_content = [penalties_box_title] + penalties_lines
+    penalties_table = Table([[item] for item in penalties_content], colWidths=[523])
+    penalties_table.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#fff1f2")),
+        ("BOX", (0, 0), (-1, -1), 1.2, colors.HexColor("#e11d48")),
+        ("ALIGN", (0, 0), (-1, -1), "RIGHT"),
+        ("TOPPADDING", (0, 0), (-1, -1), 4),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+        ("LEFTPADDING", (0, 0), (-1, -1), 10),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 10),
+    ]))
+    story.append(penalties_table)
+    story.append(Spacer(1, 14))
+
+    # 7. التوقيعات والأختام الرقمية
+    sig_headers = [
+        Paragraph(ar("المتعامل الاقتصادي (تأكيد الاستلام والاطلاع)"), styles["StampBold"]),
+        Paragraph(ar("المصلحة المتعاقدة (الآمر بالصرف)"), styles["StampBold"]),
+    ]
+    ack_text = f"تم الاستلام: {notice.acknowledged_at.strftime('%Y-%m-%d %H:%M')}" if notice.acknowledged_at else "قيد التبليغ عبر المنصة الرقمية"
+    sig_space = [
+        Paragraph(ar(f"المتعامل المقر بالاستلام: {ack_text}"), styles["StampText"]),
+        Paragraph(ar(f"ختم وتوقيع الآمر بالصرف — مؤشر إلكترونياً بتاريخ: {notice.issued_date}"), styles["StampText"]),
+    ]
+    sig_table = Table([sig_headers, sig_space], colWidths=[261, 262])
+    sig_table.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#f1f5f9")),
+        ("GRID", (0, 0), (-1, -1), 0.75, colors.HexColor("#64748b")),
+        ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+        ("TOPPADDING", (0, 0), (-1, -1), 6),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
+    ]))
+    story.append(KeepTogether([sig_table]))
+
+    doc.build(story, canvasmaker=SafaqatNumberedCanvas)
+    return buffer.getvalue()

@@ -12,6 +12,7 @@ from .models import (
     Milestone,
     MilestoneProgressReport,
     Avenant,
+    LegalNotice,
 )
 from .reference_prices import normalize_item_name, normalize_wilaya
 from apps.bids.models import BidOffer
@@ -106,6 +107,9 @@ class ProcurementDealSerializer(serializers.ModelSerializer):
     total_avenant_percentage = serializers.FloatField(read_only=True)
     avenants_count = serializers.SerializerMethodField()
     has_avenant_warning = serializers.SerializerMethodField()
+    active_legal_notices_count = serializers.IntegerField(read_only=True)
+    has_expired_notice = serializers.BooleanField(read_only=True)
+    legal_notices_count = serializers.SerializerMethodField()
 
     class Meta:
         model = ProcurementDeal
@@ -117,6 +121,9 @@ class ProcurementDealSerializer(serializers.ModelSerializer):
 
     def get_has_avenant_warning(self, obj):
         return getattr(obj, 'total_avenant_percentage', 0.0) >= 20.0
+
+    def get_legal_notices_count(self, obj):
+        return obj.legal_notices.count()
 
     def create(self, validated_data):
         if not validated_data.get('reference_number'):
@@ -185,6 +192,96 @@ class AvenantSerializer(serializers.ModelSerializer):
 
         return attrs
 
+
+
+
+
+class LegalNoticeSerializer(serializers.ModelSerializer):
+    """
+    محدد بيانات الإعذار القانوني (Mise en Demeure) وفق المرسوم الرئاسي 15-247
+    والقانون 23-12 (المادة 67 الخاصة بالتبليغ الإلكتروني والإخطارات الرسمية).
+    """
+    status_display = serializers.CharField(source='get_status_display', read_only=True)
+    notice_type_display = serializers.CharField(source='get_notice_type_display', read_only=True)
+    deal_reference = serializers.ReadOnlyField(source='deal.reference_number')
+    deal_title = serializers.ReadOnlyField(source='deal.title')
+    authority_name = serializers.ReadOnlyField(source='deal.authority.full_name')
+    created_by_name = serializers.ReadOnlyField(source='created_by.full_name')
+    acknowledged_by_name = serializers.ReadOnlyField(source='acknowledged_by.full_name')
+    operator_name = serializers.SerializerMethodField()
+    deadline_date = serializers.DateField(read_only=True)
+    days_remaining = serializers.IntegerField(read_only=True)
+    is_expired = serializers.BooleanField(read_only=True)
+
+    class Meta:
+        model = LegalNotice
+        fields = [
+            'id',
+            'deal',
+            'deal_reference',
+            'deal_title',
+            'authority_name',
+            'operator_name',
+            'reference',
+            'notice_type',
+            'notice_type_display',
+            'reason',
+            'issued_date',
+            'legal_deadline_days',
+            'deadline_date',
+            'days_remaining',
+            'is_expired',
+            'status',
+            'status_display',
+            'penalty_amount',
+            'operator_justification',
+            'operator_justification_file',
+            'justification_submitted_at',
+            'created_by',
+            'created_by_name',
+            'acknowledged_at',
+            'acknowledged_by',
+            'acknowledged_by_name',
+            'resolved_at',
+            'resolution_notes',
+            'document_pdf',
+            'created_at',
+            'updated_at',
+        ]
+        read_only_fields = [
+            'id',
+            'deal_reference',
+            'deal_title',
+            'authority_name',
+            'operator_name',
+            'created_by_name',
+            'acknowledged_by_name',
+            'deadline_date',
+            'days_remaining',
+            'is_expired',
+            'created_at',
+            'updated_at',
+        ]
+
+    def get_operator_name(self, obj):
+        try:
+            if hasattr(obj.deal, 'contract') and obj.deal.contract and obj.deal.contract.awarded_operator:
+                op = obj.deal.contract.awarded_operator
+                return getattr(op, 'company_name', None) or getattr(op, 'full_name', None) or op.email
+            contract = obj.deal.procurement_contracts.first()
+            if contract and contract.operator:
+                return getattr(contract.operator, 'company_name', None) or getattr(contract.operator, 'full_name', None) or contract.operator.email
+        except Exception:
+            pass
+        return ''
+
+    def to_representation(self, instance):
+        # التحقق التلقائي وتحديث غرامات التأخير في حال انقضاء المهلة
+        try:
+            instance.check_and_update_expiry_and_penalty()
+        except Exception:
+            pass
+        return super().to_representation(instance)
 
 
 class SessionAccessSerializer(serializers.ModelSerializer):

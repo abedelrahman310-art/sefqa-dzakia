@@ -13,6 +13,12 @@ from .views import (
     DealAvenantsView,
     AvenantApproveView,
     AvenantViewSet,
+    DealLegalNoticesView,
+    LegalNoticeAcknowledgeView,
+    LegalNoticeResolveView,
+    LegalNoticeSubmitJustificationView,
+    LegalNoticePdfView,
+    LegalNoticeViewSet,
 )
 from apps.bids.views import OfferViewSet
 from .views_opening import (
@@ -37,8 +43,19 @@ router.register(r'opportunities', OpportunityViewSet, basename='opportunity')
 router.register(r'milestones', MilestoneViewSet, basename='milestone')
 router.register(r'contracts', ContractViewSet, basename='procurement-contract')
 router.register(r'avenants', AvenantViewSet, basename='procurement-avenant')
+router.register(r'notices', LegalNoticeViewSet, basename='procurement-notice')
 
 urlpatterns = [
+    path("deals/<str:deal_id>/notices/", DealLegalNoticesView.as_view(), name="procurement-deal-notices"),
+    path("deals/<str:deal_id>/notices", DealLegalNoticesView.as_view(), name="procurement-deal-notices-no-slash"),
+    path("notices/<uuid:pk>/acknowledge/", LegalNoticeAcknowledgeView.as_view(), name="procurement-notice-acknowledge"),
+    path("notices/<uuid:pk>/acknowledge", LegalNoticeAcknowledgeView.as_view(), name="procurement-notice-acknowledge-no-slash"),
+    path("notices/<uuid:pk>/resolve/", LegalNoticeResolveView.as_view(), name="procurement-notice-resolve"),
+    path("notices/<uuid:pk>/resolve", LegalNoticeResolveView.as_view(), name="procurement-notice-resolve-no-slash"),
+    path("notices/<uuid:pk>/justification/", LegalNoticeSubmitJustificationView.as_view(), name="procurement-notice-justification"),
+    path("notices/<uuid:pk>/justification", LegalNoticeSubmitJustificationView.as_view(), name="procurement-notice-justification-no-slash"),
+    path("notices/<uuid:pk>/pdf/", LegalNoticePdfView.as_view(), name="procurement-notice-pdf"),
+    path("notices/<uuid:pk>/pdf", LegalNoticePdfView.as_view(), name="procurement-notice-pdf-no-slash"),
     path("deals/<str:deal_id>/avenants/", DealAvenantsView.as_view(), name="deal-avenants"),
     path("deals/<str:deal_id>/avenants", DealAvenantsView.as_view(), name="deal-avenants-no-slash"),
     path("avenants/<uuid:pk>/approve/", AvenantApproveView.as_view(), name="avenant-approve"),

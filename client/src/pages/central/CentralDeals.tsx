@@ -85,6 +85,7 @@ export function CentralDeals() {
   const [filterStage, setFilterStage] = useState('all');
   const [onlyDelayed, setOnlyDelayed] = useState(false);
   const [onlyAvenantAlerts, setOnlyAvenantAlerts] = useState(false);
+  const [onlyNoticeAlerts, setOnlyNoticeAlerts] = useState(false);
 
   const now = useNow(60000);
   const stages = useMemo(() => getStages(t), [t]);
@@ -104,13 +105,22 @@ export function CentralDeals() {
       return (typeof pct === 'number' && pct >= 20.0) || (deal as any).has_avenant_warning;
     });
     const avenantAlertsCount = avenantAlerts.length;
+    const noticeAlerts = deals.filter((deal) => {
+      return Boolean(
+        (deal as any).has_expired_notice ||
+        ((deal as any).active_legal_notices_count && (deal as any).active_legal_notices_count > 0) ||
+        ((deal as any).legal_notices_count && (deal as any).legal_notices_count > 0)
+      );
+    });
+    const noticeAlertsCount = noticeAlerts.length;
+    const expiredNoticesCount = deals.filter((deal) => Boolean((deal as any).has_expired_notice)).length;
 
     const perStage = stages.map((stage) => {
       const count = deals.filter((deal) => toNumber(deal.current_stage) === stage.id).length;
       return { ...stage, count, share: total > 0 ? (count / total) * 100 : 0 };
     });
 
-    return { total, active, closed, delayed, budget, perStage, avenantAlertsCount, avenantAlerts };
+    return { total, active, closed, delayed, budget, perStage, avenantAlertsCount, avenantAlerts, noticeAlertsCount, expiredNoticesCount };
   }, [deals, now, stages]);
 
   const filtered = useMemo(() => {
@@ -120,6 +130,14 @@ export function CentralDeals() {
         const stage = toNumber(deal.current_stage);
         if (filterStage !== 'all' && stage !== Number(filterStage)) return false;
         if (onlyDelayed && !isDelayed(deal, now)) return false;
+        if (onlyNoticeAlerts) {
+          const hasNotice = Boolean(
+            (deal as any).has_expired_notice ||
+            ((deal as any).active_legal_notices_count && (deal as any).active_legal_notices_count > 0) ||
+            ((deal as any).legal_notices_count && (deal as any).legal_notices_count > 0)
+          );
+          if (!hasNotice) return false;
+        }
         if (onlyAvenantAlerts) {
           const pct = (deal as any).total_avenant_percentage;
           if (!((typeof pct === 'number' && pct >= 20.0) || (deal as any).has_avenant_warning)) return false;
@@ -136,7 +154,7 @@ export function CentralDeals() {
         (a, b) =>
           new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
       );
-  }, [deals, searchQuery, filterStage, onlyDelayed, onlyAvenantAlerts, now]);
+  }, [deals, searchQuery, filterStage, onlyDelayed, onlyAvenantAlerts, onlyNoticeAlerts, now]);
 
   const stageDefinition = (stage: number): StageDefinition => {
     return stages.find((item) => item.id === stage) ?? stages[0];
@@ -201,7 +219,40 @@ export function CentralDeals() {
           description={stats.avenantAlertsCount > 0 ? 'مخالفات سقف 20% - 25% (مرسوم 15-247)' : 'كافة الملاحق مطابقة للسقف'}
           className={onlyAvenantAlerts ? 'ring-2 ring-rose-500' : ''}
         />
+        <KpiCard
+          eyebrow={t('central.deals.noticesAlerts') || 'الاعذارات القانونية والمهل'}
+          value={formatNumber(stats.noticeAlertsCount)}
+          icon={AlertTriangle}
+          accent={stats.expiredNoticesCount > 0 ? 'red' : stats.noticeAlertsCount > 0 ? 'amber' : 'emerald'}
+          description={
+            stats.expiredNoticesCount > 0
+              ? `${stats.expiredNoticesCount} صفقات بها غرامات تأخير`
+              : stats.noticeAlertsCount > 0
+              ? `${stats.noticeAlertsCount} صفقات بإعذارات نشطة`
+              : 'لا توجد اعذارات قانونية'
+          }
+          className={onlyNoticeAlerts ? 'ring-2 ring-amber-500' : ''}
+        />
       </div>
+
+      {stats.expiredNoticesCount > 0 && (
+        <div className="bg-amber-50 border border-amber-300 rounded-xl p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-amber-950">
+          <div className="flex items-center gap-2">
+            <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />
+            <span className="font-bold">
+              متابعة التأخيرات المركزية: يوجد {stats.expiredNoticesCount} صفقات انتهت مهلتها القانونية دون تسوية وتخضع لاقتطاع غرامات التأخير آلياً (المادة 147 من المرسوم 15-247).
+            </span>
+          </div>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => setOnlyNoticeAlerts(!onlyNoticeAlerts)}
+            className="h-7 text-xs font-bold border-amber-400 text-amber-900 hover:bg-amber-100 shrink-0"
+          >
+            {onlyNoticeAlerts ? 'عرض كافة الصفقات' : 'تصفية صفقات الاعذارات'}
+          </Button>
+        </div>
+      )}
 
       {stats.avenantAlertsCount > 0 && (
         <div className="bg-rose-50 border border-rose-200 rounded-xl p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-rose-900">
@@ -370,6 +421,22 @@ export function CentralDeals() {
                               title="نسبة الملاحق التعاقدية (المرسوم 15-247)"
                             >
                               ملحق {((deal as any).total_avenant_percentage as number).toFixed(0)}%
+                            </span>
+                          )}
+                          {Boolean((deal as any).has_expired_notice) && (
+                            <span
+                              className="px-1.5 py-0.5 rounded text-[10px] font-bold shrink-0 bg-rose-100 text-rose-800 border border-rose-200"
+                              title="إعذار منتهي المهلة وغرامات مفروضة (المرسوم 15-247)"
+                            >
+                              إعذار منتهي
+                            </span>
+                          )}
+                          {Boolean(!(deal as any).has_expired_notice && (deal as any).active_legal_notices_count > 0) && (
+                            <span
+                              className="px-1.5 py-0.5 rounded text-[10px] font-bold shrink-0 bg-amber-100 text-amber-800 border border-amber-200"
+                              title="إعذار قانوني نشط ضمن المهلة"
+                            >
+                              إعذار نشط
                             </span>
                           )}
                         </div>
