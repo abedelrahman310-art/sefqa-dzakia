@@ -293,6 +293,7 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
   const [complianceError, setComplianceError] = useState('');
   const [complianceChecked, setComplianceChecked] = useState(false);
   const [sealConfirmed, setSealConfirmed] = useState(false);
+  const [isExpiredDeal, setIsExpiredDeal] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -347,6 +348,10 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
       );
       setWilaya(typeof record.wilaya === 'string' ? record.wilaya : '');
       setBoqItems(getBoqRowsFromDeal(record, t('operator.form.unit_default')));
+      const isExp = Boolean(
+        record.is_expired ?? (record.submission_deadline ? new Date(String(record.submission_deadline)) < new Date() : false)
+      );
+      setIsExpiredDeal(isExp);
     };
 
     const load = async () => {
@@ -631,6 +636,9 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
   };
 
   const persistOffer = async (nextStatus: 'draft' | 'submitted'): Promise<OfferApiRecord> => {
+    if (isExpiredDeal) {
+      throw new Error(t('operator.opp.submission_closed_art68'));
+    }
     const formData = buildFormData(nextStatus);
     const jsonPayload = {
       deal: oppId,
@@ -796,6 +804,24 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
           </p>
         </div>
       </div>
+
+      {/* Protective lock if deal is expired pursuant to Law 23-12 Art. 68 */}
+      {isExpiredDeal && (
+        <div className="mb-4 flex items-start gap-3 rounded-2xl border border-rose-300 bg-rose-50/95 p-4 text-rose-950 shadow-sm dark:border-rose-900/60 dark:bg-rose-950/40 dark:text-rose-200">
+          <AlertCircle className="size-5 shrink-0 text-rose-600 dark:text-rose-400 mt-0.5" />
+          <div className="space-y-1">
+            <h4 className="text-sm font-bold text-rose-900 dark:text-rose-200 flex items-center gap-2">
+              <span>{t('operator.opp.expired_title')}</span>
+              <span className="rounded-full bg-rose-200/80 px-2.5 py-0.5 text-[11px] font-bold text-rose-900 dark:bg-rose-900/60 dark:text-rose-200">
+                {t('operator.opp.expired_badge')}
+              </span>
+            </h4>
+            <p className="text-xs leading-relaxed text-rose-800 dark:text-rose-300">
+              {t('operator.opp.expired_desc_art68')}
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Protective lock for operator docs & compliance */}
       {compliance && (
@@ -1531,7 +1557,8 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
             <button
               type="submit"
               className="op-btn op-btn-ghost"
-              disabled={isBusy || complianceLoading}
+              disabled={isBusy || complianceLoading || isExpiredDeal}
+              title={isExpiredDeal ? t('operator.opp.submission_closed_art68') : undefined}
             >
               <Save aria-hidden="true" />
               <span>{busyAction === 'save' ? t('operator.form.btn_saving_draft') : t('offers.btn.save_draft')}</span>
@@ -1543,9 +1570,11 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
               type="button"
               className="op-btn op-btn-gold"
               onClick={handleSubmitOffer}
-              disabled={isBusy || complianceLoading || hasComplianceBlock || !sealConfirmed}
+              disabled={isBusy || complianceLoading || hasComplianceBlock || isExpiredDeal || !sealConfirmed}
               title={
-                hasComplianceBlock
+                isExpiredDeal
+                  ? t('operator.opp.submission_closed_art68')
+                  : hasComplianceBlock
                   ? t('operator.form.lock_submit_tooltip')
                   : !sealConfirmed
                   ? t('operator.form.crypto_submit_tooltip')

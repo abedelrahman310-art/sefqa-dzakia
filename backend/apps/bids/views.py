@@ -65,7 +65,10 @@ class BidOfferViewSet(viewsets.ModelViewSet):
         deal = serializer.validated_data.get('deal')
         now = timezone.now()
         if deal.submission_deadline and now > deal.submission_deadline:
-            raise exceptions.ValidationError('انقضى الأجل القانوني لإيداع العروض لهذه الصفقة.')
+            raise exceptions.ValidationError({
+                'detail': 'انقضت المهلة القانونية لإيداع العروض وفقاً للمادة 68 من القانون 23-12 (لا يُقبل أي عرض بعد انقضاء الأجل المحدد لإيداع العروض).',
+                'error': 'انقضت المهلة القانونية لإيداع العروض وفقاً للمادة 68 من القانون 23-12.'
+            })
         if deal.current_stage > 5:
             raise exceptions.ValidationError('مرحلة استلام العروض مغلقة حالياً في هذه الصفقة.')
         if self._session_lock(deal):
@@ -111,7 +114,10 @@ class BidOfferViewSet(viewsets.ModelViewSet):
         deal = instance.deal
         now = timezone.now()
         if deal.submission_deadline and now > deal.submission_deadline:
-            raise exceptions.ValidationError('انقضى الأجل القانوني لإيداع وتعديل العروض لهذه الصفقة وفق القانون 23-12.')
+            raise exceptions.ValidationError({
+                'detail': 'انقضى الأجل القانوني لإيداع وتعديل العروض لهذه الصفقة وفقاً للمادة 68 من القانون 23-12.',
+                'error': 'انقضى الأجل القانوني لإيداع وتعديل العروض لهذه الصفقة وفقاً للمادة 68 من القانون 23-12.'
+            })
         if deal.current_stage > 5:
             raise exceptions.ValidationError('انتهت مرحلة استلام العروض وانطلقت أعمال الفحص والتقييم؛ يمنع تعديل العطاء.')
         if self._session_lock(deal):
@@ -230,6 +236,11 @@ class OfferViewSet(BidOfferViewSet):
     def document(self, request, pk=None):
         offer = self.get_object()
         if request.method == 'POST':
+            if offer.deal.submission_deadline and timezone.now() > offer.deal.submission_deadline:
+                return Response({
+                    'detail': 'لا يمكن رفع وثائق جديدة بعد انقضاء الأجل القانوني وفقاً للمادة 68 من القانون 23-12.',
+                    'error': 'انقضت المهلة القانونية لإيداع العروض وفقاً للمادة 68 من القانون 23-12.'
+                }, status=status.HTTP_400_BAD_REQUEST)
             doc_file = request.FILES.get('document') or request.FILES.get('file')
             if doc_file:
                 try:

@@ -479,6 +479,15 @@ class AIAnalyzeTenderView(APIView):
             except Exception as e:
                 logger.debug("خطأ البحث عن الصفقة بالمعرف %s: %s", deal_id, e)
 
+            if deal_obj and getattr(deal_obj, 'is_expired', False):
+                return Response(
+                    {
+                        'detail': 'انقضت المهلة القانونية لإيداع العروض لهذه الصفقة وفقاً للمادة 68 من القانون 23-12. التحليل الذكي متاح فقط للصفقات الجارية.',
+                        'error': 'انقضت المهلة القانونية لإيداع العروض وفقاً للمادة 68 من القانون 23-12.'
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
             if deal_obj:
                 sector = getattr(deal_obj, 'sector', '') or 'غير محدد'
                 budget = (

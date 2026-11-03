@@ -70,14 +70,34 @@ class ProcurementDealViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         if not user or not user.is_authenticated:
-            return ProcurementDeal.objects.filter(current_stage__gte=3).select_related('authority')
-        if getattr(user, 'is_superuser', False) or getattr(user, 'is_staff', False) or getattr(user, 'role', None) == 'central_admin':
-            return ProcurementDeal.objects.all().select_related('authority')
-        if getattr(user, 'role', None) == 'authority':
-            return ProcurementDeal.objects.filter(authority=user).select_related('authority')
-        if getattr(user, 'role', None) == 'operator':
-            return ProcurementDeal.objects.filter(current_stage__gte=3).select_related('authority')
-        return ProcurementDeal.objects.filter(current_stage__gte=3).select_related('authority')
+            qs = ProcurementDeal.objects.filter(current_stage__gte=3).select_related('authority')
+        elif getattr(user, 'is_superuser', False) or getattr(user, 'is_staff', False) or getattr(user, 'role', None) == 'central_admin':
+            qs = ProcurementDeal.objects.all().select_related('authority')
+        elif getattr(user, 'role', None) == 'authority':
+            qs = ProcurementDeal.objects.filter(authority=user).select_related('authority')
+        elif getattr(user, 'role', None) == 'operator':
+            qs = ProcurementDeal.objects.filter(current_stage__gte=3).select_related('authority')
+        else:
+            qs = ProcurementDeal.objects.filter(current_stage__gte=3).select_related('authority')
+
+        # فلترة الصفقات المنتهية / النشطة في القوائم وفق المادة 68 من القانون 23-12
+        if getattr(self, 'action', None) == 'list':
+            status_param = self.request.query_params.get('status')
+            now = timezone.now()
+            if getattr(user, 'role', None) == 'operator' or not user or not user.is_authenticated:
+                if status_param == 'expired':
+                    qs = qs.filter(submission_deadline__lt=now)
+                elif status_param == 'all':
+                    pass
+                else:  # الافتراضي للمتعاملين والعموم: الصفقات النشطة فقط
+                    qs = qs.filter(models.Q(submission_deadline__gte=now) | models.Q(submission_deadline__isnull=True))
+            else:
+                if status_param == 'expired':
+                    qs = qs.filter(submission_deadline__lt=now)
+                elif status_param == 'active':
+                    qs = qs.filter(models.Q(submission_deadline__gte=now) | models.Q(submission_deadline__isnull=True))
+
+        return qs
 
     def perform_create(self, serializer):
         serializer.save(authority=self.request.user)
@@ -393,12 +413,32 @@ class OpportunityViewSet(viewsets.ReadOnlyModelViewSet):
     def get_queryset(self):
         user = self.request.user
         if not user or not user.is_authenticated:
-            return ProcurementDeal.objects.filter(current_stage__gte=3).select_related('authority', 'cahier_specs')
-        if getattr(user, 'is_superuser', False) or getattr(user, 'is_staff', False) or getattr(user, 'role', None) == 'central_admin':
-            return ProcurementDeal.objects.all().select_related('authority', 'cahier_specs')
-        if getattr(user, 'role', None) == 'authority':
-            return ProcurementDeal.objects.filter(authority=user).select_related('authority', 'cahier_specs')
-        return ProcurementDeal.objects.filter(current_stage__gte=3).select_related('authority', 'cahier_specs')
+            qs = ProcurementDeal.objects.filter(current_stage__gte=3).select_related('authority', 'cahier_specs')
+        elif getattr(user, 'is_superuser', False) or getattr(user, 'is_staff', False) or getattr(user, 'role', None) == 'central_admin':
+            qs = ProcurementDeal.objects.all().select_related('authority', 'cahier_specs')
+        elif getattr(user, 'role', None) == 'authority':
+            qs = ProcurementDeal.objects.filter(authority=user).select_related('authority', 'cahier_specs')
+        else:
+            qs = ProcurementDeal.objects.filter(current_stage__gte=3).select_related('authority', 'cahier_specs')
+
+        # فلترة الصفقات المنتهية / النشطة في القوائم وفق المادة 68 من القانون 23-12
+        if getattr(self, 'action', None) == 'list':
+            status_param = self.request.query_params.get('status')
+            now = timezone.now()
+            if getattr(user, 'role', None) == 'operator' or not user or not user.is_authenticated:
+                if status_param == 'expired':
+                    qs = qs.filter(submission_deadline__lt=now)
+                elif status_param == 'all':
+                    pass
+                else:  # الافتراضي للمتعاملين: الصفقات النشطة فقط
+                    qs = qs.filter(models.Q(submission_deadline__gte=now) | models.Q(submission_deadline__isnull=True))
+            else:
+                if status_param == 'expired':
+                    qs = qs.filter(submission_deadline__lt=now)
+                elif status_param == 'active':
+                    qs = qs.filter(models.Q(submission_deadline__gte=now) | models.Q(submission_deadline__isnull=True))
+
+        return qs
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())

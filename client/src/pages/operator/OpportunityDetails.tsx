@@ -46,6 +46,9 @@ interface Opportunity {
   updatedAt: string;
   hasDocument: boolean;
   hasActiveInjunction?: boolean;
+  submissionDeadline?: string | null;
+  isExpired?: boolean;
+  daysLeft?: number;
 }
 
 const SEVERITY_STYLES: Record<TenderAnalysisSeverity, string> = {
@@ -123,6 +126,9 @@ export function OpportunityDetails() {
             updatedAt: deal.updated_at || deal.created_at || new Date().toISOString(),
             hasDocument: !!deal.cahier_specs,
             hasActiveInjunction: !!deal.has_active_injunction,
+            submissionDeadline: deal.submission_deadline || null,
+            isExpired: Boolean(deal.is_expired ?? (deal.submission_deadline ? new Date(deal.submission_deadline) < new Date() : false)),
+            daysLeft: typeof deal.days_left === 'number' ? deal.days_left : 0,
           });
         }
       })
@@ -281,9 +287,10 @@ export function OpportunityDetails() {
         <div className="op-page-actions">
           <button
             type="button"
-            className="op-btn op-btn-gold"
+            className={`op-btn op-btn-gold ${opp.isExpired ? 'opacity-50 cursor-not-allowed' : ''}`}
             onClick={() => void handleAnalyzeTender()}
-            disabled={analysisLoading}
+            disabled={analysisLoading || opp.isExpired}
+            title={opp.isExpired ? t('operator.opp.expired_tooltip') : undefined}
           >
             {analysisLoading ? (
               <Loader2 className="size-4 animate-spin" aria-hidden="true" />
@@ -303,6 +310,28 @@ export function OpportunityDetails() {
         </div>
       </div>
 
+      {opp.isExpired && (
+        <div className="mb-4 flex items-start gap-3 rounded-2xl border border-rose-300 bg-rose-50/95 p-4 text-rose-950 shadow-sm dark:border-rose-900/60 dark:bg-rose-950/40 dark:text-rose-200">
+          <AlertOctagon className="size-5 shrink-0 text-rose-600 dark:text-rose-400 mt-0.5" />
+          <div className="space-y-1">
+            <h4 className="text-sm font-bold text-rose-900 dark:text-rose-200 flex items-center gap-2">
+              <span>{t('operator.opp.expired_title')}</span>
+              <span className="rounded-full bg-rose-200/80 px-2.5 py-0.5 text-[11px] font-bold text-rose-900 dark:bg-rose-900/60 dark:text-rose-200">
+                {t('operator.opp.expired_badge')}
+              </span>
+            </h4>
+            <p className="text-xs leading-relaxed text-rose-800 dark:text-rose-300">
+              {t('operator.opp.expired_desc_art68')}
+              {opp.submissionDeadline && (
+                <span className="block mt-1 font-semibold">
+                  {t('operator.opp.deadline_label')}: {formatDate(opp.submissionDeadline, lang)}
+                </span>
+              )}
+            </p>
+          </div>
+        </div>
+      )}
+
       <section className="op-card" aria-labelledby="opportunity-details-title">
         <div className="op-card-head">
           <h2 id="opportunity-details-title" className="flex items-center gap-2">
@@ -316,7 +345,7 @@ export function OpportunityDetails() {
             {opp.description}
           </p>
 
-          <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <dl className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <div className="rounded-xl border border-[var(--op-line)] bg-[var(--op-surface-2)] p-4">
               <dt className="flex items-center gap-1.5 text-xs text-[var(--op-muted)]">
                 <Building className="size-3.5" aria-hidden="true" />
@@ -332,6 +361,27 @@ export function OpportunityDetails() {
               </dt>
               <dd className="op-mono mt-1 text-sm font-bold text-[var(--op-ink)]">
                 {opp.estimatedBudget || t('operator.opp.not_specified')}
+              </dd>
+            </div>
+
+            <div className={`rounded-xl border p-4 ${opp.isExpired ? 'border-rose-300 bg-rose-50/50 dark:border-rose-900/50 dark:bg-rose-950/20' : 'border-[var(--op-line)] bg-[var(--op-surface-2)]'}`}>
+              <dt className="flex items-center gap-1.5 text-xs text-[var(--op-muted)]">
+                <Calendar className="size-3.5" aria-hidden="true" />
+                <span>{t('operator.opp.deadline_label')}</span>
+              </dt>
+              <dd className="mt-1 flex items-center justify-between gap-2">
+                <span className="font-mono text-xs font-bold text-[var(--op-ink)]">
+                  {opp.submissionDeadline ? formatDate(opp.submissionDeadline, lang) : t('operator.opp.not_specified')}
+                </span>
+                {opp.isExpired ? (
+                  <span className="rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-bold text-rose-800 dark:bg-rose-900/50 dark:text-rose-300">
+                    {t('operator.opp.expired_badge')}
+                  </span>
+                ) : opp.daysLeft !== undefined && opp.daysLeft > 0 ? (
+                  <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300">
+                    {opp.daysLeft} {t('operator.opp.days_left_label')}
+                  </span>
+                ) : null}
               </dd>
             </div>
           </dl>
@@ -411,8 +461,17 @@ export function OpportunityDetails() {
           </div>
 
           <div className="op-action-bar">
-
-            {existingOfferId ? (
+            {opp.isExpired ? (
+              <button
+                type="button"
+                className="op-btn op-btn-outline cursor-not-allowed opacity-60 border-rose-300 text-rose-700 bg-rose-50/50 dark:border-rose-800 dark:text-rose-300 dark:bg-rose-950/20"
+                disabled
+                title={t('operator.opp.submission_closed_art68')}
+              >
+                <Lock className="size-4" />
+                <span>{t('operator.opp.submission_closed')}</span>
+              </button>
+            ) : existingOfferId ? (
               <button
                 type="button"
                 className="op-btn op-btn-green"

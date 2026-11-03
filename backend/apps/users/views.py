@@ -1,3 +1,4 @@
+from django.db import models
 from rest_framework import status, views, permissions, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -356,8 +357,10 @@ class OperatorRecommendedDealsView(views.APIView):
         if extra_wilaya and str(extra_wilaya) not in [str(w) for w in op_wilayas]:
             op_wilayas = list(op_wilayas) + [str(extra_wilaya)]
 
-        # استعلام الصفقات المنشورة (المرحلة 3 فما فوق)
-        deals = ProcurementDeal.objects.filter(current_stage__gte=3).select_related('authority')
+        # استعلام الصفقات المنشورة الجارية فقط (استبعاد الصفقات المنتهية وفقاً للمادة 68 من القانون 23-12)
+        deals = ProcurementDeal.objects.filter(current_stage__gte=3).filter(
+            models.Q(submission_deadline__gte=timezone.now()) | models.Q(submission_deadline__isnull=True)
+        ).select_related('authority')
 
         scored_deals = []
         for deal in deals:

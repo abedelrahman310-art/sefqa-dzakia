@@ -44,6 +44,8 @@ interface Opportunity {
   authorityName: string;
   status: string;
   submissionDeadline?: string | null;
+  isExpired?: boolean;
+  daysLeft?: number;
   hasDocument: boolean;
   procedure: OpportunityProcedure;
   matching?: {
@@ -70,6 +72,7 @@ export function OperatorOpportunities() {
 
   // نمط العرض: الرادار التنبؤي الذكي أم استعراض كافة الصفقات
   const [viewMode, setViewMode] = useState<'radar' | 'all'>('radar');
+  const [statusFilter, setStatusFilter] = useState<'active' | 'expired' | 'all'>('active');
 
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
   const [profileConfigured] = useState(true);
@@ -115,18 +118,22 @@ export function OperatorOpportunities() {
     setSearchQuery(q);
   }, [search]);
 
-  const loadOpportunities = async (isRefresh = false) => {
+  const loadOpportunities = async (isRefresh = false, statusOverride?: 'active' | 'expired' | 'all') => {
     if (isRefresh) setRefreshing(true);
     else setLoading(true);
 
+    const activeStatus = statusOverride ?? statusFilter;
     try {
-      const res = await api.get('/procurements/deals/');
+      const res = await api.get(`/procurements/deals/?status=${activeStatus}`);
       const data = res.data;
       const items = Array.isArray(data) ? data : data?.results || [];
       const mapped: Opportunity[] = items
         .filter((d: any) => d.current_stage >= 3)
         .map((d: any) => {
           const admin = d.cahier_specs?.administrative_clauses ?? null;
+          const isExp = Boolean(
+            d.is_expired ?? (d.submission_deadline ? new Date(d.submission_deadline) < new Date() : false)
+          );
           return {
             id: String(d.id),
             reference: d.reference_number || `DZ-${String(d.id).slice(0, 6)}`,
@@ -135,8 +142,10 @@ export function OperatorOpportunities() {
             estimatedBudget: d.estimated_budget ? formatCurrency(Number(d.estimated_budget)) : null,
             authorityName:
               d.authority?.organization_name || d.authority?.display_name || t('common.unspecified'),
-            status: d.status || 'open',
+            status: isExp ? 'expired' : (d.status || 'open'),
             submissionDeadline: d.submission_deadline || null,
+            isExpired: isExp,
+            daysLeft: typeof d.days_left === 'number' ? d.days_left : 0,
             hasDocument: Boolean(d.cahier_specs?.document_url || d.cahier_specs?.document_file),
             procedure: {
               form: admin?.procurement_form ?? null,
@@ -208,7 +217,7 @@ export function OperatorOpportunities() {
           <button
             type="button"
             className="op-btn op-btn-outline whitespace-nowrap"
-            onClick={() => loadOpportunities(true)}
+            onClick={() => loadOpportunities(true, statusFilter)}
             disabled={refreshing}
           >
             <RefreshCw className={refreshing ? 'animate-spin' : ''} aria-hidden="true" />
@@ -258,6 +267,59 @@ export function OperatorOpportunities() {
       ) : (
         /* ─── عرض كافة الصفقات العادية ─── */
         <>
+          {/* شريط فلترة الصفقات النشطة والمنتهية والكل وفق المادة 68 من القانون 23-12 */}
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-2.5 rounded-xl border border-slate-200/90 bg-white p-2 shadow-2xs">
+            <div className="flex items-center gap-1.5 text-xs font-bold">
+              <span className="text-[var(--op-muted)] ms-1 me-2">{t('deals.col.status')}:</span>
+              <button
+                type="button"
+                onClick={() => {
+                  setStatusFilter('active');
+                  void loadOpportunities(false, 'active');
+                }}
+                className={`rounded-lg px-3 py-1.5 transition-all text-xs font-bold cursor-pointer ${
+                  statusFilter === 'active'
+                    ? 'bg-emerald-600 text-white shadow-xs'
+                    : 'text-slate-600 hover:bg-slate-100'
+                }`}
+              >
+                {t('operator.opp.status_filter_active')}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setStatusFilter('expired');
+                  void loadOpportunities(false, 'expired');
+                }}
+                className={`rounded-lg px-3 py-1.5 transition-all text-xs font-bold cursor-pointer ${
+                  statusFilter === 'expired'
+                    ? 'bg-rose-600 text-white shadow-xs'
+                    : 'text-slate-600 hover:bg-slate-100'
+                }`}
+              >
+                {t('operator.opp.status_filter_expired')}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setStatusFilter('all');
+                  void loadOpportunities(false, 'all');
+                }}
+                className={`rounded-lg px-3 py-1.5 transition-all text-xs font-bold cursor-pointer ${
+                  statusFilter === 'all'
+                    ? 'bg-slate-800 text-white shadow-xs'
+                    : 'text-slate-600 hover:bg-slate-100'
+                }`}
+              >
+                {t('operator.opp.status_filter_all')}
+              </button>
+            </div>
+
+            <div className="text-xs text-[var(--op-muted)] font-medium px-2">
+              <span>{filteredOpportunities.length} {t('operator.opportunities.ad_unit')}</span>
+            </div>
+          </div>
+
           <section aria-label={t('operator.opportunities.proc_filter')}>
             <div className={`op-proc-filter${isProcOpen ? ' is-open' : ''}`}>
               <button
@@ -463,7 +525,9 @@ export function OperatorOpportunities() {
                         </td>
                         <td>
                           <div className="flex flex-col items-start gap-1">
-                            {opp.status === 'submission_closed' ? (
+                            {opp.isExpired ? (
+                              <span className="op-chip red whitespace-nowrap">{t('operator.opp.expired_badge')}</span>
+                            ) : opp.status === 'submission_closed' ? (
                               <span className="op-chip red whitespace-nowrap">{t('operator.opportunities.deadline_passed')}</span>
                             ) : (
                               renderSignalPill(opp.matching?.overallSignal)

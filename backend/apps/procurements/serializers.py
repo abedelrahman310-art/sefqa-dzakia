@@ -112,6 +112,8 @@ class ProcurementDealSerializer(serializers.ModelSerializer):
     active_legal_notices_count = serializers.IntegerField(read_only=True)
     has_expired_notice = serializers.BooleanField(read_only=True)
     legal_notices_count = serializers.SerializerMethodField()
+    is_expired = serializers.BooleanField(read_only=True)
+    days_left = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = ProcurementDeal
@@ -640,6 +642,10 @@ class OpportunitySerializer(serializers.ModelSerializer):
     is_specs_free = serializers.SerializerMethodField()
     has_purchased_specs = serializers.SerializerMethodField()
     specs_purchase = serializers.SerializerMethodField()
+    is_expired = serializers.SerializerMethodField()
+    isExpired = serializers.SerializerMethodField()
+    days_left = serializers.SerializerMethodField()
+    daysLeft = serializers.SerializerMethodField()
 
     class Meta:
         model = ProcurementDeal
@@ -660,6 +666,10 @@ class OpportunitySerializer(serializers.ModelSerializer):
             'is_specs_free',
             'has_purchased_specs',
             'specs_purchase',
+            'is_expired',
+            'isExpired',
+            'days_left',
+            'daysLeft',
             'status',
             'current_stage',
             'wilaya',
@@ -671,6 +681,18 @@ class OpportunitySerializer(serializers.ModelSerializer):
             'updated_at',
             'has_active_injunction',
         ]
+
+    def get_is_expired(self, obj):
+        return getattr(obj, 'is_expired', False)
+
+    def get_isExpired(self, obj):
+        return getattr(obj, 'is_expired', False)
+
+    def get_days_left(self, obj):
+        return getattr(obj, 'days_left', 0)
+
+    def get_daysLeft(self, obj):
+        return getattr(obj, 'days_left', 0)
 
     def get_has_active_injunction(self, obj):
         return getattr(obj, 'has_active_injunction', False)

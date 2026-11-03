@@ -119,6 +119,23 @@ class ProcurementDeal(models.Model):
         """هل توجد اعذارات قانونية منتهية المهلة مع تطبيق غرامات"""
         return self.legal_notices.filter(status='expired').exists()
 
+    @property
+    def is_expired(self) -> bool:
+        """هل انتهى الأجل القانوني لإيداع العروض وفقاً للمادة 68 من القانون 23-12"""
+        if not self.submission_deadline:
+            return False
+        return self.submission_deadline < timezone.now()
+
+    @property
+    def days_left(self) -> int:
+        """عدد الأيام المتبقية حتى آخر أجل لإيداع العروض (0 إذا انقضى الأجل)"""
+        if not self.submission_deadline:
+            return 0
+        diff = (self.submission_deadline - timezone.now()).total_seconds()
+        if diff <= 0:
+            return 0
+        return int(diff // 86400)
+
 
 
 class CahierSpecs(models.Model):

@@ -4089,5 +4089,17 @@
   "authority.specs.buyer_nif": "NIF",
   "authority.specs.paid_amount": "Montant réglé",
   "authority.specs.paid_date": "Date & heure de retrait",
-  "authority.specs.receipt_link": "Reçu"
+  "authority.specs.receipt_link": "Reçu",
+  "operator.opp.expired_title": "Ce marché est forclos (Délai légal expiré)",
+  "operator.opp.expired_desc_art68": "Le délai légal de dépôt des offres est dépassé. Conformément à l'article 68 de la loi 23-12 (aucune offre ne peut être reçue après expiration du délai imparti), aucun nouveau pli ne peut être déposé.",
+  "operator.opp.submission_closed": "Délai de soumission forclos",
+  "operator.opp.submission_closed_art68": "Dépôt forclos conformément à l'article 68 de la loi 23-12",
+  "operator.opp.expired_badge": "Forclos (Art. 68)",
+  "operator.opp.status_filter_all": "Tous les marchés",
+  "operator.opp.status_filter_active": "Marchés en cours (Actifs)",
+  "operator.opp.status_filter_expired": "Marchés forclos",
+  "operator.opp.expired_tooltip": "Le délai légal de soumission est expiré conformément à l'article 68 de la loi 23-12",
+  "operator.opp.deadline_label": "Date limite de soumission",
+  "operator.opp.days_left_label": "Jours restants",
+  "operator.opp.expired_warning_banner": "Marché forclos — Dépôt des offres définitivement clôturé"
 }

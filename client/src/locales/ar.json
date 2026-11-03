@@ -4089,5 +4089,17 @@
   "authority.specs.buyer_nif": "المعرف الجبائي NIF",
   "authority.specs.paid_amount": "المبلغ المسدد",
   "authority.specs.paid_date": "تاريخ وساعة السحب",
-  "authority.specs.receipt_link": "وصل السحب"
+  "authority.specs.receipt_link": "وصل السحب",
+  "operator.opp.expired_title": "هذه الصفقة منتهية الأجل قانوناً",
+  "operator.opp.expired_desc_art68": "انقضت المهلة القانونية المحددة لإيداع العروض. وفقاً للمادة 68 من القانون 23-12 (لا يُقبل أي عرض بعد انقضاء الأجل المحدد لإيداع العروض)، لا يمكن إيداع أي عرض جديد أو تعديل العروض السابقة.",
+  "operator.opp.submission_closed": "انتهت مهلة إيداع العروض",
+  "operator.opp.submission_closed_art68": "انتهت مهلة إيداع العروض وفقاً للمادة 68 من القانون 23-12",
+  "operator.opp.expired_badge": "منتهية الأجل (المادة 68)",
+  "operator.opp.status_filter_all": "كافة الصفقات",
+  "operator.opp.status_filter_active": "الصفقات الجارية (النشطة)",
+  "operator.opp.status_filter_expired": "الصفقات المنتهية",
+  "operator.opp.expired_tooltip": "انقضت المهلة القانونية لإيداع العروض وفقاً للمادة 68 من القانون 23-12",
+  "operator.opp.deadline_label": "آخر أجل لإيداع العروض",
+  "operator.opp.days_left_label": "الأيام المتبقية",
+  "operator.opp.expired_warning_banner": "صفقة منتهية الصلاحية — إيداع العروض مغلق نهائياً"
 }
