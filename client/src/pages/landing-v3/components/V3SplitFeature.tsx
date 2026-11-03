@@ -113,7 +113,7 @@ export const V3SplitFeature: React.FC = () => {
     <section
       id="features"
       dir={dir}
-      className="w-full bg-[#ffffff] py-20 border-b border-[#d8d8d8]"
+      className="w-full bg-[#ffffff] py-20"
     >
       <div className="max-w-[1200px] mx-auto px-4 sm:px-6">
         

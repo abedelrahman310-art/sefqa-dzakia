@@ -63,7 +63,7 @@ export const V3Hero: React.FC = () => {
     <header
       id="overview"
       dir={dir}
-      className="w-full bg-[#ffffff] pt-16 sm:pt-20 pb-16 sm:pb-24 border-b border-[#d8d8d8]"
+      className="w-full bg-[#ffffff] pt-16 sm:pt-20 pb-16 sm:pb-24"
     >
       <div className="max-w-[1200px] mx-auto px-4 sm:px-6">
         

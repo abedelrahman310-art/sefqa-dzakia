@@ -24,7 +24,7 @@ export const V3BrowserMockup: React.FC = () => {
     <section
       id="live-demo"
       dir={dir}
-      className="w-full bg-[#f0f0f0] py-20 border-b border-[#d8d8d8]"
+      className="w-full bg-[#f0f0f0] py-20"
     >
       <div className="max-w-[1200px] mx-auto px-4 sm:px-6">
         

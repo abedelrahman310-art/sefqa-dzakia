@@ -8,6 +8,7 @@ import V3SplitFeature from './components/V3SplitFeature';
 import V3LifecycleProcess from './components/V3LifecycleProcess';
 import V3GovernanceSection from './components/V3GovernanceSection';
 import V3Footer from './components/V3Footer';
+import V3SectionDivider from './components/V3SectionDivider';
 
 /**
  * صفحة الهبوط التجريبية المعمارية V3 (Webflow Style Reference)
@@ -66,17 +67,32 @@ export function LandingV3Page() {
         {/* قسم البطولة والعناوين المعمارية وشبكة الخيارات الثلاثة */}
         <V3Hero />
 
+        {/* فاصل وطني مزدوج بشعار المنصة المتحرك */}
+        <V3SectionDivider bg="bg-[#ffffff]" />
+
         {/* إطار المتصفح الواقعي (Browser-Frame Mockup) والصفقة المشفرة الحية */}
         <V3BrowserMockup />
+
+        {/* فاصل وطني مزدوج بشعار المنصة المتحرك */}
+        <V3SectionDivider bg="bg-[#f0f0f0]" />
 
         {/* ترسانة الذكاء الاصطناعي بنمط العرض المزدوج والروابط المتفاعلة */}
         <V3SplitFeature />
 
+        {/* فاصل وطني مزدوج بشعار المنصة المتحرك */}
+        <V3SectionDivider bg="bg-[#ffffff]" />
+
         {/* مسار حياة الصفقة وفق القانون 23-12 (7 مراحل بتوزيع رباعي) */}
         <V3LifecycleProcess />
 
+        {/* فاصل وطني مزدوج بشعار المنصة المتحرك */}
+        <V3SectionDivider bg="bg-[#f0f0f0]" />
+
         {/* شبكة الامتثال والركائز الدستورية الست */}
         <V3GovernanceSection />
+
+        {/* فاصل وطني مزدوج بشعار المنصة المتحرك قبل التذييل */}
+        <V3SectionDivider bg="bg-[#ffffff]" />
       </main>
 
       {/* 4. تذييل الصفحة الداكن الفخم */}

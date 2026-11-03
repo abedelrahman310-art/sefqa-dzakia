@@ -68,7 +68,7 @@ export const V3GovernanceSection: React.FC = () => {
     <section
       id="compliance"
       dir={dir}
-      className="w-full bg-[#ffffff] py-20 border-b border-[#d8d8d8]"
+      className="w-full bg-[#ffffff] py-20"
     >
       <div className="max-w-[1200px] mx-auto px-4 sm:px-6">
         
