@@ -195,6 +195,60 @@ tests/test_central_and_zero_paper_verification.py::...::test_heuristic_analysis_
 
 ---
 
+## [0.2.0-unreleased] — 2026-11-03 — دفعة إعادة التنسيق البصري للصفحة الهبوط V3
+
+### Changed — التنسيق (نطاق: `client/src/pages/landing-v3` فقط)
+
+- **الرؤية**: إزالة كل الألوان الداكنة من صفحة الهبوط V3 مع الحفاظ الحرفي على المحتوى
+  والأقسام وترتيبها (TopBanner → Nav → Hero → Divider → BrowserMockup → SplitFeature →
+  LifecycleProcess → GovernanceSection → Divider → Footer)، ودون أي مفاتيح ترجمة
+  جديدة أو محذوفة (`client/src/locales` لم يُلمس؛ 4,389 ثابتاً كما هي).
+- **العلامة الموحّدة بدل الأسود**: أزرق `#146ef5` — مربع الشعار في Nav والتذييل، مربع
+  الختم في BrowserMockup، مربعا الأيقونتين في SplitFeature، التبويب النشط في
+  LifecycleProcess، وحدود hover في Governance (`#146ef5/10` للخلفيات التينت).
+- **تذييل فاتح كامل**: إعادة كتابة `V3Footer` بثيم الورقة البيضاء والحبر `#080808` وحدود
+  الشعرية `#d8d8d8`، بنفس البنود والنصوص حرفياً (بدل `bg-[#080808]`/`#bdbdbd`/`#222222`).
+- **تباين قابل للقراءة**: شارتا `VERIFIED`/`PAID` بلون `#115ccb` الأغمق داخل صندوق
+  `#f0f0f0`؛ الأزرار المعطلة `text-[#5a5a5a]` بدل `#bdbdbd` (1.6:1 → ~6.3:1). بقي
+  لون `#006233`/`#d21034` لعلم الجزائر ونقاط المتصفح `#ff5f56/#ffbd2e/#27c93f`
+  (شارات/زخارف صغيرة مشروعة).
+- **كل النصوص المقروءة ≥13px**: حذف مقاسات 10/11/12px من مجلد landing-v3 بالكامل.
+
+### Fixed — الإصلاحات البصرية (بأدوات القياس)
+
+- **فائض أفقي 10px عند 768px** (`a.inline-flex`): فجوات روابط Nav الوسطية
+  `gap-6` → `gap-4 lg:gap-6`؛ التحقق: `scrollWidth = clientWidth = 768`.
+- **تحدب العناوين عند 390px**: مقاس h2 للموبايل `32px` → `26px` دفعة واحدة للأقسام
+  الأربعة (سطح المكتب `40px` بلا تغيير)؛ العنوانان الطويلان
+  «L'Appel d'Offres Dématérialisé…» و«L'Intelligence Artificielle…» أصلا سطرين بالضبط
+  ولم يبقَ أي عنوان يتجاوز سطرين.
+- **انحراف صفيحة الهبوط عند 390px** (محتوى إلى -238px يميناً بالعربية): إعادة بنية صف
+  `V3TopBanner` (`flex-1 min-w-0` + شارة `shrink-0` + `truncate` حقيقي).
+- **إصلاح جانبي خارج النطاق**: حقل مكرر `require_committee_ceremony?: boolean` في
+  `client/src/features/opening/types.ts` (دخل بـ`cd154a3`) كان يكسر `typecheck`
+  لتجربة المستودع كاملاً؛ أُزيل التكرار المتطابق (السلوك بلا تغيير).
+
+### Verification — التحقق (2026-11-03)
+
+- `pnpm --filter client typecheck`: **0 أخطاء**.
+- `pnpm build`: نجاح — 109 مدخلات PWA (3,383.00 KiB).
+- **الفحص البصري النهائي على بناء الإنتاج** (`vite preview :4173`) بـ`inspect.mjs`
+  على 1440/768/390: **16 FAIL/8 WARN (قبل) → 11 FAIL/7 WARN (بعد)**. اختفت تماماً:
+  `small-text` (29 كتلة <13px)، `contrast` («Précédente» 1.6:1)، `overflow@768`,
+  `headline-lines@390`, `off-centre@390`, و`dev-server`؛ وتحسّن `size-count`
+  من 13 إلى 10 مقاسات. الأدلة: `.taste-skill/before` و`.taste-skill/after`
+  (لقطات fold + صفحات كاملة للثلاثة مقاسات).
+
+### Notes — ملاحظات الدفعة
+
+- الـ11 FAIL/7 WARN المتبقية عناصر نظام V3 البنيوية نفسه
+  (eyebrow/mono/numbering/micro-label/gradient/shadow/hairline/outlined-box/icon-cards/
+  body-size/few-pictures، و`empty-middle@768` بقسم 7 Jalons بفراغ مقدَّر 510px) — موجودة
+  حرفياً في تقرير «قبل» أيضاً وتعود إلى بنية الصفحة لا إلى هذه الدفعة؛ يتطلب معالجتها
+  قرار اتجاه لاحقاً أو `--allow` مبرراً (تغييرها يشمل إعادة تركيب أقسام).
+- لا commit/push؛ تعديلات هذه الدفعة فئات Tailwind توكينية فوق الحالة المحلية
+  (HEAD `cd154a3` بعد دخول P2 الموازي).
+
 ## [0.2.0-unreleased] — 2026-11-03 — دفعة التمشيط الدقيق (Thorough Sweep)
 
 ### Added — الإضافات

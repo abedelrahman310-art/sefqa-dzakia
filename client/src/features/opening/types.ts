@@ -69,7 +69,6 @@ export interface OpeningSessionDetail {
   access_policy_display?: string;
   total_offers: number;
   opened_count: number;
-  require_committee_ceremony?: boolean;
   threshold_k?: number;
   threshold_n?: number;
   ceremony_status?: CeremonyStatus;

@@ -25,10 +25,10 @@ export const V3GovernanceSection: React.FC = () => {
     {
       num: '02',
       icon: FileCheck2,
-      title: isAr ? 'المادة 67: التجريد المادي الكامل' : 'Article 67 : Zéro Papier',
+      title: isAr ? 'المادة 67 والقانون 15-04 للتوقيع الإلكتروني' : 'Art. 67 & Loi 15-04 : Signature Légale',
       desc: isAr
-        ? 'الإلغاء القانوني التدريجي للملفات الورقية، واعتماد التبادل الإلكتروني الموثق والأرشفة الرقمية الآمنة لجميع المراسلات والمحاضر.'
-        : 'Consécration légale des échanges 100% numériques et de l’archivage sécurisé des offres et procès-verbaux.',
+        ? 'التجريد المادي الكامل وحجية الإثبات القانوني عبر التوقيع الإلكتروني المؤهل (المحفوظ بختم زمني مشفر) للأظرفة والعقود.'
+        : 'Dématérialisation intégrale et pleine force probante des signatures et scellés électroniques horodatés selon la Loi 15-04.',
     },
     {
       num: '03',

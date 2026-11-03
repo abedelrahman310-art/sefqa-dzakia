@@ -20,6 +20,12 @@ interface LegalLayoutProps {
   children: ReactNode;
 }
 
+/**
+ * LegalLayout — إطار الصفحات القانونية بلغة النظام الموحّد V3:
+ * ورقة بيضاء على قماش #f0f0f0، حبر #080808، خطوط شعرية #d8d8d8،
+ * والأزرق #146ef5 علامة وحيدة (بدل لوحة الأزرق الداكن/الأخضر القديمة).
+ * النصوص والبنية كما هي؛ الألوان والمقاسات فقط تمت المواءمة.
+ */
 export function LegalLayout({
   title,
   kicker,
@@ -66,40 +72,40 @@ export function LegalLayout({
   return (
     <div
       dir={dir}
-      className="min-h-screen flex flex-col bg-[#f8fafc] text-[#0b1a2b] font-['Cairo',sans-serif] selection:bg-[#10b981]/20 selection:text-[#047857]"
+      className="min-h-screen flex flex-col bg-[#f0f0f0] text-[#080808] font-['Cairo',sans-serif] selection:bg-[#146ef5]/20 selection:text-[#146ef5]"
     >
       {/* ═══════════════════════════════════════════════════════════════
           1. HEADER العلوي السيادي
           ═══════════════════════════════════════════════════════════════ */}
-      <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-200/80 shadow-xs">
+      <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-[#d8d8d8]">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
           {/* الشعار والاسم الرسمي */}
-          <Link href="/" className="flex items-center gap-3 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#047857] rounded-lg p-1">
-            <div className="size-9 rounded-xl bg-gradient-to-br from-[#0f3154] to-[#047857] text-white flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform">
+          <Link href="/" className="flex items-center gap-3 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#146ef5] rounded-lg p-1">
+            <div className="size-9 rounded-[8px] bg-[#146ef5] text-white flex items-center justify-center group-hover:scale-105 transition-transform">
               <Logo size={26} />
             </div>
-            <div className="flex flex-col">
-              <span className="font-extrabold text-base tracking-tight text-[#0f3154] leading-tight">
+            <div className="flex items-baseline gap-2">
+              <span className="font-extrabold text-[16px] tracking-tight text-[#080808] leading-tight">
                 {isFr ? 'Safaqat Dhakia' : 'صفقات ذكية'}
               </span>
-              <span className="text-[10px] font-semibold text-[#047857] leading-none">
+              <span className="text-[13px] font-semibold text-[#5a5a5a] leading-none">
                 {isFr ? 'Plateforme Intelligente' : 'المنصة الذكية'}
               </span>
             </div>
           </Link>
 
           {/* روابط التنقل السريعة بين الصفحات القانونية */}
-          <nav className="hidden md:flex items-center gap-1 bg-slate-100/80 p-1 rounded-xl border border-slate-200/60" aria-label="التنقل القانوني">
+          <nav className="hidden md:flex items-center gap-1 bg-[#f0f0f0] p-1 rounded-[8px] border border-[#d8d8d8]" aria-label="التنقل القانوني">
             {navLinks.map((item) => {
               const Icon = item.icon;
               return (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[6px] text-[13px] font-semibold transition-all ${
                     item.active
-                      ? 'bg-white text-[#0f3154] shadow-xs border border-slate-200/60'
-                      : 'text-slate-600 hover:text-[#0f3154] hover:bg-white/50'
+                      ? 'bg-white text-[#080808] border border-[#d8d8d8]'
+                      : 'text-[#5a5a5a] hover:text-[#080808] hover:bg-white/60'
                   }`}
                 >
                   <Icon className="w-3.5 h-3.5 shrink-0" />
@@ -115,18 +121,18 @@ export function LegalLayout({
             <button
               type="button"
               onClick={toggleLanguage}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 hover:text-[#0f3154] shadow-2xs transition-colors"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[8px] text-[13px] font-semibold border border-[#d8d8d8] bg-white hover:bg-[#f0f0f0] text-[#5a5a5a] hover:text-[#080808] transition-colors cursor-pointer"
               title={isFr ? 'Passer en Arabe' : 'التحويل إلى الفرنسية'}
               aria-label={isFr ? 'Passer en Arabe' : 'التحويل إلى الفرنسية'}
             >
-              <Globe className="w-3.5 h-3.5 text-slate-500" />
+              <Globe className="w-3.5 h-3.5" />
               <span>{isFr ? 'العربية' : 'FR'}</span>
             </button>
 
             {/* الرجوع إلى الصفحة الرئيسية */}
             <Link
               href="/"
-              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 hover:text-[#0f3154] shadow-2xs transition-colors"
+              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[8px] text-[13px] font-semibold border border-[#d8d8d8] bg-white hover:bg-[#f0f0f0] text-[#5a5a5a] hover:text-[#080808] transition-colors"
             >
               <Home className="w-3.5 h-3.5" />
               <span>{isFr ? 'Accueil' : 'الرئيسية'}</span>
@@ -135,7 +141,7 @@ export function LegalLayout({
             {/* الدخول للمنصة */}
             <Link
               href="/login"
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold bg-[#0f3154] hover:bg-[#0b243e] text-white shadow-2xs transition-colors"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-[8px] text-[13px] font-semibold bg-[#146ef5] hover:bg-[#115ccb] text-white transition-colors"
             >
               <LogIn className="w-3.5 h-3.5" />
               <span>{isFr ? 'Connexion' : 'دخول'}</span>
@@ -147,43 +153,43 @@ export function LegalLayout({
       {/* ═══════════════════════════════════════════════════════════════
           2. HERO SECTION / رأس الصفحة
           ═══════════════════════════════════════════════════════════════ */}
-      <section className="bg-gradient-to-b from-white via-slate-50/60 to-transparent border-b border-slate-200/60 py-10 sm:py-14">
+      <section className="bg-white border-b border-[#d8d8d8] py-10 sm:py-14">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* مسار التنقل البسيط (Breadcrumb) */}
-          <div className="flex items-center gap-2 text-xs font-medium text-slate-500 mb-4">
-            <Link href="/" className="hover:text-[#0f3154] transition-colors">
+          <div className="flex items-center gap-2 text-[13px] font-medium text-[#5a5a5a] mb-5">
+            <Link href="/" className="hover:text-[#146ef5] transition-colors">
               {isFr ? 'Accueil' : 'الرئيسية'}
             </Link>
             <span>/</span>
-            <span className="text-[#047857] font-semibold">{title}</span>
+            <span className="text-[#146ef5] font-semibold">{title}</span>
           </div>
 
           {/* الشارة والرمز */}
-          <div className="flex items-center gap-2 mb-3">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[#ecfdf5] text-[#047857] border border-[#a7f3d0]">
+          <div className="flex flex-wrap items-center gap-2 mb-4">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[13px] font-bold bg-[#146ef5]/10 text-[#146ef5] border border-[#146ef5]/25">
               {icon}
               {kicker}
             </span>
-            <span className="text-xs text-slate-600 bg-slate-100 px-2.5 py-1 rounded-full">
+            <span className="text-[13px] text-[#5a5a5a] bg-[#f0f0f0] px-2.5 py-1 rounded-full">
               {isFr ? 'Dernière mise à jour :' : 'آخر تحديث:'} {lastUpdated}
             </span>
           </div>
 
           {/* العنوان الرئيسي والوصف */}
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#0f3154] tracking-tight leading-tight mb-3">
+          <h1 className="text-[26px] sm:text-[40px] font-extrabold text-[#080808] tracking-[-0.4px] leading-[1.08] mb-3">
             {title}
           </h1>
-          <p className="text-sm sm:text-base text-slate-600 leading-relaxed max-w-3xl">
+          <p className="text-[15px] sm:text-[16px] text-[#5a5a5a] leading-relaxed max-w-3xl">
             {subtitle}
           </p>
         </div>
       </section>
 
       {/* ═══════════════════════════════════════════════════════════════
-          3. المحتوى الأساسي (Content Card)
+          3. المحتوى الأساسي (ورقة الوثيقة)
           ═══════════════════════════════════════════════════════════════ */}
       <main className="flex-1 max-w-4xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-8 sm:pt-10 pb-12 sm:pb-16">
-        <div className="bg-white rounded-3xl border border-slate-200/80 shadow-[0_4px_24px_rgba(15,49,84,0.04)] p-6 sm:p-10">
+        <div className="bg-white border border-[#d8d8d8] rounded-[8px] p-6 sm:p-10">
           {children}
         </div>
       </main>

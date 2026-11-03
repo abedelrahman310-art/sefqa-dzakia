@@ -6,6 +6,12 @@ interface V3SectionDividerProps {
   className?: string;
 }
 
+/**
+ * V3SectionDivider — فاصل الأقسام الوطني كقفل موحّد (lockup):
+ * الخطان المتوازيان (الأخضر #006233 فوق والأحمر #d21034 تحت) ينبثقان من جانبي
+ * وسام الشعار على ارتفاع الحزام نفسه — صلبان عند نقطة اللقاء بالوسام ويتلاشيان
+ * نحو حافتي الصفحة، وحلقة الوسام تُكمل الخطّين لفّاً (قوس أخضر أعلى وقوس أحمر أسفل).
+ */
 export const V3SectionDivider: React.FC<V3SectionDividerProps> = ({
   bg = 'bg-[#ffffff]',
   className = '',
@@ -19,10 +25,10 @@ export const V3SectionDivider: React.FC<V3SectionDividerProps> = ({
       <style>{`
         @keyframes logo-floating {
           0%, 100% {
-            transform: translateY(-5px) scale(1);
+            transform: translateY(-2px);
           }
           50% {
-            transform: translateY(5px) scale(1.05);
+            transform: translateY(2px);
           }
         }
         @keyframes aura-pulse {
@@ -37,38 +43,43 @@ export const V3SectionDivider: React.FC<V3SectionDividerProps> = ({
         }
       `}</style>
 
-      {/* الخطان المتوازيان: الأخضر في الأعلى والأحمر في الأسفل */}
-      <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 w-full flex flex-col justify-center items-center pointer-events-none">
-        {/* الخط الأخضر المتوازي الأول (الأخضر الجزائري) */}
-        <div className="w-full h-[2.5px] bg-gradient-to-r from-transparent via-[#006233] to-transparent opacity-95 shadow-2xs" />
-        
-        {/* مسافة فاصلة متوازية دقيقة بين الخطين */}
-        <div className="h-[7px]" />
+      {/* القفل الموحّد: خط ← وسام ← خط */}
+      <div className="relative z-10 w-full flex items-center justify-center pointer-events-none">
+        {/* الشريحة اليسرى: خطان متوازيان يصلبان عند الوسام ويتلاشيان نحو الحافة */}
+        <div className="flex flex-col justify-center items-stretch flex-1 min-w-0">
+          <div className="w-full h-[2.5px] bg-gradient-to-l from-[#006233] via-[#006233]/80 to-transparent opacity-95 shadow-2xs rounded-full" />
+          <div className="h-[7px]" />
+          <div className="w-full h-[2.5px] bg-gradient-to-l from-[#d21034] via-[#d21034]/80 to-transparent opacity-95 shadow-2xs rounded-full" />
+        </div>
 
-        {/* الخط الأحمر المتوازي الثاني (الأحمر القاني الجزائري) */}
-        <div className="w-full h-[2.5px] bg-gradient-to-r from-transparent via-[#d21034] to-transparent opacity-95 shadow-2xs" />
-      </div>
-
-      {/* شعار المنصة المتحرك في المركز */}
-      <div
-        className="relative z-10 flex items-center justify-center"
-        style={{ animation: 'logo-floating 3.2s ease-in-out infinite' }}
-      >
-        {/* توهج وطني خلف الشعار */}
+        {/* وسام الشعار المدموج في الحزام */}
         <div
-          className="absolute size-14 sm:size-16 rounded-full bg-gradient-to-r from-[#006233]/30 via-white to-[#d21034]/30 blur-md pointer-events-none"
-          style={{ animation: 'aura-pulse 3.2s ease-in-out infinite' }}
-        />
+          className="relative z-10 flex items-center justify-center mx-5 sm:mx-7"
+          style={{ animation: 'logo-floating 3.2s ease-in-out infinite' }}
+        >
+          {/* توهج وطني خلف الشعار عند نقطة الدمج */}
+          <div
+            className="absolute size-14 sm:size-16 rounded-full bg-gradient-to-r from-[#006233]/30 via-white to-[#d21034]/30 blur-md pointer-events-none"
+            style={{ animation: 'aura-pulse 3.2s ease-in-out infinite' }}
+          />
 
-        {/* وسام دائري أنيق يحتضن الشعار */}
-        <div className="relative size-12 sm:size-14 rounded-full bg-white border-2 border-slate-200/90 shadow-lg flex items-center justify-center p-2 hover:scale-110 transition-transform duration-300">
-          {/* إطار جانبي رقيق */}
-          <div className="absolute inset-0 rounded-full border border-emerald-400/40 pointer-events-none" />
-          
-          {/* شعار المنصة ثلاثي الأبعاد بالألوان الوطنية */}
-          <div className="size-8 sm:size-9 flex items-center justify-center">
-            <Logo size={32} />
+          {/* قرص الوسام: حلقة تبدأ خضراء من الأعلى وتقفل حمراء من الأسفل */}
+          <div className="relative size-12 sm:size-14 rounded-full bg-white border-2 border-[#d8d8d8] shadow-lg flex items-center justify-center p-2 hover:scale-110 transition-transform duration-300">
+            {/* الحلقة الوطنية المكمّلة للخطّين */}
+            <div className="absolute inset-0 rounded-full border-2 border-l-transparent border-r-transparent border-t-[#006233]/60 border-b-[#d21034]/60 pointer-events-none" />
+
+            {/* شعار المنصة */}
+            <div className="size-8 sm:size-9 flex items-center justify-center">
+              <Logo size={32} />
+            </div>
           </div>
+        </div>
+
+        {/* الشريحة اليمنى: خطان متوازيان يصلبان عند الوسام ويتلاشيان نحو الحافة */}
+        <div className="flex flex-col justify-center items-stretch flex-1 min-w-0">
+          <div className="w-full h-[2.5px] bg-gradient-to-r from-[#006233] via-[#006233]/80 to-transparent opacity-95 shadow-2xs rounded-full" />
+          <div className="h-[7px]" />
+          <div className="w-full h-[2.5px] bg-gradient-to-r from-[#d21034] via-[#d21034]/80 to-transparent opacity-95 shadow-2xs rounded-full" />
         </div>
       </div>
     </div>

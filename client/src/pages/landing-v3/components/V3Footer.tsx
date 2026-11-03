@@ -47,6 +47,8 @@ export const V3Footer: React.FC = () => {
               <span>•</span>
               <span>LAW 23-12</span>
               <span>•</span>
+              <span>LAW 15-04</span>
+              <span>•</span>
               <span>DECREE 15-247</span>
             </div>
           </div>

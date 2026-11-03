@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'wouter';
 import { useI18n } from '@/i18n';
+import Logo from '@/components/ui/Logo';
 import {
   ArrowLeft,
   ArrowRight,
@@ -10,7 +11,9 @@ import {
   CheckCircle2,
   FileCheck2,
   Lock,
-  Layers
+  Layers,
+  Receipt,
+  FileSignature
 } from 'lucide-react';
 
 export const V3Hero: React.FC = () => {
@@ -83,18 +86,20 @@ export const V3Hero: React.FC = () => {
                 <div className="w-1/2 bg-[#d21034]" />
               </div>
 
-              {/* Algerian Republic Header with Flag Emblem */}
-              <div className="flex items-center justify-center gap-2 sm:gap-3 mb-4">
-                <span className="h-0.5 w-6 sm:w-12 bg-gradient-to-r from-transparent to-[#006233]" />
-                <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-50 border border-slate-200 shadow-2xs">
-                  <span className="text-sm select-none" aria-hidden="true">🇩🇿</span>
-                  <span className="text-[13px] font-bold font-mono text-slate-800 tracking-wider uppercase">
+              {/* Algerian Republic Header with Emblem & Flanking National Lines */}
+              <div className="flex items-center justify-center gap-2 sm:gap-4 mb-4">
+                <span className="h-[2px] w-8 sm:w-16 bg-gradient-to-r from-transparent via-[#006233]/70 to-[#006233] rounded-full" />
+                <div className="inline-flex items-center gap-2 sm:gap-2.5 px-3.5 py-1.5 rounded-full bg-slate-50/95 border border-slate-200/90 shadow-2xs hover:border-slate-300 transition-colors">
+                  <div className="size-5 sm:size-6 flex items-center justify-center shrink-0">
+                    <Logo size={22} />
+                  </div>
+                  <span className={`text-[12px] sm:text-[13px] font-bold text-slate-800 select-none ${isAr ? 'font-sans tracking-normal' : 'font-mono tracking-wider uppercase'}`}>
                     {isAr
                       ? 'الجمهورية الجزائرية الديمقراطية الشعبية'
                       : 'RÉPUBLIQUE ALGÉRIENNE DÉMOCRATIQUE ET POPULAIRE'}
                   </span>
-                </span>
-                <span className="h-0.5 w-6 sm:w-12 bg-gradient-to-l from-transparent to-[#d21034]" />
+                </div>
+                <span className="h-[2px] w-8 sm:w-16 bg-gradient-to-l from-transparent via-[#d21034]/70 to-[#d21034] rounded-full" />
               </div>
 
               {/* Monumental Platform Name inside the National Frame */}
@@ -112,6 +117,11 @@ export const V3Hero: React.FC = () => {
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[13px] font-bold bg-[#d21034]/10 text-[#d21034] border border-[#d21034]/30">
                   <span className="size-2 rounded-full bg-[#d21034]" />
                   <span>{isAr ? 'القانون 23-12 • المادة 67' : 'Loi 23-12 • Art. 67'}</span>
+                </span>
+
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[13px] font-bold bg-[#146ef5]/10 text-[#146ef5] border border-[#146ef5]/30">
+                  <span className="size-2 rounded-full bg-[#146ef5]" />
+                  <span>{isAr ? 'التوقيع المؤهل • القانون 15-04' : 'Signature Qualifiée • Loi 15-04'}</span>
                 </span>
               </div>
 
@@ -150,10 +160,15 @@ export const V3Hero: React.FC = () => {
           </div>
 
           {/* Micro Trust Indicators */}
-          <div className="pt-4 flex flex-wrap items-center justify-center gap-6 text-[13px] text-[#5a5a5a]">
+          <div className="pt-4 flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-[13px] text-[#5a5a5a]">
             <span className="flex items-center gap-1.5">
-              <CheckCircle2 className="size-4 text-[#146ef5]" />
-              <span>{isAr ? 'ورق 0% (المادة 67)' : 'Zéro Papier (Art. 67)'}</span>
+              <CheckCircle2 className="size-4 text-[#006233]" />
+              <span>{isAr ? 'تجريد كامل (المادة 67)' : 'Zéro Papier (Art. 67)'}</span>
+            </span>
+            <span className="text-[#d8d8d8]">•</span>
+            <span className="flex items-center gap-1.5">
+              <FileSignature className="size-4 text-[#146ef5]" />
+              <span>{isAr ? 'توقيع مؤهل (القانون 15-04)' : 'Signature Légale (Loi 15-04)'}</span>
             </span>
             <span className="text-[#d8d8d8]">•</span>
             <span className="flex items-center gap-1.5">
@@ -162,7 +177,7 @@ export const V3Hero: React.FC = () => {
             </span>
             <span className="text-[#d8d8d8]">•</span>
             <span className="flex items-center gap-1.5">
-              <FileCheck2 className="size-4 text-[#146ef5]" />
+              <Receipt className="size-4 text-[#146ef5]" />
               <span>{isAr ? 'وصل سحب رقمي معتمد' : 'Reçu numérique certifié'}</span>
             </span>
           </div>
