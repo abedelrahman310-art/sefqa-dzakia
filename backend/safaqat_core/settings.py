@@ -136,7 +136,8 @@ if IS_TESTING:
 # Database
 # Default to PostgreSQL, with fallback to SQLite for quick local test runs
 DB_ENGINE = os.environ.get('DB_ENGINE', 'postgresql')
-if IS_TESTING or DB_ENGINE in ('sqlite', 'sqlite3'):
+TEST_WITH_POSTGRES = os.environ.get('TEST_WITH_POSTGRES', 'False').lower() in ('true', '1', 'yes')
+if (IS_TESTING and not TEST_WITH_POSTGRES) or DB_ENGINE in ('sqlite', 'sqlite3'):
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
