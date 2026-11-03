@@ -357,10 +357,19 @@ class OperatorRecommendedDealsView(views.APIView):
         if extra_wilaya and str(extra_wilaya) not in [str(w) for w in op_wilayas]:
             op_wilayas = list(op_wilayas) + [str(extra_wilaya)]
 
-        # استعلام الصفقات المنشورة الجارية فقط (استبعاد الصفقات المنتهية وفقاً للمادة 68 من القانون 23-12)
-        deals = ProcurementDeal.objects.filter(current_stage__gte=3).filter(
-            models.Q(submission_deadline__gte=timezone.now()) | models.Q(submission_deadline__isnull=True)
-        ).select_related('authority')
+        # استعلام الصفقات المنشورة الجارية فقط لرادار الصفقات التنبؤي (استبعاد الصفقات المنتهية حصرياً وفقاً للمادة 68 من القانون 23-12)
+        now = timezone.now()
+        deals = (
+            ProcurementDeal.objects.filter(
+                current_stage__in=[3, 4, 5],
+                submission_deadline__gt=now,
+            )
+            .exclude(
+                status__in=['CANCELLED', 'INFRACTED', 'closed', 'cancelled', 'rejected']
+            )
+            .select_related('authority')
+            .order_by('submission_deadline')
+        )
 
         scored_deals = []
         for deal in deals:
@@ -449,6 +458,8 @@ class OperatorRecommendedDealsView(views.APIView):
                 'wilaya': deal.wilaya,
                 'estimated_budget': str(deal.estimated_budget) if deal.estimated_budget else None,
                 'submission_deadline': deal.submission_deadline.isoformat() if deal.submission_deadline else None,
+                'is_expired': False,
+                'days_left': getattr(deal, 'days_left', 0),
                 'current_stage': deal.current_stage,
                 'current_stage_display': deal.get_current_stage_display(),
                 'match_score': total_score,

@@ -6,6 +6,7 @@ from rest_framework import status
 from apps.users.models import CustomUser, OperatorProfile
 from apps.procurements.models import ProcurementDeal, CahierSpecs
 from apps.bids.models import BidOffer
+from apps.ai_gateway.services.operator_matcher import recommend_tenders
 
 
 class ExpiredDealsEnforcementTests(APITestCase):
@@ -27,13 +28,16 @@ class ExpiredDealsEnforcementTests(APITestCase):
             display_name='شركة الإنجاز الجزائرية',
             organization_name='شركة الإنجاز',
         )
-        self.operator_profile, _ = OperatorProfile.objects.get_or_create(user=self.operator)
+        self.operator_profile, _ = OperatorProfile.objects.get_or_create(
+            user=self.operator,
+            defaults={'sector': 'works', 'available_wilayas': ['الجزائر', 'وهران']}
+        )
 
         # 3. صفقة نشطة سارية المفعول
         self.active_deal = ProcurementDeal.objects.create(
             reference_number='DZ-2026-ACTIVE-001',
             title='مشروع بناء مدرسة ابتدائية - نشطة',
-            description='مشروع قيد استلام العروض',
+            description='مشروع قيد استلام العروض أشغال بناء',
             authority=self.authority,
             current_stage=5,
             status='open',
@@ -48,7 +52,7 @@ class ExpiredDealsEnforcementTests(APITestCase):
         self.expired_deal = ProcurementDeal.objects.create(
             reference_number='DZ-2026-EXPIRED-002',
             title='مشروع تهيئة طريق ولائي - منتهية',
-            description='مشروع انقضى أجله القانوني',
+            description='مشروع انقضى أجله القانوني أشغال طرقات',
             authority=self.authority,
             current_stage=5,
             status='open',
@@ -147,3 +151,23 @@ class ExpiredDealsEnforcementTests(APITestCase):
         res = self.client.post('/api/ai/analyze-tender/', {'deal_id': str(self.expired_deal.id)}, format='json')
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('68', str(res.data))
+
+    def test_radar_recommended_deals_strictly_excludes_expired_deals(self):
+        """رادار الصفقات التنبؤي /api/operator/recommended-deals/ يستبعد الصفقات المنتهية نهائياً"""
+        self.client.force_authenticate(user=self.operator)
+
+        res = self.client.get('/api/operator/recommended-deals/')
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        deals = res.data if isinstance(res.data, list) else res.data.get('results', [])
+        ids = [str(d['deal_id']) for d in deals]
+        # الصفقة النشطة فقط هي التي تظهر في الرادار
+        self.assertIn(str(self.active_deal.id), ids)
+        # الصفقة المنتهية مستبعدة تماماً وقطعياً
+        self.assertNotIn(str(self.expired_deal.id), ids)
+
+    def test_operator_matcher_service_strictly_excludes_expired(self):
+        """خدمة operator_matcher.recommend_tenders تستبعد الصفقات المنتهية نهائياً"""
+        recommendations = recommend_tenders(operator=self.operator, limit=10)
+        rec_ids = [str(r.get('deal_id') or r.get('id') or r.get('tender_id')) for r in recommendations]
+        self.assertIn(str(self.active_deal.id), rec_ids)
+        self.assertNotIn(str(self.expired_deal.id), rec_ids)

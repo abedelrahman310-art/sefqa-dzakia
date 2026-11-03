@@ -361,12 +361,19 @@ def recommend_tenders(operator: Any, limit: int = 10) -> List[Dict[str, Any]]:
     
     try:
         from apps.procurements.models import ProcurementDeal
-        # الصفقات المنشورة الجارية لإيداع العروض (المراحل 3، 4، 5)
-        deals = list(ProcurementDeal.objects.filter(current_stage__in=[3, 4, 5]))
-        if not deals:
-            deals = list(ProcurementDeal.objects.filter(current_stage__gte=3))
-        if not deals:
-            deals = list(ProcurementDeal.objects.all())
+        # الصفقات المنشورة الجارية فقط لإيداع العروض (المراحل 3، 4، 5) مع استبعاد الصفقات المنتهية وفق القانون 23-12
+        from django.utils import timezone
+        now = timezone.now()
+        deals = list(
+            ProcurementDeal.objects.filter(
+                current_stage__in=[3, 4, 5],
+                submission_deadline__gt=now,
+            )
+            .exclude(
+                status__in=['CANCELLED', 'INFRACTED', 'closed', 'cancelled', 'rejected']
+            )
+            .order_by('submission_deadline')
+        )
     except Exception as exc:
         logger.error("تعذر استعلام الصفقات المنشورة من قاعدة البيانات: %s", exc)
         deals = []

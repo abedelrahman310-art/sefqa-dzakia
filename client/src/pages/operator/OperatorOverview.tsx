@@ -132,7 +132,15 @@ export function OperatorOverview() {
         if (cancelled) return;
         const payload = response.data;
         const items = Array.isArray(payload) ? payload : payload?.deals || payload?.results || [];
-        setRecommendedDeals(Array.isArray(items) ? items.slice(0, 3) : []);
+        const activeOnly = (Array.isArray(items) ? items : []).filter((d: any) => {
+          if (d.is_expired) return false;
+          if (d.submission_deadline) {
+            const dt = new Date(d.submission_deadline).getTime();
+            if (Number.isFinite(dt) && dt <= Date.now()) return false;
+          }
+          return true;
+        });
+        setRecommendedDeals(activeOnly.slice(0, 3));
       })
       .catch((err) => {
         if (cancelled) return;

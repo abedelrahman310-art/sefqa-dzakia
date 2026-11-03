@@ -19,6 +19,8 @@ import {
   ShieldCheck,
   TrendingUp,
   Zap,
+  Briefcase,
+  Clock,
 } from 'lucide-react';
 
 export interface RecommendedDeal {
@@ -31,6 +33,8 @@ export interface RecommendedDeal {
   wilaya?: string | null;
   estimated_budget?: string | null;
   submission_deadline?: string | null;
+  is_expired?: boolean;
+  days_left?: number;
   current_stage: number;
   current_stage_display?: string;
   match_score: number;
@@ -39,6 +43,14 @@ export interface RecommendedDeal {
   reasons: string[];
   warnings: string[];
 }
+
+/** فحص صارم في الواجهة لاستبعاد الصفقات المنتهية وفق أحكام المادة 68 من القانون 23-12 */
+export const isDealExpired = (deal: { is_expired?: boolean; submission_deadline?: string | null }): boolean => {
+  if (deal.is_expired) return true;
+  if (!deal.submission_deadline) return false;
+  const deadlineTime = new Date(deal.submission_deadline).getTime();
+  return Number.isFinite(deadlineTime) && deadlineTime <= Date.now();
+};
 
 interface SmartOpportunityRadarProps {
   onCheckCompliance?: (dealId: string) => void;
@@ -67,20 +79,21 @@ export function SmartOpportunityRadar({
     try {
       const response = await api.get<RecommendedDeal[]>('/operator/recommended-deals/');
       const data = response.data;
-      if (Array.isArray(data)) {
-        setDeals(data);
-      } else if (data && typeof data === 'object' && Array.isArray((data as any).results)) {
-        setDeals((data as any).results);
-      } else {
-        setDeals([]);
-      }
+      const rawList: RecommendedDeal[] = Array.isArray(data)
+        ? data
+        : data && typeof data === 'object' && Array.isArray((data as any).results)
+        ? (data as any).results
+        : [];
+      // طبقة حماية صلبة: تصفية أي صفقات منتهية أو خارج مرحلة استلام العروض (3-5)
+      const activeDeals = rawList.filter((d) => !isDealExpired(d) && (!d.current_stage || (d.current_stage >= 3 && d.current_stage <= 5)));
+      setDeals(activeDeals);
     } catch (err: any) {
       console.warn('Fallback to standard deals fetching for Radar:', err);
       try {
-        const fallback = await api.get('/procurements/deals/');
+        const fallback = await api.get('/procurements/deals/?status=active');
         const items = Array.isArray(fallback.data) ? fallback.data : fallback.data?.results || [];
         const mapped: RecommendedDeal[] = items
-          .filter((d: any) => d.current_stage >= 3)
+          .filter((d: any) => !isDealExpired(d) && d.current_stage >= 3 && d.current_stage <= 5)
           .map((d: any) => ({
             id: String(d.id),
             deal_id: String(d.id),
@@ -91,6 +104,8 @@ export function SmartOpportunityRadar({
             wilaya: d.wilaya || 'الجزائر',
             estimated_budget: d.estimated_budget ? String(d.estimated_budget) : null,
             submission_deadline: d.submission_deadline || null,
+            is_expired: false,
+            days_left: d.days_left ?? 0,
             current_stage: d.current_stage,
             current_stage_display: 'نشر واستلام العروض',
             match_score: 92,
@@ -114,10 +129,12 @@ export function SmartOpportunityRadar({
   }, []);
 
   const filteredDeals = useMemo(() => {
-    if (filterLevel === 'all') return deals;
-    if (filterLevel === 'excellent') return deals.filter((d) => d.match_score >= 80);
-    if (filterLevel === 'good') return deals.filter((d) => d.match_score >= 60);
-    return deals;
+    // طبقة حماية صلبة إضافية تمنع ظهور أي صفقة منتهية في الرادار
+    const activeOnly = deals.filter((d) => !isDealExpired(d));
+    if (filterLevel === 'all') return activeOnly;
+    if (filterLevel === 'excellent') return activeOnly.filter((d) => d.match_score >= 80);
+    if (filterLevel === 'good') return activeOnly.filter((d) => d.match_score >= 60);
+    return activeOnly;
   }, [deals, filterLevel]);
 
   return (
@@ -218,12 +235,38 @@ export function SmartOpportunityRadar({
           <span>{error}</span>
         </div>
       ) : filteredDeals.length === 0 ? (
-        <div className="p-12 text-center bg-white rounded-2xl border border-slate-200/80">
-          <Radio className="size-12 text-slate-300 mx-auto mb-3" />
-          <h4 className="text-sm font-bold text-slate-800">لم يتم رصد صفقات بالمعايير المختارة</h4>
-          <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
-            قم بتوسيع معايير التصفية أو تحديث قطاعات النشاط المفضلة في ملف مؤسستك.
+        <div className="p-12 text-center bg-white rounded-2xl border border-slate-200/80 shadow-2xs">
+          <div className="relative mx-auto mb-4 flex size-16 items-center justify-center rounded-2xl bg-emerald-50 border border-emerald-200/80 text-emerald-700">
+            <Radio className="size-8" />
+            <span className="absolute -top-1 -end-1 flex size-3">
+              <span className="relative inline-flex size-3 rounded-full bg-emerald-500" />
+            </span>
+          </div>
+          <h4 className="text-base font-bold text-slate-900">
+            لا توجد فرص نشطة متوفرة في الرادار حالياً
+          </h4>
+          <p className="text-xs text-slate-500 mt-1.5 max-w-md mx-auto leading-relaxed">
+            جميع الصفقات المرصودة إما انقضت مهلتها القانونية لإيداع العروض (وفق المادة 68 من القانون 23-12) أو لا تطابق قطاع نشاطك حالياً. يمكنك تحديث قطاعات نشاطك أو مراجعة كافة الصفقات المنشورة.
           </p>
+          <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
+            <button
+              type="button"
+              className="op-btn op-btn-outline op-btn-sm cursor-pointer"
+              onClick={() => void loadRecommendedDeals(true)}
+              disabled={refreshing || loading}
+            >
+              <RefreshCw className={`size-3.5 ${refreshing ? 'animate-spin' : ''}`} />
+              <span>إعادة تشغيل المسح</span>
+            </button>
+            <button
+              type="button"
+              className="op-btn op-btn-gold op-btn-sm cursor-pointer"
+              onClick={() => setLocation('/operator/deals')}
+            >
+              <Briefcase className="size-3.5" />
+              <span>استعراض كافة الصفقات المنشورة</span>
+            </button>
+          </div>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
@@ -320,7 +363,7 @@ export function SmartOpportunityRadar({
                   {/* إعداد العرض فوراً */}
                   <button
                     type="button"
-                    onClick={() => setLocation(`/operator/offers/new?dealId=${deal.id}`)}
+                    onClick={() => setLocation(`/operator/opportunities/${deal.deal_id || deal.id}`)}
                     className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-[#006233] to-[#0f3154] px-3 py-2 text-xs font-bold text-white shadow-xs hover:shadow-md transition-all hover:-translate-y-0.5 cursor-pointer"
                   >
                     <span>تقديم عرض</span>
