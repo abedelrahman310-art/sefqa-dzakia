@@ -1,3 +1,4 @@
+from apps.procurements.views_injunctions import CentralInjunctionsView, InjunctionPdfView
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from apps.users.views import ExcludedOperatorViewSet
@@ -16,6 +17,11 @@ excluded_router = DefaultRouter()
 excluded_router.register(r'excluded-operators', ExcludedOperatorViewSet, basename='central-excluded-operators')
 
 urlpatterns = [
+    # 10. الإعذارات الإدارية الرقابية (Administrative Injunctions API)
+    path('injunctions/', CentralInjunctionsView.as_view(), name='central-injunctions'),
+    path('injunctions', CentralInjunctionsView.as_view(), name='central-injunctions-no-slash'),
+    path('injunctions/<uuid:pk>/pdf/', InjunctionPdfView.as_view(), name='central-injunction-pdf'),
+    path('injunctions/<uuid:pk>/pdf', InjunctionPdfView.as_view(), name='central-injunction-pdf-no-slash'),
     # 1. الخريطة الحرارية (Heatmap API)
     path('heatmap/', CentralHeatmapView.as_view(), name='central-heatmap'),
     path('heatmap', CentralHeatmapView.as_view(), name='central-heatmap-no-slash'),

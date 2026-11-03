@@ -1,3 +1,9 @@
+from apps.procurements.views_injunctions import (
+    AuthorityInjunctionsView,
+    InjunctionRespondView,
+    InjunctionAcknowledgeView,
+    InjunctionPdfView,
+)
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import (
@@ -46,6 +52,16 @@ router.register(r'avenants', AvenantViewSet, basename='procurement-avenant')
 router.register(r'notices', LegalNoticeViewSet, basename='procurement-notice')
 
 urlpatterns = [
+    path("authorities/<uuid:authority_id>/injunctions/", AuthorityInjunctionsView.as_view(), name="authority-injunctions"),
+    path("authorities/<uuid:authority_id>/injunctions", AuthorityInjunctionsView.as_view(), name="authority-injunctions-no-slash"),
+    path("my-injunctions/", AuthorityInjunctionsView.as_view(), name="my-injunctions"),
+    path("my-injunctions", AuthorityInjunctionsView.as_view(), name="my-injunctions-no-slash"),
+    path("injunctions/<uuid:pk>/respond/", InjunctionRespondView.as_view(), name="injunction-respond"),
+    path("injunctions/<uuid:pk>/respond", InjunctionRespondView.as_view(), name="injunction-respond-no-slash"),
+    path("injunctions/<uuid:pk>/acknowledge/", InjunctionAcknowledgeView.as_view(), name="injunction-acknowledge"),
+    path("injunctions/<uuid:pk>/acknowledge", InjunctionAcknowledgeView.as_view(), name="injunction-acknowledge-no-slash"),
+    path("injunctions/<uuid:pk>/pdf/", InjunctionPdfView.as_view(), name="injunction-pdf"),
+    path("injunctions/<uuid:pk>/pdf", InjunctionPdfView.as_view(), name="injunction-pdf-no-slash"),
     path("deals/<str:deal_id>/notices/", DealLegalNoticesView.as_view(), name="procurement-deal-notices"),
     path("deals/<str:deal_id>/notices", DealLegalNoticesView.as_view(), name="procurement-deal-notices-no-slash"),
     path("notices/<uuid:pk>/acknowledge/", LegalNoticeAcknowledgeView.as_view(), name="procurement-notice-acknowledge"),

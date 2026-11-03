@@ -31,6 +31,7 @@ import {
   RefreshCw,
   ShieldCheck,
   Sparkles,
+  AlertOctagon,
 } from 'lucide-react';
 
 interface Opportunity {
@@ -41,6 +42,7 @@ interface Opportunity {
   authorityName: string;
   updatedAt: string;
   hasDocument: boolean;
+  hasActiveInjunction?: boolean;
 }
 
 const SEVERITY_STYLES: Record<TenderAnalysisSeverity, string> = {
@@ -93,6 +95,7 @@ export function OpportunityDetails() {
             authorityName: deal.authority_entity || deal.authority_name || t('operator.opportunities.table_authority'),
             updatedAt: deal.updated_at || deal.created_at || new Date().toISOString(),
             hasDocument: !!deal.cahier_specs,
+            hasActiveInjunction: !!deal.has_active_injunction,
           });
         }
       })
@@ -175,6 +178,12 @@ export function OpportunityDetails() {
             <Calendar className="size-3.5" aria-hidden="true" />
             <span>{t('operator.offers.last_updated')} {formatDate(opp.updatedAt, lang)}</span>
           </p>
+          {opp.hasActiveInjunction && (
+            <div className="mt-2 inline-flex items-center gap-2 rounded-xl border border-amber-300 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-900 shadow-sm dark:border-amber-900/50 dark:bg-amber-950/40 dark:text-amber-300">
+              <AlertOctagon className="size-4 shrink-0 text-amber-600 dark:text-amber-400" />
+              <span>{t('operator.opportunity.under_injunction')}</span>
+            </div>
+          )}
         </div>
         <div className="op-page-actions">
           <button

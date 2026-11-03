@@ -11,6 +11,7 @@ import { CentralAppeals } from './CentralAppeals';
 import { CentralReports } from './CentralReports';
 import { CentralPermissions } from './CentralPermissions';
 import { CentralIntegrityView } from './CentralIntegrityView';
+import { CentralInjunctions } from './CentralInjunctions';
 import { OperatorNotificationsView } from '@/pages/operator/OperatorNotificationsView';
 import { PortalNotFound } from '@/components/common/PortalNotFound';
 import CentralAdminTopBar from '@/components/layout/CentralAdminTopBar';
@@ -25,6 +26,7 @@ import {
   AlertTriangle,
   BarChart,
   Shield,
+  Gavel,
 } from 'lucide-react';
 
 export function CentralSpace() {
@@ -47,6 +49,7 @@ export function CentralSpace() {
   const [isReportsActive] = useRoute('/central/reports');
   const [isPermissionsActive] = useRoute('/central/permissions');
   const [isIntegrityActive] = useRoute('/central/integrity');
+  const [isInjunctionsActive] = useRoute('/central/injunctions');
 
   const navItems = [
     {
@@ -99,6 +102,13 @@ export function CentralSpace() {
       isActive: isReportsActive,
     },
     {
+      id: 'injunctions',
+      label: t('central.injunctions.title') || 'الإعذارات الإدارية',
+      href: '/central/injunctions',
+      icon: Gavel,
+      isActive: isInjunctionsActive,
+    },
+    {
       id: 'integrity',
       label: 'رادار الرقابة والنزاهة (AI Anti-Fraud)',
       href: '/central/integrity',
@@ -144,6 +154,7 @@ export function CentralSpace() {
         <Route path="/central/operators" component={CentralOperators} />
         <Route path="/central/appeals" component={CentralAppeals} />
         <Route path="/central/reports" component={CentralReports} />
+        <Route path="/central/injunctions" component={CentralInjunctions} />
         <Route path="/central/integrity" component={CentralIntegrityView} />
         <Route path="/central/permissions" component={CentralPermissions} />
         <Route path="/central/notifications" component={OperatorNotificationsView} />

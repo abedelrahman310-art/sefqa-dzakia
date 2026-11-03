@@ -86,6 +86,12 @@ class ProcurementDeal(models.Model):
         """عدد الاعذارات القانونية النشطة أو المنتهية"""
         return self.legal_notices.filter(status__in=['issued', 'acknowledged', 'expired']).count()
 
+
+    @property
+    def has_active_injunction(self) -> bool:
+        """هل توجد إعذارات إدارية رقابية نشطة أو محالة للقضاء ضد هذه الصفقة"""
+        return self.administrative_injunctions.filter(status__in=['issued', 'acknowledged', 'escalated_to_court']).exists()
+
     @property
     def has_expired_notice(self) -> bool:
         """هل توجد اعذارات قانونية منتهية المهلة مع تطبيق غرامات"""
@@ -711,5 +717,178 @@ class LegalNotice(models.Model):
 
         if has_changed:
             self.save(update_fields=['status', 'penalty_amount', 'updated_at'])
+            return True
+        return False
+
+
+class AdministrativeNotice(models.Model):
+    """
+    نموذج الإعذار الإداري الرقابي (Administrative Injunction) من الإدارة المركزية (عين الصقر) للمصلحة المتعاقدة
+    وفقاً لأحكام القانون رقم 23-12 (لا سيما المواد 13، 67، 75) والمرسوم الرئاسي 15-247.
+    يُصدر عند رصد مخالفة جسيمة (تجزئة صفقات، تجاوز ملاحق، إشراك شركات مقصاة، إلخ)
+    ويلزم المصلحة بتصحيح الوضع خلال مهلة قانونية (افتراضياً 15 يوماً)، وإلا يُحال الملف تلقائياً للجهات القضائية ومجلس المحاسبة.
+    """
+    VIOLATION_TYPES = (
+        ('tender_splitting', 'تجزئة الصفقات العمومية للتهرب من الرقابة (المادة 13 من القانون 23-12)'),
+        ('avenant_excess', 'تجاوز السقف القانوني الأقصى للملاحق التعاقدية (المادتان 138 و139)'),
+        ('blacklist_violation', 'منح أو إشراك متعامل اقتصادي مقصى في القائمة السوداء (المادة 75)'),
+        ('deadline_breach', 'إخلال بالآجال والمهل القانونية الملزمة المحددة بالتنظيم'),
+        ('hawk_eye_ignored', 'تجاهل إنذارات وتنبيهات عين الصقر المسبقة حول شبهات التلاعب'),
+        ('procedural_violation', 'مخالفات إجرائية وقانونية في شروط إبرام وتقييم العروض'),
+        ('other', 'مخالفات إدارية وتنظيمية أخرى'),
+    )
+
+    STATUS_CHOICES = (
+        ('issued', 'صادر وقيد المهلة (نشط)'),
+        ('acknowledged', 'مستلم ومقر به من المصلحة'),
+        ('resolved', 'تم تقديم تقرير التصحيح واعتماده'),
+        ('escalated_to_court', 'محال للجهات القضائية ومجلس المحاسبة (انقضاء المهلة)'),
+    )
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    reference = models.CharField('الرقم المرجعي للإعذار الرقابي', max_length=100, unique=True)
+    authority = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name='received_injunctions',
+        verbose_name='المصلحة المتعاقدة المستهدفة'
+    )
+    deal = models.ForeignKey(
+        ProcurementDeal,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='administrative_injunctions',
+        verbose_name='الصفقة المعنية إن وجدت'
+    )
+    violation_type = models.CharField('نوع المخالفة القانونية', max_length=50, choices=VIOLATION_TYPES, default='tender_splitting')
+    legal_reference = models.CharField('المادة والسند القانوني المخالف', max_length=255, default='المادة 13 من القانون 23-12')
+    directive_text = models.TextField('نص الأمر الإداري الملزم بالتصحيح والتسوية')
+    violation_details = models.TextField('حيثيات ووقائع المخالفة المثبتة لدى الرقابة المركزية', blank=True, default='')
+    issued_date = models.DateField('تاريخ الإصدار والتبليغ', default=timezone.localdate)
+    deadline_days = models.PositiveIntegerField('المهلة الممنوحة للتصحيح (بالأيام)', default=15)
+    status = models.CharField('وضعية الإعذار الإداري', max_length=40, choices=STATUS_CHOICES, default='issued')
+    
+    issued_by = models.ForeignKey(
+        CustomUser,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='issued_injunctions',
+        verbose_name='المفتش المركزي / الآمر بالإعذار'
+    )
+
+    # رد المصلحة وتقرير التصحيح
+    authority_response = models.TextField('تقرير التصحيح ورد المصلحة المتعاقدة', blank=True, default='')
+    authority_response_file = models.FileField('ملف تقرير التصحيح المرفق (PDF)', upload_to='injunctions/responses/%Y/%m/', null=True, blank=True)
+    responded_at = models.DateTimeField('تاريخ تقديم تقرير التصحيح', null=True, blank=True)
+    responded_by = models.ForeignKey(
+        CustomUser,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='submitted_injunction_responses',
+        verbose_name='المسؤول المقر بالتصحيح'
+    )
+
+    acknowledged_at = models.DateTimeField('تاريخ تأكيد استلام الإعذار', null=True, blank=True)
+    escalated_at = models.DateTimeField('تاريخ الإحالة القضائية', null=True, blank=True)
+    escalation_reason = models.TextField('حيثيات الإحالة القضائية', blank=True, default='')
+
+    # الوثيقة الرسمية
+    document_pdf = models.FileField('وثيقة الإعذار الإداري الرسمية (PDF)', upload_to='injunctions/official/%Y/%m/', null=True, blank=True)
+
+    created_at = models.DateTimeField('تاريخ التسجيل', default=timezone.now)
+    updated_at = models.DateTimeField('آخر تحديث', auto_now=True)
+
+    class Meta:
+        verbose_name = 'إعذار إداري رقابي'
+        verbose_name_plural = 'الإعذارات الإدارية الرقابية (Administrative Injunctions)'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.reference} - {self.authority.full_name} ({self.get_status_display()})"
+
+    @property
+    def deadline_date(self):
+        """تاريخ انقضاء المهلة المحددة بالأمر الإداري"""
+        if not self.issued_date:
+            return None
+        from datetime import timedelta
+        return self.issued_date + timedelta(days=self.deadline_days)
+
+    @property
+    def days_remaining(self) -> int:
+        """عدد الأيام المتبقية قبل انقضاء مهلة التصحيح والإحالة للقضاء"""
+        if self.status == 'resolved':
+            return 0
+        dl = self.deadline_date
+        if not dl:
+            return 0
+        today = timezone.localdate()
+        diff = (dl - today).days
+        return max(0, diff)
+
+    @property
+    def is_expired(self) -> bool:
+        """هل انقضت المهلة دون تقديم تقرير التصحيح"""
+        if self.status == 'resolved':
+            return False
+        dl = self.deadline_date
+        if not dl:
+            return False
+        return timezone.localdate() > dl
+
+    def check_and_update_escalation(self) -> bool:
+        """
+        التحقق الآلي: إذا انقضت مهلة الـ 15 يوماً دون رد المصلحة وتقديم تقرير التصحيح،
+        يتحول الوضع تلقائياً إلى 'escalated_to_court' وتُرسل إخطارات عاجلة لمفتشي عين الصقر والمصلحة.
+        """
+        if self.status in ['resolved', 'escalated_to_court']:
+            return False
+
+        today = timezone.localdate()
+        dl = self.deadline_date
+        if not dl:
+            return False
+
+        if today > dl:
+            self.status = 'escalated_to_court'
+            self.escalated_at = timezone.now()
+            self.escalation_reason = (
+                f"انقضاء المهلة القانونية ({self.deadline_days} يوماً) المحددة في الإعذار الإداري رقم {self.reference} "
+                f"دون تقديم المصلحة المتعاقدة لتقرير التصحيح. تمت الإحالة الآلية للجهات القضائية ومجلس المحاسبة."
+            )
+            self.save(update_fields=['status', 'escalated_at', 'escalation_reason', 'updated_at'])
+
+            try:
+                from apps.users.models import Notification
+                inspectors = CustomUser.objects.filter(models.Q(role='central_admin') | models.Q(is_staff=True))
+                auth_name = getattr(self.authority, 'entity_name', None) or getattr(self.authority, 'full_name', None) or self.authority.email
+                for inspector in inspectors:
+                    Notification.objects.create(
+                        user=inspector,
+                        title=f"إحالة قضائية عاجلة: انقضاء مهلة الإعذار الإداري {self.reference}",
+                        text=(
+                            f"انقضت المهلة الممنوحة للمصلحة ({auth_name}) لتصحيح مخالفة '{self.get_violation_type_display()}'. "
+                            f"تم تصعيد الملف رسمياً للإحالة القضائية ومجلس المحاسبة وفق المادة 13 من القانون 23-12."
+                        ),
+                        link_href="/central/injunctions",
+                        notification_type="urgent",
+                    )
+                Notification.objects.create(
+                    user=self.authority,
+                    title=f"إحالة للمتابعة القضائية: إعذار إداري رقم {self.reference}",
+                    text=(
+                        f"نحيطكم علماً بأنه نظراً لانقضاء المهلة دون تسوية المخالفة، "
+                        f"تم تصعيد الملف آلياً للإحالة إلى الجهات القضائية المختصة ومجلس المحاسبة."
+                    ),
+                    link_href="/authority/settings",
+                    notification_type="urgent",
+                )
+            except Exception as e:
+                import logging
+                logging.getLogger(__name__).warning("تعذر إرسال إشعار الإحالة القضائية للإعذار %s: %s", self.id, e)
+
             return True
         return False

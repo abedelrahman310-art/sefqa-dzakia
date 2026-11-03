@@ -13,6 +13,7 @@ from .models import (
     MilestoneProgressReport,
     Avenant,
     LegalNotice,
+    AdministrativeNotice,
 )
 from .reference_prices import normalize_item_name, normalize_wilaya
 from apps.bids.models import BidOffer
@@ -247,6 +248,7 @@ class LegalNoticeSerializer(serializers.ModelSerializer):
             'document_pdf',
             'created_at',
             'updated_at',
+            'has_active_injunction',
         ]
         read_only_fields = [
             'id',
@@ -261,6 +263,7 @@ class LegalNoticeSerializer(serializers.ModelSerializer):
             'is_expired',
             'created_at',
             'updated_at',
+            'has_active_injunction',
         ]
 
     def get_operator_name(self, obj):
@@ -279,6 +282,104 @@ class LegalNoticeSerializer(serializers.ModelSerializer):
         # التحقق التلقائي وتحديث غرامات التأخير في حال انقضاء المهلة
         try:
             instance.check_and_update_expiry_and_penalty()
+        except Exception:
+            pass
+        return super().to_representation(instance)
+
+
+
+
+class AdministrativeNoticeSerializer(serializers.ModelSerializer):
+    """
+    محدد بيانات الإعذار الإداري الرقابي الصادر من الإدارة المركزية (عين الصقر)
+    وفقاً لأحكام القانون رقم 23-12 والمرسوم الرئاسي 15-247.
+    """
+    authority_name = serializers.SerializerMethodField()
+    authority_entity = serializers.SerializerMethodField()
+    authority_wilaya = serializers.SerializerMethodField()
+    deal_reference = serializers.ReadOnlyField(source='deal.reference_number')
+    deal_title = serializers.ReadOnlyField(source='deal.title')
+    violation_type_display = serializers.CharField(source='get_violation_type_display', read_only=True)
+    status_display = serializers.CharField(source='get_status_display', read_only=True)
+    issued_by_name = serializers.ReadOnlyField(source='issued_by.full_name')
+    responded_by_name = serializers.ReadOnlyField(source='responded_by.full_name')
+    deadline_date = serializers.DateField(read_only=True)
+    days_remaining = serializers.IntegerField(read_only=True)
+    is_expired = serializers.BooleanField(read_only=True)
+
+    class Meta:
+        model = AdministrativeNotice
+        fields = [
+            'id',
+            'reference',
+            'authority',
+            'authority_name',
+            'authority_entity',
+            'authority_wilaya',
+            'deal',
+            'deal_reference',
+            'deal_title',
+            'violation_type',
+            'violation_type_display',
+            'legal_reference',
+            'directive_text',
+            'violation_details',
+            'issued_date',
+            'deadline_days',
+            'deadline_date',
+            'days_remaining',
+            'is_expired',
+            'status',
+            'status_display',
+            'issued_by',
+            'issued_by_name',
+            'authority_response',
+            'authority_response_file',
+            'responded_at',
+            'responded_by',
+            'responded_by_name',
+            'acknowledged_at',
+            'escalated_at',
+            'escalation_reason',
+            'document_pdf',
+            'created_at',
+            'updated_at',
+        ]
+        read_only_fields = [
+            'id',
+            'authority_name',
+            'authority_entity',
+            'authority_wilaya',
+            'deal_reference',
+            'deal_title',
+            'issued_by_name',
+            'responded_by_name',
+            'deadline_date',
+            'days_remaining',
+            'is_expired',
+            'created_at',
+            'updated_at',
+            'escalated_at',
+        ]
+
+    def get_authority_name(self, obj):
+        if obj.authority:
+            return getattr(obj.authority, 'organization_name', None) or getattr(obj.authority, 'entity_name', None) or getattr(obj.authority, 'full_name', None) or obj.authority.email
+        return 'المصلحة المتعاقدة'
+
+    def get_authority_entity(self, obj):
+        if obj.authority:
+            return getattr(obj.authority, 'entity_name', None) or getattr(obj.authority, 'organization_name', None) or ''
+        return ''
+
+    def get_authority_wilaya(self, obj):
+        if obj.authority:
+            return getattr(obj.authority, 'wilaya', None) or (obj.deal.wilaya if obj.deal else '')
+        return ''
+
+    def to_representation(self, instance):
+        try:
+            instance.check_and_update_escalation()
         except Exception:
             pass
         return super().to_representation(instance)
@@ -532,6 +633,7 @@ class OpportunitySerializer(serializers.ModelSerializer):
     submissionDeadline = serializers.DateTimeField(source='submission_deadline', format='%Y-%m-%dT%H:%M:%S%z', read_only=True)
     createdAt = serializers.DateTimeField(source='created_at', format='%Y-%m-%dT%H:%M:%S%z', read_only=True)
     updatedAt = serializers.DateTimeField(source='updated_at', format='%Y-%m-%dT%H:%M:%S%z', read_only=True)
+    has_active_injunction = serializers.SerializerMethodField()
 
     class Meta:
         model = ProcurementDeal
@@ -556,7 +658,11 @@ class OpportunitySerializer(serializers.ModelSerializer):
             'created_at',
             'updatedAt',
             'updated_at',
+            'has_active_injunction',
         ]
+
+    def get_has_active_injunction(self, obj):
+        return getattr(obj, 'has_active_injunction', False)
 
     def get_authorityName(self, obj):
         if obj.authority:
@@ -685,6 +791,9 @@ class OfferSerializer(serializers.ModelSerializer):
             'technical_offer',
         ]
         read_only_fields = ['operator', 'submission_timestamp']
+
+    def get_has_active_injunction(self, obj):
+        return getattr(obj, 'has_active_injunction', False)
 
     def get_authorityName(self, obj):
         if obj.deal and obj.deal.authority:
@@ -900,6 +1009,7 @@ class MilestoneSerializer(serializers.ModelSerializer):
             'progress_reports',
             'created_at',
             'updated_at',
+            'has_active_injunction',
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']
 
@@ -929,6 +1039,7 @@ class ContractSerializer(serializers.ModelSerializer):
             'amount',
             'created_at',
             'updated_at',
+            'has_active_injunction',
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']
 

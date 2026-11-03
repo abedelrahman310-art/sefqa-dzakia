@@ -1024,3 +1024,149 @@ def generate_legal_notice_pdf(notice, user=None) -> bytes:
 
     doc.build(story, canvasmaker=SafaqatNumberedCanvas)
     return buffer.getvalue()
+
+
+
+def generate_administrative_injunction_pdf(injunction, user=None) -> bytes:
+    """
+    توليد وثيقة الإعذار الإداري الرقابي الرسمي (Injonction Administrative de Contrôle)
+    الصادر عن الإدارة المركزية (المفتشية العامة / عين الصقر) وفقاً للقانون 23-12 والمرسوم 15-247.
+    """
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(
+        buffer,
+        pagesize=A4,
+        rightMargin=36,
+        leftMargin=36,
+        topMargin=36,
+        bottomMargin=40,
+        title=f"Injonction_{injunction.reference}",
+        author="Safaqat Dhakia Central Hawk Eye",
+    )
+
+    styles = get_pdf_styles()
+    story = []
+
+    # 1. الترويسة الرسمية للجمهورية والإدارة المركزية
+    story.append(Paragraph(ar("الجمهورية الجزائرية الديمقراطية الشعبية"), styles["HeaderRepublic"]))
+    story.append(Paragraph(ar("وزارة المالية — المفتشية العامة للصفقات العمومية وتفويضات المرفق العام"), styles["HeaderSub"]))
+    story.append(Paragraph(ar("المنظومة الوطنية للرقابة المركزية والنزاهة التعاقدية (عين الصقر)"), styles["BodyBold"]))
+    story.append(Spacer(1, 8))
+
+    # 2. خط أحمر فاصل وعنوان الإعذار الرقابي
+    story.append(HRFlowable(width="100%", thickness=2.5, color=colors.HexColor("#7f1d1d"), spaceAfter=10))
+
+    banner_style = ParagraphStyle(
+        "InjunctionBanner",
+        parent=styles["DocTitle"],
+        textColor=colors.HexColor("#991b1b"),
+        fontSize=15,
+        leading=20,
+    )
+    story.append(Paragraph(ar("إعـذار إداري رقـابـي مـلـزم (INJONCTION ADMINISTRATIVE)"), banner_style))
+    story.append(Paragraph(
+        ar(f"الرقم المرجعي المركزي: {injunction.reference} — أمر بتدارك وتصحيح المخالفات القانونية"),
+        styles["MetaValue"]
+    ))
+    story.append(Spacer(1, 10))
+
+    # 3. الأسانيد القانونية الآمرة
+    story.append(Paragraph(ar("• بمقتضى القانون رقم 23-12 المؤرخ في 5 أوت 2023 المحدد للقواعد العامة للصفقات العمومية، لا سيما المواد 13 (حظر تجزئة الصفقات)، 67 (التبليغ الإلكتروني)، و75 (إقصاء المخالفين)؛"), styles["MetaValue"]))
+    story.append(Paragraph(ar("• بمقتضى المرسوم الرئاسي رقم 15-247 المؤرخ في 16 سبتمبر 2015 المنظم للصفقات العمومية، لا سيما المادتين 138 و139 (ضوابط الملاحق)؛"), styles["MetaValue"]))
+    story.append(Paragraph(ar("• وبناءً على مخرجات التدقيق الرقابي الآلي والتحريات الجنائية المنجزة عبر منظومة عين الصقر المركزية."), styles["MetaValue"]))
+    story.append(Spacer(1, 10))
+
+    # 4. جدول بيانات المصلحة والصفقة المعنية
+    auth = injunction.authority
+    auth_name = getattr(auth, 'organization_name', None) or getattr(auth, 'entity_name', None) or getattr(auth, 'full_name', None) or auth.email
+    deal_info = f"{injunction.deal.reference_number} — {injunction.deal.title}" if injunction.deal else "مخالفة عامة غير مقترنة بصفقة واحدة"
+
+    table_data = [
+        [Paragraph(ar("المصلحة المتعاقدة المستهدفة:"), styles["MetaLabel"]), Paragraph(ar(auth_name), styles["MetaValue"])],
+        [Paragraph(ar("الولاية / النطاق الإقليمي:"), styles["MetaLabel"]), Paragraph(ar(getattr(auth, 'wilaya', '') or (injunction.deal.wilaya if injunction.deal else 'الجزائر')), styles["MetaValue"])],
+        [Paragraph(ar("الصفقة أو المشروع المعني:"), styles["MetaLabel"]), Paragraph(ar(deal_info), styles["MetaValue"])],
+        [Paragraph(ar("طبيعة المخالفة المسجلة:"), styles["MetaLabel"]), Paragraph(ar(injunction.get_violation_type_display()), styles["MetaValue"])],
+        [Paragraph(ar("السند القانوني المخالف:"), styles["MetaLabel"]), Paragraph(ar(injunction.legal_reference), styles["MetaValue"])],
+        [Paragraph(ar("تاريخ صدور الإعذار:"), styles["MetaLabel"]), Paragraph(ar(str(injunction.issued_date)), styles["MetaValue"])],
+        [Paragraph(ar("المهلة القانونية الممنوحة:"), styles["MetaLabel"]), Paragraph(ar(f"{injunction.deadline_days} يوماً تقويمياً (تاريخ الانتهاء: {injunction.deadline_date})"), styles["MetaValue"])],
+        [Paragraph(ar("الوضعية الرقابية الحالية:"), styles["MetaLabel"]), Paragraph(ar(injunction.get_status_display()), styles["MetaValue"])],
+    ]
+
+    info_table = Table(table_data, colWidths=[150, 373])
+    info_table.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (0, -1), colors.HexColor("#fff1f2")),
+        ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#fecaca")),
+        ("ALIGN", (0, 0), (-1, -1), "RIGHT"),
+        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+        ("TOPPADDING", (0, 0), (-1, -1), 4),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+        ("LEFTPADDING", (0, 0), (-1, -1), 8),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 8),
+    ]))
+    story.append(info_table)
+    story.append(Spacer(1, 10))
+
+    # 5. وقائع وحيثيات المخالفة
+    if injunction.violation_details:
+        story.append(Paragraph(ar("وقائع وحيثيات المخالفة المثبتة لدى الرقابة المركزية:"), styles["SectionHeading"]))
+        v_lines = str(injunction.violation_details).split('\n')
+        for v_line in v_lines:
+            if v_line.strip():
+                story.append(Paragraph(ar(v_line.strip()), styles["BodyText"]))
+                story.append(Spacer(1, 2))
+        story.append(Spacer(1, 8))
+
+    # 6. نص الأمر بالتصحيح والتسوية (Directive Text)
+    story.append(Paragraph(ar("الأمر الإداري الآمر بالتصحيح والتسوية الفورية:"), styles["SectionHeading"]))
+    d_lines = str(injunction.directive_text).split('\n')
+    for d_line in d_lines:
+        if d_line.strip():
+            story.append(Paragraph(ar(d_line.strip()), styles["BodyBold"]))
+            story.append(Spacer(1, 2))
+    story.append(Spacer(1, 10))
+
+    # 7. التنبيه القانوني بالإحالة للقضاء ومجلس المحاسبة
+    warning_box_title = Paragraph(ar("الإنذار الصارم بالآثار القضائية والمحاسبية المترتبة:"), styles["StampBold"])
+    warning_box_lines = [
+        Paragraph(ar(f"يُلزم السيد الآمر بالصرف باتخاذ كافة التدابير التصحيحية وموافاة الإدارة المركزية بتقرير تصحيحي مفصل خلال مهلة {injunction.deadline_days} يوماً."), styles["StampText"]),
+        Paragraph(ar("وفي حال انقضاء هذه المهلة دون تسوية مقبولة قانوناً:"), styles["StampText"]),
+        Paragraph(ar("1. يُحال الملف تلقائياً إلى النيابة العامة المختصة إقليمياً للمتابعة القضائية بموجب أحكام القانون 23-12 وقانون الوقاية من الفساد."), styles["StampText"]),
+        Paragraph(ar("2. إخطار مجلس المحاسبة (Cour des Comptes) لإعمال تدابير الرقابة البعدية وتحديد المسؤوليات الفردية والمادية."), styles["StampText"]),
+    ]
+    warning_content = [warning_box_title] + warning_box_lines
+    warning_table = Table([[item] for item in warning_content], colWidths=[523])
+    warning_table.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#fff1f2")),
+        ("BOX", (0, 0), (-1, -1), 1.2, colors.HexColor("#b91c1c")),
+        ("ALIGN", (0, 0), (-1, -1), "RIGHT"),
+        ("TOPPADDING", (0, 0), (-1, -1), 4),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+        ("LEFTPADDING", (0, 0), (-1, -1), 10),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 10),
+    ]))
+    story.append(warning_table)
+    story.append(Spacer(1, 12))
+
+    # 8. التوقيع والأختام الرسمية
+    sig_headers = [
+        Paragraph(ar("المصلحة المتعاقدة الآمرة بالصرف (التسلم والاطلاع الرسمي)"), styles["StampBold"]),
+        Paragraph(ar("المفتشية العامة للرقابة والنزاهة عين الصقر (الاعتماد والختم الرقمي)"), styles["StampBold"]),
+    ]
+    ack_info = f"تم الاستلام: {injunction.acknowledged_at.strftime('%Y-%m-%d %H:%M')}" if injunction.acknowledged_at else "مبلّغ إلكترونياً عبر المنصة الرقمية"
+    sig_space = [
+        Paragraph(ar(f"<br/><br/>{ack_info}"), styles["StampText"]),
+        Paragraph(ar(f"<br/><br/>مفتش الرقابة المركزية<br/>مؤشر رقمياً بتاريخ: {injunction.issued_date}"), styles["StampText"]),
+    ]
+    sig_table = Table([sig_headers, sig_space], colWidths=[261, 262])
+    sig_table.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#f1f5f9")),
+        ("GRID", (0, 0), (-1, -1), 0.75, colors.HexColor("#64748b")),
+        ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+        ("TOPPADDING", (0, 0), (-1, -1), 6),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
+    ]))
+    story.append(KeepTogether([sig_table]))
+
+    doc.build(story, canvasmaker=SafaqatNumberedCanvas)
+    return buffer.getvalue()
