@@ -1,3 +1,4 @@
+import uuid
 import logging
 from decimal import Decimal
 from django.db.models import Count, Sum, Q
@@ -427,6 +428,14 @@ class CentralSuspicionsView(APIView):
             for did in s.get("deal_ids", []):
                 all_deal_ids.add(did)
 
+        valid_uuid_ids = set()
+        for did in all_deal_ids:
+            try:
+                uuid.UUID(str(did))
+                valid_uuid_ids.add(str(did))
+            except (ValueError, TypeError, AttributeError):
+                continue
+
         deals_map = {
             str(d.id): {
                 "id": str(d.id),
@@ -436,7 +445,7 @@ class CentralSuspicionsView(APIView):
                 "estimated_budget": float(d.estimated_budget or 0),
                 "current_stage": d.current_stage,
             }
-            for d in ProcurementDeal.objects.filter(id__in=all_deal_ids)
+            for d in ProcurementDeal.objects.filter(id__in=valid_uuid_ids)
         }
 
         enriched_suspicions = []

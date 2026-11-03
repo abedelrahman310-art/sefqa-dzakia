@@ -16,12 +16,11 @@ class BidOfferSerializer(serializers.ModelSerializer):
         ret = super().to_representation(instance)
         request = self.context.get('request')
         user = getattr(request, 'user', None) if request else None
-        # حجب المبلغ المالي عن المصلحة المتعاقدة قبل مرحلة فتح الأظرفة (المراحل 1، 2، 3)
+        # حجب المبلغ المالي والمبلغ المشفر عن المصلحة المتعاقدة قبل مرحلة فتح الأظرفة الرسمية (المراحل 1، 2، 3)
         if user and getattr(user, 'role', None) == 'authority':
             deal = getattr(instance, 'deal', None)
             stage = getattr(deal, 'current_stage', 1) if deal else 1
-            if stage < 4:
+            if stage < 4 or getattr(instance, 'is_encrypted', True):
                 ret['financial_amount'] = None
+                ret['encrypted_financial_amount'] = None
         return ret
-
-

@@ -226,13 +226,13 @@ REST_FRAMEWORK = {
         'rest_framework.throttling.UserRateThrottle',
     ),
     'DEFAULT_THROTTLE_RATES': {
-        'anon': '5/minute',
-        'user': '60/minute',
-        'login': '5/minute',
-        'deals_search': '60/minute',
-        'ai_chat': '20/hour',
-        'ai_insights': '50/hour',
-        'ai_analyze_tender': '50/hour',
+        'anon': '60/minute' if not IS_TESTING else '1000/minute',
+        'user': '120/minute' if not IS_TESTING else '1000/minute',
+        'login': '15/minute' if not IS_TESTING else '1000/minute',
+        'deals_search': '60/minute' if not IS_TESTING else '1000/minute',
+        'ai_chat': '20/hour' if not IS_TESTING else '1000/minute',
+        'ai_insights': '50/hour' if not IS_TESTING else '1000/minute',
+        'ai_analyze_tender': '50/hour' if not IS_TESTING else '1000/minute',
     },
 }
 

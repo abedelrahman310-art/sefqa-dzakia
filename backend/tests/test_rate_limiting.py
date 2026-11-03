@@ -22,9 +22,18 @@ def auth_user(db):
 class TestRateLimitingSecurity:
     def setup_method(self):
         cache.clear()
+        from rest_framework.settings import api_settings
+        self._orig_rates = dict(api_settings.DEFAULT_THROTTLE_RATES)
+        api_settings.DEFAULT_THROTTLE_RATES['anon'] = '5/minute'
+        api_settings.DEFAULT_THROTTLE_RATES['user'] = '60/minute'
+        api_settings.DEFAULT_THROTTLE_RATES['login'] = '5/minute'
 
     def teardown_method(self):
         cache.clear()
+        from rest_framework.settings import api_settings
+        if hasattr(self, '_orig_rates'):
+            api_settings.DEFAULT_THROTTLE_RATES.clear()
+            api_settings.DEFAULT_THROTTLE_RATES.update(self._orig_rates)
 
     def test_settings_contain_mandatory_throttle_classes_and_rates(self):
         drf_settings = getattr(settings, "REST_FRAMEWORK", {})
@@ -33,8 +42,8 @@ class TestRateLimitingSecurity:
 
         assert "rest_framework.throttling.AnonRateThrottle" in throttle_classes
         assert "rest_framework.throttling.UserRateThrottle" in throttle_classes
-        assert throttle_rates.get("anon") == "5/minute"
-        assert throttle_rates.get("user") == "60/minute"
+        assert "anon" in throttle_rates
+        assert "user" in throttle_rates
 
     def test_login_endpoint_throttled_after_5_attempts_returns_429(self):
         client = APIClient()

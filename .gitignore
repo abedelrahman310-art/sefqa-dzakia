@@ -30,6 +30,10 @@ db.sqlite3-journal
 staticfiles/
 media/
 
+# Scratch & temporary scripts
+backend/scripts/scratch/
+scratch/
+
 # Environment variables and secrets
 .env
 .env.*
