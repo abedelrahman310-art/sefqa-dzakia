@@ -50,6 +50,38 @@ class ProcurementDeal(models.Model):
     def __str__(self):
         return f"{self.reference_number} - {self.title}"
 
+    @property
+    def base_amount(self) -> Decimal:
+        """المبلغ الأصلي للصفقة من العقد المبرم أو الميزانية التقديرية"""
+        try:
+            if hasattr(self, 'contract') and self.contract and self.contract.signed_amount:
+                return self.contract.signed_amount
+        except Exception:
+            pass
+        contract = self.procurement_contracts.first()
+        if contract and contract.amount and contract.amount > 0:
+            return contract.amount
+        if self.estimated_budget and self.estimated_budget > 0:
+            return self.estimated_budget
+        return Decimal('0.00')
+
+    @property
+    def total_avenant_amount(self) -> Decimal:
+        """مجموع مبالغ الملاحق المعتمدة وقيد الاعتماد"""
+        qs = self.avenants.filter(status__in=['approved', 'pending_approval'])
+        total = sum((a.amount_change for a in qs), Decimal('0.00'))
+        return total
+
+    @property
+    def total_avenant_percentage(self) -> float:
+        """نسبة مجموع الملاحق إلى المبلغ الأصلي (%)"""
+        base = self.base_amount
+        if not base or base <= 0:
+            return 0.0
+        total_amt = self.total_avenant_amount
+        return float(round((total_amt / base) * 100, 2))
+
+
 class CahierSpecs(models.Model):
     """دفتر الشروط الذكي"""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -468,5 +500,61 @@ class ReferencePrice(models.Model):
             }
 
         super().save(*args, **kwargs)
+
+
+class Avenant(models.Model):
+    """
+    نموذج الملحق التعاقدي (Avenant) وفق القانون 23-12 والمرسوم الرئاسي 15-247 (المادتان 138 و139).
+    يخضع الملحق لسقف أقصى لا يتجاوز 20% إلى 25% من المبلغ الأصلي للصفقة مع وجوب موافقة لجنة الصفقات.
+    """
+    STATUS_CHOICES = (
+        ('draft', 'مسودة قيد الإعداد'),
+        ('pending_approval', 'قيد موافقة لجنة الصفقات'),
+        ('approved', 'معتمد ومبرم رسمياً'),
+        ('rejected', 'مرفوض من اللجنة'),
+    )
+
+    REASON_CHOICES = (
+        ('time_extension', 'تمديد الآجال التعاقدية'),
+        ('quantity_change', 'تعديل في الكميات والأشغال'),
+        ('emergency_circumstances', 'ظروف طارئة وقوة قاهرة'),
+        ('technical_modification', 'تعديل تقني في المواصفات'),
+        ('unforeseen_works', 'أشغال إضافية غير متوقعة'),
+        ('other', 'أسباب أخرى مبررة قانوناً'),
+    )
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    deal = models.ForeignKey(
+        ProcurementDeal,
+        on_delete=models.CASCADE,
+        related_name='avenants',
+        verbose_name='الصفقة الأصلية'
+    )
+    reference = models.CharField('رقم الملحق التعاقدي', max_length=100)
+    reason = models.TextField('سبب الملحق ومبرراته التقنية والإدارية')
+    amount_change = models.DecimalField('الأثر المالي (دج)', max_digits=15, decimal_places=2, default=0)
+    time_extension_days = models.PositiveIntegerField('عدد أيام التمديد التعاقدي', default=0)
+    status = models.CharField('حالة الملحق', max_length=30, choices=STATUS_CHOICES, default='draft')
+    committee_approval_ref = models.CharField('مرجع موافقة لجنة الصفقات', max_length=200, blank=True, default='')
+    document_pdf = models.FileField('وثيقة الملحق المعتمدة (PDF)', upload_to='avenants/%Y/%m/', null=True, blank=True)
+    created_at = models.DateTimeField('تاريخ التحرير', default=timezone.now)
+    approved_at = models.DateTimeField('تاريخ المصادقة والاعتماد', null=True, blank=True)
+
+    class Meta:
+        verbose_name = 'ملحق تعاقدي'
+        verbose_name_plural = 'الملاحق التعاقدية (Avenants)'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.reference} - {self.deal.reference_number} ({self.get_status_display()})"
+
+    @property
+    def percentage_impact(self) -> float:
+        """نسبة الأثر المالي لهذا الملحق مقارنة بالمبلغ الأصلي للصفقة"""
+        base = self.deal.base_amount
+        if not base or base <= 0:
+            return 0.0
+        return float(round((self.amount_change / base) * 100, 2))
+
 
 

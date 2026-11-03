@@ -9,6 +9,8 @@ import {
   Search,
   RefreshCw,
   Clock,
+  Scale,
+  ShieldAlert,
 } from 'lucide-react';
 import {
   Card,
@@ -82,6 +84,7 @@ export function CentralDeals() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStage, setFilterStage] = useState('all');
   const [onlyDelayed, setOnlyDelayed] = useState(false);
+  const [onlyAvenantAlerts, setOnlyAvenantAlerts] = useState(false);
 
   const now = useNow(60000);
   const stages = useMemo(() => getStages(t), [t]);
@@ -96,13 +99,18 @@ export function CentralDeals() {
     const closed = deals.filter((deal) => toNumber(deal.current_stage) === CLOSED_STAGE).length;
     const delayed = deals.filter((deal) => isDelayed(deal, now)).length;
     const budget = deals.reduce((sum, deal) => sum + toNumber(deal.estimated_budget), 0);
+    const avenantAlerts = deals.filter((deal) => {
+      const pct = (deal as any).total_avenant_percentage;
+      return (typeof pct === 'number' && pct >= 20.0) || (deal as any).has_avenant_warning;
+    });
+    const avenantAlertsCount = avenantAlerts.length;
 
     const perStage = stages.map((stage) => {
       const count = deals.filter((deal) => toNumber(deal.current_stage) === stage.id).length;
       return { ...stage, count, share: total > 0 ? (count / total) * 100 : 0 };
     });
 
-    return { total, active, closed, delayed, budget, perStage };
+    return { total, active, closed, delayed, budget, perStage, avenantAlertsCount, avenantAlerts };
   }, [deals, now, stages]);
 
   const filtered = useMemo(() => {
@@ -112,6 +120,10 @@ export function CentralDeals() {
         const stage = toNumber(deal.current_stage);
         if (filterStage !== 'all' && stage !== Number(filterStage)) return false;
         if (onlyDelayed && !isDelayed(deal, now)) return false;
+        if (onlyAvenantAlerts) {
+          const pct = (deal as any).total_avenant_percentage;
+          if (!((typeof pct === 'number' && pct >= 20.0) || (deal as any).has_avenant_warning)) return false;
+        }
         if (!query) return true;
         return (
           (deal.title ?? '').toLowerCase().includes(query) ||
@@ -124,7 +136,7 @@ export function CentralDeals() {
         (a, b) =>
           new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
       );
-  }, [deals, searchQuery, filterStage, onlyDelayed, now]);
+  }, [deals, searchQuery, filterStage, onlyDelayed, onlyAvenantAlerts, now]);
 
   const stageDefinition = (stage: number): StageDefinition => {
     return stages.find((item) => item.id === stage) ?? stages[0];
@@ -150,7 +162,7 @@ export function CentralDeals() {
         }
       />
 
-      <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-5">
         <KpiCard
           eyebrow={t('central.deals.kpi_total')}
           value={formatNumber(stats.total)}
@@ -181,7 +193,34 @@ export function CentralDeals() {
           accent="red"
           description={t('central.deals.kpi_volume_sub')}
         />
+        <KpiCard
+          eyebrow={t('central.deals.avenantAlerts') || 'صفقات تجاوزت نسبة الملاحق'}
+          value={formatNumber(stats.avenantAlertsCount)}
+          icon={Scale}
+          accent={stats.avenantAlertsCount > 0 ? 'red' : 'emerald'}
+          description={stats.avenantAlertsCount > 0 ? 'مخالفات سقف 20% - 25% (مرسوم 15-247)' : 'كافة الملاحق مطابقة للسقف'}
+          className={onlyAvenantAlerts ? 'ring-2 ring-rose-500' : ''}
+        />
       </div>
+
+      {stats.avenantAlertsCount > 0 && (
+        <div className="bg-rose-50 border border-rose-200 rounded-xl p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-rose-900">
+          <div className="flex items-center gap-2">
+            <ShieldAlert className="w-5 h-5 text-rose-600 shrink-0" />
+            <span className="font-bold">
+              تنبيه رقابي وطني: يوجد {stats.avenantAlertsCount} صفقات تجاوزت فيها الملاحق التعاقدية الحدود القانونية (20% أو 25%) وفقاً للمادتين 138 و139 من المرسوم الرئاسي 15-247.
+            </span>
+          </div>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => setOnlyAvenantAlerts(!onlyAvenantAlerts)}
+            className="h-7 text-xs font-bold border-rose-300 text-rose-800 hover:bg-rose-100 shrink-0"
+          >
+            {onlyAvenantAlerts ? 'عرض كافة الصفقات' : 'تصفية الصفقات المخالفة'}
+          </Button>
+        </div>
+      )}
 
       <Card className="bg-white shadow-xs border-gray-200">
         <CardHeader className="border-b border-gray-200 p-4 pb-3">
@@ -319,7 +358,21 @@ export function CentralDeals() {
                         {deal.reference_number || '—'}
                       </TableCell>
                       <TableCell className="max-w-[280px] text-xs font-semibold text-[var(--ink-900)]">
-                        <div className="truncate">{deal.title || '—'}</div>
+                        <div className="flex items-center gap-1.5">
+                          <span className="truncate">{deal.title || '—'}</span>
+                          {Boolean((deal as any).total_avenant_percentage && (deal as any).total_avenant_percentage >= 20.0) && (
+                            <span
+                              className={`px-1.5 py-0.5 rounded text-[10px] font-bold font-mono shrink-0 ${
+                                (deal as any).total_avenant_percentage >= 25.0
+                                  ? 'bg-rose-100 text-rose-800 border border-rose-200'
+                                  : 'bg-amber-100 text-amber-800 border border-amber-200'
+                              }`}
+                              title="نسبة الملاحق التعاقدية (المرسوم 15-247)"
+                            >
+                              ملحق {((deal as any).total_avenant_percentage as number).toFixed(0)}%
+                            </span>
+                          )}
+                        </div>
                         <div className="text-xs font-normal text-[var(--ink-500)]">
                           {t('central.deals.created_at', { date: formatDate(deal.created_at) })}
                         </div>

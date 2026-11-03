@@ -11,6 +11,7 @@ from .models import (
     Contract,
     Milestone,
     MilestoneProgressReport,
+    Avenant,
 )
 from .reference_prices import normalize_item_name, normalize_wilaya
 from apps.bids.models import BidOffer
@@ -100,11 +101,22 @@ class ProcurementDealSerializer(serializers.ModelSerializer):
     cahier_specs = CahierSpecsSerializer(read_only=True)
     stage_display = serializers.CharField(source='get_current_stage_display', read_only=True)
     reference_number = serializers.CharField(required=False, allow_blank=True)
+    base_amount = serializers.DecimalField(max_digits=15, decimal_places=2, read_only=True)
+    total_avenant_amount = serializers.DecimalField(max_digits=15, decimal_places=2, read_only=True)
+    total_avenant_percentage = serializers.FloatField(read_only=True)
+    avenants_count = serializers.SerializerMethodField()
+    has_avenant_warning = serializers.SerializerMethodField()
 
     class Meta:
         model = ProcurementDeal
         fields = '__all__'
         read_only_fields = ['authority']
+
+    def get_avenants_count(self, obj):
+        return obj.avenants.count()
+
+    def get_has_avenant_warning(self, obj):
+        return getattr(obj, 'total_avenant_percentage', 0.0) >= 20.0
 
     def create(self, validated_data):
         if not validated_data.get('reference_number'):
@@ -114,6 +126,65 @@ class ProcurementDealSerializer(serializers.ModelSerializer):
             num = random.randint(1000, 9999)
             validated_data['reference_number'] = f"DZ-{year}-{num}"
         return super().create(validated_data)
+
+
+class AvenantSerializer(serializers.ModelSerializer):
+    percentage_impact = serializers.FloatField(read_only=True)
+    status_display = serializers.CharField(source='get_status_display', read_only=True)
+    deal_reference = serializers.ReadOnlyField(source='deal.reference_number')
+    deal_title = serializers.ReadOnlyField(source='deal.title')
+
+    class Meta:
+        model = Avenant
+        fields = [
+            'id',
+            'deal',
+            'deal_reference',
+            'deal_title',
+            'reference',
+            'reason',
+            'amount_change',
+            'percentage_impact',
+            'time_extension_days',
+            'status',
+            'status_display',
+            'committee_approval_ref',
+            'document_pdf',
+            'created_at',
+            'approved_at',
+        ]
+        read_only_fields = ['id', 'created_at', 'approved_at', 'percentage_impact']
+
+    def validate(self, attrs):
+        deal = attrs.get('deal') or getattr(self.instance, 'deal', None)
+        amount_change = attrs.get('amount_change')
+        if amount_change is None and self.instance:
+            amount_change = self.instance.amount_change
+        amount_change = amount_change or Decimal('0.00')
+
+        if deal:
+            base_amount = deal.base_amount
+            if base_amount and base_amount > 0:
+                # مجموع الملاحق السابقة (باستثناء الحالي إن كان تعديلاً)
+                existing_qs = deal.avenants.filter(status__in=['approved', 'pending_approval'])
+                if self.instance:
+                    existing_qs = existing_qs.exclude(id=self.instance.id)
+                current_total = sum((a.amount_change for a in existing_qs), Decimal('0.00'))
+                new_total = current_total + amount_change
+                total_percentage = (new_total / base_amount) * Decimal('100.0')
+
+                # التحقق الصارم من الحد الأقصى القانوني 25% (وفقاً للمرسوم 15-247 والقانون 23-12)
+                if total_percentage > Decimal('25.0'):
+                    raise serializers.ValidationError({
+                        'amount_change': (
+                            f"مرفوض قانوناً وفقاً لأحكام المرسوم الرئاسي 15-247 (المادتان 138 و139) والقانون 23-12: "
+                            f"مجموع مبالغ الملاحق التعاقدية سيصل إلى {new_total:,.2f} دج أي بنسبة {float(total_percentage):.2f}% "
+                            f"من المبلغ الأصلي للصفقة ({base_amount:,.2f} دج)، وهو ما يتجاوز السقف القانوني الأقصى المطلق (25%)."
+                        )
+                    })
+
+        return attrs
+
 
 
 class SessionAccessSerializer(serializers.ModelSerializer):

@@ -6,6 +6,7 @@ import { formatCurrency, formatDate } from '@/lib/format';
 import { downloadPdfBlob } from '@/lib/pdfDownloader';
 import type { ProcurementContractApi } from '@/lib/procurementApiTypes';
 import { ExecutionTracker } from '@/features/execution/components/ExecutionTracker';
+import { AvenantsManager } from '@/features/execution/components/AvenantsManager';
 import {
   AlertCircle,
   Banknote,
@@ -17,6 +18,7 @@ import {
   Loader2,
   RefreshCw,
   ShieldCheck,
+  Scale,
 } from 'lucide-react';
 
 interface OperatorContractsViewProps {
@@ -76,6 +78,7 @@ export function OperatorContractsView({ dealId }: OperatorContractsViewProps) {
   const [downloadError, setDownloadError] = useState('');
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const [selectedDealId, setSelectedDealId] = useState(dealId || '');
+  const [avenantDealId, setAvenantDealId] = useState<string>('');
 
   const loadContracts = useCallback(async () => {
     setLoading(true);
@@ -276,6 +279,17 @@ export function OperatorContractsView({ dealId }: OperatorContractsViewProps) {
                     </button>
                     <button
                       type="button"
+                      className={`op-btn ${avenantDealId === contract.deal ? 'op-btn-slate' : 'op-btn-outline'}`}
+                      onClick={() =>
+                        setAvenantDealId((prev) => (prev === contract.deal ? '' : contract.deal))
+                      }
+                    >
+                      <Scale className="size-3.5" aria-hidden="true" />
+                      <span>{t('operator.contracts.avenants_title') || 'الملاحق المعتمدة'}</span>
+                    </button>
+
+                    <button
+                      type="button"
                       className={`op-btn ${isSelected ? 'op-btn-slate' : 'op-btn-outline'}`}
                       onClick={() =>
                         setSelectedDealId((previous) =>
@@ -323,6 +337,17 @@ export function OperatorContractsView({ dealId }: OperatorContractsViewProps) {
                   <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
                     {t('operator.contracts.no_pdf_notice')}
                   </p>
+                )}
+
+                {avenantDealId === contract.deal && (
+                  <div className="pt-2">
+                    <AvenantsManager
+                      dealId={contract.deal}
+                      dealReference={contract.deal_reference}
+                      baseAmount={Number(contract.amount)}
+                      readOnly={true}
+                    />
+                  </div>
                 )}
 
                 {isSelected && (

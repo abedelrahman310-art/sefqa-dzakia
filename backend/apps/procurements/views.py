@@ -3,7 +3,7 @@ import logging
 from django.utils import timezone
 from django.core.files.base import ContentFile
 from django.core.exceptions import ValidationError
-from django.http import FileResponse
+from django.http import FileResponse, HttpResponse
 from rest_framework import viewsets, permissions, views, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -19,6 +19,7 @@ from .models import (
     Contract,
     Milestone,
     MilestoneProgressReport,
+    Avenant,
 )
 from .serializers import (
     ProcurementDealSerializer,
@@ -28,6 +29,7 @@ from .serializers import (
     MilestoneSerializer,
     MilestoneProgressReportSerializer,
     OfferSerializer,
+    AvenantSerializer,
 )
 
 logger = logging.getLogger(__name__)
@@ -927,3 +929,204 @@ class DealMilestonesView(views.APIView):
             'audit_log_id': str(audit_entry.id),
             'checksum': audit_entry.checksum,
         }, status=status.HTTP_201_CREATED)
+
+
+class DealAvenantsView(views.APIView):
+    """
+    إدارة الملاحق التعاقدية للصفقة (Avenants):
+    - GET /api/procurements/deals/{id}/avenants/ : قائمة ملاحق الصفقة ومؤشرات الحدود القانونية.
+    - POST /api/procurements/deals/{id}/avenants/ : إنشاء ملحق تعاقدي جديد مع التحقق القانوني الصارم (20%-25%).
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, deal_id):
+        deal = get_object_or_404(ProcurementDeal, id=deal_id)
+        avenants = deal.avenants.all()
+        serializer = AvenantSerializer(avenants, many=True, context={'request': request})
+
+        base_amt = deal.base_amount
+        total_amt = deal.total_avenant_amount
+        pct = deal.total_avenant_percentage
+
+        return Response({
+            'deal_id': str(deal.id),
+            'deal_reference': deal.reference_number,
+            'deal_title': deal.title,
+            'base_amount': float(base_amt),
+            'total_avenant_amount': float(total_amt),
+            'total_avenant_percentage': pct,
+            'limit_percentage': 20.0,
+            'max_limit_percentage': 25.0,
+            'is_approaching_limit': pct >= 20.0,
+            'is_exceeded_limit': pct >= 25.0,
+            'results': serializer.data,
+            'avenants': serializer.data,
+        })
+
+    def post(self, request, deal_id):
+        deal = get_object_or_404(ProcurementDeal, id=deal_id)
+        user = request.user
+
+        # التحقق من صلاحيات المصلحة أو الإدارة المركزية
+        if not user.is_staff and getattr(user, 'role', None) != 'central_admin':
+            if getattr(deal, 'authority_id', None) != user.id:
+                return Response(
+                    {'error': 'غير مخول بإنشاء ملاحق تعاقدية لهذه الصفقة. الإجراء مقتصر على المصلحة المتعاقدة المالكة.'},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+
+        data = request.data.copy() if hasattr(request.data, 'copy') else dict(request.data)
+        data['deal'] = deal.id
+
+        # توليد رقم مرجعي تلقائي إذا لم يُقدم
+        if not data.get('reference'):
+            count = deal.avenants.count() + 1
+            data['reference'] = f"AV-{count:03d}"
+
+        serializer = AvenantSerializer(data=data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        avenant = serializer.save(deal=deal)
+
+        # توثيق في سجل التدقيق الجنائي
+        now = timezone.now()
+        ip = request.META.get('HTTP_X_FORWARDED_FOR') or request.META.get('REMOTE_ADDR')
+        if ip and ',' in ip:
+            ip = ip.split(',')[0].strip()
+
+        audit_entry = AuditLog.objects.create(
+            user=user,
+            action='AVENANT_CREATED',
+            resource_type='Avenant',
+            resource_id=str(avenant.id),
+            description=(
+                f"إنشاء ملحق تعاقدي '{avenant.reference}' للصفقة {deal.reference_number} "
+                f"بأثر مالي {avenant.amount_change} دج وتمديد {avenant.time_extension_days} يوماً بواسطة {user.email}."
+            ),
+            changes={
+                'avenant_id': str(avenant.id),
+                'deal_id': str(deal.id),
+                'reference': avenant.reference,
+                'amount_change': str(avenant.amount_change),
+                'time_extension_days': avenant.time_extension_days,
+                'reason': avenant.reason,
+                'status': avenant.status,
+            },
+            ip_address=ip,
+            timestamp=now,
+        )
+
+        return Response({
+            'message': f'تم إنشاء الملحق التعاقدي {avenant.reference} بنجاح.',
+            'avenant': serializer.data,
+            'audit_log_id': str(audit_entry.id),
+        }, status=status.HTTP_201_CREATED)
+
+
+class AvenantApproveView(views.APIView):
+    """
+    اعتماد الملحق التعاقدي من قبل لجنة الصفقات:
+    - PATCH /api/procurements/avenants/{id}/approve/
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def patch(self, request, pk):
+        avenant = get_object_or_404(Avenant, pk=pk)
+        user = request.user
+        deal = avenant.deal
+
+        # الصلاحيات
+        if not user.is_staff and getattr(user, 'role', None) not in ('central_admin', 'authority'):
+            return Response(
+                {'error': 'غير مخول بالمصادقة على الملاحق التعاقدية.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        if getattr(user, 'role', None) == 'authority' and getattr(deal, 'authority_id', None) != user.id:
+            return Response(
+                {'error': 'لا تملك المصلحة المتعاقدة صلاحية مصادقة ملحق لصفقة جهة أخرى.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        committee_ref = request.data.get('committee_approval_ref') or avenant.committee_approval_ref
+        if not committee_ref:
+            committee_ref = f"PV-COM-{timezone.now().strftime('%Y%m%d')}-{str(avenant.id)[:6].upper()}"
+
+        avenant.status = 'approved'
+        avenant.approved_at = timezone.now()
+        avenant.committee_approval_ref = committee_ref
+
+        if 'document_pdf' in request.FILES:
+            avenant.document_pdf = request.FILES['document_pdf']
+
+        avenant.save()
+
+        # سجل التدقيق
+        now = timezone.now()
+        ip = request.META.get('HTTP_X_FORWARDED_FOR') or request.META.get('REMOTE_ADDR')
+        if ip and ',' in ip:
+            ip = ip.split(',')[0].strip()
+
+        AuditLog.objects.create(
+            user=user,
+            action='AVENANT_APPROVED',
+            resource_type='Avenant',
+            resource_id=str(avenant.id),
+            description=f"اعتماد ومصادقة الملحق التعاقدي {avenant.reference} للصفقة {deal.reference_number} بمرجع {committee_ref}.",
+            changes={
+                'avenant_id': str(avenant.id),
+                'status': 'approved',
+                'committee_approval_ref': committee_ref,
+                'approved_at': now.isoformat(),
+            },
+            ip_address=ip,
+            timestamp=now,
+        )
+
+        serializer = AvenantSerializer(avenant, context={'request': request})
+        return Response({
+            'message': f'تمت المصادقة على الملحق {avenant.reference} بنجاح.',
+            'avenant': serializer.data,
+        })
+
+
+class AvenantViewSet(viewsets.ModelViewSet):
+    """إدارة واستعراض الملاحق التعاقدية"""
+    queryset = Avenant.objects.all().select_related('deal')
+    serializer_class = AvenantSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        deal_id = self.request.query_params.get('deal')
+        qs = Avenant.objects.all().select_related('deal')
+        if deal_id:
+            qs = qs.filter(deal_id=deal_id)
+        if user.is_staff or getattr(user, 'role', None) == 'central_admin':
+            return qs
+        if getattr(user, 'role', None) == 'authority':
+            return qs.filter(deal__authority=user)
+        if getattr(user, 'role', None) == 'operator':
+            return qs.filter(status='approved')
+        return qs
+
+    @action(detail=True, methods=['patch'], url_path='approve')
+    def approve(self, request, pk=None):
+        view = AvenantApproveView.as_view()
+        return view(request._request, pk=pk)
+
+    @action(detail=True, methods=['get'], url_path='pdf')
+    def download_pdf(self, request, pk=None):
+        avenant = self.get_object()
+        if avenant.document_pdf:
+            return FileResponse(avenant.document_pdf.open(), content_type='application/pdf')
+
+        try:
+            from .pdf_service import generate_avenant_pdf
+            pdf_bytes = generate_avenant_pdf(avenant, request.user)
+            filename = f"Avenant_{avenant.reference}_{avenant.deal.reference_number.replace('/', '_')}.pdf"
+            response = HttpResponse(pdf_bytes, content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename="{filename}"'
+            return response
+        except Exception as e:
+            logger.error("تعذر إنشاء PDF للملحق %s: %s", avenant.id, e)
+            return Response({'error': f'تعذر إنشاء ملف PDF للملحق: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+

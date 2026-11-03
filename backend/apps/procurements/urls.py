@@ -10,6 +10,9 @@ from .views import (
     MilestoneViewSet,
     DealMilestonesView,
     ContractViewSet,
+    DealAvenantsView,
+    AvenantApproveView,
+    AvenantViewSet,
 )
 from apps.bids.views import OfferViewSet
 from .views_opening import (
@@ -33,8 +36,13 @@ router.register(r'specs', CahierSpecsViewSet, basename='cahier-specs')
 router.register(r'opportunities', OpportunityViewSet, basename='opportunity')
 router.register(r'milestones', MilestoneViewSet, basename='milestone')
 router.register(r'contracts', ContractViewSet, basename='procurement-contract')
+router.register(r'avenants', AvenantViewSet, basename='procurement-avenant')
 
 urlpatterns = [
+    path("deals/<str:deal_id>/avenants/", DealAvenantsView.as_view(), name="deal-avenants"),
+    path("deals/<str:deal_id>/avenants", DealAvenantsView.as_view(), name="deal-avenants-no-slash"),
+    path("avenants/<uuid:pk>/approve/", AvenantApproveView.as_view(), name="avenant-approve"),
+    path("avenants/<uuid:pk>/approve", AvenantApproveView.as_view(), name="avenant-approve-no-slash"),
     path("authority/dashboard/", DashboardMetricsView.as_view(), name="authority-dashboard"),
     path("authority/dashboard", DashboardMetricsView.as_view(), name="authority-dashboard-no-slash"),
     path("check-prices/", CheckPricesView.as_view(), name="check-prices"),

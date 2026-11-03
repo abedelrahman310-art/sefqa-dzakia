@@ -556,6 +556,7 @@ def generate_opening_session_pdf(session, requesting_user) -> bytes:
     return buffer.getvalue()
 
 
+
 # ==============================================================================
 # 5. توليد دفتر الشروط والمواصفات المعتمد (Cahier des Charges PDF)
 # ==============================================================================
@@ -764,3 +765,101 @@ def generate_cahier_specs_pdf(deal, requesting_user) -> bytes:
 
     doc.build(story, canvasmaker=SafaqatNumberedCanvas)
     return buffer.getvalue()
+
+
+def generate_avenant_pdf(avenant, user=None) -> bytes:
+    """
+    توليد وثيقة الملحق التعاقدي الرسمي (Avenant Contractuel) بصيغة PDF
+    وفقاً لأحكام المرسوم الرئاسي 15-247 (المادتان 138 و139) والقانون 23-12.
+    """
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(
+        buffer,
+        pagesize=A4,
+        rightMargin=36,
+        leftMargin=36,
+        topMargin=36,
+        bottomMargin=40,
+        title=f"Avenant_{avenant.reference}",
+        author="Safaqat Dhakia Platform",
+    )
+
+    styles = build_safaqat_styles()
+    deal = avenant.deal
+    story = []
+
+    # 1. الترويسة الرسمية للجمهورية
+    story.append(Paragraph(ar("الجمهورية الجزائرية الديمقراطية الشعبية"), styles["RepubTitle"]))
+    story.append(Paragraph(ar("وزارة المالية — المنظومة الوطنية للصفقات العمومية"), styles["MinistrySub"]))
+    auth_name = getattr(deal.authority, 'entity_name', None) or getattr(deal.authority, 'full_name', None) or 'المصلحة المتعاقدة'
+    story.append(Paragraph(ar(f"المصلحة المتعاقدة: {auth_name}"), styles["BodyBold"]))
+    story.append(Spacer(1, 10))
+
+    # 2. عنوان الوثيقة وشارة السند القانوني
+    story.append(HRFlowable(width="100%", thickness=1.5, color=colors.HexColor("#006233"), spaceAfter=8))
+    story.append(Paragraph(ar(f"ملحق تعاقدي رسمي رقم: {avenant.reference}"), styles["DocHeader"]))
+    story.append(Paragraph(ar("وفقاً لأحكام المادتين 138 و139 من المرسوم الرئاسي 15-247 والقانون رقم 23-12"), styles["SubHeader"]))
+    story.append(Spacer(1, 10))
+
+    # 3. جدول بيانات الصفقة الأصلية والملحق
+    deal_base = deal.base_amount
+    amt_change = avenant.amount_change
+    pct = avenant.percentage_impact
+
+    info_data = [
+        [Paragraph(ar(f"<b>الصفقة الأصلية:</b> {deal.reference_number}"), styles["BodyText"]), Paragraph(ar(f"<b>الولاية:</b> {deal.wilaya or 'الجزائر'}"), styles["BodyText"])],
+        [Paragraph(ar(f"<b>موضوع الصفقة:</b> {deal.title}"), styles["BodyText"]), Paragraph(ar(f"<b>المبلغ الأصلي:</b> {deal_base:,.2f} دج"), styles["BodyText"])],
+        [Paragraph(ar(f"<b>رقم الملحق:</b> {avenant.reference}"), styles["BodyBold"]), Paragraph(ar(f"<b>تاريخ التحرير:</b> {avenant.created_at.strftime('%Y-%m-%d')}"), styles["BodyText"])],
+        [Paragraph(ar(f"<b>الأثر المالي للملحق:</b> {amt_change:,.2f} دج"), styles["BodyBold"]), Paragraph(ar(f"<b>نسبة الأثر المالي:</b> {pct:.2f}%"), styles["BodyBold"])],
+        [Paragraph(ar(f"<b>تمديد الآجال التعاقدية:</b> {avenant.time_extension_days} يوماً"), styles["BodyText"]), Paragraph(ar(f"<b>حالة الملحق:</b> {avenant.get_status_display()}"), styles["BodyText"])],
+        [Paragraph(ar(f"<b>مرجع موافقة لجنة الصفقات:</b> {avenant.committee_approval_ref or 'قيد الاستيفاء'}"), styles["BodyBold"]), Paragraph(ar(f"<b>تاريخ المصادقة:</b> {avenant.approved_at.strftime('%Y-%m-%d') if avenant.approved_at else 'قيد الاعتماد'}"), styles["BodyText"])],
+    ]
+
+    t_info = Table(info_data, colWidths=[261, 262])
+    t_info.setStyle(TableStyle([
+        ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#cbd5e1")),
+        ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#f8fafc")),
+        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+        ("TOPPADDING", (0, 0), (-1, -1), 4),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+    ]))
+    story.append(t_info)
+    story.append(Spacer(1, 12))
+
+    # 4. أسباب ومبررات الملحق
+    story.append(Paragraph(ar("الأسباب والمبررات التقنية والإدارية للملحق:"), styles["SectionTitle"]))
+    story.append(Paragraph(ar(avenant.reason or "لا توجد تفاصيل إضافية مسجلة."), styles["BodyText"]))
+    story.append(Spacer(1, 14))
+
+    # 5. التعهد والرقابة القانونية على الحدود
+    legal_text = (
+        f"تشهد المصلحة المتعاقدة بأن هذا الملحق التعاقدي لا يتجاوز الحدود القصوى المنصوص عليها في المادتين 138 و139 "
+        f"من المرسوم الرئاسي 15-247 (سقف 20% أو 25% من المبلغ الأصلي)، حيث بلغت النسبة التراكمية لملاحق هذه الصفقة "
+        f"{deal.total_avenant_percentage:.2f}% من المبلغ الأصلي."
+    )
+    story.append(Paragraph(ar(legal_text), styles["StampText"]))
+    story.append(Spacer(1, 15))
+
+    # 6. خانات التوقيع والمصادقة
+    sig_headers = [
+        Paragraph(ar("تأشيرة ومصادقة لجنة الصفقات العمومية المختصة"), styles["StampBold"]),
+        Paragraph(ar("المصلحة المتعاقدة (الآمر بالصرف)"), styles["StampBold"]),
+    ]
+    sig_space = [
+        Paragraph(ar("<br/><br/><br/>مرجع: " + (avenant.committee_approval_ref or "........................")), styles["StampText"]),
+        Paragraph(ar("<br/><br/><br/>الختم والتوقيع: ........................"), styles["StampText"]),
+    ]
+    sig_table = Table([sig_headers, sig_space], colWidths=[261, 262])
+    sig_table.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#e2e8f0")),
+        ("GRID", (0, 0), (-1, -1), 0.75, colors.HexColor("#64748b")),
+        ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+        ("TOPPADDING", (0, 0), (-1, -1), 6),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
+    ]))
+    story.append(KeepTogether([sig_table]))
+
+    doc.build(story, canvasmaker=SafaqatNumberedCanvas)
+    return buffer.getvalue()
+

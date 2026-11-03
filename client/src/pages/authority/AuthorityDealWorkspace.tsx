@@ -33,6 +33,7 @@ import {
   Award,
   FileSignature,
   Loader2,
+  Scale,
 } from 'lucide-react';
 import { ALGERIA_69_WILAYAS } from '@/lib/wilayas';
 import { downloadPdfBlob } from '@/lib/pdfDownloader';
@@ -62,6 +63,7 @@ import type {
   ProcurementDealApi,
 } from '@/lib/procurementApiTypes';
 import { ExecutionTracker } from '@/features/execution/components/ExecutionTracker';
+import { AvenantsManager } from '@/features/execution/components/AvenantsManager';
 import { useI18n } from '@/i18n';
 import i18n from '@/lib/i18n';
 import { getTemplatePresets } from '@/lib/dealWorkspacePresets';
@@ -1301,6 +1303,13 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
               </div>
 
               <ExecutionTracker dealId={dealId} role="authority" />
+              <div className="pt-4 border-t border-slate-100">
+                <AvenantsManager
+                  dealId={dealId}
+                  dealReference={deal?.reference_number}
+                  baseAmount={deal ? Number(deal.estimated_budget || (deal as any).base_amount || 0) : 0}
+                />
+              </div>
             </div>
           ) : (
             <div className="rounded-xl border border-dashed border-[#D5DDEA] bg-slate-50/50 p-6 text-center">
@@ -1365,6 +1374,19 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
         >
           <Paperclip className="w-4 h-4" />
           <span>{t('authority.workspace.tab_documents')}</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab('avenants')}
+          className={`px-5 py-2.5 rounded-xl transition-all flex items-center gap-2 ${
+            activeTab === 'avenants'
+              ? 'bg-navy-900 text-white shadow-sm'
+              : 'bg-white text-gray-600 hover:bg-gray-100 border border-[#D5DDEA]'
+          }`}
+        >
+          <Scale className="w-4 h-4" />
+          <span>{t('authority.deal.avenants.title') || 'الملاحق التعاقدية'}</span>
         </button>
       </div>
 
@@ -2034,6 +2056,19 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                   </Button>
                 </div>
               )}
+            </div>
+          )}
+
+          {/* ══════════════════════════════════════════════════════════════════
+              TAB 4: Avenants (الملاحق التعاقدية)
+              ══════════════════════════════════════════════════════════════════ */}
+          {activeTab === 'avenants' && (
+            <div className="space-y-6">
+              <AvenantsManager
+                dealId={dealId}
+                dealReference={deal?.reference_number}
+                baseAmount={deal ? Number(deal.estimated_budget || (deal as any).base_amount || 0) : 0}
+              />
             </div>
           )}
 
