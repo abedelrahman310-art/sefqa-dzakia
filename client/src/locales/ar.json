@@ -4101,5 +4101,22 @@
   "operator.opp.expired_tooltip": "انقضت المهلة القانونية لإيداع العروض وفقاً للمادة 68 من القانون 23-12",
   "operator.opp.deadline_label": "آخر أجل لإيداع العروض",
   "operator.opp.days_left_label": "الأيام المتبقية",
-  "operator.opp.expired_warning_banner": "صفقة منتهية الصلاحية — إيداع العروض مغلق نهائياً"
+  "operator.opp.expired_warning_banner": "صفقة منتهية الصلاحية — إيداع العروض مغلق نهائياً",
+  "operator.payments.kpi_total_purchases": "إجمالي دفاتر الشروط المسحوبة",
+  "operator.payments.kpi_total_spent": "إجمالي الرسوم المسددة",
+  "operator.payments.kpi_receipts_count": "وصولات السحب الرسمية",
+  "operator.payments.table_deal": "الصفقة العمومية",
+  "operator.payments.table_authority": "المصلحة المتعاقدة",
+  "operator.payments.table_receipt": "رقم وصل السحب",
+  "operator.payments.table_amount": "المبلغ (دج)",
+  "operator.payments.table_method": "بوابة وطريقة الدفع",
+  "operator.payments.table_date": "تاريخ السداد",
+  "operator.payments.table_status": "الحالة",
+  "operator.payments.table_actions": "الإجراءات والتحميل",
+  "operator.payments.download_specs": "دفتر الشروط",
+  "operator.payments.download_receipt": "وصل السحب",
+  "operator.payments.view_deal": "استعراض الصفقة",
+  "operator.payments.search_placeholder": "ابحث برقم الوصل، رقم الصفقة، أو موضوعها...",
+  "operator.payments.status_paid": "تم السداد والسحب",
+  "operator.payments.status_pending": "قيد المعالجة"
 }

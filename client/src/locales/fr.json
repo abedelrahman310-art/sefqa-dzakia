@@ -4101,5 +4101,22 @@
   "operator.opp.expired_tooltip": "Le délai légal de soumission est expiré conformément à l'article 68 de la loi 23-12",
   "operator.opp.deadline_label": "Date limite de soumission",
   "operator.opp.days_left_label": "Jours restants",
-  "operator.opp.expired_warning_banner": "Marché forclos — Dépôt des offres définitivement clôturé"
+  "operator.opp.expired_warning_banner": "Marché forclos — Dépôt des offres définitivement clôturé",
+  "operator.payments.kpi_total_purchases": "Cahiers des charges retirés",
+  "operator.payments.kpi_total_spent": "Total des frais acquittés",
+  "operator.payments.kpi_receipts_count": "Reçus officiels émis",
+  "operator.payments.table_deal": "Marché public",
+  "operator.payments.table_authority": "Service contractant",
+  "operator.payments.table_receipt": "N° de reçu",
+  "operator.payments.table_amount": "Montant (DZD)",
+  "operator.payments.table_method": "Passerelle & Moyen",
+  "operator.payments.table_date": "Date de règlement",
+  "operator.payments.table_status": "Statut",
+  "operator.payments.table_actions": "Actions & Téléchargement",
+  "operator.payments.download_specs": "Cahier des charges",
+  "operator.payments.download_receipt": "Reçu officiel",
+  "operator.payments.view_deal": "Consulter le marché",
+  "operator.payments.search_placeholder": "Rechercher par n° de reçu, réf. ou objet...",
+  "operator.payments.status_paid": "Réglé et retiré",
+  "operator.payments.status_pending": "En cours"
 }

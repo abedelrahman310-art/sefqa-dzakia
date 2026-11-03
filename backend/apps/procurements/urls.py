@@ -5,6 +5,7 @@ from .views_specs_payment import (
     SpecsReceiptView,
     SpecsStatusView,
     SpecsBuyersListView,
+    MySpecsPurchasesView,
     ChargilyWebhookView,
 )
 from apps.procurements.views_injunctions import (
@@ -74,6 +75,8 @@ urlpatterns = [
     path("deals/<str:pk_or_id>/specs/status", SpecsStatusView.as_view(), name="specs-status-no-slash"),
     path("deals/<str:pk_or_id>/specs/purchases/", SpecsBuyersListView.as_view(), name="specs-buyers-list"),
     path("deals/<str:pk_or_id>/specs/purchases", SpecsBuyersListView.as_view(), name="specs-buyers-list-no-slash"),
+    path("specs/my-purchases/", MySpecsPurchasesView.as_view(), name="specs-my-purchases"),
+    path("specs/my-purchases", MySpecsPurchasesView.as_view(), name="specs-my-purchases-no-slash"),
     path("webhooks/chargily/", ChargilyWebhookView.as_view(), name="chargily-webhook"),
     path("webhooks/chargily", ChargilyWebhookView.as_view(), name="chargily-webhook-no-slash"),
     path("authorities/<uuid:authority_id>/injunctions/", AuthorityInjunctionsView.as_view(), name="authority-injunctions"),

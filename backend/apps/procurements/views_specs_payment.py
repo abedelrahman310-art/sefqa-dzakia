@@ -25,7 +25,15 @@ class SpecsCheckoutView(views.APIView):
 
     def post(self, request, pk_or_id):
         user = request.user
-        deal = get_object_or_404(ProcurementDeal, pk=pk_or_id)
+        deal = None
+        try:
+            deal = ProcurementDeal.objects.filter(pk=pk_or_id).first()
+        except Exception:
+            pass
+        if not deal:
+            deal = ProcurementDeal.objects.filter(reference_number=pk_or_id).first()
+        if not deal:
+            return Response({'error': 'الصفقة غير موجودة.'}, status=status.HTTP_404_NOT_FOUND)
 
         # 1. إذا كان المتعامل قد دفع مسبقاً، نوفر له الروابط مباشرة
         existing = SpecsPurchase.objects.filter(deal=deal, operator=user, status='paid').first()
@@ -210,7 +218,15 @@ class SpecsStatusView(views.APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request, pk_or_id):
-        deal = get_object_or_404(ProcurementDeal, pk=pk_or_id)
+        deal = None
+        try:
+            deal = ProcurementDeal.objects.filter(pk=pk_or_id).first()
+        except Exception:
+            pass
+        if not deal:
+            deal = ProcurementDeal.objects.filter(reference_number=pk_or_id).first()
+        if not deal:
+            return Response({'error': 'الصفقة غير موجودة.'}, status=status.HTTP_404_NOT_FOUND)
         user = request.user
 
         purchase = SpecsPurchase.objects.filter(deal=deal, operator=user, status='paid').first()
@@ -245,7 +261,15 @@ class SpecsBuyersListView(views.APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request, pk_or_id):
-        deal = get_object_or_404(ProcurementDeal, pk=pk_or_id)
+        deal = None
+        try:
+            deal = ProcurementDeal.objects.filter(pk=pk_or_id).first()
+        except Exception:
+            pass
+        if not deal:
+            deal = ProcurementDeal.objects.filter(reference_number=pk_or_id).first()
+        if not deal:
+            return Response({'error': 'الصفقة غير موجودة.'}, status=status.HTTP_404_NOT_FOUND)
         user = request.user
 
         is_authority = (deal.authority_id == user.id)
@@ -282,6 +306,52 @@ class SpecsBuyersListView(views.APIView):
             'total_buyers': len(results),
             'total_revenue': float(deal.total_specs_revenue),
             'buyers': results,
+        })
+
+
+class MySpecsPurchasesView(views.APIView):
+    """
+    استعراض سجل مشتريات وسحوبات دفاتر الشروط الخاصة بالمتعامل الاقتصادي الحالي:
+    - GET /api/procurements/specs/my-purchases/
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        purchases = SpecsPurchase.objects.filter(operator=user).select_related('deal', 'deal__authority').order_by('-created_at')
+
+        total_spent = sum(float(p.amount) for p in purchases if p.status == 'paid')
+        paid_count = sum(1 for p in purchases if p.status == 'paid')
+
+        results = []
+        for p in purchases:
+            deal = p.deal
+            authority_name = getattr(deal, 'authority_entity', '') or (getattr(deal.authority, 'organization_name', '') or getattr(deal.authority, 'full_name', '') or getattr(deal.authority, 'email', ''))
+            results.append({
+                'id': str(p.id),
+                'deal_id': str(deal.id),
+                'deal_reference': deal.reference_number,
+                'deal_title': deal.title,
+                'deal_wilaya': deal.wilaya,
+                'authority_name': authority_name,
+                'amount': float(p.amount),
+                'payment_gateway': p.payment_gateway,
+                'payment_method': p.payment_method,
+                'payment_id': p.payment_id,
+                'status': p.status,
+                'receipt_number': p.receipt_number,
+                'created_at': p.created_at.isoformat(),
+                'paid_at': p.paid_at.isoformat() if p.paid_at else None,
+                'download_url': f"/api/procurements/specs/download/{p.receipt_number}/" if p.status == 'paid' and p.receipt_number else None,
+                'receipt_url': f"/api/procurements/specs/receipt/{p.receipt_number}/" if p.status == 'paid' and p.receipt_number else None,
+                'deal_url': f"/operator/deals/{deal.id}",
+            })
+
+        return Response({
+            'total_count': len(results),
+            'paid_count': paid_count,
+            'total_spent': total_spent,
+            'purchases': results,
         })
 
 
