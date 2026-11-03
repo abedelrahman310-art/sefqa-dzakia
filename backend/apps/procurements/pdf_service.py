@@ -1170,3 +1170,183 @@ def generate_administrative_injunction_pdf(injunction, user=None) -> bytes:
 
     doc.build(story, canvasmaker=SafaqatNumberedCanvas)
     return buffer.getvalue()
+
+
+
+def generate_specs_withdrawal_receipt_pdf(purchase, user=None) -> bytes:
+    """
+    توليد وصل سحب رقمي رسمي لدفتر الشروط (Reçu de Retrait Dématérialisé du Cahier des Charges)
+    وفقاً لأحكام القانون 23-12 والمرسوم الرئاسي 15-247.
+    """
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(
+        buffer,
+        pagesize=A4,
+        rightMargin=36,
+        leftMargin=36,
+        topMargin=36,
+        bottomMargin=40,
+        title=f"Receipt_{purchase.receipt_number or purchase.id}",
+        author="Safaqat Dhakia National Procurement Platform",
+    )
+
+    styles = get_pdf_styles()
+    story = []
+
+    # 1. الترويسة السيادية الرسمية
+    story.append(Paragraph(ar("الجمهورية الجزائرية الديمقراطية الشعبية"), styles["HeaderRepublic"]))
+    story.append(Paragraph(ar("وزارة المالية — المديرية العامة للصفقات العمومية وتفويضات المرفق العام"), styles["HeaderSub"]))
+    story.append(Paragraph(ar("المنظومة الوطنية لإدارة وسحب دفاتر الشروط إلكترونياً (صفقات ذكية)"), styles["BodyBold"]))
+    story.append(Spacer(1, 8))
+
+    # 2. خط أخضر/ذهبي فاصل وعنوان الوصل
+    story.append(HRFlowable(width="100%", thickness=2.5, color=colors.HexColor("#1b4332"), spaceAfter=10))
+
+    banner_style = ParagraphStyle(
+        "ReceiptBanner",
+        parent=styles["DocTitle"],
+        textColor=colors.HexColor("#1b4332"),
+        fontSize=15,
+        leading=20,
+    )
+    story.append(Paragraph(ar("وصـل سـحـب رقـمـي رسـمـي لـدفـتـر الـشـروط"), banner_style))
+    story.append(Paragraph(
+        ar(f"رقم الوصل: {purchase.receipt_number or 'REC-PENDING'} — إثبات سداد الرسوم القانونية والتأهيل للمشاركة"),
+        styles["MetaValue"]
+    ))
+    story.append(Spacer(1, 10))
+
+    # 3. الأسانيد القانونية
+    story.append(Paragraph(ar("• بمقتضى القانون رقم 23-12 المؤرخ في 18 محرم 1445هـ (5 أوت 2023) المحدد للقواعد العامة للصفقات العمومية، لا سيما المادة 67 الخاصة بالرقمنة والتبادل الإلكتروني؛"), styles["MetaValue"]))
+    story.append(Paragraph(ar("• بمقتضى المرسوم الرئاسي رقم 15-247 المؤرخ في 16 سبتمبر 2015 المنظم للصفقات العمومية، لا سيما المواد المنظمة لحق سحب دفاتر الشروط وسداد الرسوم المقررة؛"), styles["MetaValue"]))
+    story.append(Paragraph(ar("• بناءً على عملية الدفع الإلكتروني المؤكدة عبر بوابة الدفع الوطنية المعتمدة."), styles["MetaValue"]))
+    story.append(Spacer(1, 10))
+
+    # 4. جدول بيانات العملية (الصفقة، المصلحة، المتعامل، المعاملة المالية)
+    deal = purchase.deal
+    operator = purchase.operator
+    auth = deal.authority
+
+    auth_name = getattr(auth, 'entity_name', None) or getattr(auth, 'full_name', None) or auth.email
+    op_name = getattr(operator, 'organization_name', None) or getattr(operator, 'full_name', None) or operator.email
+    op_nif = getattr(operator, 'tax_id', None) or getattr(operator, 'nif', None) or 'مسجل بالنظام'
+    op_rc = getattr(operator, 'commercial_register', None) or 'مقيد'
+    paid_time_str = purchase.paid_at.strftime('%Y-%m-%d %H:%M:%S') if purchase.paid_at else purchase.created_at.strftime('%Y-%m-%d %H:%M:%S')
+
+    info_data = [
+        [
+            Paragraph(ar("المصلحة المتعاقدة (صاحبة المشروع):"), styles["MetaLabel"]),
+            Paragraph(ar(f"<b>{auth_name}</b>"), styles["MetaValue"]),
+        ],
+        [
+            Paragraph(ar("الرقم المرجعي للصفقة:"), styles["MetaLabel"]),
+            Paragraph(ar(deal.reference_number), styles["MetaValue"]),
+        ],
+        [
+            Paragraph(ar("موضوع الصفقة / المشروع:"), styles["MetaLabel"]),
+            Paragraph(ar(deal.title), styles["MetaValue"]),
+        ],
+        [
+            Paragraph(ar("المتعامل الاقتصادي (المشتري):"), styles["MetaLabel"]),
+            Paragraph(ar(f"<b>{op_name}</b>"), styles["MetaValue"]),
+        ],
+        [
+            Paragraph(ar("المعرف الجبائي (NIF) / السجل التجاري:"), styles["MetaLabel"]),
+            Paragraph(ar(f"{op_nif} / {op_rc}"), styles["MetaValue"]),
+        ],
+        [
+            Paragraph(ar("البريد الإلكتروني المعتمد للمتعامل:"), styles["MetaLabel"]),
+            Paragraph(operator.email, styles["MetaValue"]),
+        ],
+        [
+            Paragraph(ar("الرسوم المسددة (غير قابلة للاسترداد):"), styles["MetaLabel"]),
+            Paragraph(ar(f"<b>{purchase.amount:,.2f} دج</b> ({purchase.payment_method or 'EDAHABIA / CIB'})"), styles["MetaValue"]),
+        ],
+        [
+            Paragraph(ar("بوابة الدفع الإلكتروني والمعاملة:"), styles["MetaLabel"]),
+            Paragraph(ar(f"Chargily Pay — معرف المعاملة: {purchase.payment_id or 'CH-MOCK'}"), styles["MetaValue"]),
+        ],
+        [
+            Paragraph(ar("تاريخ وساعة السحب المؤكدة:"), styles["MetaLabel"]),
+            Paragraph(paid_time_str, styles["MetaValue"]),
+        ],
+        [
+            Paragraph(ar("الحالة القانونية للوصل:"), styles["MetaLabel"]),
+            Paragraph(ar("<b>مؤكد ومقبول نظامياً (QUITUS DE RETRAIT VALIDÉ)</b>"), styles["MetaValue"]),
+        ],
+    ]
+
+    info_table = Table(info_data, colWidths=[180, 343])
+    info_table.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (0, -1), colors.HexColor("#f8fafc")),
+        ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#cbd5e1")),
+        ("ALIGN", (0, 0), (-1, -1), "RIGHT"),
+        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+        ("TOPPADDING", (0, 0), (-1, -1), 5),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
+        ("LEFTPADDING", (0, 0), (-1, -1), 8),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 8),
+    ]))
+    story.append(info_table)
+    story.append(Spacer(1, 12))
+
+    # 5. الشهادة والإقرار القانوني
+    cert_style = ParagraphStyle(
+        "CertBlock",
+        parent=styles["BodyText"],
+        fontSize=10,
+        leading=14,
+        textColor=colors.HexColor("#1b4332"),
+    )
+    cert_text = (
+        "يشهد هذا الوصل الرقمي الصادر إلكترونياً عن منصة «صفقات ذكية» بأن المتعامل الاقتصادي المذكور أعلاه قد استوفى "
+        "سداد الرسوم القانونية المقررة لسحب دفتر الشروط، ويُعتبر مؤهلاً نظامياً وقانونياً لتقديم عرضه والمشاركة "
+        "في هذه الصفقة وفق الآجال والشروط المحددة في الإعلان ودفتر الشروط."
+    )
+    cert_box = Table(
+        [[Paragraph(ar(cert_text), cert_style)]],
+        colWidths=[523]
+    )
+    cert_box.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#ecfdf5")),
+        ("BOX", (0, 0), (-1, -1), 1, colors.HexColor("#10b981")),
+        ("TOPPADDING", (0, 0), (-1, -1), 8),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 8),
+        ("LEFTPADDING", (0, 0), (-1, -1), 10),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 10),
+    ]))
+    story.append(cert_box)
+    story.append(Spacer(1, 14))
+
+    # 6. البصمة الرقمية والختم
+    import hashlib
+    raw_sig = f"{purchase.receipt_number}:{purchase.deal_id}:{purchase.operator_id}:{purchase.amount}:{paid_time_str}"
+    checksum = hashlib.sha256(raw_sig.encode()).hexdigest()
+
+    story.append(Paragraph(ar(f"البصمة الرقمية للتحقق من سلامة الوصل (SHA-256):"), styles["MetaLabel"]))
+    story.append(Paragraph(checksum, styles["MetaValue"]))
+    story.append(Spacer(1, 10))
+
+    # 7. التوقيع والأختام
+    sig_headers = [
+        Paragraph(ar("المتعامل الاقتصادي (حامل الوصل)"), styles["StampBold"]),
+        Paragraph(ar("المصلحة المتعاقدة والمنصة الرقمية (الاعتماد)"), styles["StampBold"]),
+    ]
+    sig_content = [
+        Paragraph(f"{ar('تم سحب دفتر الشروط إلكترونياً')}<br/>{ar(f'رقم القيد: {purchase.receipt_number}')}", styles["StampText"]),
+        Paragraph(f"{ar('معتمد ومسجل بالخزينة')}<br/>{ar(f'بتاريخ: {paid_time_str}')}", styles["StampText"]),
+    ]
+    sig_table = Table([sig_headers, sig_content], colWidths=[261, 262])
+    sig_table.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#f1f5f9")),
+        ("GRID", (0, 0), (-1, -1), 0.75, colors.HexColor("#64748b")),
+        ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+        ("TOPPADDING", (0, 0), (-1, -1), 6),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
+    ]))
+    story.append(KeepTogether([sig_table]))
+
+    doc.build(story, canvasmaker=SafaqatNumberedCanvas)
+    return buffer.getvalue()
+

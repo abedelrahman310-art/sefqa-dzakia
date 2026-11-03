@@ -79,6 +79,7 @@ export function AuthorityDealWizard() {
   const [procurementNature, setProcurementNature] = useState<ProcurementNature>('works');
   const [wilaya, setWilaya] = useState(defaultWilaya);
   const [budget, setBudget] = useState('');
+  const [specsPrice, setSpecsPrice] = useState('2000');
   const [taxRegime, setTaxRegime] = useState<'ttc' | 'ht'>('ttc');
   const [description, setDescription] = useState('');
   const [duration, setDuration] = useState('');
@@ -274,6 +275,7 @@ export function AuthorityDealWizard() {
             setExistingStage(d.current_stage || 1);
             if (d.wilaya) setWilaya(d.wilaya);
             if (d.estimated_budget) setBudget(String(d.estimated_budget));
+            if (d.specs_price !== undefined) setSpecsPrice(String(d.specs_price));
 
             // Load Cahier Specs if attached
             const specs = d.cahier_specs;
@@ -429,6 +431,7 @@ export function AuthorityDealWizard() {
         description: description.trim() || title.trim(),
         wilaya: wilaya || defaultWilaya,
         estimated_budget: budgetNum,
+        specs_price: specsPrice ? parseFloat(specsPrice) : 0,
         current_stage: targetStage !== undefined ? targetStage : existingStage || 1,
       };
 
@@ -856,6 +859,30 @@ export function AuthorityDealWizard() {
                   )}
                 </div>
               </div>
+
+              {/* Specs Price Field */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-gray-700 block">
+                  {t('authority.specs.price_label')}
+                </label>
+                <div className="relative">
+                  <Input
+                    type="number"
+                    min="0"
+                    placeholder="2000"
+                    value={specsPrice}
+                    onChange={(e) => setSpecsPrice(e.target.value)}
+                    className="rounded-xl border-[#D5DDEA] focus:border-navy-500 pe-12"
+                  />
+                  <span className="absolute end-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-400">
+                    {t('common.dzd')}
+                  </span>
+                </div>
+                <p className="text-[11px] text-gray-500">
+                  {t('authority.specs.price_help')}
+                </p>
+              </div>
+
 
               {/* Duration */}
               <div className="space-y-1.5">

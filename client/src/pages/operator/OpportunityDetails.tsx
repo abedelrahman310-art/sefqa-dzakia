@@ -32,6 +32,9 @@ import {
   ShieldCheck,
   Sparkles,
   AlertOctagon,
+  CreditCard,
+  Download,
+  FileCheck,
 } from 'lucide-react';
 
 interface Opportunity {
@@ -75,6 +78,30 @@ export function OpportunityDetails() {
   const [error, setError] = useState(false);
 
   const [existingOfferId, setExistingOfferId] = useState<string | null>(null);
+  const [specsStatus, setSpecsStatus] = useState<{
+    specs_price: number;
+    is_specs_free: boolean;
+    has_purchased: boolean;
+    purchase?: {
+      receipt_number: string;
+      amount: number;
+      paid_at: string;
+      download_url: string;
+      receipt_url: string;
+    } | null;
+  } | null>(null);
+  const [paymentModalOpen, setPaymentModalOpen] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<'edahabia' | 'cib'>('edahabia');
+  const [checkingOut, setCheckingOut] = useState(false);
+
+  const loadSpecsStatus = () => {
+    if (!id) return;
+    api.get(`/procurements/deals/${id}/specs/status/`)
+      .then((res) => {
+        setSpecsStatus(res.data);
+      })
+      .catch(() => {});
+  };
   const [analysisOpen, setAnalysisOpen] = useState(false);
   const [analysisLoading, setAnalysisLoading] = useState(false);
   const [analysis, setAnalysis] = useState<TenderAnalysisResponse | null>(null);
@@ -109,7 +136,73 @@ export function OpportunityDetails() {
         if (found) setExistingOfferId(found.id);
       })
       .catch(() => {});
+
+    // Check payment redirect parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const specsPayment = urlParams.get('specs_payment');
+    const checkoutId = urlParams.get('checkout_id') || urlParams.get('purchase_id');
+
+    if (specsPayment === 'success' && checkoutId) {
+      api.get(`/procurements/specs/purchase/${checkoutId}/verify/`)
+        .then((res) => {
+          if (res.data.status === 'paid') {
+            toast.success(t('operator.specs.payment_success'));
+            try {
+              window.history.replaceState({}, document.title, window.location.pathname);
+            } catch (_) {}
+          }
+        })
+        .catch(() => {})
+        .finally(() => {
+          loadSpecsStatus();
+        });
+    } else {
+      loadSpecsStatus();
+    }
   }, [id, lang, t]);
+
+  const handleDownloadSpecs = (receiptNum?: string) => {
+    if (!receiptNum) {
+      window.open(`/api/procurements/deals/${id}/specs-pdf/`, '_blank');
+      return;
+    }
+    window.open(`/api/procurements/specs/download/${receiptNum}/`, '_blank');
+  };
+
+  const handleDownloadReceipt = (receiptNum: string) => {
+    window.open(`/api/procurements/specs/receipt/${receiptNum}/`, '_blank');
+  };
+
+  const handleProceedPayment = async () => {
+    if (!id) return;
+    setCheckingOut(true);
+    try {
+      const res = await api.post(`/procurements/deals/${id}/specs/checkout/`);
+      const data = res.data;
+      if (data.status === 'paid' || data.already_paid || data.is_free) {
+        toast.success(t('operator.specs.payment_success'));
+        setPaymentModalOpen(false);
+        loadSpecsStatus();
+        return;
+      }
+      if (data.checkout_url) {
+        if (data.is_mock) {
+          const verifyRes = await api.get(`/procurements/specs/purchase/${data.payment_id}/verify/`);
+          if (verifyRes.data.status === 'paid') {
+            toast.success(t('operator.specs.payment_success'));
+            setPaymentModalOpen(false);
+            loadSpecsStatus();
+            return;
+          }
+        }
+        window.location.href = data.checkout_url;
+      }
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || err?.response?.data?.error || t('common.error_occurred'));
+    } finally {
+      setCheckingOut(false);
+    }
+  };
 
   const ArrowIcon = dir === 'rtl' ? ArrowRight : ArrowLeft;
 
@@ -243,28 +336,81 @@ export function OpportunityDetails() {
             </div>
           </dl>
 
-          <div className="op-alert warning">
-            <AlertTriangle aria-hidden="true" />
-            <div>
-              <strong className="mb-1 block text-sm font-bold">
-                {t('operator.opp.download_alert_title')}
-              </strong>
-              <p>
-                {t('doc.download_suspended')}. {t('operator.opp.download_suspended_rule')}
-              </p>
+          {/* Specs Withdrawal & E-Payment Section */}
+          <div className="rounded-xl border border-[var(--op-line)] bg-[var(--op-surface-2)] p-4 sm:p-5">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <FileText className="size-4 text-[var(--op-gold)]" />
+                  <h3 className="text-sm font-bold text-[var(--op-ink)]">
+                    {t('operator.specs.checkout_title')}
+                  </h3>
+                  {specsStatus?.has_purchased ? (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-0.5 text-[11px] font-bold text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300">
+                      <CheckCircle2 className="size-3" />
+                      <span>{t('operator.specs.purchased_badge')}</span>
+                    </span>
+                  ) : specsStatus?.is_specs_free ? (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-2.5 py-0.5 text-[11px] font-bold text-blue-800 dark:bg-blue-950/40 dark:text-blue-300">
+                      <span>{t('operator.specs.free')}</span>
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-0.5 text-[11px] font-bold text-amber-800 dark:bg-amber-950/40 dark:text-amber-300">
+                      <span>{specsStatus ? `${specsStatus.specs_price.toLocaleString(lang === 'ar' ? 'ar-DZ' : 'fr-FR')} ${t('common.dzd')}` : '...'}</span>
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs text-[var(--op-muted)]">
+                  {specsStatus?.has_purchased && specsStatus.purchase?.receipt_number ? (
+                    <span>
+                      {t('operator.specs.receipt_number')}: <code className="font-mono font-bold text-[var(--op-ink)]">{specsStatus.purchase.receipt_number}</code>
+                    </span>
+                  ) : specsStatus?.is_specs_free ? (
+                    <span>{t('operator.specs.free')} — وفق أحكام القانون 23-12</span>
+                  ) : (
+                    <span>{t('operator.specs.non_refundable')} — Chargily Pay (الذهبية / CIB)</span>
+                  )}
+                </p>
+              </div>
+
+              {/* Actions */}
+              <div className="flex items-center gap-2 flex-wrap">
+                {!specsStatus?.has_purchased && !specsStatus?.is_specs_free ? (
+                  <button
+                    type="button"
+                    onClick={() => setPaymentModalOpen(true)}
+                    className="op-btn op-btn-gold"
+                  >
+                    <CreditCard className="size-4" />
+                    <span>{t('operator.specs.buy_and_download')} ({specsStatus?.specs_price.toLocaleString(lang === 'ar' ? 'ar-DZ' : 'fr-FR')} {t('common.dzd')})</span>
+                  </button>
+                ) : (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => handleDownloadSpecs(specsStatus?.purchase?.receipt_number)}
+                      className="op-btn op-btn-gold"
+                    >
+                      <Download className="size-4" />
+                      <span>{t('operator.specs.download_pdf')}</span>
+                    </button>
+                    {specsStatus?.purchase?.receipt_number && (
+                      <button
+                        type="button"
+                        onClick={() => handleDownloadReceipt(specsStatus.purchase!.receipt_number)}
+                        className="op-btn op-btn-outline"
+                      >
+                        <FileCheck className="size-4" />
+                        <span>{t('operator.specs.download_receipt')}</span>
+                      </button>
+                    )}
+                  </>
+                )}
+              </div>
             </div>
           </div>
 
           <div className="op-action-bar">
-            <button
-              type="button"
-              disabled
-              title={t('doc.download_suspended')}
-              className="op-btn op-btn-outline"
-            >
-              <Lock aria-hidden="true" />
-              <span>{t('doc.download_suspended')}</span>
-            </button>
 
             {existingOfferId ? (
               <button
@@ -286,6 +432,93 @@ export function OpportunityDetails() {
           </div>
         </div>
       </section>
+
+      {/* Specs Payment Dialog */}
+      <Dialog open={paymentModalOpen} onOpenChange={setPaymentModalOpen}>
+        <DialogContent
+          dir={dir}
+          className="max-w-md border-[var(--op-line)] bg-white p-6 font-sans text-start rounded-2xl"
+        >
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-base font-bold text-[var(--op-ink)]">
+              <CreditCard className="size-5 text-[var(--op-gold)]" />
+              <span>{t('operator.specs.checkout_title')}</span>
+            </DialogTitle>
+            <DialogDescription className="text-xs leading-relaxed text-[var(--op-muted)]">
+              {t('operator.specs.checkout_desc')}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-2">
+            <div className="rounded-xl border border-[var(--op-line-2)] bg-[var(--op-surface-2)] p-4 text-xs space-y-2">
+              <div className="flex justify-between items-center">
+                <span className="text-[var(--op-muted)]">{t('operator.opp.details_and_subject')}:</span>
+                <span className="font-bold text-[var(--op-ink)] max-w-[200px] truncate">{opp?.title}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-[var(--op-muted)]">{t('operator.specs.price')}:</span>
+                <span className="font-mono font-black text-sm text-[var(--op-gold)]">
+                  {specsStatus?.specs_price.toLocaleString(lang === 'ar' ? 'ar-DZ' : 'fr-FR')} {t('common.dzd')}
+                </span>
+              </div>
+              <div className="text-[11px] text-amber-700 dark:text-amber-400 bg-amber-500/10 p-2 rounded-lg">
+                ⚠️ {t('operator.specs.non_refundable')}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-[var(--op-ink)]">{t('operator.specs.payment_method')}:</label>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setPaymentMethod('edahabia')}
+                  className={`p-3 rounded-xl border text-xs font-bold transition-all flex flex-col items-center gap-1.5 ${
+                    paymentMethod === 'edahabia'
+                      ? 'border-[#1B4332] bg-[#1B4332]/5 text-[#1B4332] ring-1 ring-[#1B4332]'
+                      : 'border-[var(--op-line)] bg-white text-[var(--op-muted)] hover:bg-muted/30'
+                  }`}
+                >
+                  <span className="text-sm">💳</span>
+                  <span>{t('operator.specs.edahabia')}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setPaymentMethod('cib')}
+                  className={`p-3 rounded-xl border text-xs font-bold transition-all flex flex-col items-center gap-1.5 ${
+                    paymentMethod === 'cib'
+                      ? 'border-[#1B4332] bg-[#1B4332]/5 text-[#1B4332] ring-1 ring-[#1B4332]'
+                      : 'border-[var(--op-line)] bg-white text-[var(--op-muted)] hover:bg-muted/30'
+                  }`}
+                >
+                  <span className="text-sm">🏦</span>
+                  <span>{t('operator.specs.cib')}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter className="gap-2 sm:gap-0 pt-2">
+            <button
+              type="button"
+              className="op-btn op-btn-outline op-btn-sm"
+              onClick={() => setPaymentModalOpen(false)}
+              disabled={checkingOut}
+            >
+              <span>{t('common.cancel')}</span>
+            </button>
+            <button
+              type="button"
+              className="op-btn op-btn-gold op-btn-sm"
+              onClick={() => void handleProceedPayment()}
+              disabled={checkingOut}
+            >
+              {checkingOut && <Loader2 className="size-3.5 animate-spin" />}
+              <span>{t('operator.specs.proceed_payment')}</span>
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={analysisOpen} onOpenChange={setAnalysisOpen}>
         <DialogContent

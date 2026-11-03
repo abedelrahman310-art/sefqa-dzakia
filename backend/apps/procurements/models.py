@@ -39,6 +39,13 @@ class ProcurementDeal(models.Model):
     wilaya = models.CharField('الولاية', max_length=100, blank=True)
     
     submission_deadline = models.DateTimeField('آخر أجل لإيداع العروض', null=True, blank=True)
+    specs_price = models.DecimalField(
+        'سعر سحب دفتر الشروط (دج)',
+        max_digits=10,
+        decimal_places=2,
+        default=Decimal('0.00'),
+        help_text='رسوم غير قابلة للاسترداد لسحب دفتر الشروط وفقاً للمرسوم 15-247'
+    )
     created_at = models.DateTimeField('تاريخ الإنشاء', default=timezone.now)
     updated_at = models.DateTimeField('تاريخ التحديث', auto_now=True)
 
@@ -86,6 +93,21 @@ class ProcurementDeal(models.Model):
         """عدد الاعذارات القانونية النشطة أو المنتهية"""
         return self.legal_notices.filter(status__in=['issued', 'acknowledged', 'expired']).count()
 
+
+    @property
+    def is_specs_free(self) -> bool:
+        """هل سحب دفتر الشروط مجاني"""
+        return not self.specs_price or self.specs_price <= Decimal('0.00')
+
+    @property
+    def specs_purchases_count(self) -> int:
+        """عدد المتعاملين الذين سحبوا دفتر الشروط"""
+        return self.specs_purchases.filter(status='paid').count()
+
+    @property
+    def total_specs_revenue(self) -> Decimal:
+        """إجمالي مداخيل بيع دفاتر الشروط"""
+        return sum((p.amount for p in self.specs_purchases.filter(status='paid')), Decimal('0.00'))
 
     @property
     def has_active_injunction(self) -> bool:
@@ -892,3 +914,138 @@ class AdministrativeNotice(models.Model):
 
             return True
         return False
+
+class SpecsPurchase(models.Model):
+    """
+    سجل سحب دفتر الشروط والدفع الإلكتروني (Paid Specs Download)
+    وفقاً لأحكام القانون 23-12 والمرسوم الرئاسي 15-247.
+    """
+    STATUS_CHOICES = (
+        ('pending', 'قيد انتظار الدفع'),
+        ('paid', 'تم الدفع وسحب الدفتر'),
+        ('failed', 'فشلت عملية الدفع'),
+        ('refunded', 'مسترد'),
+    )
+
+    GATEWAY_CHOICES = (
+        ('chargily', 'Chargily Pay (البطاقة الذهبية / CIB)'),
+        ('satim', 'SATIM Interbancaire'),
+    )
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    deal = models.ForeignKey(
+        ProcurementDeal,
+        on_delete=models.CASCADE,
+        related_name='specs_purchases',
+        verbose_name='الصفقة'
+    )
+    operator = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name='specs_purchases',
+        verbose_name='المتعامل الاقتصادي'
+    )
+    amount = models.DecimalField('المبلغ المدفوع (دج)', max_digits=10, decimal_places=2)
+    payment_gateway = models.CharField('بوابة الدفع', max_length=50, choices=GATEWAY_CHOICES, default='chargily')
+    payment_id = models.CharField('معرف المعاملة لدى البوابة', max_length=255, blank=True, db_index=True)
+    checkout_url = models.URLField('رابط صفحة الدفع', max_length=1000, blank=True, null=True)
+    status = models.CharField('حالة الدفع', max_length=20, choices=STATUS_CHOICES, default='pending', db_index=True)
+    receipt_number = models.CharField('رقم وصل السحب الرقمي', max_length=100, unique=True, null=True, blank=True, db_index=True)
+    receipt_pdf = models.FileField('ملف وصل السحب الرقمي (PDF)', upload_to='specs_receipts/', null=True, blank=True)
+    payment_method = models.CharField('طريقة الدفع (EDAHABIA / CIB)', max_length=50, blank=True, default='EDAHABIA')
+    metadata = models.JSONField('بيانات إضافية للمعاملة', default=dict, blank=True)
+    created_at = models.DateTimeField('تاريخ إنشاء الطلب', default=timezone.now)
+    paid_at = models.DateTimeField('تاريخ الدفع الفعلي', null=True, blank=True)
+    updated_at = models.DateTimeField('تاريخ التحديث', auto_now=True)
+
+    class Meta:
+        verbose_name = 'عملية سحب دفتر الشروط'
+        verbose_name_plural = 'سجل سحب دفاتر الشروط'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.receipt_number or self.id} - {self.deal.reference_number} ({self.operator.email})"
+
+    def generate_receipt_number(self) -> str:
+        """توليد رقم وصل سحب رقمي رسمي فريد"""
+        clean_ref = "".join(c for c in self.deal.reference_number if c.isalnum() or c == '-')
+        clean_ref = clean_ref[:12]
+        suffix = uuid.uuid4().hex[:6].upper()
+        year = timezone.now().year
+        return f"REC-{year}-{clean_ref}-{suffix}"
+
+    def mark_as_paid(self, payment_id=None, metadata=None, payment_method=None):
+        """تأكيد الدفع واعتماد السحب وتوليد الوصل والإشعارات"""
+        if self.status == 'paid':
+            return False
+
+        self.status = 'paid'
+        self.paid_at = timezone.now()
+        if payment_id:
+            self.payment_id = payment_id
+        if payment_method:
+            self.payment_method = payment_method
+        if metadata:
+            self.metadata.update(metadata)
+
+        if not self.receipt_number:
+            self.receipt_number = self.generate_receipt_number()
+
+        self.save()
+
+        # توليد ملف PDF للوصل وحفظه
+        try:
+            from .pdf_service import generate_specs_withdrawal_receipt_pdf
+            from django.core.files.base import ContentFile
+            pdf_bytes = generate_specs_withdrawal_receipt_pdf(self)
+            if pdf_bytes:
+                filename = f"Receipt_{self.receipt_number}.pdf"
+                self.receipt_pdf.save(filename, ContentFile(pdf_bytes), save=False)
+                self.save(update_fields=['receipt_pdf'])
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).warning("تعذر توليد أو حفظ ملف PDF لوصل السحب %s: %s", self.id, e)
+
+        # تسجيل في سجل التدقيق الجنائي
+        try:
+            from apps.audit.models import AuditLog
+            AuditLog.objects.create(
+                user=self.operator,
+                action='SPECS_WITHDRAWAL_PAID',
+                resource_type='SpecsPurchase',
+                resource_id=str(self.id),
+                description=f"سحب دفتر الشروط وسداد الرسوم ({self.amount} دج) للصفقة {self.deal.reference_number} - وصل رقم {self.receipt_number}.",
+                changes={
+                    'purchase_id': str(self.id),
+                    'receipt_number': self.receipt_number,
+                    'deal_id': str(self.deal.id),
+                    'amount': str(self.amount),
+                    'payment_method': self.payment_method,
+                },
+            )
+        except Exception:
+            pass
+
+        # إرسال إشعار للمتعامل
+        try:
+            from apps.users.models import Notification
+            Notification.objects.create(
+                user=self.operator,
+                title="✅ تم تأكيد سحب دفتر الشروط بنجاح",
+                text=f"تم استلام رسوم سحب دفتر الشروط ({self.amount} دج) للصفقة '{self.deal.title}'. رقم وصل السحب الرسمي: {self.receipt_number}. يمكنك الآن تحميل دفتر الشروط وإعداد العرض.",
+                link_href=f"/operator/deals/{self.deal.id}",
+                notification_type="urgent",
+            )
+            # إشعار للمصلحة المتعاقدة
+            Notification.objects.create(
+                user=self.deal.authority,
+                title="سحب دفتر شروط جديد",
+                text=f"قام المتعامل ({getattr(self.operator, 'organization_name', None) or getattr(self.operator, 'full_name', None) or self.operator.email}) بسحب دفتر الشروط للصفقة '{self.deal.title}' بوصل رقم {self.receipt_number}.",
+                link_href=f"/authority/deals/{self.deal.id}",
+                notification_type="update",
+            )
+        except Exception:
+            pass
+
+        return True
+

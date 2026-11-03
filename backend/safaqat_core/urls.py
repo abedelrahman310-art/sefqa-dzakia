@@ -1,3 +1,4 @@
+from apps.procurements.views_specs_payment import ChargilyWebhookView
 from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
@@ -110,6 +111,9 @@ urlpatterns = [
     # Modular Domain APIs
     path('api/auth/', include('apps.users.urls')),
     path('api/users/', include('apps.users.urls')),
+    # Chargily Pay Webhook
+    path('api/webhooks/chargily/', ChargilyWebhookView.as_view(), name='core_chargily_webhook'),
+    path('api/webhooks/chargily', ChargilyWebhookView.as_view(), name='core_chargily_webhook_no_slash'),
     path('api/procurements/', include('apps.procurements.urls')),
     path('api/bids/', include('apps.bids.urls')),
     path('api/contracts/', include('apps.contracts.urls')),

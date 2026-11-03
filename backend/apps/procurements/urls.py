@@ -1,3 +1,12 @@
+from .views_specs_payment import (
+    SpecsCheckoutView,
+    SpecsVerifyView,
+    SpecsDownloadView,
+    SpecsReceiptView,
+    SpecsStatusView,
+    SpecsBuyersListView,
+    ChargilyWebhookView,
+)
 from apps.procurements.views_injunctions import (
     AuthorityInjunctionsView,
     InjunctionRespondView,
@@ -52,6 +61,21 @@ router.register(r'avenants', AvenantViewSet, basename='procurement-avenant')
 router.register(r'notices', LegalNoticeViewSet, basename='procurement-notice')
 
 urlpatterns = [
+    # ═══ Specs Purchase & E-Payment (Chargily Pay V2 / SATIM) ═══
+    path("deals/<str:pk_or_id>/specs/checkout/", SpecsCheckoutView.as_view(), name="specs-checkout"),
+    path("deals/<str:pk_or_id>/specs/checkout", SpecsCheckoutView.as_view(), name="specs-checkout-no-slash"),
+    path("specs/purchase/<str:payment_id>/verify/", SpecsVerifyView.as_view(), name="specs-verify"),
+    path("specs/purchase/<str:payment_id>/verify", SpecsVerifyView.as_view(), name="specs-verify-no-slash"),
+    path("specs/download/<str:receipt_number>/", SpecsDownloadView.as_view(), name="specs-download"),
+    path("specs/download/<str:receipt_number>", SpecsDownloadView.as_view(), name="specs-download-no-slash"),
+    path("specs/receipt/<str:receipt_number>/", SpecsReceiptView.as_view(), name="specs-receipt"),
+    path("specs/receipt/<str:receipt_number>", SpecsReceiptView.as_view(), name="specs-receipt-no-slash"),
+    path("deals/<str:pk_or_id>/specs/status/", SpecsStatusView.as_view(), name="specs-status"),
+    path("deals/<str:pk_or_id>/specs/status", SpecsStatusView.as_view(), name="specs-status-no-slash"),
+    path("deals/<str:pk_or_id>/specs/purchases/", SpecsBuyersListView.as_view(), name="specs-buyers-list"),
+    path("deals/<str:pk_or_id>/specs/purchases", SpecsBuyersListView.as_view(), name="specs-buyers-list-no-slash"),
+    path("webhooks/chargily/", ChargilyWebhookView.as_view(), name="chargily-webhook"),
+    path("webhooks/chargily", ChargilyWebhookView.as_view(), name="chargily-webhook-no-slash"),
     path("authorities/<uuid:authority_id>/injunctions/", AuthorityInjunctionsView.as_view(), name="authority-injunctions"),
     path("authorities/<uuid:authority_id>/injunctions", AuthorityInjunctionsView.as_view(), name="authority-injunctions-no-slash"),
     path("my-injunctions/", AuthorityInjunctionsView.as_view(), name="my-injunctions"),

@@ -2,6 +2,7 @@ import uuid
 from decimal import Decimal
 from rest_framework import serializers
 from .models import (
+    SpecsPurchase,
     ProcurementDeal,
     CahierSpecs,
     OpeningSession,
@@ -634,6 +635,11 @@ class OpportunitySerializer(serializers.ModelSerializer):
     createdAt = serializers.DateTimeField(source='created_at', format='%Y-%m-%dT%H:%M:%S%z', read_only=True)
     updatedAt = serializers.DateTimeField(source='updated_at', format='%Y-%m-%dT%H:%M:%S%z', read_only=True)
     has_active_injunction = serializers.SerializerMethodField()
+    specs_price = serializers.DecimalField(max_digits=10, decimal_places=2, read_only=True)
+    specsPrice = serializers.SerializerMethodField()
+    is_specs_free = serializers.SerializerMethodField()
+    has_purchased_specs = serializers.SerializerMethodField()
+    specs_purchase = serializers.SerializerMethodField()
 
     class Meta:
         model = ProcurementDeal
@@ -649,6 +655,11 @@ class OpportunitySerializer(serializers.ModelSerializer):
             'has_document',
             'estimatedBudget',
             'estimated_budget',
+            'specs_price',
+            'specsPrice',
+            'is_specs_free',
+            'has_purchased_specs',
+            'specs_purchase',
             'status',
             'current_stage',
             'wilaya',
@@ -663,6 +674,34 @@ class OpportunitySerializer(serializers.ModelSerializer):
 
     def get_has_active_injunction(self, obj):
         return getattr(obj, 'has_active_injunction', False)
+
+    def get_specsPrice(self, obj):
+        return float(obj.specs_price) if obj.specs_price else 0.0
+
+    def get_is_specs_free(self, obj):
+        return obj.is_specs_free
+
+    def get_has_purchased_specs(self, obj):
+        request = self.context.get('request')
+        if not request or not request.user or not request.user.is_authenticated:
+            return False
+        return obj.specs_purchases.filter(operator=request.user, status='paid').exists()
+
+    def get_specs_purchase(self, obj):
+        request = self.context.get('request')
+        if not request or not request.user or not request.user.is_authenticated:
+            return None
+        p = obj.specs_purchases.filter(operator=request.user, status='paid').first()
+        if not p:
+            return None
+        return {
+            'id': str(p.id),
+            'receipt_number': p.receipt_number,
+            'amount': float(p.amount),
+            'paid_at': p.paid_at.isoformat() if p.paid_at else None,
+            'download_url': f"/api/procurements/specs/download/{p.receipt_number}/",
+            'receipt_url': f"/api/procurements/specs/receipt/{p.receipt_number}/",
+        }
 
     def get_authorityName(self, obj):
         if obj.authority:
@@ -794,6 +833,34 @@ class OfferSerializer(serializers.ModelSerializer):
 
     def get_has_active_injunction(self, obj):
         return getattr(obj, 'has_active_injunction', False)
+
+    def get_specsPrice(self, obj):
+        return float(obj.specs_price) if obj.specs_price else 0.0
+
+    def get_is_specs_free(self, obj):
+        return obj.is_specs_free
+
+    def get_has_purchased_specs(self, obj):
+        request = self.context.get('request')
+        if not request or not request.user or not request.user.is_authenticated:
+            return False
+        return obj.specs_purchases.filter(operator=request.user, status='paid').exists()
+
+    def get_specs_purchase(self, obj):
+        request = self.context.get('request')
+        if not request or not request.user or not request.user.is_authenticated:
+            return None
+        p = obj.specs_purchases.filter(operator=request.user, status='paid').first()
+        if not p:
+            return None
+        return {
+            'id': str(p.id),
+            'receipt_number': p.receipt_number,
+            'amount': float(p.amount),
+            'paid_at': p.paid_at.isoformat() if p.paid_at else None,
+            'download_url': f"/api/procurements/specs/download/{p.receipt_number}/",
+            'receipt_url': f"/api/procurements/specs/receipt/{p.receipt_number}/",
+        }
 
     def get_authorityName(self, obj):
         if obj.deal and obj.deal.authority:
@@ -1150,6 +1217,14 @@ class CheckPricesRequestSerializer(serializers.Serializer):
             raise serializers.ValidationError('الولاية يجب أن تحتوي على حروف أو أرقام.')
         return value
 
+class SpecsPurchaseSerializer(serializers.ModelSerializer):
+    operator_name = serializers.ReadOnlyField(source='operator.full_name')
+    operator_email = serializers.ReadOnlyField(source='operator.email')
+    deal_title = serializers.ReadOnlyField(source='deal.title')
+    deal_reference = serializers.ReadOnlyField(source='deal.reference_number')
+    status_display = serializers.CharField(source='get_status_display', read_only=True)
 
-
+    class Meta:
+        model = SpecsPurchase
+        fields = '__all__'
 

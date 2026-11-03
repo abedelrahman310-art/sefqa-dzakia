@@ -28,6 +28,7 @@ import {
   PanelRightClose,
   BookOpen,
   Paperclip,
+  CreditCard,
   CheckSquare,
   FileCode2,
   Award,
@@ -185,7 +186,150 @@ const SECTION_KEYS = [
 // Presets loaded dynamically via getTemplatePresets(lang)
 
 export interface AuthorityDealWorkspaceProps {
-  initialTab?: 'basics' | 'specs' | 'documents';
+  initialTab?: 'basics' | 'specs' | 'documents' | 'avenants' | 'notices' | 'specs_buyers';
+}
+
+
+interface SpecsBuyerItem {
+  id: string;
+  operator_id: string;
+  operator_name: string;
+  operator_email: string;
+  operator_tax_id: string;
+  amount: number;
+  payment_gateway: string;
+  payment_method: string;
+  receipt_number: string;
+  receipt_url: string;
+  paid_at: string;
+}
+
+function SpecsBuyersManager({ dealId }: { dealId: string }) {
+  const { t, lang } = useI18n();
+  const [buyers, setBuyers] = useState<SpecsBuyerItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [totalRevenue, setTotalRevenue] = useState(0);
+  const [specsPrice, setSpecsPrice] = useState(0);
+
+  const loadBuyers = async () => {
+    setLoading(true);
+    try {
+      const res = await api.get(`/procurements/deals/${dealId}/specs/purchases/`);
+      setBuyers(res.data.buyers || []);
+      setTotalRevenue(res.data.total_revenue || 0);
+      setSpecsPrice(res.data.specs_price || 0);
+    } catch (err) {
+      setBuyers([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (dealId) loadBuyers();
+  }, [dealId]);
+
+  return (
+    <div className="space-y-6">
+      {/* KPI Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="p-4 rounded-2xl bg-white border border-[#D5DDEA] shadow-sm">
+          <div className="text-xs font-bold text-gray-500">{t('authority.specs.total_buyers')}</div>
+          <div className="text-2xl font-black text-navy-900 mt-1">{buyers.length}</div>
+          <div className="text-[11px] text-gray-400 mt-0.5">متعاملين سحبوا الدفتر رسمياً</div>
+        </div>
+        <div className="p-4 rounded-2xl bg-white border border-[#D5DDEA] shadow-sm">
+          <div className="text-xs font-bold text-gray-500">{t('authority.specs.price_label')}</div>
+          <div className="text-2xl font-black text-navy-900 mt-1">
+            {specsPrice.toLocaleString(lang === 'ar' ? 'ar-DZ' : 'fr-FR')} {t('common.dzd')}
+          </div>
+          <div className="text-[11px] text-gray-400 mt-0.5">رسوم غير قابلة للاسترداد</div>
+        </div>
+        <div className="p-4 rounded-2xl bg-emerald-50/60 border border-emerald-200 shadow-sm">
+          <div className="text-xs font-bold text-emerald-800">{t('authority.specs.total_revenue')}</div>
+          <div className="text-2xl font-black text-emerald-900 mt-1">
+            {totalRevenue.toLocaleString(lang === 'ar' ? 'ar-DZ' : 'fr-FR')} {t('common.dzd')}
+          </div>
+          <div className="text-[11px] text-emerald-700/80 mt-0.5">محصلة عبر Chargily Pay / CIB</div>
+        </div>
+      </div>
+
+      {/* Buyers Table */}
+      <div className="bg-white border border-[#D5DDEA] rounded-2xl p-6 shadow-sm space-y-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-sm font-bold text-navy-900 flex items-center gap-2">
+              <CreditCard className="w-4 h-4 text-emerald-600" />
+              <span>{t('authority.specs.buyers_register')}</span>
+            </h3>
+            <p className="text-xs text-gray-500 mt-0.5">
+              سجل سحب دفاتر الشروط الرقمي وفقاً لأحكام المرسوم الرئاسي 15-247
+            </p>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={loadBuyers}
+            className="text-xs rounded-xl border-[#D5DDEA]"
+          >
+            تحديث
+          </Button>
+        </div>
+
+        {loading ? (
+          <div className="py-12 text-center text-xs text-gray-400">جاري تحميل سجل السحب...</div>
+        ) : buyers.length === 0 ? (
+          <div className="py-12 text-center text-xs text-gray-400 bg-gray-50/50 rounded-xl border border-dashed border-gray-200">
+            لم يقم أي متعامل اقتصادي بسحب دفتر الشروط بعد.
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-xs text-start border-collapse">
+              <thead>
+                <tr className="border-b border-[#D5DDEA] bg-gray-50 text-gray-600 font-bold">
+                  <th className="p-3 text-start">{t('authority.specs.buyer_name')}</th>
+                  <th className="p-3 text-start">{t('authority.specs.buyer_nif')}</th>
+                  <th className="p-3 text-start">{t('authority.specs.paid_amount')}</th>
+                  <th className="p-3 text-start">{t('operator.specs.receipt_number')}</th>
+                  <th className="p-3 text-start">{t('authority.specs.paid_date')}</th>
+                  <th className="p-3 text-end">{t('authority.specs.receipt_link')}</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#D5DDEA]">
+                {buyers.map((b) => (
+                  <tr key={b.id} className="hover:bg-gray-50/50 transition-colors">
+                    <td className="p-3">
+                      <div className="font-bold text-navy-900">{b.operator_name}</div>
+                      <div className="text-[11px] text-gray-400">{b.operator_email}</div>
+                    </td>
+                    <td className="p-3 font-mono text-gray-700">{b.operator_tax_id}</td>
+                    <td className="p-3 font-mono font-bold text-emerald-700">
+                      {b.amount.toLocaleString(lang === 'ar' ? 'ar-DZ' : 'fr-FR')} {t('common.dzd')}
+                    </td>
+                    <td className="p-3 font-mono text-navy-900 font-bold">{b.receipt_number}</td>
+                    <td className="p-3 text-gray-600">
+                      {new Date(b.paid_at).toLocaleString(lang === 'ar' ? 'ar-DZ' : 'fr-FR')}
+                    </td>
+                    <td className="p-3 text-end">
+                      <a
+                        href={b.receipt_url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1 text-emerald-700 hover:underline font-bold text-xs"
+                      >
+                        <FileText className="w-3.5 h-3.5" />
+                        <span>تحميل PDF</span>
+                      </a>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }
 
 export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspaceProps) {
@@ -224,7 +368,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
   const defaultWilaya = (user as any)?.wilaya || '16';
 
   // Active Tab state: 'basics' | 'specs' | 'documents'
-  const [activeTab, setActiveTab] = useState<'basics' | 'specs' | 'documents'>(
+  const [activeTab, setActiveTab] = useState<'basics' | 'specs' | 'documents' | 'avenants' | 'notices' | 'specs_buyers'>(
     initialTab || (draftsSpecsParams ? 'specs' : 'basics')
   );
 
@@ -250,6 +394,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
   const [templateType, setTemplateType] = useState<TemplateType>('works');
   const [wilaya, setWilaya] = useState(defaultWilaya);
   const [budget, setBudget] = useState('');
+  const [specsPrice, setSpecsPrice] = useState('2000');
   const [taxRegime, setTaxRegime] = useState<'ttc' | 'ht'>('ttc');
   const [duration, setDuration] = useState(t('authority.workspace.duration_default'));
   const [boqItems, setBoqItems] = useState<BoqItem[]>([]);
@@ -337,6 +482,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
       setTitle(d.title || '');
       setDescription(d.description || '');
       setBudget(d.estimated_budget ? String(d.estimated_budget) : '');
+      if (d.specs_price !== undefined) setSpecsPrice(String(d.specs_price));
       if (d.wilaya) setWilaya(d.wilaya);
 
       // Load Cahier Specs
@@ -669,6 +815,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
         description: description.trim(),
         wilaya,
         estimated_budget: budgetNum,
+        specs_price: specsPrice ? parseFloat(specsPrice) : 0,
       });
 
       // Update Cahier Specs duration & BOQ items and procedure metadata
@@ -1410,6 +1557,19 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
           <AlertTriangle className="w-4 h-4 text-amber-500" />
           <span>{t('execution.notices.title') || 'الاعذارات القانونية'}</span>
         </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab('specs_buyers')}
+          className={`px-5 py-2.5 rounded-xl transition-all flex items-center gap-2 ${
+            activeTab === 'specs_buyers'
+              ? 'bg-navy-900 text-white shadow-sm'
+              : 'bg-white text-gray-600 hover:bg-gray-100 border border-[#D5DDEA]'
+          }`}
+        >
+          <CreditCard className="w-4 h-4" />
+          <span>{t('authority.specs.buyers_register')}</span>
+        </button>
       </div>
 
       {/* ─── 3. Main Workspace Grid with Collapsible Assistant ────────────── */}
@@ -2106,6 +2266,10 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                 userRole="authority"
               />
             </div>
+          )}
+
+          {activeTab === 'specs_buyers' && (
+            <SpecsBuyersManager dealId={dealId} />
           )}
 
           {/* ══════════════════════════════════════════════════════════════════

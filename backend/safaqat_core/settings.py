@@ -44,6 +44,9 @@ elif DEBUG or IS_TESTING:
 else:
     raise ImproperlyConfigured("DJANGO_ALLOWED_HOSTS environment variable must be explicitly configured in production.")
 
+if 'testserver' not in ALLOWED_HOSTS and (DEBUG or IS_TESTING):
+    ALLOWED_HOSTS.append('testserver')
+
 # Application definition
 INSTALLED_APPS = [
     'daphne',
@@ -307,4 +310,10 @@ if not DEBUG and not IS_TESTING:
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
+# ═══ Payment Gateway (Chargily Pay V2 / SATIM) ═══
+CHARGILY_API_KEY = os.getenv('CHARGILY_API_KEY', '')
+CHARGILY_MODE = os.getenv('CHARGILY_MODE', 'test')  # 'test' or 'production'
+CHARGILY_BASE_URL = 'https://pay.chargily.net/test/api/v2' if CHARGILY_MODE == 'test' else 'https://pay.chargily.net/api/v2'
+
 
