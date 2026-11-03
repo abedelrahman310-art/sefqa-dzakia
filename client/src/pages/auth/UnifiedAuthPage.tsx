@@ -467,11 +467,11 @@ export function UnifiedAuthPage({ initialMode = 'operator' }: UnifiedAuthPagePro
           </div>
         </div>
 
-        {/* 3. أسفل اللوحة: شارة التغطية الوطنية للولايات الـ 69 */}
+        {/* 3. أسفل اللوحة: شارة التغطية الوطنية للولايات الـ 58 */}
         <div className="w-full relative z-10 pb-2">
           <div className="flex items-center justify-center gap-2 rounded-xl border border-slate-200/80 bg-white/80 py-2 px-3 text-center text-[10px] font-bold text-slate-700 shadow-2xs">
             <AlgeriaFlag />
-            <span>تغطية وطنية موحدة لكافة ولايات الجزائر الـ 69 والبلديات الـ 1,541</span>
+            <span>تغطية وطنية موحدة لكافة ولايات الجزائر الـ 58 والبلديات الـ 1,541</span>
           </div>
         </div>
       </div>
@@ -892,21 +892,21 @@ export function UnifiedAuthPage({ initialMode = 'operator' }: UnifiedAuthPagePro
                         <div className="absolute z-50 mt-1 max-h-48 w-full overflow-y-auto rounded-xl border border-slate-200 bg-white p-1 shadow-xl animate-in fade-in-50">
                           {availableCommunes.map((comm) => (
                             <button
-                              key={comm.code}
+                              key={comm}
                               type="button"
                               onClick={() => {
-                                setCommune(comm.nameAr);
+                                setCommune(comm);
                                 setIsCommuneOpen(false);
                                 markTouched('commune');
                               }}
                               className={`flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-start text-xs font-medium cursor-pointer ${
-                                commune === comm.nameAr
+                                commune === comm
                                   ? 'bg-emerald-50 font-bold text-emerald-800'
                                   : 'text-slate-700 hover:bg-slate-100'
                               }`}
                             >
-                              <span>{comm.nameAr}</span>
-                              {commune === comm.nameAr && <Check className="size-3.5 text-emerald-600" />}
+                              <span>{comm}</span>
+                              {commune === comm && <Check className="size-3.5 text-emerald-600" />}
                             </button>
                           ))}
                         </div>

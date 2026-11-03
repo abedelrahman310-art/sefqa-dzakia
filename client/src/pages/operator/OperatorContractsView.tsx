@@ -10,6 +10,7 @@ import { AvenantsManager } from '@/features/execution/components/AvenantsManager
 import { LegalNoticesManager } from '@/features/execution/components/LegalNoticesManager';
 import {
   AlertCircle,
+  AlertTriangle,
   Banknote,
   Building2,
   Calendar,

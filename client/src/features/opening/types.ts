@@ -1,5 +1,7 @@
 export type SessionStatus = "scheduled" | "live" | "ended" | "cancelled";
 export type AccessPolicy = "participants_only" | "authority_only" | "public";
+export type CeremonyStatus = "pending_quorum" | "quorum_reached" | "unlocked";
+
 export type EventType =
   | "offer_opened"
   | "offer_rejected"
@@ -7,6 +9,16 @@ export type EventType =
   | "session_resumed"
   | "session_ended"
   | "session_started";
+
+export interface CommitteeShare {
+  id: string;
+  member_name: string;
+  member_role: string;
+  role_display?: string;
+  share_index: number;
+  is_submitted: boolean;
+  submitted_at: string | null;
+}
 
 export interface OpeningSessionList {
   id: string;
@@ -56,6 +68,12 @@ export interface OpeningSessionDetail {
   access_policy_display?: string;
   total_offers: number;
   opened_count: number;
+  threshold_k?: number;
+  threshold_n?: number;
+  ceremony_status?: CeremonyStatus;
+  unlocked_at?: string | null;
+  quorum_reached?: boolean;
+  committee_shares?: CommitteeShare[];
   events: OpeningEvent[];
   created_at: string;
 }

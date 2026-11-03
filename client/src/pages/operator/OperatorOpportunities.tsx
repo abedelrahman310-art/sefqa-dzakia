@@ -98,7 +98,7 @@ export function OperatorOpportunities() {
       const res = await api.post<ComplianceData>('/operator/check-compliance/', { deal_id: dealId });
       setComplianceData(res.data);
     } catch (err: any) {
-      setComplianceError(err.response?.data?.error || 'تعذر تشغيل درع الفحص على هذه الصفقة حالياً.');
+      setComplianceError(err.response?.data?.error || t('operator.compliance.error_runtime'));
     } finally {
       setComplianceLoading(false);
     }
@@ -239,7 +239,7 @@ export function OperatorOpportunities() {
             }`}
           >
             <Radio className="size-4 animate-pulse" />
-            <span>رادار الصفقات التنبؤي الذكي (AI Radar)</span>
+            <span>{t('operator.opportunities.radar_tab')}</span>
           </button>
           <button
             type="button"
@@ -251,13 +251,13 @@ export function OperatorOpportunities() {
             }`}
           >
             <Briefcase className="size-4" />
-            <span>كافة الصفقات المنشورة ({opportunities.length})</span>
+            <span>{t('operator.opportunities.all_deals_tab', { count: opportunities.length })}</span>
           </button>
         </div>
 
         <div className="hidden sm:flex items-center gap-2 text-xs text-slate-500 font-semibold px-2">
           <Sparkles className="size-3.5 text-emerald-600" />
-          <span>مطابقة ذكية لولايات الجزائر الـ 69 وفق القانون 23-12</span>
+          <span>{t('operator.opportunities.radar_note')}</span>
         </div>
       </div>
 
@@ -541,10 +541,10 @@ export function OperatorOpportunities() {
                               type="button"
                               className="op-btn op-btn-outline op-btn-sm whitespace-nowrap text-emerald-700 hover:border-emerald-500 inline-flex items-center gap-1 cursor-pointer"
                               onClick={() => handleOpenComplianceModal(opp.id)}
-                              title="فحص العرض بدرع مكافحة الإقصاء الشكلي"
+                              title={t('operator.opportunities.compliance_tooltip')}
                             >
                               <ShieldCheck className="size-3.5 text-emerald-600" aria-hidden="true" />
-                              <span>درع الفحص</span>
+                              <span>{t('operator.opportunities.compliance_btn')}</span>
                             </button>
 
                             <button
@@ -603,22 +603,22 @@ export function OperatorOpportunities() {
             {complianceLoading ? (
               <div className="p-12 text-center">
                 <Loader2 className="size-10 text-emerald-600 animate-spin mx-auto mb-3" />
-                <h3 className="text-sm font-bold text-slate-900">جارٍ إجراء الفحص التلقائي بدرع الامتثال...</h3>
-                <p className="text-xs text-slate-500 mt-1">مطابقة ملف مؤسستك والوثائق الإلزامية وفق المادة 67 من القانون 23-12</p>
+                <h3 className="text-sm font-bold text-slate-900">{t('operator.compliance.loading_title')}</h3>
+                <p className="text-xs text-slate-500 mt-1">{t('operator.compliance.loading_subtitle')}</p>
               </div>
             ) : complianceError ? (
               <div className="p-8 text-center space-y-3">
                 <div className="size-12 rounded-full bg-rose-50 text-rose-600 mx-auto flex items-center justify-center">
                   <X className="size-6" />
                 </div>
-                <h3 className="text-base font-bold text-slate-900">تعذر استكمال الفحص</h3>
+                <h3 className="text-base font-bold text-slate-900">{t('operator.compliance.error_title')}</h3>
                 <p className="text-xs text-slate-500 max-w-md mx-auto">{complianceError}</p>
                 <button
                   type="button"
                   onClick={() => handleOpenComplianceModal(complianceModalDealId)}
                   className="op-btn op-btn-outline op-btn-sm"
                 >
-                  إعادة المحاولة
+                  {t('operator.compliance.retry')}
                 </button>
               </div>
             ) : complianceData ? (
@@ -628,7 +628,7 @@ export function OperatorOpportunities() {
                 {/* شريط الإجراء النهائي */}
                 <div className="flex items-center justify-between border-t border-slate-100 pt-4">
                   <span className="text-xs text-slate-500">
-                    يمكنك استكمال النواقص أو البدء في تعبئة العرض المالي والتقني مباشرة.
+                    {t('operator.compliance.continue_hint')}
                   </span>
                   <button
                     type="button"
@@ -639,7 +639,7 @@ export function OperatorOpportunities() {
                     }}
                     className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#006233] to-[#0f3154] px-4 py-2.5 text-xs font-bold text-white shadow-md hover:shadow-lg transition-all cursor-pointer"
                   >
-                    <span>المتابعة إلى إعداد العرض</span>
+                    <span>{t('operator.compliance.continue_btn')}</span>
                     {isRtl ? <ArrowLeft className="size-4" /> : <ArrowRight className="size-4" />}
                   </button>
                 </div>

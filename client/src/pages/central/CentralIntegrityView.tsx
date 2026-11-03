@@ -18,7 +18,7 @@ import { AntiCollusionRadar } from '@/features/governance/AntiCollusionRadar';
 import { ProjectDelayPredictor } from '@/features/governance/ProjectDelayPredictor';
 
 export function CentralIntegrityView() {
-  const { dir } = useI18n();
+  const { t, dir } = useI18n();
   const [activeTab, setActiveTab] = useState<'anti_collusion' | 'delay_predictor'>('anti_collusion');
   const [exporting, setExporting] = useState(false);
 
@@ -37,15 +37,15 @@ export function CentralIntegrityView() {
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <span className="text-xs font-extrabold uppercase tracking-wider text-primary bg-primary/10 px-2.5 py-0.5 rounded-full border border-primary/20">
-              الجمهورية الجزائرية الديمقراطية الشعبية · المفتشية العامة للصفقات العمومية
+              {t('central.integrity.badge')}
             </span>
           </div>
           <h1 className="text-xl md:text-2xl font-black text-navy-950 flex items-center gap-2.5">
             <ShieldAlert className="w-6 h-6 text-primary" />
-            <span>منظومة الرقابة المركزية والنزاهة المؤسسية بالذكاء الاصطناعي</span>
+            <span>{t('central.integrity.title')}</span>
           </h1>
           <p className="text-xs text-muted-foreground leading-relaxed">
-            المنصة الرقابية العليا (عين الصقر) لكشف محاولات التواطؤ، تدوير العطاءات، تجزئة الحاجات، والتنبؤ المبكر بتعثر وتوقف المشاريع العمومية وفق القانون رقم 23-12 والمرسوم الرئاسي 15-247.
+            {t('central.integrity.subtitle')}
           </p>
         </div>
 
@@ -58,7 +58,7 @@ export function CentralIntegrityView() {
             className="text-xs rounded-xl font-bold border-border shadow-sm gap-2"
           >
             <Download className="w-3.5 h-3.5" />
-            <span>{exporting ? 'جاري استخراج الملف...' : 'استخراج تقرير تدقيق معتمد'}</span>
+            <span>{exporting ? t('central.integrity.exporting') : t('central.integrity.export')}</span>
           </Button>
         </div>
       </div>
@@ -75,7 +75,7 @@ export function CentralIntegrityView() {
           }`}
         >
           <ShieldAlert className="w-4 h-4 text-rose-400" />
-          <span>رادار كشف التواطؤ والتلاعب في الأسعار (Anti-Collusion & Integrity)</span>
+          <span>{t('central.integrity.tab_anti_collusion')}</span>
         </button>
 
         <button
@@ -88,7 +88,7 @@ export function CentralIntegrityView() {
           }`}
         >
           <Clock className="w-4 h-4 text-amber-400" />
-          <span>مؤشر التنبؤ المبكر بتعثر المشاريع (Project Delay Forecast)</span>
+          <span>{t('central.integrity.tab_delay')}</span>
         </button>
       </div>
 

@@ -50,7 +50,7 @@ export interface MonitoredProject {
 }
 
 export function ProjectDelayPredictor() {
-  const { lang, dir } = useI18n();
+  const { t, lang, dir } = useI18n();
   const [loading, setLoading] = useState(true);
   const [projects, setProjects] = useState<MonitoredProject[]>([]);
   const [selectedWilaya, setSelectedWilaya] = useState<string>('all');
@@ -247,7 +247,7 @@ export function ProjectDelayPredictor() {
   }, [projects]);
 
   const handleTriggerAction = (actionName: string, p: MonitoredProject) => {
-    setActionSuccess(`تم تنفيذ الإجراء الرقابي: [${actionName}] للعقد ${p.contract_number} بنجاح.`);
+    setActionSuccess(t('central.integrity.delay.action_success', { action: actionName, contract: p.contract_number }));
     setTimeout(() => setActionSuccess(null), 5000);
   };
 
@@ -260,17 +260,17 @@ export function ProjectDelayPredictor() {
             <div className="flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping" />
               <span className="text-xs font-bold text-amber-300 tracking-wide uppercase">
-                خوارزمية الإنذار المبكر بتعثر وتوقف المشاريع (Project Delay Forecast Engine)
+                {t('central.integrity.delay.engine_badge')}
               </span>
             </div>
             <h1 className="text-xl md:text-2xl font-extrabold text-white flex items-center gap-3">
-              <span>مؤشر التنبؤ المبكر بتعثر ومخاطر الورشات</span>
+              <span>{t('central.integrity.delay.title')}</span>
               <span className="text-xs px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold">
-                {summary.critical} ورشات في منطقة الخطر الحرج
+                {t('central.integrity.delay.critical_badge', { count: summary.critical })}
               </span>
             </h1>
             <p className="text-xs text-slate-300 max-w-3xl leading-relaxed">
-              تحليل الترابط الزمني بين أوامر بداية الخدمة (ODS)، الاستهلاك الزمني، ونسبة الإنجاز المادي، مع مراقبة تراكم الملاحق التعاقدية (Avenants) ووضعيات الدفع بالخزينة لتفادي توقف الأشغال (Chantiers à l'arrêt).
+              {t('central.integrity.delay.subtitle')}
             </p>
           </div>
 
@@ -283,7 +283,7 @@ export function ProjectDelayPredictor() {
               className="border-white/20 text-white hover:bg-white/10 text-xs rounded-xl gap-2"
             >
               <Activity className="w-3.5 h-3.5" />
-              <span>إعادة احتساب المؤشرات</span>
+              <span>{t('central.integrity.delay.refresh')}</span>
             </Button>
           </div>
         </div>
@@ -300,40 +300,40 @@ export function ProjectDelayPredictor() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-card border border-border rounded-2xl p-4 shadow-sm space-y-1">
           <div className="flex items-center justify-between text-xs text-muted-foreground font-semibold">
-            <span>مجموع المشاريع الخاضعة للمراقبة</span>
+            <span>{t('central.integrity.delay.kpi_total')}</span>
             <Layers className="w-4 h-4 text-primary" />
           </div>
           <div className="text-2xl font-black text-navy-950">{summary.total}</div>
-          <div className="text-xs text-muted-foreground">عقود سارية مع أوامر ODS معتمدة</div>
+          <div className="text-xs text-muted-foreground">{t('central.integrity.delay.kpi_total_sub')}</div>
         </div>
 
         <div className="bg-card border border-rose-200 rounded-2xl p-4 shadow-sm space-y-1 bg-rose-50/20">
           <div className="flex items-center justify-between text-xs text-rose-800 font-semibold">
-            <span>ورشات في خطر التوقف الحرج</span>
+            <span>{t('central.integrity.delay.kpi_critical')}</span>
             <Flame className="w-4 h-4 text-rose-600" />
           </div>
           <div className="text-2xl font-black text-rose-600">{summary.critical}</div>
-          <div className="text-xs text-rose-700">تقتضي إعذارات فورية (Mise en demeure)</div>
+          <div className="text-xs text-rose-700">{t('central.integrity.delay.kpi_critical_sub')}</div>
         </div>
 
         <div className="bg-card border border-amber-200 rounded-2xl p-4 shadow-sm space-y-1 bg-amber-50/20">
           <div className="flex items-center justify-between text-xs text-amber-800 font-semibold">
-            <span>ورشات تشهد تباطؤاً في التوريد</span>
+            <span>{t('central.integrity.delay.kpi_warning')}</span>
             <Clock className="w-4 h-4 text-amber-600" />
           </div>
           <div className="text-2xl font-black text-amber-600">{summary.warning}</div>
-          <div className="text-xs text-amber-700">تستلزم إعادة جدولة الروزنامة التعاقدية</div>
+          <div className="text-xs text-amber-700">{t('central.integrity.delay.kpi_warning_sub')}</div>
         </div>
 
         <div className="bg-card border border-emerald-200 rounded-2xl p-4 shadow-sm space-y-1 bg-emerald-50/20">
           <div className="flex items-center justify-between text-xs text-emerald-800 font-semibold">
-            <span>إجمالي المبالغ تحت المتابعة المشددة</span>
+            <span>{t('central.integrity.delay.kpi_budget')}</span>
             <Coins className="w-4 h-4 text-emerald-600" />
           </div>
           <div className="text-base font-black text-emerald-800 truncate">
             {formatCurrency(summary.budgetAtRisk, lang)}
           </div>
-          <div className="text-xs text-emerald-700">مخصصات مالية للمشاريع المتعثرة</div>
+          <div className="text-xs text-emerald-700">{t('central.integrity.delay.kpi_budget_sub')}</div>
         </div>
       </div>
 
@@ -342,13 +342,13 @@ export function ProjectDelayPredictor() {
         <div className="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0">
           <span className="text-xs font-bold text-muted-foreground flex items-center gap-1 shrink-0">
             <Filter className="w-3.5 h-3.5" />
-            <span>مستوى الخطر:</span>
+            <span>{t('central.integrity.delay.risk_level_label')}</span>
           </span>
           {[
-            { id: 'all', label: 'كافة المشاريع' },
-            { id: 'critical', label: 'خطر حرج (Critical)' },
-            { id: 'warning', label: 'تباطؤ (Warning)' },
-            { id: 'normal', label: 'سير طبيعي (Normal)' },
+            { id: 'all', label: t('central.integrity.delay.filter_all') },
+            { id: 'critical', label: t('central.integrity.delay.filter_critical') },
+            { id: 'warning', label: t('central.integrity.delay.filter_warning') },
+            { id: 'normal', label: t('central.integrity.delay.filter_normal') },
           ].map((tier) => (
             <button
               key={tier.id}
@@ -372,7 +372,7 @@ export function ProjectDelayPredictor() {
               onChange={(e) => setSelectedWilaya(e.target.value)}
               className="text-xs border border-border bg-background rounded-xl h-9 px-3 font-semibold focus:outline-none"
             >
-              <option value="all">كافة الولايات ({wilayasList.length})</option>
+              <option value="all">{t('central.integrity.delay.all_wilayas', { count: wilayasList.length })}</option>
               {wilayasList.map((w) => (
                 <option key={w} value={w}>
                   {w}
@@ -384,7 +384,7 @@ export function ProjectDelayPredictor() {
           <div className="relative min-w-[200px]">
             <Search className="w-3.5 h-3.5 absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
             <Input
-              placeholder="بحث بالمشروع، العقد، أو المقاولة..."
+              placeholder={t('central.integrity.delay.search_placeholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="text-xs ps-8 rounded-xl h-9"
@@ -399,7 +399,7 @@ export function ProjectDelayPredictor() {
         {filteredProjects.length === 0 ? (
           <div className="p-12 text-center text-muted-foreground bg-muted/20 border border-dashed border-border rounded-2xl space-y-2">
             <CheckCircle2 className="w-8 h-8 text-emerald-600 mx-auto" />
-            <p className="text-xs font-semibold">لا توجد مشاريع تطابق المعايير المحددة</p>
+            <p className="text-xs font-semibold">{t('central.integrity.delay.empty')}</p>
           </div>
         ) : (
           filteredProjects.map((p) => {
@@ -426,7 +426,7 @@ export function ProjectDelayPredictor() {
                             : 'bg-emerald-100 text-emerald-900 border-emerald-300'
                         }`}
                       >
-                        {isCritical ? 'خطر توقف حرج' : isWarning ? 'تباطؤ في الإنجاز' : 'سير منتظم'}
+                        {isCritical ? t('central.integrity.delay.badge_critical') : isWarning ? t('central.integrity.delay.badge_warning') : t('central.integrity.delay.badge_normal')}
                       </span>
                       <span className="text-xs font-mono font-bold bg-navy-50 text-navy-900 px-2 py-0.5 rounded border border-navy-100">
                         {p.contract_number}
@@ -435,7 +435,7 @@ export function ProjectDelayPredictor() {
                         {p.wilaya}
                       </span>
                       <span className="text-xs font-semibold text-navy-900">
-                        قيمة الصفقة: <strong>{formatCurrency(p.signed_amount, lang)}</strong>
+                        {t('central.integrity.delay.deal_value', { amount: formatCurrency(p.signed_amount, lang) })}
                       </span>
                     </div>
                     <h3 className="text-sm font-extrabold text-navy-950 mt-1">{p.deal_title}</h3>
@@ -443,7 +443,7 @@ export function ProjectDelayPredictor() {
 
                   <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
                     <div className="text-end">
-                      <div className="text-xs text-muted-foreground">درجة خطورة التعثر</div>
+                      <div className="text-xs text-muted-foreground">{t('central.integrity.delay.risk_score_label')}</div>
                       <div
                         className={`text-xl font-black ${
                           isCritical ? 'text-rose-600' : isWarning ? 'text-amber-600' : 'text-emerald-600'
@@ -461,22 +461,20 @@ export function ProjectDelayPredictor() {
                     <div className="flex items-center gap-4">
                       <span className="flex items-center gap-1.5 text-navy-900">
                         <Clock className="w-3.5 h-3.5 text-navy-700" />
-                        <span>المدة المستهلكة (الاستهلاك الزمني): <strong>{p.elapsed_percentage}%</strong> ({p.elapsed_days} من أصل {p.duration_months * 30} يوماً)</span>
+                        <span>{t('central.integrity.delay.elapsed', { percent: p.elapsed_percentage, days: p.elapsed_days, total: p.duration_months * 30 })}</span>
                       </span>
                       <span className="flex items-center gap-1.5 text-emerald-800">
                         <TrendingUp className="w-3.5 h-3.5 text-emerald-600" />
-                        <span>التقدم المادي الفعلي: <strong>{p.physical_progress_percentage}%</strong></span>
+                        <span>{t('central.integrity.delay.progress', { percent: p.physical_progress_percentage })}</span>
                       </span>
                     </div>
 
                     {p.gap_percentage > 0 ? (
                       <span className="text-rose-700 font-bold bg-rose-100 px-2 py-0.5 rounded border border-rose-200">
-                        فجوة التأخير: -{p.gap_percentage}%
+                        {t('central.integrity.delay.gap', { percent: p.gap_percentage })}
                       </span>
                     ) : (
-                      <span className="text-emerald-700 font-bold bg-emerald-100 px-2 py-0.5 rounded border border-emerald-200">
-                        متقدم عن الجدول
-                      </span>
+                      <span className="text-emerald-700 font-bold bg-emerald-100 px-2 py-0.5 rounded border border-emerald-200">{t('central.integrity.delay.ahead')}</span>
                     )}
                   </div>
 
@@ -505,33 +503,33 @@ export function ProjectDelayPredictor() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
                   <div className="space-y-1 bg-background p-3 rounded-xl border border-border/60">
                     <div className="flex items-center justify-between text-muted-foreground pb-1 border-b border-border/40">
-                      <span>المصلحة المتعاقدة:</span>
+                      <span>{t('central.integrity.delay.authority_label')}</span>
                       <strong className="text-navy-900">{p.authority_name}</strong>
                     </div>
                     <div className="flex items-center justify-between text-muted-foreground pt-1">
-                      <span>مقاولة الإنجاز:</span>
+                      <span>{t('central.integrity.delay.operator_label')}</span>
                       <strong className="text-navy-900">{p.operator_name}</strong>
                     </div>
                     <div className="flex items-center justify-between text-muted-foreground pt-1">
-                      <span>تاريخ أمر الخدمة (ODS):</span>
+                      <span>{t('central.integrity.delay.ods_label')}</span>
                       <span className="font-mono">{p.ods_date}</span>
                     </div>
                   </div>
 
                   <div className="space-y-1 bg-background p-3 rounded-xl border border-border/60">
                     <div className="flex items-center justify-between text-muted-foreground pb-1 border-b border-border/40">
-                      <span>الملاحق التعاقدية (Avenants):</span>
+                      <span>{t('central.integrity.delay.amendments_label')}</span>
                       <span className="font-semibold text-navy-900">
-                        {p.amendments_count} ملاحق ({p.amendments_financial_ratio}% من قيمة العقد)
+                        {t('central.integrity.delay.amendments_value', { count: p.amendments_count, ratio: p.amendments_financial_ratio })}
                       </span>
                     </div>
                     <div className="flex items-center justify-between text-muted-foreground pt-1">
-                      <span>المحطات المتأخرة:</span>
-                      <span className="font-semibold text-rose-700">{p.delayed_milestones_count} محطات</span>
+                      <span>{t('central.integrity.delay.delayed_milestones_label')}</span>
+                      <span className="font-semibold text-rose-700">{t('central.integrity.delay.delayed_milestones_value', { count: p.delayed_milestones_count })}</span>
                     </div>
                     <div className="flex items-center justify-between text-muted-foreground pt-1">
-                      <span>أيام التمديد الإجمالية:</span>
-                      <span className="font-mono font-semibold">{p.days_extended} يوماً</span>
+                      <span>{t('central.integrity.delay.days_extended_label')}</span>
+                      <span className="font-mono font-semibold">{t('central.integrity.delay.days_extended_value', { days: p.days_extended })}</span>
                     </div>
                   </div>
                 </div>
@@ -539,7 +537,7 @@ export function ProjectDelayPredictor() {
                 {/* مسببات الخطر وتنبيهات الذكاء الاصطناعي */}
                 {p.risk_factors.length > 0 && (
                   <div className="space-y-1">
-                    <span className="text-xs font-bold text-navy-900">مؤشرات الخطر والإنذار المبكر:</span>
+                    <span className="text-xs font-bold text-navy-900">{t('central.integrity.delay.risk_factors_label')}</span>
                     <ul className="list-disc ps-5 text-xs text-slate-600 space-y-0.5">
                       {p.risk_factors.map((rf, idx2) => (
                         <li key={idx2}>{rf}</li>
@@ -553,7 +551,7 @@ export function ProjectDelayPredictor() {
                   <div className="text-xs text-navy-900 bg-navy-50/70 p-2.5 rounded-xl border border-navy-200/80 flex-1 flex items-start gap-2">
                     <ShieldAlert className="w-4 h-4 text-navy-700 shrink-0 mt-0.5" />
                     <div>
-                      <span className="font-bold block">التدبير الرقابي الموصى به:</span>
+                      <span className="font-bold block">{t('central.integrity.delay.recommendation_label')}</span>
                       <span className="text-navy-800 leading-relaxed">{p.statutory_recommendation}</span>
                     </div>
                   </div>
@@ -562,21 +560,19 @@ export function ProjectDelayPredictor() {
                     {isCritical && (
                       <Button
                         size="sm"
-                        onClick={() => handleTriggerAction('توجيه إعذار رسمي (Mise en demeure)', p)}
+                        onClick={() => handleTriggerAction(t('central.integrity.delay.action_notice_full'), p)}
                         className="bg-rose-700 hover:bg-rose-800 text-white font-bold text-xs rounded-xl shadow-sm gap-1.5"
                       >
                         <Send className="w-3.5 h-3.5" />
-                        <span>إعذار رسمي (Mise en demeure)</span>
+                        <span>{t('central.integrity.delay.action_notice')}</span>
                       </Button>
                     )}
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => handleTriggerAction('طلب تقرير تدقيق ميداني عاجل', p)}
+                      onClick={() => handleTriggerAction(t('central.integrity.delay.action_audit_full'), p)}
                       className="text-xs rounded-xl border-border hover:bg-muted font-bold"
-                    >
-                      طلب تقرير ميداني
-                    </Button>
+                    >{t('central.integrity.delay.action_audit')}</Button>
                   </div>
                 </div>
               </div>

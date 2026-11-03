@@ -38,6 +38,7 @@ type ExecutionTrackerRole = 'authority' | 'operator';
 export interface ExecutionTrackerProps {
   dealId: string;
   role: ExecutionTrackerRole;
+  dealTitle?: string;
   className?: string;
 }
 
@@ -148,7 +149,7 @@ const getStatusMeta = (status: string, t: (k: string) => string) => {
   };
 };
 
-export function ExecutionTracker({ dealId, role, className = '' }: ExecutionTrackerProps) {
+export function ExecutionTracker({ dealId, role, dealTitle, className = '' }: ExecutionTrackerProps) {
   const { t, lang, dir } = useI18n();
   const [milestones, setMilestones] = useState<MilestoneApi[]>([]);
   const [dealReference, setDealReference] = useState('');

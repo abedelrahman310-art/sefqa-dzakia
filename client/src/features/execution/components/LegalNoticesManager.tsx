@@ -129,23 +129,25 @@ export const LegalNoticesManager: React.FC<LegalNoticesManagerProps> = ({
     setError('');
     try {
       const res = await api.get<DealLegalNoticesResponseApi>(`/execution/deals/${dealId}/notices/`);
-      const list = res.notices || [];
+      const payload = res.data;
+      const list = payload.notices || [];
       setNotices(list);
-      setActiveCount(res.active_notices_count || 0);
-      setHasExpired(res.has_expired_notice || false);
+      setActiveCount(payload.active_notices_count || 0);
+      setHasExpired(payload.has_expired_notice || false);
       if (onNoticesUpdated) {
-        onNoticesUpdated(res.active_notices_count || 0);
+        onNoticesUpdated(payload.active_notices_count || 0);
       }
     } catch (err: any) {
       // Fallback to procurements path if needed
       try {
         const fallback = await api.get<DealLegalNoticesResponseApi>(`/procurements/deals/${dealId}/notices/`);
-        const list = fallback.notices || [];
+        const payload = fallback.data;
+        const list = payload.notices || [];
         setNotices(list);
-        setActiveCount(fallback.active_notices_count || 0);
-        setHasExpired(fallback.has_expired_notice || false);
+        setActiveCount(payload.active_notices_count || 0);
+        setHasExpired(payload.has_expired_notice || false);
         if (onNoticesUpdated) {
-          onNoticesUpdated(fallback.active_notices_count || 0);
+          onNoticesUpdated(payload.active_notices_count || 0);
         }
       } catch (e: any) {
         setError(e?.message || err?.message || 'تعذر تحميل سجل الاعذارات القانونية');

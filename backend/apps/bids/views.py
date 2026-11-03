@@ -264,6 +264,52 @@ class BidOfferViewSet(viewsets.ModelViewSet):
             'id': str(bid.id),
         })
 
+    @action(detail=True, methods=['post'], url_path='sign')
+    def sign_offer(self, request, pk=None):
+        """
+        توقيع العرض إلكترونياً بتوقيع مؤهل وفق القانون رقم 15-04
+        """
+        bid = self.get_object()
+        user = request.user
+        if bid.operator_id != user.id and not (user.is_staff or getattr(user, 'is_superuser', False)):
+            return Response({'detail': 'غير مصرح: المتعهد صاحب العرض فقط مخول بتوقيعه.'}, status=status.HTTP_403_FORBIDDEN)
+        if bid.status in ['rejected', 'withdrawn']:
+            return Response({'detail': 'لا يمكن توقيع عرض ملغى أو مرفوض.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        from apps.bids.digital_signature import sign_bid
+        from apps.bids.serializers import ElectronicSignatureSerializer
+        
+        cert_serial = request.data.get('certificate_serial')
+        signer_role = request.data.get('signer_role')
+
+        sig = sign_bid(bid, user, cert_serial=cert_serial, signer_role=signer_role, request=request)
+        serializer = ElectronicSignatureSerializer(sig)
+        return Response({
+            'message': 'تم التوقيع الإلكتروني المؤهل على العرض بنجاح بموجب القانون رقم 15-04.',
+            'signature': serializer.data,
+            'status': 'success',
+        }, status=status.HTTP_201_CREATED)
+
+    @action(detail=True, methods=['get'], url_path='signature')
+    def get_signature(self, request, pk=None):
+        """
+        استرجاع تفاصيل وفحص التوقيع الإلكتروني المؤهل للعرض
+        """
+        bid = self.get_object()
+        from apps.bids.digital_signature import verify_bid_signature
+        from apps.bids.serializers import ElectronicSignatureSerializer
+
+        latest_sig = bid.signatures.filter(is_valid=True).order_by('-created_at').first()
+        if not latest_sig:
+            return Response({'detail': 'لا يوجد توقيع إلكتروني مسجل لهذا العرض.'}, status=status.HTTP_404_NOT_FOUND)
+
+        verification = verify_bid_signature(latest_sig)
+        sig_data = ElectronicSignatureSerializer(latest_sig).data
+        return Response({
+            'signature': sig_data,
+            'verification': verification,
+        }, status=status.HTTP_200_OK)
+
 
 class OfferViewSet(BidOfferViewSet):
     """

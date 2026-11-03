@@ -100,23 +100,23 @@ export function SmartOpportunityRadar({
             reference_number: d.reference_number || `DZ-${String(d.id).slice(0, 6)}`,
             title: d.title,
             description: d.description || '',
-            authority_name: d.authority?.organization_name || d.authority?.display_name || 'المصلحة المتعاقدة',
-            wilaya: d.wilaya || 'الجزائر',
+            authority_name: d.authority?.organization_name || d.authority?.display_name || t('operator.radar.default_authority'),
+            wilaya: d.wilaya || t('operator.radar.default_wilaya'),
             estimated_budget: d.estimated_budget ? String(d.estimated_budget) : null,
             submission_deadline: d.submission_deadline || null,
             is_expired: false,
             days_left: d.days_left ?? 0,
             current_stage: d.current_stage,
-            current_stage_display: 'نشر واستلام العروض',
+            current_stage_display: t('operator.radar.stage_published'),
             match_score: 92,
             match_level: 'excellent',
-            level_display: 'تطابق ممتاز',
-            reasons: ['مطابق لقطاع نشاط المؤسسة في السجل التجاري', 'يقع ضمن النطاق الإقليمي المفضل'],
+            level_display: t('operator.radar.level_excellent'),
+            reasons: [t('operator.radar.reason_sector'), t('operator.radar.reason_region')],
             warnings: [],
           }));
         setDeals(mapped);
       } catch (fallbackErr) {
-        setError('تعذر تحميل بيانات رادار الصفقات التنبؤي حالياً.');
+        setError(t('operator.radar.error'));
       }
     } finally {
       setLoading(false);
@@ -157,15 +157,15 @@ export function SmartOpportunityRadar({
             <div>
               <div className="flex items-center gap-2">
                 <span className="rounded-full bg-emerald-500/20 border border-emerald-400/30 px-2 py-0.5 text-[10px] font-extrabold text-emerald-300 uppercase tracking-wider">
-                  خوارزمية المطابقة السيادية 2.0
+                  {t('operator.radar.badge_algorithm')}
                 </span>
-                <span className="text-xs text-slate-300">نشط الآن</span>
+                <span className="text-xs text-slate-300">{t('operator.radar.status_active')}</span>
               </div>
               <h2 className="text-lg sm:text-xl font-black tracking-tight text-white mt-0.5">
-                رادار الصفقات التنبؤي (Smart Opportunity Radar)
+                {t('operator.radar.title')}
               </h2>
               <p className="text-xs text-slate-300 mt-0.5 max-w-xl leading-relaxed">
-                مسح آلي ذكي لصفقات ولايات الجزائر الـ 69 ومطابقتها اللحظية مع رموز نشاطك وسجلك التجاري لتفادي تفويت أي فرصة.
+                {t('operator.radar.subtitle')}
               </p>
             </div>
           </div>
@@ -177,14 +177,14 @@ export function SmartOpportunityRadar({
             className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-3.5 py-2 text-xs font-bold text-white shadow-xs backdrop-blur-md transition-all hover:bg-white/20 active:scale-95 disabled:opacity-50 cursor-pointer"
           >
             <RefreshCw className={`size-3.5 ${refreshing ? 'animate-spin' : ''}`} />
-            <span>تحديث المسح الراداري</span>
+            <span>{t('operator.radar.refresh')}</span>
           </button>
         </div>
 
         {/* فلاتر الرادار */}
         <div className="relative z-10 mt-5 flex flex-wrap items-center gap-2 border-t border-white/10 pt-3 text-xs">
           <span className="text-slate-300 font-semibold text-[11px] me-1 flex items-center gap-1">
-            <Filter className="size-3" /> درجة التطابق:
+            <Filter className="size-3" /> {t('operator.radar.match_level')}
           </span>
           <button
             type="button"
@@ -195,7 +195,7 @@ export function SmartOpportunityRadar({
                 : 'bg-white/10 text-slate-200 hover:bg-white/20'
             }`}
           >
-            جميع الفرص ({deals.length})
+            {t('operator.radar.filter_all', { count: deals.length })}
           </button>
           <button
             type="button"
@@ -206,7 +206,7 @@ export function SmartOpportunityRadar({
                 : 'bg-white/10 text-slate-200 hover:bg-white/20'
             }`}
           >
-            تطابق ممتاز (+80%) ({deals.filter((d) => d.match_score >= 80).length})
+            {t('operator.radar.filter_excellent', { count: deals.filter((d) => d.match_score >= 80).length })}
           </button>
           <button
             type="button"
@@ -217,7 +217,7 @@ export function SmartOpportunityRadar({
                 : 'bg-white/10 text-slate-200 hover:bg-white/20'
             }`}
           >
-            تطابق جيد (+60%) ({deals.filter((d) => d.match_score >= 60).length})
+            {t('operator.radar.filter_good', { count: deals.filter((d) => d.match_score >= 60).length })}
           </button>
         </div>
       </div>
@@ -226,8 +226,8 @@ export function SmartOpportunityRadar({
       {loading ? (
         <div className="flex flex-col items-center justify-center p-12 text-center bg-white rounded-2xl border border-slate-200/80">
           <div className="size-10 animate-spin rounded-full border-3 border-emerald-600 border-t-transparent mb-3" />
-          <p className="text-xs font-bold text-slate-700">جارٍ إجراء المسح الراداري الشامل للصفقات...</p>
-          <p className="text-[11px] text-slate-400 mt-0.5">مطابقة الكفاءة والقطاع والنطاق الجغرافي</p>
+          <p className="text-xs font-bold text-slate-700">{t('operator.radar.loading_title')}</p>
+          <p className="text-[11px] text-slate-400 mt-0.5">{t('operator.radar.loading_subtitle')}</p>
         </div>
       ) : error ? (
         <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4 text-xs font-bold text-rose-800 flex items-center gap-2">
@@ -243,10 +243,10 @@ export function SmartOpportunityRadar({
             </span>
           </div>
           <h4 className="text-base font-bold text-slate-900">
-            لا توجد فرص نشطة متوفرة في الرادار حالياً
+            {t('operator.radar.empty_title')}
           </h4>
           <p className="text-xs text-slate-500 mt-1.5 max-w-md mx-auto leading-relaxed">
-            جميع الصفقات المرصودة إما انقضت مهلتها القانونية لإيداع العروض (وفق المادة 68 من القانون 23-12) أو لا تطابق قطاع نشاطك حالياً. يمكنك تحديث قطاعات نشاطك أو مراجعة كافة الصفقات المنشورة.
+            {t('operator.radar.empty_desc')}
           </p>
           <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
             <button
@@ -256,7 +256,7 @@ export function SmartOpportunityRadar({
               disabled={refreshing || loading}
             >
               <RefreshCw className={`size-3.5 ${refreshing ? 'animate-spin' : ''}`} />
-              <span>إعادة تشغيل المسح</span>
+              <span>{t('operator.radar.restart')}</span>
             </button>
             <button
               type="button"
@@ -264,7 +264,7 @@ export function SmartOpportunityRadar({
               onClick={() => setLocation('/operator/deals')}
             >
               <Briefcase className="size-3.5" />
-              <span>استعراض كافة الصفقات المنشورة</span>
+              <span>{t('operator.radar.browse_all')}</span>
             </button>
           </div>
         </div>
@@ -293,7 +293,7 @@ export function SmartOpportunityRadar({
                       }`}
                     >
                       <Sparkles className="size-3 text-emerald-600" />
-                      <span>{deal.match_score}% تطابق</span>
+                      <span>{t('operator.radar.match_badge', { score: deal.match_score })}</span>
                     </div>
                   </div>
 
@@ -312,7 +312,7 @@ export function SmartOpportunityRadar({
                     <div className="flex items-center justify-between gap-2 text-[11px]">
                       <div className="flex items-center gap-1 text-slate-500">
                         <MapPin className="size-3 text-slate-400 shrink-0" />
-                        <span>{deal.wilaya || 'ولاية الجزائر'}</span>
+                        <span>{deal.wilaya || t('operator.radar.default_wilaya')}</span>
                       </div>
                       {deal.estimated_budget && (
                         <span className="font-bold text-slate-700">
@@ -324,7 +324,7 @@ export function SmartOpportunityRadar({
                     {deal.submission_deadline && (
                       <div className="flex items-center gap-1 text-[11px] text-amber-700 font-semibold">
                         <Calendar className="size-3 shrink-0" />
-                        <span>آخر أجل للإيداع: {formatDate(deal.submission_deadline)}</span>
+                        <span>{t('operator.radar.deadline', { date: formatDate(deal.submission_deadline) })}</span>
                       </div>
                     )}
                   </div>
@@ -333,7 +333,7 @@ export function SmartOpportunityRadar({
                   {deal.reasons && deal.reasons.length > 0 && (
                     <div className="mt-3 rounded-xl bg-slate-50/80 p-2.5 border border-slate-100 space-y-1">
                       <span className="block text-[10px] font-bold text-slate-500 uppercase">
-                        أسباب التوصية الرادارية:
+                        {t('operator.radar.reasons_title')}
                       </span>
                       {deal.reasons.slice(0, 2).map((reason, idx) => (
                         <div key={idx} className="flex items-center gap-1.5 text-[11px] text-emerald-900 font-medium">
@@ -357,7 +357,7 @@ export function SmartOpportunityRadar({
                     className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50/70 px-3 py-2 text-xs font-bold text-emerald-800 hover:bg-emerald-100 transition-colors shadow-2xs cursor-pointer"
                   >
                     <ShieldCheck className="size-3.5 text-emerald-700" />
-                    <span>فحص بالدرع</span>
+                    <span>{t('operator.radar.check_shield')}</span>
                   </button>
 
                   {/* إعداد العرض فوراً */}
@@ -366,7 +366,7 @@ export function SmartOpportunityRadar({
                     onClick={() => setLocation(`/operator/opportunities/${deal.deal_id || deal.id}`)}
                     className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-[#006233] to-[#0f3154] px-3 py-2 text-xs font-bold text-white shadow-xs hover:shadow-md transition-all hover:-translate-y-0.5 cursor-pointer"
                   >
-                    <span>تقديم عرض</span>
+                    <span>{t('operator.radar.submit_offer')}</span>
                     {isRtl ? <ArrowLeft className="size-3.5" /> : <ArrowRight className="size-3.5" />}
                   </button>
                 </div>

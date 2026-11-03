@@ -73,7 +73,7 @@ export function CentralOverview() {
           <h3 className="text-xs font-semibold text-slate-600 truncate">{t('central.dashboard.kpi_ai_alarms')}</h3>
           <p className="text-2xl font-bold text-rose-600 mt-1 tabular-nums">{data.total_ai_alarms ?? 0}</p>
           <span className="text-xs text-rose-600 font-bold mt-1 flex items-center gap-1 group-hover:underline">
-            فتح رادار النزاهة والرقابة ←
+            {t('central.dashboard.integrity_link')}
           </span>
         </div>
 
@@ -98,13 +98,13 @@ export function CentralOverview() {
           </div>
           <div>
             <h4 className="text-sm font-extrabold text-white flex items-center gap-2">
-              <span>رادار النزاهة والتنبؤ بتعثر المشاريع (AI Sovereign Integrity)</span>
+              <span>{t('central.dashboard.integrity_title')}</span>
               <span className="text-xs px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30 font-bold">
-                تحديث فوري
+                {t('central.dashboard.integrity_badge')}
               </span>
             </h4>
             <p className="text-xs text-slate-300 mt-0.5">
-              رصد مؤشرات التواطؤ، تدوير العطاءات، تجزئة الصفقات، وتحليل مخاطر توقف الورشات في 69 ولاية.
+              {t('central.dashboard.integrity_desc')}
             </p>
           </div>
         </div>
@@ -113,7 +113,7 @@ export function CentralOverview() {
           onClick={() => setLocation('/central/integrity')}
           className="px-4 py-2 bg-rose-700 hover:bg-rose-800 text-white font-bold text-xs rounded-xl shadow transition-colors shrink-0 whitespace-nowrap self-stretch md:self-auto text-center"
         >
-          الانتقال لرادار الرقابة والنزاهة
+          {t('central.dashboard.integrity_cta')}
         </button>
       </div>
 

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useI18n, type TranslationKey } from '@/i18n';
 import { useLocation, useParams } from 'wouter';
+import { api } from '@/lib/api';
 import {
   ArrowLeft,
   CheckCircle2,
@@ -95,23 +96,19 @@ export function RequirementsResponse() {
       setError(null);
 
       // 1. Get requirements for this opportunity
-      const reqRes = await fetch(`/api/sanad/opportunities/${oppId}/requirements`);
-      if (!reqRes.ok) throw new Error('Failed to load requirements');
-      const reqData = await reqRes.json();
+      const reqRes = await api.get(`/sanad/opportunities/${oppId}/requirements`);
+      const reqData = reqRes.data;
 
       setHasRequirements(reqData.hasRequirements);
       setCahierVersion(reqData.cahierVersion || null);
       setRequirements(reqData.requirements || []);
 
       // 2. Get the operator's offer for this opportunity
-      const offersRes = await fetch('/api/offers');
-      if (offersRes.ok) {
-        const offersData = await offersRes.json();
-        const found = offersData.offers?.find((o: any) => o.opportunityId === oppId);
-        if (found) {
-          setOfferId(found.id);
-          setOfferStatus(found.status);
-        }
+      const offersRes = await api.get<{ offers: Array<{ id: string; opportunityId: string; status: string }> }>('/offers');
+      const found = offersRes.data.offers?.find((o) => o.opportunityId === oppId);
+      if (found) {
+        setOfferId(found.id);
+        setOfferStatus(found.status);
       }
     } catch (err: any) {
       setError(err.message || 'Error');
@@ -138,26 +135,15 @@ export function RequirementsResponse() {
     }
     try {
       setSaving(true);
-      const res = await fetch(`/api/sanad/offers/${offerId}/requirements/${reqId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-safaqat-csrf': '1',
-        },
-        body: JSON.stringify({
-          complianceClaim: editClaim,
-          evidenceLocation: editLocation || null,
-          operatorNotes: editNotes || null,
-        }),
+      await api.put(`/sanad/offers/${offerId}/requirements/${reqId}`, {
+        complianceClaim: editClaim,
+        evidenceLocation: editLocation || null,
+        operatorNotes: editNotes || null,
       });
-      if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.error || 'Failed to save');
-      }
       setEditingReqId(null);
       await fetchData();
     } catch (err: any) {
-      alert(err.message);
+      alert(err?.response?.data?.error || err.message);
     } finally {
       setSaving(false);
     }

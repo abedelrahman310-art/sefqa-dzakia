@@ -5,6 +5,7 @@ import { useLocation } from 'wouter';
 import { ExternalLink, Building2, ShieldCheck, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { REGISTRY_69W } from '@safaqat/shared/territorial';
+import { api } from '@/lib/api';
 
 interface ProfileData {
   wilayaCode?: string;
@@ -21,11 +22,8 @@ export function OperatorIdentityCard() {
 
   useEffect(() => {
     let isMounted = true;
-    fetch('/api/operator/profile')
-      .then((res) => {
-        if (!res.ok) return null;
-        return res.json();
-      })
+    api.get('/operator/profile')
+      .then((res) => res.data)
       .then((data) => {
         if (isMounted && data && data.profile) {
           setProfile(data.profile);

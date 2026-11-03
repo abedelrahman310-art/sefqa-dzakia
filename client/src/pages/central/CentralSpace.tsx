@@ -103,14 +103,14 @@ export function CentralSpace() {
     },
     {
       id: 'injunctions',
-      label: t('central.injunctions.title') || 'الإعذارات الإدارية',
+      label: t('central.injunctions.title'),
       href: '/central/injunctions',
       icon: Gavel,
       isActive: isInjunctionsActive,
     },
     {
       id: 'integrity',
-      label: 'رادار الرقابة والنزاهة (AI Anti-Fraud)',
+      label: t('central.integrity.nav_label'),
       href: '/central/integrity',
       icon: Shield,
       isActive: isIntegrityActive,

@@ -52,6 +52,18 @@ export const openingApi = {
       .post<OpeningSessionDetail>(`/procurements/sessions/${id}/end/`)
       .then((r) => r.data),
 
+  submitKeyShare: (sessionId: string, memberRole: string) =>
+    api
+      .post(`/procurements/sessions/${sessionId}/submit-key-share/`, {
+        member_role: memberRole,
+      })
+      .then((r) => r.data),
+
+  getCommitteeStatus: (sessionId: string) =>
+    api
+      .get(`/procurements/sessions/${sessionId}/committee-status/`)
+      .then((r) => r.data),
+
   // Helper utilities for authority session management
   listTenders: () =>
     api.get<EligibleTender[]>("/procurements/deals/").then((r) => r.data),

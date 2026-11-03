@@ -42,7 +42,7 @@ export interface SuspicionItem {
 }
 
 export function AntiCollusionRadar() {
-  const { dir } = useI18n();
+  const { t, dir } = useI18n();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [suspicionsData, setSuspicionsData] = useState<Record<string, SuspicionItem[]>>({});
@@ -191,7 +191,7 @@ export function AntiCollusionRadar() {
   }, [allSuspicions]);
 
   const handleActionTrigger = (actionName: string, item: SuspicionItem) => {
-    setActionSuccess(`تم تسجيل الإجراء: [${actionName}] في سجل التدقيق الرقمي بنجاح للصفقة ${item.deal_ids?.[0] || ''}`);
+    setActionSuccess(t('central.integrity.radar.action_success', { action: actionName, deal: item.deal_ids?.[0] || '' }));
     setTimeout(() => setActionSuccess(null), 5000);
   };
 
@@ -204,17 +204,17 @@ export function AntiCollusionRadar() {
             <div className="flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping" />
               <span className="text-xs font-bold text-rose-300 tracking-wide uppercase">
-                منظومة المراقبة المستمرة لمكافحة التواطؤ والتلاعب بالصفقات (Anti-Collusion AI Engine)
+                {t('central.integrity.radar.engine_badge')}
               </span>
             </div>
             <h1 className="text-xl md:text-2xl font-extrabold text-white flex items-center gap-3">
-              <span>رادار كشف التواطؤ ومحاكاة التلاعب بالعطاءات</span>
+              <span>{t('central.integrity.radar.title')}</span>
               <span className="text-xs px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30 font-bold">
-                {stats.total} إنذارات نشطة
+                {t('central.integrity.radar.active_alerts', { count: stats.total })}
               </span>
             </h1>
             <p className="text-xs text-slate-300 max-w-3xl leading-relaxed">
-              تحليل آلي فوري يجمع بين فحص بصمات الاتصال والـ IP، كشف تدوير العطاءات والاتفاقات المسبقة، ورصد تجزئة الصفقات لتفادي العتبات المالية وفقاً لأحكام القانون رقم 23-12.
+              {t('central.integrity.radar.subtitle')}
             </p>
           </div>
 
@@ -227,7 +227,7 @@ export function AntiCollusionRadar() {
               className="border-white/20 text-white hover:bg-white/10 text-xs rounded-xl gap-2"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
-              <span>تحديث الفحص الآلي</span>
+              <span>{t('central.integrity.radar.refresh')}</span>
             </Button>
           </div>
         </div>
@@ -244,38 +244,38 @@ export function AntiCollusionRadar() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-card border border-border rounded-2xl p-4 shadow-sm space-y-1">
           <div className="flex items-center justify-between text-xs text-muted-foreground font-semibold">
-            <span>إجمالي الشبهات المرصودة</span>
+            <span>{t('central.integrity.radar.kpi_total')}</span>
             <ShieldAlert className="w-4 h-4 text-primary" />
           </div>
           <div className="text-2xl font-black text-navy-950">{stats.total}</div>
-          <div className="text-xs text-muted-foreground">عبر صفقات الولايات الـ 69</div>
+          <div className="text-xs text-muted-foreground">{t('central.integrity.radar.kpi_total_sub')}</div>
         </div>
 
         <div className="bg-card border border-rose-200 rounded-2xl p-4 shadow-sm space-y-1 bg-rose-50/20">
           <div className="flex items-center justify-between text-xs text-rose-800 font-semibold">
-            <span>شبهات حرجة تستلزم تدخلاً</span>
+            <span>{t('central.integrity.radar.kpi_critical')}</span>
             <AlertTriangle className="w-4 h-4 text-rose-600" />
           </div>
           <div className="text-2xl font-black text-rose-600">{stats.critical}</div>
-          <div className="text-xs text-rose-700">تقتضي تجميد الترسية والإحالة</div>
+          <div className="text-xs text-rose-700">{t('central.integrity.radar.kpi_critical_sub')}</div>
         </div>
 
         <div className="bg-card border border-amber-200 rounded-2xl p-4 shadow-sm space-y-1 bg-amber-50/20">
           <div className="flex items-center justify-between text-xs text-amber-800 font-semibold">
-            <span>تطابق بصمات IP الرقمية</span>
+            <span>{t('central.integrity.radar.kpi_ip')}</span>
             <Network className="w-4 h-4 text-amber-600" />
           </div>
           <div className="text-2xl font-black text-amber-600">{stats.ipOverlap}</div>
-          <div className="text-xs text-amber-700">إيداع عروض من نفس الشبكة</div>
+          <div className="text-xs text-amber-700">{t('central.integrity.radar.kpi_ip_sub')}</div>
         </div>
 
         <div className="bg-card border border-blue-200 rounded-2xl p-4 shadow-sm space-y-1 bg-blue-50/20">
           <div className="flex items-center justify-between text-xs text-blue-800 font-semibold">
-            <span>تجزئة وتفتيت الصفقات</span>
+            <span>{t('central.integrity.radar.kpi_splitting')}</span>
             <Scale className="w-4 h-4 text-blue-600" />
           </div>
           <div className="text-2xl font-black text-blue-600">{stats.splitting}</div>
-          <div className="text-xs text-blue-700">لتفادي عتبة 12 مليون دج</div>
+          <div className="text-xs text-blue-700">{t('central.integrity.radar.kpi_splitting_sub')}</div>
         </div>
       </div>
 
@@ -283,12 +283,12 @@ export function AntiCollusionRadar() {
       <div className="bg-card border border-border rounded-2xl p-4 shadow-sm flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
         <div className="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0">
           {[
-            { id: 'all', label: 'كافة الشبهات' },
-            { id: 'ip_overlap', label: 'تطابق عناوين IP' },
-            { id: 'tender_splitting', label: 'تجزئة الصفقات (المادة 13)' },
-            { id: 'bid_rotation', label: 'تدوير العطاءات' },
-            { id: 'bid_rigging', label: 'تطابق الأسعار الأحادية' },
-            { id: 'conflict_of_interest', label: 'تنازع المصالح والملكية' },
+            { id: 'all', label: t('central.integrity.radar.filter_all') },
+            { id: 'ip_overlap', label: t('central.integrity.radar.filter_ip') },
+            { id: 'tender_splitting', label: t('central.integrity.radar.filter_splitting') },
+            { id: 'bid_rotation', label: t('central.integrity.radar.filter_rotation') },
+            { id: 'bid_rigging', label: t('central.integrity.radar.filter_rigging') },
+            { id: 'conflict_of_interest', label: t('central.integrity.radar.filter_conflict') },
           ].map((cat) => (
             <button
               key={cat.id}
@@ -308,7 +308,7 @@ export function AntiCollusionRadar() {
         <div className="relative min-w-[240px]">
           <Search className="w-3.5 h-3.5 absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="بحث بالولاية، المصلحة، أو رقم الصفقة..."
+            placeholder={t('central.integrity.radar.search_placeholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="text-xs ps-8 rounded-xl h-9"
@@ -321,7 +321,7 @@ export function AntiCollusionRadar() {
         {filteredSuspicions.length === 0 ? (
           <div className="p-12 text-center text-muted-foreground bg-muted/20 border border-dashed border-border rounded-2xl space-y-2">
             <ShieldCheck className="w-8 h-8 text-emerald-600 mx-auto" />
-            <p className="text-xs font-semibold">لم يتم العثور على شبهات تطابق معايير الفلترة المحددة</p>
+            <p className="text-xs font-semibold">{t('central.integrity.radar.empty')}</p>
           </div>
         ) : (
           filteredSuspicions.map((item, idx) => {
@@ -344,10 +344,10 @@ export function AntiCollusionRadar() {
                             : 'bg-amber-100 text-amber-900 border-amber-300'
                         }`}
                       >
-                        {isCritical ? 'شبهة عالية الخطورة (Critical)' : 'تحذير رقابي (Warning)'}
+                        {isCritical ? t('central.integrity.radar.severity_critical') : t('central.integrity.radar.severity_warning')}
                       </span>
                       <span className="text-xs font-mono px-2 py-0.5 rounded bg-muted text-muted-foreground">
-                        دقة المؤشر: {Math.round(item.confidence * 100)}%
+                        {t('central.integrity.radar.confidence', { percent: Math.round(item.confidence * 100) })}
                       </span>
                       {item.wilaya && (
                         <span className="text-xs font-semibold text-navy-800 bg-navy-50 px-2 py-0.5 rounded border border-navy-100">
@@ -381,7 +381,7 @@ export function AntiCollusionRadar() {
                 <div className="p-3 bg-muted/40 rounded-xl border border-border/60 space-y-1">
                   <div className="flex items-center gap-1.5 text-xs font-bold text-navy-900">
                     <Scale className="w-3.5 h-3.5 text-primary" />
-                    <span>المخالفة التشريعية المرصودة:</span>
+                    <span>{t('central.integrity.radar.statutory_label')}</span>
                   </div>
                   <p className="text-xs text-muted-foreground leading-relaxed ps-5">
                     {item.statutory_violation}
@@ -393,7 +393,7 @@ export function AntiCollusionRadar() {
                   <div className="text-xs text-emerald-900 bg-emerald-50/70 p-2.5 rounded-xl border border-emerald-200/80 flex-1 flex items-start gap-2">
                     <ShieldCheck className="w-4 h-4 text-emerald-700 shrink-0 mt-0.5" />
                     <div>
-                      <span className="font-bold block">التوصية الإلزامية:</span>
+                      <span className="font-bold block">{t('central.integrity.radar.recommendation_label')}</span>
                       <span className="text-emerald-800 leading-relaxed">{item.recommendation}</span>
                     </div>
                   </div>
@@ -402,18 +402,14 @@ export function AntiCollusionRadar() {
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => handleActionTrigger('إحالة للمفتشية العامة للمالية (IGF)', item)}
+                      onClick={() => handleActionTrigger(t('central.integrity.radar.action_igf_full'), item)}
                       className="text-xs rounded-xl border-border hover:bg-muted font-bold"
-                    >
-                      إحالة للمفتشية (IGF)
-                    </Button>
+                    >{t('central.integrity.radar.action_igf')}</Button>
                     <Button
                       size="sm"
-                      onClick={() => handleActionTrigger('تجميد إجراءات الترسية المؤقتة', item)}
+                      onClick={() => handleActionTrigger(t('central.integrity.radar.action_freeze_full'), item)}
                       className="bg-rose-700 hover:bg-rose-800 text-white font-bold text-xs rounded-xl shadow-sm"
-                    >
-                      تجميد الترسية
-                    </Button>
+                    >{t('central.integrity.radar.action_freeze')}</Button>
                   </div>
                 </div>
               </div>

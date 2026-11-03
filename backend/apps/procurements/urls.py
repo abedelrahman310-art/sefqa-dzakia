@@ -47,6 +47,8 @@ from .views_opening import (
     SessionEndView,
     SessionEventsView,
     SessionOffersView,
+    SessionSubmitKeyShareView,
+    SessionCommitteeStatusView,
 )
 from .views_pdf import OpeningSessionPdfView, CahierSpecsPdfView
 from .views_reference_prices import CheckPricesView
@@ -121,6 +123,10 @@ urlpatterns = [
     path("sessions/<uuid:pk>/open-envelope/", SessionOpenEnvelopeView.as_view(), name="session-open-envelope"),
     path("sessions/<uuid:pk>/open-offer/", SessionOpenOfferView.as_view(), name="session-open-offer"),
     path("sessions/<uuid:pk>/end/", SessionEndView.as_view(), name="session-end"),
+    path("sessions/<uuid:pk>/submit-key-share/", SessionSubmitKeyShareView.as_view(), name="session-submit-key-share"),
+    path("sessions/<uuid:pk>/submit-key-share", SessionSubmitKeyShareView.as_view(), name="session-submit-key-share-no-slash"),
+    path("sessions/<uuid:pk>/committee-status/", SessionCommitteeStatusView.as_view(), name="session-committee-status"),
+    path("sessions/<uuid:pk>/committee-status", SessionCommitteeStatusView.as_view(), name="session-committee-status-no-slash"),
     path("sessions/<uuid:pk>/events/", SessionEventsView.as_view(), name="session-events"),
     path("sessions/<uuid:pk>/pdf/", OpeningSessionPdfView.as_view(), name="session-pdf"),
     path("deals/<uuid:pk>/specs-pdf/", CahierSpecsPdfView.as_view(), name="deal-specs-pdf"),

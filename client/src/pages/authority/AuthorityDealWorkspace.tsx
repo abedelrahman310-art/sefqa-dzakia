@@ -34,7 +34,6 @@ import {
   Award,
   FileSignature,
   Loader2,
-  Scale,
 } from 'lucide-react';
 import { ALGERIA_69_WILAYAS } from '@/lib/wilayas';
 import { downloadPdfBlob } from '@/lib/pdfDownloader';
@@ -2247,9 +2246,9 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
           {activeTab === 'avenants' && (
             <div className="space-y-6">
               <AvenantsManager
-                dealId={dealId}
+                dealId={dealId || ''}
                 dealReference={deal?.reference_number}
-                baseAmount={deal ? Number(deal.estimated_budget || (deal as any).base_amount || 0) : 0}
+                baseAmount={deal ? Number(deal.estimated_budget || deal.base_amount || 0) : 0}
               />
             </div>
           )}
@@ -2260,7 +2259,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
           {activeTab === 'notices' && (
             <div className="space-y-6">
               <LegalNoticesManager
-                dealId={dealId}
+                dealId={dealId || ''}
                 dealReference={deal?.reference_number}
                 dealTitle={deal?.title}
                 userRole="authority"
@@ -2269,7 +2268,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
           )}
 
           {activeTab === 'specs_buyers' && (
-            <SpecsBuyersManager dealId={dealId} />
+            <SpecsBuyersManager dealId={dealId || ''} />
           )}
 
           {/* ══════════════════════════════════════════════════════════════════

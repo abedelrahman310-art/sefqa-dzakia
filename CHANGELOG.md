@@ -192,3 +192,68 @@ tests/test_central_and_zero_paper_verification.py::...::test_heuristic_analysis_
 - الملفات غير المتعقّبة `client/src/lib/dealWorkspacePresets.ts` و`client/src/pages/authority/AuthorityAssistantView.tsx` تُركت كما هي لأنها عمل مقصود.
 - تحذير حجم الحزمة (>500 kB) ديناميكي وغير مانع، ويمكن معالجته لاحقاً بتقسيم `LandingV2Page` و`CentralSpace` عبر `React.lazy`.
 - 351 مجموعة قيم عربية مكررة (950 مفتاحاً) موثّقة ولم تُحذف؛ قد تكون تسميات مشتركة مشروعة.
+
+---
+
+## [0.2.0-unreleased] — 2026-11-03 — دفعة التمشيط الدقيق (Thorough Sweep)
+
+### Added — الإضافات
+
+- **العدد الرسمي الآن 4,389 مفتاحاً** في `ar.json` و`fr.json` (صفر مفقود/مكرر/فارغ/عربي في الفرنسية).
+- 31 مفتاح `central.integrity.radar.*`: ترجمة كاملة لرادار كشف التواطؤ `AntiCollusionRadar.tsx`
+  (الترويسة، إنذارات نشطة، KPIs ×4، الفلاتر، البحث، التوصيات، فضلاً عن أزرار إحالة IGF وتجميد الترسية وسجلاتها).
+- 45 مفتاح `central.integrity.delay.*`: ترجمة كاملة لمؤشر التنبؤ بالتعثر `ProjectDelayPredictor.tsx`
+  (الرأس، KPIs ×4، مقاييس الخطر، الروزنامة، الملاحق، الإجراءات).
+- 16 مفتاح `central.injunctions.*` إضافي (الشارات، KPIs، الفلاتر، الأعمدة، النماذج، تحذير التصعيد، مودال الرد، الردود القانونية الافتراضية).
+- 14 مفتاح `central.deals.*`: KPI الملاحق/الإعذارات، البانرات الرقابية، أزرار التصفية، شاراتي «ملحق/إعذار».
+- 6 مفاتيح `central.dashboard.integrity_*`: بطاقة رادار النزاهة في `CentralOverview` (عنوان/شارة/وصف/رابطان).
+- 7 مفاتيح `central.integrity.*` للترويسة السيادية وتبويبَي رادار النزاهة (nav_label مشترك مع `CentralSpace`).
+- 13 مفتاح `central.permissions.*`: شارة الجمهورية، مسؤول النظام، رسائل الأخطاء الخمس، ووصفات الأدوار الخمسة.
+- إصلاح `aria-label` في `AcceptInvite` ليصبح ثنائي اللغة (كان عربياً ثابتاً).
+
+### Fixed — الإصلاحات
+
+- **توثيق 58 ولاية** في كل المواضع المرئية المتبقية: `NeumorphicRegister`, `UnifiedAuthPage`,
+  `CentralOverview`, `V3Hero`, `V3LifecycleProcess`, `OperatorOpportunities`, `SmartOpportunityRadar`,
+  `AntiCollusionRadar` (KPI); بقيت رموز `REGISTRY_69W`/`ALGERIA_69_WILAYAS` وهما بنيتان داخليتان دون عرض.
+- ترجمة `CentralIntegrityView` (الرأس/التبويبات/زر الاستخراج) واستبدال الرابط العربي الصلب في `CentralSpace`.
+- إزالة كل الجسور العربية الصلبة من `CentralDeals` (14 مجموعة)، `CentralInjunctions` (85 مجموعة)،
+  `CentralOverview` (بطاقة النزاهة: 4 مجموعات)، `CentralPermissions` (الشارة + مسؤول النظام + 7 رسائل/وصفات).
+- 401 جذرية: `fetch('/api/...')` غير الموثق → `api` في `OperatorArchiveView`, `OperatorProfileView`,
+  `OperatorIdentityCard`, `RequirementsResponse`.
+- مرونة الجلسة: `AuthProvider` و`api.ts` لا يمسحان الجلسة عند 429/5xx/انقطاع الشبكة؛ الحذف في 400/401/403 فقط.
+- ردود احتياطية واعية باللغة (ar/fr) للمساعد القانوني مع مسارات RAG فرنسية.
+- `operator.css`: `direction: inherit` ليتبع الشريط الجانبي اتجاه الصفحة (RTL/LTR).
+- القيم الافتراضية للنماذج القانونية (السند/الأمر) تُترجم إلى الفرنسية عند اختيار FR مع بقاء AR عربياً.
+
+### Backend — الخادم
+
+- `apps/procurements/serializers.py`: إزالة `has_active_injunction` من `LegalNoticeSerializer`
+  و`MilestoneSerializer` و`ContractSerializer` (لا يمتلك النموذجان الحقل)، هذا كان يكسر توليد مخطط
+  `drf-spectacular` (خطأ E001 في `check --deploy`). بعد الإصلاح: **0 أخطاء** في `check --deploy`.
+- تحقق الترحيلات: `makemigrations --check --dry-run` → **No changes detected**.
+- اختبارات مركّزة على ما بعد التعديل (lifecycle + lifecycle_rules + execution_audit + zero-paper +
+  opening-session): **47 passed** في 354s; المجموعة الكاملة سابقاً **343 passed, 3 skipped, 0 failed**.
+
+### Verification — التحقق (2026-11-03)
+
+- `pnpm i18n:check`: 4,389/4,389 — كل المؤشرات صفر إلا القيم المتطابقة (8، رموز وأرقام).
+- `pnpm --filter client typecheck`: **0 أخطاء**.
+- `pnpm build`: نجح — 109 مدخلات PWA (3,373.88 KiB)، `locales-CTkHPRlx.js` 628.73 kB
+  (تحذير >600 kB مؤجل)، CentralSpace 212.87 kB، OperatorSpace 261.01 kB، AuthoritySpace 334.46 kB.
+- مسح الفرنسي للبوابة المركزية (11 صفحة): 0 مفاتيح خام، 0 عتاد عربي على مستوى الواجهة؛
+  المتبقي بيانات منهجية: عنوانا شبهة تجريبيتان في رادار fallback + عناوين إشعارات من الخادم.
+- مسح العربية RTL: البوابة المركزية 11/11، المتعامل 12/12، المصلحة 12/12 — كلها `dir="rtl"`
+  و0 مفاتيح خام و0 طلبات فاشلة (35 صفحة إجمالاً).
+- مسح الفرنسي للمتعامل والمصلحة (سابقة، ما زال صالحاً): 12/12 لكل بوابة، 0 طلبات فاشلة، 0 مفاتيح خام.
+- تفاعلية FR: فتح لوحة «Séances d'ouverture des plis»، «Déposer un nouveau recours»، فلاتر الطعن
+  (`Tous/Déposé/En examen`)، ورد المساعد القانوني الفرنسي — كلها تعمل (الاختبارات الآلية لـRAG: 99 passed).
+
+### Notes — ملاحظات الدفعة
+
+- لا commit/push؛ كل تغييرات هذه الدفعة محلية فوق HEAD `d68c17d`
+  (تغييرات `backend/apps/bids/*` و`threshold_crypto.py` و`test_p2_sovereign_upgrades.py` ومهاجري
+  `0007_electronicsignature`/`0016_ceremony` تنتمي إلى مسار P2 موازٍ خارج نطاق هذا التمشيط).
+- تحذير chunk `locales` >600 kB ظهر بعد بلوغ 4,389 مفتاحاً؛ تُعالَج لاحقاً عبر تقسيم الحزمة.
+- بيانات العرض: العنوانان التجريبيان في `AntiCollusionRadar` fallback وسجلات `ProjectDelayPredictor`
+  التجريبية عربية وتظهر فقط عند فشل استدعاءات AI؛ الإنتاج يعتمد بيانات الخادم.

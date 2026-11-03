@@ -455,7 +455,7 @@ export function NeumorphicRegister({ initialRole }: NeumorphicRegisterProps) {
             {/* شارة التغطية الوطنية */}
             <div className="mt-2.5 flex items-center justify-center gap-1.5 rounded-xl border border-slate-200/70 bg-slate-50/70 py-1.5 px-2.5 text-center text-[10px] font-bold text-slate-600">
               <AlgeriaFlag />
-              <span>تغطية وطنية موحدة لكافة ولايات الجزائر الـ 69 والبلديات الـ 1,541</span>
+              <span>تغطية وطنية موحدة لكافة ولايات الجزائر الـ 58 والبلديات الـ 1,541</span>
             </div>
           </aside>
 

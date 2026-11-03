@@ -113,8 +113,8 @@ export const V3LifecycleProcess: React.FC = () => {
         ? 'فحص التناسب المالي والجدوى الاقتصادية للعرض الأفضل تقنياً ومالياً.'
         : 'Contrôle de la viabilité budgétaire de l’offre économiquement la plus avantageuse.',
       hawkRole: isAr
-        ? 'تشغيل رادار كشف التواطؤ ومقارنة الأسعار مع الصفقات المماثلة في الولايات الـ 69.'
-        : 'Activation du radar anti-collusion et comparaison avec les mercuriales des 69 wilayas.',
+        ? 'تشغيل رادار كشف التواطؤ ومقارنة الأسعار مع الصفقات المماثلة في الولايات الـ 58.'
+        : 'Activation du radar anti-collusion et comparaison avec les mercuriales des 58 wilayas.',
       output: isAr ? 'تقرير تقييم العروض واقتراح المنح المؤقت' : 'Rapport d’évaluation et proposition de choix',
     },
     {

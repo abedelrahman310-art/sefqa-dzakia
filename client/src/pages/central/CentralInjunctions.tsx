@@ -101,7 +101,7 @@ export function CentralInjunctions() {
   const [submitting, setSubmitting] = useState(false);
   const [selectedAuthId, setSelectedAuthId] = useState('');
   const [formViolationType, setFormViolationType] = useState('tender_splitting');
-  const [formLegalRef, setFormLegalRef] = useState('المادة 13 من القانون 23-12');
+  const [formLegalRef, setFormLegalRef] = useState(() => t('central.injunctions.legal_default_splitting'));
   const [formDirective, setFormDirective] = useState('');
   const [formDetails, setFormDetails] = useState('');
   const [formDeadline, setFormDeadline] = useState('15');
@@ -118,27 +118,29 @@ export function CentralInjunctions() {
     setError('');
     try {
       const res = await api.get<CentralInjunctionsResponse>('/reports/central/injunctions/');
-      const list = res.injunctions || res.results || [];
+      const payload = res.data;
+      const list = payload.injunctions || payload.results || [];
       setInjunctions(list);
-      setStats(res.stats || { total: list.length, active: 0, resolved: 0, escalated: 0 });
+      setStats(payload.stats || { total: list.length, active: 0, resolved: 0, escalated: 0 });
     } catch (err: any) {
       try {
         const fallback = await api.get<CentralInjunctionsResponse>('/central/injunctions/');
-        const list = fallback.injunctions || fallback.results || [];
+        const payload = fallback.data;
+        const list = payload.injunctions || payload.results || [];
         setInjunctions(list);
-        setStats(fallback.stats || { total: list.length, active: 0, resolved: 0, escalated: 0 });
+        setStats(payload.stats || { total: list.length, active: 0, resolved: 0, escalated: 0 });
       } catch (e: any) {
-        setError(e?.message || err?.message || 'تعذر تحميل سجل الإعذارات الإدارية.');
+        setError(t('central.injunctions.error_load'));
       }
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   const loadAuthorities = useCallback(async () => {
     try {
       const res = await api.get<any>('/central/authorities/');
-      const list = res.authorities || res.results || [];
+      const list = res.data?.authorities || res.data?.results || [];
       const opts: AuthorityOption[] = list.map((a: any) => ({
         id: a.id,
         name: a.name || a.organization_name || a.full_name || a.email,
@@ -159,22 +161,22 @@ export function CentralInjunctions() {
   const handleViolationChange = (type: string) => {
     setFormViolationType(type);
     if (type === 'tender_splitting') {
-      setFormLegalRef('المادة 13 من القانون 23-12');
-      setFormDirective('إلغاء إجراء التجزئة فوراً، وتوحيد الحصص في استشارة أو طلب عروض موحد وفقاً لحدود المبالغ الإجمالية المبرمجة.');
+      setFormLegalRef(t('central.injunctions.legal_default_splitting'));
+      setFormDirective(t('central.injunctions.directive_splitting'));
     } else if (type === 'avenant_excess') {
-      setFormLegalRef('المادتان 138 و139 من المرسوم الرئاسي 15-247');
-      setFormDirective('إلغاء مشروع الملحق المتجاوز للسقف القانوني (20%-25%)، ومراجعة الاحتياج وفقاً للأحكام التشريعية.');
+      setFormLegalRef(t('central.injunctions.legal_default_avenant'));
+      setFormDirective(t('central.injunctions.directive_avenant'));
     } else if (type === 'blacklist_violation') {
-      setFormLegalRef('المادة 75 من القانون 23-12');
-      setFormDirective('استبعاد المتعامل الاقتصادي المدرج في القائمة السوداء فوراً من الصفقة، وإلغاء أي إجراء إسناد مؤقت تم لفائدته.');
+      setFormLegalRef(t('central.injunctions.legal_default_blacklist'));
+      setFormDirective(t('central.injunctions.directive_blacklist'));
     } else if (type === 'deadline_breach') {
-      setFormLegalRef('المادتان 65 و66 من القانون 23-12');
-      setFormDirective('استدراك التأخر الإجرائي ونشر نتائج التقييم والإسناد المؤقت عبر البوابة الرقمية في أجل 48 ساعة.');
+      setFormLegalRef(t('central.injunctions.legal_default_deadline'));
+      setFormDirective(t('central.injunctions.directive_deadline'));
     } else if (type === 'hawk_eye_ignored') {
-      setFormLegalRef('المادة 10 من القانون 23-12 (النزاهة والرقابة)');
-      setFormDirective('موافاة المفتشية العامة بتقرير تبريري مفصل حول أسباب تجاهل تنبيه التلاعب الصادر عن رادار عين الصقر.');
+      setFormLegalRef(t('central.injunctions.legal_default_hawk'));
+      setFormDirective(t('central.injunctions.directive_hawk'));
     } else {
-      setFormLegalRef('أحكام القانون 23-12 والمرسوم الرئاسي 15-247');
+      setFormLegalRef(t('central.injunctions.legal_default_other'));
       setFormDirective('');
     }
   };
@@ -183,11 +185,11 @@ export function CentralInjunctions() {
     e.preventDefault();
     setFormError('');
     if (!selectedAuthId) {
-      setFormError('يرجى اختيار المصلحة المتعاقدة المستهدفة.');
+      setFormError(t('central.injunctions.error_select_authority'));
       return;
     }
     if (!formDirective.trim()) {
-      setFormError('يرجى إدخال نص الأمر الإداري بالتصحيح.');
+      setFormError(t('central.injunctions.error_directive'));
       return;
     }
 
@@ -204,7 +206,7 @@ export function CentralInjunctions() {
       if (formPdf) formData.append('document_pdf', formPdf);
 
       await api.post('/reports/central/injunctions/', formData);
-      setSuccessMsg('تم إصدار الإعذار الإداري الرقابي وتبليغه رسمياً للمصلحة المتعاقدة.');
+      setSuccessMsg(t('central.injunctions.success_issue'));
       setIsCreateOpen(false);
       setSelectedAuthId('');
       setFormDirective('');
@@ -214,7 +216,7 @@ export function CentralInjunctions() {
       setFormPdf(null);
       await loadInjunctions();
     } catch (err: any) {
-      setFormError(err?.message || 'تعذر إصدار الإعذار الإداري.');
+      setFormError(err?.response?.data?.error || t('central.injunctions.error_issue'));
     } finally {
       setSubmitting(false);
     }
@@ -252,14 +254,14 @@ export function CentralInjunctions() {
           <div>
             <div className="flex items-center gap-2">
               <h1 className="text-xl font-bold text-slate-900 tracking-tight">
-                {t('central.injunctions.title') || 'الإعذارات الإدارية الرقابية (Administrative Injunctions)'}
+                {t('central.injunctions.title')}
               </h1>
               <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-red-50 text-red-800 border border-red-200">
-                عين الصقر
+                {t('central.injunctions.badge')}
               </span>
             </div>
             <p className="text-xs text-slate-500 mt-1">
-              إصدار الأوامر الإدارية الملزمة للمصالح المتعاقدة لتصحيح الخروقات القانونية، والتحويل الآلي للجهات القضائية ومجلس المحاسبة.
+              {t('central.injunctions.header_subtitle')}
             </p>
           </div>
         </div>
@@ -274,7 +276,7 @@ export function CentralInjunctions() {
           className="bg-red-800 hover:bg-red-900 text-white font-bold text-xs gap-1.5 shadow-sm shrink-0 h-10 px-4"
         >
           <Plus className="size-4" />
-          <span>{t('central.injunctions.issue') || 'إصدار إعذار إداري ملزم'}</span>
+          <span>{t('central.injunctions.issue')}</span>
         </Button>
       </div>
 
@@ -283,41 +285,41 @@ export function CentralInjunctions() {
         {/* Total Injunctions */}
         <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
           <div className="flex items-center justify-between text-slate-500 text-xs font-semibold">
-            <span>إجمالي الإعذارات</span>
+            <span>{t('central.injunctions.kpi_total')}</span>
             <Gavel className="size-4 text-slate-400" />
           </div>
           <div className="text-2xl font-bold font-mono text-slate-900 mt-2">{stats.total}</div>
-          <span className="text-[11px] text-slate-400 mt-0.5 block">منذ بداية المنظومة</span>
+          <span className="text-[11px] text-slate-400 mt-0.5 block">{t('central.injunctions.kpi_total_sub')}</span>
         </div>
 
         {/* Active within Deadline */}
         <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
           <div className="flex items-center justify-between text-amber-700 text-xs font-semibold">
-            <span>نشط (قيد المهلة 15 يوماً)</span>
+            <span>{t('central.injunctions.kpi_active')}</span>
             <Clock className="size-4 text-amber-500 animate-pulse" />
           </div>
           <div className="text-2xl font-bold font-mono text-amber-600 mt-2">{stats.active}</div>
-          <span className="text-[11px] text-amber-600/80 mt-0.5 block">بانتظار تقارير التصحيح</span>
+          <span className="text-[11px] text-amber-600/80 mt-0.5 block">{t('central.injunctions.kpi_active_sub')}</span>
         </div>
 
         {/* Resolved */}
         <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
           <div className="flex items-center justify-between text-emerald-700 text-xs font-semibold">
-            <span>تمت التسوية والاعتماد</span>
+            <span>{t('central.injunctions.kpi_resolved')}</span>
             <CheckCircle2 className="size-4 text-emerald-500" />
           </div>
           <div className="text-2xl font-bold font-mono text-emerald-600 mt-2">{stats.resolved}</div>
-          <span className="text-[11px] text-emerald-600/80 mt-0.5 block">تمت مطابقة التقارير</span>
+          <span className="text-[11px] text-emerald-600/80 mt-0.5 block">{t('central.injunctions.kpi_resolved_sub')}</span>
         </div>
 
         {/* Escalated to Court */}
         <div className={`p-4 rounded-xl border shadow-xs ${stats.escalated > 0 ? 'bg-rose-50 border-rose-200' : 'bg-white border-slate-200'}`}>
           <div className="flex items-center justify-between text-rose-700 text-xs font-semibold">
-            <span>محال للقضاء والعدالة</span>
+            <span>{t('central.injunctions.kpi_escalated')}</span>
             <ShieldAlert className="size-4 text-rose-600 animate-pulse" />
           </div>
           <div className="text-2xl font-bold font-mono text-rose-700 mt-2">{stats.escalated}</div>
-          <span className="text-[11px] text-rose-600/90 mt-0.5 block">انقضت المهلة دون رد</span>
+          <span className="text-[11px] text-rose-600/90 mt-0.5 block">{t('central.injunctions.kpi_escalated_sub')}</span>
         </div>
       </div>
 
@@ -353,17 +355,17 @@ export function CentralInjunctions() {
           <Input
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="بحث بالمرجع، المصلحة، الصفقة، المخالفة..."
+            placeholder={t('central.injunctions.search_placeholder')}
             className="ps-9 text-xs"
           />
         </div>
 
         <div className="flex items-center gap-1.5 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0">
           {[
-            { id: 'all', label: 'كافة الإعذارات' },
-            { id: 'active', label: 'النشطة قيد المهلة' },
-            { id: 'resolved', label: 'تمت التسوية' },
-            { id: 'escalated_to_court', label: 'المحالة للقضاء' },
+            { id: 'all', label: t('central.injunctions.filter_all') },
+            { id: 'active', label: t('central.injunctions.filter_active') },
+            { id: 'resolved', label: t('central.injunctions.filter_resolved') },
+            { id: 'escalated_to_court', label: t('central.injunctions.filter_escalated') },
           ].map((pill) => (
             <button
               key={pill.id}
@@ -386,14 +388,14 @@ export function CentralInjunctions() {
         {loading ? (
           <div className="py-20 flex flex-col items-center justify-center gap-3 text-slate-400">
             <Loader2 className="size-8 animate-spin text-red-700" />
-            <span className="text-xs">جاري تحميل سجل الإعذارات الرقابية المركزية...</span>
+            <span className="text-xs">{t('central.injunctions.loading')}</span>
           </div>
         ) : filteredInjunctions.length === 0 ? (
           <div className="py-20 flex flex-col items-center justify-center gap-2 text-slate-400">
             <CheckCircle2 className="size-12 text-emerald-500/80" />
-            <p className="text-sm font-bold text-slate-700">لا توجد إعذارات إدارية مطابقة</p>
+            <p className="text-sm font-bold text-slate-700">{t('central.injunctions.empty_title')}</p>
             <p className="text-xs text-slate-500 max-w-sm text-center">
-              كافة المصالح المتعاقدة ممتثلة للمعايير التشريعية ولم تسجل أي إعذارات رقابية ضمن الفلتر المختار.
+              {t('central.injunctions.empty_desc')}
             </p>
           </div>
         ) : (
@@ -401,13 +403,13 @@ export function CentralInjunctions() {
             <table className="w-full text-start text-xs border-collapse">
               <thead>
                 <tr className="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold">
-                  <th className="p-3 text-start">المرجع والتاريخ</th>
-                  <th className="p-3 text-start">المصلحة المتعاقدة</th>
-                  <th className="p-3 text-start">نوع المخالفة والسند</th>
-                  <th className="p-3 text-start">الصفقة المعنية</th>
-                  <th className="p-3 text-center">المهلة والعداد</th>
-                  <th className="p-3 text-center">الوضعية الرقابية</th>
-                  <th className="p-3 text-center">الإجراءات</th>
+                  <th className="p-3 text-start">{t('central.injunctions.col_reference')}</th>
+                  <th className="p-3 text-start">{t('central.injunctions.col_authority')}</th>
+                  <th className="p-3 text-start">{t('central.injunctions.col_violation')}</th>
+                  <th className="p-3 text-start">{t('central.injunctions.col_deal')}</th>
+                  <th className="p-3 text-center">{t('central.injunctions.col_deadline')}</th>
+                  <th className="p-3 text-center">{t('central.injunctions.col_status')}</th>
+                  <th className="p-3 text-center">{t('central.injunctions.col_actions')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -427,7 +429,7 @@ export function CentralInjunctions() {
                         <div className="font-mono font-bold text-slate-900">{inj.reference}</div>
                         <div className="flex items-center gap-1 text-[11px] text-slate-400 mt-0.5">
                           <Calendar className="size-3" />
-                          <span>صادر: {formatDate(inj.issued_date)}</span>
+                          <span>{t('central.injunctions.issued_at', { date: formatDate(inj.issued_date) })}</span>
                         </div>
                       </td>
 
@@ -437,7 +439,7 @@ export function CentralInjunctions() {
                         {inj.authority_wilaya && (
                           <div className="text-[11px] text-slate-500 flex items-center gap-1 mt-0.5">
                             <Building className="size-3 text-slate-400" />
-                            <span>ولاية {inj.authority_wilaya}</span>
+                            <span>{t('central.injunctions.wilaya', { wilaya: inj.authority_wilaya })}</span>
                           </div>
                         )}
                       </td>
@@ -464,7 +466,7 @@ export function CentralInjunctions() {
                             </div>
                           </div>
                         ) : (
-                          <span className="text-slate-400 text-xs">مخالفة عامة للمصلحة</span>
+                          <span className="text-slate-400 text-xs">{t('central.injunctions.general_violation')}</span>
                         )}
                       </td>
 
@@ -474,12 +476,12 @@ export function CentralInjunctions() {
                           {isResolved ? (
                             <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200 flex items-center gap-1">
                               <CheckCircle2 className="size-3" />
-                              <span>تمت التسوية</span>
+                              <span>{t('central.injunctions.resolved_badge')}</span>
                             </span>
                           ) : isEscalated ? (
                             <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-rose-100 text-rose-900 border border-rose-300 flex items-center gap-1 animate-pulse">
                               <ShieldAlert className="size-3 text-rose-700" />
-                              <span>انقضت المهلة (محال للقضاء)</span>
+                              <span>{t('central.injunctions.escalated_badge')}</span>
                             </span>
                           ) : (
                             <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold flex items-center gap-1 ${
@@ -488,11 +490,11 @@ export function CentralInjunctions() {
                                 : 'bg-blue-50 text-blue-900 border border-blue-200'
                             }`}>
                               <Clock className="size-3" />
-                              <span>متبقي {inj.days_remaining} يوماً</span>
+                              <span>{t('central.injunctions.days_remaining', { days: inj.days_remaining })}</span>
                             </span>
                           )}
                           <span className="text-[10px] text-slate-400 font-mono">
-                            حتى {formatDate(inj.deadline_date)}
+                            {t('central.injunctions.deadline_until', { date: formatDate(inj.deadline_date) })}
                           </span>
                         </div>
                       </td>
@@ -522,10 +524,10 @@ export function CentralInjunctions() {
                               variant="outline"
                               onClick={() => setViewingResponse(inj)}
                               className="h-7 text-[11px] font-bold text-sky-700 border-sky-200 hover:bg-sky-50"
-                              title="معاينة تقرير التصحيح المودع من المصلحة"
+                              title={t('central.injunctions.view_response_title')}
                             >
                               <Eye className="size-3" />
-                              <span>الرد والتصحيح</span>
+                              <span>{t('central.injunctions.view_response')}</span>
                             </Button>
                           )}
 
@@ -535,7 +537,7 @@ export function CentralInjunctions() {
                             variant="ghost"
                             onClick={() => handleDownloadPdf(inj.id, inj.reference)}
                             className="h-7 text-[11px] font-bold text-slate-700 hover:bg-slate-100"
-                            title="تحميل وثيقة الإعذار الإداري الرسمية PDF مع الختم الرقمي"
+                            title={t('central.injunctions.download_pdf_title')}
                           >
                             <Download className="size-3" />
                             <span>PDF</span>
@@ -564,10 +566,10 @@ export function CentralInjunctions() {
                 </div>
                 <div>
                   <h3 className="text-base font-bold text-slate-900">
-                    {t('central.injunctions.issue') || 'إصدار إعذار إداري رقابي ملزم'}
+                    {t('central.injunctions.issue')}
                   </h3>
                   <p className="text-xs text-slate-500">
-                    أمر رسمي نافذ بموجب المادة 13 من القانون 23-12 يمنح مهلة 15 يوماً للتسوية قبل الإحالة القضائية
+                    {t('central.injunctions.modal_subtitle')}
                   </p>
                 </div>
               </div>
@@ -590,17 +592,17 @@ export function CentralInjunctions() {
             <form onSubmit={handleIssueSubmit} className="space-y-4">
               {/* Target Authority */}
               <div className="space-y-1.5">
-                <Label className="text-xs font-bold text-slate-700">المصلحة المتعاقدة المستهدفة بالإعذار *</Label>
+                <Label className="text-xs font-bold text-slate-700">{t('central.injunctions.form_authority')}</Label>
                 <select
                   value={selectedAuthId}
                   onChange={(e) => setSelectedAuthId(e.target.value)}
                   className="w-full text-xs font-semibold rounded-lg border border-slate-300 p-2.5 focus:ring-2 focus:ring-red-500 focus:outline-none"
                   required
                 >
-                  <option value="">-- اختر المصلحة المتعاقدة --</option>
+                  <option value="">-- {t('central.injunctions.form_authority_placeholder')} --</option>
                   {authorities.map((a) => (
                     <option key={a.id} value={a.id}>
-                      {a.name} {a.wilaya ? `(ولاية ${a.wilaya})` : ''}
+                      {a.name} {a.wilaya ? ` ${t('central.injunctions.wilaya', { wilaya: a.wilaya })}` : ''}
                     </option>
                   ))}
                 </select>
@@ -609,24 +611,24 @@ export function CentralInjunctions() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {/* Violation Type */}
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-bold text-slate-700">نوع المخالفة القانونية *</Label>
+                  <Label className="text-xs font-bold text-slate-700">{t('central.injunctions.form_type')}</Label>
                   <select
                     value={formViolationType}
                     onChange={(e) => handleViolationChange(e.target.value)}
                     className="w-full text-xs font-semibold rounded-lg border border-slate-300 p-2.5 focus:ring-2 focus:ring-red-500 focus:outline-none"
                   >
-                    <option value="tender_splitting">تجزئة الصفقات العمومية (المادة 13)</option>
-                    <option value="avenant_excess">تجاوز نسبة الملاحق القانونية (المادتان 138-139)</option>
-                    <option value="blacklist_violation">منح صفقة لشركة مقصاة في القائمة السوداء (المادة 75)</option>
-                    <option value="deadline_breach">إخلال بالآجال والمهل القانونية الملزمة</option>
-                    <option value="hawk_eye_ignored">تجاهل إنذارات عين الصقر وشبهات التلاعب</option>
-                    <option value="other">مخالفات إدارية وتنظيمية أخرى</option>
+                    <option value="tender_splitting">{t('central.injunctions.types.tender_splitting')}</option>
+                    <option value="avenant_excess">{t('central.injunctions.types.avenant_excess')}</option>
+                    <option value="blacklist_violation">{t('central.injunctions.types.blacklist_violation')}</option>
+                    <option value="deadline_breach">{t('central.injunctions.types.deadline_breach')}</option>
+                    <option value="hawk_eye_ignored">{t('central.injunctions.types.hawk_eye_ignored')}</option>
+                    <option value="other">{t('central.injunctions.types.other')}</option>
                   </select>
                 </div>
 
                 {/* Legal Reference */}
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-bold text-slate-700">السند القانوني المخالف *</Label>
+                  <Label className="text-xs font-bold text-slate-700">{t('central.injunctions.form_legal_ref')}</Label>
                   <Input
                     type="text"
                     value={formLegalRef}
@@ -640,7 +642,7 @@ export function CentralInjunctions() {
               {/* Deadline Days */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-bold text-slate-700">المهلة القانونية الممنوحة (بالأيام) *</Label>
+                  <Label className="text-xs font-bold text-slate-700">{t('central.injunctions.form_deadline_days')}</Label>
                   <Input
                     type="number"
                     min="1"
@@ -651,49 +653,49 @@ export function CentralInjunctions() {
                     placeholder="15"
                     required
                   />
-                  <span className="text-[10px] text-slate-500">المهلة القانونية الرسمية: 15 يوماً للتسوية</span>
+                  <span className="text-[10px] text-slate-500">{t('central.injunctions.form_deadline_hint')}</span>
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-bold text-slate-700">الرقم المرجعي للإعذار (اختياري)</Label>
+                  <Label className="text-xs font-bold text-slate-700">{t('central.injunctions.form_ref')}</Label>
                   <Input
                     type="text"
                     value={formRef}
                     onChange={(e) => setFormRef(e.target.value)}
                     className="text-xs font-mono"
-                    placeholder="يولد تلقائياً: INJ-2026-XXX"
+                    placeholder={t('central.injunctions.form_ref_placeholder')}
                   />
                 </div>
               </div>
 
               {/* Directive Text */}
               <div className="space-y-1.5">
-                <Label className="text-xs font-bold text-slate-700">نص الأمر الإداري الملزم بالتصحيح والتسوية *</Label>
+                <Label className="text-xs font-bold text-slate-700">{t('central.injunctions.form_directive')}</Label>
                 <Textarea
                   value={formDirective}
                   onChange={(e) => setFormDirective(e.target.value)}
                   rows={3}
                   className="text-xs leading-relaxed font-semibold"
-                  placeholder="أدخل الإجراءات الواجب اتخاذها من قبل المصلحة (مثلاً: إلغاء الإجراء، توحيد الحصص، استبعاد المتعامل المقصى)..."
+                  placeholder={t('central.injunctions.form_directive_placeholder')}
                   required
                 />
               </div>
 
               {/* Violation Details */}
               <div className="space-y-1.5">
-                <Label className="text-xs font-bold text-slate-700">حيثيات ووقائع المخالفة المثبتة بالتحريات</Label>
+                <Label className="text-xs font-bold text-slate-700">{t('central.injunctions.form_details')}</Label>
                 <Textarea
                   value={formDetails}
                   onChange={(e) => setFormDetails(e.target.value)}
                   rows={3}
                   className="text-xs leading-relaxed"
-                  placeholder="بيان الوقائع المادية وتقارير عين الصقر التي تثبت المخالفة..."
+                  placeholder={t('central.injunctions.form_details_placeholder')}
                 />
               </div>
 
               {/* Optional PDF Attachment */}
               <div className="space-y-1.5">
-                <Label className="text-xs font-bold text-slate-700">مرفق تقرير التفتيش المادي (اختياري PDF)</Label>
+                <Label className="text-xs font-bold text-slate-700">{t('central.injunctions.form_pdf')}</Label>
                 <Input
                   type="file"
                   accept=".pdf"
@@ -706,7 +708,7 @@ export function CentralInjunctions() {
               <div className="bg-rose-50 border border-rose-300 rounded-xl p-3 text-xs text-rose-950 flex items-start gap-2">
                 <ShieldAlert className="size-4 text-rose-700 shrink-0 mt-0.5" />
                 <div>
-                  <span className="font-bold">التصعيد التلقائي:</span> في حال انقضاء مهلة الـ {formDeadline || 15} يوماً دون إيداع المصلحة لتقرير التصحيح، سيتم تحويل الملف آلياً إلى وضعية <span className="font-bold text-rose-800">"محال للجهات القضائية ومجلس المحاسبة"</span> وتوجيه إخطار استعجالي فوري لكافة المفتشين.
+                  <span className="font-bold">{t('central.injunctions.escalation_warning', { days: formDeadline || 15 })}</span>
                 </div>
               </div>
 
@@ -719,7 +721,7 @@ export function CentralInjunctions() {
                   disabled={submitting}
                   className="text-xs"
                 >
-                  إلغاء
+                  {t('central.injunctions.cancel')}
                 </Button>
                 <Button
                   type="submit"
@@ -729,12 +731,12 @@ export function CentralInjunctions() {
                   {submitting ? (
                     <>
                       <Loader2 className="size-3.5 animate-spin" />
-                      <span>جاري الإصدار والتبليغ...</span>
+                      <span>{t('central.injunctions.submitting')}</span>
                     </>
                   ) : (
                     <>
                       <Gavel className="size-3.5" />
-                      <span>إصدار الإعذار وتبليغه رسمياً</span>
+                      <span>{t('central.injunctions.submit')}</span>
                     </>
                   )}
                 </Button>
@@ -754,7 +756,7 @@ export function CentralInjunctions() {
               <div className="flex items-center gap-2">
                 <FileText className="size-5 text-emerald-600" />
                 <h3 className="text-base font-bold text-slate-900">
-                  تقرير التصحيح والرد للإعذار {viewingResponse.reference}
+                  {t('central.injunctions.response_title', { ref: viewingResponse.reference })}
                 </h3>
               </div>
               <button
@@ -768,10 +770,10 @@ export function CentralInjunctions() {
 
             <div className="space-y-3">
               <div className="text-[11px] text-slate-500">
-                المصلحة: <span className="font-bold text-slate-700">{viewingResponse.authority_name}</span> · تاريخ الرد: {formatDate(viewingResponse.responded_at)}
+                {t('central.injunctions.response_meta', { authority: viewingResponse.authority_name, date: formatDate(viewingResponse.responded_at) })}
               </div>
               <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 text-xs text-slate-800 whitespace-pre-wrap leading-relaxed">
-                {viewingResponse.authority_response || 'لا يوجد نص مكتوب.'}
+                {viewingResponse.authority_response || t('central.injunctions.no_text')}
               </div>
               {viewingResponse.authority_response_file && (
                 <a
@@ -781,7 +783,7 @@ export function CentralInjunctions() {
                   className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-800 hover:text-emerald-950 bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-200"
                 >
                   <Download className="size-3.5" />
-                  <span>تحميل ملف تقرير التصحيح المرفق (PDF)</span>
+                  <span>{t('central.injunctions.download_response')}</span>
                 </a>
               )}
             </div>
@@ -793,7 +795,7 @@ export function CentralInjunctions() {
                 onClick={() => setViewingResponse(null)}
                 className="text-xs"
               >
-                إغلاق
+                {t('central.injunctions.close')}
               </Button>
             </div>
           </div>

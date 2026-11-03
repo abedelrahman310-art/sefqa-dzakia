@@ -7,9 +7,10 @@ export interface KpiCardProps {
   trend?: number;
   trendLabel?: string;
   icon?: LucideIcon;
-  accent?: 'emerald' | 'gold' | 'navy' | 'red' | 'ai';
+  accent?: 'emerald' | 'gold' | 'navy' | 'red' | 'amber' | 'ai';
   sparkline?: number[];
   description?: string;
+  className?: string;
   /** أصناف الرقم الرئيسي — الافتراضي 'font-mono text-4xl' */
   valueClassName?: string;
   /** أصناف سطر الوصف — الافتراضي 'text-xs text-[var(--ink-500)]' */
@@ -27,6 +28,7 @@ export function KpiCard({
   accent = 'emerald',
   sparkline,
   description,
+  className = '',
   valueClassName,
   descriptionClassName,
   valueContent,
@@ -39,6 +41,8 @@ export function KpiCard({
         return 'var(--stamp-gold-700)';  // #8B6914
       case 'red':
         return 'var(--stamp-red-700)';   // #8B1A1A / #B02A2A
+      case 'amber':
+        return '#B45309';
       case 'navy':
         return 'var(--official-700)';    // #0A2540
       case 'ai':
@@ -49,7 +53,7 @@ export function KpiCard({
   };
 
   return (
-    <div className="group relative bg-white border border-[var(--color-border-subtle)] rounded-xl p-5 transition-all duration-200 hover:shadow-[var(--card-shadow-hover)] hover:-translate-y-0.5">
+    <div className={`group relative bg-white border border-[var(--color-border-subtle)] rounded-xl p-5 transition-all duration-200 hover:shadow-[var(--card-shadow-hover)] hover:-translate-y-0.5 ${className}`}>
       {/* Header */}
       <div className="flex items-start justify-between mb-3">
         <div className="eyebrow !text-xs text-[var(--ink-500)]">{eyebrow}</div>

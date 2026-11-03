@@ -137,7 +137,7 @@ export function CentralPermissions() {
       const data = await fetchCentralStaff();
       setStaffData(data);
     } catch (err: any) {
-      setStaffError(err.response?.data?.error || err.message || 'تعذر تحميل بيانات الموظفين.');
+      setStaffError(err.response?.data?.error || err.message || t('central.permissions.error_staff_load'));
     } finally {
       setLoadingStaff(false);
     }
@@ -151,7 +151,7 @@ export function CentralPermissions() {
       const data = await fetchCentralAuditLogs();
       setAuditLogs(data);
     } catch (err: any) {
-      setAuditError(err.response?.data?.error || err.message || 'تعذر تحميل سجل التدقيق.');
+      setAuditError(err.response?.data?.error || err.message || t('central.permissions.error_audit_load'));
     } finally {
       setLoadingAudit(false);
     }
@@ -185,7 +185,7 @@ export function CentralPermissions() {
       loadStaff();
       loadAudit();
     } catch (err: any) {
-      setInviteError(err.response?.data?.error || 'تعذر إرسال الدعوة.');
+      setInviteError(err.response?.data?.error || t('central.permissions.error_invite_send'));
     } finally {
       setInviting(false);
     }
@@ -207,7 +207,7 @@ export function CentralPermissions() {
       await loadAudit();
     } catch (err: any) {
       setActionMessage({
-        text: err.response?.data?.error || 'تعذر تغيير حالة الحساب.',
+        text: err.response?.data?.error || t('central.permissions.error_status_change'),
         type: 'error',
       });
     } finally {
@@ -228,7 +228,7 @@ export function CentralPermissions() {
       await loadAudit();
     } catch (err: any) {
       setActionMessage({
-        text: err.response?.data?.error || 'تعذر إلغاء الدعوة.',
+        text: err.response?.data?.error || t('central.permissions.error_invite_cancel'),
         type: 'error',
       });
     } finally {
@@ -291,7 +291,7 @@ export function CentralPermissions() {
         <div className="space-y-1">
           <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 text-xs font-bold">
             <span className="size-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span>الجمهورية الجزائرية الديمقراطية الشعبية · المفتشية العامة للصفقات العمومية</span>
+            <span>{t('central.permissions.header_badge')}</span>
           </div>
           <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white flex items-center gap-2.5">
             <Shield className="size-6 text-emerald-600 dark:text-emerald-500" />
@@ -358,27 +358,27 @@ export function CentralPermissions() {
       {/* 2. بطاقات المؤشرات الأساسية (KPI Matrix) */}
       <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
         <KpiCard
-          label={lang === 'ar' ? 'فريق عمل عين الصقر' : 'Équipe de contrôle central'}
-          value={formatNumber(staffData?.total_staff ?? 0, lang)}
-          subtext={lang === 'ar' ? 'موظف مسجل بالإدارة المركزية' : 'Agents officiels enregistrés'}
+          eyebrow={lang === 'ar' ? 'فريق عمل عين الصقر' : 'Équipe de contrôle central'}
+          value={formatNumber(staffData?.total_staff ?? 0)}
+          description={lang === 'ar' ? 'موظف مسجل بالإدارة المركزية' : 'Agents officiels enregistrés'}
           icon={Users}
         />
         <KpiCard
-          label={t('central.permissions.status.accepted')}
-          value={formatNumber(staffData?.active_staff ?? 0, lang)}
-          subtext={lang === 'ar' ? 'حسابات نشطة ومأذونة بالدخول' : 'Comptes actifs habilités'}
+          eyebrow={t('central.permissions.status.accepted')}
+          value={formatNumber(staffData?.active_staff ?? 0)}
+          description={lang === 'ar' ? 'حسابات نشطة ومأذونة بالدخول' : 'Comptes actifs habilités'}
           icon={ShieldCheck}
         />
         <KpiCard
-          label={t('central.permissions.status.pending')}
-          value={formatNumber(staffData?.pending_invitations ?? 0, lang)}
-          subtext={lang === 'ar' ? 'دعوات تفعيل قيد الانتظار' : 'Invitations en attente d’activation'}
+          eyebrow={t('central.permissions.status.pending')}
+          value={formatNumber(staffData?.pending_invitations ?? 0)}
+          description={lang === 'ar' ? 'دعوات تفعيل قيد الانتظار' : 'Invitations en attente d’activation'}
           icon={Clock}
         />
         <KpiCard
-          label={t('central.permissions.kpi_audit_logs')}
-          value={formatNumber(auditLogs.length, lang)}
-          subtext={t('central.permissions.kpi_audit_logs_sub')}
+          eyebrow={t('central.permissions.kpi_audit_logs')}
+          value={formatNumber(auditLogs.length)}
+          description={t('central.permissions.kpi_audit_logs_sub')}
           icon={Fingerprint}
         />
       </div>
@@ -558,7 +558,7 @@ export function CentralPermissions() {
 
                           {/* آخر نشاط / آخر تسجيل دخول */}
                           <TableCell className="py-3 text-slate-500 text-[11px] font-mono">
-                            {staff.last_login ? formatDateTime(staff.last_login, lang) : (lang === 'ar' ? 'لم يسجل دخول بعد' : 'Jamais connecté')}
+                            {staff.last_login ? formatDateTime(staff.last_login) : (lang === 'ar' ? 'لم يسجل دخول بعد' : 'Jamais connecté')}
                           </TableCell>
 
                           {/* زر الإجراء: تعطيل / تفعيل */}
@@ -667,9 +667,9 @@ export function CentralPermissions() {
 
                           {/* صاحب الدعوة */}
                           <TableCell className="py-3 text-slate-500 text-[11px]">
-                            <div>{inv.invited_by_name || 'مسؤول النظام'}</div>
+                            <div>{inv.invited_by_name || t('central.permissions.system_owner')}</div>
                             <div className="font-mono text-[10px] text-slate-400">
-                              {inv.created_at ? formatDateTime(inv.created_at, lang) : '—'}
+                              {inv.created_at ? formatDateTime(inv.created_at) : '—'}
                             </div>
                           </TableCell>
 
@@ -824,7 +824,7 @@ export function CentralPermissions() {
                     {paginatedAuditLogs.map((log) => (
                       <TableRow key={log.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-900/30 text-xs">
                         <TableCell className="py-2.5 text-[11px] font-mono text-slate-500 whitespace-nowrap">
-                          {formatDateTime(log.timestamp, lang)}
+                          {formatDateTime(log.timestamp)}
                         </TableCell>
                         <TableCell className="py-2.5 font-bold text-slate-900 dark:text-white whitespace-nowrap">
                           {log.user_name || log.user_email || t('central.permissions.unknown_account')}
@@ -1000,19 +1000,19 @@ export function CentralPermissions() {
                     className="w-full h-9 text-xs px-3 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white font-medium"
                   >
                     <option value="inspector">
-                      {t('central.permissions.roles.inspector')} — (التفتيش، التدقيق، وإصدار الإعذارات الإدارية)
+                      {t('central.permissions.roles.inspector')} — {t('central.permissions.roles.inspector_desc')}
                     </option>
                     <option value="analyst">
-                      {t('central.permissions.roles.analyst')} — (التحليلات الإحصائية، رادار الشبهات، والتقارير)
+                      {t('central.permissions.roles.analyst')} — {t('central.permissions.roles.analyst_desc')}
                     </option>
                     <option value="financial_auditor">
-                      {t('central.permissions.roles.financial_auditor')} — (مراقبة الميزانيات، أسعار الصفقات، والمدفوعات)
+                      {t('central.permissions.roles.financial_auditor')} — {t('central.permissions.roles.financial_auditor_desc')}
                     </option>
                     <option value="system_admin">
-                      {t('central.permissions.roles.system_admin')} — (إدارة الحسابات التقنية والأمان والربط)
+                      {t('central.permissions.roles.system_admin')} — {t('central.permissions.roles.system_admin_desc')}
                     </option>
                     <option value="inspector_general">
-                      {t('central.permissions.roles.inspector_general')} — (كامل الصلاحيات الرقابية والإشرافية العليا)
+                      {t('central.permissions.roles.inspector_general')} — {t('central.permissions.roles.inspector_general_desc')}
                     </option>
                   </select>
                 </div>

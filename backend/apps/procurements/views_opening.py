@@ -175,6 +175,14 @@ class SessionScheduleView(APIView):
             session.id,
             tender.reference_number,
         )
+
+        # تهيئة حصص التشفير التعددي لأعضاء اللجنة وفقاً للقانون 23-12 والمرسوم 15-247
+        from .threshold_crypto import init_session_committee
+        try:
+            init_session_committee(session)
+        except Exception as exc:
+            logger.warning("تعذر تهيئة حصص التشفير التعددي تلقائياً: %s", exc)
+
         return Response(
             OpeningSessionDetailSerializer(session, context={"request": request}).data,
             status=status.HTTP_201_CREATED,
@@ -336,6 +344,21 @@ class SessionOpenEnvelopeView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+        # التحقق من اكتمال مراسم النصاب القانوني والتشفير التعددي (المادة 70 من القانون 23-12)
+        if session.committee_shares.exists() and session.ceremony_status != "unlocked":
+            submitted_count = session.committee_shares.filter(is_submitted=True).count()
+            if submitted_count < session.threshold_k:
+                return Response(
+                    {
+                        "detail": "لا يمكن فك أظرفة العروض قبل اكتمال النصاب القانوني لمراسم التشفير التعددي للجنة (المادة 70 من القانون 23-12 والمادتين 70-71 من المرسوم 15-247).",
+                        "error_code": "THRESHOLD_QUORUM_REQUIRED",
+                        "ceremony_status": session.ceremony_status,
+                        "submitted_count": submitted_count,
+                        "required_k": session.threshold_k,
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
         offer_id = request.data.get("offer_id")
         envelope_type = str(request.data.get("envelope_type", "financial")).lower().strip()
         notes = request.data.get("notes", "")
@@ -480,6 +503,21 @@ class SessionOpenOfferView(APIView):
                 {"detail": f"جلسة الفتح ليست جارية حالياً (الحالة الحالية: {session.get_status_display()})."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+
+        # التحقق من اكتمال مراسم النصاب القانوني والتشفير التعددي (المادة 70 من القانون 23-12)
+        if session.committee_shares.exists() and session.ceremony_status != "unlocked":
+            submitted_count = session.committee_shares.filter(is_submitted=True).count()
+            if submitted_count < session.threshold_k:
+                return Response(
+                    {
+                        "detail": "لا يمكن فك أظرفة العروض قبل اكتمال النصاب القانوني لمراسم التشفير التعددي للجنة (المادة 70 من القانون 23-12 والمادتين 70-71 من المرسوم 15-247).",
+                        "error_code": "THRESHOLD_QUORUM_REQUIRED",
+                        "ceremony_status": session.ceremony_status,
+                        "submitted_count": submitted_count,
+                        "required_k": session.threshold_k,
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
 
         serializer = OpenOfferRequestSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -755,4 +793,73 @@ class SessionSSEStreamView(APIView):
         response["Cache-Control"] = "no-cache"
         response["X-Accel-Buffering"] = "no"
         return response
+
+class SessionSubmitKeyShareView(APIView):
+    """
+    POST /api/procurements/sessions/{id}/submit-key-share/
+    تأكيد حضور عضو لجنة فتح الأظرفة وتقديم حصته التشفيرية
+    """
+    permission_classes = [IsAuthority]
+
+    def post(self, request, pk):
+        session = get_object_or_404(OpeningSession.objects.select_related("tender"), pk=pk)
+        member_role = request.data.get("member_role") or request.data.get("role") or request.data.get("share_id")
+        if not member_role:
+            return Response({"detail": "يجب تحديد صفة أو معرف عضو اللجنة."}, status=status.HTTP_400_BAD_REQUEST)
+
+        from .threshold_crypto import init_session_committee, submit_committee_share
+        if not session.committee_shares.exists():
+            init_session_committee(session)
+
+        try:
+            result = submit_committee_share(session, str(member_role), user=request.user, request=request)
+            # بث تحديث النصاب فورياً
+            broadcast_session_event(
+                str(session.id),
+                {
+                    "type": "committee_quorum_update",
+                    "event_type": "committee_quorum_update",
+                    "session_id": str(session.id),
+                    **result,
+                    "timestamp": timezone.now().isoformat(),
+                }
+            )
+            return Response({
+                "message": f"تم تسجيل حضور وتقديم حصة {result['member_submitted']} بنجاح.",
+                **result,
+            }, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class SessionCommitteeStatusView(APIView):
+    """
+    GET /api/procurements/sessions/{id}/committee-status/
+    استرجاع حالة أعضاء لجنة فتح الأظرفة ونصاب التشفير التعددي
+    """
+    permission_classes = [permissions.IsAuthenticated, HasSessionAccess]
+
+    def get(self, request, pk):
+        session = get_object_or_404(OpeningSession.objects.select_related("tender"), pk=pk)
+        self.check_object_permissions(request, session)
+
+        from .threshold_crypto import init_session_committee
+        if not session.committee_shares.exists():
+            init_session_committee(session)
+
+        shares = session.committee_shares.all()
+        from .serializers import OpeningCommitteeShareSerializer
+        shares_data = OpeningCommitteeShareSerializer(shares, many=True).data
+
+        submitted_count = shares.filter(is_submitted=True).count()
+        return Response({
+            "session_id": str(session.id),
+            "ceremony_status": session.ceremony_status,
+            "threshold_k": session.threshold_k,
+            "threshold_n": session.threshold_n,
+            "submitted_count": submitted_count,
+            "quorum_reached": session.ceremony_status == 'unlocked' or (submitted_count >= session.threshold_k),
+            "unlocked_at": session.unlocked_at.isoformat() if session.unlocked_at else None,
+            "committee_shares": shares_data,
+        }, status=status.HTTP_200_OK)
 

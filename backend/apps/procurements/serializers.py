@@ -2,6 +2,7 @@ import uuid
 from decimal import Decimal
 from rest_framework import serializers
 from .models import (
+    OpeningCommitteeShare,
     SpecsPurchase,
     ProcurementDeal,
     CahierSpecs,
@@ -251,7 +252,6 @@ class LegalNoticeSerializer(serializers.ModelSerializer):
             'document_pdf',
             'created_at',
             'updated_at',
-            'has_active_injunction',
         ]
         read_only_fields = [
             'id',
@@ -266,7 +266,6 @@ class LegalNoticeSerializer(serializers.ModelSerializer):
             'is_expired',
             'created_at',
             'updated_at',
-            'has_active_injunction',
         ]
 
     def get_operator_name(self, obj):
@@ -461,6 +460,26 @@ class OpeningEventSerializer(serializers.ModelSerializer):
         return f"المتعامل رقم {obj.order}" if obj.order else "عرض منافس"
 
 
+class OpeningCommitteeShareSerializer(serializers.ModelSerializer):
+    """بيانات عضو لجنة فتح الأظرفة وحالة تقديم حصته التشفيرية"""
+    role_display = serializers.CharField(source='get_member_role_display', read_only=True)
+
+    class Meta:
+        model = OpeningCommitteeShare
+        fields = [
+            'id',
+            'session_id',
+            'member_name',
+            'member_role',
+            'role_display',
+            'share_index',
+            'is_submitted',
+            'submitted_at',
+            'created_at',
+        ]
+        read_only_fields = fields
+
+
 class OpeningSessionListSerializer(serializers.ModelSerializer):
     tender_id = serializers.UUIDField(source='tender.id', read_only=True)
     tender_reference = serializers.CharField(source='tender.reference_number', read_only=True)
@@ -497,6 +516,11 @@ class OpeningSessionDetailSerializer(serializers.ModelSerializer):
     accesses_count = serializers.SerializerMethodField()
     my_access = serializers.SerializerMethodField()
     events = serializers.SerializerMethodField()
+    committee_shares = OpeningCommitteeShareSerializer(many=True, read_only=True)
+    quorum_reached = serializers.SerializerMethodField()
+
+    def get_quorum_reached(self, obj) -> bool:
+        return obj.ceremony_status == 'unlocked' or (obj.committee_shares.filter(is_submitted=True).count() >= obj.threshold_k)
 
     class Meta:
         model = OpeningSession
@@ -519,6 +543,12 @@ class OpeningSessionDetailSerializer(serializers.ModelSerializer):
             'access_policy_display',
             'total_offers',
             'opened_count',
+            'threshold_k',
+            'threshold_n',
+            'ceremony_status',
+            'unlocked_at',
+            'committee_shares',
+            'quorum_reached',
             'accesses_count',
             'my_access',
             'events',
@@ -1127,7 +1157,6 @@ class MilestoneSerializer(serializers.ModelSerializer):
             'progress_reports',
             'created_at',
             'updated_at',
-            'has_active_injunction',
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']
 
@@ -1157,7 +1186,6 @@ class ContractSerializer(serializers.ModelSerializer):
             'amount',
             'created_at',
             'updated_at',
-            'has_active_injunction',
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']
 

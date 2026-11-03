@@ -87,6 +87,27 @@ export const useScheduleSession = () => {
   });
 };
 
+export const useSubmitKeyShare = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      sessionId,
+      memberRole,
+    }: {
+      sessionId: string;
+      memberRole: string;
+    }) => openingApi.submitKeyShare(sessionId, memberRole),
+    onSuccess: (data, vars) => {
+      toast.success(data.message || "تم تسجيل حضور وتقديم حصة العضو بنجاح");
+      qc.invalidateQueries({ queryKey: ["opening-session", vars.sessionId] });
+    },
+    onError: (err: any) => {
+      const msg = err.response?.data?.detail || "فشل تقديم حصة عضو اللجنة";
+      toast.error(msg);
+    },
+  });
+};
+
 export const useEligibleTenders = () =>
   useQuery({
     queryKey: ["eligible-tenders"],
@@ -149,5 +170,3 @@ export const useSessionEvents = (sessionId?: string) =>
     enabled: !!sessionId,
     refetchInterval: 4000,
   });
-
-

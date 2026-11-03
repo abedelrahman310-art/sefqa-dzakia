@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo } from 'react';
 import { useI18n } from '@/i18n';
 import { useLocation } from 'wouter';
 import { formatCurrency, formatDate } from '@/lib/format';
+import { api } from '@/lib/api';
 import {
   Archive,
   Search,
@@ -49,10 +50,12 @@ export function OperatorArchiveView() {
 
   useEffect(() => {
     Promise.all([
-      fetch('/api/opportunities').then((res) => (res.ok ? res.json() : Promise.reject())),
-      fetch('/api/offers').then((res) => (res.ok ? res.json() : Promise.reject())),
+      api.get<{ opportunities: ArchiveOpportunity[] }>('/opportunities'),
+      api.get<{ offers: ArchiveOffer[] }>('/offers'),
     ])
-      .then(([oppsData, offersData]) => {
+      .then(([oppsRes, offersRes]) => {
+        const oppsData = oppsRes.data;
+        const offersData = offersRes.data;
         if (oppsData.opportunities) {
           setOpportunities(oppsData.opportunities);
         }

@@ -46,6 +46,7 @@ import {
 } from "lucide-react";
 import { downloadPdfBlob } from "@/lib/pdfDownloader";
 import type { DealOfferSummary } from "../types";
+import { CommitteeQuorumCeremony } from "./CommitteeQuorumCeremony";
 
 export function AuthoritySessionControl() {
   const params = useParams<{ id: string }>();
@@ -59,6 +60,7 @@ export function AuthoritySessionControl() {
   );
 
   const startMutation = useStartSession();
+  const isUnlocked = Boolean(session?.ceremony_status === "unlocked" || session?.quorum_reached);
   const endMutation = useEndSession();
   const openOfferMutation = useOpenOffer();
 
@@ -376,6 +378,9 @@ export function AuthoritySessionControl() {
         </CardContent>
       </Card>
 
+      {/* Committee Shamir Threshold Quorum Ceremony (المادة 70 من القانون 23-12) */}
+      <CommitteeQuorumCeremony session={session} />
+
       {/* Grid: Offers to open vs Live Session Events Feed */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left Column (7 cols): Submitted Offers List */}
@@ -467,16 +472,26 @@ export function AuthoritySessionControl() {
                           {!isOpened && (
                             <Button
                               onClick={() => handleOpenOfferClick(offer)}
-                              disabled={!isLive || openOfferMutation.isPending}
+                              disabled={!isLive || openOfferMutation.isPending || !isUnlocked}
                               title={
                                 !isLive
                                 ? t("opening.must_start_first_tooltip")
+                                : !isUnlocked
+                                ? "يجب اكتمال النصاب القانوني لمراسم التشفير التعددي للجنة أولاً (المادة 70 من القانون 23-12)"
                                 : undefined
                               }
-                              className="bg-navy-900 hover:bg-navy-800 text-white font-bold text-xs gap-1.5 rounded-xl whitespace-nowrap shadow-xs"
+                              className={`font-bold text-xs gap-1.5 rounded-xl whitespace-nowrap shadow-xs ${
+                                !isUnlocked
+                                  ? "bg-slate-300 dark:bg-slate-800 text-slate-600 dark:text-slate-400 cursor-not-allowed"
+                                  : "bg-navy-900 hover:bg-navy-800 text-white"
+                              }`}
                             >
                               <FileText className="w-3.5 h-3.5" />
-                              <span>{t("opening.open_offer")}</span>
+                              <span>
+                                {!isUnlocked
+                                  ? "بانتظار نصاب اللجنة"
+                                  : t("opening.open_offer")}
+                              </span>
                             </Button>
                           )}
                         </div>

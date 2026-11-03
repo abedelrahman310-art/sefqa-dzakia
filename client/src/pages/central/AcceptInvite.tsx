@@ -277,7 +277,7 @@ export function AcceptInvite({ token: propToken }: AcceptInviteProps) {
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute inset-y-0 end-0 pe-3 flex items-center text-slate-400 hover:text-white"
-                  aria-label={showPassword ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'}
+                  aria-label={showPassword ? (lang === 'ar' ? 'إخفاء كلمة المرور' : 'Masquer le mot de passe') : (lang === 'ar' ? 'إظهار كلمة المرور' : 'Afficher le mot de passe')}
                 >
                   {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                 </button>

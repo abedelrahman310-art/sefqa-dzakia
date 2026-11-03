@@ -48,8 +48,8 @@ export const V3Hero: React.FC = () => {
       id: 'central',
       title: isAr ? 'عين الصقر (الإدارة المركزية)' : 'Supervision Centrale',
       desc: isAr
-        ? 'الرقابة الكلية عبر 69 ولاية، رادار كشف التواطؤ، ومنع انحراف الآجال والملاحق القانونية.'
-        : 'Supervision nationale sur 69 wilayas, radar anti-collusion et détection des dérives.',
+        ? 'الرقابة الكلية عبر 58 ولاية، رادار كشف التواطؤ، ومنع انحراف الآجال والملاحق القانونية.'
+        : 'Supervision nationale sur 58 wilayas, radar anti-collusion et détection des dérives.',
       icon: Eye,
       link: '/central',
       tag: isAr ? 'الرقابة والنزاهة' : 'Contrôle National',

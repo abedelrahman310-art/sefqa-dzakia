@@ -11,6 +11,7 @@ import {
   Clock,
   Scale,
   ShieldAlert,
+  AlertTriangle,
 } from 'lucide-react';
 import {
   Card,
@@ -212,24 +213,24 @@ export function CentralDeals() {
           description={t('central.deals.kpi_volume_sub')}
         />
         <KpiCard
-          eyebrow={t('central.deals.avenantAlerts') || 'صفقات تجاوزت نسبة الملاحق'}
+          eyebrow={t('central.deals.avenantAlerts')}
           value={formatNumber(stats.avenantAlertsCount)}
           icon={Scale}
           accent={stats.avenantAlertsCount > 0 ? 'red' : 'emerald'}
-          description={stats.avenantAlertsCount > 0 ? 'مخالفات سقف 20% - 25% (مرسوم 15-247)' : 'كافة الملاحق مطابقة للسقف'}
+          description={stats.avenantAlertsCount > 0 ? t('central.deals.avenant_kpi_desc_alert') : t('central.deals.avenant_kpi_desc_ok')}
           className={onlyAvenantAlerts ? 'ring-2 ring-rose-500' : ''}
         />
         <KpiCard
-          eyebrow={t('central.deals.noticesAlerts') || 'الاعذارات القانونية والمهل'}
+          eyebrow={t('central.deals.noticesAlerts')}
           value={formatNumber(stats.noticeAlertsCount)}
           icon={AlertTriangle}
           accent={stats.expiredNoticesCount > 0 ? 'red' : stats.noticeAlertsCount > 0 ? 'amber' : 'emerald'}
           description={
             stats.expiredNoticesCount > 0
-              ? `${stats.expiredNoticesCount} صفقات بها غرامات تأخير`
+              ? t('central.deals.notice_kpi_desc_expired', { count: formatNumber(stats.expiredNoticesCount) })
               : stats.noticeAlertsCount > 0
-              ? `${stats.noticeAlertsCount} صفقات بإعذارات نشطة`
-              : 'لا توجد اعذارات قانونية'
+              ? t('central.deals.notice_kpi_desc_active', { count: formatNumber(stats.noticeAlertsCount) })
+              : t('central.deals.notice_kpi_desc_none')
           }
           className={onlyNoticeAlerts ? 'ring-2 ring-amber-500' : ''}
         />
@@ -240,7 +241,7 @@ export function CentralDeals() {
           <div className="flex items-center gap-2">
             <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />
             <span className="font-bold">
-              متابعة التأخيرات المركزية: يوجد {stats.expiredNoticesCount} صفقات انتهت مهلتها القانونية دون تسوية وتخضع لاقتطاع غرامات التأخير آلياً (المادة 147 من المرسوم 15-247).
+              {t('central.deals.expired_banner', { count: formatNumber(stats.expiredNoticesCount) })}
             </span>
           </div>
           <Button
@@ -249,7 +250,7 @@ export function CentralDeals() {
             onClick={() => setOnlyNoticeAlerts(!onlyNoticeAlerts)}
             className="h-7 text-xs font-bold border-amber-400 text-amber-900 hover:bg-amber-100 shrink-0"
           >
-            {onlyNoticeAlerts ? 'عرض كافة الصفقات' : 'تصفية صفقات الاعذارات'}
+            {onlyNoticeAlerts ? t('central.deals.show_all') : t('central.deals.filter_notice_alerts')}
           </Button>
         </div>
       )}
@@ -259,7 +260,7 @@ export function CentralDeals() {
           <div className="flex items-center gap-2">
             <ShieldAlert className="w-5 h-5 text-rose-600 shrink-0" />
             <span className="font-bold">
-              تنبيه رقابي وطني: يوجد {stats.avenantAlertsCount} صفقات تجاوزت فيها الملاحق التعاقدية الحدود القانونية (20% أو 25%) وفقاً للمادتين 138 و139 من المرسوم الرئاسي 15-247.
+              {t('central.deals.avenant_banner', { count: formatNumber(stats.avenantAlertsCount) })}
             </span>
           </div>
           <Button
@@ -268,7 +269,7 @@ export function CentralDeals() {
             onClick={() => setOnlyAvenantAlerts(!onlyAvenantAlerts)}
             className="h-7 text-xs font-bold border-rose-300 text-rose-800 hover:bg-rose-100 shrink-0"
           >
-            {onlyAvenantAlerts ? 'عرض كافة الصفقات' : 'تصفية الصفقات المخالفة'}
+            {onlyAvenantAlerts ? t('central.deals.show_all') : t('central.deals.filter_avenant_alerts')}
           </Button>
         </div>
       )}
@@ -418,25 +419,25 @@ export function CentralDeals() {
                                   ? 'bg-rose-100 text-rose-800 border border-rose-200'
                                   : 'bg-amber-100 text-amber-800 border border-amber-200'
                               }`}
-                              title="نسبة الملاحق التعاقدية (المرسوم 15-247)"
+                              title={t('central.deals.avenant_badge_title')}
                             >
-                              ملحق {((deal as any).total_avenant_percentage as number).toFixed(0)}%
+                              {t('central.deals.avenant_badge', { percent: ((deal as any).total_avenant_percentage as number).toFixed(0) })}
                             </span>
                           )}
                           {Boolean((deal as any).has_expired_notice) && (
                             <span
                               className="px-1.5 py-0.5 rounded text-[10px] font-bold shrink-0 bg-rose-100 text-rose-800 border border-rose-200"
-                              title="إعذار منتهي المهلة وغرامات مفروضة (المرسوم 15-247)"
+                              title={t('central.deals.notice_expired_title')}
                             >
-                              إعذار منتهي
+                              {t('central.deals.notice_expired_badge')}
                             </span>
                           )}
                           {Boolean(!(deal as any).has_expired_notice && (deal as any).active_legal_notices_count > 0) && (
                             <span
                               className="px-1.5 py-0.5 rounded text-[10px] font-bold shrink-0 bg-amber-100 text-amber-800 border border-amber-200"
-                              title="إعذار قانوني نشط ضمن المهلة"
+                              title={t('central.deals.notice_active_title')}
                             >
-                              إعذار نشط
+                              {t('central.deals.notice_active_badge')}
                             </span>
                           )}
                         </div>

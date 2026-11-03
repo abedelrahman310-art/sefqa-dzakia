@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { AlertCircle, CheckCircle, Building2, MapPin, Award, Layers } from 'lucide-react';
 import { REGISTRY_69W } from '@safaqat/shared/territorial';
+import { api } from '@/lib/api';
 
 export function OperatorProfileView() {
   const { t, lang } = useI18n();
@@ -19,8 +20,8 @@ export function OperatorProfileView() {
   const [qualificationSector, setQualificationSector] = useState('');
 
   useEffect(() => {
-    fetch('/api/operator/profile')
-      .then((res) => res.json())
+    api.get('/operator/profile')
+      .then((res) => res.data)
       .then((data) => {
         if (data.profile) {
           setWilayaCode(data.profile.wilayaCode || '');
@@ -58,29 +59,19 @@ export function OperatorProfileView() {
     }
 
     try {
-      const res = await fetch('/api/operator/profile', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-safaqat-csrf': '1',
-        },
-        body: JSON.stringify({
-          wilayaCode,
-          mainSector,
-          declaredActivityCodes: codes,
-          declaredQualificationLevel: qualificationLevel || null,
-          declaredQualificationSector: qualificationSector || null,
-        }),
+      await api.put('/operator/profile', {
+        wilayaCode,
+        mainSector,
+        declaredActivityCodes: codes,
+        declaredQualificationLevel: qualificationLevel || null,
+        declaredQualificationSector: qualificationSector || null,
       });
 
-      const data = await res.json();
-      if (!res.ok) {
-        setErrorMsg(data.error || t('operator.profile.err_save_failed'));
-      } else {
-        setSuccessMsg(t('operator.profile.saved_success'));
-      }
-    } catch {
-      setErrorMsg(t('operator.profile.err_server_conn'));
+      setSuccessMsg(t('operator.profile.saved_success'));
+    } catch (error) {
+      const serverMessage = (error as { response?: { data?: { error?: string } } })
+        ?.response?.data?.error;
+      setErrorMsg(serverMessage || t('operator.profile.err_save_failed'));
     } finally {
       setSaving(false);
     }

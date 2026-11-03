@@ -201,6 +201,21 @@ class OpeningSession(models.Model):
     )
     total_offers = models.IntegerField('إجمالي العروض المستلمة', default=0)
     opened_count = models.IntegerField('عدد العروض المفتوحة', default=0)
+    # التشفير التعددي العتباتي (Threshold Multi-Party Sealing / Shamir's Secret Sharing)
+    threshold_k = models.PositiveSmallIntegerField('عتبة النصاب القانوني لفك الأظرفة (k)', default=2)
+    threshold_n = models.PositiveSmallIntegerField('إجمالي حصص مفاتيح اللجنة (n)', default=3)
+    ceremony_status = models.CharField(
+        'حالة مراسم فك الأظرفة التعددية',
+        max_length=25,
+        default='pending_quorum',
+        choices=(
+            ('pending_quorum', 'في انتظار اكتمال النصاب القانوني'),
+            ('quorum_reached', 'اكتمل النصاب القانوني'),
+            ('unlocked', 'تم فك الختم التعددي بنجاح'),
+        ),
+    )
+    session_key_hash = models.CharField('بصمة مفتاح الجلسة التشفيرية SHA-256', max_length=64, blank=True, default='')
+    unlocked_at = models.DateTimeField('تاريخ وتوقيت فك الختم التعددي', null=True, blank=True)
     created_by = models.ForeignKey(
         CustomUser,
         on_delete=models.PROTECT,
@@ -224,6 +239,53 @@ class OpeningSession(models.Model):
 
     def __str__(self):
         return f"جلسة فتح: {self.tender.reference_number} ({self.get_status_display()})"
+
+
+class OpeningCommitteeShare(models.Model):
+    """
+    حصص التشفير التعددي لأعضاء لجنة فتح الأظرفة وتقييم العروض
+    وفق المادة 70 من القانون 23-12 والمادتين 70-71 من المرسوم الرئاسي 15-247.
+    مبنية على خوارزمية Shamir's Secret Sharing (k-of-n).
+    """
+    MEMBER_ROLE_CHOICES = (
+        ('president', 'رئيس المصلحة المتعاقدة / رئيس اللجنة'),
+        ('finance_rep', 'ممثل المصلحة المالية / المحاسب العمومي'),
+        ('technical_rep', 'ممثل المصلحة التقنية المختصة'),
+        ('member', 'عضو ممثل قانوني'),
+    )
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    session = models.ForeignKey(
+        OpeningSession,
+        on_delete=models.CASCADE,
+        related_name='committee_shares',
+        verbose_name='جلسة الفتح'
+    )
+    member_name = models.CharField('اسم عضو اللجنة', max_length=150)
+    member_role = models.CharField('الصفة في اللجنة', max_length=50, choices=MEMBER_ROLE_CHOICES)
+    share_index = models.PositiveSmallIntegerField('رقم الحصة x')
+    share_token = models.CharField('رمز الحصة التشفيرية y', max_length=128)
+    
+    is_submitted = models.BooleanField('تم تأكيد الحضور وتقديم الحصة', default=False)
+    submitted_at = models.DateTimeField('تاريخ وتوقيت تقديم الحصة', null=True, blank=True)
+    submitted_by = models.ForeignKey(
+        CustomUser,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='submitted_opening_shares',
+        verbose_name='المستخدم المؤكد'
+    )
+    created_at = models.DateTimeField('تاريخ الإنشاء', auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'حصة تشفير عضو اللجنة'
+        verbose_name_plural = 'حصص تشفير أعضاء اللجنة'
+        ordering = ['share_index']
+        unique_together = ('session', 'share_index')
+
+    def __str__(self):
+        return f"حصة {self.get_member_role_display()} ({self.member_name}) - جلسة {self.session_id}"
 
 
 class SessionAccess(models.Model):

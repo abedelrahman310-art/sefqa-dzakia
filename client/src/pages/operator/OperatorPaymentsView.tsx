@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'wouter';
 import { useI18n } from '@/i18n';
-import api from '@/lib/api';
+import { api } from '@/lib/api';
 import {
   CreditCard,
   Shield,

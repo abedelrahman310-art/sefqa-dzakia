@@ -71,6 +71,8 @@ export interface ProcurementDealApi {
   current_stage: number;
   stage_display?: string;
   estimated_budget: string | number | null;
+  specs_price?: string | number | null;
+  base_amount?: string | number | null;
   wilaya?: string;
   submission_deadline?: string | null;
   created_at: string;
