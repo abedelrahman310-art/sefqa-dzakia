@@ -61,30 +61,58 @@ export const V3Hero: React.FC = () => {
         {/* Centered Hero Stack */}
         <div className="max-w-[840px] mx-auto text-center space-y-6 mb-16">
           
-          {/* Eyebrow Label (13px, weight 500, +0.1em tracking, uppercase, #5a5a5a) */}
-          <div className="inline-flex items-center gap-2">
-            <span className="size-2 rounded-full bg-[#146ef5]" />
-            <p className="text-[13px] font-medium tracking-[0.1em] uppercase text-[#5a5a5a] font-mono">
-              {isAr
-                ? 'الجمهورية الجزائرية الديمقراطية الشعبية • القانون 23-12'
-                : 'RÉPUBLIQUE ALGÉRIENNE • LOI 23-12 DES MARCHÉS PUBLICS'}
-            </p>
-          </div>
+          {/* Platform Name within Prestige National Frame (Algerian Tricolor: Green, White, Red) */}
+          <div className="relative inline-block mx-auto max-w-full my-1">
+            {/* Algerian Tricolor Ambient Border Glow */}
+            <div className="absolute -inset-1 rounded-3xl bg-gradient-to-r from-[#006233] via-white to-[#d21034] opacity-90 blur-xs" />
 
-          {/* Monumental Headline (56–72px, weight 600, #080808, line-height 1.04, letter-spacing -0.01em) */}
-          <h1 className="text-[42px] sm:text-[56px] lg:text-[70px] font-bold text-[#080808] leading-[1.04] tracking-[-0.01em] font-sans">
-            {isAr ? (
-              <>
-                المنظومة الوطنية الموحدة <br />
-                <span className="text-[#146ef5]">للصفقات العمومية</span>
-              </>
-            ) : (
-              <>
-                La plateforme souveraine des <br />
-                <span className="text-[#146ef5]">marchés publics</span>
-              </>
-            )}
-          </h1>
+            {/* Main Prestige Frame */}
+            <div className="relative rounded-3xl border-2 border-slate-200/90 bg-white shadow-xl px-6 py-6 sm:px-14 sm:py-8 overflow-hidden">
+              {/* Top National Ribbon Accent: 50% Green, 50% Red */}
+              <div className="absolute top-0 left-0 right-0 h-2 flex">
+                <div className="w-1/2 bg-[#006233]" />
+                <div className="w-1/2 bg-[#d21034]" />
+              </div>
+
+              {/* Algerian Republic Header with Flag Emblem */}
+              <div className="flex items-center justify-center gap-2 sm:gap-3 mb-4">
+                <span className="h-0.5 w-6 sm:w-12 bg-gradient-to-r from-transparent to-[#006233]" />
+                <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-50 border border-slate-200 shadow-2xs">
+                  <span className="text-sm select-none" aria-hidden="true">🇩🇿</span>
+                  <span className="text-[11px] sm:text-[13px] font-bold font-mono text-slate-800 tracking-wider uppercase">
+                    {isAr
+                      ? 'الجمهورية الجزائرية الديمقراطية الشعبية'
+                      : 'RÉPUBLIQUE ALGÉRIENNE DÉMOCRATIQUE ET POPULAIRE'}
+                  </span>
+                </span>
+                <span className="h-0.5 w-6 sm:w-12 bg-gradient-to-l from-transparent to-[#d21034]" />
+              </div>
+
+              {/* Monumental Platform Name inside the National Frame */}
+              <h1 className="text-[44px] sm:text-[62px] lg:text-[78px] font-black text-[#080808] leading-[1.05] tracking-tight font-sans">
+                {isAr ? 'صفقات ذكية' : 'Safaqat Dhakia'}
+              </h1>
+
+              {/* Official Status Subtitle & Legal Badges in National Colors */}
+              <div className="mt-4 flex flex-wrap items-center justify-center gap-2 sm:gap-3">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[12px] font-bold bg-[#006233]/10 text-[#006233] border border-[#006233]/30">
+                  <span className="size-2 rounded-full bg-[#006233]" />
+                  <span>{isAr ? 'المنظومة الوطنية الرسمية' : 'Portail Officiel'}</span>
+                </span>
+
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[12px] font-bold bg-[#d21034]/10 text-[#d21034] border border-[#d21034]/30">
+                  <span className="size-2 rounded-full bg-[#d21034]" />
+                  <span>{isAr ? 'القانون 23-12 • المادة 67' : 'Loi 23-12 • Art. 67'}</span>
+                </span>
+              </div>
+
+              {/* Bottom National Ribbon Accent: 50% Green, 50% Red */}
+              <div className="absolute bottom-0 left-0 right-0 h-2 flex">
+                <div className="w-1/2 bg-[#006233]" />
+                <div className="w-1/2 bg-[#d21034]" />
+              </div>
+            </div>
+          </div>
 
           {/* Subtext (20px, weight 400, #5a5a5a, max-width 640px) */}
           <p className="text-[18px] sm:text-[20px] font-normal text-[#5a5a5a] leading-[1.4] max-w-[640px] mx-auto">
