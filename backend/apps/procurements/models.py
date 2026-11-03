@@ -1066,3 +1066,85 @@ class SpecsPurchase(models.Model):
 
         return True
 
+
+class Authority(models.Model):
+    """
+    نموذج المصلحة المتعاقدة (الهيئة العمومية الخاضعة لأحكام القانون 23-12).
+    يدعم نظام التسجيل الذاتي والاعتماد المسبق من قبل الإدارة المركزية (عين الصقر).
+    القيمة الافتراضية للحالة هي 'approved' لضمان استمرارية جميع المصالح الحالية (Zero Breaking Changes).
+    """
+    STATUS_CHOICES = (
+        ('pending_approval', 'قيد المراجعة والاعتماد'),
+        ('approved', 'معتمدة ونشطة'),
+        ('rejected', 'مرفوضة'),
+        ('suspended', 'معلقة مؤقتاً'),
+    )
+
+    ENTITY_TYPE_CHOICES = (
+        ('ministry', 'وزارة أو هيئة سيادية'),
+        ('wilaya', 'ولاية'),
+        ('commune', 'بلدية'),
+        ('public_institution', 'مؤسسة عمومية ذات طابع إداري (EPA)'),
+        ('epic', 'مؤسسة عمومية ذات طابع صناعي وتجاري (EPIC)'),
+        ('health_sector', 'قطاع الصحة والمستشفيات'),
+        ('university', 'جامعة أو مركز بحث علمي'),
+        ('other', 'هيئة عمومية أخرى'),
+    )
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField('اسم المصلحة المتعاقدة', max_length=255, db_index=True)
+    wilaya = models.CharField('الولاية', max_length=100, blank=True, default='')
+    entity_type = models.CharField('طبيعة الهيئة', max_length=50, choices=ENTITY_TYPE_CHOICES, default='public_institution', blank=True)
+    
+    user = models.OneToOneField(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name='authority',
+        null=True,
+        blank=True,
+        verbose_name='حساب المستخدم المرتبط (الآمر بالصرف)'
+    )
+
+    logo = models.ImageField('شعار المصلحة الرسمي', upload_to='authorities/logos/%Y/%m/', null=True, blank=True)
+    status = models.CharField(
+        'حالة الاعتماد',
+        max_length=30,
+        choices=STATUS_CHOICES,
+        default='approved',
+        db_index=True,
+        help_text='حالة المصلحة في المنظومة (المصالح السابقة معتمدة افتراضياً)'
+    )
+
+    ordonnateur_name = models.CharField('اسم الآمر بالصرف أو المفوض', max_length=150, blank=True, default='')
+    ordonnateur_title = models.CharField('الصفة أو الوظيفة الرسمية', max_length=150, blank=True, default='')
+    ordonnateur_email = models.EmailField('البريد الإلكتروني الرسمي للآمر بالصرف', blank=True, default='')
+    ordonnateur_phone = models.CharField('رقم الهاتف الرسمي', max_length=30, blank=True, default='')
+    appointment_proof = models.FileField(
+        'سند التعيين أو التفويض الرسمي (PDF/صورة)',
+        upload_to='authorities/appointments/%Y/%m/',
+        null=True,
+        blank=True
+    )
+
+    approved_by = models.ForeignKey(
+        CustomUser,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='approved_authorities',
+        verbose_name='المسؤول المعتمد'
+    )
+    approved_at = models.DateTimeField('تاريخ الاعتماد الرسمي', null=True, blank=True)
+
+    created_at = models.DateTimeField('تاريخ التسجيل', default=timezone.now)
+    updated_at = models.DateTimeField('تاريخ التحديث', auto_now=True)
+
+    class Meta:
+        verbose_name = 'مصلحة متعاقدة'
+        verbose_name_plural = 'المصالح المتعاقدة'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.name} ({self.get_status_display()})"
+
+

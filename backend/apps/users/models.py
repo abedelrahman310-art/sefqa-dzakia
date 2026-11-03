@@ -26,6 +26,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     ROLE_CHOICES = (
         ('operator', 'متعامل اقتصادي'),
         ('authority', 'مصلحة متعاقدة'),
+        ('ordonnateur', 'آمر بالصرف (مصلحة متعاقدة)'),
         ('central_admin', 'إدارة مركزية ورقابة'),
     )
 
