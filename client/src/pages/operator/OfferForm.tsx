@@ -17,6 +17,7 @@ import {
   Paperclip,
   Plus,
   RefreshCw,
+  RotateCcw,
   Save,
   Send,
   ShieldAlert,
@@ -294,6 +295,7 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
   const [complianceChecked, setComplianceChecked] = useState(false);
   const [sealConfirmed, setSealConfirmed] = useState(false);
   const [isExpiredDeal, setIsExpiredDeal] = useState(false);
+  const [isWithdrawing, setIsWithdrawing] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -675,6 +677,12 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
       return;
     }
 
+    if (nextStatus === 'submitted' && !hasOfferDocument) {
+      setError(t('operator.form.err_doc_required_to_submit'));
+      setSuccessMsg('');
+      return;
+    }
+
     setBusyAction(nextStatus === 'draft' ? 'save' : 'submit');
     setError('');
     setSuccessMsg('');
@@ -762,6 +770,41 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
   const isBusy = busyAction !== null;
   const documentName = documentFile?.name || savedDocument?.name || '';
   const documentUrl = savedDocument?.url || '';
+  const hasOfferDocument = Boolean(documentFile || (savedDocument && savedDocument.name));
+  const canWithdraw = Boolean(isSubmitted && !isExpiredDeal && id);
+
+  const handleWithdrawOffer = async () => {
+    if (!id) return;
+    const confirmed = window.confirm(t('offers.withdraw_confirm_msg'));
+    if (!confirmed) return;
+
+    setIsWithdrawing(true);
+    setError('');
+    setSuccessMsg('');
+    try {
+      await api.post(`/offers/${id}/withdraw/`, {
+        reason: 'سحب العرض لإعادة استكماله وتعديله قبل انقضاء الأجل القانوني',
+      });
+      setStatus('draft');
+      setStep(1);
+      setSealConfirmed(false);
+      setSuccessMsg(t('offers.withdraw_success_msg'));
+    } catch (err) {
+      try {
+        await api.post(`/bids/offers/${id}/withdraw/`, {
+          reason: 'سحب العرض لإعادة استكماله وتعديله قبل انقضاء الأجل القانوني',
+        });
+        setStatus('draft');
+        setStep(1);
+        setSealConfirmed(false);
+        setSuccessMsg(t('offers.withdraw_success_msg'));
+      } catch (innerErr) {
+        setError(getErrorMessage(innerErr || err, t('offers.withdraw_err_msg')));
+      }
+    } finally {
+      setIsWithdrawing(false);
+    }
+  };
   const boqTotal = boqItems.reduce(
     (sum, item) => sum + (Number(item.quantity) || 0) * (Number(item.unitPrice) || 0),
     0,
@@ -913,11 +956,42 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
       )}
 
       {isSubmitted && (
-        <div className="op-alert success">
-          <ShieldCheck aria-hidden="true" />
-          <div>
-            <strong className="block text-sm">{t('offers.status.submitted')}</strong>
-            <span>{t('offers.msg.frozen')}</span>
+        <div className="rounded-2xl border border-blue-200 bg-blue-50/90 p-4 text-slate-800 shadow-xs dark:border-blue-900/60 dark:bg-blue-950/40 dark:text-slate-200">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex items-start gap-3">
+              <ShieldCheck className="size-6 text-[#1e3a8a] dark:text-blue-400 shrink-0 mt-0.5" aria-hidden="true" />
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <strong className="text-sm font-bold text-[#0A2540] dark:text-blue-200">{t('offers.status.submitted')}</strong>
+                  <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-bold text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
+                    {t('operator.form.sealed_badge')}
+                  </span>
+                </div>
+                <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
+                  {canWithdraw
+                    ? t('offers.msg.frozen_with_withdraw_hint')
+                    : isExpiredDeal
+                    ? t('offers.msg.frozen_final_expired')
+                    : t('offers.msg.frozen')}
+                </p>
+              </div>
+            </div>
+
+            {canWithdraw && (
+              <button
+                type="button"
+                className="op-btn op-btn-outline shrink-0 text-xs font-bold border-blue-300 text-blue-900 hover:bg-blue-100 dark:border-blue-700 dark:text-blue-200 flex items-center gap-2"
+                onClick={() => void handleWithdrawOffer()}
+                disabled={isWithdrawing || isBusy}
+              >
+                {isWithdrawing ? (
+                  <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+                ) : (
+                  <RotateCcw className="size-4" aria-hidden="true" />
+                )}
+                <span>{isWithdrawing ? t('offers.btn.withdrawing') : t('offers.btn.withdraw')}</span>
+              </button>
+            )}
           </div>
         </div>
       )}
@@ -1436,14 +1510,21 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
                     />
                   </div>
                 </div>
-                {!documentName && (
-                  <div className="op-alert warning mt-3">
-                    <AlertTriangle aria-hidden="true" />
-                    <span>
-                      {t('operator.form.no_doc_warn')}
-                    </span>
+                {!hasOfferDocument ? (
+                  <div className="rounded-2xl border-2 border-rose-300 bg-rose-50/95 p-4 text-rose-950 shadow-xs mt-3" role="alert">
+                    <div className="flex items-start gap-3">
+                      <ShieldAlert className="size-5 text-rose-600 shrink-0 mt-0.5" aria-hidden="true" />
+                      <div className="space-y-1">
+                        <strong className="text-sm font-bold text-rose-900 block">
+                          {t('operator.form.missing_doc_block_title')}
+                        </strong>
+                        <p className="text-xs text-rose-800 leading-relaxed font-medium">
+                          {t('operator.form.missing_doc_block_desc')}
+                        </p>
+                      </div>
+                    </div>
                   </div>
-                )}
+                ) : null}
               </div>
             </section>
 
@@ -1570,10 +1651,12 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
               type="button"
               className="op-btn op-btn-gold"
               onClick={handleSubmitOffer}
-              disabled={isBusy || complianceLoading || hasComplianceBlock || isExpiredDeal || !sealConfirmed}
+              disabled={isBusy || complianceLoading || hasComplianceBlock || isExpiredDeal || !hasOfferDocument || !sealConfirmed}
               title={
                 isExpiredDeal
                   ? t('operator.opp.submission_closed_art68')
+                  : !hasOfferDocument
+                  ? t('operator.form.err_doc_required_to_submit')
                   : hasComplianceBlock
                   ? t('operator.form.lock_submit_tooltip')
                   : !sealConfirmed

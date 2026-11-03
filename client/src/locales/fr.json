@@ -4118,5 +4118,16 @@
   "operator.payments.view_deal": "Consulter le marché",
   "operator.payments.search_placeholder": "Rechercher par n° de reçu, réf. ou objet...",
   "operator.payments.status_paid": "Réglé et retiré",
-  "operator.payments.status_pending": "En cours"
+  "operator.payments.status_pending": "En cours",
+  "offers.btn.withdraw": "Retirer l'offre pour modification",
+  "offers.btn.withdrawing": "Retrait en cours...",
+  "offers.msg.frozen_with_withdraw_hint": "Cette offre est scellée et figée. Le délai légal de soumission étant toujours en vigueur, vous disposez du droit légal de retirer votre offre pour la compléter avant l'échéance.",
+  "offers.msg.frozen_final_expired": "Cette offre est définitivement scellée suite à l'expiration du délai légal de dépôt.",
+  "offers.withdraw_confirm_msg": "Avertissement légal :\nLe scellement temporaire sera levé et l'offre retournera à l'état de « Brouillon » afin de vous permettre de joindre les pièces et modifier vos données.\n\nRappel : vous devrez impérativement sceller et redéposer l'offre avant l'expiration du délai légal de la commande publique.\n\nConfirmez-vous le retrait ?",
+  "offers.withdraw_success_msg": "L'offre a été retirée avec succès et est revenue à l'état de brouillon. Vous pouvez désormais la modifier et la redéposer.",
+  "offers.withdraw_err_msg": "Échec du retrait de l'offre. Veuillez vérifier les délais légaux ou réessayer.",
+  "operator.form.missing_doc_block_title": "Dossier d'offre manquant — Dépôt final bloqué",
+  "operator.form.missing_doc_block_desc": "Le dépôt définitif et le scellement sont impossibles sans joindre la pièce d'offre (PDF). Veuillez revenir à l'étape précédente pour joindre le fichier ou sauvegarder en brouillon.",
+  "operator.form.err_doc_required_to_submit": "Vous devez joindre le document de l'offre (PDF) avant de pouvoir procéder au dépôt définitif.",
+  "operator.form.sealed_badge": "Scellé cryptographiquement"
 }

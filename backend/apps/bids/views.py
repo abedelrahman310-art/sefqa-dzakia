@@ -87,20 +87,36 @@ class BidOfferViewSet(viewsets.ModelViewSet):
             if not is_valid:
                 raise exceptions.ValidationError({'detail': doc_err, 'error': doc_err})
 
+            # منع الإيداع النهائي إذا لم يتم إرفاق وثيقة العرض (ملف PDF)
+            has_upload = bool(
+                self.request.FILES.get('document')
+                or self.request.FILES.get('file')
+                or serializer.validated_data.get('document')
+                or serializer.validated_data.get('file')
+            )
+            if not has_upload:
+                raise exceptions.ValidationError({
+                    'detail': 'لا يمكن إيداع العرض بصفة نهائية دون إرفاق وثيقة العرض (ملف PDF). يمكنك حفظ العرض كمسودة حتى تجهيز الملف المطلوب.',
+                    'error': 'وثيقة العرض غير مرفقة؛ يرجى رفع الملف قبل الإيداع النهائي أو حفظ العرض كمسودة.'
+                })
+
         # العلامة التقنية تمنحها لجنة التقييم حصراً — تُتجاهل أي قيمة مرسلة من المتعامل
         serializer.validated_data.pop('technical_score', None)
-        bid = serializer.save(operator=user, submission_timestamp=now)
+        bid = serializer.save(
+            operator=user,
+            submission_timestamp=now if requested_status == 'submitted' else None
+        )
         AuditLog.objects.create(
             user=user,
-            action='bid_submitted',
+            action='bid_submitted' if requested_status == 'submitted' else 'bid_draft_created',
             resource_type='BidOffer',
             resource_id=str(bid.id),
-            description=f"إيداع عرض المتعامل {user.email} في الصفقة {deal.reference_number}",
+            description=f"{'إيداع عرض' if requested_status == 'submitted' else 'إنشاء مسودة عرض'} المتعامل {user.email} في الصفقة {deal.reference_number}",
             changes={
                 'deal_id': str(deal.id),
                 'status': bid.status,
                 'financial_amount': str(bid.financial_amount),
-                'submission_timestamp': bid.submission_timestamp.isoformat(),
+                'submission_timestamp': bid.submission_timestamp.isoformat() if bid.submission_timestamp else None,
             },
         )
 
@@ -138,18 +154,36 @@ class BidOfferViewSet(viewsets.ModelViewSet):
             if not is_valid:
                 raise exceptions.ValidationError({'detail': doc_err, 'error': doc_err})
 
+            # منع الإيداع النهائي إذا لم يكن العرض يملك وثيقة مرفوعة سابقاً أو جديدة
+            has_existing_doc = instance.documents.exists()
+            has_upload = bool(
+                self.request.FILES.get('document')
+                or self.request.FILES.get('file')
+                or serializer.validated_data.get('document')
+                or serializer.validated_data.get('file')
+            )
+            if not has_existing_doc and not has_upload:
+                raise exceptions.ValidationError({
+                    'detail': 'لا يمكن إيداع العرض بصفة نهائية دون إرفاق وثيقة العرض (ملف PDF). يمكنك حفظ التعديلات كمسودة حتى تجهيز الملف المطلوب.',
+                    'error': 'وثيقة العرض غير مرفقة؛ يرجى رفع الملف قبل الإيداع النهائي أو حفظ العرض كمسودة.'
+                })
+
         serializer.validated_data.pop('technical_score', None)
-        bid = serializer.save()
+        if new_status == 'submitted':
+            bid = serializer.save(submission_timestamp=now)
+        else:
+            bid = serializer.save()
         AuditLog.objects.create(
             user=user,
-            action='bid_updated',
+            action='bid_submitted' if new_status == 'submitted' else 'bid_updated',
             resource_type='BidOffer',
             resource_id=str(bid.id),
-            description=f"تعديل مسودة عرض المتعامل {user.email} في الصفقة {deal.reference_number}",
+            description=f"{'إيداع عرض' if new_status == 'submitted' else 'تعديل مسودة عرض'} المتعامل {user.email} في الصفقة {deal.reference_number}",
             changes={
                 'deal_id': str(deal.id),
                 'status': bid.status,
                 'financial_amount': str(bid.financial_amount),
+                'submission_timestamp': bid.submission_timestamp.isoformat() if bid.submission_timestamp else None,
             },
         )
 
@@ -179,6 +213,52 @@ class BidOfferViewSet(viewsets.ModelViewSet):
             changes={'deal_id': deal_id},
         )
         instance.delete()
+
+    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
+    def withdraw(self, request, pk=None):
+        """
+        سحب العرض المودع وإعادته إلى مسودة (Droit de retrait de l'offre avant expiration du délai).
+        متاح حصراً للمتعامل صاحب العرض طالما أن الأجل القانوني للإيداع ما زال سارياً
+        ولم تنطلق جلسة فتح الأظرفة وتقييم العروض (المادة 68 من القانون 23-12).
+        """
+        bid = self.get_object()
+        user = request.user
+        if user.role != 'operator' or bid.operator_id != user.id:
+            raise exceptions.PermissionDenied('سحب العرض مخصص حصراً للمتعامل الاقتصادي صاحب العرض.')
+        if bid.status != 'submitted':
+            raise exceptions.ValidationError('يمكن سحب العروض المودعة رسمياً فقط لإعادتها إلى مسودة وتصحيحها.')
+
+        deal = bid.deal
+        now = timezone.now()
+        if deal.submission_deadline and now > deal.submission_deadline:
+            raise exceptions.ValidationError({
+                'detail': 'انقضى الأجل القانوني لإيداع العروض وفقاً للمادة 68 من القانون 23-12؛ لا يمكن سحب العرض بعد انقضاء الأجل المحدد.',
+                'error': 'انقضى الأجل القانوني لإيداع العروض وفقاً للمادة 68 من القانون 23-12.'
+            })
+        if deal.current_stage > 5:
+            raise exceptions.ValidationError('انتهت مرحلة استلام العروض وبدأت مراحل الفحص والتقييم؛ يمنع سحب العطاء.')
+        if self._session_lock(deal):
+            raise exceptions.ValidationError('انطلقت جلسة فتح الأظرفة؛ العروض مقفلة ولا يمكن سحبها.')
+
+        reason = request.data.get('reason', 'سحب العرض لاستكماله وتعديله قبل انقضاء الأجل القانوني')
+        bid.status = 'draft'
+        bid.submission_timestamp = None
+        bid.save(update_fields=['status', 'submission_timestamp'])
+
+        AuditLog.objects.create(
+            user=user,
+            action='bid_withdrawn',
+            resource_type='BidOffer',
+            resource_id=str(bid.id),
+            description=f"سحب عرض المتعامل {user.email} في الصفقة {deal.reference_number} لإعادة استكماله وتعديله قبل انقضاء الأجل",
+            changes={'status': 'draft', 'previous_status': 'submitted', 'reason': reason},
+        )
+
+        return Response({
+            'message': 'تم سحب العرض بنجاح وإعادته إلى مسودة. يمكنك الآن استكمال وثائقك وتعديل العرض ثم إعادة إيداعه وختمه قبل انقضاء الأجل.',
+            'status': 'draft',
+            'id': str(bid.id),
+        })
 
 
 class OfferViewSet(BidOfferViewSet):

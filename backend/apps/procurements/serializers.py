@@ -812,6 +812,8 @@ class OfferSerializer(serializers.ModelSerializer):
     # حقول إضافية قد تمررها الواجهة عند الحفظ والإيداع
     technical_offer = serializers.CharField(required=False, allow_blank=True, write_only=True)
     delivery_time_days = serializers.CharField(required=False, allow_blank=True, write_only=True)
+    can_withdraw = serializers.SerializerMethodField()
+    canWithdraw = serializers.SerializerMethodField()
 
     class Meta:
         model = BidOffer
@@ -850,8 +852,35 @@ class OfferSerializer(serializers.ModelSerializer):
             'document_name',
             'documents',
             'technical_offer',
+            'can_withdraw',
+            'canWithdraw',
         ]
         read_only_fields = ['operator', 'submission_timestamp']
+
+    def get_can_withdraw(self, obj):
+        request = self.context.get('request')
+        user = getattr(request, 'user', None) if request else None
+        if not user or getattr(user, 'role', None) != 'operator' or obj.operator_id != user.id:
+            return False
+        if obj.status != 'submitted':
+            return False
+        deal = obj.deal
+        if not deal:
+            return False
+        from django.utils import timezone
+        now = timezone.now()
+        if deal.submission_deadline and now > deal.submission_deadline:
+            return False
+        if getattr(deal, 'current_stage', 1) > 5:
+            return False
+        from apps.procurements.models import OpeningSession
+        session = OpeningSession.objects.filter(tender=deal).first()
+        if session and session.status in ('live', 'ended'):
+            return False
+        return True
+
+    def get_canWithdraw(self, obj):
+        return self.get_can_withdraw(obj)
 
     def get_has_active_injunction(self, obj):
         return getattr(obj, 'has_active_injunction', False)
