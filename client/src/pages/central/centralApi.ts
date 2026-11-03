@@ -381,3 +381,70 @@ export async function deleteCentralExcludedOperator(id: string): Promise<void> {
   await api.delete(`/central/excluded-operators/${id}/`);
 }
 
+// ─── إدارة الحسابات والصلاحيات (Staff & Role Management) ──────────────────
+export interface CentralStaffMember {
+  id: string;
+  email: string;
+  full_name: string;
+  role: 'inspector_general' | 'inspector' | 'analyst' | 'financial_auditor' | 'system_admin' | string;
+  role_display: string;
+  is_active: boolean;
+  is_staff: boolean;
+  is_superuser: boolean;
+  last_login?: string | null;
+  created_at?: string | null;
+}
+
+export interface CentralStaffInvitationRow {
+  id: string;
+  email: string;
+  full_name: string;
+  role: string;
+  role_display: string;
+  status: 'pending' | 'accepted' | 'expired' | 'revoked' | string;
+  status_display: string;
+  invited_by_name?: string | null;
+  created_at: string;
+  expires_at: string;
+  is_valid: boolean;
+  invite_url: string;
+}
+
+export interface CentralStaffResponse {
+  can_manage: boolean;
+  staff: CentralStaffMember[];
+  invitations: CentralStaffInvitationRow[];
+  total_staff: number;
+  active_staff: number;
+  pending_invitations: number;
+}
+
+export interface InviteStaffPayload {
+  email: string;
+  full_name: string;
+  role: string;
+}
+
+export async function fetchCentralStaff(): Promise<CentralStaffResponse> {
+  const { data } = await api.get<CentralStaffResponse>('/central/staff/');
+  return data;
+}
+
+export async function inviteCentralStaff(payload: InviteStaffPayload): Promise<{
+  message: string;
+  invitation: CentralStaffInvitationRow;
+}> {
+  const { data } = await api.post('/central/staff/invite/', payload);
+  return data;
+}
+
+export async function revokeToggleCentralStaff(
+  id: string,
+  isActive?: boolean
+): Promise<{ message: string }> {
+  const payload = isActive !== undefined ? { is_active: isActive } : {};
+  const { data } = await api.patch(`/central/staff/${id}/revoke/`, payload);
+  return data;
+}
+
+

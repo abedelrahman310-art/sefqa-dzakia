@@ -8,6 +8,7 @@ from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 
 from apps.users.models import CustomUser, Notification
+from apps.users.permissions import CanIssueInjunctions
 from apps.audit.models import AuditLog
 from .models import AdministrativeNotice, ProcurementDeal
 from .serializers import AdministrativeNoticeSerializer
@@ -78,9 +79,9 @@ class CentralInjunctionsView(views.APIView):
 
     def post(self, request):
         user = request.user
-        if not user.is_staff and getattr(user, 'role', None) != 'central_admin':
+        if not CanIssueInjunctions().has_permission(request, self):
             return Response(
-                {'error': 'إصدار الإعذارات الإدارية الرقابية مقصور حصرياً على مسؤولي عين الصقر.'},
+                {'error': 'إصدار الإعذارات الإدارية الرقابية مقصور حصرياً على المفتش العام والمفتشين المعتمدين.'},
                 status=status.HTTP_403_FORBIDDEN
             )
 

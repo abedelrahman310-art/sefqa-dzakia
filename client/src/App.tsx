@@ -12,6 +12,7 @@ const AuthorityRegister = lazy(() => import('./pages/auth/AuthorityRegister').th
 const OperatorSpace = lazy(() => import('./pages/operator/OperatorSpace').then(m => ({ default: m.OperatorSpace })));
 const AuthoritySpace = lazy(() => import('./pages/authority/AuthoritySpace').then(m => ({ default: m.AuthoritySpace })));
 const CentralSpace = lazy(() => import('./pages/central/CentralSpace').then(m => ({ default: m.CentralSpace })));
+const AcceptInvite = lazy(() => import('./pages/central/AcceptInvite').then(m => ({ default: m.AcceptInvite })));
 const LandingPage = lazy(() => import('./pages/landing/LandingPage').then(m => ({ default: m.LandingPage })));
 const LandingV3Page = lazy(() => import('./pages/landing-v3/LandingV3Page').then(m => ({ default: m.LandingV3Page })));
 const TermsPage = lazy(() => import('./pages/legal/TermsPage').then(m => ({ default: m.TermsPage })));
@@ -60,6 +61,10 @@ export function App() {
             <RequireRole roles={['authority']}>
               <AuthoritySpace />
             </RequireRole>
+          </Route>
+
+          <Route path="/central/accept-invite/:token">
+            {(params) => <AcceptInvite token={params.token} />}
           </Route>
 
           <Route path="/central/:rest*">

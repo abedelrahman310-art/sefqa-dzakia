@@ -2,6 +2,12 @@ from apps.procurements.views_injunctions import CentralInjunctionsView, Injuncti
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from apps.users.views import ExcludedOperatorViewSet
+from apps.users.central_staff_views import (
+    CentralStaffListView,
+    CentralStaffInviteView,
+    CentralStaffRevokeToggleView,
+    CentralStaffAcceptInviteView,
+)
 from .central_views import (
     CentralHeatmapView,
     CentralDashboardView,
@@ -17,11 +23,24 @@ excluded_router = DefaultRouter()
 excluded_router.register(r'excluded-operators', ExcludedOperatorViewSet, basename='central-excluded-operators')
 
 urlpatterns = [
+    # 11. إدارة الموظفين والصلاحيات (Staff & Role Management API)
+    path('staff/', CentralStaffListView.as_view(), name='central-staff-list'),
+    path('staff', CentralStaffListView.as_view(), name='central-staff-list-no-slash'),
+    path('staff/invite/', CentralStaffInviteView.as_view(), name='central-staff-invite'),
+    path('staff/invite', CentralStaffInviteView.as_view(), name='central-staff-invite-no-slash'),
+    path('staff/<uuid:pk>/revoke/', CentralStaffRevokeToggleView.as_view(), name='central-staff-revoke'),
+    path('staff/<uuid:pk>/revoke', CentralStaffRevokeToggleView.as_view(), name='central-staff-revoke-no-slash'),
+    path('staff/accept-invite/<uuid:token>/', CentralStaffAcceptInviteView.as_view(), name='central-staff-accept-invite'),
+    path('staff/accept-invite/<uuid:token>', CentralStaffAcceptInviteView.as_view(), name='central-staff-accept-invite-no-slash'),
+    path('staff/verify-invite/<uuid:token>/', CentralStaffAcceptInviteView.as_view(), name='central-staff-verify-invite'),
+    path('staff/verify-invite/<uuid:token>', CentralStaffAcceptInviteView.as_view(), name='central-staff-verify-invite-no-slash'),
+
     # 10. الإعذارات الإدارية الرقابية (Administrative Injunctions API)
     path('injunctions/', CentralInjunctionsView.as_view(), name='central-injunctions'),
     path('injunctions', CentralInjunctionsView.as_view(), name='central-injunctions-no-slash'),
     path('injunctions/<uuid:pk>/pdf/', InjunctionPdfView.as_view(), name='central-injunction-pdf'),
     path('injunctions/<uuid:pk>/pdf', InjunctionPdfView.as_view(), name='central-injunction-pdf-no-slash'),
+    
     # 1. الخريطة الحرارية (Heatmap API)
     path('heatmap/', CentralHeatmapView.as_view(), name='central-heatmap'),
     path('heatmap', CentralHeatmapView.as_view(), name='central-heatmap-no-slash'),

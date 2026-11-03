@@ -29,11 +29,27 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         ('central_admin', 'إدارة مركزية ورقابة'),
     )
 
+    CENTRAL_ROLE_CHOICES = (
+        ('inspector_general', 'المفتش العام'),
+        ('inspector', 'مفتش'),
+        ('analyst', 'محلل بيانات'),
+        ('financial_auditor', 'مراقب مالي'),
+        ('system_admin', 'مدير نظام'),
+    )
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     email = models.EmailField('البريد الإلكتروني', unique=True, db_index=True)
     display_name = models.CharField('الاسم الظاهر', max_length=150, blank=True)
     organization_name = models.CharField('اسم المؤسسة أو المصلحة', max_length=255, blank=True)
     role = models.CharField('الدور الوظيفي', max_length=30, choices=ROLE_CHOICES, default='operator')
+    central_role = models.CharField(
+        'الدور في الإدارة المركزية',
+        max_length=30,
+        choices=CENTRAL_ROLE_CHOICES,
+        blank=True,
+        null=True,
+        default=None,
+    )
     municipality = models.CharField('البلدية', max_length=100, blank=True, null=True)
     
     is_active = models.BooleanField('مفعل', default=True)
@@ -366,6 +382,65 @@ class Subscription(models.Model):
 
     def __str__(self):
         return f"اشتراك {self.user.email} - {self.get_plan_type_display()} ({'نشط' if self.is_active else 'غير نشط'})"
+
+
+class CentralStaffInvitation(models.Model):
+    """
+    دعوات موظفي الإدارة المركزية والرقابة الوطنية (عين الصقر).
+    تتيح للمفتش العام أو مدير النظام إرسال دعوة مشفرة تنتهي بعد 7 أيام
+    وفق أحكام القانون 23-12 وقواعد حوكمة صلاحيات الإدارة المركزية.
+    """
+    STATUS_CHOICES = (
+        ('pending', 'معلقة'),
+        ('accepted', 'مقبولة'),
+        ('expired', 'منتهية الصلاحية'),
+        ('revoked', 'ملغاة'),
+    )
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    email = models.EmailField('البريد الرسمي للموظف', db_index=True)
+    full_name = models.CharField('الاسم الكامل', max_length=150)
+    role = models.CharField(
+        'الدور الوظيفي',
+        max_length=30,
+        choices=CustomUser.CENTRAL_ROLE_CHOICES,
+        default='inspector',
+    )
+    invited_by = models.ForeignKey(
+        CustomUser,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='sent_central_invitations',
+        verbose_name='المسؤول صاحب الدعوة',
+    )
+    token = models.UUIDField('رمز التفعيل', default=uuid.uuid4, unique=True, editable=False, db_index=True)
+    status = models.CharField('حالة الدعوة', max_length=20, choices=STATUS_CHOICES, default='pending', db_index=True)
+    created_at = models.DateTimeField('تاريخ الدعوة', default=timezone.now)
+    expires_at = models.DateTimeField('تاريخ انتهاء الصلاحية', null=True, blank=True)
+
+    class Meta:
+        verbose_name = 'دعوة موظف إدارة مركزية'
+        verbose_name_plural = 'دعوات موظفي الإدارة المركزية'
+        ordering = ['-created_at']
+
+    def save(self, *args, **kwargs):
+        if not self.expires_at:
+            self.expires_at = timezone.now() + timezone.timedelta(days=7)
+        super().save(*args, **kwargs)
+
+    def is_valid(self):
+        if self.status != 'pending':
+            return False
+        if self.expires_at and timezone.now() > self.expires_at:
+            self.status = 'expired'
+            self.save(update_fields=['status'])
+            return False
+        return True
+
+    def __str__(self):
+        return f"دعوة {self.full_name} ({self.email}) - {self.get_role_display()} [{self.get_status_display()}]"
+
 
 
 
