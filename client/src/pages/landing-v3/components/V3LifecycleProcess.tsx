@@ -245,10 +245,10 @@ export const V3LifecycleProcess: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             
             {/* Role 1: Authority */}
-            <div className="p-4 rounded-[4px] border border-[#d8d8d8] bg-[#ffffff] space-y-2">
+            <div className="p-4 rounded-[6px] border border-[#d8d8d8] border-t-4 border-t-[#60ed76] bg-[#ffffff] space-y-2">
               <div className="flex items-center gap-2 text-[#080808] text-[13px] font-semibold">
-                <Building className="size-4 text-[#146ef5]" />
-                <span>{isAr ? 'المصلحة المتعاقدة' : 'Service Contractant'}</span>
+                <Building className="size-4 text-[#15803d]" />
+                <span className="text-[#15803d] font-bold">{isAr ? 'المصلحة المتعاقدة' : 'Service Contractant'}</span>
               </div>
               <p className="text-[13px] text-[#5a5a5a] leading-relaxed">
                 {current.authorityRole}
@@ -256,10 +256,10 @@ export const V3LifecycleProcess: React.FC = () => {
             </div>
 
             {/* Role 2: Operator */}
-            <div className="p-4 rounded-[4px] border border-[#d8d8d8] bg-[#ffffff] space-y-2">
+            <div className="p-4 rounded-[6px] border border-[#d8d8d8] border-t-4 border-t-[#146ef5] bg-[#ffffff] space-y-2">
               <div className="flex items-center gap-2 text-[#080808] text-[13px] font-semibold">
                 <Briefcase className="size-4 text-[#146ef5]" />
-                <span>{isAr ? 'المتعامل الاقتصادي' : 'Opérateur'}</span>
+                <span className="text-[#146ef5] font-bold">{isAr ? 'المتعامل الاقتصادي' : 'Opérateur'}</span>
               </div>
               <p className="text-[13px] text-[#5a5a5a] leading-relaxed">
                 {current.operatorRole}
@@ -267,9 +267,9 @@ export const V3LifecycleProcess: React.FC = () => {
             </div>
 
             {/* Role 3: Finance Controller */}
-            <div className="p-4 rounded-[4px] border border-[#d8d8d8] bg-[#ffffff] space-y-2">
+            <div className="p-4 rounded-[6px] border border-[#d8d8d8] bg-[#ffffff] space-y-2">
               <div className="flex items-center gap-2 text-[#080808] text-[13px] font-semibold">
-                <Coins className="size-4 text-[#146ef5]" />
+                <Coins className="size-4 text-[#5a5a5a]" />
                 <span>{isAr ? 'المراقب المالي' : 'Contrôleur'}</span>
               </div>
               <p className="text-[13px] text-[#5a5a5a] leading-relaxed">
@@ -278,10 +278,10 @@ export const V3LifecycleProcess: React.FC = () => {
             </div>
 
             {/* Role 4: Hawk Eye */}
-            <div className="p-4 rounded-[4px] border border-[#d8d8d8] bg-[#f0f0f0] space-y-2">
+            <div className="p-4 rounded-[6px] border border-[#d8d8d8] border-t-4 border-t-[#ffa666] bg-[#ffffff] space-y-2">
               <div className="flex items-center gap-2 text-[#080808] text-[13px] font-semibold">
-                <Eye className="size-4 text-[#146ef5]" />
-                <span>{isAr ? 'عين الصقر المركزية' : 'Supervision'}</span>
+                <Eye className="size-4 text-[#c2410c]" />
+                <span className="text-[#c2410c] font-bold">{isAr ? 'عين الصقر المركزية' : 'Supervision'}</span>
               </div>
               <p className="text-[13px] text-[#5a5a5a] leading-relaxed">
                 {current.hawkRole}

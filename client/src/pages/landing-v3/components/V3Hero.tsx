@@ -27,6 +27,9 @@ export const V3Hero: React.FC = () => {
       icon: Briefcase,
       link: '/operator/deals',
       tag: isAr ? 'المتعهدون' : 'Soumissionnaires',
+      accentColor: '#146ef5',
+      badgeBg: 'rgba(20, 110, 245, 0.1)',
+      textColor: '#146ef5',
     },
     {
       id: 'authority',
@@ -37,6 +40,9 @@ export const V3Hero: React.FC = () => {
       icon: Building,
       link: '/authority/deals',
       tag: isAr ? 'الإدارات' : 'Services Publics',
+      accentColor: '#60ed76',
+      badgeBg: 'rgba(96, 237, 118, 0.18)',
+      textColor: '#15803d',
     },
     {
       id: 'central',
@@ -47,6 +53,9 @@ export const V3Hero: React.FC = () => {
       icon: Eye,
       link: '/central',
       tag: isAr ? 'الرقابة والنزاهة' : 'Contrôle National',
+      accentColor: '#ffa666',
+      badgeBg: 'rgba(255, 166, 102, 0.2)',
+      textColor: '#c2410c',
     },
   ];
 
@@ -160,27 +169,53 @@ export const V3Hero: React.FC = () => {
 
         </div>
 
-        {/* 3-Card Choice Row (Spec: 8px radius, 1px #d8d8d8 border, 24px padding, 16px gap) */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* 3-Card Choice Row with portal-specific color branding */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {choices.map((choice) => {
             const Icon = choice.icon;
             return (
               <Link
                 key={choice.id}
                 href={choice.link}
-                className="group flex flex-col justify-between p-6 bg-[#ffffff] border border-[#d8d8d8] rounded-[8px] hover:border-[#080808] transition-all cursor-pointer"
+                className="group relative flex flex-col justify-between p-6 bg-[#ffffff] border border-[#d8d8d8] rounded-[10px] hover:shadow-lg transition-all duration-200 cursor-pointer overflow-hidden"
+                style={{
+                  borderTop: `4px solid ${choice.accentColor}`,
+                }}
               >
-                <div>
+                {/* Subtle top background gradient glow in the card's specific color */}
+                <div
+                  className="absolute top-0 inset-x-0 h-28 opacity-25 pointer-events-none transition-opacity group-hover:opacity-40"
+                  style={{
+                    background: `linear-gradient(180deg, ${choice.accentColor} 0%, transparent 100%)`,
+                  }}
+                />
+
+                <div className="relative z-10">
                   <div className="flex items-center justify-between mb-4">
-                    <span className="text-[11px] font-mono uppercase tracking-wider text-[#5a5a5a]">
-                      {choice.tag}
+                    <span
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[4px] text-[11px] font-mono font-bold uppercase tracking-wider border"
+                      style={{
+                        backgroundColor: choice.badgeBg,
+                        borderColor: choice.accentColor,
+                        color: choice.textColor,
+                      }}
+                    >
+                      <span className="size-1.5 rounded-full" style={{ backgroundColor: choice.accentColor }} />
+                      <span>{choice.tag}</span>
                     </span>
-                    <div className="p-2 rounded-[4px] bg-[#f0f0f0] text-[#080808] group-hover:bg-[#146ef5] group-hover:text-white transition-colors">
-                      <Icon className="size-4" />
+
+                    <div
+                      className="p-2.5 rounded-[6px] transition-all duration-200 group-hover:scale-105"
+                      style={{
+                        backgroundColor: choice.badgeBg,
+                        color: choice.textColor,
+                      }}
+                    >
+                      <Icon className="size-4" style={{ color: choice.textColor }} />
                     </div>
                   </div>
 
-                  <h2 className="text-[16px] font-semibold text-[#080808] mb-2 leading-snug">
+                  <h2 className="text-[17px] font-bold text-[#080808] mb-2 leading-snug">
                     {choice.title}
                   </h2>
 
@@ -189,7 +224,10 @@ export const V3Hero: React.FC = () => {
                   </p>
                 </div>
 
-                <div className="pt-5 mt-4 border-t border-[#d8d8d8] flex items-center justify-between text-[13px] font-medium text-[#146ef5] group-hover:underline">
+                <div
+                  className="relative z-10 pt-5 mt-4 border-t border-[#f0f0f0] flex items-center justify-between text-[13px] font-bold group-hover:underline"
+                  style={{ color: choice.textColor }}
+                >
                   <span>{isAr ? 'دخول فضاء العمل' : 'Ouvrir l’espace'}</span>
                   {isAr ? (
                     <ArrowLeft className="size-3.5 transition-transform group-hover:-translate-x-1" />
