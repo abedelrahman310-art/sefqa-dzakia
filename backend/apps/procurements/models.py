@@ -202,6 +202,11 @@ class OpeningSession(models.Model):
     total_offers = models.IntegerField('إجمالي العروض المستلمة', default=0)
     opened_count = models.IntegerField('عدد العروض المفتوحة', default=0)
     # التشفير التعددي العتباتي (Threshold Multi-Party Sealing / Shamir's Secret Sharing)
+    require_committee_ceremony = models.BooleanField(
+        'إلزامية مراسم فك الأختام التعددية للجنة',
+        default=False,
+        help_text='إلزامية النصاب التشفيري لأعضاء اللجنة قبل فك أظرفة العروض (المادة 70 من القانون 23-12)',
+    )
     threshold_k = models.PositiveSmallIntegerField('عتبة النصاب القانوني لفك الأظرفة (k)', default=2)
     threshold_n = models.PositiveSmallIntegerField('إجمالي حصص مفاتيح اللجنة (n)', default=3)
     ceremony_status = models.CharField(

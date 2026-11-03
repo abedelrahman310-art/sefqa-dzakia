@@ -42,7 +42,7 @@ export const V3Nav: React.FC = () => {
           className="flex items-center gap-2.5 group focus:outline-hidden"
           aria-label="Safaqat Dhakia"
         >
-          <div className="flex items-center justify-center size-8 rounded-[4px] bg-[#080808] text-white">
+          <div className="flex items-center justify-center size-8 rounded-[4px] bg-[#146ef5] text-white">
             <Logo size={20} />
           </div>
           <div className="flex items-baseline gap-1.5">
@@ -54,7 +54,7 @@ export const V3Nav: React.FC = () => {
         </a>
 
         {/* Center Nav Links */}
-        <div className="hidden md:flex items-center gap-6" aria-label="Navigation">
+        <div className="hidden md:flex items-center gap-4 lg:gap-6" aria-label="Navigation">
           {navLinks.map((link) => (
             <a
               key={link.href}

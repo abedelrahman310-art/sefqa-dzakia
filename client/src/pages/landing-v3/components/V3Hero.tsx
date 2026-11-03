@@ -88,7 +88,7 @@ export const V3Hero: React.FC = () => {
                 <span className="h-0.5 w-6 sm:w-12 bg-gradient-to-r from-transparent to-[#006233]" />
                 <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-50 border border-slate-200 shadow-2xs">
                   <span className="text-sm select-none" aria-hidden="true">🇩🇿</span>
-                  <span className="text-[11px] sm:text-[13px] font-bold font-mono text-slate-800 tracking-wider uppercase">
+                  <span className="text-[13px] font-bold font-mono text-slate-800 tracking-wider uppercase">
                     {isAr
                       ? 'الجمهورية الجزائرية الديمقراطية الشعبية'
                       : 'RÉPUBLIQUE ALGÉRIENNE DÉMOCRATIQUE ET POPULAIRE'}
@@ -104,12 +104,12 @@ export const V3Hero: React.FC = () => {
 
               {/* Official Status Subtitle & Legal Badges in National Colors */}
               <div className="mt-4 flex flex-wrap items-center justify-center gap-2 sm:gap-3">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[12px] font-bold bg-[#006233]/10 text-[#006233] border border-[#006233]/30">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[13px] font-bold bg-[#006233]/10 text-[#006233] border border-[#006233]/30">
                   <span className="size-2 rounded-full bg-[#006233]" />
                   <span>{isAr ? 'المنظومة الوطنية الرسمية' : 'Portail Officiel'}</span>
                 </span>
 
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[12px] font-bold bg-[#d21034]/10 text-[#d21034] border border-[#d21034]/30">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[13px] font-bold bg-[#d21034]/10 text-[#d21034] border border-[#d21034]/30">
                   <span className="size-2 rounded-full bg-[#d21034]" />
                   <span>{isAr ? 'القانون 23-12 • المادة 67' : 'Loi 23-12 • Art. 67'}</span>
                 </span>
@@ -193,7 +193,7 @@ export const V3Hero: React.FC = () => {
                 <div className="relative z-10">
                   <div className="flex items-center justify-between mb-4">
                     <span
-                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[4px] text-[11px] font-mono font-bold uppercase tracking-wider border"
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[4px] text-[13px] font-mono font-bold uppercase tracking-wider border"
                       style={{
                         backgroundColor: choice.badgeBg,
                         borderColor: choice.accentColor,

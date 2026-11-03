@@ -24,6 +24,11 @@ interface Props {
 
 export function CommitteeQuorumCeremony({ session }: Props) {
   const { t, dir } = useI18n();
+
+  // عدم عرض مراسم التشفير التعددي إذا كانت غير مفعلة للجلسة ولم يتم إنشاء حصص لها
+  if (session.require_committee_ceremony === false && (!session.committee_shares || session.committee_shares.length === 0)) {
+    return null;
+  }
   const submitKeyShareMutation = useSubmitKeyShare();
 
   const isUnlocked =

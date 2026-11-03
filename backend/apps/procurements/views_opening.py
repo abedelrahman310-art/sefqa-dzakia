@@ -176,12 +176,18 @@ class SessionScheduleView(APIView):
             tender.reference_number,
         )
 
-        # تهيئة حصص التشفير التعددي لأعضاء اللجنة وفقاً للقانون 23-12 والمرسوم 15-247
-        from .threshold_crypto import init_session_committee
-        try:
-            init_session_committee(session)
-        except Exception as exc:
-            logger.warning("تعذر تهيئة حصص التشفير التعددي تلقائياً: %s", exc)
+        # تهيئة حصص التشفير التعددي لأعضاء اللجنة وفقاً للقانون 23-12 والمرسوم 15-247 (اختياري بحسب إعداد الجلسة)
+        enable_ceremony = bool(
+            request.data.get('require_committee_ceremony') or
+            request.data.get('enable_committee_ceremony') or
+            request.data.get('is_threshold_ceremony_enabled')
+        )
+        if enable_ceremony:
+            from .threshold_crypto import init_session_committee
+            try:
+                init_session_committee(session)
+            except Exception as exc:
+                logger.warning("تعذر تهيئة حصص التشفير التعددي تلقائياً: %s", exc)
 
         return Response(
             OpeningSessionDetailSerializer(session, context={"request": request}).data,
@@ -345,7 +351,7 @@ class SessionOpenEnvelopeView(APIView):
             )
 
         # التحقق من اكتمال مراسم النصاب القانوني والتشفير التعددي (المادة 70 من القانون 23-12)
-        if session.committee_shares.exists() and session.ceremony_status != "unlocked":
+        if getattr(session, "require_committee_ceremony", False) and session.ceremony_status != "unlocked":
             submitted_count = session.committee_shares.filter(is_submitted=True).count()
             if submitted_count < session.threshold_k:
                 return Response(
@@ -505,7 +511,7 @@ class SessionOpenOfferView(APIView):
             )
 
         # التحقق من اكتمال مراسم النصاب القانوني والتشفير التعددي (المادة 70 من القانون 23-12)
-        if session.committee_shares.exists() and session.ceremony_status != "unlocked":
+        if getattr(session, "require_committee_ceremony", False) and session.ceremony_status != "unlocked":
             submitted_count = session.committee_shares.filter(is_submitted=True).count()
             if submitted_count < session.threshold_k:
                 return Response(
@@ -844,7 +850,7 @@ class SessionCommitteeStatusView(APIView):
         self.check_object_permissions(request, session)
 
         from .threshold_crypto import init_session_committee
-        if not session.committee_shares.exists():
+        if getattr(session, 'require_committee_ceremony', False) and not session.committee_shares.exists():
             init_session_committee(session)
 
         shares = session.committee_shares.all()

@@ -543,6 +543,7 @@ class OpeningSessionDetailSerializer(serializers.ModelSerializer):
             'access_policy_display',
             'total_offers',
             'opened_count',
+            'require_committee_ceremony',
             'threshold_k',
             'threshold_n',
             'ceremony_status',

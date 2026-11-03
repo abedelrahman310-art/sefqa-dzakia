@@ -61,6 +61,7 @@ export interface OpeningSessionDetail {
   ended_at: string | null;
   location: string;
   stream_url?: string;
+  require_committee_ceremony?: boolean;
   recording_url?: string;
   status: SessionStatus;
   status_display?: string;
@@ -68,6 +69,7 @@ export interface OpeningSessionDetail {
   access_policy_display?: string;
   total_offers: number;
   opened_count: number;
+  require_committee_ceremony?: boolean;
   threshold_k?: number;
   threshold_n?: number;
   ceremony_status?: CeremonyStatus;
@@ -83,6 +85,7 @@ export interface ScheduleSessionPayload {
   scheduled_at: string;
   location: string;
   stream_url?: string;
+  require_committee_ceremony?: boolean;
 }
 
 export interface OpenOfferPayload {

@@ -126,7 +126,7 @@ export const V3SplitFeature: React.FC = () => {
               <p className="text-[13px] font-medium tracking-[0.1em] uppercase text-[#5a5a5a] font-mono">
                 {isAr ? 'الترسانة التقنية المطورة' : 'SUITE TECHNOLOGIQUE DÉPLOYÉE'}
               </p>
-              <h2 className="text-[32px] sm:text-[40px] font-semibold text-[#080808] leading-[1.04] tracking-[-0.4px]">
+              <h2 className="text-[26px] sm:text-[40px] font-semibold text-[#080808] leading-[1.04] tracking-[-0.4px]">
                 {isAr ? 'ذكاء اصطناعي سيادي... في صلب كل إجراء' : 'L’Intelligence Artificielle Souveraine au Cœur de l’Action'}
               </h2>
               <p className="text-[16px] text-[#5a5a5a] leading-[1.6]">
@@ -148,7 +148,7 @@ export const V3SplitFeature: React.FC = () => {
                     className="w-full py-4 border-b border-[#d8d8d8] flex items-center justify-between text-start group cursor-pointer transition-colors"
                   >
                     <div className="flex items-center gap-3">
-                      <span className={`font-mono text-[12px] font-bold ${isSelected ? 'text-[#146ef5]' : 'text-[#5a5a5a]'}`}>
+                      <span className={`font-mono text-[13px] font-bold ${isSelected ? 'text-[#146ef5]' : 'text-[#5a5a5a]'}`}>
                         0{index + 1}
                       </span>
                       <span
@@ -180,11 +180,11 @@ export const V3SplitFeature: React.FC = () => {
               {/* Feature Header */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="p-3 rounded-[4px] bg-[#080808] text-white">
+                  <div className="p-3 rounded-[4px] bg-[#146ef5]/10 text-[#146ef5]">
                     <CurrentIcon className="size-6" />
                   </div>
                   <div>
-                    <span className="font-mono text-[11px] text-[#146ef5] uppercase font-bold tracking-wider block">
+                    <span className="font-mono text-[13px] text-[#146ef5] uppercase font-bold tracking-wider block">
                       PHASE 0{current.id + 1} • OPERATIONAL
                     </span>
                     <h3 className="text-[20px] font-semibold text-[#080808]">
@@ -197,7 +197,7 @@ export const V3SplitFeature: React.FC = () => {
                   <span className="text-[24px] font-bold text-[#146ef5] font-mono block leading-none">
                     {current.metric}
                   </span>
-                  <span className="text-[10px] text-[#5a5a5a] uppercase tracking-wider font-mono">
+                  <span className="text-[13px] text-[#5a5a5a] uppercase tracking-wider font-mono">
                     {current.metricLabel}
                   </span>
                 </div>
@@ -219,9 +219,9 @@ export const V3SplitFeature: React.FC = () => {
               </div>
 
               {/* Legal Reference Note in Spec Mist Surface */}
-              <div className="p-3.5 bg-[#f0f0f0] rounded-[4px] border border-[#d8d8d8] flex items-center justify-between text-[12px] text-[#5a5a5a]">
+              <div className="p-3.5 bg-[#f0f0f0] rounded-[4px] border border-[#d8d8d8] flex items-center justify-between text-[13px] text-[#5a5a5a]">
                 <span>{isAr ? 'المرجع: القانون رقم 23-12 والمرسوم الرئاسي 15-247' : 'Cadre : Loi 23-12 & Décret 15-247'}</span>
-                <span className="font-mono text-[11px] font-bold text-[#080808]">OFFICIAL</span>
+                <span className="font-mono text-[13px] font-bold text-[#080808]">OFFICIAL</span>
               </div>
 
             </div>

@@ -33,7 +33,7 @@ export const V3BrowserMockup: React.FC = () => {
           <p className="text-[13px] font-medium tracking-[0.1em] uppercase text-[#5a5a5a] font-mono">
             {isAr ? 'المعاينة المباشرة للمنظومة' : 'DÉMONSTRATION DU SYSTÈME RÉEL'}
           </p>
-          <h2 className="text-[32px] sm:text-[40px] font-semibold text-[#080808] leading-[1.04] tracking-[-0.4px]">
+          <h2 className="text-[26px] sm:text-[40px] font-semibold text-[#080808] leading-[1.04] tracking-[-0.4px]">
             {isAr ? 'الصفقة الرقمية المشفرة... كما يراها المتعامل والمصلحة' : 'L’Appel d’Offres Dématérialisé en Conditions Réelles'}
           </h2>
           <p className="text-[16px] text-[#5a5a5a] leading-[1.6]">
@@ -62,14 +62,14 @@ export const V3BrowserMockup: React.FC = () => {
 
             {/* Centered URL Bar */}
             <div className="flex-1 max-w-[480px] mx-auto">
-              <div className="bg-[#ffffff] border border-[#d8d8d8] rounded-[4px] px-3 py-1 flex items-center justify-center gap-2 text-[12px] font-mono text-[#5a5a5a]">
+              <div className="bg-[#ffffff] border border-[#d8d8d8] rounded-[4px] px-3 py-1 flex items-center justify-center gap-2 text-[13px] font-mono text-[#5a5a5a]">
                 <Lock className="size-3 text-[#146ef5]" />
                 <span className="truncate">https://safaqat.gov.dz/operator/deals/DZ-2026-084</span>
               </div>
             </div>
 
             {/* Status dot */}
-            <div className="w-16 flex items-center justify-end gap-1.5 text-[11px] font-mono text-[#5a5a5a]">
+            <div className="w-16 flex items-center justify-end gap-1.5 text-[13px] font-mono text-[#5a5a5a]">
               <span className="size-1.5 rounded-full bg-[#146ef5]" />
               <span>LIVE</span>
             </div>
@@ -82,13 +82,13 @@ export const V3BrowserMockup: React.FC = () => {
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-[#d8d8d8]">
               <div className="space-y-1">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="px-2 py-0.5 rounded-[4px] bg-[#f0f0f0] text-[#080808] font-mono text-[11px] font-bold">
+                  <span className="px-2 py-0.5 rounded-[4px] bg-[#f0f0f0] text-[#080808] font-mono text-[13px] font-bold">
                     DZ-2026-084
                   </span>
-                  <span className="px-2 py-0.5 rounded-[4px] bg-[#146ef5]/10 text-[#146ef5] text-[11px] font-medium">
+                  <span className="px-2 py-0.5 rounded-[4px] bg-[#146ef5]/10 text-[#146ef5] text-[13px] font-medium">
                     {isAr ? 'طلب عروض وطني مفتوح' : 'Appel d’offres national ouvert'}
                   </span>
-                  <span className="px-2 py-0.5 rounded-[4px] bg-[#f0f0f0] text-[#5a5a5a] text-[11px]">
+                  <span className="px-2 py-0.5 rounded-[4px] bg-[#f0f0f0] text-[#5a5a5a] text-[13px]">
                     {isAr ? 'ولاية الجزائر' : 'Wilaya d’Alger'}
                   </span>
                 </div>
@@ -124,14 +124,14 @@ export const V3BrowserMockup: React.FC = () => {
                 <div className="p-5 rounded-[8px] border border-[#d8d8d8] bg-[#ffffff] space-y-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <div className="p-1.5 rounded-[4px] bg-[#080808] text-white">
+                      <div className="p-1.5 rounded-[4px] bg-[#146ef5]/10 text-[#146ef5]">
                         <Lock className="size-4" />
                       </div>
                       <strong className="text-[14px] font-semibold text-[#080808]">
                         {isAr ? 'الظرف المالي مشفر ومقفل سيادياً' : 'Enveloppe financière scellée'}
                       </strong>
                     </div>
-                    <span className="font-mono text-[11px] px-2 py-0.5 rounded-[4px] bg-[#f0f0f0] text-[#080808]">
+                    <span className="font-mono text-[13px] px-2 py-0.5 rounded-[4px] bg-[#f0f0f0] text-[#080808]">
                       AES-256 BIT
                     </span>
                   </div>
@@ -142,12 +142,12 @@ export const V3BrowserMockup: React.FC = () => {
                       : 'Les clés de déchiffrement sont fragmentées et protégées par scellé temporel inviolable jusqu’à la séance publique.'}
                   </p>
 
-                  <div className="p-3 bg-[#f0f0f0] rounded-[4px] border border-[#d8d8d8] font-mono text-[11px] text-[#080808] flex items-center justify-between">
+                  <div className="p-3 bg-[#f0f0f0] rounded-[4px] border border-[#d8d8d8] font-mono text-[13px] text-[#080808] flex items-center justify-between">
                     <span className="truncate">SHA256: 7f8a9b2c4e1d0938a1f6c7e2b8c9d0e1f2a3...bf62a</span>
-                    <span className="text-[#146ef5] text-[10px] font-bold uppercase ms-2 shrink-0">VERIFIED</span>
+                    <span className="text-[#115ccb] text-[13px] font-bold uppercase ms-2 shrink-0">VERIFIED</span>
                   </div>
 
-                  <div className="flex items-center justify-between pt-1 text-[12px] text-[#5a5a5a]">
+                  <div className="flex items-center justify-between pt-1 text-[13px] text-[#5a5a5a]">
                     <span className="flex items-center gap-1.5">
                       <Clock className="size-3.5 text-[#146ef5]" />
                       <span>{isAr ? 'موعد جلسة الفتح العلنية المباشرة:' : 'Séance d’ouverture:'}</span>
@@ -162,7 +162,7 @@ export const V3BrowserMockup: React.FC = () => {
                     <span className="font-medium text-[#080808]">
                       {isAr ? 'مرحلة العملية الإجرائية:' : 'Jalon actuel :'}
                     </span>
-                    <span className="font-mono text-[12px] font-bold text-[#146ef5]">
+                    <span className="font-mono text-[13px] font-bold text-[#146ef5]">
                       {isAr ? 'المرحلة 03 / 07 — إيداع العروض' : 'Étape 03 / 07 — Dépôt des plis'}
                     </span>
                   </div>
@@ -179,7 +179,7 @@ export const V3BrowserMockup: React.FC = () => {
                 {/* Bouclier Pre-Audit Box */}
                 <div className="p-5 rounded-[8px] border border-[#d8d8d8] bg-[#ffffff] space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-mono uppercase tracking-wider text-[#5a5a5a]">
+                    <span className="text-[13px] font-mono uppercase tracking-wider text-[#5a5a5a]">
                       {isAr ? 'فاحص المطابقة المسبقة' : 'AUDIT PRÉ-DÉPÔT'}
                     </span>
                     <span className="size-2 rounded-full bg-[#146ef5]" />
@@ -193,13 +193,13 @@ export const V3BrowserMockup: React.FC = () => {
                       <strong className="text-[14px] font-semibold text-[#080808] block">
                         {isAr ? 'درع الامتثال الاستباقي' : 'Bouclier de Conformité'}
                       </strong>
-                      <span className="text-[12px] text-[#5a5a5a]">
+                      <span className="text-[13px] text-[#5a5a5a]">
                         {isAr ? 'مراجعة تلقائية لـ 14 وثيقة إلزامية' : '14 pièces administratives vérifiées'}
                       </span>
                     </div>
                   </div>
 
-                  <div className="space-y-1.5 pt-1 text-[12px] text-[#080808]">
+                  <div className="space-y-1.5 pt-1 text-[13px] text-[#080808]">
                     <div className="flex items-center gap-2">
                       <CheckCircle2 className="size-3.5 text-[#146ef5]" />
                       <span>{isAr ? 'شهادة الضرائب والضمان الاجتماعي سارية' : 'Attestations fiscales valides'}</span>
@@ -217,14 +217,14 @@ export const V3BrowserMockup: React.FC = () => {
 
                 {/* Digital Receipt Status */}
                 <div className="p-4 rounded-[8px] border border-[#d8d8d8] bg-[#f0f0f0] space-y-1.5">
-                  <div className="flex items-center justify-between text-[11px] font-mono text-[#5a5a5a]">
+                  <div className="flex items-center justify-between text-[13px] font-mono text-[#5a5a5a]">
                     <span>{isAr ? 'وصل سحب دفتر الشروط' : 'RÉCÉPISSÉ DE RETRAIT'}</span>
-                    <span className="font-bold text-[#146ef5]">PAID</span>
+                    <span className="font-bold text-[#115ccb]">PAID</span>
                   </div>
-                  <strong className="font-mono text-[12px] text-[#080808] block">
+                  <strong className="font-mono text-[13px] text-[#080808] block">
                     REC-2026-DZ084-7F89B2
                   </strong>
-                  <span className="text-[11px] text-[#5a5a5a] block">
+                  <span className="text-[13px] text-[#5a5a5a] block">
                     {isAr ? 'رسوم السحب مسددة عبر Chargily Pay' : 'Acquitté via passerelle nationale'}
                   </span>
                 </div>
@@ -236,9 +236,9 @@ export const V3BrowserMockup: React.FC = () => {
           </div>
 
           {/* Browser Footer Strip */}
-          <div className="px-6 py-3 bg-[#f0f0f0] border-t border-[#d8d8d8] flex items-center justify-between text-[12px] text-[#5a5a5a]">
+          <div className="px-6 py-3 bg-[#f0f0f0] border-t border-[#d8d8d8] flex items-center justify-between text-[13px] text-[#5a5a5a]">
             <span>{isAr ? 'المرجع التشريعي: القانون رقم 23-12 والمرسوم 15-247' : 'Conformité légale : Loi 23-12 & Décret 15-247'}</span>
-            <span className="font-mono text-[11px]">DZ-PUBLIC-PROCUREMENT-STANDARD</span>
+            <span className="font-mono text-[13px]">DZ-PUBLIC-PROCUREMENT-STANDARD</span>
           </div>
 
         </div>

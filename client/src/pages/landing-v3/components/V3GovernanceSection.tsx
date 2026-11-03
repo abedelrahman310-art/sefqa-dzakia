@@ -77,7 +77,7 @@ export const V3GovernanceSection: React.FC = () => {
           <p className="text-[13px] font-medium tracking-[0.1em] uppercase text-[#5a5a5a] font-mono">
             {isAr ? 'المرجعية الدستورية والسيادية' : 'FONDEMENTS JURIDIQUES ET SOUVERAINETÉ'}
           </p>
-          <h2 className="text-[32px] sm:text-[40px] font-semibold text-[#080808] leading-[1.04] tracking-[-0.4px]">
+          <h2 className="text-[26px] sm:text-[40px] font-semibold text-[#080808] leading-[1.04] tracking-[-0.4px]">
             {isAr ? 'منظومة قائمة على الشرعية وحماية المال العام' : 'Une Plateforme Fondée sur la Légalité Absolue'}
           </h2>
           <p className="text-[16px] text-[#5a5a5a] leading-[1.6]">
@@ -94,13 +94,13 @@ export const V3GovernanceSection: React.FC = () => {
             return (
               <div
                 key={pillar.num}
-                className="p-6 bg-[#ffffff] border border-[#d8d8d8] rounded-[8px] space-y-4 hover:border-[#080808] transition-colors"
+                className="p-6 bg-[#ffffff] border border-[#d8d8d8] rounded-[8px] space-y-4 hover:border-[#146ef5] transition-colors"
               >
                 <div className="flex items-center justify-between">
                   <div className="p-2.5 rounded-[4px] bg-[#f0f0f0] text-[#080808]">
                     <Icon className="size-5" />
                   </div>
-                  <span className="font-mono text-[11px] text-[#5a5a5a]">
+                  <span className="font-mono text-[13px] text-[#5a5a5a]">
                     {pillar.num}
                   </span>
                 </div>

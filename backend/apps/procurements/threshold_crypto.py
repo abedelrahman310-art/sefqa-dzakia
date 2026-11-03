@@ -116,7 +116,8 @@ def init_session_committee(session, custom_members: list[dict] = None):
     session.threshold_k = k
     session.ceremony_status = 'pending_quorum'
     session.session_key_hash = session_key_hash
-    session.save(update_fields=['threshold_n', 'threshold_k', 'ceremony_status', 'session_key_hash'])
+    session.require_committee_ceremony = True
+    session.save(update_fields=['threshold_n', 'threshold_k', 'ceremony_status', 'session_key_hash', 'require_committee_ceremony'])
 
     return created_shares
 

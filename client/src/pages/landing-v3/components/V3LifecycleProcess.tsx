@@ -174,7 +174,7 @@ export const V3LifecycleProcess: React.FC = () => {
           <p className="text-[13px] font-medium tracking-[0.1em] uppercase text-[#5a5a5a] font-mono">
             {isAr ? 'المسار الإجرائي القانوني' : 'CYCLE DE VIE DU MARCHÉ'}
           </p>
-          <h2 className="text-[32px] sm:text-[40px] font-semibold text-[#080808] leading-[1.04] tracking-[-0.4px]">
+          <h2 className="text-[26px] sm:text-[40px] font-semibold text-[#080808] leading-[1.04] tracking-[-0.4px]">
             {isAr ? 'دورة حياة الصفقة… 7 مراحل قانونية متزامنة' : '7 Jalons Légaux Synchronisés (Loi 23-12)'}
           </h2>
           <p className="text-[16px] text-[#5a5a5a] leading-[1.6]">
@@ -196,12 +196,12 @@ export const V3LifecycleProcess: React.FC = () => {
                   onClick={() => setSelectedStage(stage.id)}
                   className={`flex-1 py-3 px-2 text-center rounded-[4px] transition-all cursor-pointer ${
                     isSelected
-                      ? 'bg-[#080808] text-white'
+                      ? 'bg-[#146ef5]/10 text-[#080808]'
                       : 'text-[#5a5a5a] hover:text-[#080808] hover:bg-[#f0f0f0]'
                   }`}
                 >
                   <span
-                    className={`font-mono text-[11px] block font-bold ${
+                    className={`font-mono text-[13px] block font-bold ${
                       isSelected ? 'text-[#146ef5]' : 'text-[#5a5a5a]'
                     }`}
                   >
@@ -220,12 +220,12 @@ export const V3LifecycleProcess: React.FC = () => {
         <div className="bg-[#ffffff] border border-[#d8d8d8] rounded-[8px] p-6 sm:p-8 space-y-6">
           
           {/* Header of Stage */}
-          <div className="flex flex-wrap items-center justify-between gap-4 pb-6 border-b border-[#d8d8d8]">
-            <div className="flex items-center gap-3">
-              <span className="size-10 rounded-[4px] bg-[#146ef5] text-white flex items-center justify-center font-mono text-[16px] font-bold">
+          <div className="flex items-center justify-between gap-4 pb-6 border-b border-[#d8d8d8]">
+            <div className="flex items-center gap-3 min-w-0 flex-1">
+              <span className="size-10 rounded-[4px] bg-[#146ef5] text-white flex items-center justify-center font-mono text-[16px] font-bold shrink-0">
                 {current.num}
               </span>
-              <div>
+              <div className="min-w-0">
                 <h3 className="text-[20px] font-semibold text-[#080808]">
                   {current.title}
                 </h3>
@@ -235,7 +235,7 @@ export const V3LifecycleProcess: React.FC = () => {
               </div>
             </div>
 
-            <div className="px-3 py-1.5 rounded-[4px] bg-[#f0f0f0] border border-[#d8d8d8] text-[12px] text-[#5a5a5a]">
+            <div className="shrink-0 max-w-[45%] px-3 py-1.5 rounded-[4px] bg-[#f0f0f0] border border-[#d8d8d8] text-[13px] text-[#5a5a5a]">
               <span className="font-semibold text-[#080808] me-1.5">{isAr ? 'المخرج الإجرائي:' : 'Livrable :'}</span>
               <span>{current.output}</span>
             </div>
@@ -298,7 +298,7 @@ export const V3LifecycleProcess: React.FC = () => {
               onClick={() => setSelectedStage((prev) => Math.max(1, prev - 1))}
               className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[4px] border border-[#d8d8d8] text-[13px] font-medium transition-colors ${
                 selectedStage === 1
-                  ? 'text-[#bdbdbd] bg-[#f0f0f0] cursor-not-allowed border-transparent'
+                  ? 'text-[#5a5a5a] bg-[#f0f0f0] cursor-not-allowed border-transparent'
                   : 'text-[#080808] bg-white hover:bg-[#f0f0f0] cursor-pointer'
               }`}
             >
@@ -306,7 +306,7 @@ export const V3LifecycleProcess: React.FC = () => {
               <span>{isAr ? 'المرحلة السابقة' : 'Précédente'}</span>
             </button>
 
-            <span className="font-mono text-[12px] text-[#5a5a5a]">
+            <span className="font-mono text-[13px] text-[#5a5a5a]">
               0{selectedStage} / 07
             </span>
 
@@ -316,7 +316,7 @@ export const V3LifecycleProcess: React.FC = () => {
               onClick={() => setSelectedStage((prev) => Math.min(7, prev + 1))}
               className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[4px] border border-[#d8d8d8] text-[13px] font-medium transition-colors ${
                 selectedStage === 7
-                  ? 'text-[#bdbdbd] bg-[#f0f0f0] cursor-not-allowed border-transparent'
+                  ? 'text-[#5a5a5a] bg-[#f0f0f0] cursor-not-allowed border-transparent'
                   : 'text-[#080808] bg-white hover:bg-[#f0f0f0] cursor-pointer'
               }`}
             >
