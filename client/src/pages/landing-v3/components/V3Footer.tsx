@@ -105,26 +105,31 @@ export const V3Footer: React.FC = () => {
             </ul>
           </div>
 
-          {/* Links Column 3: Compare & Versions */}
+          {/* Links Column 3: Platform Tools */}
           <div className="md:col-span-2 space-y-3">
             <h4 className="text-[13px] font-semibold text-[#ffffff] uppercase tracking-wider font-mono">
-              {isAr ? 'إصدارات التصميم' : 'Éditions'}
+              {isAr ? 'الترسانة الذكية' : 'Outils IA'}
             </h4>
             <ul className="space-y-2 text-[13px] text-[#bdbdbd]">
               <li>
-                <span className="text-[#146ef5] font-medium">
-                  {isAr ? 'V3 Studio (الحالية)' : 'V3 Studio (Actuel)'}
-                </span>
+                <a href="#features" className="hover:text-white transition-colors">
+                  {isAr ? 'درع الامتثال' : 'Bouclier IA'}
+                </a>
               </li>
               <li>
-                <Link href="/landing-v2" className="hover:text-white transition-colors">
-                  {isAr ? 'V2 الملكية السيادية' : 'V2 Royal Edition'}
-                </Link>
+                <a href="#features" className="hover:text-white transition-colors">
+                  {isAr ? 'دفاتر الشروط' : 'Cahier des charges'}
+                </a>
               </li>
               <li>
-                <Link href="/landing-old" className="hover:text-white transition-colors">
-                  {isAr ? 'الإصدار الأول V1' : 'V1 Classic'}
-                </Link>
+                <a href="#features" className="hover:text-white transition-colors">
+                  {isAr ? 'رادار كشف التواطؤ' : 'Radar anti-collusion'}
+                </a>
+              </li>
+              <li>
+                <a href="#live-demo" className="hover:text-white transition-colors">
+                  {isAr ? 'الختم التشفيري' : 'Scellement AES-256'}
+                </a>
               </li>
             </ul>
           </div>

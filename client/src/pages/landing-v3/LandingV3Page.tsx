@@ -24,8 +24,8 @@ export function LandingV3Page() {
   useEffect(() => {
     document.title =
       lang === 'ar'
-        ? 'صفقات ذكية (V3 Studio) — المنظومة الوطنية الموحدة للصفقات العمومية'
-        : 'Safaqat Dhakia (V3 Studio) — Plateforme des Marchés Publics';
+        ? 'صفقات ذكية — المنظومة الوطنية الموحدة للصفقات العمومية'
+        : 'Safaqat Dhakia — Plateforme Nationale des Marchés Publics';
   }, [lang]);
 
   // دعم التمرير السلس للروابط

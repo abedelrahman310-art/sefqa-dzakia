@@ -13,7 +13,6 @@ const OperatorSpace = lazy(() => import('./pages/operator/OperatorSpace').then(m
 const AuthoritySpace = lazy(() => import('./pages/authority/AuthoritySpace').then(m => ({ default: m.AuthoritySpace })));
 const CentralSpace = lazy(() => import('./pages/central/CentralSpace').then(m => ({ default: m.CentralSpace })));
 const LandingPage = lazy(() => import('./pages/landing/LandingPage').then(m => ({ default: m.LandingPage })));
-const LandingV2Page = lazy(() => import('./pages/landing-v2/LandingV2Page').then(m => ({ default: m.LandingV2Page })));
 const LandingV3Page = lazy(() => import('./pages/landing-v3/LandingV3Page').then(m => ({ default: m.LandingV3Page })));
 const TermsPage = lazy(() => import('./pages/legal/TermsPage').then(m => ({ default: m.TermsPage })));
 const FAQPage = lazy(() => import('./pages/legal/FAQPage').then(m => ({ default: m.FAQPage })));
@@ -69,15 +68,21 @@ export function App() {
             </RequireRole>
           </Route>
 
-          <Route path="/v3" component={LandingV3Page} />
-          <Route path="/landing-v3" component={LandingV3Page} />
-          <Route path="/landing-v2" component={LandingV2Page} />
+          <Route path="/v3">
+            <Redirect to="/" />
+          </Route>
+          <Route path="/landing-v3">
+            <Redirect to="/" />
+          </Route>
+          <Route path="/landing-v2">
+            <Redirect to="/" />
+          </Route>
           <Route path="/landing-old" component={LandingPage} />
           <Route path="/terms" component={TermsPage} />
           <Route path="/faq" component={FAQPage} />
           <Route path="/accessibility" component={AccessibilityPage} />
           <Route path="/pricing" component={AISubscriptionPage} />
-          <Route path="/" component={LandingV2Page} />
+          <Route path="/" component={LandingV3Page} />
 
           <Route>
             <div className="flex items-center justify-center min-h-screen">
