@@ -1,6 +1,7 @@
 import React from 'react';
+import { Link } from 'wouter';
 import { useI18n } from '@/i18n';
-import { ShieldCheck, FileText, Lock } from 'lucide-react';
+import { ShieldCheck, FileText, Lock, LayoutTemplate } from 'lucide-react';
 
 export const SovereignTopBar: React.FC = () => {
   const { lang } = useI18n();
@@ -45,6 +46,14 @@ export const SovereignTopBar: React.FC = () => {
             <Lock className="w-3.5 h-3.5" />
             <span>AES-256 + SHA-256</span>
           </div>
+
+          <Link
+            href="/v3"
+            className="flex items-center gap-1.5 bg-[#146ef5]/20 hover:bg-[#146ef5]/40 text-[#6ca7ff] px-2.5 py-1 rounded border border-[#146ef5]/40 font-semibold transition-colors"
+          >
+            <LayoutTemplate className="w-3.5 h-3.5" />
+            <span>{isAr ? 'معاينة V3 Studio' : 'V3 Studio'}</span>
+          </Link>
         </div>
       </div>
     </div>
