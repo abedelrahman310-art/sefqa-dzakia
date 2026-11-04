@@ -29,6 +29,8 @@ interface OperatorStageItem {
   hoverDetail: string;
   icon: React.ComponentType<{ className?: string }>;
   group: 'green' | 'red'; // green = 1-4 (#00753A), red = 5-8 (#D21034)
+  themeColor: string;
+  arrowColor: string;
 }
 
 export const V3OperatorBidProcess: React.FC = () => {
@@ -54,6 +56,8 @@ export const V3OperatorBidProcess: React.FC = () => {
         : 'Criblage intelligent des avis et ciblage direct selon le registre du commerce et la qualification.',
       icon: Megaphone,
       group: 'green',
+      themeColor: '#00753A',
+      arrowColor: '#00753A',
     },
     {
       id: 2,
@@ -68,6 +72,8 @@ export const V3OperatorBidProcess: React.FC = () => {
         : 'Extraction automatique des clauses clés, de la liste des pièces et des délais légaux.',
       icon: FileText,
       group: 'green',
+      themeColor: '#00753A',
+      arrowColor: '#008544',
     },
     {
       id: 3,
@@ -82,6 +88,8 @@ export const V3OperatorBidProcess: React.FC = () => {
         : 'Audit préalable des capacités de l’entreprise face aux critères de qualification minimaux.',
       icon: CheckCircle2,
       group: 'green',
+      themeColor: '#00753A',
+      arrowColor: '#128f4c',
     },
     {
       id: 4,
@@ -96,6 +104,8 @@ export const V3OperatorBidProcess: React.FC = () => {
         : 'Vérification de la validité des attestations fiscales/sociales et contrôle de la déclaration.',
       icon: FolderArchive,
       group: 'green',
+      themeColor: '#00753A',
+      arrowColor: '#4f9450',
     },
 
     // ══════════════════════════════════════════════════════════════════════════
@@ -114,6 +124,8 @@ export const V3OperatorBidProcess: React.FC = () => {
         : 'Génération de la trame du mémoire technique et ordonnancement des moyens mobilisés.',
       icon: PenTool,
       group: 'red',
+      themeColor: '#D21034',
+      arrowColor: '#c41f39',
     },
     {
       id: 6,
@@ -128,6 +140,8 @@ export const V3OperatorBidProcess: React.FC = () => {
         : 'Vérification du BPU, du DQE et analyse des marges pour une soumission compétitive et viable.',
       icon: Calculator,
       group: 'red',
+      themeColor: '#D21034',
+      arrowColor: '#cb1734',
     },
     {
       id: 7,
@@ -142,6 +156,8 @@ export const V3OperatorBidProcess: React.FC = () => {
         : 'Audit croisé exhaustif entre offres technique et financière pour éliminer tout motif de rejet.',
       icon: Search,
       group: 'red',
+      themeColor: '#D21034',
+      arrowColor: '#D21034',
     },
     {
       id: 8,
@@ -156,11 +172,20 @@ export const V3OperatorBidProcess: React.FC = () => {
         : 'Chiffrement souverain AES-256 des plis et génération instantanée du récépissé légal de dépôt.',
       icon: Lock,
       group: 'red',
+      themeColor: '#D21034',
+      arrowColor: '#D21034',
     },
   ];
 
-  const row1 = stages.slice(0, 4); // مراحل 1 إلى 4 (أخضر)
-  const row2 = stages.slice(4, 8); // مراحل 5 إلى 8 (أحمر)
+  // في سطح المكتب، الصف الأول يحتوي المراحل 1 إلى 4
+  const row1 = stages.slice(0, 4);
+
+  // الصف الثاني في الخط الزمني المتعرج (Serpentine Zigzag):
+  // في العرض العربي (RTL): التدفق يبدأ من المرحلة 1 (يمين) إلى 4 (يسار)،
+  // ثم ينعطف يساراً للأسفل نحو المرحلة 5 (يسار)، ويتدفق يميناً 5 -> 6 -> 7 -> 8 (يمين).
+  // لذلك في شبكة RTL الرباعية (حيث العمود الأول على اليمين):
+  // نضع [8, 7, 6, 5] لتظهر 5 في أقصى اليسار تحت 4 مباشرة، و 8 في أقصى اليمين تحت 1.
+  const row2Serpentine = isAr ? [stages[7], stages[6], stages[5], stages[4]] : stages.slice(4, 8);
 
   return (
     <section
@@ -171,7 +196,7 @@ export const V3OperatorBidProcess: React.FC = () => {
       <div className="max-w-[1240px] mx-auto px-4 sm:px-6">
 
         {/* ══════════════════════════════════════════════════════════════════════
-            ترويسة القسم: إطار بسيط يحيط بالعنوان الرئيسي مع خلفية بيضاء
+            ترويسة القسم: إطار بسيط يحيط بالعنوان الرئيسي مع خلفية بيضاء ناصعة
             ══════════════════════════════════════════════════════════════════════ */}
         <div className="flex flex-col items-center justify-center text-center mb-12 sm:mb-16">
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full border border-emerald-200 bg-emerald-50 text-[#00753A] text-xs sm:text-sm font-bold shadow-2xs mb-3">
@@ -197,32 +222,33 @@ export const V3OperatorBidProcess: React.FC = () => {
         </div>
 
         {/* ══════════════════════════════════════════════════════════════════════
-            عرض سطح المكتب: خط زمني أفقي متعرج (Zigzag Timeline)
+            عرض سطح المكتب: خط زمني أفقي متعرج (Horizontal Serpentine Zigzag)
             الصف الأول: 4 مراحل (1 إلى 4) بالأخضر #00753A
+            منعطف ربط انسيابي متدرج من الأخضر إلى الأحمر في أقصى اليسار
             الصف الثاني: 4 مراحل (5 إلى 8) بالأحمر #D21034
             ══════════════════════════════════════════════════════════════════════ */}
-        <div className="hidden lg:block space-y-8">
+        <div className="hidden lg:block space-y-6">
 
           {/* ────── الصف الأول: المراحل 1 إلى 4 (الأخضر #00753A) ────── */}
           <div className="relative">
             <div className="flex items-center justify-between mb-4 px-1">
               <div className="flex items-center gap-2">
-                <span className="size-2 rounded-full bg-[#00753A]" />
+                <span className="size-2.5 rounded-full bg-[#00753A]" />
                 <span className="text-xs font-bold text-[#00753A] tracking-wider uppercase">
-                  {isAr ? 'مرحلة الاكتشاف والتأهيل (المراحل 1 - 4)' : 'Phase Découverte & Éligibilité (Étapes 1 - 4)'}
+                  {isAr ? 'المرحلة 1 إلى 4: الاكتشاف، الفهم والترشح (اللون الأخضر السيادي)' : 'Étapes 1 à 4 : Découverte et Candidature (Vert Souverain)'}
                 </span>
               </div>
               <span className="text-[11px] font-semibold text-[#00753A] bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
-                {isAr ? 'الفرصة • الشروط • الأهلية • الترشح' : 'Opportunité • Cahier • Éligibilité • Candidature'}
+                {isAr ? '1. الفرصة • 2. الشروط • 3. الأهلية • 4. الترشح' : '1. Opportunité • 2. Cahier • 3. Éligibilité • 4. Candidature'}
               </span>
             </div>
 
-            {/* شبكة البطاقات الأربع للصف الأول */}
+            {/* شبكة البطاقات الأربع للصف الأول (من اليمين لليسار في RTL) */}
             <div className="grid grid-cols-4 gap-4 xl:gap-5 relative items-stretch">
               {row1.map((stage, idx) => {
                 const IconComponent = stage.icon;
                 const isHovered = activeStage === stage.id;
-                const isLastInRow = idx === row1.length - 1;
+                const isLastInRow = idx === row1.length - 1; // المرحلة 4 في نهاية الصف
 
                 return (
                   <div
@@ -235,18 +261,24 @@ export const V3OperatorBidProcess: React.FC = () => {
                     <div
                       className={`group relative h-full flex flex-col justify-between rounded-2xl p-5 transition-all duration-300 border backdrop-blur-xl ${
                         isHovered
-                          ? 'bg-white/95 border-[#00753A] shadow-xl -translate-y-1.5 ring-2 ring-[#00753A]/20'
+                          ? 'bg-white/95 border-[#00753A] shadow-xl -translate-y-2 ring-2 ring-[#00753A]/20'
                           : 'bg-white/70 border-[#00753A]/30 shadow-xs hover:border-[#00753A]'
                       }`}
                     >
                       {/* الشريط العلوي الأخضر الرفيع */}
                       <div className="absolute top-0 inset-x-0 h-1 bg-[#00753A] rounded-t-2xl" />
 
-                      {/* رأس البطاقة: رقم المرحلة داخل دائرة خضراء + أيقونة AI */}
+                      {/* رأس البطاقة: رقم المرحلة داخل دائرة خضراء + أيقونة المرحلة + أيقونة AI */}
                       <div className="flex items-center justify-between gap-2 mb-3 pt-1">
                         {/* 1. رقم المرحلة داخل دائرة */}
-                        <div className="size-9 rounded-full bg-[#00753A]/10 border-2 border-[#00753A] text-[#00753A] flex items-center justify-center font-mono font-black text-sm shadow-2xs">
-                          {stage.num}
+                        <div className="flex items-center gap-2.5">
+                          <div className="size-9 rounded-full bg-emerald-50 border-2 border-[#00753A] text-[#00753A] flex items-center justify-center font-mono font-black text-sm shadow-2xs">
+                            {stage.num}
+                          </div>
+                          {/* أيقونة المرحلة المحددة */}
+                          <div className="size-8 rounded-xl bg-emerald-50/80 border border-emerald-200/80 flex items-center justify-center text-[#00753A]">
+                            <IconComponent className="size-4" />
+                          </div>
                         </div>
 
                         {/* أيقونة الذكاء الاصطناعي مع شعار AI */}
@@ -257,7 +289,7 @@ export const V3OperatorBidProcess: React.FC = () => {
                       </div>
 
                       {/* جسم البطاقة: 2. عنوان المرحلة + 3. دور الذكاء الاصطناعي في سطر واحد */}
-                      <div className="space-y-2 flex-1">
+                      <div className="space-y-1.5 flex-1">
                         <div className="text-[11px] font-bold text-[#00753A]/80 tracking-wide">
                           {stage.stageName}
                         </div>
@@ -280,24 +312,25 @@ export const V3OperatorBidProcess: React.FC = () => {
                         </p>
                       </div>
 
-                      {/* الأيقونة المحددة لكل مرحلة في زاوية البطاقة */}
-                      <div className="absolute bottom-3 left-3 rtl:left-auto rtl:left-3 opacity-10 group-hover:opacity-25 transition-opacity pointer-events-none">
-                        <IconComponent className="size-8 text-[#00753A]" />
+                      {/* أيقونة شفافة في زاوية البطاقة */}
+                      <div className="absolute bottom-3 left-3 rtl:left-auto rtl:left-3 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
+                        <IconComponent className="size-7 text-[#00753A]" />
                       </div>
                     </div>
 
-                    {/* سهم متدرج بين البطاقات */}
+                    {/* سهم متدرج بين البطاقات في الصف الأول (من اليمين لليسار في RTL) */}
                     {!isLastInRow && (
                       <div
-                        className={`absolute top-1/2 -translate-y-1/2 z-20 pointer-events-none hidden xl:flex items-center justify-center size-7 rounded-full bg-white border border-[#00753A]/40 shadow-xs ${
+                        className={`absolute top-1/2 -translate-y-1/2 z-20 pointer-events-none hidden xl:flex items-center justify-center size-7 rounded-full bg-white border shadow-xs ${
                           isAr ? '-left-3.5' : '-right-3.5'
                         }`}
+                        style={{ borderColor: stage.arrowColor }}
                         aria-hidden="true"
                       >
                         {isAr ? (
-                          <ArrowLeft className="size-3.5 text-[#00753A]" />
+                          <ArrowLeft className="size-3.5" style={{ color: stage.arrowColor }} />
                         ) : (
-                          <ArrowRight className="size-3.5 text-[#00753A]" />
+                          <ArrowRight className="size-3.5" style={{ color: stage.arrowColor }} />
                         )}
                       </div>
                     )}
@@ -305,17 +338,23 @@ export const V3OperatorBidProcess: React.FC = () => {
                 );
               })}
             </div>
+          </div>
 
-            {/* سهم الانتقال المتعرج المنحني من الصف الأول إلى الصف الثاني (تدرج من الأخضر إلى الأحمر) */}
-            <div className="flex items-center justify-end px-6 my-3 text-slate-400">
-              <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-linear-to-r from-emerald-50 via-slate-50 to-rose-50 border border-slate-200 text-xs font-bold text-slate-700 shadow-2xs">
-                <span>{isAr ? 'الانتقال إلى إعداد العروض الفنية والمالية والإيداع' : 'Passage aux offres technique, financière et dépôt'}</span>
+          {/* ────── منعطف الربط المتعرج الانسيابي بين الصف الأول والثاني (تدرج أخضر -> أحمر) ────── */}
+          <div className="relative py-1 flex items-center justify-start px-2">
+            <div className="flex items-center gap-3 px-4 py-2 rounded-2xl bg-linear-to-r from-emerald-50 via-white to-rose-50 border border-slate-200/90 shadow-2xs">
+              <div className="size-6 rounded-full bg-linear-to-b from-[#00753A] to-[#D21034] text-white flex items-center justify-center shadow-xs">
                 {isAr ? (
-                  <CornerDownLeft className="size-4 text-[#D21034]" />
+                  <CornerDownRight className="size-3.5" />
                 ) : (
-                  <CornerDownRight className="size-4 text-[#D21034]" />
+                  <CornerDownLeft className="size-3.5" />
                 )}
               </div>
+              <span className="text-xs font-bold text-slate-700">
+                {isAr
+                  ? 'منعطف المسار المتعرج: الانتقال المباشر من ملف الترشح (4) إلى إعداد العرض التقني (5)'
+                  : 'Connexion en zigzag : Passage direct de la candidature (4) à l’offre technique (5)'}
+              </span>
             </div>
           </div>
 
@@ -323,22 +362,24 @@ export const V3OperatorBidProcess: React.FC = () => {
           <div className="relative">
             <div className="flex items-center justify-between mb-4 px-1">
               <div className="flex items-center gap-2">
-                <span className="size-2 rounded-full bg-[#D21034]" />
+                <span className="size-2.5 rounded-full bg-[#D21034]" />
                 <span className="text-xs font-bold text-[#D21034] tracking-wider uppercase">
-                  {isAr ? 'مرحلة إعداد العروض والإيداع (المراحل 5 - 8)' : 'Phase Offres & Soumission (Étapes 5 - 8)'}
+                  {isAr ? 'المرحلة 5 إلى 8: العروض، التدقيق والإيداع الآمن (اللون الأحمر السيادي)' : 'Étapes 5 à 8 : Offres, Qualité et Dépôt (Rouge Souverain)'}
                 </span>
               </div>
               <span className="text-[11px] font-semibold text-[#D21034] bg-rose-50 px-2.5 py-0.5 rounded-full border border-rose-200">
-                {isAr ? 'التقني • المالي • مراجعة الجودة • الإيداع المشفر' : 'Technique • Financier • Qualité • Dépôt Chiffré'}
+                {isAr ? '5. التقني • 6. المالي • 7. مراجعة الجودة • 8. الإيداع الآمن' : '5. Technique • 6. Financier • 7. Qualité • 8. Dépôt Sécurisé'}
               </span>
             </div>
 
-            {/* شبكة البطاقات الأربع للصف الثاني */}
+            {/* شبكة البطاقات الأربع للصف الثاني في المسار المتعرج */}
             <div className="grid grid-cols-4 gap-4 xl:gap-5 relative items-stretch">
-              {row2.map((stage, idx) => {
+              {row2Serpentine.map((stage, idx) => {
                 const IconComponent = stage.icon;
                 const isHovered = activeStage === stage.id;
-                const isLastInRow = idx === row2.length - 1;
+                // في RTL المسار يسير من اليسار (المرحلة 5) نحو اليمين (المرحلة 8)
+                // لذلك السهم يربط نحو اليمين حتى المرحلة 8
+                const isEndStage = isAr ? stage.id === 8 : stage.id === 8;
 
                 return (
                   <div
@@ -351,18 +392,24 @@ export const V3OperatorBidProcess: React.FC = () => {
                     <div
                       className={`group relative h-full flex flex-col justify-between rounded-2xl p-5 transition-all duration-300 border backdrop-blur-xl ${
                         isHovered
-                          ? 'bg-white/95 border-[#D21034] shadow-xl -translate-y-1.5 ring-2 ring-[#D21034]/20'
+                          ? 'bg-white/95 border-[#D21034] shadow-xl -translate-y-2 ring-2 ring-[#D21034]/20'
                           : 'bg-white/70 border-[#D21034]/30 shadow-xs hover:border-[#D21034]'
                       }`}
                     >
                       {/* الشريط العلوي الأحمر الرفيع */}
                       <div className="absolute top-0 inset-x-0 h-1 bg-[#D21034] rounded-t-2xl" />
 
-                      {/* رأس البطاقة: رقم المرحلة داخل دائرة حمراء + أيقونة AI */}
+                      {/* رأس البطاقة: رقم المرحلة داخل دائرة حمراء + أيقونة المرحلة + أيقونة AI */}
                       <div className="flex items-center justify-between gap-2 mb-3 pt-1">
                         {/* 1. رقم المرحلة داخل دائرة */}
-                        <div className="size-9 rounded-full bg-[#D21034]/10 border-2 border-[#D21034] text-[#D21034] flex items-center justify-center font-mono font-black text-sm shadow-2xs">
-                          {stage.num}
+                        <div className="flex items-center gap-2.5">
+                          <div className="size-9 rounded-full bg-rose-50 border-2 border-[#D21034] text-[#D21034] flex items-center justify-center font-mono font-black text-sm shadow-2xs">
+                            {stage.num}
+                          </div>
+                          {/* أيقونة المرحلة المحددة */}
+                          <div className="size-8 rounded-xl bg-rose-50/80 border border-rose-200/80 flex items-center justify-center text-[#D21034]">
+                            <IconComponent className="size-4" />
+                          </div>
                         </div>
 
                         {/* أيقونة الذكاء الاصطناعي مع شعار AI */}
@@ -373,7 +420,7 @@ export const V3OperatorBidProcess: React.FC = () => {
                       </div>
 
                       {/* جسم البطاقة: 2. عنوان المرحلة + 3. دور الذكاء الاصطناعي في سطر واحد */}
-                      <div className="space-y-2 flex-1">
+                      <div className="space-y-1.5 flex-1">
                         <div className="text-[11px] font-bold text-[#D21034]/80 tracking-wide">
                           {stage.stageName}
                         </div>
@@ -396,24 +443,25 @@ export const V3OperatorBidProcess: React.FC = () => {
                         </p>
                       </div>
 
-                      {/* الأيقونة المحددة لكل مرحلة في زاوية البطاقة */}
-                      <div className="absolute bottom-3 left-3 rtl:left-auto rtl:left-3 opacity-10 group-hover:opacity-25 transition-opacity pointer-events-none">
-                        <IconComponent className="size-8 text-[#D21034]" />
+                      {/* أيقونة شفافة في زاوية البطاقة */}
+                      <div className="absolute bottom-3 left-3 rtl:left-auto rtl:left-3 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
+                        <IconComponent className="size-7 text-[#D21034]" />
                       </div>
                     </div>
 
-                    {/* سهم متدرج بين البطاقات */}
-                    {!isLastInRow && (
+                    {/* سهم متدرج في الصف الثاني يوجه التدفق المتعرج نحو اليمين في RTL */}
+                    {!isEndStage && (
                       <div
-                        className={`absolute top-1/2 -translate-y-1/2 z-20 pointer-events-none hidden xl:flex items-center justify-center size-7 rounded-full bg-white border border-[#D21034]/40 shadow-xs ${
-                          isAr ? '-left-3.5' : '-right-3.5'
+                        className={`absolute top-1/2 -translate-y-1/2 z-20 pointer-events-none hidden xl:flex items-center justify-center size-7 rounded-full bg-white border shadow-xs ${
+                          isAr ? '-right-3.5' : '-left-3.5'
                         }`}
+                        style={{ borderColor: stage.arrowColor }}
                         aria-hidden="true"
                       >
                         {isAr ? (
-                          <ArrowLeft className="size-3.5 text-[#D21034]" />
+                          <ArrowRight className="size-3.5" style={{ color: stage.arrowColor }} />
                         ) : (
-                          <ArrowRight className="size-3.5 text-[#D21034]" />
+                          <ArrowLeft className="size-3.5" style={{ color: stage.arrowColor }} />
                         )}
                       </div>
                     )}
@@ -426,13 +474,13 @@ export const V3OperatorBidProcess: React.FC = () => {
         </div>
 
         {/* ══════════════════════════════════════════════════════════════════════
-            عرض الهاتف: خط زمني عمودي متتابع ومترابط بأسهم
+            عرض الهاتف: خط زمني عمودي متتابع ومترابط بأسهم متدرجة
             ══════════════════════════════════════════════════════════════════════ */}
         <div className="block lg:hidden space-y-4">
           {stages.map((stage, idx) => {
             const IconComponent = stage.icon;
             const isGreen = stage.group === 'green';
-            const themeColor = isGreen ? '#00753A' : '#D21034';
+            const themeColor = stage.themeColor;
             const isLast = idx === stages.length - 1;
 
             return (
@@ -496,12 +544,12 @@ export const V3OperatorBidProcess: React.FC = () => {
                   </p>
                 </div>
 
-                {/* سهم عمودي يصل بين البطاقات */}
+                {/* سهم عمودي يصل بين البطاقات بتدرج لوني */}
                 {!isLast && (
                   <div className="py-1 flex items-center justify-center">
                     <ArrowDown
                       className="size-4"
-                      style={{ color: idx === 3 ? '#94a3b8' : themeColor }}
+                      style={{ color: stage.arrowColor }}
                     />
                   </div>
                 )}
