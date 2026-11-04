@@ -3,6 +3,7 @@ import { Route, Switch, Redirect } from 'wouter';
 import { RequireRole } from './components/auth/RequireRole';
 import { PWAInstallPrompt } from '@/shared/components/PWAInstallPrompt';
 import { useI18n } from '@/i18n';
+import { ErrorBoundary } from './components/common/ErrorBoundary';
 
 // Code Splitting with React.lazy
 const DevShell = lazy(() => import('./pages/DevShell').then(m => ({ default: m.DevShell })));
@@ -39,7 +40,8 @@ export function App() {
     <>
       <PWAInstallPrompt />
       <Suspense fallback={<PageFallback label={t('common.loading') || 'جاري التحميل...'} />}>
-        <Switch>
+        <ErrorBoundary>
+          <Switch>
           {isDev && (
             <Route path="/dev/shell" component={DevShell} />
           )}
@@ -95,7 +97,8 @@ export function App() {
             </div>
           </Route>
         </Switch>
-      </Suspense>
+      </ErrorBoundary>
+    </Suspense>
     </>
   );
 }

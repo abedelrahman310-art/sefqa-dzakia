@@ -3,6 +3,8 @@ import { Link, useLocation, Redirect } from 'wouter';
 import { useI18n } from '@/i18n';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { Logo } from '@/components/ui/Logo';
+import { PasswordStrengthMeter } from '@/components/auth/PasswordStrengthMeter';
+import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 import { REGISTRY_69W, getCommunesForWilaya } from '@safaqat/shared/territorial';
 import {
   AlertCircle,
@@ -124,6 +126,7 @@ export function UnifiedAuthPage({ initialMode = 'operator' }: UnifiedAuthPagePro
   const [isWilayaOpen, setIsWilayaOpen] = useState(false);
   const [wilayaSearch, setWilayaSearch] = useState('');
   const [isCommuneOpen, setIsCommuneOpen] = useState(false);
+  const [communeSearch, setCommuneSearch] = useState('');
   const wilayaCellRef = useRef<HTMLDivElement | null>(null);
   const communeCellRef = useRef<HTMLDivElement | null>(null);
 
@@ -142,6 +145,23 @@ export function UnifiedAuthPage({ initialMode = 'operator' }: UnifiedAuthPagePro
 
   const wilayaUnits = useMemo(() => REGISTRY_69W.units, []);
 
+  // فهرس وطني كامل للبلديات الـ 1,541 يربط كل بلدية بولايتها لتسهيل البحث الشامل
+  const nationalCommunesIndex = useMemo(() => {
+    const list: { commune: string; wilayaCode: string; wilayaNameAr: string; wilayaNameFr: string }[] = [];
+    for (const unit of wilayaUnits) {
+      const comms = getCommunesForWilaya(unit.code);
+      for (const c of comms) {
+        list.push({
+          commune: c,
+          wilayaCode: unit.code,
+          wilayaNameAr: unit.nameAr,
+          wilayaNameFr: unit.nameFr,
+        });
+      }
+    }
+    return list;
+  }, [wilayaUnits]);
+
   const filteredWilayas = useMemo(() => {
     if (!wilayaSearch.trim()) return wilayaUnits;
     const q = wilayaSearch.toLowerCase().trim();
@@ -159,6 +179,67 @@ export function UnifiedAuthPage({ initialMode = 'operator' }: UnifiedAuthPagePro
   );
 
   const availableCommunes = useMemo(() => getCommunesForWilaya(wilaya), [wilaya]);
+
+  // البلديات المصفاة للولاية أو لكل التراب الوطني عند البحث
+  const filteredCommunes = useMemo(() => {
+    const q = communeSearch.trim().toLowerCase();
+    if (wilaya) {
+      if (!q) return availableCommunes;
+      return availableCommunes.filter((c) => c.toLowerCase().includes(q));
+    }
+    // لم يتم تحديد ولاية مسبقاً -> بحث وطني فوري
+    if (!q) return [];
+    return nationalCommunesIndex
+      .filter(
+        (item) =>
+          item.commune.toLowerCase().includes(q) ||
+          item.wilayaNameAr.includes(q) ||
+          item.wilayaCode.includes(q)
+      )
+      .slice(0, 40);
+  }, [wilaya, communeSearch, availableCommunes, nationalCommunesIndex]);
+
+  const toggleWilaya = () => {
+    setIsWilayaOpen((open) => {
+      const next = !open;
+      if (next) {
+        setIsCommuneOpen(false);
+        setWilayaSearch('');
+      }
+      return next;
+    });
+  };
+
+  const toggleCommune = () => {
+    setIsCommuneOpen((open) => {
+      const next = !open;
+      if (next) {
+        setIsWilayaOpen(false);
+        setCommuneSearch('');
+      }
+      return next;
+    });
+  };
+
+  const handleSelectWilaya = (code: string) => {
+    setWilaya(code);
+    setCommune('');
+    setCommuneSearch('');
+    setIsWilayaOpen(false);
+    setWilayaSearch('');
+    markTouched('wilaya');
+  };
+
+  const handleSelectCommune = (communeName: string, parentWilayaCode?: string) => {
+    setCommune(communeName);
+    if (parentWilayaCode && parentWilayaCode !== wilaya) {
+      setWilaya(parentWilayaCode);
+      markTouched('wilaya');
+    }
+    setIsCommuneOpen(false);
+    setCommuneSearch('');
+    markTouched('commune');
+  };
 
   // الحسابات التجريبية السريعة
   const isDemoLoginEnabled =
@@ -768,6 +849,9 @@ export function UnifiedAuthPage({ initialMode = 'operator' }: UnifiedAuthPagePro
                       </button>
                     </div>
                     <FieldError name="password" />
+                    <div className="mt-1.5">
+                      <PasswordStrengthMeter password={regPassword} />
+                    </div>
                   </div>
 
                   {/* تأكيد كلمة المرور */}
@@ -802,35 +886,61 @@ export function UnifiedAuthPage({ initialMode = 'operator' }: UnifiedAuthPagePro
 
                 {/* 4. النطاق الإقليمي (الولاية والبلدية) */}
                 <div className="rounded-2xl border border-slate-200/90 bg-slate-50/40 p-3.5">
-                  <div className="mb-2.5 flex items-center gap-1.5 text-xs font-bold text-slate-800">
-                    <MapPin className="size-4 text-emerald-600" aria-hidden="true" />
-                    <span>النطاق الإقليمي والمقر الإداري (الولاية والبلدية)</span>
+                  <div className="mb-2.5 flex items-center justify-between text-xs font-bold text-slate-800">
+                    <div className="flex items-center gap-1.5">
+                      <MapPin className="size-4 text-emerald-600" aria-hidden="true" />
+                      <span>النطاق الإقليمي والمقر الإداري (الولاية والبلدية)</span>
+                    </div>
+                    {wilaya && (
+                      <span className="text-[10px] text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                        {selectedWilayaUnit?.code} — {lang === 'fr' ? selectedWilayaUnit?.nameFr : selectedWilayaUnit?.nameAr}
+                      </span>
+                    )}
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
                     {/* اختيار الولاية */}
                     <div ref={wilayaCellRef} className="relative">
-                      <label className="mb-1 block text-xs font-bold text-slate-700">
-                        {t('register.neumorphic.wilaya') || 'الولاية'} <span className="text-rose-500">*</span>
-                      </label>
+                      <div className="flex items-center justify-between mb-1">
+                        <label htmlFor="reg-wilaya-btn" className="block text-xs font-bold text-slate-700">
+                          {t('register.neumorphic.wilaya') || 'الولاية'} <span className="text-rose-500">*</span>
+                        </label>
+                        <span className="text-[10px] text-slate-400 font-medium">
+                          69 ولاية ودائرة منتدبة
+                        </span>
+                      </div>
+
                       <button
+                        id="reg-wilaya-btn"
                         type="button"
-                        onClick={() => setIsWilayaOpen(!isWilayaOpen)}
-                        className="flex h-10 w-full items-center justify-between rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-800 shadow-2xs hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500/10 cursor-pointer"
+                        onClick={toggleWilaya}
+                        aria-haspopup="listbox"
+                        aria-expanded={isWilayaOpen}
+                        className={`flex h-10 w-full items-center justify-between rounded-xl border bg-white px-3 text-xs font-semibold shadow-2xs hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500/10 cursor-pointer transition-all ${
+                          touched.wilaya && !wilaya
+                            ? 'border-rose-400 ring-2 ring-rose-500/10'
+                            : 'border-slate-200'
+                        } text-slate-800`}
                       >
                         <span className="truncate">
-                          {selectedWilayaUnit
-                            ? `${selectedWilayaUnit.code} - ${selectedWilayaUnit.nameAr}`
-                            : t('register.neumorphic.select_wilaya') || 'اختر الولاية'}
+                          {selectedWilayaUnit ? (
+                            <span className="font-bold text-slate-900">
+                              {selectedWilayaUnit.code} — {lang === 'fr' ? selectedWilayaUnit.nameFr : selectedWilayaUnit.nameAr}
+                            </span>
+                          ) : (
+                            <span className="text-slate-400">
+                              {t('register.neumorphic.select_wilaya') || 'اختر الولاية...'}
+                            </span>
+                          )}
                         </span>
                         <ChevronDown className={`size-4 text-slate-400 transition-transform ${isWilayaOpen ? 'rotate-180' : ''}`} />
                       </button>
 
                       {isWilayaOpen && (
-                        <div className="absolute z-50 mt-1 max-h-56 w-full overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl animate-in fade-in-50">
-                          <div className="p-2 border-b border-slate-100">
-                            <div className="flex items-center gap-1.5 rounded-lg bg-slate-50 px-2 py-1 border border-slate-200">
-                              <Search className="size-3.5 text-slate-400" />
+                        <div className="absolute z-50 mt-1 max-h-64 w-full overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl animate-in fade-in-50">
+                          <div className="p-2 border-b border-slate-100 bg-slate-50/60">
+                            <div className="flex items-center gap-1.5 rounded-lg bg-white px-2.5 py-1.5 border border-slate-200 shadow-2xs">
+                              <Search className="size-3.5 text-slate-400 shrink-0" />
                               <input
                                 type="text"
                                 value={wilayaSearch}
@@ -839,30 +949,51 @@ export function UnifiedAuthPage({ initialMode = 'operator' }: UnifiedAuthPagePro
                                 className="w-full bg-transparent text-xs text-slate-800 focus:outline-none"
                                 autoFocus
                               />
+                              {wilayaSearch && (
+                                <button
+                                  type="button"
+                                  onClick={() => setWilayaSearch('')}
+                                  className="text-slate-400 hover:text-slate-600 cursor-pointer"
+                                  aria-label="تفريغ البحث"
+                                >
+                                  <X className="size-3" />
+                                </button>
+                              )}
                             </div>
                           </div>
-                          <div className="max-h-40 overflow-y-auto p-1">
-                            {filteredWilayas.map((unit) => (
-                              <button
-                                key={unit.code}
-                                type="button"
-                                onClick={() => {
-                                  setWilaya(unit.code);
-                                  setCommune('');
-                                  setIsWilayaOpen(false);
-                                  setWilayaSearch('');
-                                  markTouched('wilaya');
-                                }}
-                                className={`flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-start text-xs font-medium cursor-pointer ${
-                                  wilaya === unit.code
-                                    ? 'bg-emerald-50 font-bold text-emerald-800'
-                                    : 'text-slate-700 hover:bg-slate-100'
-                                }`}
-                              >
-                                <span>{unit.code} - {unit.nameAr}</span>
-                                {wilaya === unit.code && <Check className="size-3.5 text-emerald-600" />}
-                              </button>
-                            ))}
+                          <div className="max-h-48 overflow-y-auto p-1" role="listbox">
+                            {filteredWilayas.length === 0 ? (
+                              <div className="py-6 px-4 text-center">
+                                <p className="text-xs font-bold text-slate-600">
+                                  لا توجد ولاية مطابقة لـ &quot;{wilayaSearch}&quot;
+                                </p>
+                                <button
+                                  type="button"
+                                  onClick={() => setWilayaSearch('')}
+                                  className="mt-2 text-[11px] font-bold text-emerald-700 hover:underline cursor-pointer"
+                                >
+                                  عرض كافة الولايات (69)
+                                </button>
+                              </div>
+                            ) : (
+                              filteredWilayas.map((unit) => (
+                                <button
+                                  key={unit.code}
+                                  type="button"
+                                  role="option"
+                                  aria-selected={wilaya === unit.code}
+                                  onClick={() => handleSelectWilaya(unit.code)}
+                                  className={`flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-start text-xs font-medium cursor-pointer transition-colors ${
+                                    wilaya === unit.code
+                                      ? 'bg-emerald-50 font-bold text-emerald-800'
+                                      : 'text-slate-700 hover:bg-slate-100'
+                                  }`}
+                                >
+                                  <span>{unit.code} — {lang === 'fr' ? unit.nameFr : unit.nameAr}</span>
+                                  {wilaya === unit.code && <Check className="size-3.5 text-emerald-600" />}
+                                </button>
+                              ))
+                            )}
                           </div>
                         </div>
                       )}
@@ -871,44 +1002,184 @@ export function UnifiedAuthPage({ initialMode = 'operator' }: UnifiedAuthPagePro
 
                     {/* اختيار البلدية */}
                     <div ref={communeCellRef} className="relative">
-                      <label className="mb-1 block text-xs font-bold text-slate-700">
-                        {t('register.neumorphic.commune') || 'البلدية'} <span className="text-rose-500">*</span>
-                      </label>
+                      <div className="flex items-center justify-between mb-1">
+                        <label htmlFor="reg-commune-btn" className="block text-xs font-bold text-slate-700">
+                          {t('register.neumorphic.commune') || 'البلدية'} <span className="text-rose-500">*</span>
+                        </label>
+                        {wilaya && (
+                          <span className="text-[10px] text-emerald-700 font-semibold">
+                            {availableCommunes.length} بلدية مسجلة
+                          </span>
+                        )}
+                      </div>
+
                       <button
+                        id="reg-commune-btn"
                         type="button"
-                        disabled={!wilaya}
-                        onClick={() => setIsCommuneOpen(!isCommuneOpen)}
-                        className={`flex h-10 w-full items-center justify-between rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold shadow-2xs focus:outline-none focus:ring-2 focus:ring-emerald-500/10 cursor-pointer ${
-                          !wilaya ? 'cursor-not-allowed bg-slate-100 text-slate-400' : 'text-slate-800 hover:border-slate-300'
-                        }`}
+                        onClick={toggleCommune}
+                        aria-haspopup="listbox"
+                        aria-expanded={isCommuneOpen}
+                        className={`flex h-10 w-full items-center justify-between rounded-xl border bg-white px-3 text-xs font-semibold shadow-2xs focus:outline-none focus:ring-2 focus:ring-emerald-500/10 cursor-pointer transition-all ${
+                          touched.commune && !commune.trim()
+                            ? 'border-rose-400 ring-2 ring-rose-500/10'
+                            : 'border-slate-200 hover:border-slate-300'
+                        } ${!wilaya && !commune ? 'text-slate-500' : 'text-slate-800'}`}
                       >
                         <span className="truncate">
-                          {commune || (!wilaya ? 'اختر الولاية أولاً' : 'اختر البلدية')}
+                          {commune ? (
+                            <span className="font-bold text-slate-900">{commune}</span>
+                          ) : wilaya ? (
+                            <span className="text-slate-600">
+                              {t('register.neumorphic.select_commune') || 'اختر البلدية من القائمة...'}
+                            </span>
+                          ) : (
+                            <span className="text-slate-400">
+                              اختر البلدية (أو ابحث مباشرة)...
+                            </span>
+                          )}
                         </span>
-                        <ChevronDown className={`size-4 text-slate-400 transition-transform ${isCommuneOpen ? 'rotate-180' : ''}`} />
+                        <ChevronDown
+                          className={`size-4 text-slate-400 transition-transform ${
+                            isCommuneOpen ? 'rotate-180' : ''
+                          }`}
+                        />
                       </button>
 
-                      {isCommuneOpen && wilaya && (
-                        <div className="absolute z-50 mt-1 max-h-48 w-full overflow-y-auto rounded-xl border border-slate-200 bg-white p-1 shadow-xl animate-in fade-in-50">
-                          {availableCommunes.map((comm) => (
-                            <button
-                              key={comm}
-                              type="button"
-                              onClick={() => {
-                                setCommune(comm);
-                                setIsCommuneOpen(false);
-                                markTouched('commune');
-                              }}
-                              className={`flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-start text-xs font-medium cursor-pointer ${
-                                commune === comm
-                                  ? 'bg-emerald-50 font-bold text-emerald-800'
-                                  : 'text-slate-700 hover:bg-slate-100'
-                              }`}
-                            >
-                              <span>{comm}</span>
-                              {commune === comm && <Check className="size-3.5 text-emerald-600" />}
-                            </button>
-                          ))}
+                      {isCommuneOpen && (
+                        <div className="absolute z-50 mt-1 max-h-64 w-full overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl animate-in fade-in-50">
+                          {/* شريط البحث في البلديات */}
+                          <div className="p-2 border-b border-slate-100 bg-slate-50/60">
+                            <div className="flex items-center gap-1.5 rounded-lg bg-white px-2.5 py-1.5 border border-slate-200 shadow-2xs">
+                              <Search className="size-3.5 text-slate-400 shrink-0" />
+                              <input
+                                type="text"
+                                value={communeSearch}
+                                onChange={(e) => setCommuneSearch(e.target.value)}
+                                placeholder={
+                                  selectedWilayaUnit
+                                    ? `ابحث في بلديات ${selectedWilayaUnit.nameAr}...`
+                                    : 'ابحث عن أي بلدية في الجزائر...'
+                                }
+                                className="w-full bg-transparent text-xs text-slate-800 focus:outline-none"
+                                autoFocus
+                              />
+                              {communeSearch && (
+                                <button
+                                  type="button"
+                                  onClick={() => setCommuneSearch('')}
+                                  className="text-slate-400 hover:text-slate-600 cursor-pointer"
+                                  aria-label="تفريغ البحث"
+                                >
+                                  <X className="size-3" />
+                                </button>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* محتوى القائمة */}
+                          <div className="max-h-48 overflow-y-auto p-1" role="listbox">
+                            {wilaya ? (
+                              // حالة 1: الولاية محددة
+                              (filteredCommunes as string[]).length === 0 ? (
+                                <div className="py-6 px-4 text-center">
+                                  <MapPin className="size-5 text-slate-300 mx-auto mb-1.5" />
+                                  <p className="text-xs font-bold text-slate-600">
+                                    لا توجد بلدية مطابقة لـ &quot;{communeSearch}&quot;
+                                  </p>
+                                  <p className="text-[10px] text-slate-400 mt-0.5">
+                                    تأكد من كتابة الاسم أو انقر لمسح البحث لعرض كل بلديات {selectedWilayaUnit?.nameAr}
+                                  </p>
+                                  <button
+                                    type="button"
+                                    onClick={() => setCommuneSearch('')}
+                                    className="mt-2 text-[11px] font-bold text-emerald-700 hover:underline cursor-pointer"
+                                  >
+                                    إظهار كل بلديات الولاية ({availableCommunes.length})
+                                  </button>
+                                </div>
+                              ) : (
+                                (filteredCommunes as string[]).map((comm) => {
+                                  const isSelected = commune === comm;
+                                  return (
+                                    <button
+                                      key={comm}
+                                      type="button"
+                                      role="option"
+                                      aria-selected={isSelected}
+                                      onClick={() => handleSelectCommune(comm)}
+                                      className={`flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-start text-xs font-medium cursor-pointer transition-colors ${
+                                        isSelected
+                                          ? 'bg-emerald-50 font-bold text-emerald-800'
+                                          : 'text-slate-700 hover:bg-slate-100'
+                                      }`}
+                                    >
+                                      <span>{comm}</span>
+                                      {isSelected && <Check className="size-3.5 text-emerald-600" />}
+                                    </button>
+                                  );
+                                })
+                              )
+                            ) : (
+                              // حالة 2: لم يتم اختيار ولاية بعد
+                              !communeSearch.trim() ? (
+                                <div className="p-4 text-center">
+                                  <MapPin className="size-6 text-emerald-500/60 mx-auto mb-2" />
+                                  <p className="text-xs font-bold text-slate-800 mb-1">
+                                    تحديد البلدية والمقر الإداري
+                                  </p>
+                                  <p className="text-[11px] text-slate-500 leading-relaxed mb-3">
+                                    يمكنك اختيار الولاية أولاً لتصفية بلدياتها المعتمدة، أو البدء بكتابة اسم بلديتك في شريط البحث أعلاه وسنقوم بربط الولاية تلقائياً.
+                                  </p>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setIsCommuneOpen(false);
+                                      setIsWilayaOpen(true);
+                                    }}
+                                    className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-50 border border-emerald-200 px-3 py-1.5 text-xs font-bold text-emerald-800 hover:bg-emerald-100 cursor-pointer transition-colors"
+                                  >
+                                    <span>اختر الولاية أولاً</span>
+                                    <ArrowLeft className="size-3" />
+                                  </button>
+                                </div>
+                              ) : (filteredCommunes as { commune: string; wilayaCode: string; wilayaNameAr: string }[]).length === 0 ? (
+                                <div className="py-6 px-4 text-center">
+                                  <p className="text-xs font-bold text-slate-600">
+                                    لا توجد بلدية مطابقة لـ &quot;{communeSearch}&quot;
+                                  </p>
+                                  <p className="text-[10px] text-slate-400 mt-1">
+                                    جرّب البحث بدون همزات أو اختر الولاية من القائمة المجاورة
+                                  </p>
+                                </div>
+                              ) : (
+                                (filteredCommunes as { commune: string; wilayaCode: string; wilayaNameAr: string }[]).map((item) => {
+                                  const isSelected = commune === item.commune && wilaya === item.wilayaCode;
+                                  return (
+                                    <button
+                                      key={`${item.wilayaCode}-${item.commune}`}
+                                      type="button"
+                                      role="option"
+                                      aria-selected={isSelected}
+                                      onClick={() => handleSelectCommune(item.commune, item.wilayaCode)}
+                                      className={`flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-start text-xs font-medium cursor-pointer transition-colors ${
+                                        isSelected
+                                          ? 'bg-emerald-50 font-bold text-emerald-800'
+                                          : 'text-slate-700 hover:bg-slate-100'
+                                      }`}
+                                    >
+                                      <div className="flex items-center gap-2">
+                                        <span className="font-bold text-slate-800">{item.commune}</span>
+                                        <span className="text-[10px] rounded-md bg-slate-100 text-slate-500 px-1.5 py-0.5">
+                                          {item.wilayaCode} - {item.wilayaNameAr}
+                                        </span>
+                                      </div>
+                                      {isSelected && <Check className="size-3.5 text-emerald-600" />}
+                                    </button>
+                                  );
+                                })
+                              )
+                            )}
+                          </div>
                         </div>
                       )}
                       <FieldError name="commune" />
