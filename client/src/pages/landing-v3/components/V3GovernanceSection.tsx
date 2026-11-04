@@ -68,50 +68,55 @@ export const V3GovernanceSection: React.FC = () => {
     <section
       id="compliance"
       dir={dir}
-      className="w-full bg-[#ffffff] py-20"
+      className="w-full bg-[#ffffff] py-14 sm:py-20"
     >
       <div className="max-w-[1200px] mx-auto px-4 sm:px-6">
         
-        {/* Section Heading */}
-        <div className="max-w-[720px] mx-auto text-center space-y-3 mb-16">
-          <p className="text-[13px] font-medium tracking-[0.1em] uppercase text-[#5a5a5a] font-mono">
-            {isAr ? 'المرجعية الدستورية والسيادية' : 'FONDEMENTS JURIDIQUES ET SOUVERAINETÉ'}
-          </p>
-          <h2 className="text-[26px] sm:text-[40px] font-semibold text-[#080808] leading-[1.04] tracking-[-0.4px]">
-            {isAr ? 'منظومة قائمة على الشرعية وحماية المال العام' : 'Une Plateforme Fondée sur la Légalité Absolue'}
-          </h2>
-          <p className="text-[16px] text-[#5a5a5a] leading-[1.6]">
+        {/* Framed Short Section Title */}
+        <div className="flex flex-col items-center justify-center text-center mb-10 sm:mb-14">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full border border-slate-200 bg-slate-50 text-slate-700 text-xs sm:text-sm font-bold shadow-2xs mb-2.5">
+            <span className="size-2 rounded-full bg-emerald-600" />
+            <span>{isAr ? 'المرجعية الدستورية والسيادية' : 'Fondements Juridiques'}</span>
+          </div>
+          <div className="inline-block px-5 sm:px-7 py-2 sm:py-2.5 rounded-2xl border border-slate-200/90 bg-white shadow-2xs">
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-slate-900 tracking-tight">
+              {isAr ? 'الركائز القانونية والسيادية' : 'Piliers Juridiques & Souverains'}
+            </h2>
+          </div>
+          <p className="mt-3 text-sm sm:text-base text-slate-600 max-w-2xl leading-relaxed font-medium">
             {isAr
-              ? 'صُممت منصة «صفقات ذكية» لتكون الدرع الرقمي للدولة في ترسيخ الشفافية ومكافحة البيروقراطية وتجسيد أحدث الإصلاحات التشريعية.'
+              ? 'صُممت منصة «صفقات ذكية» لتكون الدرع الرقمي للدولة في ترسيخ الشفافية ومكافحة البيروقراطية وتجسيد أحكام القانون 23-12.'
               : 'Safaqat Dhakia incarne les réformes législatives nationales visant à bannir la bureaucratie et sécuriser les fonds publics.'}
           </p>
         </div>
 
-        {/* Feature Cards Grid (Spec: 3-column, 16px gap, 24px padding, 8px radius, 1px #d8d8d8 border) */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {/* Feature Cards Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {pillars.map((pillar) => {
             const Icon = pillar.icon;
             return (
               <div
                 key={pillar.num}
-                className="p-6 bg-[#ffffff] border border-[#d8d8d8] rounded-[8px] space-y-4 hover:border-[#146ef5] transition-colors"
+                className="p-6 bg-white border border-slate-200 rounded-2xl hover:border-emerald-400 hover:shadow-sm transition-all duration-200 flex flex-col justify-between"
               >
-                <div className="flex items-center justify-between">
-                  <div className="p-2.5 rounded-[4px] bg-[#f0f0f0] text-[#080808]">
-                    <Icon className="size-5" />
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="text-sm font-black font-mono text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200/60">
+                      {pillar.num}
+                    </span>
+                    <div className="p-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-700">
+                      <Icon className="size-5 text-emerald-700" />
+                    </div>
                   </div>
-                  <span className="font-mono text-[13px] text-[#5a5a5a]">
-                    {pillar.num}
-                  </span>
+
+                  <h3 className="text-base sm:text-lg font-bold text-slate-900 mb-2 leading-snug">
+                    {pillar.title}
+                  </h3>
+
+                  <p className="text-sm text-slate-600 leading-relaxed font-normal">
+                    {pillar.desc}
+                  </p>
                 </div>
-
-                <h3 className="text-[16px] font-semibold text-[#080808] leading-snug">
-                  {pillar.title}
-                </h3>
-
-                <p className="text-[14px] font-normal text-[#5a5a5a] leading-relaxed">
-                  {pillar.desc}
-                </p>
               </div>
             );
           })}

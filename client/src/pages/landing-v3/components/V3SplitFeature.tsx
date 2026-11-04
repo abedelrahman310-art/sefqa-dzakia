@@ -113,28 +113,33 @@ export const V3SplitFeature: React.FC = () => {
     <section
       id="features"
       dir={dir}
-      className="w-full bg-[#ffffff] py-20"
+      className="w-full bg-[#ffffff] py-14 sm:py-20"
     >
       <div className="max-w-[1200px] mx-auto px-4 sm:px-6">
         
+        {/* Framed Short Section Title */}
+        <div className="flex flex-col items-center justify-center text-center mb-10 sm:mb-14">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full border border-slate-200 bg-slate-50 text-slate-700 text-xs sm:text-sm font-bold shadow-2xs mb-2.5">
+            <span className="size-2 rounded-full bg-emerald-600" />
+            <span>{isAr ? 'الترسانة الذكية الاستشارية' : 'Suite d’Intelligence Souveraine'}</span>
+          </div>
+          <div className="inline-block px-5 sm:px-7 py-2 sm:py-2.5 rounded-2xl border border-slate-200/90 bg-white shadow-2xs">
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-slate-900 tracking-tight">
+              {isAr ? 'ذكاء اصطناعي سيادي استشاري' : 'IA Réglementaire & Consultative'}
+            </h2>
+          </div>
+          <p className="mt-3 text-sm sm:text-base text-slate-600 max-w-2xl leading-relaxed font-medium">
+            {isAr
+              ? 'أداة مساعدة ورقابية استشارية تضمن النزاهة والامتثال وتكافؤ الفرص، ولا تتخذ أي قرارات تلقائية إطلاقاً.'
+              : 'Quatre piliers stratégiques développés pour protéger les fonds publics, accélérer les délais et fiabiliser la prise de décision.'}
+          </p>
+        </div>
+
         {/* Split 50/50 Layout with 48px Gap */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           
-          {/* Left Column (6 cols): Eyebrow, Heading, Feature List Items with Arrow Affordance */}
-          <div className="lg:col-span-6 space-y-8">
-            <div className="space-y-3">
-              <p className="text-[13px] font-medium tracking-[0.1em] uppercase text-[#5a5a5a] font-mono">
-                {isAr ? 'الترسانة التقنية المطورة' : 'SUITE TECHNOLOGIQUE DÉPLOYÉE'}
-              </p>
-              <h2 className="text-[26px] sm:text-[40px] font-semibold text-[#080808] leading-[1.04] tracking-[-0.4px]">
-                {isAr ? 'ذكاء اصطناعي سيادي... في صلب كل إجراء' : 'L’Intelligence Artificielle Souveraine au Cœur de l’Action'}
-              </h2>
-              <p className="text-[16px] text-[#5a5a5a] leading-[1.6]">
-                {isAr
-                  ? 'أربع ركائز تقنية تم بناؤها لتأمين المال العام، تسريع الإجراءات، وتمكين المسؤولين والمتعاملين من اتخاذ قرارات دقيقة موثوقة.'
-                  : 'Quatre piliers stratégiques développés pour protéger les fonds publics, accélérer les délais et fiabiliser la prise de décision.'}
-              </p>
-            </div>
+          {/* Left Column (6 cols): Feature List Items with Arrow Affordance */}
+          <div className="lg:col-span-6 space-y-4">
 
             {/* Feature List Items (Spec: body 16px weight 400 #080808, right-arrow in #5a5a5a, bottom border 1px #d8d8d8, padding 16px 0, arrow shifts 4px on hover) */}
             <div className="border-t border-[#d8d8d8]">

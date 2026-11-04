@@ -165,19 +165,22 @@ export const V3LifecycleProcess: React.FC = () => {
     <section
       id="lifecycle"
       dir={dir}
-      className="w-full bg-[#f0f0f0] py-20"
+      className="w-full bg-[#ffffff] py-14 sm:py-20"
     >
       <div className="max-w-[1200px] mx-auto px-4 sm:px-6">
         
-        {/* Section Heading */}
-        <div className="max-w-[720px] mx-auto text-center space-y-3 mb-12">
-          <p className="text-[13px] font-medium tracking-[0.1em] uppercase text-[#5a5a5a] font-mono">
-            {isAr ? 'المسار الإجرائي القانوني' : 'CYCLE DE VIE DU MARCHÉ'}
-          </p>
-          <h2 className="text-[26px] sm:text-[40px] font-semibold text-[#080808] leading-[1.04] tracking-[-0.4px]">
-            {isAr ? 'دورة حياة الصفقة… 7 مراحل قانونية متزامنة' : '7 Jalons Légaux Synchronisés (Loi 23-12)'}
-          </h2>
-          <p className="text-[16px] text-[#5a5a5a] leading-[1.6]">
+        {/* Framed Short Section Title */}
+        <div className="flex flex-col items-center justify-center text-center mb-10 sm:mb-14">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full border border-slate-200 bg-slate-50 text-slate-700 text-xs sm:text-sm font-bold shadow-2xs mb-2.5">
+            <span className="size-2 rounded-full bg-emerald-600" />
+            <span>{isAr ? 'المسار الإجرائي القانوني' : 'Cycle de Vie Réglementaire'}</span>
+          </div>
+          <div className="inline-block px-5 sm:px-7 py-2 sm:py-2.5 rounded-2xl border border-slate-200/90 bg-white shadow-2xs">
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-slate-900 tracking-tight">
+              {isAr ? 'دورة حياة الصفقة العمومية' : 'Cycle de Vie du Marché Public'}
+            </h2>
+          </div>
+          <p className="mt-3 text-sm sm:text-base text-slate-600 max-w-2xl leading-relaxed font-medium">
             {isAr
               ? 'تزامن الأدوار بدقة بين المصلحة المتعاقدة، المتعامل الاقتصادي، والمراقب المالي، تحت الإشراف المباشر لعين الصقر للإدارة المركزية.'
               : 'Coordination fluide et traçabilité intégrale entre l’ensemble des acteurs institutionnels et économiques.'}
