@@ -5,8 +5,7 @@ import V3Nav from './components/V3Nav';
 import V3Hero from './components/V3Hero';
 import V3PortalsSection from './components/V3PortalsSection';
 import V3BrowserMockup from './components/V3BrowserMockup';
-import V3LifecycleProcess from './components/V3LifecycleProcess';
-import V3OperatorBidProcess from './components/V3OperatorBidProcess';
+import V3UnifiedProcurementSection from './components/V3UnifiedProcurementSection';
 import V3SplitFeature from './components/V3SplitFeature';
 import V3GovernanceSection from './components/V3GovernanceSection';
 import V3InteroperabilitySection from './components/V3InteroperabilitySection';
@@ -86,14 +85,8 @@ export function LandingV3Page() {
         {/* فاصل وطني سيادي مزدوج */}
         <V3SectionDivider bg="bg-[#ffffff]" />
 
-        {/* القسم 4: دورة حياة الصفقة القانونية الموحدة (10 مراحل تشريعية) */}
-        <V3LifecycleProcess />
-
-        {/* فاصل وطني سيادي مزدوج */}
-        <V3SectionDivider bg="bg-[#ffffff]" />
-
-        {/* مراحل تحضير العرض للمتعامل بدعم الذكاء الاصطناعي (8 مراحل متسلسلة) */}
-        <V3OperatorBidProcess />
+        {/* القسم 4: مصفوفة مسار الصفقة والرقابة المركزية (5 محطات كبرى مدمجة) */}
+        <V3UnifiedProcurementSection />
 
         {/* فاصل وطني سيادي مزدوج */}
         <V3SectionDivider bg="bg-[#ffffff]" />
