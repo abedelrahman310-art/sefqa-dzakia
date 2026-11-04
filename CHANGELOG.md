@@ -311,3 +311,59 @@ tests/test_central_and_zero_paper_verification.py::...::test_heuristic_analysis_
 - تحذير chunk `locales` >600 kB ظهر بعد بلوغ 4,389 مفتاحاً؛ تُعالَج لاحقاً عبر تقسيم الحزمة.
 - بيانات العرض: العنوانان التجريبيان في `AntiCollusionRadar` fallback وسجلات `ProjectDelayPredictor`
   التجريبية عربية وتظهر فقط عند فشل استدعاءات AI؛ الإنتاج يعتمد بيانات الخادم.
+
+## [0.2.0-unreleased] — 2026-11-04 — شعارات المصلحة والمتعامل (الإعدادات → الشريط العلوي) + إغلاق تصميم الشروط وفاصل V3
+
+### Added — الإضافات
+
+#### 1) رفع شعار المصلحة وشعار المتعامل من صفحة الإعدادات
+
+- **خلفية (Django)**:
+  - `CustomUser.company_logo` (`operator_logos/%Y/%m/`) + ترحيل `users/0011_customuser_company_logo` (مطبّق على Postgres). حقل `Authority.logo` كان موجوداً مسبقاً.
+  - نقاط نهاية جديدة في `safaqat_core/urls.py` (بصيغتي slash/no-slash): `POST/DELETE /api/authority/settings/`
+    (الرفع والحذف حصرياً لدور `ordonnateur` — دور `authority` العادي يُرد 403 `code: 'ordonnateur_only'`)،
+    `POST/DELETE /api/operator/settings/` (دور `operator`)، و`GET …/settings/logo/` لتدفق بايتات الصورة
+    (`FileResponse` + `X-Content-Type-Options: nosniff`) — الوسائط ليست عامة والـ`<img>` لا يحمل Bearer.
+  - التحقق للرفع: الحجم ≤ 2 ميغابايت والصيغ PNG/JPG/SVG فقط (MultiPartParser)؛ الملف القديم يُحذف من التخزين
+    عند الاستبدال؛ كل رفع/حذف يُوثَّق في `AuditLog` (`OPERATOR_LOGO_UPLOADED/DELETED`، `AUTHORITY_LOGO_UPLOADED/DELETED`).
+- **واجهة (React)**:
+  - مكوّنان مشتركان في `components/common/`: `OrgLogo.tsx` (يجلب البايتات عبر عميل `api` المصرّح ويعرضها
+    كـ Object URL مع تنظيف الذاكرة وحدث إعادة تحميل ردود الفعل) و`LogoUploader.tsx` (رفع + معاينة + حذف،
+    تحقق محلي 2MB/PNG-JPG-SVG، ورسائل خطأ من الخادم إن وجدت).
+  - إدراج `LogoUploader` في `pages/authority/SettingsView.tsx` و`pages/operator/OperatorSettingsView.tsx` (بقسمين جديدين لا يغيّران أقاسماً قائمة).
+  - عرض الشعار في الشريط العلوي: `ServiceTopBar` (شريحة 32px في كتلة الهوية بجوار الشعار المنصت، fallback أيقونة Building2)
+    و`OperatorTopBar` (زر الملف الشخصي يعرض شعار المؤسسة عند وجوده ويعود لأيقونته الأصلية عند غيابه).
+  - التحديث الفوري بعد الرفع/الحذف عبر الحدث المخصص `safaqat:org-logo-updated`.
+- **ترجمة**: 10 مفاتيح جديدة `settings.logo.*` في `ar.json` و`fr.json` — **العدد الرسمي الآن 4,399 مفتاحاً**
+  مقابل 4,389 (توثيق خاص منفصل عن قاعدة «لا مفاتيح جديدة» الخاصة بدفعة إعادة التنسيق فقط).
+- **اختبارات سريعة** (`backend/tests/test_settings_logo.py`): **11 passed** — رفع PNG صالح للمتعامل والآمر بالصرف
+  (مع تحقق `AuditLog`)، رفض ملف >2MB (400)، رفض PDF (400)، رفض رفع شعار المصلحة من دور `authority` العادي (403)،
+  404 عند غياب الشعار، تدفق بايتات الشعار في المسار الإظهاري، حذف مع توثيقه، ورفض غير المصادق.
+
+#### 2) إغلاق ملفي التصميم السابقين (المشهد دون تغيير النصوص)
+
+- `pages/legal/TermsPage.tsx` + `pages/legal/LegalLayout.tsx`: ورقة بيضاء V3 بحواف شعرية، ترقيم أزرق tint،
+  وصندوقا استثناء بارزان (أزرق للختم التشفيري، برتقالي `#ffa666` لحظر التواطؤ) — النصوص القانونية كما هي حرفياً.
+- `landing-v3/components/V3SectionDivider.tsx`: دمج النسختين في شعار شبكي واحد — خطوط خضراء `#006233` وحمراء
+  `#d21034` تخرج من ميدالية الذكاء مع حلقة ثنائية اللون، بدل التعاقب المزدوج.
+
+### Fixed — الإصلاحات
+
+- **قراءة علاقة عكسية قديمة في `AuthorityLogoView.get`**: هذا كان سبب الفشل الوحيد في اختبارات الشعار (404 بعد رفع ناجح).
+  بناء `Authority(user=u)` يملأ كاش العلاقة العكسية `'authority'` على كائن المستخدم الشائع التداول؛ في جلسة متعددة الطلبات
+  على نفس الكائن (force_authenticate في الاختبارات) كان `getattr(user, 'authority')` يعيد مثيلاً قديماً بـ`logo=None`
+  رغم تحديث القاعدة. الحل: استعلام مباشر `Authority.objects.filter(user=…).first()` يقرأ أحدث حالة من القاعدة.
+  (سبب تمرير نظرتي المتعامل بدون إصلاح: حقل شعاره على `CustomUser` نفسه لا علاقة عكسية.)
+
+### Verification — التحقق (2026-11-04)
+
+- `python -m pytest tests/test_settings_logo.py -q` → **11 passed**؛ مع `tests/test_auth.py` → 21 passed (لا انكسار).
+- `python manage.py check` → نظيف؛ ترقيل `users/0011` مطبّق على `safaqat_db` (Postgres 5434)؛ حُذف ملف اختبار التصحيح المؤقت.
+- `pnpm i18n:check` → `SUCCESS` (مطابقة تامة: 0/0/0/0).
+- `pnpm --filter client typecheck` → **0 أخطاء** (يشمل `TermsPage`/`LegalLayout`/`OrgLogo`/`LogoUploader` وطريقتَي الشريطين).
+
+### Notes — ملاحظات الدفعة
+
+- لا commit/push — التغييرات المحلية فوق HEAD `89b75d3` (مسح المتعامل/المركزي الموازي كان قبله).
+- حقول الشعار اختيارية بالكامل (null/blank)؛ لا يتغير أي سلوك قائم عند غياب شعار (fallback أيقوني).
+- التغطية البصرية مع الجلسة المسجّلة (شريطان علويان + بطاقتا رفع) متاحة عند إعادة تشغيل الخادمين — لا تُشترط للإغلاق.

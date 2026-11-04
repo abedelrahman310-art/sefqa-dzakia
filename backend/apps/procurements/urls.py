@@ -35,6 +35,7 @@ from .views import (
     LegalNoticeSubmitJustificationView,
     LegalNoticePdfView,
     LegalNoticeViewSet,
+    DealCommitteeView,
 )
 from apps.bids.views import OfferViewSet
 from .views_opening import (
@@ -109,6 +110,10 @@ urlpatterns = [
     path("authority/dashboard", DashboardMetricsView.as_view(), name="authority-dashboard-no-slash"),
     path("check-prices/", CheckPricesView.as_view(), name="check-prices"),
     path("check-prices", CheckPricesView.as_view(), name="check-prices-no-slash"),
+    path("authority/opportunities/<str:pk>/committee/members/", DealCommitteeView.as_view(), name="authority-committee-members"),
+    path("authority/opportunities/<str:pk>/committee/members", DealCommitteeView.as_view(), name="authority-committee-members-no-slash"),
+    path("deals/<str:pk>/committee/members/", DealCommitteeView.as_view(), name="deal-committee-members"),
+    path("deals/<str:pk>/committee/members", DealCommitteeView.as_view(), name="deal-committee-members-no-slash"),
     path("authority/opportunities/<str:pk>/evaluation-data/", EvaluationDataView.as_view(), name="authority-evaluation-data"),
     path("authority/opportunities/<str:pk>/evaluation-data", EvaluationDataView.as_view(), name="authority-evaluation-data-no-slash"),
     path("authority/opportunities/<str:pk>/conclude-evaluation/", ConcludeEvaluationView.as_view(), name="authority-conclude-evaluation"),

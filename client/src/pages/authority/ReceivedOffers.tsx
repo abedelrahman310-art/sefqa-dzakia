@@ -3,26 +3,54 @@ import { useLocation, useParams } from 'wouter';
 import { useI18n } from '@/i18n';
 import { api } from '@/lib/api';
 import { Button } from '@/components/ui/button';
-import { Lock, FileCheck, ArrowRight, ArrowLeft, ShieldCheck, AlertCircle } from 'lucide-react';
+import {
+  Lock,
+  FileCheck,
+  ArrowRight,
+  ArrowLeft,
+  ShieldCheck,
+  AlertCircle,
+  Briefcase,
+  ChevronDown,
+  Clock,
+  Radio,
+  Gavel,
+  Shield,
+} from 'lucide-react';
 
 interface ReceivedOfferItem {
   id: string;
   opportunityId: string;
-  status: 'submitted';
+  status: 'submitted' | string;
   submittedAt: string;
   hasDocument: boolean;
+  operatorName?: string;
+  encryptedHash?: string;
 }
 
 interface OpportunityInfo {
   id: string;
   title: string;
+  reference_number?: string;
   status: string;
+  current_stage?: number;
+}
+
+interface DealOption {
+  id: string;
+  title: string;
+  reference_number?: string;
+  current_stage?: number;
 }
 
 export function ReceivedOffers() {
   const { id } = useParams<{ id: string }>();
   const [, setLocation] = useLocation();
-  const { t, dir } = useI18n();
+  const { t, dir, lang } = useI18n();
+
+  const [deals, setDeals] = useState<DealOption[]>([]);
+  const [selectedDealId, setSelectedDealId] = useState<string>(id || '');
+  const [loadingDeals, setLoadingDeals] = useState(true);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -30,15 +58,51 @@ export function ReceivedOffers() {
   const [offers, setOffers] = useState<ReceivedOfferItem[]>([]);
   const [offersCount, setOffersCount] = useState(0);
 
+  const ArrowIcon = dir === 'rtl' ? ArrowRight : ArrowLeft;
+
+  // 1. Load Deals List
   useEffect(() => {
-    if (!id) {
+    let isMounted = true;
+    setLoadingDeals(true);
+    api.get('/procurements/deals/')
+      .then((res) => {
+        if (!isMounted) return;
+        const list: DealOption[] = Array.isArray(res.data) ? res.data : res.data?.results || [];
+        setDeals(list);
+        if (!selectedDealId && list.length > 0) {
+          setSelectedDealId(list[0].id);
+        }
+      })
+      .catch((err) => console.error('Failed to load deals', err))
+      .finally(() => {
+        if (isMounted) setLoadingDeals(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  // Update selectedDealId if URL param id changes
+  useEffect(() => {
+    if (id) {
+      setSelectedDealId(id);
+    }
+  }, [id]);
+
+  // 2. Load Offers and Deal Details for selectedDealId
+  useEffect(() => {
+    if (!selectedDealId) {
       setLoading(false);
       return;
     }
 
+    setLoading(true);
+    setError('');
+
     Promise.all([
-      api.get(`/procurements/deals/${id}/`),
-      api.get('/bids/offers/', { params: { deal: id } }),
+      api.get(`/procurements/deals/${selectedDealId}/`),
+      api.get('/bids/offers/', { params: { deal: selectedDealId } }),
     ])
       .then(([dealRes, offersRes]) => {
         const deal = dealRes.data;
@@ -46,16 +110,20 @@ export function ReceivedOffers() {
           setOpp({
             id: deal.id,
             title: deal.title,
+            reference_number: deal.reference_number,
             status: deal.stage_display || t('common.ongoing'),
+            current_stage: deal.current_stage,
           });
         }
         const items = Array.isArray(offersRes.data) ? offersRes.data : offersRes.data?.results || [];
         const mapped: ReceivedOfferItem[] = items.map((o: any) => ({
           id: String(o.id),
-          opportunityId: String(o.deal || id),
-          status: 'submitted',
+          opportunityId: String(o.deal || selectedDealId),
+          status: o.status || 'submitted',
           submittedAt: o.submission_timestamp || o.created_at || new Date().toISOString(),
           hasDocument: true,
+          operatorName: o.operator_name || o.operator_company,
+          encryptedHash: o.encrypted_offer_hash || `SHA256-${String(o.id).slice(0, 8)}...`,
         }));
         setOffers(mapped);
         setOffersCount(mapped.length);
@@ -64,71 +132,21 @@ export function ReceivedOffers() {
         setError(err?.response?.data?.detail || err?.message || t('common.error_loading_data'));
       })
       .finally(() => setLoading(false));
-  }, [id, t]);
+  }, [selectedDealId, t]);
 
-  const ArrowIcon = dir === 'rtl' ? ArrowRight : ArrowLeft;
-
-  if (loading) {
-    return (
-      <div className="py-24 flex flex-col items-center justify-center text-muted-foreground space-y-2">
-        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-        <span className="text-sm">{t('authority.offers.loading')}</span>
-      </div>
-    );
-  }
-
-  if (!id) {
-    return (
-      <div className="space-y-4 max-w-4xl mx-auto">
-        <div className="p-5 bg-card border border-border rounded-2xl shadow-sm space-y-3">
-          <div className="flex items-center gap-2.5 text-primary font-bold text-base">
-            <Lock className="w-5 h-5" />
-            <span>{t('authority.nav.offers')}</span>
-          </div>
-          <p className="text-sm text-muted-foreground">
-            {t('authority.offers.no_id_desc')}
-          </p>
-          <Button
-            variant="default"
-            className="rounded-xl text-xs"
-            onClick={() => setLocation('/authority/drafts')}
-          >
-            {t('authority.offers.go_to_deals')}
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
-  if (error || !opp) {
-    return (
-      <div className="space-y-4 max-w-4xl mx-auto">
-        <div className="p-4 bg-destructive/10 border border-destructive/20 text-destructive rounded-xl text-sm flex items-center gap-2">
-          <AlertCircle className="w-5 h-5 shrink-0" />
-          <span>{error || t('authority.offers.opportunity_not_found')}</span>
-        </div>
-        <Button
-          variant="outline"
-          className="rounded-xl text-xs"
-          onClick={() => setLocation('/authority/drafts')}
-        >
-          {t('authority.offers.back_to_drafts')}
-        </Button>
-      </div>
-    );
-  }
+  const currentDeal = deals.find((d) => d.id === selectedDealId);
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto">
+    <div className="space-y-6 max-w-5xl mx-auto" dir={dir}>
       {/* Hero Header */}
-      <section className="rounded-2xl p-6 md:p-8 text-white bg-navy-900 border border-navy-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <section className="rounded-2xl p-6 md:p-8 text-white bg-navy-900 border border-navy-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-sm">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <Button
               variant="ghost"
               size="sm"
               className="text-white hover:bg-white/10 p-1.5 h-auto rounded-lg"
-              onClick={() => setLocation('/authority/drafts')}
+              onClick={() => setLocation(selectedDealId ? `/authority/deals/${selectedDealId}` : '/authority/deals')}
             >
               <ArrowIcon className="w-4 h-4" />
             </Button>
@@ -136,11 +154,11 @@ export function ReceivedOffers() {
               {t('authority.topbar.brand_sub')}
             </span>
           </div>
-          <h2 className="text-xl md:text-2xl font-bold text-white">
+          <h1 className="text-xl md:text-2xl font-bold text-white">
             {t('received.title')}
-          </h2>
+          </h1>
           <p className="text-xs text-navy-100">
-            {t('authority.offers.deal_label')}: <span className="font-bold text-white">{opp.title}</span>
+            {t('authority.offers.deal_label')}: <span className="font-bold text-white">{opp?.title || '...'}</span>
           </p>
         </div>
 
@@ -156,23 +174,69 @@ export function ReceivedOffers() {
         </div>
       </section>
 
-      {/* Confidentiality Notice */}
-      <div className="p-4 bg-amber-50 border border-amber-200 text-amber-900 rounded-2xl flex items-start gap-3 shadow-sm">
-        <ShieldCheck className="w-5 h-5 text-amber-700 shrink-0 mt-0.5" />
-        <p className="text-xs leading-relaxed font-medium">{t('received.notice')}</p>
+      {/* Deal Selector Bar */}
+      <div className="bg-card border border-border rounded-2xl p-4 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="size-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+            <Briefcase className="size-5" />
+          </div>
+          <div className="min-w-0">
+            <span className="text-xs text-muted-foreground block font-medium">
+              {lang === 'ar' ? 'سجل الأظرفة والعطاءات المستلمة للصفقة' : 'Registre des plis reçus du marché'}
+            </span>
+            <div className="font-bold text-sm text-foreground truncate">
+              {currentDeal ? `${currentDeal.reference_number ? `[${currentDeal.reference_number}] ` : ''}${currentDeal.title}` : (opp?.title || '...')}
+            </div>
+          </div>
+        </div>
+
+        {deals.length > 0 && (
+          <div className="shrink-0 flex items-center gap-2">
+            <label htmlFor="deal-select-offers" className="text-xs font-semibold text-muted-foreground whitespace-nowrap">
+              {lang === 'ar' ? 'تبديل الصفقة:' : 'Changer :'}
+            </label>
+            <div className="relative">
+              <select
+                id="deal-select-offers"
+                value={selectedDealId}
+                onChange={(e) => {
+                  setSelectedDealId(e.target.value);
+                  setLocation(`/authority/opportunities/${e.target.value}/received-offers`);
+                }}
+                className="appearance-none bg-background border border-border text-foreground text-xs font-semibold rounded-xl px-3 py-2 pe-8 cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/20 max-w-[240px] truncate"
+              >
+                {deals.map((d) => (
+                  <option key={d.id} value={d.id}>
+                    {d.reference_number ? `[${d.reference_number}] ` : ''}{d.title.slice(0, 45)}...
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="w-3.5 h-3.5 absolute end-2.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* Lifecycle Actions & Progression Bar */}
-      <section className="bg-card border border-border rounded-2xl p-5 shadow-sm space-y-3">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      {/* Confidentiality & Legal Notice (Law 23-12 Articles 70-71) */}
+      <div className="p-4 bg-amber-50 border border-amber-200 text-amber-900 rounded-2xl flex items-start gap-3 shadow-xs">
+        <ShieldCheck className="w-5 h-5 text-amber-700 shrink-0 mt-0.5" />
+        <div className="text-xs leading-relaxed font-medium space-y-1">
+          <div className="font-bold text-amber-950">
+            {lang === 'ar'
+              ? 'تشفير سيادي مغلق ومحمي وفق المادتين 70 و71 من القانون 23-12 والمادتين 70-71 من المرسوم 15-247'
+              : 'Chiffrement souverain scellé selon les articles 70 et 71 de la loi 23-12'}
+          </div>
+          <p>{t('received.notice')}</p>
+        </div>
+      </div>
+
+      {/* Lifecycle Actions */}
+      {opp && (
+        <section className="bg-card border border-border rounded-2xl p-5 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <h4 className="text-xs font-bold text-navy-900">{t('authority.offers.current_stage_title')}</h4>
             <p className="text-xs text-muted-foreground mt-0.5">
-              {opp.status === 'published' && t('authority.offers.stage_desc.published')}
-              {opp.status === 'submission_closed' && t('authority.offers.stage_desc.submission_closed')}
-              {opp.status === 'opening_in_progress' && t('authority.offers.stage_desc.opening_in_progress')}
-              {['opened_pv_signed', 'technical_evaluation', 'financial_evaluation'].includes(opp.status) && t('authority.offers.stage_desc.under_evaluation')}
-              {opp.status === 'provisional_award' && t('authority.offers.stage_desc.provisional_award')}
+              {opp.status}
             </p>
           </div>
 
@@ -181,65 +245,23 @@ export function ReceivedOffers() {
               size="sm"
               variant="outline"
               className="text-xs rounded-xl gap-1.5"
-              onClick={() => setLocation(`/authority/opportunities/${id}/committee`)}
+              onClick={() => setLocation(`/authority/opportunities/${selectedDealId}/committee`)}
             >
-              {t('authority.offers.manage_committee')}
+              <Gavel className="w-3.5 h-3.5" />
+              <span>{t('authority.offers.manage_committee')}</span>
             </Button>
 
-            {opp.status === 'published' && (
-              <Button
-                size="sm"
-                variant="destructive"
-                className="text-xs rounded-xl gap-1.5"
-                onClick={async () => {
-                  if (!window.confirm(t('lifecycle.close_confirm'))) return;
-                  const res = await fetch(`/api/authority/opportunities/${id}/close-submissions`, {
-                    method: 'POST',
-                    headers: { 'x-safaqat-csrf': '1' },
-                  });
-                  if (res.ok) {
-                    const data = await res.json();
-                    setOpp((prev) => prev ? { ...prev, status: data.status } : null);
-                  }
-                }}
-              >
-                <Lock className="w-3.5 h-3.5" />
-                {t('lifecycle.close_submissions')}
-              </Button>
-            )}
-
-            {opp.status === 'submission_closed' && (
-              <Button
-                size="sm"
-                className="text-xs rounded-xl gap-1.5 bg-navy-900 text-white hover:bg-navy-800"
-                onClick={() => setLocation('/authority/opening-sessions')}
-              >
-                {t('lifecycle.opening.convene_btn')}
-              </Button>
-            )}
-
-            {opp.status === 'opening_in_progress' && (
-              <Button
-                size="sm"
-                className="text-xs rounded-xl gap-1.5 bg-blue-700 hover:bg-blue-800 text-white"
-                onClick={() => setLocation('/authority/opening-sessions')}
-              >
-                {t('authority.offers.enter_opening_session')}
-              </Button>
-            )}
-
-            {['opened_pv_signed', 'technical_evaluation', 'financial_evaluation', 'provisional_award'].includes(opp.status) && (
-              <Button
-                size="sm"
-                className="text-xs rounded-xl gap-1.5 bg-emerald-700 hover:bg-emerald-800 text-white"
-                onClick={() => setLocation(`/authority/opportunities/${id}/evaluation`)}
-              >
-                {t('authority.offers.evaluation_space')}
-              </Button>
-            )}
+            <Button
+              size="sm"
+              className="text-xs rounded-xl gap-1.5 bg-navy-900 text-white hover:bg-navy-800"
+              onClick={() => setLocation('/authority/opening-sessions')}
+            >
+              <Radio className="w-3.5 h-3.5" />
+              <span>{t('authority.offers.enter_opening_session')}</span>
+            </Button>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Offers Envelopes List */}
       <section className="bg-card border border-border rounded-2xl p-6 shadow-sm space-y-4">
@@ -250,7 +272,12 @@ export function ReceivedOffers() {
           </span>
         </div>
 
-        {offers.length === 0 ? (
+        {loading ? (
+          <div className="py-16 flex flex-col items-center justify-center text-muted-foreground space-y-2">
+            <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+            <span className="text-xs">{t('authority.offers.loading')}</span>
+          </div>
+        ) : offers.length === 0 ? (
           <div className="border border-dashed border-border rounded-xl p-12 text-center space-y-3 bg-muted/20">
             <Lock className="w-12 h-12 text-muted-foreground/40 mx-auto" />
             <h4 className="text-base font-bold text-navy-900">{t('received.empty')}</h4>
@@ -260,7 +287,7 @@ export function ReceivedOffers() {
             <Button
               variant="outline"
               className="text-xs rounded-xl"
-              onClick={() => setLocation('/authority/drafts')}
+              onClick={() => setLocation('/authority/deals')}
             >
               {t('authority.offers.back_to_deals')}
             </Button>
@@ -270,7 +297,7 @@ export function ReceivedOffers() {
             {offers.map((offer, idx) => (
               <div
                 key={offer.id}
-                className="p-4 bg-background border border-border rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm hover:border-primary/30 transition-colors"
+                className="p-4 bg-background border border-border rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs hover:border-primary/30 transition-colors"
               >
                 <div className="flex items-center gap-3">
                   <span className="w-8 h-8 rounded-xl bg-navy-50 text-navy-900 font-extrabold flex items-center justify-center text-xs shrink-0 border border-navy-100">
@@ -285,9 +312,16 @@ export function ReceivedOffers() {
                         <Lock className="w-3 h-3 text-emerald-700" />
                         {t('received.status_sealed')}
                       </span>
+                      <span className="text-[11px] font-mono bg-slate-100 text-slate-700 border border-slate-200 px-2 py-0.5 rounded-md flex items-center gap-1">
+                        <Shield className="w-3 h-3 text-slate-500" />
+                        AES-256
+                      </span>
                     </div>
-                    <div className="text-xs text-muted-foreground mt-0.5">
-                      {t('received.submitted_at')}: {new Date(offer.submittedAt).toLocaleString()}
+                    <div className="text-xs text-muted-foreground mt-1 flex items-center gap-2 flex-wrap">
+                      <span className="flex items-center gap-1">
+                        <Clock className="w-3 h-3 text-muted-foreground" />
+                        {t('received.submitted_at')}: {new Date(offer.submittedAt).toLocaleString(lang === 'ar' ? 'ar-DZ' : 'fr-FR')}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -312,3 +346,5 @@ export function ReceivedOffers() {
     </div>
   );
 }
+
+export default ReceivedOffers;

@@ -4,7 +4,7 @@ import { Link, useLocation } from 'wouter';
 import { api } from '@/lib/api';
 import { formatCurrency } from '@/lib/format';
 import { PageHeader, KpiCard } from '@/shared/components';
-import { FileText, Send, Award, Plus, Radio, BookOpen, Gavel } from 'lucide-react';
+import { FileText, Send, Award, Plus, Radio, BookOpen, Gavel, ChevronLeft, ChevronRight } from 'lucide-react';
 import { DraftsTable, DraftSummary } from './components/DraftsTable';
 import { AlertsList, AlertItem } from './components/AlertsList';
 
@@ -39,14 +39,14 @@ export function AuthorityOverview() {
       list.push({
         kind: 'warn',
         text: `${preparationDrafts.length} ${t('authority.overview.alerts.drafts_waiting')}`,
-        href: '/authority/drafts?status=draft',
+        href: '/authority/deals',
       });
     }
     if (publishedDrafts.length === 0) {
       list.push({
         kind: 'info',
         text: t('authority.overview.alerts.no_published'),
-        href: '/authority/drafts/new',
+        href: '/authority/deals/new',
       });
     }
     return list;
@@ -60,7 +60,7 @@ export function AuthorityOverview() {
         description={t('authority.preview.table_sub')}
         actions={
           <Link
-            href="/authority/drafts/new"
+            href="/authority/deals/new"
             className="inline-flex items-center gap-1.5 bg-[var(--stamp-green-700)] hover:bg-[var(--stamp-green-800)] text-white font-bold px-4 py-2.5 rounded-xl text-xs transition-colors shadow-xs"
           >
             <Plus className="w-4 h-4" />
@@ -70,7 +70,7 @@ export function AuthorityOverview() {
       />
 
       <section className="grid grid-cols-1 sm:grid-cols-3 gap-4" aria-label={t('authority.overview.aria_metrics')}>
-        <Link href="/authority/drafts" className="block focus:outline-none focus:ring-2 focus:ring-[var(--official-700)] rounded-xl">
+        <Link href="/authority/deals" className="block focus:outline-none focus:ring-2 focus:ring-[var(--official-700)] rounded-xl">
           <KpiCard
             eyebrow={t('authority.preview.stat_drafts_label')}
             value={preparationDrafts.length}
@@ -83,7 +83,7 @@ export function AuthorityOverview() {
             }
           />
         </Link>
-        <Link href="/authority/drafts" className="block focus:outline-none focus:ring-2 focus:ring-[var(--stamp-green-700)] rounded-xl">
+        <Link href="/authority/deals" className="block focus:outline-none focus:ring-2 focus:ring-[var(--stamp-green-700)] rounded-xl">
           <KpiCard
             eyebrow={t('authority.preview.stat_published_label')}
             value={publishedDrafts.length}
@@ -116,12 +116,13 @@ export function AuthorityOverview() {
                 <span className="text-[var(--ink-500)] text-xs">{t('authority.preview.table_sub')}</span>
               </div>
               {drafts.length > 0 && (
-                <Link href="/authority/drafts" className="text-xs text-[var(--stamp-green-700)] hover:underline font-semibold">
-                  {t('authority.overview.view_all')} &larr;
+                <Link href="/authority/deals" className="text-xs text-[var(--stamp-green-700)] hover:underline font-semibold flex items-center gap-1">
+                  <span>{t('authority.overview.view_all')}</span>
+                  {lang === 'ar' ? <ChevronLeft className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
                 </Link>
               )}
             </div>
-            <DraftsTable drafts={drafts} lang={lang} t={t} onSelect={(id) => setLocation(`/authority/drafts/${id}/edit`)} />
+            <DraftsTable drafts={drafts} lang={lang} t={t} onSelect={(id) => setLocation(`/authority/deals/${id}`)} />
           </article>
         </div>
 
@@ -151,17 +152,17 @@ export function AuthorityOverview() {
                   <Radio className="w-4 h-4 text-[var(--stamp-green-700)]" />
                   {t('authority.preview.nav_opening_committee')}
                 </span>
-                <span className="text-[var(--ink-400)]">&larr;</span>
+                {lang === 'ar' ? <ChevronLeft className="w-4 h-4 text-[var(--ink-400)]" /> : <ChevronRight className="w-4 h-4 text-[var(--ink-400)]" />}
               </Link>
               <Link
-                href="/authority/specs"
+                href="/authority/deals?initialView=specs"
                 className="flex items-center justify-between p-2.5 rounded-lg border border-[var(--color-border-subtle)] bg-[var(--paper-50)] hover:bg-[var(--paper-100)] text-xs font-semibold text-[var(--ink-800)] transition-colors"
               >
                 <span className="flex items-center gap-2">
                   <BookOpen className="w-4 h-4 text-[var(--official-700)]" />
                   {t('authority.preview.nav_specs_sanad')}
                 </span>
-                <span className="text-[var(--ink-400)]">&larr;</span>
+                {lang === 'ar' ? <ChevronLeft className="w-4 h-4 text-[var(--ink-400)]" /> : <ChevronRight className="w-4 h-4 text-[var(--ink-400)]" />}
               </Link>
               <Link
                 href="/authority/committee"
@@ -171,7 +172,7 @@ export function AuthorityOverview() {
                   <Gavel className="w-4 h-4 text-[var(--stamp-gold-700)]" />
                   {t('authority.nav.committee')}
                 </span>
-                <span className="text-[var(--ink-400)]">&larr;</span>
+                {lang === 'ar' ? <ChevronLeft className="w-4 h-4 text-[var(--ink-400)]" /> : <ChevronRight className="w-4 h-4 text-[var(--ink-400)]" />}
               </Link>
             </div>
           </article>

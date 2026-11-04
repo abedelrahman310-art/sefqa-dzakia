@@ -14,7 +14,9 @@ import {
   AlertCircle,
   Save,
   ShieldCheck,
+  ImagePlus,
 } from 'lucide-react';
+import { LogoUploader } from '@/components/common/LogoUploader';
 
 export function SettingsView() {
   const { t, lang, setLang } = useI18n();
@@ -139,6 +141,22 @@ export function SettingsView() {
               <Input value={orgWilaya} readOnly className="bg-muted text-foreground cursor-not-allowed text-xs" />
             </div>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* 1.5 Org logo upload */}
+      <Card className="shadow-sm border-border bg-card">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base font-bold flex items-center gap-2">
+            <ImagePlus className="w-4 h-4 text-primary" />
+            <span>{t('settings.logo.title')}</span>
+          </CardTitle>
+          <CardDescription className="text-xs">
+            {t('settings.logo.subtitle')}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <LogoUploader portal="authority" />
         </CardContent>
       </Card>
 

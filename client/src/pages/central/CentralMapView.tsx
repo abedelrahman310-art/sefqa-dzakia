@@ -366,7 +366,7 @@ export function CentralMapView() {
                   {t('central.map_view.title')}
                 </h1>
                 <span className="inline-flex items-center gap-1 rounded-full border border-emerald-100 bg-emerald-50 px-2 py-0.5 text-xs font-bold text-emerald-700">
-                  {t('central.map_view.coverage_count', { count: 58 })}
+                  {t('central.map_view.coverage_count', { count: 69 })}
                 </span>
               </div>
               <p className="mt-0.5 hidden text-xs font-medium leading-relaxed text-gray-500 sm:block">
@@ -396,7 +396,7 @@ export function CentralMapView() {
                     : 'text-gray-500 hover:bg-white/70 hover:text-gray-900'
                 }`}
               >
-                {t('central.map_view.all_wilayas_tab', { count: 58 })}
+                {t('central.map_view.all_wilayas_tab', { count: 69 })}
               </button>
               <button
                 type="button"

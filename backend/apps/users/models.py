@@ -52,7 +52,14 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         default=None,
     )
     municipality = models.CharField('البلدية', max_length=100, blank=True, null=True)
-    
+    company_logo = models.ImageField(
+        'شعار المؤسسة',
+        upload_to='operator_logos/%Y/%m/',
+        null=True,
+        blank=True,
+        help_text='شعار المتعامل الاقتصادي الظاهر في الشريط العلوي (PNG/JPG/SVG، 2MB كحد أقصى)'
+    )
+
     is_active = models.BooleanField('مفعل', default=True)
     is_staff = models.BooleanField('موظف إداري', default=False)
     created_at = models.DateTimeField('تاريخ الإنشاء', default=timezone.now)

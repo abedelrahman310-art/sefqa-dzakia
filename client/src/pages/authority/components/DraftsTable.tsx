@@ -26,7 +26,7 @@ export function DraftsTable({ drafts, lang, t, onSelect }: DraftsTableProps) {
         description={t('authority.overview.empty_drafts_desc')}
         action={
           <Link
-            href="/authority/drafts/new"
+            href="/authority/deals/new"
             className="inline-flex items-center gap-1.5 bg-[var(--stamp-green-700)] hover:bg-[var(--stamp-green-800)] text-white font-bold px-4 py-2 rounded-lg text-xs transition-colors shadow-sm"
           >
             + {t('drafts.new')}
@@ -50,7 +50,7 @@ export function DraftsTable({ drafts, lang, t, onSelect }: DraftsTableProps) {
             </tr>
           </thead>
           <tbody className="divide-y divide-[var(--color-border-subtle)] bg-white">
-          {drafts.slice(0, 3).map((d) => (
+          {drafts.slice(0, 5).map((d) => (
             <tr
               key={d.id}
               className="border-b border-[var(--color-border-subtle)] hover:bg-[var(--paper-100)] transition-colors"

@@ -12,6 +12,7 @@ import {
   Calendar,
 } from 'lucide-react';
 import { NotificationDropdown } from './NotificationDropdown';
+import { OrgLogo } from '@/components/common/OrgLogo';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -142,7 +143,11 @@ export function OperatorTopBar({
             aria-label={t('nav.operator.profile')}
             title={t('nav.operator.profile')}
           >
-            <Building2 aria-hidden="true" />
+            <OrgLogo
+              portal="operator"
+              className="size-full rounded-[10px]"
+              fallback={<Building2 aria-hidden="true" />}
+            />
           </a>
         </Link>
 

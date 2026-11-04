@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useParams } from 'wouter';
 import { useI18n } from '@/i18n';
+import { api } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -13,12 +14,17 @@ import {
   AlertCircle,
   CheckCircle2,
   FileCheck,
+  Briefcase,
+  Printer,
+  ChevronDown,
 } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface CommitteeMember {
   id: string;
   fullName: string;
-  role: 'president' | 'secretary' | 'member' | 'controller';
+  displayName?: string;
+  role: 'president' | 'secretary' | 'rapporteur' | 'member' | 'controller';
   organization?: string;
   title?: string;
   email?: string;
@@ -26,12 +32,26 @@ interface CommitteeMember {
   isActive: boolean;
 }
 
+interface DealOption {
+  id: string;
+  title: string;
+  reference_number?: string;
+  current_stage?: number;
+  stage_display?: string;
+}
+
 export function DealCommitteeManager() {
   const { id } = useParams<{ id: string }>();
   const [, setLocation] = useLocation();
-  const { t, dir } = useI18n();
+  const { t, dir, lang } = useI18n();
+
+  const [deals, setDeals] = useState<DealOption[]>([]);
+  const [selectedDealId, setSelectedDealId] = useState<string>(id || '');
+  const [loadingDeals, setLoadingDeals] = useState(true);
 
   const [members, setMembers] = useState<CommitteeMember[]>([]);
+  const [decreeRef, setDecreeRef] = useState<string>('');
+  const [dealInfo, setDealInfo] = useState<{ title?: string; reference?: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -39,26 +59,69 @@ export function DealCommitteeManager() {
 
   // Form fields
   const [fullName, setFullName] = useState('');
-  const [role, setRole] = useState<'president' | 'secretary' | 'member' | 'controller'>('member');
+  const [role, setRole] = useState<'president' | 'secretary' | 'rapporteur' | 'member' | 'controller'>('member');
   const [organization, setOrganization] = useState('');
   const [title, setTitle] = useState('');
   const [email, setEmail] = useState('');
 
   const ArrowIcon = dir === 'rtl' ? ArrowRight : ArrowLeft;
 
-  const loadMembers = () => {
-    if (!id) {
+  // 1. Load Deals List for Authority
+  useEffect(() => {
+    let isMounted = true;
+    setLoadingDeals(true);
+    api.get('/procurements/deals/')
+      .then((res) => {
+        if (!isMounted) return;
+        const list: DealOption[] = Array.isArray(res.data) ? res.data : res.data?.results || [];
+        setDeals(list);
+        if (!selectedDealId && list.length > 0) {
+          setSelectedDealId(list[0].id);
+        }
+      })
+      .catch((err) => {
+        console.error('Failed to load deals for committee', err);
+      })
+      .finally(() => {
+        if (isMounted) setLoadingDeals(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  // Update selectedDealId if URL param id changes
+  useEffect(() => {
+    if (id) {
+      setSelectedDealId(id);
+    }
+  }, [id]);
+
+  // 2. Load Committee Members for Selected Deal
+  const loadMembers = (targetDealId: string) => {
+    if (!targetDealId) {
       setLoading(false);
       return;
     }
     setLoading(true);
-    fetch(`/api/authority/opportunities/${id}/committee/members`)
+    setError('');
+    fetch(`/api/authority/opportunities/${targetDealId}/committee/members/`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('safaqat_access_token') || ''}`,
+      },
+    })
       .then((res) => {
         if (!res.ok) throw new Error(t('authority.committee.fetch_error'));
         return res.json();
       })
       .then((data) => {
         setMembers(data.committee || data.members || []);
+        setDecreeRef(data.decree_reference || `DEC-COPEM-${targetDealId.slice(0, 6).toUpperCase()}`);
+        setDealInfo({
+          title: data.deal_title,
+          reference: data.deal_reference,
+        });
       })
       .catch((err: any) => {
         setError(err.message || t('authority.committee.load_error'));
@@ -67,40 +130,39 @@ export function DealCommitteeManager() {
   };
 
   useEffect(() => {
-    loadMembers();
-  }, [id]);
+    if (selectedDealId) {
+      loadMembers(selectedDealId);
+    }
+  }, [selectedDealId]);
 
   const handleAddMember = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!fullName.trim()) return;
+    if (!fullName.trim() || !selectedDealId) return;
 
     setSubmitting(true);
     setError('');
     setSuccess('');
 
     try {
-      const assignedRole = (role === 'secretary' ? 'rapporteur' : role === 'controller' ? 'member' : role) as 'president' | 'rapporteur' | 'member';
+      const assignedRole = (role === 'secretary' ? 'rapporteur' : role === 'controller' ? 'member' : role);
       const newMember = {
         displayName: fullName.trim(),
+        fullName: fullName.trim(),
         role: assignedRole,
         appointmentReference: organization.trim() || t('authority.committee.default_appointment_ref'),
+        organization: organization.trim() || t('authority.committee.default_appointment_ref'),
+        title: title.trim() || undefined,
+        email: email.trim() || undefined,
       };
 
-      const existingPayload = members.map((m: any) => ({
-        displayName: m.displayName || m.fullName || t('authority.committee.default_member_name'),
-        role: (m.role === 'secretary' ? 'rapporteur' : m.role === 'controller' ? 'member' : m.role) as 'president' | 'rapporteur' | 'member',
-        appointmentReference: m.appointmentReference || m.organization || t('authority.committee.default_appointment_internal'),
-      }));
-
-      const res = await fetch(`/api/authority/opportunities/${id}/committee/members`, {
+      const res = await fetch(`/api/authority/opportunities/${selectedDealId}/committee/members/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('safaqat_access_token') || ''}`,
           'x-safaqat-csrf': '1',
         },
-        body: JSON.stringify({
-          members: [...existingPayload, newMember],
-        }),
+        body: JSON.stringify(newMember),
       });
 
       if (!res.ok) {
@@ -109,11 +171,12 @@ export function DealCommitteeManager() {
       }
 
       setSuccess(t('authority.committee.assign_success'));
+      toast.success(lang === 'ar' ? 'تم إضافة عضو اللجنة وتحديث مقرر التعيين بنجاح' : 'Membre ajouté avec succès');
       setFullName('');
       setOrganization('');
       setTitle('');
       setEmail('');
-      loadMembers();
+      loadMembers(selectedDealId);
     } catch (err: any) {
       setError(err.message || t('authority.committee.generic_error'));
     } finally {
@@ -121,57 +184,119 @@ export function DealCommitteeManager() {
     }
   };
 
+  const handlePrintDecree = () => {
+    window.print();
+  };
+
   const hasPresident = members.some((m) => m.role === 'president');
   const isQuorumReady = members.length >= 3 && hasPresident;
+  const currentDeal = deals.find((d) => d.id === selectedDealId);
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto">
+    <div className="space-y-6 max-w-5xl mx-auto" dir={dir}>
       {/* Top Banner */}
-      <section className="rounded-2xl p-6 md:p-8 text-white bg-navy-900 border border-navy-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <section className="rounded-2xl p-6 md:p-8 text-white bg-navy-900 border border-navy-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-sm">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <Button
               variant="ghost"
               size="sm"
               className="text-white hover:bg-white/10 p-1.5 h-auto rounded-lg"
-              onClick={() => setLocation(id ? `/authority/opportunities/${id}/received-offers` : '/authority/offers')}
+              onClick={() => setLocation(selectedDealId ? `/authority/deals/${selectedDealId}` : '/authority/deals')}
             >
               <ArrowIcon className="w-4 h-4" />
             </Button>
             <span className="text-xs font-semibold text-navy-100">
-              {t('lifecycle.opening.decree_ref')}
+              {decreeRef ? `${t('lifecycle.opening.decree_ref')}: ${decreeRef}` : t('lifecycle.opening.decree_ref')}
             </span>
           </div>
-          <h2 className="text-xl md:text-2xl font-bold text-white">
+          <h1 className="text-xl md:text-2xl font-bold text-white">
             {t('lifecycle.committee.title')}
-          </h2>
+          </h1>
           <p className="text-xs text-navy-100">
             {t('authority.committee.desc')}
           </p>
         </div>
 
-        {/* Quorum Badge */}
-        <div className="bg-white/10 backdrop-blur border border-white/20 rounded-xl px-5 py-3 flex items-center gap-3">
-          <div className={`p-2.5 rounded-xl border ${isQuorumReady ? 'bg-emerald-500/20 text-emerald-300 border-emerald-400/30' : 'bg-amber-500/20 text-amber-300 border-amber-400/30'}`}>
-            <ShieldCheck className="w-5 h-5" />
+        {/* Quorum Badge & Action */}
+        <div className="flex items-center gap-3 self-end md:self-center flex-wrap">
+          <div className="bg-white/10 backdrop-blur border border-white/20 rounded-xl px-4 py-2.5 flex items-center gap-3">
+            <div className={`p-2 rounded-xl border ${isQuorumReady ? 'bg-emerald-500/20 text-emerald-300 border-emerald-400/30' : 'bg-amber-500/20 text-amber-300 border-amber-400/30'}`}>
+              <ShieldCheck className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="text-[11px] text-navy-100">{t('lifecycle.opening.quorum')}</div>
+              <div className="text-xs font-bold text-white">
+                {isQuorumReady ? (
+                  <span className="text-emerald-300 flex items-center gap-1">
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    {t('lifecycle.opening.quorum_met')} ({members.length})
+                  </span>
+                ) : (
+                  <span className="text-amber-300">
+                    {members.length < 3 ? t('authority.committee.quorum_need_members', { count: 3 - members.length }) : t('authority.committee.quorum_need_president')}
+                  </span>
+                )}
+              </div>
+            </div>
           </div>
-          <div>
-            <div className="text-xs text-navy-100">{t('lifecycle.opening.quorum')}</div>
-            <div className="text-sm font-bold text-white">
-              {isQuorumReady ? (
-                <span className="text-emerald-300 flex items-center gap-1">
-                  <CheckCircle2 className="w-3.5 h-3.5" />
-                  {t('lifecycle.opening.quorum_met')} ({members.length})
-                </span>
-              ) : (
-                <span className="text-amber-300">
-                  {members.length < 3 ? t('authority.committee.quorum_need_members', { count: 3 - members.length }) : t('authority.committee.quorum_need_president')}
-                </span>
-              )}
+
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={handlePrintDecree}
+            className="bg-white/10 hover:bg-white/20 text-white border-white/20 rounded-xl text-xs font-semibold gap-1.5"
+            title={lang === 'ar' ? 'طباعة مقرر التعيين الرسمي (PDF)' : 'Imprimer la décision de nomination'}
+          >
+            <Printer className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">{lang === 'ar' ? 'مقرر التعيين' : 'Décision'}</span>
+          </Button>
+        </div>
+      </section>
+
+      {/* Deal Selector Bar */}
+      <div className="bg-card border border-border rounded-2xl p-4 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="size-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+            <Briefcase className="size-5" />
+          </div>
+          <div className="min-w-0">
+            <span className="text-xs text-muted-foreground block font-medium">
+              {lang === 'ar' ? 'الصفقة المعنية باللجنة (المادة 78 من القانون 23-12)' : 'Marché concerné par la commission'}
+            </span>
+            <div className="font-bold text-sm text-foreground truncate">
+              {currentDeal ? `${currentDeal.reference_number || ''} — ${currentDeal.title}` : (dealInfo?.title || '...')}
             </div>
           </div>
         </div>
-      </section>
+
+        {deals.length > 0 && (
+          <div className="shrink-0 flex items-center gap-2">
+            <label htmlFor="deal-select" className="text-xs font-semibold text-muted-foreground whitespace-nowrap">
+              {lang === 'ar' ? 'تبديل الصفقة:' : 'Changer :'}
+            </label>
+            <div className="relative">
+              <select
+                id="deal-select"
+                value={selectedDealId}
+                onChange={(e) => {
+                  setSelectedDealId(e.target.value);
+                  setLocation(`/authority/opportunities/${e.target.value}/committee`);
+                }}
+                className="appearance-none bg-background border border-border text-foreground text-xs font-semibold rounded-xl px-3 py-2 pe-8 cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/20 max-w-[240px] truncate"
+              >
+                {deals.map((d) => (
+                  <option key={d.id} value={d.id}>
+                    {d.reference_number ? `[${d.reference_number}] ` : ''}{d.title.slice(0, 45)}...
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="w-3.5 h-3.5 absolute end-2.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* Alerts */}
       {error && (
@@ -213,7 +338,7 @@ export function DealCommitteeManager() {
               <div className="space-y-3">
                 {members.map((m, idx) => (
                   <div
-                    key={m.id}
+                    key={m.id || idx}
                     className="p-4 bg-background border border-border rounded-xl flex items-center justify-between gap-3 shadow-sm hover:border-primary/30 transition-colors"
                   >
                     <div className="flex items-center gap-3">
@@ -222,12 +347,12 @@ export function DealCommitteeManager() {
                       </span>
                       <div>
                         <div className="flex items-center gap-2">
-                          <span className="font-bold text-navy-900 text-sm">{(m as any).displayName || m.fullName}</span>
+                          <span className="font-bold text-navy-900 text-sm">{m.displayName || m.fullName}</span>
                           <span
                             className={`text-xs font-bold px-2 py-0.5 rounded-full border ${
                               m.role === 'president'
                                 ? 'bg-amber-50 text-amber-900 border-amber-200'
-                                : m.role === 'secretary'
+                                : m.role === 'secretary' || m.role === 'rapporteur'
                                 ? 'bg-blue-50 text-blue-900 border-blue-200'
                                 : m.role === 'controller'
                                 ? 'bg-teal-50 text-teal-900 border-teal-200'
@@ -236,7 +361,7 @@ export function DealCommitteeManager() {
                           >
                             {m.role === 'president'
                               ? t('lifecycle.committee.role_president')
-                              : m.role === 'secretary'
+                              : m.role === 'secretary' || m.role === 'rapporteur'
                               ? t('lifecycle.committee.role_secretary')
                               : m.role === 'controller'
                               ? t('lifecycle.committee.role_controller')
@@ -326,7 +451,7 @@ export function DealCommitteeManager() {
 
             <Button
               type="submit"
-              disabled={submitting || !fullName.trim()}
+              disabled={submitting || !fullName.trim() || !selectedDealId}
               className="w-full rounded-xl text-xs font-bold gap-2 mt-2"
             >
               <UserPlus className="w-4 h-4" />
@@ -338,3 +463,5 @@ export function DealCommitteeManager() {
     </div>
   );
 }
+
+export default DealCommitteeManager;

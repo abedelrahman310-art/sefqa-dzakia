@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useI18n } from '@/i18n';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { useLocation } from 'wouter';
+import { LogoUploader } from '@/components/common/LogoUploader';
 import {
   Bell,
   User,
@@ -12,6 +13,7 @@ import {
   Building2,
   Mail,
   BadgeCheck,
+  ImagePlus,
 } from 'lucide-react';
 
 interface NotificationPrefs {
@@ -174,6 +176,21 @@ export function OperatorSettingsView() {
                 </button>
               </div>
             </div>
+          </div>
+        </section>
+
+        <section className="op-card" aria-labelledby="org-logo-title">
+          <div className="op-card-head">
+            <div>
+              <h2 id="org-logo-title" className="flex items-center gap-2">
+                <ImagePlus className="size-5 text-[var(--op-gold)]" aria-hidden="true" />
+                <span>{t('settings.logo.title')}</span>
+              </h2>
+              <p className="mt-1 text-xs text-[var(--op-muted)]">{t('settings.logo.subtitle')}</p>
+            </div>
+          </div>
+          <div className="op-card-body">
+            <LogoUploader portal="operator" />
           </div>
         </section>
 

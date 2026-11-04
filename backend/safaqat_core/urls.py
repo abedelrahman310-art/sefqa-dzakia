@@ -10,6 +10,7 @@ from apps.procurements.views import (
     EvaluationDataView,
     EvaluateOfferView,
     ConcludeEvaluationView,
+    DealCommitteeView,
 )
 from apps.bids.views import OfferViewSet
 from apps.contracts.views import ObjectionViewSet
@@ -20,6 +21,8 @@ from apps.users.views import (
     OperatorRecommendedDealsView,
     OperatorCheckComplianceView,
 )
+from apps.users.views_settings import OperatorSettingsApiView, OperatorLogoView
+from apps.procurements.views_settings import AuthoritySettingsApiView, AuthorityLogoView
 from apps.procurements.views_secure_media import SecureDocumentDownloadView
 from apps.procurements.views_pricing import AuthorityPriceAnalysisView
 from apps.reports.views import DashboardMetricsView
@@ -66,6 +69,18 @@ urlpatterns = [
     path('api/operator/profile/', OperatorProfileView.as_view(), name='direct_operator_profile'),
     path('api/operator/profile', OperatorProfileView.as_view(), name='direct_operator_profile_no_slash'),
 
+    # 4.0 Operator Settings (Logo): /api/operator/settings/ & /api/operator/settings/logo/
+    path('api/operator/settings/logo/', OperatorLogoView.as_view(), name='direct_operator_settings_logo'),
+    path('api/operator/settings/logo', OperatorLogoView.as_view(), name='direct_operator_settings_logo_no_slash'),
+    path('api/operator/settings/', OperatorSettingsApiView.as_view(), name='direct_operator_settings'),
+    path('api/operator/settings', OperatorSettingsApiView.as_view(), name='direct_operator_settings_no_slash'),
+
+    # 4.0.1 Authority Settings (Logo): /api/authority/settings/ & /api/authority/settings/logo/
+    path('api/authority/settings/logo/', AuthorityLogoView.as_view(), name='direct_authority_settings_logo'),
+    path('api/authority/settings/logo', AuthorityLogoView.as_view(), name='direct_authority_settings_logo_no_slash'),
+    path('api/authority/settings/', AuthoritySettingsApiView.as_view(), name='direct_authority_settings'),
+    path('api/authority/settings', AuthoritySettingsApiView.as_view(), name='direct_authority_settings_no_slash'),
+
     # 4.1 Operator 2.0 Intelligence: Matcher & Compliance APIs
     path('api/operator/recommended-deals/', OperatorRecommendedDealsView.as_view(), name='direct_operator_recommended_deals'),
     path('api/operator/recommended-deals', OperatorRecommendedDealsView.as_view(), name='direct_operator_recommended_deals_no_slash'),
@@ -73,6 +88,9 @@ urlpatterns = [
     path('api/operator/check-compliance', OperatorCheckComplianceView.as_view(), name='direct_operator_check_compliance_no_slash'),
 
     # 5. Authority Evaluation Workspace: /api/authority/opportunities/{id}/evaluation-data/
+    # 5.0 Authority Committee Members (COPEM) under Law 23-12
+    path('api/authority/opportunities/<str:pk>/committee/members/', DealCommitteeView.as_view(), name='direct_authority_committee_members'),
+    path('api/authority/opportunities/<str:pk>/committee/members', DealCommitteeView.as_view(), name='direct_authority_committee_members_no_slash'),
     path('api/authority/opportunities/<str:pk>/evaluation-data/', EvaluationDataView.as_view(), name='direct_authority_eval_data'),
     path('api/authority/opportunities/<str:pk>/evaluation-data', EvaluationDataView.as_view(), name='direct_authority_eval_data_no_slash'),
     path('api/authority/opportunities/<str:pk>/conclude-evaluation/', ConcludeEvaluationView.as_view(), name='direct_authority_conclude_eval'),

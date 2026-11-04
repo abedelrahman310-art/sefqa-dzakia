@@ -15,8 +15,11 @@ import {
   ArrowRight,
   FileText,
   Clock,
+  Building2,
 } from 'lucide-react';
 import { NotificationDropdown } from './NotificationDropdown';
+import { OrgLogo } from '@/components/common/OrgLogo';
+import { AIChatAssistant } from '@/features/ai/components/AIChatAssistant';
 import {
   Dialog,
   DialogContent,
@@ -50,6 +53,7 @@ export function ServiceTopBar(_props: ServiceTopBarProps) {
   const [isMoreOpen, setIsMoreOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [aiAssistantOpen, setAiAssistantOpen] = useState(false);
   const moreRef = useRef<HTMLDivElement>(null);
 
   const [isSettingsActive] = useRoute('/authority/settings');
@@ -91,8 +95,7 @@ export function ServiceTopBar(_props: ServiceTopBarProps) {
 
   // 5. المساعد الذكي (RAG)
   const handleAssistant = () => {
-    // توجيه مستخدم المصلحة المتعاقدة إلى مسار المساعد الذكي الخاص بالمصلحة
-    setLocation('/authority/assistant');
+    setAiAssistantOpen(true);
   };
 
   // اختصار لوحة المفاتيح Ctrl+K أو Cmd+K لفتح البحث السريع
@@ -159,6 +162,20 @@ export function ServiceTopBar(_props: ServiceTopBarProps) {
         <span className="hidden sm:inline tracking-tight font-extrabold text-[#0B1F3A] text-sm">
           {t('portal.brand')}
         </span>
+        {/* شعار المصلحة المتعاقدة — يُرفع من /authority/settings ويظهر هنا */}
+        <Link href="/authority/settings">
+          <a
+            className="hidden sm:flex size-8 rounded-lg bg-slate-100 border border-[#D5DDEA] items-center justify-center overflow-hidden flex-none transition-colors hover:bg-slate-200/70"
+            title={t('settings.logo.title')}
+            aria-label={t('settings.logo.title')}
+          >
+            <OrgLogo
+              portal="authority"
+              className="size-full"
+              fallback={<Building2 className="size-4 text-[#5B6472]" aria-hidden="true" />}
+            />
+          </a>
+        </Link>
       </div>
 
       {/* فاصل مرن */}
@@ -475,6 +492,7 @@ export function ServiceTopBar(_props: ServiceTopBarProps) {
           </form>
         </DialogContent>
       </Dialog>
+      <AIChatAssistant open={aiAssistantOpen} onOpenChange={setAiAssistantOpen} showTrigger={false} />
     </header>
   );
 }
