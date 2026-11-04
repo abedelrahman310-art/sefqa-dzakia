@@ -68,27 +68,6 @@ export const V3Hero: React.FC = () => {
               <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black text-[#0f3154] leading-[1.08] tracking-tight font-sans my-1">
                 {isAr ? 'صفقات ذكية' : 'Safaqat Dhakia'}
               </h1>
-              <p className="text-sm sm:text-base font-bold text-emerald-800 tracking-wide mt-1">
-                {isAr ? 'البوابة الوطنية الموحدة للصفقات العمومية' : 'Portail National des Marchés Publics'}
-              </p>
-
-              {/* Statutory Badges in Algerian National Colors */}
-              <div className="mt-5 flex flex-wrap items-center justify-center gap-2 sm:gap-3">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs sm:text-sm font-bold bg-[#006233]/10 text-[#006233] border border-[#006233]/30">
-                  <span className="size-2 rounded-full bg-[#006233]" />
-                  <span>{isAr ? 'المنظومة الوطنية الرسمية' : 'Portail Officiel'}</span>
-                </span>
-
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs sm:text-sm font-bold bg-[#d21034]/10 text-[#d21034] border border-[#d21034]/30">
-                  <span className="size-2 rounded-full bg-[#d21034]" />
-                  <span>{isAr ? 'القانون 23-12 • المادة 67' : 'Loi 23-12 • Art. 67'}</span>
-                </span>
-
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs sm:text-sm font-bold bg-[#146ef5]/10 text-[#146ef5] border border-[#146ef5]/30">
-                  <span className="size-2 rounded-full bg-[#146ef5]" />
-                  <span>{isAr ? 'التوقيع المؤهل • القانون 15-04' : 'Signature Qualifiée • Loi 15-04'}</span>
-                </span>
-              </div>
 
               {/* Bottom National Ribbon Accent: 50% Green, 50% Red */}
               <div className="absolute bottom-0 left-0 right-0 h-1.5 flex">
