@@ -13,7 +13,6 @@ import {
   Building2,
   Check,
   ChevronDown,
-  Coins,
   Eye,
   EyeOff,
   Globe,
@@ -25,8 +24,6 @@ import {
   Phone,
   Search,
   Shield,
-  ShieldCheck,
-  Sparkles,
   User,
   UserPlus,
   X,
@@ -50,15 +47,6 @@ const FIELD_NAMES = [
 ] as const;
 
 type FieldName = (typeof FIELD_NAMES)[number];
-
-/** علم الجزائر المصغّر */
-const AlgeriaFlag = () => (
-  <svg viewBox="0 0 20 14" className="h-3 w-5 shrink-0 rounded-[2px] ring-1 ring-black/10" aria-hidden="true">
-    <rect width="10" height="14" fill="#006233" />
-    <rect x="10" width="10" height="14" fill="#ffffff" />
-    <circle cx="10" cy="7" r="3.4" fill="none" stroke="#d21034" strokeWidth="1.4" />
-  </svg>
-);
 
 export function NeumorphicRegister({ initialRole }: NeumorphicRegisterProps) {
   const { lang, dir, setLang } = useI18n();
@@ -373,89 +361,33 @@ export function NeumorphicRegister({ initialRole }: NeumorphicRegisterProps) {
               العمود 1: الواجهة السيادية الطافية (5 أعمدة)
               ══════════════════════════════════════════════════════════════════════ */}
           <aside
-            className={`hidden lg:col-span-5 lg:flex lg:flex-col justify-between rounded-2xl border border-white/80 bg-gradient-to-b from-white/80 to-white/50 p-4 shadow-sm backdrop-blur-2xl ${
+            className={`hidden lg:col-span-5 lg:flex lg:flex-col justify-center items-center rounded-2xl border border-white/80 bg-gradient-to-b from-white/80 to-white/50 p-6 shadow-sm backdrop-blur-2xl ${
               isRtl ? 'lg:order-2' : 'lg:order-1'
             }`}
           >
-            <div>
+            <div className="w-full text-center flex flex-col items-center justify-center my-auto py-8">
               {/* الرأس المؤسسي */}
-              <div className="text-center">
-                <span className="inline-block rounded-full border border-slate-200/60 bg-slate-100/60 px-3 py-0.5 text-[10px] font-bold text-slate-600">
-                  الجمهورية الجزائرية الديمقراطية الشعبية
-                </span>
+              <span className="inline-block rounded-full border border-slate-200/80 bg-white/90 px-4 py-1 text-xs font-bold text-slate-700 shadow-2xs mb-6">
+                الجمهورية الجزائرية الديمقراطية الشعبية
+              </span>
 
-                {/* الشعار الوطني البارز */}
-                <div className="relative my-3 flex justify-center">
-                  <div className="absolute inset-0 mx-auto size-28 rounded-full bg-emerald-400/20 blur-2xl" />
-                  <div className="relative animate-antigravity-float">
-                    <Logo size={96} className="drop-shadow-md" />
-                  </div>
-                </div>
-
-                <h1 className="text-xl font-bold tracking-tight text-[#0f3154]">
-                  {t('register.neumorphic.brand_name')}
-                </h1>
-                <p className="mt-0.5 text-xs font-semibold text-slate-600">
-                  {t('register.neumorphic.brand_tagline')}
-                </p>
-                <p className="mt-0.5 text-[10px] text-slate-500 font-medium">
-                  منظومة رقمية وطنية موحدة وفق أحكام القانون 23-12 والمرسوم 15-247
-                </p>
-              </div>
-
-              {/* بطاقات الميزات الثلاث المدمجة */}
-              <div className="mt-3 space-y-2">
-                {/* 1. صفر ورقة */}
-                <div className="flex items-center gap-2.5 rounded-xl border border-white/90 bg-white/70 p-2 shadow-2xs backdrop-blur-md">
-                  <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-700 ring-1 ring-emerald-500/20">
-                    <ShieldCheck className="size-4" aria-hidden="true" />
-                  </div>
-                  <div>
-                    <h4 className="text-xs font-bold text-slate-800">
-                      مبدأ «صفر ورقة» الرقمي بالكامل
-                    </h4>
-                    <p className="text-[10px] text-slate-500 font-medium leading-tight mt-0.5">
-                      إيداع وتشفير AES-256 رقمي بالكامل دون الحاجة لأي أظرفة ورقية
-                    </p>
-                  </div>
-                </div>
-
-                {/* 2. الربط البيني الآلي */}
-                <div className="flex items-center gap-2.5 rounded-xl border border-white/90 bg-white/70 p-2 shadow-2xs backdrop-blur-md">
-                  <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-sky-500/10 text-sky-700 ring-1 ring-sky-500/20">
-                    <Coins className="size-4" aria-hidden="true" />
-                  </div>
-                  <div>
-                    <h4 className="text-xs font-bold text-slate-800">
-                      الربط البيني للدولة (Inter-opérabilité)
-                    </h4>
-                    <p className="text-[10px] text-slate-500 font-medium leading-tight mt-0.5">
-                      تحقق تلقائي من السجل التجاري وNIF والضرائب دون طلب وثائق ورقية
-                    </p>
-                  </div>
-                </div>
-
-                {/* 3. الذكاء الاصطناعي السيادي */}
-                <div className="flex items-center gap-2.5 rounded-xl border border-white/90 bg-white/70 p-2 shadow-2xs backdrop-blur-md">
-                  <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-indigo-500/10 text-indigo-700 ring-1 ring-indigo-500/20">
-                    <Sparkles className="size-4" aria-hidden="true" />
-                  </div>
-                  <div>
-                    <h4 className="text-xs font-bold text-slate-800">
-                      المطابقة والذكاء الاصطناعي السيادي
-                    </h4>
-                    <p className="text-[10px] text-slate-500 font-medium leading-tight mt-0.5">
-                      مطابقة دقيقة لدفاتر الشروط واقتراح الفرص الأنسب لنشاطك
-                    </p>
-                  </div>
+              {/* الشعار الوطني البارز في المنتصف مع تأثير الطفو */}
+              <div className="relative mb-6 flex justify-center">
+                <div className="absolute inset-0 mx-auto size-32 rounded-full bg-emerald-400/20 blur-2xl" />
+                <div className="relative animate-antigravity-float">
+                  <Logo size={120} className="drop-shadow-md" />
                 </div>
               </div>
-            </div>
 
-            {/* شارة التغطية الوطنية */}
-            <div className="mt-2.5 flex items-center justify-center gap-1.5 rounded-xl border border-slate-200/70 bg-slate-50/70 py-1.5 px-2.5 text-center text-[10px] font-bold text-slate-600">
-              <AlgeriaFlag />
-              <span>تغطية وطنية موحدة لكافة ولايات الجزائر الـ 58 والبلديات الـ 1,541</span>
+              <h1 className="text-2xl font-black tracking-tight text-[#0f3154]">
+                {t('register.neumorphic.brand_name')}
+              </h1>
+              <p className="mt-1 text-sm font-bold text-emerald-800">
+                {t('register.neumorphic.brand_tagline')}
+              </p>
+              <p className="mt-2 text-xs text-slate-500 font-medium leading-relaxed max-w-xs mx-auto">
+                منظومة رقمية وطنية موحدة وفق أحكام القانون 23-12 والمرسوم 15-247
+              </p>
             </div>
           </aside>
 

@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { NotificationDropdown } from './NotificationDropdown';
 import { OrgLogo } from '@/components/common/OrgLogo';
+import { AIChatAssistant } from '@/features/ai/components/AIChatAssistant';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -41,6 +42,7 @@ export function OperatorTopBar({
   const [, setLocation] = useLocation();
   const search = useSearch();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [aiAssistantOpen, setAiAssistantOpen] = useState(false);
   const [query, setQuery] = useState('');
   const currentBreadcrumb = breadcrumb ?? t('nav.operator.workspace');
 
@@ -108,16 +110,15 @@ export function OperatorTopBar({
           {t('common.lang_switch_short')}
         </button>
 
-        <Link href="/operator/assistant">
-          <a
-            href="/operator/assistant"
-            className="op-icon-btn bg-emerald-600/10 text-emerald-700 hover:bg-emerald-600 hover:text-white transition-colors"
-            aria-label={t('common.assistant_rag')}
-            title={t('common.assistant_rag')}
-          >
-            <Sparkles className="size-4" aria-hidden="true" />
-          </a>
-        </Link>
+        <button
+          type="button"
+          onClick={() => setAiAssistantOpen(true)}
+          className="op-icon-btn bg-emerald-600/10 text-emerald-700 hover:bg-emerald-600 hover:text-white transition-colors cursor-pointer"
+          aria-label={t('common.assistant_rag')}
+          title={t('common.assistant_rag')}
+        >
+          <Sparkles className="size-4" aria-hidden="true" />
+        </button>
 
         <Link href="/operator/opening-sessions">
           <a
@@ -181,6 +182,7 @@ export function OperatorTopBar({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      <AIChatAssistant open={aiAssistantOpen} onOpenChange={setAiAssistantOpen} showTrigger={false} />
     </header>
   );
 }
