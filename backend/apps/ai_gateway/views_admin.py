@@ -27,6 +27,7 @@ from .services.price_estimator import (
     estimate_price,
     estimate_from_description,
 )
+from .services.authority_boq_estimator import estimate_authority_boq
 
 logger = logging.getLogger(__name__)
 
@@ -348,3 +349,68 @@ class ProjectDelayRiskView(APIView):
     def get(self, request):
         data = compute_project_delay_risks()
         return Response(data)
+
+
+class AuthorityBOQEstimateView(APIView):
+    """
+    POST /api/ai/authority/estimate-boq/
+    إعداد التقدير المالي الإداري المبدئي وتوليد جدول B.O.Q سري لصالح المصلحة المتعاقدة
+    وفق أحكام القانون رقم 23-12 والمرسوم الرئاسي رقم 15-247.
+    """
+    permission_classes = [IsAuthorityOrAdmin]
+
+    def post(self, request):
+        data = request.data or {}
+        title = (data.get("title") or "").strip()
+        description = (data.get("description") or "").strip()
+        procurement_nature = data.get("procurement_nature", "supplies")
+        wilaya = str(data.get("wilaya", "16"))
+        available_budget = data.get("available_budget")
+        try:
+            vat_rate = float(data.get("vat_rate", 19.0))
+        except (ValueError, TypeError):
+            vat_rate = 19.0
+
+        try:
+            transport_cost = float(data.get("transport_cost", 0.0))
+        except (ValueError, TypeError):
+            transport_cost = 0.0
+
+        try:
+            installation_cost = float(data.get("installation_cost", 0.0))
+        except (ValueError, TypeError):
+            installation_cost = 0.0
+
+        raw_specs_text = (data.get("raw_specs_text") or "").strip()
+
+        if not title and not description and not raw_specs_text:
+            return Response(
+                {"error": "يجب إدخال عنوان الصفقة أو وصف الحاجة أو المواصفات التقنية."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            budget_val = float(available_budget) if available_budget is not None and str(available_budget).strip() != "" else None
+        except (ValueError, TypeError):
+            budget_val = None
+
+        try:
+            result = estimate_authority_boq(
+                title=title or "مشروع صفقة عمومية",
+                description=description or title,
+                procurement_nature=procurement_nature,
+                wilaya=wilaya,
+                available_budget=budget_val,
+                vat_rate=vat_rate,
+                transport_cost=transport_cost,
+                installation_cost=installation_cost,
+                raw_specs_text=raw_specs_text,
+            )
+            return Response(result, status=status.HTTP_200_OK)
+        except Exception as e:
+            logger.exception(f"خطأ أثناء تقدير B.O.Q الإداري: {e}")
+            return Response(
+                {"error": "تعذر توليد التقدير الإداري، يرجى المحاولة لاحقاً."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+

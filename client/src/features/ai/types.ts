@@ -252,4 +252,67 @@ export interface RecommendationsResponse {
   human_verification_required: boolean;
 }
 
+// ─── Authority Administrative Cost & BOQ Estimation ─────────────────────────
+export interface AuthorityBOQItem {
+  id: string;
+  item_number: string;
+  name: string;
+  unit: string;
+  quantity: number;
+  unit_price: number;
+  total_price: number;
+  reference_source?: string;
+  technical_notes?: string;
+}
+
+export interface AuthorityBOQDealSummary {
+  title: string;
+  authority_name: string;
+  procurement_nature: string;
+  procurement_nature_ar: string;
+  wilaya: string;
+  estimated_procedure: string;
+  threshold_limit: number;
+  items_count: number;
+}
+
+export interface AuthorityBOQBudgetSummary {
+  subtotal_ht: number;
+  transport_cost: number;
+  installation_cost: number;
+  total_ht: number;
+  vat_rate: number;
+  vat_amount: number;
+  total_ttc: number;
+  available_budget?: number | null;
+  budget_variance?: number;
+  is_within_budget: boolean;
+  procedure_recommendation: string;
+}
+
+export interface AuthorityBOQEstimatePayload {
+  title: string;
+  description: string;
+  procurement_nature?: string;
+  wilaya?: string;
+  available_budget?: number | null;
+  vat_rate?: number;
+  transport_cost?: number;
+  installation_cost?: number;
+  raw_specs_text?: string;
+}
+
+export interface AuthorityBOQEstimateResponse {
+  deal_summary: AuthorityBOQDealSummary;
+  boq_items: AuthorityBOQItem[];
+  budget_summary: AuthorityBOQBudgetSummary;
+  authority_alerts: string[];
+  tender_recommendations: string[];
+  disclaimer: string;
+  is_advisory: boolean;
+  human_verification_required: boolean;
+  is_confidential_admin_estimate: boolean;
+}
+
+
 

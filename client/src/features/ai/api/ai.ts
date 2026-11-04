@@ -11,7 +11,17 @@ import type {
   PriceEstimateResponse,
   RecommendationsResponse,
   TenderAnalysisResponse,
+  AuthorityBOQEstimatePayload,
+  AuthorityBOQEstimateResponse,
 } from '../types';
+
+export const estimateAuthorityBOQ = (
+  payload: AuthorityBOQEstimatePayload,
+): Promise<AuthorityBOQEstimateResponse> =>
+  api
+    .post<AuthorityBOQEstimateResponse>('/ai/authority/estimate-boq/', payload)
+    .then((r) => r.data);
+
 
 export const priceEstimate = (payload: PriceEstimateRequest): Promise<PriceEstimateResponse> =>
   api.post<PriceEstimateResponse>('/ai/price-estimate/', payload).then((r) => r.data);

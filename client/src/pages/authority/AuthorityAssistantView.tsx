@@ -160,6 +160,7 @@ export function AuthorityAssistantView() {
 
   const quickPrompts = useMemo(
     () => [
+      t('authority.assistant.prompt_boq', { defaultValue: 'كيف أعد تقديراً مالياً مبدئياً وجدول كميات B.O.Q سري قبل إطلاق طلب العروض؟' }),
       t('authority.assistant.prompt_1'),
       t('authority.assistant.prompt_2'),
       t('authority.assistant.prompt_3'),

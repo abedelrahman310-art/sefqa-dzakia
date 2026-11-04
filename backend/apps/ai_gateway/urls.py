@@ -17,6 +17,7 @@ from .views_admin import (
     PriceEstimateView,
     OperatorRecommendationsView,
     ProjectDelayRiskView,
+    AuthorityBOQEstimateView,
 )
 
 urlpatterns = [
@@ -41,6 +42,8 @@ urlpatterns = [
 
     # ─── Authority Portal (بوابة المصلحة المتعاقدة) ──────────────────────
     path("authority/insights/", AuthorityInsightsView.as_view(), name="ai-authority-insights"),
+    path("authority/estimate-boq/", AuthorityBOQEstimateView.as_view(), name="ai-authority-estimate-boq"),
+    path("authority/estimate-boq", AuthorityBOQEstimateView.as_view(), name="ai-authority-estimate-boq-no-slash"),
 
     # ─── Operator Portal (بوابة المتعامل الاقتصادي) ───────────────────────
     path("operator/recommendations/", OperatorRecommendationsView.as_view(), name="ai-operator-recommendations"),

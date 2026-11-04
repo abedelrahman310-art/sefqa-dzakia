@@ -26,10 +26,12 @@ import {
   Eye,
   AlertTriangle,
   Lock,
+  Sparkles,
 } from 'lucide-react';
 import { ALGERIA_69_WILAYAS } from '@/lib/wilayas';
 import { downloadPdfBlob } from '@/lib/pdfDownloader';
 import { toast } from 'sonner';
+import { AIBOQEstimatorModal } from './components/AIBOQEstimatorModal';
 import {
   ProcurementNature,
   ProcurementMethod,
@@ -71,6 +73,7 @@ export function AuthorityDealWizard() {
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [loading, setLoading] = useState<boolean>(!!dealId);
   const [saving, setSaving] = useState<boolean>(false);
+  const [openAIBoqModal, setOpenAIBoqModal] = useState<boolean>(false);
   const [referenceNumber, setReferenceNumber] = useState<string>('');
   const [existingStage, setExistingStage] = useState<number>(1);
 
@@ -369,6 +372,22 @@ export function AuthorityDealWizard() {
   };
 
   // BOQ row handlers
+
+  const handleApplyAIBoq = (
+    items: Array<{ id: string; name: string; unit: string; quantity: number; unitPrice: number }>,
+    totalBudget: number,
+  ) => {
+    setBoqItems(items);
+    if (totalBudget > 0) {
+      setBudget(String(totalBudget));
+    }
+    toast.success(
+      lang === 'ar'
+        ? 'تم إدراج جدول الكميات والأسعار وتحديث الميزانية بنجاح!'
+        : 'B.O.Q et budget mis à jour avec succès!'
+    );
+  };
+
   const handleAddBoqRow = () => {
     setBoqItems((prev) => [
       ...prev,
@@ -1318,16 +1337,29 @@ export function AuthorityDealWizard() {
                     {t('authority.wizard.s3_boq_desc', { total: boqTotal.toLocaleString(lang === 'ar' ? 'ar-DZ' : 'fr-FR') })}
                   </p>
                 </div>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="outline"
-                  onClick={handleAddBoqRow}
-                  className="border-gray-200 text-xs font-bold rounded-xl"
-                >
-                  <Plus className="w-3.5 h-3.5 me-1" />
-                  {t('authority.wizard.s3_boq_add_btn')}
-                </Button>
+                <div className="flex flex-wrap items-center gap-2">
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setOpenAIBoqModal(true)}
+                    className="border-emerald-600/70 bg-emerald-50/70 hover:bg-emerald-100/80 text-emerald-900 text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-2xs"
+                  >
+                    <Sparkles className="w-3.5 h-3.5 text-emerald-700 animate-pulse" />
+                    <span>{lang === 'ar' ? '✨ تقدير الميزانية وتوليد B.O.Q بالذكاء الاصطناعي' : '✨ Estimation & BOQ par IA'}</span>
+                  </Button>
+
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={handleAddBoqRow}
+                    className="border-gray-200 text-xs font-bold rounded-xl"
+                  >
+                    <Plus className="w-3.5 h-3.5 me-1" />
+                    {t('authority.wizard.s3_boq_add_btn')}
+                  </Button>
+                </div>
               </div>
 
               <div className="border border-gray-200 rounded-xl overflow-hidden">
@@ -1778,6 +1810,16 @@ export function AuthorityDealWizard() {
           </div>
         </div>
       )}
+      {/* AI Administrative BOQ & Cost Estimator Modal (Law 23-12 Art. 19) */}
+      <AIBOQEstimatorModal
+        open={openAIBoqModal}
+        onOpenChange={setOpenAIBoqModal}
+        initialTitle={title}
+        initialNature={procurementNature}
+        initialWilaya={wilaya}
+        initialBudget={budget}
+        onApplyToDeal={handleApplyAIBoq}
+      />
     </div>
   );
-}
+};
