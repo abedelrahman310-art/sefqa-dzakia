@@ -10,6 +10,7 @@ import {
   Menu,
   Sparkles,
   Calendar,
+  Settings,
 } from 'lucide-react';
 import { NotificationDropdown } from './NotificationDropdown';
 import { OrgLogo } from '@/components/common/OrgLogo';
@@ -136,6 +137,17 @@ export function OperatorTopBar({
           iconSize={16}
           allNotificationsHref="/operator/notifications"
         />
+
+        <Link href="/operator/settings">
+          <a
+            href="/operator/settings"
+            className="op-icon-btn op-hide-sm"
+            aria-label={t('common.settings') || 'الإعدادات'}
+            title={t('common.settings') || 'الإعدادات'}
+          >
+            <Settings className="size-4 text-gray-600" aria-hidden="true" />
+          </a>
+        </Link>
 
         <Link href="/operator/profile">
           <a

@@ -1,8 +1,9 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useLocation } from 'wouter';
 import {
   Bell,
+  BellRing,
   CheckCheck,
   CheckCircle2,
   Calendar,
@@ -12,9 +13,31 @@ import {
   ExternalLink,
   Loader2,
   Clock,
+  Volume2,
 } from 'lucide-react';
 import { api } from '@/lib/api';
 import { useI18n, type TranslationKey } from '@/i18n';
+
+function playNotificationChime() {
+  try {
+    const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    if (!AudioContextClass) return;
+    const ctx = new AudioContextClass();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
+    osc.frequency.setValueAtTime(880, ctx.currentTime + 0.1); // A5
+    gain.gain.setValueAtTime(0.12, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.35);
+  } catch {
+    // AudioContext blocked or unsupported
+  }
+}
 
 export interface NotificationDropdownProps {
   /** Optional custom button class name to adapt to different topbar styles */
@@ -156,6 +179,44 @@ export function NotificationDropdown({
       ? data.unread_count
       : notifications.filter((n) => !n.isRead).length;
 
+  const [browserPermission, setBrowserPermission] = useState<NotificationPermission>(() => {
+    if (typeof window !== 'undefined' && 'Notification' in window) {
+      return Notification.permission;
+    }
+    return 'default';
+  });
+  const [permissionPrompting, setPermissionPrompting] = useState(false);
+  const [activationSuccess, setActivationSuccess] = useState(false);
+
+  const enableBrowserNotifications = useCallback(async () => {
+    if (typeof window === 'undefined' || !('Notification' in window)) {
+      alert(lang === 'fr' ? 'Votre navigateur ne supporte pas les notifications.' : 'المتصفح لا يدعم التنبيهات المباشرة.');
+      return;
+    }
+    setPermissionPrompting(true);
+    try {
+      const res = await Notification.requestPermission();
+      setBrowserPermission(res);
+      if (res === 'granted') {
+        playNotificationChime();
+        setActivationSuccess(true);
+        setTimeout(() => setActivationSuccess(false), 4000);
+        try {
+          new Notification(lang === 'fr' ? 'Safaqat Dzakia' : 'صفقات ذكية', {
+            body: lang === 'fr'
+              ? 'Les alertes et notifications instantanées sont désormais activées.'
+              : 'تم تفعيل التنبيهات الفورية بنجاح — ستصلك كافة المستجدات.',
+            icon: '/favicon.ico',
+          });
+        } catch {
+          // fallback
+        }
+      }
+    } finally {
+      setPermissionPrompting(false);
+    }
+  }, [lang]);
+
   // Mutation to mark single notification as read
   const markReadMutation = useMutation({
     mutationFn: async (id: string) => {
@@ -253,12 +314,18 @@ export function NotificationDropdown({
 
         {unreadCount > 0 ? (
           <span
-            className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-[#B42318] text-white text-[10px] font-bold flex items-center justify-center shadow-xs border-2 border-white pointer-events-none animate-in fade-in zoom-in-75 duration-200"
+            className="absolute -top-1 -end-1 min-w-[18px] h-[18px] px-1 rounded-full bg-[#B42318] text-white text-[10px] font-bold flex items-center justify-center shadow-xs border-2 border-white pointer-events-none animate-in fade-in zoom-in-75 duration-200"
             aria-hidden="true"
           >
             {unreadCount > 99 ? '99+' : unreadCount}
           </span>
-        ) : null}
+        ) : (
+          <span
+            className="absolute top-1.5 end-1.5 size-2 rounded-full bg-emerald-500 pointer-events-none ring-2 ring-white"
+            title={lang === 'fr' ? 'Système d’alertes actif' : 'نظام التنبيهات مفعّل'}
+            aria-hidden="true"
+          />
+        )}
       </button>
 
       {/* القائمة المنسدلة للإشعارات */}
@@ -300,6 +367,47 @@ export function NotificationDropdown({
               </button>
             )}
           </div>
+
+          {/* شريط حالة / تفعيل التنبيهات الفورية */}
+          {browserPermission !== 'granted' ? (
+            <div className="px-3 py-2 bg-gradient-to-r from-emerald-50 to-teal-50 border-b border-emerald-100 flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2 text-xs text-emerald-950 min-w-0">
+                <BellRing className="size-4 text-emerald-700 shrink-0 animate-bounce" />
+                <span className="truncate text-[11px] font-bold">
+                  {lang === 'fr' ? 'Activer les alertes sur le bureau' : 'تفعيل التنبيهات الفورية (المتصفح)'}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={enableBrowserNotifications}
+                disabled={permissionPrompting}
+                className="px-2.5 py-1 text-[11px] font-black bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg shadow-2xs transition-colors shrink-0 cursor-pointer disabled:opacity-50"
+              >
+                {permissionPrompting ? '...' : (lang === 'fr' ? 'Activer' : 'تفعيل الآن')}
+              </button>
+            </div>
+          ) : (
+            <div className="px-3 py-1.5 bg-emerald-50/50 border-b border-emerald-100/70 flex items-center justify-between text-[11px]">
+              <span className="flex items-center gap-1.5 font-bold text-emerald-800">
+                <span className="size-1.5 rounded-full bg-emerald-600 animate-pulse" />
+                <span>{lang === 'fr' ? 'Alertes instantanées activées' : 'التنبيهات الفورية مفعّلة بنجاح'}</span>
+              </span>
+              <button
+                type="button"
+                onClick={playNotificationChime}
+                title={lang === 'fr' ? 'Tester le son' : 'اختبار صوت التنبيه'}
+                className="p-1 text-emerald-700 hover:text-emerald-900 rounded hover:bg-emerald-100/60 transition-colors cursor-pointer"
+              >
+                <Volume2 className="size-3.5" />
+              </button>
+            </div>
+          )}
+
+          {activationSuccess && (
+            <div className="px-3 py-1.5 bg-emerald-600 text-white text-[11px] font-bold text-center animate-in fade-in">
+              {lang === 'fr' ? '✓ Alertes activées avec succès !' : '✓ تم تفعيل التنبيهات الفورية بنجاح !'}
+            </div>
+          )}
 
           {/* محتوى الإشعارات */}
           <div className="max-h-[360px] overflow-y-auto divide-y divide-slate-100 divide-opacity-60 overscroll-contain">

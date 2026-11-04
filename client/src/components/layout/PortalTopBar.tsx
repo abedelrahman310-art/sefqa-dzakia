@@ -4,7 +4,7 @@ import {
   Check,
   Search,
   Calendar,
-  MessageSquare,
+  Settings,
   User,
   Languages,
   LogOut,
@@ -160,14 +160,25 @@ export function PortalTopBar({
           <Calendar className="w-4 h-4 text-gray-600" aria-hidden="true" />
         </button>
 
-        {/* 5. الإشعارات الحية */}
+        {/* 5. الإشعارات الحية والتنبيهات */}
         <NotificationDropdown
           buttonClassName="portal-topbar__icon-btn relative hover:text-[#0f3154] hover:bg-slate-100 transition-colors"
           iconSize={16}
           allNotificationsHref={routePrefix === '/central' ? '/central/notifications' : '/operator/notifications'}
         />
 
-        {/* 6. الملف التعريفي وإدارة الصلاحيات */}
+        {/* 6. الإعدادات وتخصيص المنظومة */}
+        <button
+          type="button"
+          onClick={() => setLocation(routePrefix === '/central' ? '/central/permissions' : '/operator/settings')}
+          className="portal-topbar__icon-btn hover:text-[#0f3154] hover:bg-slate-100 transition-colors"
+          aria-label={t('common.settings') || 'الإعدادات'}
+          title={t('common.settings') || 'الإعدادات'}
+        >
+          <Settings className="w-4 h-4 text-gray-600" aria-hidden="true" />
+        </button>
+
+        {/* 7. الملف التعريفي للمستخدم */}
         <button
           type="button"
           onClick={() => setLocation(routePrefix === '/central' ? '/central/permissions' : '/operator/profile')}

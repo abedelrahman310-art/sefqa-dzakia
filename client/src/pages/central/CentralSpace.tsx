@@ -157,6 +157,7 @@ export function CentralSpace() {
         <Route path="/central/injunctions" component={CentralInjunctions} />
         <Route path="/central/integrity" component={CentralIntegrityView} />
         <Route path="/central/permissions" component={CentralPermissions} />
+        <Route path="/central/settings" component={CentralPermissions} />
         <Route path="/central/notifications" component={OperatorNotificationsView} />
         <Route path="/central/overview" component={CentralOverview} />
         <Route path="/central" component={CentralOverview} />
