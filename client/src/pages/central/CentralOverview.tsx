@@ -91,19 +91,19 @@ export function CentralOverview() {
 
 
       {/* بانر رادار النزاهة والتنبؤ بتعثر المشاريع */}
-      <div className="bg-[#0B1F3A] rounded-2xl p-4 text-white border border-[#14305A] shadow-md flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-rose-500/20 text-rose-400 border border-rose-500/30 flex items-center justify-center shrink-0">
-            <AlertTriangle className="w-5 h-5 text-rose-400" />
+      <div className="relative overflow-hidden rounded-2xl border border-rose-200/80 bg-gradient-to-r from-rose-50/60 via-slate-50 to-white p-4.5 shadow-2xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div className="flex items-center gap-3.5">
+          <div className="w-10 h-10 rounded-xl bg-rose-100 text-rose-700 border border-rose-200 flex items-center justify-center shrink-0 shadow-2xs">
+            <AlertTriangle className="w-5 h-5 text-rose-600" />
           </div>
           <div>
-            <h4 className="text-sm font-extrabold text-white flex items-center gap-2">
-              <span className="text-white">{t('central.dashboard.integrity_title')}</span>
-              <span className="text-[11px] px-2 py-0.5 rounded-full bg-rose-500/30 text-rose-200 border border-rose-400/40 font-bold">
+            <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+              <span>{t('central.dashboard.integrity_title')}</span>
+              <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-800 border border-rose-200 font-bold">
                 {t('central.dashboard.integrity_badge')}
               </span>
             </h4>
-            <p className="text-xs text-slate-200 mt-0.5">
+            <p className="text-xs text-slate-600 mt-1 leading-relaxed">
               {t('central.dashboard.integrity_desc')}
             </p>
           </div>
@@ -111,7 +111,7 @@ export function CentralOverview() {
         <button
           type="button"
           onClick={() => setLocation('/central/integrity')}
-          className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs rounded-xl shadow transition-colors shrink-0 whitespace-nowrap self-stretch md:self-auto text-center cursor-pointer"
+          className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs rounded-xl shadow-xs transition-colors shrink-0 whitespace-nowrap self-stretch md:self-auto text-center cursor-pointer"
         >
           {t('central.dashboard.integrity_cta')}
         </button>

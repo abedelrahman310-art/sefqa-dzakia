@@ -289,10 +289,6 @@ export function CentralPermissions() {
       {/* 1. ترويسة الصفحة السيادية الرسمية */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200 dark:border-slate-800">
         <div className="space-y-1">
-          <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 text-xs font-bold">
-            <span className="size-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span>{t('central.permissions.header_badge')}</span>
-          </div>
           <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white flex items-center gap-2.5">
             <Shield className="size-6 text-emerald-600 dark:text-emerald-500" />
             <span>{t('central.permissions.title')}</span>

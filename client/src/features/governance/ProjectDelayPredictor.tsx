@@ -253,23 +253,23 @@ export function ProjectDelayPredictor() {
 
   return (
     <div className="space-y-6" dir={dir}>
-      {/* رأس المؤشر والبانر التوضيحي */}
-      <div className="bg-gradient-to-r from-slate-900 via-navy-900 to-indigo-950 rounded-2xl p-6 text-white border border-slate-800 shadow-md">
+      {/* رأس المؤشر: تصميم ناصع ومؤسسي راقٍ */}
+      <div className="rounded-2xl border border-slate-200/90 bg-gradient-to-r from-slate-50 via-amber-50/20 to-white p-5 shadow-2xs">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-1.5">
             <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping" />
-              <span className="text-xs font-bold text-amber-300 tracking-wide uppercase">
+              <span className="size-2 rounded-full bg-amber-500 animate-ping" />
+              <span className="text-[11px] font-bold text-amber-800 uppercase tracking-wide">
                 {t('central.integrity.delay.engine_badge')}
               </span>
             </div>
-            <h1 className="text-xl md:text-2xl font-extrabold text-white flex items-center gap-3">
+            <h2 className="text-lg sm:text-xl font-black text-slate-900 flex items-center gap-2.5">
               <span>{t('central.integrity.delay.title')}</span>
-              <span className="text-xs px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold">
+              <span className="text-xs px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-200 font-bold">
                 {t('central.integrity.delay.critical_badge', { count: summary.critical })}
               </span>
-            </h1>
-            <p className="text-xs text-slate-300 max-w-3xl leading-relaxed">
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-600 max-w-3xl leading-relaxed">
               {t('central.integrity.delay.subtitle')}
             </p>
           </div>
@@ -280,7 +280,7 @@ export function ProjectDelayPredictor() {
               disabled={loading}
               variant="outline"
               size="sm"
-              className="border-white/20 text-white hover:bg-white/10 text-xs rounded-xl gap-2"
+              className="border-slate-300 text-slate-700 hover:bg-slate-100 text-xs rounded-xl gap-2 h-9"
             >
               <Activity className="w-3.5 h-3.5" />
               <span>{t('central.integrity.delay.refresh')}</span>
@@ -303,7 +303,7 @@ export function ProjectDelayPredictor() {
             <span>{t('central.integrity.delay.kpi_total')}</span>
             <Layers className="w-4 h-4 text-primary" />
           </div>
-          <div className="text-2xl font-black text-navy-950">{summary.total}</div>
+          <div className="text-2xl font-black text-slate-900">{summary.total}</div>
           <div className="text-xs text-muted-foreground">{t('central.integrity.delay.kpi_total_sub')}</div>
         </div>
 
@@ -354,10 +354,10 @@ export function ProjectDelayPredictor() {
               key={tier.id}
               type="button"
               onClick={() => setSelectedRisk(tier.id)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
                 selectedRisk === tier.id
-                  ? 'bg-navy-900 text-white shadow-sm'
-                  : 'bg-muted/60 text-muted-foreground hover:text-navy-900 hover:bg-muted'
+                  ? 'bg-emerald-700 text-white shadow-xs'
+                  : 'bg-slate-100 text-slate-600 hover:text-slate-900 hover:bg-slate-200/70'
               }`}
             >
               {tier.label}

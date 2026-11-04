@@ -115,17 +115,6 @@ export function PortalTopBar({
           <span className="text-xs font-bold text-gray-800">{t('common.lang_switch_short')}</span>
         </button>
 
-        {/* المساعد الصوتي السيادي (Voice Copilot) */}
-        <button
-          type="button"
-          onClick={() => setVoiceCopilotOpen(true)}
-          className="portal-topbar__icon-btn bg-emerald-50 hover:bg-emerald-600 text-emerald-800 hover:text-white transition-colors"
-          aria-label="المساعد الصوتي السيادي (Voice Copilot)"
-          title="المساعد الصوتي السيادي (Voice Copilot)"
-        >
-          <Mic className="w-4 h-4 shrink-0 text-emerald-700 hover:text-white" aria-hidden="true" />
-        </button>
-
         {/* 1. المساعد الذكي السيادي (AI Copilot / Assistant) */}
         <button
           type="button"
@@ -138,7 +127,18 @@ export function PortalTopBar({
           <span className="size-1.5 rounded-full bg-emerald-500 absolute top-1.5 end-1.5 animate-pulse" />
         </button>
 
-        {/* 2. بحث */}
+        {/* 2. المساعد الصوتي السيادي (Voice Copilot) */}
+        <button
+          type="button"
+          onClick={() => setVoiceCopilotOpen(true)}
+          className="portal-topbar__icon-btn bg-emerald-50 hover:bg-emerald-600 text-emerald-800 hover:text-white transition-colors"
+          aria-label="المساعد الصوتي السيادي (Voice Copilot)"
+          title="المساعد الصوتي السيادي (Voice Copilot)"
+        >
+          <Mic className="w-4 h-4 shrink-0 text-emerald-700 hover:text-white" aria-hidden="true" />
+        </button>
+
+        {/* 3. بحث في الصفقات */}
         <button
           type="button"
           onClick={() => setLocation(routePrefix === '/central' ? '/central/deals' : '/operator/deals')}
@@ -149,7 +149,7 @@ export function PortalTopBar({
           <Search className="w-4 h-4 text-gray-600" aria-hidden="true" />
         </button>
 
-        {/* 3. التقويم */}
+        {/* 4. التقويم والجلسات */}
         <button
           type="button"
           onClick={() => setLocation(routePrefix === '/central' ? '/central/deals' : '/operator/opening-sessions')}
@@ -160,31 +160,23 @@ export function PortalTopBar({
           <Calendar className="w-4 h-4 text-gray-600" aria-hidden="true" />
         </button>
 
-        {/* 4. الرسائل والمحادثة */}
-        <button
-          type="button"
-          onClick={() => setLocation('/operator/assistant')}
-          className="portal-topbar__icon-btn hover:text-[#0f3154] hover:bg-slate-100 transition-colors"
-          aria-label={t('common.messages')}
-          title={t('common.messages')}
-        >
-          <MessageSquare className="w-4 h-4 text-gray-600" aria-hidden="true" />
-        </button>
-
-        {/* 5. الإشعارات */}
+        {/* 5. الإشعارات الحية */}
         <NotificationDropdown
           buttonClassName="portal-topbar__icon-btn relative hover:text-[#0f3154] hover:bg-slate-100 transition-colors"
           iconSize={16}
           allNotificationsHref={routePrefix === '/central' ? '/central/notifications' : '/operator/notifications'}
         />
 
-        {/* الصورة الرمزية للمستخدم */}
-        <div
-          className="size-8 rounded-full bg-[#0f172a] text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-xs cursor-pointer"
-          title={orgName}
+        {/* 6. الملف التعريفي وإدارة الصلاحيات */}
+        <button
+          type="button"
+          onClick={() => setLocation(routePrefix === '/central' ? '/central/permissions' : '/operator/profile')}
+          className="size-8 rounded-full bg-[#0f3154] hover:bg-emerald-700 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-xs cursor-pointer transition-colors"
+          title={`${orgName} — ${routePrefix === '/central' ? t('nav.central.permissions') : t('common.profile')}`}
+          aria-label={`${orgName} — ${routePrefix === '/central' ? t('nav.central.permissions') : t('common.profile')}`}
         >
           <User className="w-4 h-4" />
-        </div>
+        </button>
 
         {/* تسجيل الخروج — يظهر في بوابة الرقابة المركزية فقط */}
         {showLogout && (

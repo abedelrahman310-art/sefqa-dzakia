@@ -5,24 +5,25 @@ export interface PageHeaderProps {
   title: string;
   description?: string;
   actions?: React.ReactNode;
-  /** تخصيص حجم/وزن عنوان الصفحة (افتراضياً heading-h1) */
+  /** تخصيص حجم/وزن عنوان الصفحة (افتراضياً text-xl font-black) */
   titleClassName?: string;
+  descriptionClassName?: string;
 }
 
-export function PageHeader({ eyebrow, title, description, actions, titleClassName = '' }: PageHeaderProps) {
+export function PageHeader({ eyebrow, title, description, actions, titleClassName = '', descriptionClassName = '' }: PageHeaderProps) {
   return (
-    <div className="mb-8">
-      {eyebrow && <div className="eyebrow">{eyebrow}</div>}
-      <div className="flex items-start justify-between gap-6 flex-wrap">
+    <div className="mb-6">
+      {eyebrow && <div className="eyebrow mb-1.5">{eyebrow}</div>}
+      <div className="flex items-start justify-between gap-4 flex-wrap">
         <div className="flex-1 min-w-0">
-          <h1 className={`heading-h1 mb-3 ${titleClassName}`}>{title}</h1>
+          <h1 className={`text-xl sm:text-2xl font-black text-slate-900 tracking-tight mb-1.5 ${titleClassName}`}>{title}</h1>
           {description && (
-            <p className="text-body-lg text-[var(--color-text-secondary)] max-w-2xl">
+            <p className={`text-xs sm:text-sm text-slate-500 leading-relaxed max-w-3xl ${descriptionClassName}`}>
               {description}
             </p>
           )}
         </div>
-        {actions && <div className="flex items-center gap-3">{actions}</div>}
+        {actions && <div className="flex items-center gap-2.5 shrink-0">{actions}</div>}
       </div>
     </div>
   );

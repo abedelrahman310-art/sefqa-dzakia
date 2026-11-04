@@ -33,18 +33,13 @@ export function CentralIntegrityView() {
   return (
     <div className="space-y-6 max-w-7xl mx-auto" dir={dir}>
       {/* الترويسة السيادية الوطنية للإدارة المركزية */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-border">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-slate-200">
         <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-extrabold uppercase tracking-wider text-primary bg-primary/10 px-2.5 py-0.5 rounded-full border border-primary/20">
-              {t('central.integrity.badge')}
-            </span>
-          </div>
-          <h1 className="text-xl md:text-2xl font-black text-navy-950 flex items-center gap-2.5">
-            <ShieldAlert className="w-6 h-6 text-primary" />
+          <h1 className="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2.5">
+            <ShieldAlert className="w-6 h-6 text-emerald-600" />
             <span>{t('central.integrity.title')}</span>
           </h1>
-          <p className="text-xs text-muted-foreground leading-relaxed">
+          <p className="text-xs sm:text-sm text-slate-500 leading-relaxed max-w-3xl">
             {t('central.integrity.subtitle')}
           </p>
         </div>
@@ -55,7 +50,7 @@ export function CentralIntegrityView() {
             size="sm"
             onClick={handleExportAuditDossier}
             disabled={exporting}
-            className="text-xs rounded-xl font-bold border-border shadow-sm gap-2"
+            className="text-xs rounded-xl font-bold border-slate-300 text-slate-700 hover:bg-slate-100 shadow-2xs gap-2 h-9"
           >
             <Download className="w-3.5 h-3.5" />
             <span>{exporting ? t('central.integrity.exporting') : t('central.integrity.export')}</span>
@@ -64,30 +59,30 @@ export function CentralIntegrityView() {
       </div>
 
       {/* شريط التبويب الرئيسي */}
-      <div className="flex items-center gap-2 border-b border-border pb-1">
+      <div className="flex items-center gap-2 border-b border-slate-200 pb-1.5">
         <button
           type="button"
           onClick={() => setActiveTab('anti_collusion')}
-          className={`px-4 py-2.5 rounded-xl text-xs font-extrabold transition-all flex items-center gap-2 cursor-pointer ${
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
             activeTab === 'anti_collusion'
-              ? 'bg-[#0B1F3A] text-white shadow-md border border-[#14305A]'
-              : 'bg-card text-muted-foreground hover:bg-muted/80 hover:text-slate-900 border border-border/80'
+              ? 'bg-emerald-700 text-white shadow-xs border border-emerald-800'
+              : 'bg-white text-slate-600 hover:bg-slate-100 hover:text-slate-900 border border-slate-200'
           }`}
         >
-          <ShieldAlert className="w-4 h-4 text-rose-400" />
+          <ShieldAlert className="w-4 h-4 text-rose-500" />
           <span>{t('central.integrity.tab_anti_collusion')}</span>
         </button>
 
         <button
           type="button"
           onClick={() => setActiveTab('delay_predictor')}
-          className={`px-4 py-2.5 rounded-xl text-xs font-extrabold transition-all flex items-center gap-2 cursor-pointer ${
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
             activeTab === 'delay_predictor'
-              ? 'bg-[#0B1F3A] text-white shadow-md border border-[#14305A]'
-              : 'bg-card text-muted-foreground hover:bg-muted/80 hover:text-slate-900 border border-border/80'
+              ? 'bg-emerald-700 text-white shadow-xs border border-emerald-800'
+              : 'bg-white text-slate-600 hover:bg-slate-100 hover:text-slate-900 border border-slate-200'
           }`}
         >
-          <Clock className="w-4 h-4 text-amber-400" />
+          <Clock className="w-4 h-4 text-amber-500" />
           <span>{t('central.integrity.tab_delay')}</span>
         </button>
       </div>
