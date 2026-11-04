@@ -24,6 +24,7 @@ export const V3Nav: React.FC = () => {
     { label: isAr ? 'المعاينة الحية' : 'Aperçu Direct', href: '#live-demo' },
     { label: isAr ? 'الترسانة الذكية' : 'Suite IA', href: '#features' },
     { label: isAr ? 'مسار الصفقة' : 'Cycle de Vie', href: '#lifecycle' },
+    { label: isAr ? 'تحضير العرض' : 'Offre IA', href: '#bid-prep' },
     { label: isAr ? 'الامتثال' : 'Conformité', href: '#compliance' },
   ];
 
