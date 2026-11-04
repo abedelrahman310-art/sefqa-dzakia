@@ -68,10 +68,10 @@ export function CentralIntegrityView() {
         <button
           type="button"
           onClick={() => setActiveTab('anti_collusion')}
-          className={`px-4 py-2.5 rounded-xl text-xs font-extrabold transition-all flex items-center gap-2 ${
+          className={`px-4 py-2.5 rounded-xl text-xs font-extrabold transition-all flex items-center gap-2 cursor-pointer ${
             activeTab === 'anti_collusion'
-              ? 'bg-navy-950 text-white shadow-md'
-              : 'bg-card text-muted-foreground hover:bg-muted/80 hover:text-navy-950 border border-border/80'
+              ? 'bg-[#0B1F3A] text-white shadow-md border border-[#14305A]'
+              : 'bg-card text-muted-foreground hover:bg-muted/80 hover:text-slate-900 border border-border/80'
           }`}
         >
           <ShieldAlert className="w-4 h-4 text-rose-400" />
@@ -81,10 +81,10 @@ export function CentralIntegrityView() {
         <button
           type="button"
           onClick={() => setActiveTab('delay_predictor')}
-          className={`px-4 py-2.5 rounded-xl text-xs font-extrabold transition-all flex items-center gap-2 ${
+          className={`px-4 py-2.5 rounded-xl text-xs font-extrabold transition-all flex items-center gap-2 cursor-pointer ${
             activeTab === 'delay_predictor'
-              ? 'bg-navy-950 text-white shadow-md'
-              : 'bg-card text-muted-foreground hover:bg-muted/80 hover:text-navy-950 border border-border/80'
+              ? 'bg-[#0B1F3A] text-white shadow-md border border-[#14305A]'
+              : 'bg-card text-muted-foreground hover:bg-muted/80 hover:text-slate-900 border border-border/80'
           }`}
         >
           <Clock className="w-4 h-4 text-amber-400" />

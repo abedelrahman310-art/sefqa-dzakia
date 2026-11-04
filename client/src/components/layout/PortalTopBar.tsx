@@ -12,6 +12,7 @@ import {
   Mic,
 } from 'lucide-react';
 import { VoiceCopilotWidget } from '@/features/voice/VoiceCopilotWidget';
+import { AIChatAssistant } from '@/features/ai/components/AIChatAssistant';
 import { useI18n } from '@/i18n';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { useLocation } from 'wouter';
@@ -51,6 +52,7 @@ export function PortalTopBar({
   const { user, logout } = useAuth();
   const [pathname, setLocation] = useLocation();
   const [voiceCopilotOpen, setVoiceCopilotOpen] = React.useState(false);
+  const [aiAssistantOpen, setAiAssistantOpen] = React.useState(false);
 
   const orgName = user?.organizationName || user?.displayName || t('common.organization');
 
@@ -124,15 +126,16 @@ export function PortalTopBar({
           <Mic className="w-4 h-4 shrink-0 text-emerald-700 hover:text-white" aria-hidden="true" />
         </button>
 
-        {/* 1. المساعد الذكي — أخضر ومميز */}
+        {/* 1. المساعد الذكي السيادي (AI Copilot / Assistant) */}
         <button
           type="button"
-          onClick={() => setLocation('/operator/assistant')}
-          className="portal-topbar__icon-btn bg-[#047857]/10 hover:bg-[#047857] text-[#047857] hover:text-white transition-colors"
+          onClick={() => setAiAssistantOpen(true)}
+          className="portal-topbar__icon-btn bg-[#047857]/10 hover:bg-[#047857] text-[#047857] hover:text-white transition-colors relative"
           aria-label={t('common.assistant_rag')}
           title={t('common.assistant_rag')}
         >
           <Sparkles className="w-4 h-4 shrink-0" aria-hidden="true" />
+          <span className="size-1.5 rounded-full bg-emerald-500 absolute top-1.5 end-1.5 animate-pulse" />
         </button>
 
         {/* 2. بحث */}
@@ -200,6 +203,7 @@ export function PortalTopBar({
         )}
       </div>
       <VoiceCopilotWidget isOpen={voiceCopilotOpen} onClose={() => setVoiceCopilotOpen(false)} />
+      <AIChatAssistant open={aiAssistantOpen} onOpenChange={setAiAssistantOpen} showTrigger={false} />
     </header>
   );
 }

@@ -21,9 +21,21 @@ import { Input } from '@/components/ui/input';
 import type { ChatMessage } from '../types';
 import { useI18n } from '@/i18n';
 
-export function AIChatAssistant() {
+export interface AIChatAssistantProps {
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  showTrigger?: boolean;
+}
+
+export function AIChatAssistant({
+  open: controlledOpen,
+  onOpenChange: setControlledOpen,
+  showTrigger = true,
+}: AIChatAssistantProps = {}) {
   const { t, dir } = useI18n();
-  const [isOpen, setIsOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+  const isOpen = controlledOpen !== undefined ? controlledOpen : internalOpen;
+  const setIsOpen = controlledOpen !== undefined && setControlledOpen ? setControlledOpen : setInternalOpen;
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       role: 'assistant',
@@ -108,18 +120,20 @@ export function AIChatAssistant() {
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       {/* TopBar Action Button */}
-      <SheetTrigger asChild>
-        <Button
-          variant="outline"
-          size="sm"
-          className="gap-2 h-9 px-3 text-sm border-border hover:bg-muted hover:border-primary transition-colors"
-        >
-          <Bot className="size-4 text-primary" />
-          <span className="hidden md:inline">{t('ai.chat_btn')}</span>
-          {/* Connection indicator */}
-          <span className="size-1.5 rounded-full bg-emerald-500 hidden md:inline-block" />
-        </Button>
-      </SheetTrigger>
+      {showTrigger && (
+        <SheetTrigger asChild>
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2 h-9 px-3 text-sm border-border hover:bg-muted hover:border-primary transition-colors"
+          >
+            <Bot className="size-4 text-primary" />
+            <span className="hidden md:inline">{t('ai.chat_btn')}</span>
+            {/* Connection indicator */}
+            <span className="size-1.5 rounded-full bg-emerald-500 hidden md:inline-block" />
+          </Button>
+        </SheetTrigger>
+      )}
 
       {/* Chat Drawer Content */}
       <SheetContent

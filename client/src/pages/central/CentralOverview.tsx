@@ -91,19 +91,19 @@ export function CentralOverview() {
 
 
       {/* بانر رادار النزاهة والتنبؤ بتعثر المشاريع */}
-      <div className="bg-gradient-to-r from-navy-950 via-slate-900 to-navy-900 rounded-2xl p-4 text-white border border-navy-800 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
+      <div className="bg-[#0B1F3A] rounded-2xl p-4 text-white border border-[#14305A] shadow-md flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-rose-500/20 text-rose-400 border border-rose-500/30 flex items-center justify-center shrink-0">
-            <AlertTriangle className="w-5 h-5" />
+            <AlertTriangle className="w-5 h-5 text-rose-400" />
           </div>
           <div>
             <h4 className="text-sm font-extrabold text-white flex items-center gap-2">
-              <span>{t('central.dashboard.integrity_title')}</span>
-              <span className="text-xs px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30 font-bold">
+              <span className="text-white">{t('central.dashboard.integrity_title')}</span>
+              <span className="text-[11px] px-2 py-0.5 rounded-full bg-rose-500/30 text-rose-200 border border-rose-400/40 font-bold">
                 {t('central.dashboard.integrity_badge')}
               </span>
             </h4>
-            <p className="text-xs text-slate-300 mt-0.5">
+            <p className="text-xs text-slate-200 mt-0.5">
               {t('central.dashboard.integrity_desc')}
             </p>
           </div>
@@ -111,7 +111,7 @@ export function CentralOverview() {
         <button
           type="button"
           onClick={() => setLocation('/central/integrity')}
-          className="px-4 py-2 bg-rose-700 hover:bg-rose-800 text-white font-bold text-xs rounded-xl shadow transition-colors shrink-0 whitespace-nowrap self-stretch md:self-auto text-center"
+          className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs rounded-xl shadow transition-colors shrink-0 whitespace-nowrap self-stretch md:self-auto text-center cursor-pointer"
         >
           {t('central.dashboard.integrity_cta')}
         </button>

@@ -15,6 +15,8 @@ const CENTRAL_NAV_ITEMS = (t: (key: TranslationKey) => string): PortalNavItem[] 
   { path: '/central/deals', label: t('nav.central.deals') },
   { path: '/central/appeals', label: t('nav.central.appeals') },
   { path: '/central/reports', label: t('nav.central.reports') },
+  { path: '/central/integrity', label: t('central.integrity.nav_label') },
+  { path: '/central/injunctions', label: t('central.injunctions.title') },
   { path: '/central/permissions', label: t('nav.central.permissions') },
 ];
 

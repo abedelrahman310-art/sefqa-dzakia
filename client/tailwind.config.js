@@ -55,6 +55,7 @@ module.exports = {
           500: 'hsl(var(--navy-500))',
           700: 'hsl(var(--navy-700))',
           900: 'hsl(var(--navy-900))',
+          950: '#081729',
         },
         emerald: {
           50: 'hsl(var(--emerald-50))',

@@ -4104,7 +4104,7 @@
   "central.injunctions.status.acknowledged": "Accusé de réception confirmé",
   "central.injunctions.status.resolved": "Régularisée (rapport validé)",
   "central.injunctions.status.escalated": "Transmis à la justice (délai expiré)",
-  "central.integrity.nav_label": "Radar de contrôle et d'intégrité (AI Anti-Fraud)",
+  "central.integrity.nav_label": "Radar de contrôle et d'intégrité",
   "central.integrity.badge": "République algérienne démocratique et populaire · Inspection générale des marchés publics",
   "central.integrity.title": "Système de contrôle central et d'intégrité institutionnelle par intelligence artificielle",
   "central.integrity.subtitle": "Plateforme suprême de contrôle (Hawk Eye) pour détecter les tentatives de collusion, la rotation des offres, le fractionnement des besoins et anticiper les difficultés et interruptions des projets publics conformément à la loi n° 23-12 et au décret présidentiel 15-247.",

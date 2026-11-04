@@ -67,13 +67,23 @@ export const aiApi = {
     api.get('/ai/central/suspicions/').then((r) => r.data),
 
   // Chat Assistant
-  chat: (conversationId: string | null | undefined, message: string): Promise<ChatResponse> =>
-    api
-      .post('/ai/central/chat/', {
+  chat: (conversationId: string | null | undefined, message: string): Promise<ChatResponse> => {
+    let role = 'central_admin';
+    try {
+      const stored = localStorage.getItem('safaqat_user');
+      if (stored) {
+        const u = JSON.parse(stored);
+        role = u.role || role;
+      }
+    } catch {}
+    const endpoint = role === 'central_admin' ? '/ai/central/chat/' : '/ai/legal-chat/';
+    return api
+      .post(endpoint, {
         conversation_id: conversationId || undefined,
         message,
       })
-      .then((r) => r.data),
+      .then((r) => r.data);
+  },
 
   // KPI Alerts
   getAlerts: (): Promise<SmartAlertsResponse> =>

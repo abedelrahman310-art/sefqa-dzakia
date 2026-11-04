@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, useCallback, ReactNode } from 'react';
 import i18n, { normalizeLanguage, type AppLanguage } from '@/lib/i18n';
 import ar from '@/locales/ar.json';
 
@@ -47,12 +47,21 @@ export const I18nProvider = ({ children }: { children: ReactNode }) => {
     localStorage.setItem('lang', lang);
   }, [lang, dir]);
 
-  const setLang = (newLang: Language) => {
+  const setLang = useCallback((newLang: Language) => {
     void i18n.changeLanguage(newLang);
-  };
+  }, []);
 
-  const t = (key: string, options?: Record<string, unknown>): string =>
-    i18n.t(key as TranslationKey, options as never) as unknown as string;
+  const t = useCallback((key: string, options?: Record<string, unknown>): string => {
+    let text = i18n.t(key as TranslationKey, options as never) as unknown as string;
+    if (options && typeof text === 'string') {
+      for (const [k, v] of Object.entries(options)) {
+        if (v !== undefined && v !== null) {
+          text = text.replaceAll(`{${k}}`, String(v));
+        }
+      }
+    }
+    return text;
+  }, [lang]);
 
   return (
     <I18nContext.Provider value={{ lang, dir, t, setLang }}>
