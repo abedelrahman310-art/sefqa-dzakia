@@ -76,13 +76,15 @@ async function main() {
 
   console.log('5. Testing topbar icons for 403 or routing errors...');
   const topbarCheck = await page.eval(() => {
-    const buttons = Array.from(document.querySelectorAll('.portal-topbar__actions button, .portal-topbar__actions [role="button"]'));
+    const buttons = Array.from(document.querySelectorAll('.portal-topbar__actions button, .portal-topbar__actions a'));
     return buttons.map(b => ({
       title: b.getAttribute('title') || b.getAttribute('aria-label') || b.innerText,
       className: b.className,
+      href: b.getAttribute('href') || null,
+      tagName: b.tagName,
     }));
   });
-  console.log('Topbar buttons:', topbarCheck);
+  console.log('Topbar buttons:', JSON.stringify(topbarCheck, null, 2));
 
   await browser.close();
   console.log('Verification completed successfully!');
