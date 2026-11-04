@@ -14,7 +14,6 @@ import {
   Building2,
   Check,
   ChevronDown,
-  Coins,
   Eye,
   EyeOff,
   Globe,
@@ -26,8 +25,6 @@ import {
   MapPin,
   Phone,
   Search,
-  ShieldCheck,
-  Sparkles,
   User,
   UserPlus,
   X,
@@ -51,15 +48,6 @@ const FIELD_NAMES = [
 ] as const;
 
 type FieldName = (typeof FIELD_NAMES)[number];
-
-/** علم الجزائر المصغّر للشارة الرسمية */
-const AlgeriaFlag = () => (
-  <svg viewBox="0 0 20 14" className="h-3.5 w-5 shrink-0 rounded-[2px] ring-1 ring-black/10" aria-hidden="true">
-    <rect width="10" height="14" fill="#006233" />
-    <rect x="10" width="10" height="14" fill="#ffffff" />
-    <circle cx="10" cy="7" r="3.4" fill="none" stroke="#d21034" strokeWidth="1.4" />
-  </svg>
-);
 
 export function UnifiedAuthPage({ initialMode = 'operator' }: UnifiedAuthPageProps) {
   const { lang, dir, setLang, t } = useI18n();
@@ -462,7 +450,7 @@ export function UnifiedAuthPage({ initialMode = 'operator' }: UnifiedAuthPagePro
       {/* ════════════════════════════════════════════════════════════════════════
           اللوحة الجانبية (Brand Panel): تمثل بالضبط 30% على الشاشات الكبيرة (lg:col-span-3)
           ════════════════════════════════════════════════════════════════════════ */}
-      <div className="hidden lg:flex lg:col-span-3 flex-col justify-between items-center bg-gradient-to-br from-slate-50 via-emerald-50/40 to-slate-100 p-8 relative overflow-hidden border-e border-slate-200/80">
+      <div className="hidden lg:flex lg:col-span-3 flex-col justify-center items-center bg-gradient-to-br from-slate-50 via-emerald-50/40 to-slate-100 p-8 relative overflow-hidden border-e border-slate-200/80 min-h-screen">
         {/* هالات الإضاءة الخلفية الناعمة */}
         <div
           className="absolute -top-24 -start-24 size-80 rounded-full bg-emerald-400/10 blur-3xl pointer-events-none"
@@ -473,87 +461,31 @@ export function UnifiedAuthPage({ initialMode = 'operator' }: UnifiedAuthPagePro
           aria-hidden="true"
         />
 
-        {/* 1. أعلى اللوحة: الترويسة المؤسسية والشعار الوطني */}
-        <div className="w-full text-center relative z-10 pt-2">
-          <span className="inline-block rounded-full border border-slate-200/80 bg-white/90 px-3.5 py-1 text-[11px] font-bold text-slate-700 shadow-2xs">
+        {/* الشعار الوطني والهوية المؤسسية في المنتصف */}
+        <div className="w-full text-center relative z-10 flex flex-col items-center justify-center my-auto py-12">
+          <span className="inline-block rounded-full border border-slate-200/80 bg-white/90 px-4 py-1.5 text-xs font-bold text-slate-700 shadow-2xs mb-8">
             الجمهورية الجزائرية الديمقراطية الشعبية
           </span>
 
-          {/* الشعار الوطني الفاخر مع تأثير الطفو */}
-          <div className="my-6 flex justify-center">
+          {/* الشعار الوطني الفاخر في المنتصف مع تأثير الطفو */}
+          <div className="mb-8 flex justify-center">
             <div className="relative group">
-              <div className="absolute -inset-2 rounded-full bg-emerald-500/15 blur-xl opacity-75 group-hover:opacity-100 transition duration-500" />
+              <div className="absolute -inset-4 rounded-full bg-emerald-500/15 blur-2xl opacity-80 group-hover:opacity-100 transition duration-500" />
               <div className="relative animate-antigravity-float">
-                <Logo size={100} className="drop-shadow-sm" />
+                <Logo size={130} className="drop-shadow-md" />
               </div>
             </div>
           </div>
 
-          <h1 className="text-2xl font-black text-[#0f3154] tracking-tight">
+          <h1 className="text-3xl font-black text-[#0f3154] tracking-tight">
             {t('register.neumorphic.brand_name') || 'صفقات ذكية'}
           </h1>
-          <p className="mt-1 text-xs font-bold text-emerald-800">
+          <p className="mt-2 text-sm font-bold text-emerald-800">
             {t('register.neumorphic.brand_tagline') || 'البوابة الوطنية الموحدة للصفقات العمومية'}
           </p>
-          <p className="mt-1.5 text-[11px] text-slate-500 font-medium leading-relaxed max-w-xs mx-auto">
+          <p className="mt-3 text-xs text-slate-500 font-medium leading-relaxed max-w-xs mx-auto">
             المنظومة الرقمية السيادية المعتمدة وفق أحكام القانون 23-12 والمرسوم الرئاسي 15-247
           </p>
-        </div>
-
-        {/* 2. وسط اللوحة: بطاقات الميزات الثلاث المؤسسية */}
-        <div className="w-full space-y-3 relative z-10 my-4">
-          {/* صفر ورقة */}
-          <div className="flex items-center gap-3 rounded-2xl border border-white/90 bg-white/80 p-3 shadow-2xs backdrop-blur-sm transition-all hover:shadow-xs">
-            <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700 ring-1 ring-emerald-500/20">
-              <ShieldCheck className="size-5" aria-hidden="true" />
-            </div>
-            <div>
-              <h4 className="text-xs font-bold text-slate-900">
-                مبدأ «صفر ورقة» وتشفير سيادي
-              </h4>
-              <p className="text-[10px] text-slate-500 mt-0.5 leading-tight">
-                إيداع رقمي كامل وتشفير AES-256 للأظرفة دون أوراق
-              </p>
-            </div>
-          </div>
-
-          {/* الربط البيني */}
-          <div className="flex items-center gap-3 rounded-2xl border border-white/90 bg-white/80 p-3 shadow-2xs backdrop-blur-sm transition-all hover:shadow-xs">
-            <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-sky-50 text-sky-700 ring-1 ring-sky-500/20">
-              <Coins className="size-5" aria-hidden="true" />
-            </div>
-            <div>
-              <h4 className="text-xs font-bold text-slate-900">
-                الربط البيني الحكومي المباشر
-              </h4>
-              <p className="text-[10px] text-slate-500 mt-0.5 leading-tight">
-                تحقق آلي من السجل التجاري والضرائب دون وثائق
-              </p>
-            </div>
-          </div>
-
-          {/* الذكاء الاصطناعي */}
-          <div className="flex items-center gap-3 rounded-2xl border border-white/90 bg-white/80 p-3 shadow-2xs backdrop-blur-sm transition-all hover:shadow-xs">
-            <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-700 ring-1 ring-indigo-500/20">
-              <Sparkles className="size-5" aria-hidden="true" />
-            </div>
-            <div>
-              <h4 className="text-xs font-bold text-slate-900">
-                ذكاء اصطناعي للمطابقة القانونية
-              </h4>
-              <p className="text-[10px] text-slate-500 mt-0.5 leading-tight">
-                مطابقة دفاتر الشروط ومكافحة البنود الإقصائية
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* 3. أسفل اللوحة: شارة التغطية الوطنية للولايات الـ 58 */}
-        <div className="w-full relative z-10 pb-2">
-          <div className="flex items-center justify-center gap-2 rounded-xl border border-slate-200/80 bg-white/80 py-2 px-3 text-center text-[10px] font-bold text-slate-700 shadow-2xs">
-            <AlgeriaFlag />
-            <span>تغطية وطنية موحدة لكافة ولايات الجزائر الـ 58 والبلديات الـ 1,541</span>
-          </div>
         </div>
       </div>
 
