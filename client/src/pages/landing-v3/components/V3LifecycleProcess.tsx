@@ -1,333 +1,558 @@
 import React, { useState } from 'react';
 import { useI18n } from '@/i18n';
 import {
-  Building,
-  Briefcase,
-  Coins,
-  Eye,
-  ChevronLeft,
-  ChevronRight,
-  Layers,
-  Check
+  Sparkles,
+  ArrowLeft,
+  ArrowRight,
+  ArrowDown,
+  CornerDownLeft,
+  CornerDownRight,
+  ShieldCheck,
+  Bot,
+  Search,
+  FileText,
+  FileCode,
+  GitBranch,
+  Megaphone,
+  Inbox,
+  FolderOpen,
+  BarChart3,
+  AlertTriangle,
+  Award,
 } from 'lucide-react';
+
+interface StageItem {
+  id: number;
+  num: string;
+  title: string;
+  aiRole: string;
+  hoverDetail: string;
+  icon: React.ComponentType<{ className?: string }>;
+  group: 'prep' | 'award'; // prep = 1-5 (Green), award = 6-10 (Red)
+}
 
 export const V3LifecycleProcess: React.FC = () => {
   const { lang, dir } = useI18n();
   const isAr = lang === 'ar';
-  const [selectedStage, setSelectedStage] = useState<number>(1);
+  const [activeStage, setActiveStage] = useState<number | null>(null);
 
-  const stages = [
+  // المراحل العشر القانونية مع دور الذكاء الاصطناعي الاستشاري والرقابي
+  const stages: StageItem[] = [
+    // ══════════════════════════════════════════════════════════════════════════
+    // الصف الأول (المراحل 1 إلى 5): مرحلة التحضير والإشهار — اللون الأخضر #00753A
+    // ══════════════════════════════════════════════════════════════════════════
     {
-      num: '01',
       id: 1,
-      title: isAr ? 'التخطيط وتحديد الحاجيات' : 'Planification & Besoins',
-      legal: isAr ? 'المادتان 16 و24' : 'Articles 16 et 24',
-      subtitle: isAr ? 'ضبط الحاجيات والكلفة والاعتمادات' : 'Estimation préalable et crédits',
-      authorityRole: isAr
-        ? 'حصر الحاجيات السنوية بدقة، إعداد بطاقة التقدير المالي، وتسجيل العملية ضمن المخطط التقديري.'
-        : 'Recensement annuel des besoins, évaluation financière et inscription au plan prévisionnel.',
-      operatorRole: isAr
-        ? 'متابعة البرمجة العامة للمصالح العمومية والاستعداد لتجهيز القدرات التقنية والمالية.'
-        : 'Veille sur les programmes prévisionnels et préparation des capacités techniques et financières.',
-      financeRole: isAr
-        ? 'التحقق من توفر رخصة البرامج والاعتمادات المالية المفتوحة ومنح التأشيرة المسبقة.'
-        : 'Vérification de la disponibilité des crédits budgétaires et visa préalable d’engagement.',
-      hawkRole: isAr
-        ? 'التأكد من التوافق مع السياسات الوطنية للإنفاق العام وعدم تجزئة الصفقات.'
-        : 'Contrôle de conformité avec les budgets nationaux et prévention du fractionnement illégal.',
-      output: isAr ? 'بطاقة الحاجيات السنوية والتأشيرة المسبقة' : 'Fiche des besoins validée & Visa',
+      num: '01',
+      title: isAr ? 'تحديد الحاجة' : 'Définition du Besoin',
+      aiRole: isAr
+        ? 'تحليل البيانات التاريخية والتنبؤ بالاحتياجات.'
+        : 'Analyse des données historiques et prévision des besoins.',
+      hoverDetail: isAr
+        ? 'دراسة استهلاك السنوات السابقة وتقدير الكميات المطلوبة بدقة لتفادي العجز أو الهدر.'
+        : 'Étude prédictive des consommations passées et estimation précise des volumes nécessaires.',
+      icon: Search,
+      group: 'prep',
     },
     {
-      num: '02',
       id: 2,
-      title: isAr ? 'الإشهار ودفتر الشروط' : 'Avis d’Appel & Cahier des Charges',
-      legal: isAr ? 'المواد 39 إلى 43' : 'Articles 39 à 43',
-      subtitle: isAr ? 'صياغة المعايير المحايدة والنشر' : 'Rédaction neutre et publication',
-      authorityRole: isAr
-        ? 'صياغة دفتر الشروط بمواصفات تقنية محايدة، تحديد معايير الاختيار، ونشر الإعلان بالبوابة والصحف.'
-        : 'Élaboration du cahier des charges aux critères objectifs et publication de l’avis d’appel.',
-      operatorRole: isAr
-        ? 'سحب دفتر الشروط رقمياً عبر المنصة، دراسة الشروط والقدرات المطلوبة، وتقديم طلبات الاستفسار.'
-        : 'Téléchargement électronique des dossiers, analyse des critères et formulation des requêtes d’éclaircissement.',
-      financeRole: isAr
-        ? 'مراقبة مطابقة دفتر الشروط للحدود المالية المعتمدة في قانون المالية.'
-        : 'Contrôle de l’alignement des clauses financières avec les plafonds autorisés.',
-      hawkRole: isAr
-        ? 'فحص مدة الإشهار القانونية (منع تقليص الآجال غير المبرر) وضمان مبدأ حرية الوصول.'
-        : 'Surveillance des délais d’affichage légaux et garantie du libre accès à la commande.',
-      output: isAr ? 'دفتر شروط معتمد وإعلان رسمي منشور' : 'Cahier des charges homologué et publié',
+      num: '02',
+      title: isAr ? 'إعداد الملف' : 'Préparation du Dossier',
+      aiRole: isAr
+        ? 'اقتراح المواصفات وتقدير التكلفة الأولية.'
+        : 'Proposition des spécifications et estimation préalable du coût.',
+      hoverDetail: isAr
+        ? 'استخراج بنود المواصفات القياسية وحساب التقدير المالي استناداً إلى الأسعار المرجعية.'
+        : 'Extraction des normes techniques types et calcul prévisionnel basé sur les mercuriales officielles.',
+      icon: FileText,
+      group: 'prep',
     },
     {
-      num: '03',
       id: 3,
-      title: isAr ? 'تقديم العروض والإيداع المشفر' : 'Dépôt & Chiffrement des Offres',
-      legal: isAr ? 'المواد 48 إلى 51' : 'Articles 48 à 51',
-      subtitle: isAr ? 'الختم التشفيري والحماية الزمنية' : 'Scellement temporel AES-256',
-      authorityRole: isAr
-        ? 'الإجابة الشفافة عن استفسارات المتعهدين وتعميم مذكرات الإيضاح على جميع المتنافسين بالتساوي.'
-        : 'Réponse impartiale aux questions et diffusion publique des notes additives à tous les soumissionnaires.',
-      operatorRole: isAr
-        ? 'تجهيز ملفات الترشح والعروض المالية، فحصها بدرع الامتثال، وتشفيرها وختمها بـ AES-256.'
-        : 'Constitution des offres, audit pré-dépôt via le bouclier IA et scellement électronique AES-256.',
-      financeRole: isAr
-        ? 'تسجيل ومراقبة استقرار الالتزامات المالية للعملية.'
-        : 'Suivi de la stabilité des engagements de l’opération.',
-      hawkRole: isAr
-        ? 'الرقابة على سلامة أقفال التشفير ومنع أي تسريب أو فتح للوثائق قبل انقضاء الأجل القانوني.'
-        : 'Surveillance de l’inviolabilité des clés cryptographiques jusqu’à la minute légale d’ouverture.',
-      output: isAr ? 'وصل إيداع إلكتروني مشفر بخاتم زمني' : 'Récépissé de dépôt scellé et horodaté',
+      num: '03',
+      title: isAr ? 'دفتر الشروط' : 'Cahier des Charges',
+      aiRole: isAr
+        ? 'مساعدة في صياغة الشروط والتحقق من اكتمالها.'
+        : 'Assistance à la rédaction des clauses et contrôle d’exhaustivité.',
+      hoverDetail: isAr
+        ? 'فحص البنود الإلزامية ومنع الشروط الإقصائية وضمان مطابقة القانون 23-12.'
+        : 'Contrôle automatique des clauses obligatoires et exclusion des conditions discriminatoires.',
+      icon: FileCode,
+      group: 'prep',
     },
     {
-      num: '04',
       id: 4,
-      title: isAr ? 'فتح الأظرفة العلني المباشر' : 'Séance d’Ouverture Publique',
-      legal: isAr ? 'المادة 53 من القانون' : 'Article 53 de la Loi',
-      subtitle: isAr ? 'بث رقمي وتوثيق فوري للمحاضر' : 'Retransmission directe & PV instantané',
-      authorityRole: isAr
-        ? 'عقد الجلسة بحضور المتعهدين أو عبر البث الرقمي المباشر، وتفريغ الوثائق وتدوين المحضر ثانية بثانية.'
-        : 'Tenue de la séance en présence des candidats ou en streaming direct, avec PV dressé séance tenante.',
-      operatorRole: isAr
-        ? 'حضور الجلسة العلنية مباشرة والاطلاع اللحظي على قائمة المنافسين والأسعار المسجلة بالمحضر.'
-        : 'Participation en temps réel à l’ouverture et consultation immédiate des montants annoncés.',
-      financeRole: isAr
-        ? 'حضور ممثل الهيئات المالية ومطابقة المبالغ والضمانات المصرفية المسجلة.'
-        : 'Vérification des cautions bancaires et constats des montants proposés.',
-      hawkRole: isAr
-        ? 'التوثيق الجنائي المرئي والمكتوب لجلسة الفتح وضمان نزاهة القيد ومنع أي إضافة وثائق لاحقة.'
-        : 'Enregistrement légal infalsifiable garantissant qu’aucune pièce n’est ajoutée après clôture.',
-      output: isAr ? 'محضر جلسة فتح الأظرفة الموقع إلكترونياً' : 'Procès-Verbal d’ouverture officiel (PV)',
+      num: '04',
+      title: isAr ? 'طريقة الإبرام' : 'Mode de Passation',
+      aiRole: isAr
+        ? 'اقتراح طريقة الإبرام المناسبة حسب طبيعة الصفقة.'
+        : 'Recommandation du mode de passation adapté selon la nature du marché.',
+      hoverDetail: isAr
+        ? 'المقارنة الآلية مع العتبات المالية وحالات طلب العروض والتراضي القانونية.'
+        : 'Vérification automatisée des seuils financiers et des critères de recours aux procédures légales.',
+      icon: GitBranch,
+      group: 'prep',
     },
     {
-      num: '05',
       id: 5,
-      title: isAr ? 'تقييم العروض والترتيب' : 'Évaluation des Offres & Classement',
-      legal: isAr ? 'المواد 55 إلى 60' : 'Articles 55 à 60',
-      subtitle: isAr ? 'فحص المطابقة وتطبيق مصفوفة التنقيط' : 'Examen technique et matrice 100 pts',
-      authorityRole: isAr
-        ? 'الفحص التقني والمالي الموضوعي، تطبيق مصفوفة الـ 100 نقطة، وإقصاء العروض غير المطابقة أو الشاذة.'
-        : 'Évaluation objective des dossiers, application du barème 100 pts et détection des offres anormales.',
-      operatorRole: isAr
-        ? 'الرد على طلبات الاستيضاح أو تبرير الأسعار التي توجهها لجنة الصفقات دون تعديل العرض.'
-        : 'Réponse aux demandes de précisions ou de justifications de prix sans modifier le fond de l’offre.',
-      financeRole: isAr
-        ? 'فحص التناسب المالي والجدوى الاقتصادية للعرض الأفضل تقنياً ومالياً.'
-        : 'Contrôle de la viabilité budgétaire de l’offre économiquement la plus avantageuse.',
-      hawkRole: isAr
-        ? 'تشغيل رادار كشف التواطؤ ومقارنة الأسعار مع الصفقات المماثلة في الولايات الـ 58.'
-        : 'Activation du radar anti-collusion et comparaison avec les mercuriales des 58 wilayas.',
-      output: isAr ? 'تقرير تقييم العروض واقتراح المنح المؤقت' : 'Rapport d’évaluation et proposition de choix',
+      num: '05',
+      title: isAr ? 'الإشهار' : 'Publication & Avis',
+      aiRole: isAr
+        ? 'تحديد المزودين المحتملين ونشر الصفقة للجمهور المستهدف.'
+        : 'Ciblage des prestataires qualifiés et diffusion ciblée de l’avis.',
+      hoverDetail: isAr
+        ? 'إشعار المؤسسات والمؤسسات الناشئة المؤهلة وتوزيع الإعلان عبر القنوات الرسمية.'
+        : 'Notification ciblée des opérateurs qualifiés et diffusion multicanale certifiée.',
+      icon: Megaphone,
+      group: 'prep',
     },
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // الصف الثاني (المراحل 6 إلى 10): مرحلة العروض والإسناد — اللون الأحمر #D21034
+    // ══════════════════════════════════════════════════════════════════════════
     {
-      num: '06',
       id: 6,
-      title: isAr ? 'الإسناد المؤقت والطعون والتعاقد' : 'Attribution, Recours & Contrat',
-      legal: isAr ? 'المواد 65 و73 و82' : 'Articles 65, 73 et 82',
-      subtitle: isAr ? 'مهلة الـ 10 أيام والتأشيرة النهائية' : 'Délai de 10 jours et visa définitif',
-      authorityRole: isAr
-        ? 'نشر إعلان المنح المؤقت، تسيير مهلة الطعون القانونية (10 أيام)، وإعداد وثيقة العقد النهائي.'
-        : 'Publication de l’attribution provisoire, gestion du délai de recours de 10 jours et finalisation du contrat.',
-      operatorRole: isAr
-        ? 'تقديم كفالة حسن التنفيذ (5% من مبلغ العقد) أو رفع طعن نظامي مؤسس في الآجال، وتوقيع العقد.'
-        : 'Dépôt de la caution de bonne exécution (5%) ou recours gracieux motivé, puis signature du marché.',
-      financeRole: isAr
-        ? 'فحص ملف الصفقة النهائي ومحاضر اللجان ومنح التأشيرة المالية النهائية الملزمة لسريان العقد.'
-        : 'Examen juridique et budgétaire approfondi pour délivrance du visa définitif du Contrôle Financier.',
-      hawkRole: isAr
-        ? 'المتابعة المركزية للطعون والفصل فيها وفق أحكام القانون، وضمان الشفافية التامة للإسناد.'
-        : 'Suivi national des recours devant la commission des marchés et validation de la probité de l’attribution.',
-      output: isAr ? 'عقد الصفقة المبرم والمؤشر عليه مالياً' : 'Contrat de marché revêtu du visa financier',
+      num: '06',
+      title: isAr ? 'استلام العروض' : 'Réception des Offres',
+      aiRole: isAr
+        ? 'فحص آلي للوثائق والتنبيه إلى النواقص.'
+        : 'Vérification automatisée des pièces et détection des omissions.',
+      hoverDetail: isAr
+        ? 'التدقيق اللحظي في صلاحية السجل التجاري والشهادات الجبائية وكفالات التعهد.'
+        : 'Vérification instantanée de la validité fiscale, parafiscale et bancaire des dossiers.',
+      icon: Inbox,
+      group: 'award',
     },
     {
-      num: '07',
       id: 7,
-      title: isAr ? 'التنفيذ وأوامر الخدمة والتسديد' : 'Exécution, ODS & Règlements',
-      legal: isAr ? 'المواد 88 إلى 102' : 'Articles 88 à 102',
-      subtitle: isAr ? 'أوامر الخدمة والاستلام الميداني' : 'Ordres de service et réceptions',
-      authorityRole: isAr
-        ? 'إصدار أمر بداية الأشغال (ODS)، متابعة الوتيرة الميدانية، والتحقق عبر الختم الجغرافي بالأقمار الصناعية.'
-        : 'Notification de l’ODS de démarrage, suivi d’avancement certifié par GPS et réception des travaux.',
-      operatorRole: isAr
-        ? 'تنفيذ الأشغال وفق المواصفات والآجال، وتقديم وضعيات الكشوف الشهرية وصرف المستحقات.'
-        : 'Réalisation des prestations conformément aux clauses, dépôt des décomptes mensuels et facturation.',
-      financeRole: isAr
-        ? 'صرف الحوالات المالية بعد مطابقة الإنجاز الفعلي، وتصفية وتحرير كفالات الضمان عند الاستلام النهائي.'
-        : 'Mandatement des situations sur attestation de service fait et mainlevée des cautions à terme.',
-      hawkRole: isAr
-        ? 'تفعيل مؤشر مخاطر التأخير والانحراف المالي لمنع تجاوز سقف الملاحق القانوني (10% و20%).'
-        : 'Détection prédictive des retards et blocage des avenants dépassant les plafonds stricts (10% / 20%).',
-      output: isAr ? 'محاضر الاستلام المؤقت والنهائي وتصفية الحساب' : 'PV de réception provisoire/définitive & Décompte général',
+      num: '07',
+      title: isAr ? 'فتح الأظرفة' : 'Ouverture des Plis',
+      aiRole: isAr
+        ? 'تسجيل العروض واستخراج البيانات الأساسية آلياً.'
+        : 'Enregistrement des offres et extraction automatisée des données clés.',
+      hoverDetail: isAr
+        ? 'قراءة OCR الذكية وتفريغ المبالغ والضمانات وتوليد مسودة محضر الفتح فوراً.'
+        : 'Extraction OCR sécurisée des montants, vérification des cautions et pré-génération du PV.',
+      icon: FolderOpen,
+      group: 'award',
+    },
+    {
+      id: 8,
+      num: '08',
+      title: isAr ? 'تقييم العروض' : 'Évaluation des Offres',
+      aiRole: isAr
+        ? 'مقارنة العروض وترتيبها وفق معايير دفتر الشروط.'
+        : 'Comparaison et classement objectif selon les critères fixés.',
+      hoverDetail: isAr
+        ? 'تطبيق مصفوفة التنقيط ورصد العروض المنخفضة بشكل غير طبيعي أو الشاذة.'
+        : 'Application du barème de notation et identification prédictive des offres anormalement basses.',
+      icon: BarChart3,
+      group: 'award',
+    },
+    {
+      id: 9,
+      num: '09',
+      title: isAr ? 'المنح المؤقت' : 'Attribution Provisoire',
+      aiRole: isAr
+        ? 'رصد المخالفات والتنبيه إلى الطعون المحتملة.'
+        : 'Détection des anomalies et anticipation des recours éventuels.',
+      hoverDetail: isAr
+        ? 'تشغيل خوارزميات النزاهة واحتساب آجال الطعون القانونية (10 أيام) بدقة.'
+        : 'Audit continu de probité et suivi rigoureux du délai légal de recours de 10 jours.',
+      icon: AlertTriangle,
+      group: 'award',
+    },
+    {
+      id: 10,
+      num: '10',
+      title: isAr ? 'الإسناد النهائي' : 'Attribution Définitive',
+      aiRole: isAr
+        ? 'إعداد تقرير دعم القرار والتحقق من اكتمال الإجراءات.'
+        : 'Rapport d’aide à la décision et validation de la conformité légale.',
+      hoverDetail: isAr
+        ? 'مراجعة ملف الرقابة القبلية والتأشيرة المالية وتجهيز مسودة عقد الصفقة النهائي.'
+        : 'Synthèse pour les corps de contrôle, visa financier et finalisation contractuelle.',
+      icon: Award,
+      group: 'award',
     },
   ];
 
-  const current = stages.find((s) => s.id === selectedStage) || stages[0];
+  const row1 = stages.slice(0, 5); // مراحل 1 إلى 5
+  const row2 = stages.slice(5, 10); // مراحل 6 إلى 10
 
   return (
     <section
       id="lifecycle"
       dir={dir}
-      className="w-full bg-[#ffffff] py-14 sm:py-20"
+      className="w-full bg-[#FFFFFF] py-14 sm:py-20 overflow-hidden"
     >
-      <div className="max-w-[1200px] mx-auto px-4 sm:px-6">
+      <div className="max-w-[1240px] mx-auto px-4 sm:px-6">
         
-        {/* Framed Short Section Title */}
-        <div className="flex flex-col items-center justify-center text-center mb-10 sm:mb-14">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full border border-slate-200 bg-slate-50 text-slate-700 text-xs sm:text-sm font-bold shadow-2xs mb-2.5">
-            <span className="size-2 rounded-full bg-emerald-600" />
-            <span>{isAr ? 'المسار الإجرائي القانوني' : 'Cycle de Vie Réglementaire'}</span>
+        {/* ══════════════════════════════════════════════════════════════════════
+            ترويسة القسم المؤطرة والمختصرة
+            ══════════════════════════════════════════════════════════════════════ */}
+        <div className="flex flex-col items-center justify-center text-center mb-12 sm:mb-16">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full border border-emerald-200 bg-emerald-50 text-[#00753A] text-xs sm:text-sm font-bold shadow-2xs mb-3">
+            <Sparkles className="size-3.5 text-[#00753A]" />
+            <span>{isAr ? 'المسار الإجرائي والذكاء الاصطناعي' : 'Cycle Procédural & Intelligence Artificielle'}</span>
           </div>
-          <div className="inline-block px-5 sm:px-7 py-2 sm:py-2.5 rounded-2xl border border-slate-200/90 bg-white shadow-2xs">
+
+          <div className="inline-block px-5 sm:px-7 py-2 rounded-2xl border border-slate-200 bg-white shadow-2xs">
             <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-slate-900 tracking-tight">
-              {isAr ? 'دورة حياة الصفقة العمومية' : 'Cycle de Vie du Marché Public'}
+              {isAr ? 'مراحل الصفقة العمومية' : 'Étapes du Marché Public'}
             </h2>
           </div>
+
           <p className="mt-3 text-sm sm:text-base text-slate-600 max-w-2xl leading-relaxed font-medium">
             {isAr
-              ? 'تزامن الأدوار بدقة بين المصلحة المتعاقدة، المتعامل الاقتصادي، والمراقب المالي، تحت الإشراف المباشر لعين الصقر للإدارة المركزية.'
-              : 'Coordination fluide et traçabilité intégrale entre l’ensemble des acteurs institutionnels et économiques.'}
+              ? 'مرافقة ذكية وشاملة عبر المراحل العشر للصفقة وفق القانون 23-12، لتعزيز النزاهة والسرعة.'
+              : 'Accompagnement intelligent des 10 étapes légales selon la Loi 23-12, alliant probité et efficacité.'}
           </p>
         </div>
 
-        {/* Stepper Tabs (Spec: 1px #d8d8d8 border, 4px/8px radii) */}
-        <div className="mb-8 overflow-x-auto pb-2 scrollbar-none">
-          <div className="flex items-center min-w-[780px] bg-[#ffffff] border border-[#d8d8d8] rounded-[8px] p-1.5">
-            {stages.map((stage) => {
-              const isSelected = stage.id === selectedStage;
-              return (
-                <button
-                  key={stage.id}
-                  type="button"
-                  onClick={() => setSelectedStage(stage.id)}
-                  className={`flex-1 py-3 px-2 text-center rounded-[4px] transition-all cursor-pointer ${
-                    isSelected
-                      ? 'bg-[#146ef5]/10 text-[#080808]'
-                      : 'text-[#5a5a5a] hover:text-[#080808] hover:bg-[#f0f0f0]'
-                  }`}
-                >
-                  <span
-                    className={`font-mono text-[13px] block font-bold ${
-                      isSelected ? 'text-[#146ef5]' : 'text-[#5a5a5a]'
-                    }`}
-                  >
-                    {stage.num}
-                  </span>
-                  <strong className="text-[13px] font-semibold block truncate">
-                    {stage.title}
-                  </strong>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Stage Content Card (Spec: 8px radius, 1px #d8d8d8 border, 24px padding) */}
-        <div className="bg-[#ffffff] border border-[#d8d8d8] rounded-[8px] p-6 sm:p-8 space-y-6">
+        {/* ══════════════════════════════════════════════════════════════════════
+            عرض سطح المكتب / الأجهزة اللوحية الكبيرة: خط زمني في صفّين (2 Rows Timeline)
+            الصف الأول: مراحل 1 إلى 5 (أخضر #00753A)
+            الصف الثاني: مراحل 6 إلى 10 (أحمر #D21034)
+            ══════════════════════════════════════════════════════════════════════ */}
+        <div className="hidden lg:block space-y-8">
           
-          {/* Header of Stage */}
-          <div className="flex items-center justify-between gap-4 pb-6 border-b border-[#d8d8d8]">
-            <div className="flex items-center gap-3 min-w-0 flex-1">
-              <span className="size-10 rounded-[4px] bg-[#146ef5] text-white flex items-center justify-center font-mono text-[16px] font-bold shrink-0">
-                {current.num}
-              </span>
-              <div className="min-w-0">
-                <h3 className="text-[20px] font-semibold text-[#080808]">
-                  {current.title}
-                </h3>
-                <span className="text-[13px] text-[#5a5a5a]">
-                  {current.legal} — {current.subtitle}
+          {/* ────── الصف الأول: المراحل 1 إلى 5 (الأخضر السيادي #00753A) ────── */}
+          <div className="relative">
+            {/* عنوان فرعي لمجموعة التحضير والإشهار */}
+            <div className="flex items-center justify-between mb-4 px-1">
+              <div className="flex items-center gap-2">
+                <span className="size-2 rounded-full bg-[#00753A]" />
+                <span className="text-xs font-bold text-[#00753A] tracking-wider uppercase">
+                  {isAr ? 'المرحلة التحضيرية والإشهار (المراحل 1 - 5)' : 'Phase Préparatoire & Avis (Étapes 1 - 5)'}
                 </span>
               </div>
+              <span className="text-[11px] font-semibold text-slate-600 bg-slate-50 px-2.5 py-0.5 rounded-full border border-slate-200">
+                {isAr ? 'القانون 23-12 • المواد 16 إلى 43' : 'Loi 23-12 • Articles 16 à 43'}
+              </span>
             </div>
 
-            <div className="shrink-0 max-w-[45%] px-3 py-1.5 rounded-[4px] bg-[#f0f0f0] border border-[#d8d8d8] text-[13px] text-[#5a5a5a]">
-              <span className="font-semibold text-[#080808] me-1.5">{isAr ? 'المخرج الإجرائي:' : 'Livrable :'}</span>
-              <span>{current.output}</span>
+            {/* شبكة البطاقات الخمس للصف الأول مع الأسهم البينية */}
+            <div className="grid grid-cols-5 gap-3 xl:gap-4 relative items-stretch">
+              {row1.map((stage, idx) => {
+                const IconComponent = stage.icon;
+                const isHovered = activeStage === stage.id;
+                const isLastInRow = idx === row1.length - 1;
+
+                return (
+                  <div
+                    key={stage.id}
+                    className="relative flex flex-col"
+                    onMouseEnter={() => setActiveStage(stage.id)}
+                    onMouseLeave={() => setActiveStage(null)}
+                  >
+                    {/* البطاقة الزجاجية الشفافة الأنيقة */}
+                    <div
+                      className={`group relative h-full flex flex-col justify-between rounded-2xl p-4 sm:p-5 transition-all duration-300 border backdrop-blur-xl ${
+                        isHovered
+                          ? 'bg-white/95 border-[#00753A] shadow-xl -translate-y-1.5 ring-2 ring-[#00753A]/20'
+                          : 'bg-white/80 border-slate-200/90 shadow-sm hover:border-[#00753A]/60'
+                      }`}
+                    >
+                      {/* الشريط العلوي الدقيق الملون بالأخضر #00753A */}
+                      <div className="absolute top-0 inset-x-0 h-1 bg-[#00753A] rounded-t-2xl" />
+
+                      {/* رأس البطاقة: رقم المرحلة + وسم AI + الأيقونة */}
+                      <div className="flex items-center justify-between gap-2 mb-3 pt-1">
+                        {/* 1. رقم المرحلة */}
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono text-base font-black text-[#00753A] px-2 py-0.5 rounded-md bg-[#00753A]/10 border border-[#00753A]/20">
+                            {stage.num}
+                          </span>
+                        </div>
+
+                        {/* أيقونة الذكاء الاصطناعي مع شعار AI */}
+                        <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200/80 text-[#00753A]">
+                          <Sparkles className="size-3 text-[#00753A]" />
+                          <span className="font-mono text-[10px] font-extrabold tracking-wide">AI</span>
+                        </div>
+                      </div>
+
+                      {/* جسم البطاقة الأساسي (العناصر الثلاثة المطلوبة حصراً) */}
+                      <div className="space-y-2 flex-1">
+                        {/* 2. عنوان المرحلة */}
+                        <h3 className="text-base font-black text-slate-900 group-hover:text-[#00753A] transition-colors line-clamp-1">
+                          {stage.title}
+                        </h3>
+
+                        {/* 3. دور الذكاء الاصطناعي في سطر واحد */}
+                        <p className="text-xs font-semibold text-slate-700 leading-snug line-clamp-2">
+                          {stage.aiRole}
+                        </p>
+                      </div>
+
+                      {/* وصف إضافي قصير يظهر بسلاسة عند التمرير (Hover Reveal Effect) */}
+                      <div
+                        className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                          isHovered ? 'max-h-24 opacity-100 pt-2.5 mt-2.5 border-t border-emerald-100' : 'max-h-0 opacity-0'
+                        }`}
+                      >
+                        <p className="text-[11px] font-medium text-slate-500 leading-relaxed">
+                          {stage.hoverDetail}
+                        </p>
+                      </div>
+
+                      {/* أيقونة المرحلة الجانبية الشفافة بالخلفية */}
+                      <div className="absolute bottom-2.5 left-2.5 rtl:left-auto rtl:left-2.5 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
+                        <IconComponent className="size-7 text-[#00753A]" />
+                      </div>
+                    </div>
+
+                    {/* سهم الربط بين البطاقات (في الاتجاه الطبيعي لـ RTL: من اليمين لليسار) */}
+                    {!isLastInRow && (
+                      <div
+                        className={`absolute top-1/2 -translate-y-1/2 z-20 pointer-events-none hidden xl:flex items-center justify-center size-6 rounded-full bg-white border border-[#00753A]/30 shadow-xs ${
+                          isAr ? '-left-3' : '-right-3'
+                        }`}
+                        aria-hidden="true"
+                      >
+                        {isAr ? (
+                          <ArrowLeft className="size-3.5 text-[#00753A]" />
+                        ) : (
+                          <ArrowRight className="size-3.5 text-[#00753A]" />
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* سهم الانتقال المنحني من نهاية الصف الأول إلى بداية الصف الثاني */}
+            <div className="flex items-center justify-end px-6 my-2 text-slate-400">
+              <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-slate-50 border border-slate-200 text-xs font-bold text-slate-600">
+                <span>{isAr ? 'الانتقال إلى مرحلة فتح العروض والتقييم' : 'Passage à la phase d’ouverture et évaluation'}</span>
+                {isAr ? (
+                  <CornerDownLeft className="size-4 text-[#D21034]" />
+                ) : (
+                  <CornerDownRight className="size-4 text-[#D21034]" />
+                )}
+              </div>
             </div>
           </div>
 
-          {/* 4 Roles Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            
-            {/* Role 1: Authority */}
-            <div className="p-4 rounded-[6px] border border-[#d8d8d8] border-t-4 border-t-[#60ed76] bg-[#ffffff] space-y-2">
-              <div className="flex items-center gap-2 text-[#080808] text-[13px] font-semibold">
-                <Building className="size-4 text-[#15803d]" />
-                <span className="text-[#15803d] font-bold">{isAr ? 'المصلحة المتعاقدة' : 'Service Contractant'}</span>
+          {/* ────── الصف الثاني: المراحل 6 إلى 10 (الأحمر السيادي #D21034) ────── */}
+          <div className="relative">
+            {/* عنوان فرعي لمجموعة استلام العروض والتقييم والإسناد */}
+            <div className="flex items-center justify-between mb-4 px-1">
+              <div className="flex items-center gap-2">
+                <span className="size-2 rounded-full bg-[#D21034]" />
+                <span className="text-xs font-bold text-[#D21034] tracking-wider uppercase">
+                  {isAr ? 'مرحلة العروض والتقييم والإسناد (المراحل 6 - 10)' : 'Phase Offres & Attribution (Étapes 6 - 10)'}
+                </span>
               </div>
-              <p className="text-[13px] text-[#5a5a5a] leading-relaxed">
-                {current.authorityRole}
-              </p>
+              <span className="text-[11px] font-semibold text-slate-600 bg-slate-50 px-2.5 py-0.5 rounded-full border border-slate-200">
+                {isAr ? 'القانون 23-12 • المواد 48 إلى 82' : 'Loi 23-12 • Articles 48 à 82'}
+              </span>
             </div>
 
-            {/* Role 2: Operator */}
-            <div className="p-4 rounded-[6px] border border-[#d8d8d8] border-t-4 border-t-[#146ef5] bg-[#ffffff] space-y-2">
-              <div className="flex items-center gap-2 text-[#080808] text-[13px] font-semibold">
-                <Briefcase className="size-4 text-[#146ef5]" />
-                <span className="text-[#146ef5] font-bold">{isAr ? 'المتعامل الاقتصادي' : 'Opérateur'}</span>
-              </div>
-              <p className="text-[13px] text-[#5a5a5a] leading-relaxed">
-                {current.operatorRole}
-              </p>
-            </div>
+            {/* شبكة البطاقات الخمس للصف الثاني مع الأسهم البينية */}
+            <div className="grid grid-cols-5 gap-3 xl:gap-4 relative items-stretch">
+              {row2.map((stage, idx) => {
+                const IconComponent = stage.icon;
+                const isHovered = activeStage === stage.id;
+                const isLastInRow = idx === row2.length - 1;
 
-            {/* Role 3: Finance Controller */}
-            <div className="p-4 rounded-[6px] border border-[#d8d8d8] bg-[#ffffff] space-y-2">
-              <div className="flex items-center gap-2 text-[#080808] text-[13px] font-semibold">
-                <Coins className="size-4 text-[#5a5a5a]" />
-                <span>{isAr ? 'المراقب المالي' : 'Contrôleur'}</span>
-              </div>
-              <p className="text-[13px] text-[#5a5a5a] leading-relaxed">
-                {current.financeRole}
-              </p>
-            </div>
+                return (
+                  <div
+                    key={stage.id}
+                    className="relative flex flex-col"
+                    onMouseEnter={() => setActiveStage(stage.id)}
+                    onMouseLeave={() => setActiveStage(null)}
+                  >
+                    {/* البطاقة الزجاجية الشفافة الأنيقة */}
+                    <div
+                      className={`group relative h-full flex flex-col justify-between rounded-2xl p-4 sm:p-5 transition-all duration-300 border backdrop-blur-xl ${
+                        isHovered
+                          ? 'bg-white/95 border-[#D21034] shadow-xl -translate-y-1.5 ring-2 ring-[#D21034]/20'
+                          : 'bg-white/80 border-slate-200/90 shadow-sm hover:border-[#D21034]/60'
+                      }`}
+                    >
+                      {/* الشريط العلوي الدقيق الملون بالأحمر #D21034 */}
+                      <div className="absolute top-0 inset-x-0 h-1 bg-[#D21034] rounded-t-2xl" />
 
-            {/* Role 4: Hawk Eye */}
-            <div className="p-4 rounded-[6px] border border-[#d8d8d8] border-t-4 border-t-[#ffa666] bg-[#ffffff] space-y-2">
-              <div className="flex items-center gap-2 text-[#080808] text-[13px] font-semibold">
-                <Eye className="size-4 text-[#c2410c]" />
-                <span className="text-[#c2410c] font-bold">{isAr ? 'عين الصقر المركزية' : 'Supervision'}</span>
-              </div>
-              <p className="text-[13px] text-[#5a5a5a] leading-relaxed">
-                {current.hawkRole}
-              </p>
-            </div>
+                      {/* رأس البطاقة: رقم المرحلة + وسم AI + الأيقونة */}
+                      <div className="flex items-center justify-between gap-2 mb-3 pt-1">
+                        {/* 1. رقم المرحلة */}
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono text-base font-black text-[#D21034] px-2 py-0.5 rounded-md bg-[#D21034]/10 border border-[#D21034]/20">
+                            {stage.num}
+                          </span>
+                        </div>
 
+                        {/* أيقونة الذكاء الاصطناعي مع شعار AI */}
+                        <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-rose-50 border border-rose-200/80 text-[#D21034]">
+                          <Sparkles className="size-3 text-[#D21034]" />
+                          <span className="font-mono text-[10px] font-extrabold tracking-wide">AI</span>
+                        </div>
+                      </div>
+
+                      {/* جسم البطاقة الأساسي (العناصر الثلاثة المطلوبة حصراً) */}
+                      <div className="space-y-2 flex-1">
+                        {/* 2. عنوان المرحلة */}
+                        <h3 className="text-base font-black text-slate-900 group-hover:text-[#D21034] transition-colors line-clamp-1">
+                          {stage.title}
+                        </h3>
+
+                        {/* 3. دور الذكاء الاصطناعي في سطر واحد */}
+                        <p className="text-xs font-semibold text-slate-700 leading-snug line-clamp-2">
+                          {stage.aiRole}
+                        </p>
+                      </div>
+
+                      {/* وصف إضافي قصير يظهر بسلاسة عند التمرير (Hover Reveal Effect) */}
+                      <div
+                        className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                          isHovered ? 'max-h-24 opacity-100 pt-2.5 mt-2.5 border-t border-rose-100' : 'max-h-0 opacity-0'
+                        }`}
+                      >
+                        <p className="text-[11px] font-medium text-slate-500 leading-relaxed">
+                          {stage.hoverDetail}
+                        </p>
+                      </div>
+
+                      {/* أيقونة المرحلة الجانبية الشفافة بالخلفية */}
+                      <div className="absolute bottom-2.5 left-2.5 rtl:left-auto rtl:left-2.5 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
+                        <IconComponent className="size-7 text-[#D21034]" />
+                      </div>
+                    </div>
+
+                    {/* سهم الربط بين البطاقات (في الاتجاه الطبيعي لـ RTL: من اليمين لليسار) */}
+                    {!isLastInRow && (
+                      <div
+                        className={`absolute top-1/2 -translate-y-1/2 z-20 pointer-events-none hidden xl:flex items-center justify-center size-6 rounded-full bg-white border border-[#D21034]/30 shadow-xs ${
+                          isAr ? '-left-3' : '-right-3'
+                        }`}
+                        aria-hidden="true"
+                      >
+                        {isAr ? (
+                          <ArrowLeft className="size-3.5 text-[#D21034]" />
+                        ) : (
+                          <ArrowRight className="size-3.5 text-[#D21034]" />
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           </div>
 
-          {/* Stepper Navigation Buttons */}
-          <div className="flex items-center justify-between pt-4 border-t border-[#d8d8d8]">
-            <button
-              type="button"
-              disabled={selectedStage === 1}
-              onClick={() => setSelectedStage((prev) => Math.max(1, prev - 1))}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[4px] border border-[#d8d8d8] text-[13px] font-medium transition-colors ${
-                selectedStage === 1
-                  ? 'text-[#5a5a5a] bg-[#f0f0f0] cursor-not-allowed border-transparent'
-                  : 'text-[#080808] bg-white hover:bg-[#f0f0f0] cursor-pointer'
-              }`}
-            >
-              {isAr ? <ChevronRight className="size-3.5" /> : <ChevronLeft className="size-3.5" />}
-              <span>{isAr ? 'المرحلة السابقة' : 'Précédente'}</span>
-            </button>
+        </div>
 
-            <span className="font-mono text-[13px] text-[#5a5a5a]">
-              0{selectedStage} / 07
-            </span>
+        {/* ══════════════════════════════════════════════════════════════════════
+            عرض الهاتف والأجهزة المحمولة: بطاقات عمودية متجاوبة ومتسلسلة
+            (Mobile Stacked Timeline with Vertical Progression)
+            ══════════════════════════════════════════════════════════════════════ */}
+        <div className="block lg:hidden space-y-4">
+          {stages.map((stage, idx) => {
+            const IconComponent = stage.icon;
+            const isGreenGroup = stage.group === 'prep';
+            const themeColor = isGreenGroup ? '#00753A' : '#D21034';
+            const isLast = idx === stages.length - 1;
 
-            <button
-              type="button"
-              disabled={selectedStage === 7}
-              onClick={() => setSelectedStage((prev) => Math.min(7, prev + 1))}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[4px] border border-[#d8d8d8] text-[13px] font-medium transition-colors ${
-                selectedStage === 7
-                  ? 'text-[#5a5a5a] bg-[#f0f0f0] cursor-not-allowed border-transparent'
-                  : 'text-[#080808] bg-white hover:bg-[#f0f0f0] cursor-pointer'
-              }`}
-            >
-              <span>{isAr ? 'المرحلة التالية' : 'Suivante'}</span>
-              {isAr ? <ChevronLeft className="size-3.5" /> : <ChevronRight className="size-3.5" />}
-            </button>
+            return (
+              <div key={stage.id} className="relative flex flex-col items-center">
+                {/* البطاقة الزجاجية للهاتف */}
+                <div
+                  className="w-full relative rounded-2xl p-5 border border-slate-200/90 bg-white/90 backdrop-blur-xl shadow-xs transition-shadow active:shadow-md"
+                >
+                  {/* شريط علوي ملون */}
+                  <div
+                    className="absolute top-0 inset-x-0 h-1 rounded-t-2xl"
+                    style={{ backgroundColor: themeColor }}
+                  />
+
+                  {/* رأس البطاقة */}
+                  <div className="flex items-center justify-between gap-2 mb-2 pt-1">
+                    {/* 1. رقم المرحلة */}
+                    <div className="flex items-center gap-2">
+                      <span
+                        className="font-mono text-sm font-black px-2 py-0.5 rounded-md"
+                        style={{
+                          color: themeColor,
+                          backgroundColor: `${themeColor}15`,
+                          borderColor: `${themeColor}30`,
+                        }}
+                      >
+                        {stage.num}
+                      </span>
+                      {/* 2. عنوان المرحلة */}
+                      <h3 className="text-base font-black text-slate-900">
+                        {stage.title}
+                      </h3>
+                    </div>
+
+                    {/* أيقونة ووسم AI */}
+                    <div
+                      className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold border"
+                      style={{
+                        color: themeColor,
+                        backgroundColor: `${themeColor}10`,
+                        borderColor: `${themeColor}25`,
+                      }}
+                    >
+                      <Sparkles className="size-3" style={{ color: themeColor }} />
+                      <span className="font-mono text-[10px] font-extrabold">AI</span>
+                    </div>
+                  </div>
+
+                  {/* 3. دور الذكاء الاصطناعي في سطر واحد */}
+                  <p className="text-xs font-semibold text-slate-700 leading-snug mt-1">
+                    {stage.aiRole}
+                  </p>
+
+                  {/* وصف تفصيلي على الهاتف لتوضيح القيمة */}
+                  <p className="text-[11px] font-medium text-slate-500 leading-relaxed mt-2 pt-2 border-t border-slate-100">
+                    {stage.hoverDetail}
+                  </p>
+                </div>
+
+                {/* سهم عمودي يصل بين كل بطاقة والتي تليها على الهاتف */}
+                {!isLast && (
+                  <div className="py-1 flex items-center justify-center text-slate-300">
+                    <ArrowDown className="size-4" style={{ color: themeColor }} />
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* ══════════════════════════════════════════════════════════════════════
+            العبارة الإلزامية في أسفل القسم:
+            «الذكاء الاصطناعي يدعم القرار، والإنسان يبقى مسؤولًا عن القرار النهائي.»
+            ══════════════════════════════════════════════════════════════════════ */}
+        <div className="mt-12 sm:mt-16 flex items-center justify-center">
+          <div className="relative w-full max-w-3xl rounded-2xl border border-slate-200/90 bg-white/95 backdrop-blur-xl p-5 sm:p-6 shadow-md text-center overflow-hidden">
+            {/* شريط العلم الوطني العلوي المزدوج */}
+            <div className="absolute top-0 left-0 right-0 h-1 flex">
+              <div className="w-1/2 bg-[#00753A]" />
+              <div className="w-1/2 bg-[#D21034]" />
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
+              <div className="size-10 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center shrink-0 shadow-2xs">
+                <ShieldCheck className="size-5 text-[#00753A]" />
+              </div>
+
+              <div className="text-center sm:text-start">
+                <span className="text-xs font-bold text-slate-600 uppercase tracking-wider block mb-0.5">
+                  {isAr ? 'المبدأ السيادي الحاكم للمنظومة' : 'Principe Souverain Directeur'}
+                </span>
+                <p className="text-base sm:text-lg font-black text-slate-900 leading-snug">
+                  {isAr
+                    ? 'الذكاء الاصطناعي يدعم القرار، والإنسان يبقى مسؤولًا عن القرار النهائي.'
+                    : 'L’intelligence artificielle assiste la décision, l’humain demeure seul responsable de la décision finale.'}
+                </p>
+              </div>
+            </div>
           </div>
-
         </div>
 
       </div>
