@@ -2,10 +2,10 @@ import React from 'react';
 import { Link } from 'wouter';
 import { useI18n } from '@/i18n';
 import {
-  Globe,
   Briefcase,
   Landmark,
   Eye,
+  Globe,
   ShieldCheck,
   ArrowLeft,
   ArrowRight,
@@ -20,18 +20,6 @@ export const V3FivePortalsSection: React.FC = () => {
 
   const portals = [
     {
-      id: 'national',
-      title: isAr ? 'البوابة الوطنية' : 'Portail National',
-      tag: isAr ? 'وصول عام' : 'Accès Public',
-      desc: isAr
-        ? 'استعراض شامل لجميع الاستشارات وطلبات العروض والمناقصات الوطنية عبر 69 ولاية جزائرية في الوقت الفعلي.'
-        : 'Consultation libre de tous les avis d’appels d’offres et consultations nationales à travers les 69 wilayas.',
-      icon: Globe,
-      link: '/tenders',
-      accent: 'border-slate-200 hover:border-emerald-500',
-      iconColor: 'text-emerald-700 bg-emerald-50 border-emerald-100',
-    },
-    {
       id: 'operator',
       title: isAr ? 'بوابة المتعامل الاقتصادي' : 'Portail Opérateur Économique',
       tag: isAr ? 'المؤسسات والمقاولون' : 'Entreprises & Fournisseurs',
@@ -40,8 +28,15 @@ export const V3FivePortalsSection: React.FC = () => {
         : 'Espace dédié aux entreprises pour retirer les cahiers des charges, préparer les offres et soumissionner sous pli scellé.',
       icon: Briefcase,
       link: '/operator',
-      accent: 'border-slate-200 hover:border-teal-500',
-      iconColor: 'text-teal-700 bg-teal-50 border-teal-100',
+      cardClass: 'bg-gradient-to-br from-[#0284c7] via-[#0369a1] to-[#075985] text-white border-sky-600/40 shadow-sm hover:shadow-lg',
+      titleClass: 'text-white',
+      descClass: 'text-sky-100',
+      tagClass: 'bg-white/20 text-white border border-white/30',
+      iconBox: 'bg-white text-[#0284c7] shadow-2xs',
+      btnClass: 'bg-white hover:bg-sky-50 text-[#0284c7] hover:text-[#0369a1] border border-white shadow-2xs font-bold',
+      dividerClass: 'border-white/15',
+      noteText: isAr ? 'لون القائمة الجانبية للمتعامل' : 'Thème barre latérale opérateur',
+      noteClass: 'text-sky-200',
     },
     {
       id: 'authority',
@@ -52,8 +47,15 @@ export const V3FivePortalsSection: React.FC = () => {
         : 'Outil de gestion pour les administrations publiques: estimation B.O.Q, commission d’ouverture et attribution.',
       icon: Landmark,
       link: '/authority',
-      accent: 'border-slate-200 hover:border-[#006233]',
-      iconColor: 'text-[#006233] bg-emerald-50 border-emerald-200/70',
+      cardClass: 'bg-gradient-to-br from-[#0b4348] via-[#0d4f55] to-[#072f33] text-white border-teal-700/40 shadow-sm hover:shadow-lg',
+      titleClass: 'text-white',
+      descClass: 'text-teal-100',
+      tagClass: 'bg-white/20 text-white border border-white/30',
+      iconBox: 'bg-white text-[#0b4348] shadow-2xs',
+      btnClass: 'bg-white hover:bg-teal-50 text-[#0b4348] hover:text-[#072f33] border border-white shadow-2xs font-bold',
+      dividerClass: 'border-white/15',
+      noteText: isAr ? 'لون القائمة الجانبية للمصلحة' : 'Thème barre latérale service',
+      noteClass: 'text-teal-200',
     },
     {
       id: 'central',
@@ -64,8 +66,34 @@ export const V3FivePortalsSection: React.FC = () => {
         : 'Tableau de bord pour les autorités de contrôle afin de suivre les flux budgétaires et détecter les collusions.',
       icon: Eye,
       link: '/central',
-      accent: 'border-slate-200 hover:border-amber-600',
-      iconColor: 'text-amber-700 bg-amber-50 border-amber-200',
+      cardClass: 'bg-gradient-to-br from-[#0f3154] via-[#143d66] to-[#0a233c] text-white border-slate-700/50 shadow-sm hover:shadow-lg',
+      titleClass: 'text-white',
+      descClass: 'text-slate-200',
+      tagClass: 'bg-amber-400/20 text-amber-300 border border-amber-400/40',
+      iconBox: 'bg-amber-400 text-[#0f3154] shadow-2xs',
+      btnClass: 'bg-amber-400 hover:bg-amber-300 text-[#0f3154] hover:text-black border border-amber-400 shadow-2xs font-bold',
+      dividerClass: 'border-white/15',
+      noteText: isAr ? 'لون القائمة الجانبية للرقابة' : 'Thème barre latérale contrôle',
+      noteClass: 'text-amber-200/90',
+    },
+    {
+      id: 'national',
+      title: isAr ? 'البوابة الوطنية' : 'Portail National',
+      tag: isAr ? 'وصول عام' : 'Accès Public',
+      desc: isAr
+        ? 'استعراض شامل لجميع الاستشارات وطلبات العروض والمناقصات الوطنية عبر 69 ولاية جزائرية في الوقت الفعلي.'
+        : 'Consultation libre de tous les avis d’appels d’offres et consultations nationales à travers les 69 wilayas.',
+      icon: Globe,
+      link: '/tenders',
+      cardClass: 'bg-white text-slate-900 border border-slate-200/90 shadow-xs hover:shadow-md',
+      titleClass: 'text-slate-900 group-hover:text-[#006233]',
+      descClass: 'text-slate-600',
+      tagClass: 'bg-slate-50 text-slate-600 border border-slate-200/80',
+      iconBox: 'text-emerald-700 bg-emerald-50 border border-emerald-100 shadow-2xs',
+      btnClass: 'bg-slate-50 hover:bg-[#006233] text-slate-700 hover:text-white border border-slate-200/90 hover:border-[#006233] font-bold',
+      dividerClass: 'border-slate-100',
+      noteText: isAr ? 'دليل الصفقات العامة' : 'Consultation publique',
+      noteClass: 'text-slate-400',
     },
     {
       id: 'auth',
@@ -76,8 +104,15 @@ export const V3FivePortalsSection: React.FC = () => {
         : 'Point d’accès unifié vérifiant le registre de commerce, le code NIF et les domaines administratifs officiels.',
       icon: ShieldCheck,
       link: '/login',
-      accent: 'border-slate-200 hover:border-slate-500',
-      iconColor: 'text-slate-700 bg-slate-100 border-slate-200',
+      cardClass: 'bg-white text-slate-900 border border-slate-200/90 shadow-xs hover:shadow-md',
+      titleClass: 'text-slate-900 group-hover:text-[#006233]',
+      descClass: 'text-slate-600',
+      tagClass: 'bg-slate-50 text-slate-600 border border-slate-200/80',
+      iconBox: 'text-slate-700 bg-slate-100 border border-slate-200 shadow-2xs',
+      btnClass: 'bg-slate-50 hover:bg-slate-800 text-slate-700 hover:text-white border border-slate-200/90 hover:border-slate-800 font-bold',
+      dividerClass: 'border-slate-100',
+      noteText: isAr ? 'التوثيق الرقمي السيادي' : 'Authentification officielle',
+      noteClass: 'text-slate-400',
     },
   ];
 
@@ -106,38 +141,43 @@ export const V3FivePortalsSection: React.FC = () => {
           </p>
         </div>
 
-        {/* شبكة البوابات الخمس: 3 في الصف الأول و2 في الصف الثاني المتوازن */}
+        {/* الصف الأول: البوابات الثلاث التنفيذية بهوية القائمة الجانبية لكل فضاء */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-7">
           {portals.slice(0, 3).map((portal) => {
             const Icon = portal.icon;
             return (
               <div
                 key={portal.id}
-                className={`group bg-white rounded-2xl border ${portal.accent} p-6 sm:p-7 shadow-xs hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 flex flex-col justify-between`}
+                className={`group rounded-2xl p-6 sm:p-7 ${portal.cardClass} hover:-translate-y-0.5 transition-all duration-300 flex flex-col justify-between`}
               >
                 <div>
                   <div className="flex items-center justify-between gap-3 mb-5">
-                    <div className={`size-11 rounded-xl border flex items-center justify-center ${portal.iconColor} shadow-2xs`}>
+                    <div className={`size-11 rounded-xl flex items-center justify-center ${portal.iconBox}`}>
                       <Icon className="size-5" strokeWidth={1.75} />
                     </div>
-                    <span className="text-[11px] font-bold text-slate-600 bg-slate-50 border border-slate-200/80 px-2.5 py-1 rounded-full">
+                    <span className={`text-[11px] font-bold px-2.5 py-1 rounded-full ${portal.tagClass}`}>
                       {portal.tag}
                     </span>
                   </div>
 
-                  <h3 className="text-lg sm:text-xl font-bold text-slate-900 mb-2.5 leading-snug group-hover:text-[#006233] transition-colors">
+                  <h3 className={`text-lg sm:text-xl font-bold mb-2.5 leading-snug ${portal.titleClass}`}>
                     {portal.title}
                   </h3>
 
-                  <p className="text-sm text-slate-600 leading-relaxed font-medium mb-6">
+                  <p className={`text-sm leading-relaxed font-medium mb-6 ${portal.descClass}`}>
                     {portal.desc}
                   </p>
                 </div>
 
-                <div className="pt-4 border-t border-slate-100">
+                <div>
+                  <div className={`pt-3 mb-4 border-t ${portal.dividerClass} flex items-center justify-between text-xs font-medium`}>
+                    <span className={portal.noteClass}>{portal.noteText}</span>
+                    <span className="size-1.5 rounded-full bg-white/70" />
+                  </div>
+
                   <Link
                     href={portal.link}
-                    className="inline-flex items-center justify-between w-full px-4 py-2.5 rounded-xl bg-slate-50 hover:bg-[#006233] text-slate-700 hover:text-white border border-slate-200/90 hover:border-[#006233] text-sm font-bold transition-all duration-200 shadow-2xs group/btn"
+                    className={`inline-flex items-center justify-between w-full px-4 py-2.5 rounded-xl text-sm transition-all duration-200 ${portal.btnClass} group/btn`}
                   >
                     <span>{isAr ? 'استكشاف البوابة' : 'Explorer le portail'}</span>
                     <ArrowIcon className="size-4 transition-transform group-hover/btn:translate-x-1 rtl:group-hover/btn:-translate-x-1" strokeWidth={1.75} />
@@ -148,38 +188,43 @@ export const V3FivePortalsSection: React.FC = () => {
           })}
         </div>
 
-        {/* الصف الثاني: البوابتان المتبقيتان (الرقابة المركزية عين الصقر + بوابة الهوية) */}
+        {/* الصف الثاني: البوابتان المتبقيتان (البوابة الوطنية + بوابة الهوية والتحقق الموحد) */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-7 mt-6 sm:mt-7 max-w-4xl mx-auto">
           {portals.slice(3, 5).map((portal) => {
             const Icon = portal.icon;
             return (
               <div
                 key={portal.id}
-                className={`group bg-white rounded-2xl border ${portal.accent} p-6 sm:p-7 shadow-xs hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 flex flex-col justify-between`}
+                className={`group rounded-2xl p-6 sm:p-7 ${portal.cardClass} hover:-translate-y-0.5 transition-all duration-300 flex flex-col justify-between`}
               >
                 <div>
                   <div className="flex items-center justify-between gap-3 mb-5">
-                    <div className={`size-11 rounded-xl border flex items-center justify-center ${portal.iconColor} shadow-2xs`}>
+                    <div className={`size-11 rounded-xl flex items-center justify-center ${portal.iconBox}`}>
                       <Icon className="size-5" strokeWidth={1.75} />
                     </div>
-                    <span className="text-[11px] font-bold text-slate-600 bg-slate-50 border border-slate-200/80 px-2.5 py-1 rounded-full">
+                    <span className={`text-[11px] font-bold px-2.5 py-1 rounded-full ${portal.tagClass}`}>
                       {portal.tag}
                     </span>
                   </div>
 
-                  <h3 className="text-lg sm:text-xl font-bold text-slate-900 mb-2.5 leading-snug group-hover:text-[#006233] transition-colors">
+                  <h3 className={`text-lg sm:text-xl font-bold mb-2.5 leading-snug ${portal.titleClass} transition-colors`}>
                     {portal.title}
                   </h3>
 
-                  <p className="text-sm text-slate-600 leading-relaxed font-medium mb-6">
+                  <p className={`text-sm leading-relaxed font-medium mb-6 ${portal.descClass}`}>
                     {portal.desc}
                   </p>
                 </div>
 
-                <div className="pt-4 border-t border-slate-100">
+                <div>
+                  <div className={`pt-3 mb-4 border-t ${portal.dividerClass} flex items-center justify-between text-xs font-medium`}>
+                    <span className={portal.noteClass}>{portal.noteText}</span>
+                    <span className="size-1.5 rounded-full bg-slate-300" />
+                  </div>
+
                   <Link
                     href={portal.link}
-                    className="inline-flex items-center justify-between w-full px-4 py-2.5 rounded-xl bg-slate-50 hover:bg-[#006233] text-slate-700 hover:text-white border border-slate-200/90 hover:border-[#006233] text-sm font-bold transition-all duration-200 shadow-2xs group/btn"
+                    className={`inline-flex items-center justify-between w-full px-4 py-2.5 rounded-xl text-sm transition-all duration-200 ${portal.btnClass} group/btn`}
                   >
                     <span>{isAr ? 'استكشاف البوابة' : 'Explorer le portail'}</span>
                     <ArrowIcon className="size-4 transition-transform group-hover/btn:translate-x-1 rtl:group-hover/btn:-translate-x-1" strokeWidth={1.75} />
