@@ -51,10 +51,10 @@ export const V3AIToolsSection: React.FC = () => {
     {
       id: 'anti-collusion',
       title: isAr ? 'رادار مكافحة التواطؤ عين الصقر' : 'Radar Anti-Collusion Œil de Faucon',
-      role: isAr ? 'مساعد الرقابة والنزاهة' : 'Détection Algorithmique',
+      role: isAr ? 'مساعد الرقابة والنزاهة' : 'Support Analytique',
       desc: isAr
-        ? 'نماذج استباقية تحلل سلوك العطاءات وتكتشف عروض التغطية وتدوير الصفقات وتطابق الأسعار لدعم النزاهة وحماية المال العام.'
-        : 'Algorithmes surveillant les offres de couverture, la rotation des marchés et les anomalies de prix suspectes.',
+        ? 'تحليل مؤشرات المخاطر ودعم رصد السلوكيات المشبوهة كأداة تحليلية واستشارية مساندة لأجهزة الرقابة، دون إصدار أي قرار قانوني.'
+        : 'Analyse des indicateurs de risque et appui à la détection des comportements suspects, en tant qu’outil consultatif sans décision juridique.',
       icon: ScanSearch,
       accent: 'border-amber-200/90 hover:border-amber-500',
       iconBox: 'text-amber-700 bg-amber-50 border-amber-200',

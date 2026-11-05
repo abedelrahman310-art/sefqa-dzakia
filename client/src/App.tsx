@@ -20,6 +20,7 @@ const TermsPage = lazy(() => import('./pages/legal/TermsPage').then(m => ({ defa
 const FAQPage = lazy(() => import('./pages/legal/FAQPage').then(m => ({ default: m.FAQPage })));
 const AccessibilityPage = lazy(() => import('./pages/legal/AccessibilityPage').then(m => ({ default: m.AccessibilityPage })));
 const AISubscriptionPage = lazy(() => import('./pages/pricing/AISubscriptionPage').then(m => ({ default: m.AISubscriptionPage })));
+const AIPowerPage = lazy(() => import('./pages/ai/AIPowerPage').then(m => ({ default: m.AIPowerPage })));
 
 function PageFallback({ label }: { label: string }) {
   return (
@@ -89,6 +90,9 @@ export function App() {
           <Route path="/faq" component={FAQPage} />
           <Route path="/accessibility" component={AccessibilityPage} />
           <Route path="/pricing" component={AISubscriptionPage} />
+          <Route path="/ai-capabilities" component={AIPowerPage} />
+          <Route path="/ai" component={AIPowerPage} />
+          <Route path="/power-of-ai" component={AIPowerPage} />
           <Route path="/" component={LandingV3Page} />
 
           <Route>

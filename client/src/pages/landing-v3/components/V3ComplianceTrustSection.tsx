@@ -6,7 +6,7 @@ import {
   FileText,
   Lock,
   Database,
-  Award,
+  Sparkles,
   ArrowLeft,
   ArrowRight,
   ShieldCheck,
@@ -42,7 +42,7 @@ export const V3ComplianceTrustSection: React.FC = () => {
     {
       id: 'data-protection',
       title: isAr ? 'حماية بيانات العروض والأظرفة الرقمية' : 'Protection des Données et Plis Numériques',
-      tag: isAr ? 'القانون 18-07' : 'Loi 18-07',
+      tag: isAr ? 'حماية البيانات والخصوصية' : 'Protection des Données',
       desc: isAr
         ? 'تشفير تام بـ SHA-256 وأقفال زمنية تمنع كشف الأسعار المالية قبل تاريخ وساعة جلسة فتح الأظرفة الرسمية.'
         : 'Chiffrement SHA-256 et verrou temporel interdisant la révélation des prix avant la séance officielle d’ouverture.',
@@ -51,11 +51,11 @@ export const V3ComplianceTrustSection: React.FC = () => {
     },
     {
       id: 'audit-log',
-      title: isAr ? 'سجل تدقيق آمن للعمليات' : 'Journal d’Audit Sécurisé et Inaltérable',
+      title: isAr ? 'سجل تدقيق آمن للعمليات' : 'Journal d’Audit Sécurisé des Opérations',
       tag: isAr ? 'حجية رقمية' : 'Force Probante',
       desc: isAr
-        ? 'سجل جنائي رقمي متسلسل غير قابل للتعديل أو المسح يوثق كل توقيع وإيداع وتعديل لضمان الحجية الرقابية الكاملة.'
-        : 'Piste d’audit numérique append-only scellée par hachage cryptographique pour les inspections de la Cour des comptes.',
+        ? 'مسار تدقيق رقمي متسلسل وآمن يوثق كل توقيع وإيداع وتعديل لضمان الموثوقية الرقابية والشفافية المؤسسية.'
+        : 'Piste d’audit numérique continue et sécurisée documentant chaque validation et dépôt pour la conformité réglementaire.',
       icon: Database,
       color: 'text-amber-700 bg-amber-50 border-amber-200',
     },
@@ -124,8 +124,8 @@ export const V3ComplianceTrustSection: React.FC = () => {
         </div>
 
         {/* ══════════════════════════════════════════════════════════════════════
-            البطاقة الخاصة المستلهمة من منصة Startup.dz الجزائرية (Label Projet)
-            تصميم فاتح ونظيف، شارة خفيفة، ومحتوى وطني مؤسسي دقيق
+            بطاقة مشروع رقمي جزائري مبتكر
+            تصميم فاتح ونظيف ومحتوى وطني مؤسسي دقيق
             ══════════════════════════════════════════════════════════════════════ */}
         <div className="relative bg-white rounded-2xl border border-emerald-200/80 p-6 sm:p-8 shadow-xs hover:shadow-md transition-all duration-300 max-w-4xl mx-auto overflow-hidden">
           {/* لمسة زليج هندسية خفيفة جداً في زاوية البطاقة */}
@@ -137,32 +137,19 @@ export const V3ComplianceTrustSection: React.FC = () => {
             }}
           />
 
-          <div className="relative flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
-            <div className="flex items-start gap-4">
-              <div className="size-12 rounded-2xl bg-emerald-50 border border-emerald-200/90 flex items-center justify-center text-[#006233] shrink-0 shadow-2xs">
-                <Award className="size-6" strokeWidth={1.75} />
-              </div>
-              <div>
-                <div className="flex flex-wrap items-center gap-2 mb-1.5">
-                  <h3 className="text-lg sm:text-xl font-bold text-slate-900">
-                    {isAr ? 'مشروع رقمي جزائري مبتكر' : 'Projet Numérique Algérien Innovant'}
-                  </h3>
-                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
-                    Label projet innovant
-                  </span>
-                </div>
-                <p className="text-sm text-slate-600 font-medium leading-relaxed">
-                  {isAr
-                    ? 'منصة رقمية جزائرية تدعم رقمنة الصفقات العمومية والشفافية والامتثال'
-                    : 'Plateforme numérique algérienne soutenant la dématérialisation des marchés publics, la transparence et la conformité.'}
-                </p>
-              </div>
+          <div className="relative flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-5">
+            <div className="size-12 rounded-2xl bg-emerald-50 border border-emerald-200/90 flex items-center justify-center text-[#006233] shrink-0 shadow-2xs">
+              <Sparkles className="size-6" strokeWidth={1.75} />
             </div>
-
-            <div className="shrink-0 self-end sm:self-center">
-              <span className="text-xs font-bold text-[#006233] bg-emerald-50/70 border border-emerald-200/60 px-3 py-1.5 rounded-xl">
-                Startup.dz GovTech
-              </span>
+            <div className="flex-1 min-w-0">
+              <h3 className="text-lg sm:text-xl font-bold text-slate-900 mb-1.5">
+                {isAr ? 'مشروع رقمي جزائري مبتكر' : 'Projet Numérique Algérien Innovant'}
+              </h3>
+              <p className="text-sm text-slate-600 font-medium leading-relaxed">
+                {isAr
+                  ? 'منصة رقمية جزائرية تدعم رقمنة الصفقات العمومية والشفافية والامتثال'
+                  : 'Plateforme numérique algérienne soutenant la dématérialisation des marchés publics, la transparence et la conformité.'}
+              </p>
             </div>
           </div>
         </div>

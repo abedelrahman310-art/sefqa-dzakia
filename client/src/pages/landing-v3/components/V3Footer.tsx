@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'wouter';
 import { useI18n } from '@/i18n';
 import Logo from '@/components/ui/Logo';
-import { Shield, Lock, FileCheck } from 'lucide-react';
+import { Shield, Lock, FileCheck, Sparkles } from 'lucide-react';
 
 /**
  * V3Footer — تذييل فاتح موحّد مع نظام الصفحة (قماش أبيض، حبر أسود، خطوط شعرية #d8d8d8).
@@ -117,6 +117,16 @@ export const V3Footer: React.FC = () => {
               {isAr ? 'الترسانة الذكية' : 'Outils IA'}
             </h4>
             <ul className="space-y-2 text-[13px] text-[#5a5a5a]">
+              <li>
+                <Link
+                  href="/ai-capabilities"
+                  className="inline-flex items-center gap-1.5 font-bold text-[#006233] hover:text-[#004d28] transition-colors"
+                >
+                  <Sparkles className="size-3.5 text-[#006233] shrink-0" />
+                  <span>{isAr ? 'قوة الذكاء الاصطناعي' : 'Puissance de l’IA'}</span>
+                </Link>
+              </li>
+
               <li>
                 <a href="#features" className="hover:text-[#146ef5] transition-colors">
                   {isAr ? 'درع الامتثال' : 'Bouclier IA'}

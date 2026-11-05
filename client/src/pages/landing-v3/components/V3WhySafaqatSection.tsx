@@ -22,8 +22,8 @@ export const V3WhySafaqatSection: React.FC = () => {
       id: 'traceability',
       title: isAr ? 'تتبع رقمي لكل مرحلة' : 'Traçabilité Numérique de Chaque Étape',
       desc: isAr
-        ? 'توثيق رقمي دقيق لمسار الصفقة من تقدير الحاجة الأولية حتى الإقفال المالي والاستلام النهائي، مع مسار تدقيق غير قابل للحذف.'
-        : 'Documentation continue du cycle du marché, de l’expression des besoins jusqu’à la réception définitive, avec journal d’audit inaltérable.',
+        ? 'توثيق رقمي دقيق لمسار الصفقة من تقدير الحاجة الأولية حتى الإقفال المالي والاستلام النهائي، مع مسار تدقيق آمن وقابل للتتبع.'
+        : 'Documentation continue du cycle du marché, de l’expression des besoins jusqu’à la réception définitive, avec un journal d’audit sécurisé et traçable.',
       badge: isAr ? 'رصد تسلسلي' : 'Suivi continu',
       icon: Activity,
       accent: 'text-teal-700 bg-teal-50 border-teal-100',
