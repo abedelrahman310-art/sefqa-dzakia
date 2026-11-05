@@ -3,24 +3,25 @@ import { useI18n } from '@/i18n';
 import V3TopBanner from './components/V3TopBanner';
 import V3Nav from './components/V3Nav';
 import V3Hero from './components/V3Hero';
-import V3PortalsSection from './components/V3PortalsSection';
-import V3BrowserMockup from './components/V3BrowserMockup';
-import V3UnifiedProcurementSection from './components/V3UnifiedProcurementSection';
-import V3SplitFeature from './components/V3SplitFeature';
-import V3GovernanceSection from './components/V3GovernanceSection';
-import V3InteroperabilitySection from './components/V3InteroperabilitySection';
-import V3FAQSection from './components/V3FAQSection';
+import V3WhySafaqatSection from './components/V3WhySafaqatSection';
+import V3FivePortalsSection from './components/V3FivePortalsSection';
+import V3AIToolsSection from './components/V3AIToolsSection';
+import V3ComplianceTrustSection from './components/V3ComplianceTrustSection';
 import V3Footer from './components/V3Footer';
 import V3SectionDivider from './components/V3SectionDivider';
 
 /**
- * صفحة الهبوط الوطنية المعمارية الموحدة (Safaqat Dzakia Landing Page)
+ * صفحة الهبوط الوطنية المعمارية الموحدة — منصة «صفقات ذكية»
  *
- * تصميم GovTech سيادي ناصع البياض (#ffffff):
- * - 8 أقسام متكاملة مفصولة بخطين وطنيين (أخضر وأحمر) يتوسطهما شعار المنصة المدمج.
- * - اسم المنصة داخل بطاقة زجاجية فاخرة طافية (Frosted Glassmorphic Card).
- * - عناوين الأقسام مؤطرة وقصيرة وخالية من النصوص الدقيقة.
- * - الحفاظ على التذييل المؤسسي الحالي وتعزيز الهوية الوطنية السيادية.
+ * الهيكلية المعتمدة بدقة:
+ * 1. الشريط العلوي الرئاسي (V3TopBanner)
+ * 2. شريط التنقل المعماري (V3Nav)
+ * 3. قسم البطل والبطاقة الزجاجية السيادية المركزية (V3Hero) - دون أي مساس
+ * 4. القسم 1: لماذا صفقات ذكية؟ (V3WhySafaqatSection)
+ * 5. القسم 2: البوابات الخمس (V3FivePortalsSection)
+ * 6. القسم 3: أدوات الذكاء الاصطناعي (V3AIToolsSection)
+ * 7. القسم 4: الامتثال والثقة (V3ComplianceTrustSection) مع بطاقة مشروع مبتكر وزر الدخول الموحد
+ * 8. التذييل المؤسسي الراقي المعتمد (V3Footer) - دون أي مساس
  */
 export function LandingV3Page() {
   const { lang, dir } = useI18n();
@@ -59,64 +60,50 @@ export function LandingV3Page() {
       lang={lang}
       className="min-h-screen bg-[#ffffff] text-[#080808] font-sans antialiased selection:bg-[#006233] selection:text-white"
     >
-      {/* الشريط العلوي الإرشادي */}
+      {/* ─── الشريط العلوي الرئاسي ─── */}
       <V3TopBanner />
 
-      {/* شريط التنقل المعماري */}
+      {/* ─── شريط التنقل المعماري ─── */}
       <V3Nav />
 
-      {/* صلب الصفحة بـ 8 أقسام متكاملة ومفصولة بخطي العلم الوطني مع الشعار */}
+      {/* ─── صلب الصفحة ─── */}
       <main id="main-content">
-        {/* القسم 1: قسم البطولة والبطاقة الزجاجية السيادية لاسم المنصة */}
+        {/* قسم البطل السيادي والبطاقة الزجاجية المركزية الطافية (دون أي تعديل) */}
         <V3Hero />
 
-        {/* فاصل وطني سيادي مزدوج (خط أخضر وخط أحمر يتوسطهما الشعار) */}
+        {/* فاصل وطني سيادي مزدوج */}
         <V3SectionDivider bg="bg-[#ffffff]" />
 
-        {/* القسم 2: بوابات المنظومة الثلاث المترابطة */}
-        <V3PortalsSection />
+        {/* ─── بداية القسم 1: لماذا صفقات ذكية؟ ─── */}
+        <V3WhySafaqatSection />
+        {/* ─── نهاية القسم 1: لماذا صفقات ذكية؟ ─── */}
+
+        {/* فاصل وطني سيادي مزدوج */}
+        <V3SectionDivider bg="bg-[#f8fafc]" />
+
+        {/* ─── بداية القسم 2: البوابات الخمس ─── */}
+        <V3FivePortalsSection />
+        {/* ─── نهاية القسم 2: البوابات الخمس ─── */}
 
         {/* فاصل وطني سيادي مزدوج */}
         <V3SectionDivider bg="bg-[#ffffff]" />
 
-        {/* القسم 3: المعمل الرقمي والصفقة المشفرة الحية */}
-        <V3BrowserMockup />
+        {/* ─── بداية القسم 3: أدوات الذكاء الاصطناعي ─── */}
+        <V3AIToolsSection />
+        {/* ─── نهاية القسم 3: أدوات الذكاء الاصطناعي ─── */}
 
         {/* فاصل وطني سيادي مزدوج */}
-        <V3SectionDivider bg="bg-[#ffffff]" />
+        <V3SectionDivider bg="bg-[#f8fafc]" />
 
-        {/* القسم 4: مصفوفة مسار الصفقة والرقابة المركزية (5 محطات كبرى مدمجة) */}
-        <V3UnifiedProcurementSection />
-
-        {/* فاصل وطني سيادي مزدوج */}
-        <V3SectionDivider bg="bg-[#ffffff]" />
-
-        {/* القسم 5: ترسانة الذكاء الاصطناعي الرقابي والاستشاري */}
-        <V3SplitFeature />
-
-        {/* فاصل وطني سيادي مزدوج */}
-        <V3SectionDivider bg="bg-[#ffffff]" />
-
-        {/* القسم 6: الركائز القانونية والسيادية للجمهورية */}
-        <V3GovernanceSection />
-
-        {/* فاصل وطني سيادي مزدوج */}
-        <V3SectionDivider bg="bg-[#ffffff]" />
-
-        {/* القسم 7: الربط البيني الحكومي والتغطية الوطنية للـ 69 ولاية */}
-        <V3InteroperabilitySection />
-
-        {/* فاصل وطني سيادي مزدوج */}
-        <V3SectionDivider bg="bg-[#ffffff]" />
-
-        {/* القسم 8: الأسئلة الشائعة، مركز النزاهة والدعوة المباشرة للانضمام */}
-        <V3FAQSection />
+        {/* ─── بداية القسم 4: الامتثال والثقة ─── */}
+        <V3ComplianceTrustSection />
+        {/* ─── نهاية القسم 4: الامتثال والثقة ─── */}
 
         {/* فاصل وطني سيادي ختامي قبل التذييل */}
         <V3SectionDivider bg="bg-[#ffffff]" />
       </main>
 
-      {/* التذييل المؤسسي الراقي المعتمد */}
+      {/* ─── التذييل المؤسسي الراقي المعتمد (دون أي تعديل) ─── */}
       <V3Footer />
     </div>
   );

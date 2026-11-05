@@ -19,12 +19,10 @@ export const V3Nav: React.FC = () => {
   }, []);
 
   const navLinks = [
-    { label: isAr ? 'المنظومة' : 'Plateforme', href: '#overview' },
-    { label: isAr ? 'البوابات' : 'Portails', href: '#portals' },
-    { label: isAr ? 'المعاينة الحية' : 'Aperçu Direct', href: '#live-demo' },
-    { label: isAr ? 'الترسانة الذكية' : 'Suite IA', href: '#features' },
-    { label: isAr ? 'مسار الصفقة والرقابة' : 'Cycle & Contrôle', href: '#procurement-matrix' },
-    { label: isAr ? 'الامتثال' : 'Conformité', href: '#compliance' },
+    { label: isAr ? 'لماذا صفقات ذكية' : 'Pourquoi Safaqat', href: '#why-safaqat' },
+    { label: isAr ? 'البوابات الخمس' : 'Les Portails', href: '#portals' },
+    { label: isAr ? 'أدوات الذكاء الاصطناعي' : 'Outils IA', href: '#ai-tools' },
+    { label: isAr ? 'الامتثال والثقة' : 'Conformité & Confiance', href: '#compliance' },
   ];
 
   return (
