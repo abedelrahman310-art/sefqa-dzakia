@@ -68,12 +68,12 @@ export const AIPowerPage: React.FC = () => {
       highlights: isAr
         ? [
             'مطابقة لحظية مع رموز السجل التجاري',
-            'رصد مستمر لمناقصات ولايات الجزائر الـ 69',
+            'رصد مستمر لمناقصات ولايات الوطن والدوائر المنتدبة',
             'تنبيهات استباقية بالفرص الأكثر ملاءمة',
           ]
         : [
             'Correspondance instantanée avec les codes d’activité',
-            'Surveillance des marchés des 69 wilayas',
+            'Surveillance des marchés sur l’ensemble du territoire national',
             'Alertes proactives sur les opportunités adaptées',
           ],
       path: '/operator/deals',
@@ -336,7 +336,7 @@ export const AIPowerPage: React.FC = () => {
     {
       id: 'national-price-benchmark',
       portalKey: 'central',
-      title: isAr ? 'بنك الأسعار المرجعية عبر 69 ولاية' : 'Observatoire des Prix de Référence',
+      title: isAr ? 'بنك الأسعار المرجعية الوطنية' : 'Observatoire des Prix de Référence',
       target: isAr ? 'الرقابة المركزية وكافة الإدارات' : 'Supervision & Administrations',
       targetColor: 'text-slate-800 bg-slate-100 border-slate-200',
       status: isAr ? 'قيد التطوير' : 'En Développement',
@@ -346,11 +346,11 @@ export const AIPowerPage: React.FC = () => {
       targetRelease: isAr ? 'الربع الأول 2026' : 'T1 2026',
       icon: Network,
       desc: isAr
-        ? 'بناء قاعدة بيانات مرجعية لمتوسط أسعار المواد والخدمات عبر الـ 69 ولاية جزائرية لمساعدة المصالح في ترشيد الإنفاق العمومي'
-        : 'Constitution d’une base de données des prix moyens unitaires à travers les 69 wilayas pour rationaliser la commande.',
+        ? 'بناء قاعدة بيانات مرجعية لمتوسط أسعار المواد والخدمات عبر ولايات والدوائر المنتدبة لمساعدة المصالح في ترشيد الإنفاق العمومي'
+        : 'Constitution d’une base de données des prix moyens unitaires à travers le territoire national pour rationaliser la commande.',
       milestones: isAr
         ? ['تغطية جغرافية كاملة لجميع ولايات الوطن', 'تحديث دوري لمعدلات التضخم وتكلفة المواد', 'مؤشرات استرشادية لترشيد المال العام']
-        : ['Couverture complète des 69 wilayas', 'Actualisation selon les cours des matériaux', 'Repères d’optimisation budgétaire'],
+        : ['Couverture complète du territoire', 'Actualisation selon les cours des matériaux', 'Repères d’optimisation budgétaire'],
     },
   ];
 
@@ -500,9 +500,9 @@ export const AIPowerPage: React.FC = () => {
             </div>
 
             <div className="bg-white rounded-2xl border border-slate-200/90 p-4 shadow-2xs text-center">
-              <div className="text-2xl sm:text-3xl font-black text-[#0284c7]">69</div>
+              <div className="text-2xl sm:text-3xl font-black text-[#0284c7]">58+</div>
               <div className="text-xs font-bold text-slate-700 mt-1">
-                {isAr ? 'ولاية مغطاة بالرصد' : 'Wilayas couvertes'}
+                {isAr ? 'ولاية ومقاطعة إدارية' : 'Wilayas & Circonscriptions'}
               </div>
               <div className="text-[11px] text-slate-400 font-medium mt-0.5">
                 {isAr ? 'مسح جغرافي شامل' : 'Couverture territoriale'}
@@ -510,7 +510,9 @@ export const AIPowerPage: React.FC = () => {
             </div>
 
             <div className="bg-white rounded-2xl border border-slate-200/90 p-4 shadow-2xs text-center">
-              <div className="text-2xl sm:text-3xl font-black text-slate-800">100%</div>
+              <div className="text-2xl sm:text-3xl font-black text-slate-800">
+                {isAr ? 'مطابق' : 'Conforme'}
+              </div>
               <div className="text-xs font-bold text-slate-700 mt-1">
                 {isAr ? 'امتثال تشريعي' : 'Conformité légale'}
               </div>

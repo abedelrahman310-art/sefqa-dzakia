@@ -81,7 +81,7 @@ export function BidComplianceShield({
         badgeBg: 'bg-emerald-600 text-white',
         ringColor: 'stroke-emerald-600',
         trackColor: 'stroke-emerald-100',
-        title: isAr ? 'عرض محمي من الإقصاء الشكلي بنسبة 100%' : "Offre protégée contre l'élimination formelle à 100%",
+        title: isAr ? 'فحص الامتثال الشكلي مستوفٍ لكافة الشروط' : "Conformité formelle vérifiée selon les critères réglementaires",
         subtitle: isAr
           ? 'كافة الوثائق الإلزامية لملف الترشح والعرضين التقني والمالي مستوفاة وسارية المفعول وفق القانون 23-12.'
           : 'Tous les documents obligatoires du dossier de candidature, des offres technique et financière sont conformes et valides selon la loi 23-12.',

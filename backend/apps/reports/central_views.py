@@ -472,7 +472,7 @@ class CentralSuspicionsView(APIView):
             }
             enriched_suspicions.append(enriched)
 
-            # تسجيل الإنذار في سجل التدقيق AuditLog بشكل دائم وغير قابل للتعديل
+            # تسجيل الإنذار في سجل التدقيق AuditLog بتسلسل تراكمي محمي (Append-Only)
             try:
                 deal_ids_str = ",".join(deal_ids)
                 resource_key = f"{item['type']}:{deal_ids_str}"[:100]

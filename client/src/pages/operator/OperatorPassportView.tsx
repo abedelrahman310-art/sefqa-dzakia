@@ -277,7 +277,7 @@ export function OperatorPassportView() {
             <div className="flex flex-wrap items-center gap-2.5">
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold bg-emerald-50 text-emerald-800 border border-emerald-200">
                 <ShieldCheck className="size-3.5 text-emerald-700" />
-                {isAr ? 'جواز سفر رقمي سيادي معتمد' : 'Passeport Numérique Souverain'}
+                {isAr ? 'الملف الإداري الرقمي الموحد' : 'Dossier Administratif Numérique'}
               </span>
               <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200">
                 {isAr ? 'المرسوم الرئاسي 15-247 · القانون 23-12' : 'Réglementation Officielle'}

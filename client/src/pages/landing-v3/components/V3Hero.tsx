@@ -88,7 +88,7 @@ export const V3Hero: React.FC = () => {
                   </div>
                   <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-50/90 border border-slate-200/90 text-slate-700 text-xs font-bold shadow-2xs hover:border-emerald-300 transition-colors">
                     <span className="size-1.5 rounded-full bg-[#006233]" />
-                    <span>{isAr ? 'سيادة رقمية جزائرية 100%' : 'Souveraineté Numérique 100%'}</span>
+                    <span>{isAr ? 'سيادة رقمية جزائرية وتوطين محلي' : 'Souveraineté Numérique et Hébergement Local'}</span>
                   </div>
                 </div>
 

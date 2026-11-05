@@ -321,4 +321,64 @@ CHARGILY_API_KEY = os.getenv('CHARGILY_API_KEY', '')
 CHARGILY_MODE = os.getenv('CHARGILY_MODE', 'test')  # 'test' or 'production'
 CHARGILY_BASE_URL = 'https://pay.chargily.net/test/api/v2' if CHARGILY_MODE == 'test' else 'https://pay.chargily.net/api/v2'
 
+# ═══ Production Structured Logging & Sanitization (Priority 7) ═══
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'filters': {
+        'sensitive_data_filter': {
+            '()': 'safaqat_core.logging_filters.SensitiveDataFilter',
+        },
+    },
+    'formatters': {
+        'verbose': {
+            'format': '[{asctime}] [{levelname}] [{name}:{lineno}] {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '[{levelname}] {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'filters': ['sensitive_data_filter'],
+            'formatter': 'verbose',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': os.environ.get('DJANGO_LOG_LEVEL', 'INFO'),
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'django.request': {
+            'handlers': ['console'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
+        'django.security': {
+            'handlers': ['console'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
+        'django.db.backends': {
+            'handlers': ['console'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
+        'apps': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+    },
+}
+
+
 

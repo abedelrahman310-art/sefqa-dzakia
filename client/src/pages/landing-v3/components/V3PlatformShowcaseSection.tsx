@@ -263,7 +263,7 @@ export const V3PlatformShowcaseSection: React.FC = () => {
                     <span className="text-xs text-slate-500 font-semibold">{isAr ? 'سجل العمليات المشفر' : 'Journal d’audit'}</span>
                     <div className="text-sm font-bold text-slate-900 flex items-center gap-1.5">
                       <Lock className="size-4 text-emerald-600" />
-                      <span>{isAr ? 'سجل غير قابل للتعديل' : 'Registre immuable'}</span>
+                      <span>{isAr ? 'سجل تدقيق تراكمي موثق' : 'Journal d’audit certifié'}</span>
                     </div>
                   </div>
                 </div>

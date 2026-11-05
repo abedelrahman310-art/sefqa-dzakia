@@ -1,138 +1,135 @@
-import logging
-from django.core.management.base import BaseCommand
+"""
+أمر الإدارة الآمن: purge_demo_data
+منصة صفقات ذكية — تنظيف وتصفير البيانات التجريبية لحسابات وبيانات الاختبار.
+
+القواعد الصارمة:
+1. لا يحذف أي حساب مسؤول خارق (is_superuser=True) أو موظف إداري رسمي (is_staff=True).
+2. يحذف الصفقات والعروض والدفاتر المرتبطة بحسابات الاختبار والبيانات التجريبية فقط.
+3. يتطلب راية --confirm صريحة لمنع التنفيذ العرضي في بيئات العمل.
+4. يوفر وضع المحاكاة --dry-run لمعاينة السجلات قبل التنفيذ الفعلي.
+"""
+
+from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
-
-from apps.users.models import CustomUser, OperatorProfile, Notification
-from apps.procurements.models import (
-    ProcurementDeal,
-    CahierSpecs,
-    OpeningSession,
-    SessionAccess,
-    OpeningEvent,
-    OfferDocument,
-    Contract as ProcContract,
-    Milestone,
-    MilestoneProgressReport,
-)
+from apps.users.models import CustomUser, OperatorProfile
+from apps.procurements.models import ProcurementDeal, CahierSpecs, OpeningSession, SessionAccess, OpeningEvent
 from apps.bids.models import BidOffer
-from apps.contracts.models import (
-    Contract as ContContract,
-    AwardDecision,
-    AwardObjection,
-    ObjectionTimeline,
-)
-from apps.execution.models import (
-    ExecutionMilestone,
-    ContractAmendment,
-    ReceptionProcess,
-    PaymentSituation,
-)
-from apps.ai_gateway.models import AIInsight, AIConversation, AIMessage
-
-logger = logging.getLogger(__name__)
+from apps.contracts.models import AwardDecision, AwardObjection, Contract
+from apps.execution.models import ExecutionMilestone, ContractAmendment, ReceptionProcess, PaymentSituation
+from apps.audit.models import AuditLog
 
 
 class Command(BaseCommand):
-    help = "تصفير المنصة بالكامل وحذف كافة الصفقات والعروض والبيانات الوهمية التجريبية لضمان بدء المستخدمين الجدد من الصفر"
+    help = 'تنظيف وتصفير البيانات والصفقات التجريبية بأمان دون المساس بالحسابات الإدارية الرسمية'
 
     def add_arguments(self, parser):
         parser.add_argument(
             '--confirm',
             action='store_true',
-            help='تأكيد تنفيذ الحذف والتصفير الفعلي للبيانات الوهمية',
+            help='تأكيد صريح لتنفيذ عملية التصفير والحذف الفعلي',
+        )
+        parser.add_argument(
+            '--dry-run',
+            action='store_true',
+            help='معاينة السجلات التي سيتم تنظيفها دون حذف فعلي',
         )
 
     def handle(self, *args, **options):
-        if not options.get('confirm'):
-            self.stdout.write(
-                self.style.WARNING(
-                    "⚠️ تحذير: هذا الأمر سيقوم بتصفير وحذف جميع الصفقات والعروض والبيانات الوهمية!\n"
-                    "لتأكيد العملية، يرجى التمرير مع المعامل --confirm:\n"
-                    "python manage.py purge_demo_data --confirm"
-                )
+        dry_run = options.get('dry_run', False)
+        confirm = options.get('confirm', False)
+
+        if not confirm and not dry_run:
+            raise CommandError(
+                'تم إيقاف العملية للحماية: يجب تمرير الراية --confirm للتنفيذ الفعلي، '
+                'أو استخدام --dry-run للمعاينة دون حذف.'
             )
+
+        self.stdout.write(self.style.NOTICE(
+            '=== [صفقات ذكية] فحص وتنظيف البيانات التجريبية للمنصة ==='
+        ))
+
+        # 1. تحديد المستخدمين التجريبيين (استثناء صارم للمسؤولين الخارقين والموظفين الرسميين)
+        demo_emails = [
+            'operator@safaqat.dz',
+            'operator2@safaqat.dz',
+            'operator3@safaqat.dz',
+            'operator4@safaqat.dz',
+            'auth_oran@safaqat.dz',
+            'auth_constantine@safaqat.dz',
+            'auth_tizi@safaqat.dz',
+            'auth_setif@safaqat.dz',
+        ]
+        
+        # حماية صارمة: منع حذف أي حساب يملك صلاحيات superuser أو staff
+        demo_users_qs = CustomUser.objects.filter(
+            email__in=demo_emails,
+            is_superuser=False,
+            is_staff=False,
+        )
+        demo_users_count = demo_users_qs.count()
+
+        # 2. تحديد الصفقات التجريبية
+        demo_deals_qs = ProcurementDeal.objects.filter(
+            reference_number__icontains='DEMO'
+        ) | ProcurementDeal.objects.filter(
+            title__icontains='تجريب'
+        ) | ProcurementDeal.objects.filter(
+            authority__in=demo_users_qs
+        )
+        demo_deals_count = demo_deals_qs.count()
+        demo_deal_ids = list(demo_deals_qs.values_list('id', flat=True))
+
+        # 3. إحصاء السجلات التابعة
+        offers_count = BidOffer.objects.filter(deal_id__in=demo_deal_ids).count()
+        cahiers_count = CahierSpecs.objects.filter(deal_id__in=demo_deal_ids).count()
+        sessions_count = OpeningSession.objects.filter(deal_id__in=demo_deal_ids).count()
+        awards_count = AwardDecision.objects.filter(deal_id__in=demo_deal_ids).count()
+        contracts_count = Contract.objects.filter(deal_id__in=demo_deal_ids).count()
+        contract_ids = list(Contract.objects.filter(deal_id__in=demo_deal_ids).values_list('id', flat=True))
+        milestones_count = ExecutionMilestone.objects.filter(contract_id__in=contract_ids).count()
+        amendments_count = ContractAmendment.objects.filter(contract_id__in=contract_ids).count()
+        receptions_count = ReceptionProcess.objects.filter(contract_id__in=contract_ids).count()
+        payments_count = PaymentSituation.objects.filter(contract_id__in=contract_ids).count()
+
+        # التدقيق
+        audit_count = AuditLog.objects.filter(details__deal_id__in=[str(d) for d in demo_deal_ids]).count()
+
+        self.stdout.write(f"• صفقات تجريبية مستهدفة: {demo_deals_count}")
+        self.stdout.write(f"• عروض أظرفة تجريبية: {offers_count}")
+        self.stdout.write(f"• دفاتر شروط تجريبية: {cahiers_count}")
+        self.stdout.write(f"• جلسات فتح أظرفة: {sessions_count}")
+        self.stdout.write(f"• قرارات منح مؤقت: {awards_count}")
+        self.stdout.write(f"• عقود وملاحق تنفيذ: {contracts_count + milestones_count + amendments_count + receptions_count + payments_count}")
+        self.stdout.write(f"• مستخدمون تجريبيون (غير إداريين): {demo_users_count}")
+
+        if dry_run:
+            self.stdout.write(self.style.SUCCESS(
+                '\n[محاكاة ناجحة --dry-run]: لم يتم حذف أي سجل من قاعدة البيانات.'
+            ))
             return
 
-        self.stdout.write(self.style.NOTICE("🚀 بدء عملية التصفير وتطهير المنصة من البيانات والصفقات الوهمية..."))
-
+        # تنفيذ الحذف داخل معاملة ذرية آمنة
         with transaction.atomic():
-            # 1. حذف مدفوعات ومراحل التنفيذ التعاقدي
-            p_count, _ = PaymentSituation.objects.all().delete()
-            r_count, _ = ReceptionProcess.objects.all().delete()
-            ca_count, _ = ContractAmendment.objects.all().delete()
-            em_count, _ = ExecutionMilestone.objects.all().delete()
-            self.stdout.write(f"✓ تم حذف {p_count} وضعية دفع و {em_count} مرحلة تنفيذية.")
-
-            # 2. حذف عقود الصفقات وقرارات والطعون
-            ot_count, _ = ObjectionTimeline.objects.all().delete()
-            ao_count, _ = AwardObjection.objects.all().delete()
-            ad_count, _ = AwardDecision.objects.all().delete()
-            cc_count, _ = ContContract.objects.all().delete()
-            pc_count, _ = ProcContract.objects.all().delete()
-            self.stdout.write(f"✓ تم حذف {cc_count + pc_count} عقداً و {ad_count} قرار إسناد و {ao_count} طعناً.")
-
-            # 3. حذف مراحل الصفقات وتقارير الإنجاز
-            mpr_count, _ = MilestoneProgressReport.objects.all().delete()
-            m_count, _ = Milestone.objects.all().delete()
-            self.stdout.write(f"✓ تم حذف {m_count} مرحلة صفقة.")
-
-            # 4. حذف أحداث وجلسات فتح الأظرفة (يجب أن يتم قبل حذف العروض لأن OpeningEvent يشير إلى BidOffer بـ on_delete=PROTECT)
-            oe_count, _ = OpeningEvent.objects.all().delete()
-            sa_count, _ = SessionAccess.objects.all().delete()
-            os_count, _ = OpeningSession.objects.all().delete()
-            self.stdout.write(f"✓ تم حذف {os_count} جلسة فتح أظرفة و {oe_count} حدث جلسة.")
-
-            # 5. حذف وثائق العروض والعروض نفسها
-            od_count, _ = OfferDocument.objects.all().delete()
-            bids_count, _ = BidOffer.objects.all().delete()
-            self.stdout.write(f"✓ تم حذف {bids_count} عرضاً و {od_count} وثيقة عرض.")
-
-            # 6. حذف دفاتر الشروط
-            cs_count, _ = CahierSpecs.objects.all().delete()
-            self.stdout.write(f"✓ تم حذف {cs_count} دفتر شروط ومواصفات.")
-
-            # 7. حذف كافة الصفقات العمومية
-            deals_count, _ = ProcurementDeal.objects.all().delete()
-            self.stdout.write(self.style.SUCCESS(f"✓ تم تصفير وحذف {deals_count} صفقة عمومية بالكامل."))
-
-            # 8. حذف إشعارات وتنبيهات الذكاء الاصطناعي والمحادثات
-            aim_count, _ = AIMessage.objects.all().delete()
-            aic_count, _ = AIConversation.objects.all().delete()
-            aii_count, _ = AIInsight.objects.all().delete()
-            notif_count, _ = Notification.objects.all().delete()
-            self.stdout.write(f"✓ تم حذف {aii_count} إنذار ذكاء اصطناعي و {notif_count} إشعار.")
-
-            # 9. تنظيف الحسابات التجريبية الوهمية من جدول المستخدمين
-            # مع الاحتفاظ بالحسابات الحقيقية مثل abedel@gmail.com, kar7@gmail.com والحساب الرئيسي admin@safaqat.dz
-            demo_users_qs = CustomUser.objects.filter(
-                is_superuser=False,
-            ).filter(
-                email__startswith='auth_'
-            ) | CustomUser.objects.filter(
-                is_superuser=False,
-                email__startswith='operator_'
-            ) | CustomUser.objects.filter(
-                is_superuser=False,
-                email__startswith='operator2'
-            ) | CustomUser.objects.filter(
-                is_superuser=False,
-                email__startswith='operator3'
-            ) | CustomUser.objects.filter(
-                is_superuser=False,
-                email__startswith='operator4'
-            ) | CustomUser.objects.filter(
-                is_superuser=False,
-                email__startswith='curl_'
-            ) | CustomUser.objects.filter(
-                is_superuser=False,
-                email__startswith='central_test'
-            ) | CustomUser.objects.filter(
-                is_superuser=False,
-                email__in=['operator@safaqat.dz', 'authority@safaqat.dz']
-            )
-
-            demo_count = demo_users_qs.count()
+            # حذف السجلات التابعة أولاً
+            PaymentSituation.objects.filter(contract_id__in=contract_ids).delete()
+            ReceptionProcess.objects.filter(contract_id__in=contract_ids).delete()
+            ContractAmendment.objects.filter(contract_id__in=contract_ids).delete()
+            ExecutionMilestone.objects.filter(contract_id__in=contract_ids).delete()
+            Contract.objects.filter(deal_id__in=demo_deal_ids).delete()
+            AwardObjection.objects.filter(deal_id__in=demo_deal_ids).delete()
+            AwardDecision.objects.filter(deal_id__in=demo_deal_ids).delete()
+            OpeningEvent.objects.filter(session__deal_id__in=demo_deal_ids).delete()
+            SessionAccess.objects.filter(session__deal_id__in=demo_deal_ids).delete()
+            OpeningSession.objects.filter(deal_id__in=demo_deal_ids).delete()
+            BidOffer.objects.filter(deal_id__in=demo_deal_ids).delete()
+            CahierSpecs.objects.filter(deal_id__in=demo_deal_ids).delete()
+            demo_deals_qs.delete()
+            
+            # حذف المستخدمين التجريبيين المحميين
+            OperatorProfile.objects.filter(user__in=demo_users_qs).delete()
             demo_users_qs.delete()
-            self.stdout.write(self.style.SUCCESS(f"✓ تم حذف {demo_count} حساب تجريبي وهمي بنجاح."))
 
-        self.stdout.write(self.style.SUCCESS("✅ اكتملت عملية التصفير بنجاح! المنصة الآن نظيفة 100% وخالية من أي صفقات أو بيانات وهمية."))
+            self.stdout.write(self.style.SUCCESS(
+                '\n✅ [تم بنجاح]: تم تنظيف وتصفير جميع البيانات التجريبية بأمان، '
+                'مع الحفاظ التام على الحسابات الإدارية والمشرفين الرسميين.'
+            ))

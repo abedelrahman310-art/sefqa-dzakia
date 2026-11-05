@@ -42,8 +42,8 @@ export const V3FAQSection: React.FC = () => {
         ? 'ما هي الحجية القانونية للتوقيع الإلكتروني والمحاضر الرقمية (القانون 15-04)؟'
         : 'Quelle est la force probante de la signature électronique (Loi 15-04) ?',
       a: isAr
-        ? 'تعتمد المنصة منظومة توقيع رقمي معتمد ذات حجية ثبوتية كاملة وفق القانون رقم 15-04، حيث تُوقع كافة محاضر جلسات الفتح والتقييم وقرارات المنح المؤقت إلكترونياً مع ختم زمني مشفر غير قابل للتعديل'
-        : 'La plateforme intègre une signature électronique qualifiée à pleine force probante régie par la Loi 15-04, avec horodatage cryptographique inaltérable pour tous les PV et actes',
+        ? 'تعتمد المنصة منظومة توقيع رقمي ذات حجية ثبوتية وفق القانون رقم 15-04، حيث تُوقع كافة محاضر جلسات الفتح والتقييم وقرارات المنح المؤقت إلكترونياً مع ختم زمني رقمي مشفر موثق بالبصمة الإلكترونية SHA-256'
+        : 'La plateforme intègre un dispositif de signature électronique à valeur probante (Loi 15-04), avec horodatage cryptographique SHA-256 pour l’ensemble des procès-verbaux et actes',
     },
     {
       q: isAr

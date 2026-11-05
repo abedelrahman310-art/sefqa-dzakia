@@ -120,7 +120,7 @@ export const V3ComplianceTrustSection: React.FC<V3ComplianceTrustSectionProps> =
                 </div>
 
                 <div className="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">
-                  <span>{isAr ? 'مُعتمد ومُطابق' : 'Conforme et certifié'}</span>
+                  <span>{isAr ? 'مطابق تشريعياً' : 'Conformité réglementaire'}</span>
                   <div className="size-1.5 rounded-full bg-emerald-500" />
                 </div>
               </div>
@@ -150,7 +150,7 @@ export const V3ComplianceTrustSection: React.FC<V3ComplianceTrustSectionProps> =
               </div>
               <div className="flex-1 min-w-0">
                 <h3 className="text-lg sm:text-xl font-bold text-slate-900 mb-1.5">
-                  {isAr ? 'مشروع رقمي جزائري مبتكر' : 'Projet Numérique Algérien Innovant'}
+                  {isAr ? 'منظومة رقمية جزائرية متقدمة' : 'Système Numérique Algérien Dédié'}
                 </h3>
                 <p className="text-sm text-slate-600 font-medium leading-relaxed">
                   {isAr

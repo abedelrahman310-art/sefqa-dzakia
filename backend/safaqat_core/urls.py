@@ -1,4 +1,5 @@
 from apps.procurements.views_specs_payment import ChargilyWebhookView
+from safaqat_core.views_health import HealthCheckView
 from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
@@ -42,6 +43,8 @@ objections_router.register(r'', ObjectionViewSet, basename='direct-objection')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('api/health/', HealthCheckView.as_view(), name='health-check'),
+    path('api/health', HealthCheckView.as_view(), name='health-check-no-slash'),
     
     # OpenAPI Documentation
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),

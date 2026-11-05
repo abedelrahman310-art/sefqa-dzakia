@@ -116,7 +116,7 @@ export function OperatorProfileView() {
         </div>
       )}
 
-      {/* 1.5 بنر جواز السفر الرقمي السيادي */}
+      {/* 1.5 بنر الملف الإداري الرقمي الموحد */}
       <div className="bg-gradient-to-r from-emerald-50/80 via-white to-slate-50 text-slate-900 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-2xs border border-emerald-200/80">
         <div className="flex items-center gap-3.5">
           <div className="size-11 rounded-xl bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center justify-center shrink-0 shadow-2xs">
@@ -128,7 +128,7 @@ export function OperatorProfileView() {
                 {lang === 'ar' ? 'جواز السفر الرقمي للمتعامل (DZ-PASSPORT)' : 'Passeport Numérique de l’Opérateur'}
               </h2>
               <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
-                {lang === 'ar' ? 'جاهز 94%' : 'Prêt 94%'}
+                {lang === 'ar' ? 'ملف نشط' : 'Actif'}
               </span>
             </div>
             <p className="text-xs text-slate-600 mt-0.5">
