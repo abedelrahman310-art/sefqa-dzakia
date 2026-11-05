@@ -2,7 +2,6 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'wouter';
 import { useI18n } from '@/i18n';
 import Logo from '@/components/ui/Logo';
-import V3Footer from '../landing-v3/components/V3Footer';
 import {
   Sparkles,
   Bot,
@@ -940,9 +939,6 @@ export const AIPowerPage: React.FC = () => {
           </div>
         </section>
       </main>
-
-      {/* ─── التذييل المؤسسي الراقي ─── */}
-      <V3Footer />
     </div>
   );
 };
