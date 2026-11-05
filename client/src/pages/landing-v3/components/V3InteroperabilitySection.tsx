@@ -95,7 +95,7 @@ export const V3InteroperabilitySection: React.FC = () => {
           <p className="mt-3 text-sm sm:text-base text-slate-600 max-w-2xl leading-relaxed font-medium">
             {isAr
               ? 'ربط مباشر مع قواعد البيانات الحكومية لتجسيد مبدأ «صفر ورقة» وتغطية كافة ولايات وبلديات الجزائر.'
-              : 'Interconnexion directe avec les registres de l’État pour concrétiser le principe Zéro Papier sur 58 wilayas.'}
+              : 'Interconnexion directe avec les registres de l’État pour concrétiser le principe Zéro Papier sur 69 wilayas.'}
           </p>
         </div>
 

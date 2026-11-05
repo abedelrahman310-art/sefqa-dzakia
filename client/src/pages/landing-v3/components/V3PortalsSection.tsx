@@ -55,8 +55,8 @@ export const V3PortalsSection: React.FC = () => {
       id: 'central',
       title: isAr ? 'بوابة الرقابة والنزاهة المركزية' : 'Supervision Centrale',
       desc: isAr
-        ? 'الرقابة الكلية عبر الولايات الـ 58، رادار كشف التواطؤ ومحاكاة العطاءات، ومنع انحراف الآجال والملاحق، وإصدار التوجيهات الإدارية.'
-        : 'Contrôle national sur les 58 wilayas, radar anti-collusion algorithmique et prévention des dérives budgétaires.',
+        ? 'الرقابة الكلية عبر الولايات الـ 69، رادار كشف التواطؤ ومحاكاة العطاءات، ومنع انحراف الآجال والملاحق، وإصدار التوجيهات الإدارية.'
+        : 'Contrôle national sur les 69 wilayas, radar anti-collusion algorithmique et prévention des dérives budgétaires.',
       icon: Eye,
       link: '/central',
       tag: isAr ? 'المفتشية العامة والرقابة' : 'Contrôle National',

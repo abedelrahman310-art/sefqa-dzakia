@@ -21,7 +21,7 @@ export interface AlgeriaMapProps {
   width?: string;
 }
 
-// 58 geographic wilayas supported directly in algeria-map-ts SVG
+// 58 geographic polygon wilayas supported directly in algeria-map-ts SVG
 const ALL_58_WILAYAS = [
   "Adrar", "Chlef", "Laghouat", "Oum El Bouaghi", "Batna", "Béjaïa", "Biskra", "Béchar", "Blida", "Bouira",
   "Tamanrasset", "Tébessa", "Tlemcen", "Tiaret", "Tizi Ouzou", "Alger", "Djelfa", "Jijel", "Sétif", "Saïda",
@@ -31,6 +31,21 @@ const ALL_58_WILAYAS = [
   "Relizane", "Timimoun", "Bordj Badji Mokhtar", "Ouled Djellal", "Béni Abbès", "In Salah", "In Guezzam",
   "Touggourt", "Djanet", "El M'Ghair", "El Menia"
 ];
+
+// الربط الإقليمي للولايات المستحدثة الـ 11 بالولاية الأم جغرافياً لضمان التمثيل على الخريطة
+const PROMOTED_WILAYAS_PARENT_MAP: Record<string, string> = {
+  "59": "Laghouat",
+  "60": "Batna",
+  "61": "Biskra",
+  "62": "Tébessa",
+  "63": "Tlemcen",
+  "64": "Tiaret",
+  "65": "Djelfa",
+  "66": "Djelfa",
+  "67": "Médéa",
+  "68": "M'Sila",
+  "69": "El Bayadh",
+};
 
 // Helper to calculate heatmap color from activity value & warning flags
 export function getHeatmapColor(value: number, warnings = 0): string {
@@ -135,9 +150,21 @@ export default function AlgeriaMap({
         point = data[wilayaFr];
       }
 
-      const val = point?.value ?? 0;
-      const warnings = point?.warnings ?? 0;
-      const budget = point?.budget ?? 0;
+      let val = point?.value ?? 0;
+      let warnings = point?.warnings ?? 0;
+      let budget = point?.budget ?? 0;
+
+      // دمج بيانات الولايات الـ 11 المستحدثة جغرافياً مع الولاية الأم
+      Object.entries(PROMOTED_WILAYAS_PARENT_MAP).forEach(([promotedCode, parentFr]) => {
+        if (parentFr.toLowerCase() === wilayaFr.toLowerCase() && data[promotedCode]) {
+          const pPoint = data[promotedCode];
+          if (pPoint) {
+            val += (pPoint.value ?? 0);
+            warnings += (pPoint.warnings ?? 0);
+            budget += (pPoint.budget ?? 0);
+          }
+        }
+      });
       const arName = point?.name || baseMeta?.ar || wilayaFr;
       const code = point?.code || baseMeta?.code || "";
 

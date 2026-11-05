@@ -242,7 +242,7 @@ export function DraftForm({ id }: { id?: string }) {
               </span>
             </div>
 
-            {/* Wilaya (58 wilayas) */}
+            {/* Wilaya (69 wilayas) */}
             <div className="space-y-2 text-start">
               <label className="text-sm font-bold text-navy-900 block">
                 {t('ai.price_wilaya')} <span className="text-destructive">*</span>

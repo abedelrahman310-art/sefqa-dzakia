@@ -151,10 +151,10 @@ export function HeroSection({ onStartClick }: HeroSectionProps) {
             {/* Tabular Stats Grid (font-mono, tabular-nums) — Below the Map Frame */}
             <div className="grid grid-cols-3 gap-3 sm:gap-4 mt-4 sm:mt-5">
               
-              {/* Stat 1: 58 ولاية */}
+              {/* Stat 1: 69 ولاية */}
               <div className="hero-stat-box text-center py-3 px-3 sm:px-4">
                 <span className="block font-mono tabular-nums text-lg sm:text-2xl font-bold text-[var(--ink-900)]">
-                  58
+                  69
                 </span>
                 <span className="block text-[11px] sm:text-xs text-[var(--ink-500)] font-medium mt-0.5">
                   {t('landing.hero.stat_wilayas')}

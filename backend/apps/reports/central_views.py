@@ -100,6 +100,17 @@ ALGERIA_WILAYAS_CATALOG = {
     "56": ("جانت", "Djanet"),
     "57": ("المغير", "El M'Ghair"),
     "58": ("المنيعة", "El Meniaa"),
+    "59": ("أفلو", "Aflou"),
+    "60": ("بريكة", "Barika"),
+    "61": ("القنطرة", "El Kantara"),
+    "62": ("بئر العاتر", "Bir El Ater"),
+    "63": ("العريشة", "El Aricha"),
+    "64": ("قصر الشلالة", "Ksar Chellala"),
+    "65": ("عين وسارة", "Aïn Oussara"),
+    "66": ("مسعد", "Messaad"),
+    "67": ("قصر البخاري", "Ksar El Boukhari"),
+    "68": ("بوسعادة", "Bou Saâda"),
+    "69": ("الأبيض سيدي الشيخ", "El Abiodh Sidi Cheikh"),
 }
 
 # فهرس بحث بالاسم العربي المعياري
@@ -646,7 +657,7 @@ class CentralReportsView(APIView):
                 "title": f"الحصيلة الوطنية الدورية للرقابة والصفقات - الثلاثي {quarter} / {now.year}",
                 "type": "quarterly",
                 "period": f"الثلاثي {quarter} {now.year}",
-                "wilaya_scope": "كافة الولايات (58 ولاية)",
+                "wilaya_scope": "كافة الولايات (69 ولاية)",
                 "generated_date": now.strftime("%Y-%m-%d"),
                 "total_deals": total_national_deals,
                 "total_volume_dzd": float(total_national_volume),
