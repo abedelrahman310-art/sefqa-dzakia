@@ -251,43 +251,53 @@ export function UnifiedAuthPage({ initialMode = 'operator' }: UnifiedAuthPagePro
     if (user.role === 'central_admin') return <Redirect to="/central" />;
   }
 
-  // نصوص متغيرة بحسب الدور
+  const isAr = lang === 'ar';
+
+  // نصوص متغيرة بحسب الدور واللغة
   const orgLabel =
     mode === 'operator'
-      ? t('register.neumorphic.org_operator') || 'اسم الشركة أو المؤسسة'
-      : t('register.neumorphic.org_authority') || 'اسم الهيئة أو المصلحة';
+      ? (isAr ? 'اسم الشركة أو المؤسسة' : 'Nom de l\'entreprise / société')
+      : (isAr ? 'اسم الهيئة أو المصلحة' : 'Nom du service contractant');
 
   const orgPlaceholder =
     mode === 'operator'
-      ? t('register.neumorphic.org_placeholder_operator') || 'مؤسسة الأشغال العامة SARL'
-      : t('register.neumorphic.org_placeholder_authority') || 'مديرية التجهيزات العمومية';
+      ? (isAr ? 'مؤسسة الأشغال العامة SARL' : 'Entreprise des travaux publics SARL')
+      : (isAr ? 'مديرية التجهيزات العمومية' : 'Direction des équipements publics');
 
   // التحقق من الحقول
   const valueError = (name: FieldName): string | null => {
     switch (name) {
       case 'fullName':
-        return fullName.trim().length < 2 ? t('register.neumorphic.err_full_name') || 'الاسم الكامل مطلوب (حرفان على الأقل).' : null;
+        return fullName.trim().length < 2
+          ? (isAr ? 'الاسم الكامل مطلوب (حرفان على الأقل)' : 'Le nom complet est requis (2 caractères minimum)')
+          : null;
       case 'organization':
-        return organization.trim().length < 2 ? `${orgLabel} مطلوب.` : null;
+        return organization.trim().length < 2
+          ? (isAr ? `${orgLabel} مطلوب` : `${orgLabel} est requis`)
+          : null;
       case 'email':
         return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(regEmail.trim())
           ? null
-          : t('register.neumorphic.err_email') || 'يرجى إدخال بريد إلكتروني صحيح.';
+          : (isAr ? 'يرجى إدخال بريد إلكتروني صحيح' : 'Veuillez saisir une adresse e-mail valide');
       case 'phone': {
         const clean = phone.replace(/[\s.-]/g, '');
         return /^(0[5-7]\d{8}|0[1-4]\d{7}|0\d{8,9})$/.test(clean) || /^[5-7]\d{8}$/.test(clean)
           ? null
-          : t('register.neumorphic.err_phone') || 'رقم هاتف صحيح مطلوب (مثال: 0512345678).';
+          : (isAr ? 'رقم هاتف صحيح مطلوب (مثال: 0512345678)' : 'Numéro de téléphone valide requis (ex. : 0512345678)');
       }
       case 'password':
-        return regPassword.length < 8 ? t('register.neumorphic.err_password') || 'كلمة المرور 8 محارف على الأقل.' : null;
+        return regPassword.length < 8
+          ? (isAr ? 'كلمة المرور 8 محارف على الأقل' : 'Le mot de passe doit contenir au moins 8 caractères')
+          : null;
       case 'confirmPassword':
-        if (!confirmPassword) return t('register.neumorphic.err_confirm_required') || 'يرجى تأكيد كلمة المرور.';
-        return regPassword === confirmPassword ? null : t('register.neumorphic.err_password_mismatch') || 'كلمتا المرور غير متطابقتين.';
+        if (!confirmPassword) return isAr ? 'يرجى تأكيد كلمة المرور' : 'Veuillez confirmer le mot de passe';
+        return regPassword === confirmPassword
+          ? null
+          : (isAr ? 'كلمتا المرور غير متطابقتين' : 'Les mots de passe ne correspondent pas');
       case 'wilaya':
-        return wilaya ? null : t('register.neumorphic.err_wilaya') || 'يرجى اختيار الولاية.';
+        return wilaya ? null : (isAr ? 'يرجى اختيار الولاية' : 'Veuillez choisir une wilaya');
       case 'commune':
-        return commune.trim() ? null : t('register.neumorphic.err_commune') || 'يرجى اختيار البلدية.';
+        return commune.trim() ? null : (isAr ? 'يرجى اختيار البلدية' : 'Veuillez choisir une commune');
       default:
         return null;
     }
@@ -341,8 +351,8 @@ export function UnifiedAuthPage({ initialMode = 'operator' }: UnifiedAuthPagePro
           (data.email && Array.isArray(data.email) ? data.email[0] : null) ||
           (data.password && Array.isArray(data.password) ? data.password[0] : null) ||
           (res.status === 502 || res.status === 504
-            ? t('login.server_connection_error') || 'تعذر الاتصال بالخادم.'
-            : t('login.error') || 'فشل تسجيل الدخول. تحقق من البريد وكلمة المرور.');
+            ? (isAr ? 'تعذر الاتصال بالخادم. يرجى التحقق من الاتصال' : 'Impossible de contacter le serveur. Vérifiez votre connexion')
+            : (isAr ? 'فشل تسجيل الدخول. تحقق من صحة البريد وكلمة المرور' : 'Échec de la connexion. Vérifiez votre e-mail et votre mot de passe'));
         throw new Error(errorMsg);
       }
 
@@ -351,7 +361,7 @@ export function UnifiedAuthPage({ initialMode = 'operator' }: UnifiedAuthPagePro
       else if (data.user.role === 'authority') setLocation('/authority');
       else if (data.user.role === 'central_admin') setLocation('/central');
     } catch (err: any) {
-      setServerError(err.message || t('login.error'));
+      setServerError(err.message || (isAr ? 'فشل تسجيل الدخول' : 'Échec de la connexion'));
     } finally {
       setIsSubmitting(false);
     }
@@ -401,7 +411,7 @@ export function UnifiedAuthPage({ initialMode = 'operator' }: UnifiedAuthPagePro
           const value = data[firstKey];
           message = Array.isArray(value) ? value.join(' ') : String(value);
         }
-        setServerError(message || t('register.neumorphic.err_server') || 'فشل التسجيل.');
+        setServerError(message || (isAr ? 'فشل التسجيل. يرجى مراجعة البيانات المدخلة' : 'Échec de l\'inscription. Veuillez vérifier les informations saisies'));
         setIsSubmitting(false);
         return;
       }
@@ -418,7 +428,7 @@ export function UnifiedAuthPage({ initialMode = 'operator' }: UnifiedAuthPagePro
         setLocation(mode === 'operator' ? '/operator' : '/authority');
       }, 1000);
     } catch {
-      setServerError(t('register.neumorphic.err_network') || 'تعذر الاتصال بالخادم.');
+      setServerError(isAr ? 'تعذر الاتصال بالخادم. يرجى التحقق من الاتصال' : 'Impossible de contacter le serveur. Vérifiez votre connexion');
     } finally {
       setIsSubmitting(false);
     }
@@ -464,7 +474,7 @@ export function UnifiedAuthPage({ initialMode = 'operator' }: UnifiedAuthPagePro
         {/* الشعار الوطني والهوية المؤسسية في المنتصف */}
         <div className="w-full text-center relative z-10 flex flex-col items-center justify-center my-auto py-12">
           <span className="inline-block rounded-full border border-slate-200/80 bg-white/90 px-4 py-1.5 text-xs font-bold text-slate-700 shadow-2xs mb-8">
-            الجمهورية الجزائرية الديمقراطية الشعبية
+            {isAr ? 'الجمهورية الجزائرية الديمقراطية الشعبية' : 'République Algérienne Démocratique et Populaire'}
           </span>
 
           {/* الشعار الوطني الفاخر في المنتصف مع تأثير الطفو */}
@@ -478,13 +488,15 @@ export function UnifiedAuthPage({ initialMode = 'operator' }: UnifiedAuthPagePro
           </div>
 
           <h1 className="text-3xl font-black text-[#0f3154] tracking-tight">
-            {t('register.neumorphic.brand_name') || 'صفقات ذكية'}
+            {isAr ? 'صفقات ذكية' : 'Safaqat Dzakia'}
           </h1>
           <p className="mt-2 text-sm font-bold text-emerald-800">
-            {t('register.neumorphic.brand_tagline') || 'المنظومة الموحدة للصفقات العمومية'}
+            {isAr ? 'المنظومة الموحدة للصفقات العمومية' : 'Plateforme unifiée des marchés publics'}
           </p>
           <p className="mt-3 text-xs text-slate-500 font-medium leading-relaxed max-w-xs mx-auto">
-            المنظومة الرقمية السيادية المعتمدة وفق أحكام القانون 23-12 والمرسوم الرئاسي 15-247
+            {isAr
+              ? 'المنظومة الرقمية السيادية المعتمدة وفق أحكام القانون 23-12 والمرسوم الرئاسي 15-247'
+              : 'Système numérique souverain régi par la Loi 23-12 et le Décret présidentiel 15-247'}
           </p>
         </div>
       </div>
@@ -505,7 +517,7 @@ export function UnifiedAuthPage({ initialMode = 'operator' }: UnifiedAuthPagePro
               ) : (
                 <ArrowLeft className="size-4 transition-transform group-hover:-translate-x-0.5" aria-hidden="true" />
               )}
-              <span>{t('register.redesign.back_home') || 'الصفحة الرئيسية'}</span>
+              <span>{isAr ? 'الصفحة الرئيسية' : 'Retour à l\'accueil'}</span>
             </Link>
 
             <div className="flex items-center gap-3">
@@ -515,7 +527,7 @@ export function UnifiedAuthPage({ initialMode = 'operator' }: UnifiedAuthPagePro
                   <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-75" />
                   <span className="relative inline-flex size-1.5 rounded-full bg-emerald-500" />
                 </span>
-                <span>{t('register.neumorphic.system_status') || 'الربط السيادي نشط'}</span>
+                <span>{isAr ? 'الربط السيادي نشط' : 'Système en ligne'}</span>
               </div>
 
               {/* زر تبديل اللغة */}
@@ -539,38 +551,44 @@ export function UnifiedAuthPage({ initialMode = 'operator' }: UnifiedAuthPagePro
                 <div className="flex items-center justify-between">
                   <div>
                     <span className="text-xs font-bold uppercase tracking-wider text-emerald-700">
-                      {mode === 'operator' ? 'فضاء المتعاملين الاقتصاديين' : 'فضاء المصالح المتعاقدة'}
+                      {mode === 'operator'
+                        ? (isAr ? 'فضاء المتعاملين الاقتصاديين' : 'Espace Opérateurs Économiques')
+                        : (isAr ? 'فضاء المصالح المتعاقدة' : 'Espace Services Contractants')}
                     </span>
                     <h2 className="text-2xl font-black text-slate-900 mt-0.5">
                       {mode === 'operator'
-                        ? 'إنشاء حساب متعامل اقتصادي جديد'
-                        : 'إنشاء حساب مصلحة متعاقدة جديدة'}
+                        ? (isAr ? 'إنشاء حساب متعامل اقتصادي جديد' : 'Créer un compte opérateur économique')
+                        : (isAr ? 'إنشاء حساب مصلحة متعاقدة جديدة' : 'Créer un compte service contractant')}
                     </h2>
                   </div>
 
                   {/* رابط التحويل لتسجيل الدخول */}
                   <div className="text-end">
-                    <span className="block text-xs text-slate-500">لديك حساب مسجل؟</span>
+                    <span className="block text-xs text-slate-500">{isAr ? 'لديك حساب مسجل؟' : 'Déjà inscrit ?'}</span>
                     <button
                       type="button"
                       onClick={() => handleModeChange('login')}
                       className="text-xs font-bold text-emerald-700 hover:text-emerald-800 hover:underline cursor-pointer"
                     >
-                      تسجيل الدخول ←
+                      {isAr ? 'تسجيل الدخول ←' : 'Se connecter →'}
                     </button>
                   </div>
                 </div>
                 <p className="text-xs text-slate-500 mt-1">
                   {mode === 'operator'
-                    ? 'سجّل مؤسستك للمشاركة في الصفقات العمومية، تحميل دفاتر الشروط، وإيداع العروض المشفرة.'
-                    : 'سجّل هيئتك أو إدارتك العمومية لنشر دفاتر الشروط وإدارة لجان فتح الأظرفة وتقييم العروض.'}
+                    ? (isAr
+                        ? 'سجّل مؤسستك للمشاركة في الصفقات العمومية، تحميل دفاتر الشروط، وإيداع العروض المشفرة'
+                        : 'Inscrivez votre entreprise pour soumissionner aux marchés publics, télécharger les cahiers des charges et déposer vos offres chiffrées')
+                    : (isAr
+                        ? 'سجّل هيئتك أو إدارتك العمومية لنشر دفاتر الشروط وإدارة لجان فتح الأظرفة وتقييم العروض'
+                        : 'Inscrivez votre administration pour publier les cahiers des charges et gérer l\'évaluation des offres')}
                 </p>
               </div>
 
               {/* اختيار صفة التسجيل (متعامل اقتصادي أم مصلحة متعاقدة) */}
               <div className="mb-6">
                 <label className="mb-2 block text-xs font-bold text-slate-700">
-                  اختر صفة الحساب المراد إنشاؤه:
+                  {isAr ? 'اختر صفة الحساب المراد إنشاؤه:' : 'Sélectionnez le type de compte à créer :'}
                 </label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {/* كارت المتعامل الاقتصادي */}
@@ -594,13 +612,17 @@ export function UnifiedAuthPage({ initialMode = 'operator' }: UnifiedAuthPagePro
                     </div>
                     <div>
                       <div className="flex items-center gap-1.5">
-                        <span className="text-xs font-bold text-slate-900">متعامل اقتصادي</span>
+                        <span className="text-xs font-bold text-slate-900">
+                          {isAr ? 'متعامل اقتصادي' : 'Opérateur économique'}
+                        </span>
                         {mode === 'operator' && (
                           <span className="size-1.5 rounded-full bg-emerald-600" />
                         )}
                       </div>
                       <p className="text-[11px] text-slate-500 mt-0.5 leading-snug">
-                        للشركات، المقاولين، الموردين، والمكاتب الاستشارية
+                        {isAr
+                          ? 'للشركات والمقاولين والموردين والمكاتب الاستشارية'
+                          : 'Pour les entreprises, entrepreneurs, fournisseurs et bureaux d\'études'}
                       </p>
                     </div>
                   </button>
@@ -626,13 +648,17 @@ export function UnifiedAuthPage({ initialMode = 'operator' }: UnifiedAuthPagePro
                     </div>
                     <div>
                       <div className="flex items-center gap-1.5">
-                        <span className="text-xs font-bold text-slate-900">مصلحة متعاقدة</span>
+                        <span className="text-xs font-bold text-slate-900">
+                          {isAr ? 'مصلحة متعاقدة' : 'Service contractant'}
+                        </span>
                         {mode === 'authority' && (
                           <span className="size-1.5 rounded-full bg-emerald-600" />
                         )}
                       </div>
                       <p className="text-[11px] text-slate-500 mt-0.5 leading-snug">
-                        للوزارات، الولايات، البلديات، والمؤسسات العمومية
+                        {isAr
+                          ? 'للوزارات والولايات والبلديات والمؤسسات العمومية'
+                          : 'Pour les ministères, wilayas, communes et établissements publics'}
                       </p>
                     </div>
                   </button>
@@ -651,7 +677,7 @@ export function UnifiedAuthPage({ initialMode = 'operator' }: UnifiedAuthPagePro
               {isSuccess && (
                 <div className="mb-5 flex items-center gap-2.5 rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-xs font-bold text-emerald-800 animate-in fade-in-50">
                   <Check className="size-4 shrink-0 text-emerald-600" aria-hidden="true" />
-                  <span>{t('register.neumorphic.success') || 'تم إنشاء الحساب بنجاح! جارٍ التوجيه للفضاء الخاص بك...'}</span>
+                  <span>{isAr ? 'تم إنشاء الحساب بنجاح! جارٍ التوجيه للفضاء الخاص بك...' : 'Compte créé avec succès ! Redirection en cours...'}</span>
                 </div>
               )}
 
@@ -662,7 +688,7 @@ export function UnifiedAuthPage({ initialMode = 'operator' }: UnifiedAuthPagePro
                   {/* الاسم الكامل */}
                   <div>
                     <label htmlFor="reg-fullname" className="mb-1 block text-xs font-bold text-slate-800">
-                      الاسم الكامل للمسؤول أو المفوض <span className="text-rose-500">*</span>
+                      {isAr ? 'الاسم الكامل للمسؤول أو المفوض' : 'Nom complet du responsable ou mandataire'} <span className="text-rose-500">*</span>
                     </label>
                     <div className="group relative flex h-10 w-full items-center rounded-xl border border-slate-200 bg-slate-50/60 transition-all focus-within:border-emerald-600 focus-within:bg-white focus-within:ring-2 focus-within:ring-emerald-500/10">
                       <User className="ms-3 size-4 shrink-0 text-slate-400 group-focus-within:text-emerald-600" aria-hidden="true" />
@@ -672,7 +698,7 @@ export function UnifiedAuthPage({ initialMode = 'operator' }: UnifiedAuthPagePro
                         value={fullName}
                         onChange={(e) => setFullName(e.target.value)}
                         onBlur={() => markTouched('fullName')}
-                        placeholder="محمد بن عبد الله"
+                        placeholder={isAr ? 'محمد بن عبد الله' : 'ex. Mohamed Benali'}
                         autoComplete="name"
                         className="h-full w-full min-w-0 flex-1 bg-transparent px-3 text-xs font-semibold text-slate-900 placeholder:text-slate-400 focus:outline-none"
                       />
@@ -710,7 +736,7 @@ export function UnifiedAuthPage({ initialMode = 'operator' }: UnifiedAuthPagePro
                   {/* رقم الهاتف الجزائري — بدون كود دولي وبدون علم */}
                   <div>
                     <label htmlFor="reg-phone" className="mb-1 block text-xs font-bold text-slate-800">
-                      {t('register.neumorphic.phone') || 'رقم الهاتف'} <span className="text-rose-500">*</span>
+                      {isAr ? 'رقم الهاتف' : 'Numéro de téléphone'} <span className="text-rose-500">*</span>
                     </label>
                     <div className="group relative flex h-10 w-full items-center rounded-xl border border-slate-200 bg-slate-50/60 transition-all focus-within:border-emerald-600 focus-within:bg-white focus-within:ring-2 focus-within:ring-emerald-500/10">
                       <Phone className="ms-3 size-4 shrink-0 text-slate-400 group-focus-within:text-emerald-600" aria-hidden="true" />
@@ -732,7 +758,7 @@ export function UnifiedAuthPage({ initialMode = 'operator' }: UnifiedAuthPagePro
                   {/* البريد الإلكتروني المهني */}
                   <div>
                     <label htmlFor="reg-email" className="mb-1 block text-xs font-bold text-slate-800">
-                      {t('register.neumorphic.email') || 'البريد الإلكتروني المهني'} <span className="text-rose-500">*</span>
+                      {isAr ? 'البريد الإلكتروني المهني' : 'Adresse e-mail professionnelle'} <span className="text-rose-500">*</span>
                     </label>
                     <div className="group relative flex h-10 w-full items-center rounded-xl border border-slate-200 bg-slate-50/60 transition-all focus-within:border-emerald-600 focus-within:bg-white focus-within:ring-2 focus-within:ring-emerald-500/10">
                       <Mail className="ms-3 size-4 shrink-0 text-slate-400 group-focus-within:text-emerald-600" aria-hidden="true" />
@@ -757,7 +783,7 @@ export function UnifiedAuthPage({ initialMode = 'operator' }: UnifiedAuthPagePro
                   {/* كلمة المرور */}
                   <div>
                     <label htmlFor="reg-password" className="mb-1 block text-xs font-bold text-slate-800">
-                      {t('register.neumorphic.password') || 'كلمة المرور'} <span className="text-rose-500">*</span>
+                      {isAr ? 'كلمة المرور' : 'Mot de passe'} <span className="text-rose-500">*</span>
                     </label>
                     <div className="group relative flex h-10 w-full items-center rounded-xl border border-slate-200 bg-slate-50/60 transition-all focus-within:border-emerald-600 focus-within:bg-white focus-within:ring-2 focus-within:ring-emerald-500/10">
                       <Lock className="ms-3 size-4 shrink-0 text-slate-400 group-focus-within:text-emerald-600" aria-hidden="true" />
@@ -789,7 +815,7 @@ export function UnifiedAuthPage({ initialMode = 'operator' }: UnifiedAuthPagePro
                   {/* تأكيد كلمة المرور */}
                   <div>
                     <label htmlFor="reg-confirm-password" className="mb-1 block text-xs font-bold text-slate-800">
-                      {t('register.neumorphic.confirm_password') || 'تأكيد كلمة المرور'} <span className="text-rose-500">*</span>
+                      {isAr ? 'تأكيد كلمة المرور' : 'Confirmation du mot de passe'} <span className="text-rose-500">*</span>
                     </label>
                     <div className="group relative flex h-10 w-full items-center rounded-xl border border-slate-200 bg-slate-50/60 transition-all focus-within:border-emerald-600 focus-within:bg-white focus-within:ring-2 focus-within:ring-emerald-500/10">
                       <Lock className="ms-3 size-4 shrink-0 text-slate-400 group-focus-within:text-emerald-600" aria-hidden="true" />
@@ -821,7 +847,7 @@ export function UnifiedAuthPage({ initialMode = 'operator' }: UnifiedAuthPagePro
                   <div className="mb-2.5 flex items-center justify-between text-xs font-bold text-slate-800">
                     <div className="flex items-center gap-1.5">
                       <MapPin className="size-4 text-emerald-600" aria-hidden="true" />
-                      <span>النطاق الإقليمي والمقر الإداري (الولاية والبلدية)</span>
+                      <span>{isAr ? 'النطاق الإقليمي والمقر الإداري (الولاية والبلدية)' : 'Périmètre territorial et siège administratif (Wilaya et Commune)'}</span>
                     </div>
                     {wilaya && (
                       <span className="text-[10px] text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
@@ -835,10 +861,10 @@ export function UnifiedAuthPage({ initialMode = 'operator' }: UnifiedAuthPagePro
                     <div ref={wilayaCellRef} className="relative">
                       <div className="flex items-center justify-between mb-1">
                         <label htmlFor="reg-wilaya-btn" className="block text-xs font-bold text-slate-700">
-                          {t('register.neumorphic.wilaya') || 'الولاية'} <span className="text-rose-500">*</span>
+                          {isAr ? 'الولاية' : 'Wilaya'} <span className="text-rose-500">*</span>
                         </label>
                         <span className="text-[10px] text-slate-400 font-medium">
-                          69 ولاية ودائرة منتدبة
+                          {isAr ? '69 ولاية ودائرة منتدبة' : '69 wilayas et circonscriptions'}
                         </span>
                       </div>
 
@@ -861,7 +887,7 @@ export function UnifiedAuthPage({ initialMode = 'operator' }: UnifiedAuthPagePro
                             </span>
                           ) : (
                             <span className="text-slate-400">
-                              {t('register.neumorphic.select_wilaya') || 'اختر الولاية...'}
+                              {isAr ? 'اختر الولاية...' : 'Sélectionnez la wilaya...'}
                             </span>
                           )}
                         </span>
@@ -877,7 +903,7 @@ export function UnifiedAuthPage({ initialMode = 'operator' }: UnifiedAuthPagePro
                                 type="text"
                                 value={wilayaSearch}
                                 onChange={(e) => setWilayaSearch(e.target.value)}
-                                placeholder="ابحث برقم الولاية أو اسمها..."
+                                placeholder={isAr ? 'ابحث برقم الولاية أو اسمها...' : 'Rechercher par code ou nom de wilaya...'}
                                 className="w-full bg-transparent text-xs text-slate-800 focus:outline-none"
                                 autoFocus
                               />
@@ -886,7 +912,7 @@ export function UnifiedAuthPage({ initialMode = 'operator' }: UnifiedAuthPagePro
                                   type="button"
                                   onClick={() => setWilayaSearch('')}
                                   className="text-slate-400 hover:text-slate-600 cursor-pointer"
-                                  aria-label="تفريغ البحث"
+                                  aria-label={isAr ? 'تفريغ البحث' : 'Effacer la recherche'}
                                 >
                                   <X className="size-3" />
                                 </button>
@@ -897,14 +923,14 @@ export function UnifiedAuthPage({ initialMode = 'operator' }: UnifiedAuthPagePro
                             {filteredWilayas.length === 0 ? (
                               <div className="py-6 px-4 text-center">
                                 <p className="text-xs font-bold text-slate-600">
-                                  لا توجد ولاية مطابقة لـ &quot;{wilayaSearch}&quot;
+                                  {isAr ? `لا توجد ولاية مطابقة لـ "${wilayaSearch}"` : `Aucune wilaya ne correspond à "${wilayaSearch}"`}
                                 </p>
                                 <button
                                   type="button"
                                   onClick={() => setWilayaSearch('')}
                                   className="mt-2 text-[11px] font-bold text-emerald-700 hover:underline cursor-pointer"
                                 >
-                                  عرض كافة الولايات (69)
+                                  {isAr ? 'عرض كافة الولايات (69)' : 'Afficher toutes les wilayas (69)'}
                                 </button>
                               </div>
                             ) : (
@@ -936,11 +962,11 @@ export function UnifiedAuthPage({ initialMode = 'operator' }: UnifiedAuthPagePro
                     <div ref={communeCellRef} className="relative">
                       <div className="flex items-center justify-between mb-1">
                         <label htmlFor="reg-commune-btn" className="block text-xs font-bold text-slate-700">
-                          {t('register.neumorphic.commune') || 'البلدية'} <span className="text-rose-500">*</span>
+                          {isAr ? 'البلدية' : 'Commune'} <span className="text-rose-500">*</span>
                         </label>
                         {wilaya && (
                           <span className="text-[10px] text-emerald-700 font-semibold">
-                            {availableCommunes.length} بلدية مسجلة
+                            {isAr ? `${availableCommunes.length} بلدية مسجلة` : `${availableCommunes.length} communes enregistrées`}
                           </span>
                         )}
                       </div>
@@ -962,11 +988,11 @@ export function UnifiedAuthPage({ initialMode = 'operator' }: UnifiedAuthPagePro
                             <span className="font-bold text-slate-900">{commune}</span>
                           ) : wilaya ? (
                             <span className="text-slate-600">
-                              {t('register.neumorphic.select_commune') || 'اختر البلدية من القائمة...'}
+                              {isAr ? 'اختر البلدية من القائمة...' : 'Sélectionnez la commune dans la liste...'}
                             </span>
                           ) : (
                             <span className="text-slate-400">
-                              اختر البلدية (أو ابحث مباشرة)...
+                              {isAr ? 'اختر البلدية (أو ابحث مباشرة)...' : 'Sélectionnez la commune (ou recherchez directement)...'}
                             </span>
                           )}
                         </span>
@@ -989,8 +1015,8 @@ export function UnifiedAuthPage({ initialMode = 'operator' }: UnifiedAuthPagePro
                                 onChange={(e) => setCommuneSearch(e.target.value)}
                                 placeholder={
                                   selectedWilayaUnit
-                                    ? `ابحث في بلديات ${selectedWilayaUnit.nameAr}...`
-                                    : 'ابحث عن أي بلدية في الجزائر...'
+                                    ? (isAr ? `ابحث في بلديات ${selectedWilayaUnit.nameAr}...` : `Rechercher dans les communes de ${selectedWilayaUnit.nameFr}...`)
+                                    : (isAr ? 'ابحث عن أي بلدية في الجزائر...' : 'Rechercher une commune en Algérie...')
                                 }
                                 className="w-full bg-transparent text-xs text-slate-800 focus:outline-none"
                                 autoFocus
@@ -1000,7 +1026,7 @@ export function UnifiedAuthPage({ initialMode = 'operator' }: UnifiedAuthPagePro
                                   type="button"
                                   onClick={() => setCommuneSearch('')}
                                   className="text-slate-400 hover:text-slate-600 cursor-pointer"
-                                  aria-label="تفريغ البحث"
+                                  aria-label={isAr ? 'تفريغ البحث' : 'Effacer la recherche'}
                                 >
                                   <X className="size-3" />
                                 </button>
@@ -1016,17 +1042,19 @@ export function UnifiedAuthPage({ initialMode = 'operator' }: UnifiedAuthPagePro
                                 <div className="py-6 px-4 text-center">
                                   <MapPin className="size-5 text-slate-300 mx-auto mb-1.5" />
                                   <p className="text-xs font-bold text-slate-600">
-                                    لا توجد بلدية مطابقة لـ &quot;{communeSearch}&quot;
+                                    {isAr ? `لا توجد بلدية مطابقة لـ "${communeSearch}"` : `Aucune commune ne correspond à "${communeSearch}"`}
                                   </p>
                                   <p className="text-[10px] text-slate-400 mt-0.5">
-                                    تأكد من كتابة الاسم أو انقر لمسح البحث لعرض كل بلديات {selectedWilayaUnit?.nameAr}
+                                    {isAr
+                                      ? `تأكد من كتابة الاسم أو انقر لمسح البحث لعرض كل بلديات ${selectedWilayaUnit?.nameAr}`
+                                      : `Vérifiez l'orthographe ou effacez la recherche pour afficher toutes les communes de ${selectedWilayaUnit?.nameFr}`}
                                   </p>
                                   <button
                                     type="button"
                                     onClick={() => setCommuneSearch('')}
                                     className="mt-2 text-[11px] font-bold text-emerald-700 hover:underline cursor-pointer"
                                   >
-                                    إظهار كل بلديات الولاية ({availableCommunes.length})
+                                    {isAr ? `إظهار كل بلديات الولاية (${availableCommunes.length})` : `Afficher toutes les communes de la wilaya (${availableCommunes.length})`}
                                   </button>
                                 </div>
                               ) : (
@@ -1057,10 +1085,12 @@ export function UnifiedAuthPage({ initialMode = 'operator' }: UnifiedAuthPagePro
                                 <div className="p-4 text-center">
                                   <MapPin className="size-6 text-emerald-500/60 mx-auto mb-2" />
                                   <p className="text-xs font-bold text-slate-800 mb-1">
-                                    تحديد البلدية والمقر الإداري
+                                    {isAr ? 'تحديد البلدية والمقر الإداري' : 'Sélection de la commune et siège administratif'}
                                   </p>
                                   <p className="text-[11px] text-slate-500 leading-relaxed mb-3">
-                                    يمكنك اختيار الولاية أولاً لتصفية بلدياتها المعتمدة، أو البدء بكتابة اسم بلديتك في شريط البحث أعلاه وسنقوم بربط الولاية تلقائياً.
+                                    {isAr
+                                      ? 'يمكنك اختيار الولاية أولاً لتصفية بلدياتها المعتمدة، أو البدء بكتابة اسم بلديتك في شريط البحث أعلاه وسنقوم بربط الولاية تلقائياً'
+                                      : 'Vous pouvez choisir la wilaya pour filtrer les communes, ou taper le nom de la commune pour lier la wilaya automatiquement.'}
                                   </p>
                                   <button
                                     type="button"
@@ -1070,21 +1100,21 @@ export function UnifiedAuthPage({ initialMode = 'operator' }: UnifiedAuthPagePro
                                     }}
                                     className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-50 border border-emerald-200 px-3 py-1.5 text-xs font-bold text-emerald-800 hover:bg-emerald-100 cursor-pointer transition-colors"
                                   >
-                                    <span>اختر الولاية أولاً</span>
+                                    <span>{isAr ? 'اختر الولاية أولاً' : 'Choisir la wilaya d\'abord'}</span>
                                     <ArrowLeft className="size-3" />
                                   </button>
                                 </div>
-                              ) : (filteredCommunes as { commune: string; wilayaCode: string; wilayaNameAr: string }[]).length === 0 ? (
+                              ) : (filteredCommunes as { commune: string; wilayaCode: string; wilayaNameAr: string; wilayaNameFr?: string }[]).length === 0 ? (
                                 <div className="py-6 px-4 text-center">
                                   <p className="text-xs font-bold text-slate-600">
-                                    لا توجد بلدية مطابقة لـ &quot;{communeSearch}&quot;
+                                    {isAr ? `لا توجد بلدية مطابقة لـ "${communeSearch}"` : `Aucune commune ne correspond à "${communeSearch}"`}
                                   </p>
                                   <p className="text-[10px] text-slate-400 mt-1">
-                                    جرّب البحث بدون همزات أو اختر الولاية من القائمة المجاورة
+                                    {isAr ? 'جرّب البحث بدون همزات أو اختر الولاية من القائمة المجاورة' : 'Essayez une autre recherche ou sélectionnez la wilaya'}
                                   </p>
                                 </div>
                               ) : (
-                                (filteredCommunes as { commune: string; wilayaCode: string; wilayaNameAr: string }[]).map((item) => {
+                                (filteredCommunes as { commune: string; wilayaCode: string; wilayaNameAr: string; wilayaNameFr?: string }[]).map((item) => {
                                   const isSelected = commune === item.commune && wilaya === item.wilayaCode;
                                   return (
                                     <button
@@ -1102,7 +1132,7 @@ export function UnifiedAuthPage({ initialMode = 'operator' }: UnifiedAuthPagePro
                                       <div className="flex items-center gap-2">
                                         <span className="font-bold text-slate-800">{item.commune}</span>
                                         <span className="text-[10px] rounded-md bg-slate-100 text-slate-500 px-1.5 py-0.5">
-                                          {item.wilayaCode} - {item.wilayaNameAr}
+                                          {item.wilayaCode} - {lang === 'fr' ? (item.wilayaNameFr || item.wilayaNameAr) : item.wilayaNameAr}
                                         </span>
                                       </div>
                                       {isSelected && <Check className="size-3.5 text-emerald-600" />}
@@ -1129,11 +1159,13 @@ export function UnifiedAuthPage({ initialMode = 'operator' }: UnifiedAuthPagePro
                       className="mt-0.5 size-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
                     />
                     <span className="text-[11px] font-medium text-slate-600 leading-tight">
-                      أشهد بصحة كافة البيانات المدخلة، وأوافق على{' '}
+                      {isAr ? 'أشهد بصحة كافة البيانات المدخلة وأوافق على' : 'J\'atteste de l\'exactitude des informations et j\'accepte les'}{' '}
                       <Link href="/terms" className="font-bold text-emerald-700 hover:underline">
-                        شروط الاستخدام
+                        {isAr ? 'شروط الاستخدام' : 'conditions d\'utilisation'}
                       </Link>{' '}
-                      والمطابقة لمنظومة الصفقات العمومية وفق القانون 23-12.
+                      {isAr
+                        ? 'والمطابقة لمنظومة الصفقات العمومية وفق القانون 23-12 والمرسوم الرئاسي 15-247'
+                        : 'et la conformité au cadre des marchés publics selon la Loi 23-12 et le Décret présidentiel 15-247'}
                     </span>
                   </label>
                 </div>
@@ -1147,12 +1179,12 @@ export function UnifiedAuthPage({ initialMode = 'operator' }: UnifiedAuthPagePro
                   {isSubmitting ? (
                     <>
                       <Loader2 className="size-4 animate-spin" />
-                      <span>{t('register.neumorphic.submitting') || 'جارٍ إنشاء الحساب وتجهيز الفضاء...'}</span>
+                      <span>{isAr ? 'جارٍ إنشاء الحساب وتجهيز الفضاء...' : 'Création du compte en cours...'}</span>
                     </>
                   ) : (
                     <>
                       <UserPlus className="size-4" />
-                      <span>إنشاء الحساب والمتابعة</span>
+                      <span>{isAr ? 'تأكيد تسجيل الحساب' : 'Confirmer l\'inscription'}</span>
                     </>
                   )}
                 </button>
@@ -1160,13 +1192,13 @@ export function UnifiedAuthPage({ initialMode = 'operator' }: UnifiedAuthPagePro
 
               {/* التذييل في أسفل نموذج التسجيل */}
               <div className="mt-6 text-center text-xs text-slate-500 border-t border-slate-100 pt-4">
-                لديك حساب مسجل بالفعل؟{' '}
+                {isAr ? 'لديك حساب مسجل بالفعل؟' : 'Vous possédez déjà un compte ?'}{' '}
                 <button
                   type="button"
                   onClick={() => handleModeChange('login')}
                   className="font-bold text-emerald-700 hover:text-emerald-800 hover:underline cursor-pointer"
                 >
-                  تسجيل الدخول إلى فضاء عملك
+                  {isAr ? 'تسجيل الدخول إلى فضاء عملك' : 'Se connecter à votre espace'}
                 </button>
               </div>
             </div>
@@ -1178,27 +1210,29 @@ export function UnifiedAuthPage({ initialMode = 'operator' }: UnifiedAuthPagePro
                 <div className="flex items-center justify-between">
                   <div>
                     <span className="text-xs font-bold uppercase tracking-wider text-emerald-700">
-                      بوابة الدخول الموحدة
+                      {isAr ? 'بوابة الدخول الموحدة' : 'Portail d\'accès unifié'}
                     </span>
                     <h2 className="text-2xl font-black text-slate-900 mt-0.5">
-                      تسجيل الدخول إلى حسابك
+                      {isAr ? 'تسجيل الدخول إلى حسابك' : 'Connexion à votre compte'}
                     </h2>
                   </div>
 
                   {/* رابط التحويل لإنشاء حساب */}
                   <div className="text-end">
-                    <span className="block text-xs text-slate-500">مستخدم جديد؟</span>
+                    <span className="block text-xs text-slate-500">{isAr ? 'مستخدم جديد؟' : 'Nouvel utilisateur ?'}</span>
                     <button
                       type="button"
                       onClick={() => handleModeChange('operator')}
                       className="text-xs font-bold text-emerald-700 hover:text-emerald-800 hover:underline cursor-pointer"
                     >
-                      إنشاء حساب ←
+                      {isAr ? 'إنشاء حساب ←' : 'Créer un compte →'}
                     </button>
                   </div>
                 </div>
                 <p className="text-xs text-slate-500 mt-1">
-                  أدخل بريدك الإلكتروني المهني المعتمد وكلمة المرور للوصول إلى فضاء عملك.
+                  {isAr
+                    ? 'أدخل بريدك الإلكتروني المهني المعتمد وكلمة المرور للوصول إلى فضاء عملك'
+                    : 'Saisissez votre e-mail professionnel et votre mot de passe pour accéder à votre espace'}
                 </p>
               </div>
 
@@ -1215,7 +1249,7 @@ export function UnifiedAuthPage({ initialMode = 'operator' }: UnifiedAuthPagePro
                 {/* البريد الإلكتروني */}
                 <div>
                   <label htmlFor="login-email" className="mb-1 block text-xs font-bold text-slate-800">
-                    {t('login.email') || 'البريد الإلكتروني'} <span className="text-rose-500">*</span>
+                    {isAr ? 'البريد الإلكتروني المهني' : 'Adresse e-mail professionnelle'} <span className="text-rose-500">*</span>
                   </label>
                   <div className="group relative flex h-10 w-full items-center rounded-xl border border-slate-200 bg-slate-50/60 transition-all focus-within:border-emerald-600 focus-within:bg-white focus-within:ring-2 focus-within:ring-emerald-500/10">
                     <Mail className="ms-3 size-4 shrink-0 text-slate-400 group-focus-within:text-emerald-600" aria-hidden="true" />
@@ -1225,7 +1259,7 @@ export function UnifiedAuthPage({ initialMode = 'operator' }: UnifiedAuthPagePro
                       dir="ltr"
                       value={loginEmail}
                       onChange={(e) => setLoginEmail(e.target.value)}
-                      placeholder="admin@safaqat.dz أو user@entreprise.dz"
+                      placeholder={isAr ? 'admin@safaqat.dz أو user@entreprise.dz' : 'admin@safaqat.dz ou user@entreprise.dz'}
                       required
                       autoComplete="email"
                       className="h-full w-full min-w-0 flex-1 bg-transparent px-3 text-xs font-semibold text-slate-900 placeholder:text-slate-400 focus:outline-none"
@@ -1237,7 +1271,7 @@ export function UnifiedAuthPage({ initialMode = 'operator' }: UnifiedAuthPagePro
                 <div>
                   <div className="mb-1 flex items-center justify-between">
                     <label htmlFor="login-password" className="text-xs font-bold text-slate-800">
-                      {t('login.password') || 'كلمة المرور'} <span className="text-rose-500">*</span>
+                      {isAr ? 'كلمة المرور' : 'Mot de passe'} <span className="text-rose-500">*</span>
                     </label>
                   </div>
                   <div className="group relative flex h-10 w-full items-center rounded-xl border border-slate-200 bg-slate-50/60 transition-all focus-within:border-emerald-600 focus-within:bg-white focus-within:ring-2 focus-within:ring-emerald-500/10">
@@ -1267,7 +1301,7 @@ export function UnifiedAuthPage({ initialMode = 'operator' }: UnifiedAuthPagePro
                 {isDemoLoginEnabled && (
                   <div className="rounded-xl border border-slate-200/90 bg-slate-50/70 p-3 transition-all">
                     <span className="mb-2 block text-[11px] font-bold text-slate-600">
-                      حسابات المعاينة السريعة (Demo Accounts):
+                      {isAr ? 'حسابات المعاينة السريعة (Demo Accounts):' : 'Comptes de démonstration rapide (Demo Accounts) :'}
                     </span>
                     <div className="grid grid-cols-3 gap-2">
                       <button
@@ -1275,25 +1309,25 @@ export function UnifiedAuthPage({ initialMode = 'operator' }: UnifiedAuthPagePro
                         onClick={() => fillTestAccount('authority@safaqat.dz')}
                         className="truncate rounded-lg bg-white border border-slate-200 px-2 py-1.5 text-xs font-bold text-slate-700 shadow-2xs hover:border-emerald-500 hover:text-emerald-700 cursor-pointer transition-colors"
                       >
-                        مصلحة متعاقدة
+                        {isAr ? 'مصلحة متعاقدة' : 'Service contractant'}
                       </button>
                       <button
                         type="button"
                         onClick={() => fillTestAccount('operator@safaqat.dz')}
                         className="truncate rounded-lg bg-white border border-slate-200 px-2 py-1.5 text-xs font-bold text-slate-700 shadow-2xs hover:border-emerald-500 hover:text-emerald-700 cursor-pointer transition-colors"
                       >
-                        متعامل اقتصادي
+                        {isAr ? 'متعامل اقتصادي' : 'Opérateur économique'}
                       </button>
                       <button
                         type="button"
                         onClick={() => fillTestAccount('admin@safaqat.dz')}
                         className="truncate rounded-lg bg-white border border-slate-200 px-2 py-1.5 text-xs font-bold text-slate-700 shadow-2xs hover:border-emerald-500 hover:text-emerald-700 cursor-pointer transition-colors"
                       >
-                        إدارة مركزية
+                        {isAr ? 'إدارة مركزية' : 'Administration centrale'}
                       </button>
                     </div>
                     <div className="mt-2 text-center text-[10px] text-slate-500">
-                      كلمة المرور لجميع الحسابات:{' '}
+                      {isAr ? 'كلمة المرور لجميع الحسابات:' : 'Mot de passe commun :'}{' '}
                       <span className="font-bold tabular-nums text-emerald-800 select-all">Safaqat@2026</span>
                     </div>
                   </div>
@@ -1308,12 +1342,12 @@ export function UnifiedAuthPage({ initialMode = 'operator' }: UnifiedAuthPagePro
                   {isSubmitting ? (
                     <>
                       <Loader2 className="size-4 animate-spin" />
-                      <span>{t('login.loading') || 'جاري التحقق...'}</span>
+                      <span>{isAr ? 'جاري التحقق...' : 'Vérification en cours...'}</span>
                     </>
                   ) : (
                     <>
                       <LogIn className="size-4" />
-                      <span>تسجيل الدخول</span>
+                      <span>{isAr ? 'تسجيل الدخول' : 'Se connecter'}</span>
                     </>
                   )}
                 </button>
@@ -1321,13 +1355,13 @@ export function UnifiedAuthPage({ initialMode = 'operator' }: UnifiedAuthPagePro
 
               {/* التذييل في أسفل نموذج الدخول */}
               <div className="mt-6 text-center text-xs text-slate-500 border-t border-slate-100 pt-4">
-                ليس لديك حساب بعد؟{' '}
+                {isAr ? 'ليس لديك حساب بعد؟' : 'Pas encore de compte ?'}{' '}
                 <button
                   type="button"
                   onClick={() => handleModeChange('operator')}
                   className="font-bold text-emerald-700 hover:text-emerald-800 hover:underline cursor-pointer"
                 >
-                  إنشاء حساب جديد كمتعامل أو مصلحة
+                  {isAr ? 'إنشاء حساب جديد كمتعامل أو مصلحة' : 'Créer un compte opérateur ou administration'}
                 </button>
               </div>
             </div>
