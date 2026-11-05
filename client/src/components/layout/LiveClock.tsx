@@ -4,14 +4,14 @@ import { useI18n } from '@/i18n';
 export interface LiveClockProps {
   className?: string;
   showSeconds?: boolean;
-  variant?: 'dark' | 'light';
+  variant?: 'light' | 'dark';
   size?: 'sm' | 'md' | 'lg';
 }
 
 export function LiveClock({
   className = '',
   showSeconds = false,
-  variant = 'dark',
+  variant = 'light',
   size = 'md',
 }: LiveClockProps) {
   const { lang } = useI18n();
@@ -31,7 +31,7 @@ export function LiveClock({
     month: 'short',
   }).format(time);
 
-  // إزالة الفواصل والنقاط ليكون النص متناسقاً تماماً مع تصميم شاشة القفل (e.g. الخميس 5 نوفمبر / Jeu 5 nov)
+  // إزالة الفواصل والنقاط ليكون النص متناسقاً وأنيقاً (e.g. الخميس 5 نوفمبر / Jeu 5 nov)
   const formattedDate = rawDate.replace(/،|,|\./g, '').trim();
 
   // تنسيق الوقت بتوقيت الجزائر (24 ساعة)
@@ -79,14 +79,14 @@ export function LiveClock({
     <div
       className={`hidden sm:inline-flex flex-col items-center justify-center rounded-xl transition-all select-none ${sizeClasses} ${
         isDark
-          ? 'bg-slate-950 text-white border border-slate-800/90 shadow-xs hover:border-slate-700 hover:bg-slate-900'
-          : 'bg-white/95 text-slate-900 border border-slate-200/90 shadow-2xs hover:border-slate-300 hover:bg-slate-50/80'
+          ? 'bg-slate-900 text-white border border-slate-800 shadow-xs'
+          : 'bg-white text-slate-900 border border-slate-200/90 shadow-2xs hover:border-slate-300 hover:bg-slate-50/80'
       } ${className}`}
       dir="ltr"
       title="توقيت الجزائر الرسمي (Africa/Algiers · UTC+1)"
       aria-label={`توقيت الجزائر: ${hours}:${minutes} - ${formattedDate}`}
     >
-      {/* 1. السطر العلوي: اليوم والتاريخ محاكاةً لتصميم شاشة القفل */}
+      {/* 1. السطر العلوي: اليوم والتاريخ بخلفية فاتحة أنيقة */}
       <div className="flex items-center justify-center gap-1 leading-none text-center">
         <span
           className={`size-1.5 rounded-full ${
@@ -95,7 +95,7 @@ export function LiveClock({
           aria-hidden="true"
         />
         <span
-          className={`${dateTextSize} font-medium tracking-tight ${
+          className={`${dateTextSize} font-semibold tracking-tight ${
             isDark ? 'text-slate-300' : 'text-slate-500'
           }`}
           style={{ fontFamily: "'Cairo', system-ui, sans-serif" }}
@@ -104,7 +104,7 @@ export function LiveClock({
         </span>
       </div>
 
-      {/* 2. السطر السفلي: الأرقام الرقمية العريضة المتصلة محاكاةً لتصميم 16:16 */}
+      {/* 2. السطر السفلي: الأرقام الرقمية العريضة المتصلة 16:16 بخط داكن ناصع فوق خلفية فاتحة */}
       <div
         className={`flex items-center justify-center gap-0.5 tracking-tight leading-none mt-0.5 ${
           isDark ? 'text-white' : 'text-slate-900'
@@ -117,7 +117,7 @@ export function LiveClock({
         {/* الساعات */}
         <span className={`${timeTextSize} tabular-nums tracking-wide`}>{hours}</span>
 
-        {/* النقطتان الفاصلتان الدائريتان النابضتان */}
+        {/* النقطتان الفاصلتان الدائريتان النابضتان باللون الزمردي الأنيق */}
         <span
           className="inline-flex flex-col justify-center items-center gap-[3px] mx-[2px] select-none"
           aria-hidden="true"

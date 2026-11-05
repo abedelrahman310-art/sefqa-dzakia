@@ -117,21 +117,21 @@ export function OperatorProfileView() {
       )}
 
       {/* 1.5 بنر جواز السفر الرقمي السيادي */}
-      <div className="bg-gradient-to-r from-slate-900 to-[#0b3135] text-white rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm border border-slate-800">
+      <div className="bg-gradient-to-r from-emerald-50/80 via-white to-slate-50 text-slate-900 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-2xs border border-emerald-200/80">
         <div className="flex items-center gap-3.5">
-          <div className="size-11 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 flex items-center justify-center shrink-0">
-            <ShieldCheck className="size-6 text-emerald-400" />
+          <div className="size-11 rounded-xl bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center justify-center shrink-0 shadow-2xs">
+            <ShieldCheck className="size-6 text-emerald-700" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-base font-extrabold text-white">
+              <h2 className="text-base font-extrabold text-slate-900">
                 {lang === 'ar' ? 'جواز السفر الرقمي للمتعامل (DZ-PASSPORT)' : 'Passeport Numérique de l’Opérateur'}
               </h2>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
                 {lang === 'ar' ? 'جاهز 94%' : 'Prêt 94%'}
               </span>
             </div>
-            <p className="text-xs text-slate-300 mt-0.5">
+            <p className="text-xs text-slate-600 mt-0.5">
               {lang === 'ar'
                 ? 'الملف الإداري والقانوني الموحد للترشح بنقرة واحدة لجميع الصفقات العمومية الوطنية'
                 : 'Dossier administratif unique pour soumissionner en un clic'}
@@ -141,7 +141,7 @@ export function OperatorProfileView() {
 
         <Link
           href="/operator/passport"
-          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white shadow-xs transition-colors shrink-0"
+          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-[#0b4348] hover:bg-[#073135] text-white shadow-xs transition-colors shrink-0"
         >
           <span>{lang === 'ar' ? 'فتح الجواز الرقمي الكامل' : 'Ouvrir le passeport'}</span>
           <ArrowLeft className="size-3.5 rtl:rotate-0 ltr:rotate-180" />

@@ -267,28 +267,28 @@ export function OperatorPassportView() {
   return (
     <div className="space-y-6" dir={dir}>
       {/* ─── 1. بطاقة الجواز السيادية الكبرى (Sovereign Digital Passport Card) ─── */}
-      <div className="bg-gradient-to-br from-slate-900 via-slate-900 to-[#0b3135] text-white rounded-3xl p-6 sm:p-8 border border-slate-800 shadow-md relative overflow-hidden">
+      <div className="bg-white text-slate-900 rounded-3xl p-6 sm:p-8 border border-slate-200/90 shadow-xs relative overflow-hidden">
         {/* خلفية جمالية مائية خفيفة */}
-        <div className="absolute top-0 end-0 size-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-10 -start-10 size-80 bg-teal-500/10 rounded-full blur-2xl pointer-events-none" />
+        <div className="absolute top-0 end-0 size-96 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-10 -start-10 size-80 bg-teal-500/5 rounded-full blur-2xl pointer-events-none" />
 
         <div className="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
           <div className="space-y-3">
             <div className="flex flex-wrap items-center gap-2.5">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
-                <ShieldCheck className="size-3.5 text-emerald-400" />
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                <ShieldCheck className="size-3.5 text-emerald-700" />
                 {isAr ? 'جواز سفر رقمي سيادي معتمد' : 'Passeport Numérique Souverain'}
               </span>
-              <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-white/10 text-slate-300 border border-white/10">
+              <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200">
                 {isAr ? 'المرسوم الرئاسي 15-247 · القانون 23-12' : 'Réglementation Officielle'}
               </span>
             </div>
 
             <div>
-              <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+              <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
                 {operatorInfo.legalName}
               </h1>
-              <p className="text-sm text-slate-300 mt-1 flex flex-wrap items-center gap-x-4 gap-y-1">
+              <p className="text-sm text-slate-600 mt-1 flex flex-wrap items-center gap-x-4 gap-y-1">
                 <span>{operatorInfo.enterpriseType}</span>
                 <span>•</span>
                 <span>{operatorInfo.categoryGrade}</span>
@@ -298,43 +298,43 @@ export function OperatorPassportView() {
             </div>
 
             {/* الأرقام التعريفية الرسمية */}
-            <div className="pt-2 flex flex-wrap items-center gap-4 text-xs font-mono">
-              <div className="bg-slate-800/80 px-3 py-1.5 rounded-xl border border-slate-700/80">
-                <span className="text-slate-400 font-sans me-1.5">{isAr ? 'السجل التجاري (RC):' : 'RC:'}</span>
-                <span className="text-emerald-300 font-bold">{operatorInfo.tradeRegister}</span>
+            <div className="pt-2 flex flex-wrap items-center gap-3 text-xs font-mono">
+              <div className="bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200">
+                <span className="text-slate-500 font-sans me-1.5">{isAr ? 'السجل التجاري (RC):' : 'RC:'}</span>
+                <span className="text-slate-900 font-bold">{operatorInfo.tradeRegister}</span>
               </div>
-              <div className="bg-slate-800/80 px-3 py-1.5 rounded-xl border border-slate-700/80">
-                <span className="text-slate-400 font-sans me-1.5">{isAr ? 'التعريف الجبائي (NIF):' : 'NIF:'}</span>
-                <span className="text-emerald-300 font-bold">{operatorInfo.nif}</span>
+              <div className="bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200">
+                <span className="text-slate-500 font-sans me-1.5">{isAr ? 'التعريف الجبائي (NIF):' : 'NIF:'}</span>
+                <span className="text-slate-900 font-bold">{operatorInfo.nif}</span>
               </div>
-              <div className="bg-slate-800/80 px-3 py-1.5 rounded-xl border border-slate-700/80">
-                <span className="text-slate-400 font-sans me-1.5">{isAr ? 'التعريف الإحصائي (NIS):' : 'NIS:'}</span>
-                <span className="text-emerald-300 font-bold">{operatorInfo.nis}</span>
+              <div className="bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200">
+                <span className="text-slate-500 font-sans me-1.5">{isAr ? 'التعريف الإحصائي (NIS):' : 'NIS:'}</span>
+                <span className="text-slate-900 font-bold">{operatorInfo.nis}</span>
               </div>
             </div>
           </div>
 
           {/* الجانب الأيمن: رمز الجواز والرمز الشريطي QR */}
-          <div className="flex flex-col sm:flex-row lg:flex-col items-start sm:items-center lg:items-end gap-3 self-stretch lg:self-auto shrink-0 pt-4 lg:pt-0 border-t lg:border-t-0 border-slate-800">
-            <div className="bg-slate-950/80 p-3 rounded-2xl border border-slate-800 flex items-center gap-3">
+          <div className="flex flex-col sm:flex-row lg:flex-col items-start sm:items-center lg:items-end gap-3 self-stretch lg:self-auto shrink-0 pt-4 lg:pt-0 border-t lg:border-t-0 border-slate-100">
+            <div className="bg-slate-50 p-3 rounded-2xl border border-slate-200/90 flex items-center gap-3">
               <div
-                className="size-16 rounded-xl bg-white p-1.5 flex items-center justify-center cursor-pointer hover:scale-105 transition-transform"
+                className="size-16 rounded-xl bg-white p-1.5 flex items-center justify-center cursor-pointer hover:scale-105 transition-transform border border-slate-200 shadow-2xs"
                 onClick={() => setShowQrModal(true)}
                 title={isAr ? 'انقر لتكبير رمز التحقق QR' : 'Agrandir le QR'}
               >
-                <QrCode className="size-full text-slate-900" />
+                <QrCode className="size-full text-slate-800" />
               </div>
               <div className="text-end">
-                <span className="text-[10px] text-slate-400 uppercase tracking-wider block">
+                <span className="text-[10px] text-slate-500 uppercase tracking-wider block">
                   {isAr ? 'رمز الجواز السيادي' : 'ID Passeport'}
                 </span>
-                <span className="font-mono text-sm font-extrabold text-white block">
+                <span className="font-mono text-sm font-extrabold text-slate-900 block">
                   {passportId}
                 </span>
                 <button
                   type="button"
                   onClick={handleCopyPassportId}
-                  className="mt-1 inline-flex items-center gap-1 text-[11px] text-emerald-400 hover:text-emerald-300"
+                  className="mt-1 inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 hover:text-emerald-800"
                 >
                   {isCopied ? <Check className="size-3" /> : <Copy className="size-3" />}
                   <span>{isCopied ? (isAr ? 'تم النسخ' : 'Copié') : (isAr ? 'نسخ الرمز' : 'Copier')}</span>
@@ -347,7 +347,7 @@ export function OperatorPassportView() {
                 type="button"
                 size="sm"
                 onClick={() => window.print()}
-                className="gap-1.5 text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white shadow-xs flex-1 sm:flex-initial"
+                className="gap-1.5 text-xs font-bold bg-[#0b4348] hover:bg-[#073135] text-white shadow-xs flex-1 sm:flex-initial"
               >
                 <Download className="size-3.5" />
                 {isAr ? 'تصدير الملف الموحد (PDF)' : 'Exporter Dossier Unique'}
@@ -357,9 +357,9 @@ export function OperatorPassportView() {
                 size="sm"
                 variant="outline"
                 onClick={() => setShowQrModal(true)}
-                className="gap-1.5 text-xs font-semibold bg-white/10 hover:bg-white/20 text-white border-white/20"
+                className="gap-1.5 text-xs font-semibold bg-white hover:bg-slate-50 text-slate-700 border-slate-300"
               >
-                <QrCode className="size-3.5" />
+                <QrCode className="size-3.5 text-slate-500" />
                 {isAr ? 'شهادة التحقق QR' : 'Certificat QR'}
               </Button>
             </div>
@@ -649,9 +649,9 @@ export function OperatorPassportView() {
                     type="button"
                     size="sm"
                     onClick={() => alert(isAr ? `تحديث الوثيقة ${doc.code}` : 'Mise à jour')}
-                    className="gap-1.5 text-xs font-bold bg-slate-900 text-white hover:bg-slate-800"
+                    className="gap-1.5 text-xs font-bold bg-[#0b4348] text-white hover:bg-[#073135]"
                   >
-                    <UploadCloud className="size-3.5 text-slate-300" />
+                    <UploadCloud className="size-3.5 text-slate-100" />
                     {isAr ? 'تحديث' : 'Renouveler'}
                   </Button>
                 </div>
@@ -663,7 +663,7 @@ export function OperatorPassportView() {
 
       {/* ─── 5. نافذة استعراض رمز التحقق QR ─── */}
       {showQrModal && (
-        <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full border border-slate-200 shadow-2xl space-y-5 text-center">
             <div className="size-16 rounded-2xl bg-emerald-50 text-emerald-800 border border-emerald-200 mx-auto flex items-center justify-center">
               <QrCode className="size-8" />
@@ -704,7 +704,7 @@ export function OperatorPassportView() {
 
       {/* ─── 6. نافذة معاينة الوثيقة ─── */}
       {previewDoc && (
-        <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl p-6 max-w-lg w-full border border-slate-200 shadow-2xl space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
               <div className="flex items-center gap-2">

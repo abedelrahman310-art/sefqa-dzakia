@@ -326,19 +326,21 @@ export function PriceRevisionCalculator({
         </div>
 
         {/* كرت المبلغ الإجمالي المحين النهائي */}
-        <div className="bg-slate-900 text-white rounded-2xl p-5 border border-slate-800 shadow-sm relative overflow-hidden">
+        <div className="bg-emerald-50/70 rounded-2xl p-5 border border-emerald-200/90 shadow-2xs relative overflow-hidden">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-300 uppercase tracking-wider">
+            <span className="text-xs font-bold text-emerald-900 uppercase tracking-wider">
               {isAr ? 'المبلغ النهائي بعد المراجعة (P)' : 'Nouveau Montant Contractuel'}
             </span>
-            <Coins className="size-4 text-emerald-400" />
+            <div className="size-7 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center border border-emerald-200">
+              <Coins className="size-4 text-emerald-700" />
+            </div>
           </div>
           <div className="mt-2">
-            <span className="text-2xl font-black text-white tracking-tight">
+            <span className="text-2xl font-black text-emerald-950 tracking-tight">
               {formatCurrency(calculationDetails.revisedAmount)}
             </span>
           </div>
-          <p className="text-[11px] text-slate-400 mt-1">
+          <p className="text-[11px] text-emerald-800/80 font-medium mt-1">
             {isAr ? 'المبلغ الإجمالي المعتمد للملحق المالي' : 'Montant total pour l’avenant'}
           </p>
         </div>
