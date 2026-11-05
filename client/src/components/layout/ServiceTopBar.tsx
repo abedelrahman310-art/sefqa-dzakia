@@ -18,6 +18,7 @@ import {
   Building2,
 } from 'lucide-react';
 import { NotificationDropdown } from './NotificationDropdown';
+import { LiveClock } from './LiveClock';
 import { OrgLogo } from '@/components/common/OrgLogo';
 import { AIChatAssistant } from '@/features/ai/components/AIChatAssistant';
 import {
@@ -310,6 +311,9 @@ export function ServiceTopBar(_props: ServiceTopBarProps) {
               : '/authority/notifications'
           }
         />
+
+        {/* الساعة الرقمية الحية بتوقيت الجزائر */}
+        <LiveClock className="mx-1" />
 
         {/* فاصل رأسي خفيف بين مجموعات الأدوات */}
         <div className="hidden sm:block h-6 w-[1px] bg-[#D5DDEA] mx-0.5" aria-hidden="true" />

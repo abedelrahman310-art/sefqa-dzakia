@@ -77,7 +77,11 @@ export const aiApi = {
     api.get('/ai/central/suspicions/').then((r) => r.data),
 
   // Chat Assistant
-  chat: (conversationId: string | null | undefined, message: string): Promise<ChatResponse> => {
+  chat: (
+    conversationId: string | null | undefined,
+    message: string,
+    files?: File[],
+  ): Promise<ChatResponse> => {
     let role = 'central_admin';
     try {
       const stored = localStorage.getItem('safaqat_user');
@@ -87,10 +91,27 @@ export const aiApi = {
       }
     } catch {}
     const endpoint = role === 'central_admin' ? '/ai/central/chat/' : '/ai/legal-chat/';
+
+    if (files && files.length > 0) {
+      const formData = new FormData();
+      if (conversationId) formData.append('conversation_id', conversationId);
+      formData.append('message', message);
+      formData.append('question', message);
+      files.forEach((f) => {
+        formData.append('files', f);
+      });
+      return api
+        .post(endpoint, formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        })
+        .then((r) => r.data);
+    }
+
     return api
       .post(endpoint, {
         conversation_id: conversationId || undefined,
         message,
+        question: message,
       })
       .then((r) => r.data);
   },

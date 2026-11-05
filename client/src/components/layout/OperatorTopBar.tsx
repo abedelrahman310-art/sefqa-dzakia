@@ -13,6 +13,7 @@ import {
   Settings,
 } from 'lucide-react';
 import { NotificationDropdown } from './NotificationDropdown';
+import { LiveClock } from './LiveClock';
 import { OrgLogo } from '@/components/common/OrgLogo';
 import { AIChatAssistant } from '@/features/ai/components/AIChatAssistant';
 import {
@@ -99,6 +100,9 @@ export function OperatorTopBar({
       </form>
 
       <div className="op-topbar-actions">
+        {/* الساعة الرقمية الحية بتوقيت الجزائر */}
+        <LiveClock className="mx-1" />
+
         <button
           type="button"
           onClick={toggleLang}

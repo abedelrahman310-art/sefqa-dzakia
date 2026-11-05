@@ -17,6 +17,7 @@ import { useI18n } from '@/i18n';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { useLocation } from 'wouter';
 import { NotificationDropdown } from './NotificationDropdown';
+import { LiveClock } from './LiveClock';
 import './PortalTopBar.css';
 
 export interface PortalNavItem {
@@ -103,6 +104,9 @@ export function PortalTopBar({
 
       {/* 3. RTL End: أيقونة اللغة + أدوات العمل (Search, Calendar, MessageSquare, Bell, User) */}
       <div className="portal-topbar__end">
+        {/* الساعة الرقمية الحية بتوقيت الجزائر */}
+        <LiveClock className="mx-1" />
+
         {/* أيقونة اللغة في الشريط العلوي */}
         <button
           type="button"

@@ -256,7 +256,7 @@ export const V3PlatformShowcaseSection: React.FC = () => {
                     <span className="text-xs text-slate-500 font-semibold">{isAr ? 'التغطية الإقليمية' : 'Couverture territoriale'}</span>
                     <div className="text-sm font-bold text-slate-900 flex items-center gap-1.5">
                       <Building2 className="size-4 text-blue-600" />
-                      <span>{isAr ? '58 ولاية تحت المتابعة' : '58 Wilayas interconnectées'}</span>
+                      <span>{isAr ? '69 ولاية تحت المتابعة' : '69 Wilayas interconnectées'}</span>
                     </div>
                   </div>
                   <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs space-y-1">

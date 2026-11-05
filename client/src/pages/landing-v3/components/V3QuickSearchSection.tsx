@@ -77,7 +77,7 @@ export const V3QuickSearchSection: React.FC = () => {
                 className="w-full h-12 ps-10 pe-8 rounded-xl border border-slate-200 bg-slate-50/70 focus:bg-white text-xs sm:text-sm font-medium text-slate-800 focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/10 transition-all appearance-none cursor-pointer"
               >
                 <option value="">
-                  {isAr ? 'كافة الولايات (58 ولاية)' : 'Toutes les wilayas (58)'}
+                  {isAr ? 'كافة الولايات (69 ولاية)' : 'Toutes les wilayas (69)'}
                 </option>
                 {ALGERIA_69_WILAYAS.map((w) => (
                   <option key={w.code} value={w.code}>

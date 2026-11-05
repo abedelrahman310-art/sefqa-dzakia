@@ -122,6 +122,13 @@ export interface LegalArticle {
  */
 export type LegalArticleSource = LegalArticle | string | Record<string, unknown>;
 
+export interface AttachedDocument {
+  id?: string;
+  name: string;
+  size: number;
+  type?: string;
+}
+
 export interface ChatMessage {
   id?: string;
   role: 'user' | 'assistant' | 'system';
@@ -129,6 +136,7 @@ export interface ChatMessage {
   content: string;
   sources?: string[];
   legal_articles?: LegalArticle[];
+  attached_files?: AttachedDocument[];
   no_legal_answer?: boolean;
   is_advisory?: boolean;
   created_at?: string;
@@ -141,6 +149,7 @@ export interface ChatResponse {
   sources: string[];
   legal_articles?: LegalArticleSource[];
   retrieved_articles?: any[];
+  attached_files?: AttachedDocument[];
   /** Optional top-level full text when the backend returns a single article. */
   legal_text?: string;
   /** Explicit RAG signals used by newer backend versions. */

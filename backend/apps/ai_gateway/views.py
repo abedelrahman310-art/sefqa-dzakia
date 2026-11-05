@@ -272,19 +272,97 @@ class AILegalChatView(APIView):
             or ''
         ).strip()
 
+        # فحص ومعالجة الوثائق المرفقة (الحد الأقصى 5 ملفات بحجم 10 ميغابايت لكل ملف)
+        uploaded_files = request.FILES.getlist('files') or request.FILES.getlist('documents')
+        if not uploaded_files and request.FILES.get('file'):
+            uploaded_files = [request.FILES.get('file')]
+
+        if len(uploaded_files) > 5:
+            return Response(
+                {
+                    'error': (
+                        '5 fichiers maximum par message.'
+                        if language == 'fr'
+                        else 'الحد الأقصى المسموح به هو 5 ملفات في الرسالة الواحدة.'
+                    )
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        allowed_exts = {'.pdf', '.docx', '.doc', '.xlsx', '.xls', '.csv', '.png', '.jpg', '.jpeg'}
+        attached_files_meta = []
+        extracted_docs_text = []
+
+        for f in uploaded_files:
+            if f.size > 10 * 1024 * 1024:
+                return Response(
+                    {
+                        'error': (
+                            f'Le fichier {f.name} dépasse la taille limite (10 Mo).'
+                            if language == 'fr'
+                            else f'حجم الملف {f.name} يتجاوز الحد المسموح (10 ميغابايت).'
+                        )
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            ext = os.path.splitext(f.name)[1].lower()
+            if ext not in allowed_exts:
+                return Response(
+                    {
+                        'error': (
+                            f'Format de fichier non pris en charge ({f.name}).'
+                            if language == 'fr'
+                            else f'صيغة الملف {f.name} غير مدعومة.'
+                        )
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            attached_files_meta.append({
+                'name': os.path.basename(f.name),
+                'size': f.size,
+                'type': getattr(f, 'content_type', '') or ext,
+            })
+
+            # استخراج النصوص بحسب نوع الملف
+            try:
+                file_bytes = f.read()
+                if ext == '.pdf':
+                    pdf_text, _ = extract_text_from_pdf(file_bytes, max_pages=15)
+                    if pdf_text.strip():
+                        extracted_docs_text.append(f"محتوى الملف المرفق [{f.name}]:\n{pdf_text[:3500]}")
+                elif ext in ('.csv', '.txt'):
+                    txt = file_bytes.decode('utf-8', errors='ignore')
+                    if txt.strip():
+                        extracted_docs_text.append(f"محتوى الملف المرفق [{f.name}]:\n{txt[:2500]}")
+                else:
+                    extracted_docs_text.append(f"وثيقة مرفقة للتحليل والمراجعة: [{f.name}] ({ext.upper()})")
+            except Exception as e:
+                logger.warning("تعذر استخراج النص من الملف %s: %s", f.name, e)
+                extracted_docs_text.append(f"وثيقة مرفقة: [{f.name}]")
+
+        if not user_question and uploaded_files:
+            user_question = (
+                'Veuillez examiner et analyser les documents joints selon la réglementation des marchés publics.'
+                if language == 'fr'
+                else 'يرجى فحص وتحليل الوثائق المرفقة وتقديم استشارة قانونية وإجرائية حولها وفق القانون 23-12.'
+            )
+
         if not user_question:
             return Response(
                 {
                     'error': (
-                        'Veuillez saisir une question juridique.'
+                        'Veuillez saisir une question juridique ou joindre un document.'
                         if language == 'fr'
-                        else 'يرجى تقديم سؤال قانوني للاستشارة.'
+                        else 'يرجى تقديم سؤال أو رفع وثيقة للاستشارة والمساعدة.'
                     )
                 },
                 status=status.HTTP_400_BAD_REQUEST
             )
 
         clean_question = sanitize_pii(user_question)
+        if extracted_docs_text:
+            clean_question += "\n\nالوثائق المرفقة للتحليل:\n" + "\n---\n".join(extracted_docs_text)
 
         # 1. RAG Step: البحث الدلالي الشعاعي عن أقرب 3 مواد قانونية (Top 3 Similarity)
         from apps.legal_rag.services.rag_service import (
@@ -422,7 +500,8 @@ class AILegalChatView(APIView):
             'language': language,
             'human_verification_required': True,
             'statutory_reference': statutory_reference,
-            'disclaimer': disclaimer
+            'disclaimer': disclaimer,
+            'attached_files': attached_files_meta
         }, status=status.HTTP_200_OK)
 
 

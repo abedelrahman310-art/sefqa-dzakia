@@ -65,10 +65,12 @@ export const useChat = () =>
     mutationFn: ({
       conversationId,
       message,
+      files,
     }: {
       conversationId?: string | null;
       message: string;
-    }) => aiApi.chat(conversationId, message),
+      files?: File[];
+    }) => aiApi.chat(conversationId, message, files),
   });
 
 export const useAlerts = () =>
