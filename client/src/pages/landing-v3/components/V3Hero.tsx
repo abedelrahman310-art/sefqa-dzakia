@@ -18,9 +18,14 @@ export const V3Hero: React.FC = () => {
           
           {/* Framed Short Eyebrow: Isolated Centered Row */}
           <div className="flex items-center justify-center w-full">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-emerald-200/80 bg-emerald-50/80 text-emerald-900 text-xs sm:text-sm font-bold shadow-2xs">
-              <span className="size-2 rounded-full bg-emerald-600 animate-ping" />
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-emerald-200/80 bg-emerald-50/90 text-emerald-900 text-xs sm:text-sm font-bold shadow-2xs">
+              <span className="relative flex size-2">
+                <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                <span className="relative inline-flex size-2 rounded-full bg-emerald-600" />
+              </span>
               <span>{isAr ? 'المنظومة الرقمية المعتمدة' : 'Plateforme Numérique Certifiée'}</span>
+              <span className="text-emerald-300 select-none">|</span>
+              <span className="text-[11px] font-semibold text-emerald-800">{isAr ? 'جاهزة للخدمة' : 'Opérationnelle'}</span>
             </div>
           </div>
 
@@ -30,8 +35,8 @@ export const V3Hero: React.FC = () => {
               ══════════════════════════════════════════════════════════════════════ */}
           <div className="w-full flex items-center justify-center my-1">
             <div className="relative w-full max-w-[940px] mx-auto">
-              {/* Algerian Tricolor Ambient Border Glow */}
-              <div className="absolute -inset-2 rounded-3xl bg-gradient-to-r from-[#006233]/20 via-emerald-100/35 to-[#d21034]/20 blur-xl pointer-events-none" />
+              {/* Algerian Tricolor Ambient Border Glow with Gentle Breathing Effect */}
+              <div className="absolute -inset-3 rounded-3xl bg-gradient-to-r from-[#006233]/25 via-emerald-100/40 to-[#d21034]/25 blur-2xl pointer-events-none transition-all duration-1000" />
 
               {/* The Glassmorphic Floating Card */}
               <div className="relative w-full rounded-3xl border border-white/95 bg-white/90 backdrop-blur-2xl shadow-xl px-6 py-10 sm:px-14 sm:py-14 md:py-16 overflow-hidden flex flex-col items-center justify-center text-center">
@@ -69,6 +74,22 @@ export const V3Hero: React.FC = () => {
                       ? 'المنظومة الرقمية الموحدة لإدارة ورقمنة الصفقات العمومية'
                       : 'Plateforme Numérique Unifiée des Marchés Publics'}
                   </p>
+                </div>
+
+                {/* الشارات السيادية الثلاث لضمانات الثقة والأمان */}
+                <div className="mt-6 flex flex-wrap items-center justify-center gap-2 sm:gap-3 max-w-2xl mx-auto">
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-50/90 border border-slate-200/90 text-slate-700 text-xs font-bold shadow-2xs hover:border-emerald-300 transition-colors">
+                    <span className="size-1.5 rounded-full bg-emerald-600" />
+                    <span>{isAr ? 'تشفير الأظرفة بـ SHA-256' : 'Chiffrement SHA-256'}</span>
+                  </div>
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-50/90 border border-slate-200/90 text-slate-700 text-xs font-bold shadow-2xs hover:border-emerald-300 transition-colors">
+                    <span className="size-1.5 rounded-full bg-emerald-600" />
+                    <span>{isAr ? 'مطابقة لأحكام القانون 23-12' : 'Conformité Loi 23-12'}</span>
+                  </div>
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-50/90 border border-slate-200/90 text-slate-700 text-xs font-bold shadow-2xs hover:border-emerald-300 transition-colors">
+                    <span className="size-1.5 rounded-full bg-[#006233]" />
+                    <span>{isAr ? 'سيادة رقمية جزائرية 100%' : 'Souveraineté Numérique 100%'}</span>
+                  </div>
                 </div>
 
                 {/* Bottom National Ribbon Accent: 50% Green, 50% Red */}

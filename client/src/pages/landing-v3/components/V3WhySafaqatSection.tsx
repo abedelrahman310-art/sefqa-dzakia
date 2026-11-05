@@ -82,17 +82,26 @@ export const V3WhySafaqatSection: React.FC = () => {
             return (
               <div
                 key={card.id}
-                className="group relative bg-white rounded-2xl border border-slate-200/90 p-7 sm:p-8 shadow-xs hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 flex flex-col justify-between"
+                className="group relative bg-white rounded-2xl border border-slate-200/90 p-7 sm:p-8 shadow-xs hover:shadow-md hover:border-emerald-300 hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between overflow-hidden"
               >
-                <div>
+                {/* لمسة زليج هندسية خافتة جداً في زاوية البطاقة */}
+                <div
+                  className="absolute -bottom-6 -end-6 size-28 pointer-events-none opacity-[0.025] group-hover:opacity-[0.06] transition-opacity duration-500"
+                  style={{
+                    backgroundImage: `radial-gradient(#006233 1px, transparent 1px)`,
+                    backgroundSize: '10px 10px',
+                  }}
+                />
+
+                <div className="relative z-10">
                   {/* رأس البطاقة: الأيقونة والشارة الهادئة */}
                   <div className="flex items-center justify-between gap-3 mb-6">
                     <div
-                      className={`size-12 rounded-xl border flex items-center justify-center ${card.accent} shadow-2xs group-hover:scale-105 transition-transform duration-300`}
+                      className={`size-12 rounded-xl border flex items-center justify-center ${card.accent} shadow-2xs group-hover:scale-110 transition-transform duration-300`}
                     >
                       <Icon className="size-6" strokeWidth={1.75} />
                     </div>
-                    <span className="text-[11px] font-bold text-slate-500 bg-slate-50 border border-slate-200/80 px-2.5 py-1 rounded-full">
+                    <span className="text-[11px] font-bold text-slate-500 bg-slate-50 border border-slate-200/80 px-2.5 py-1 rounded-full group-hover:border-emerald-200 group-hover:text-emerald-800 transition-colors">
                       {card.badge}
                     </span>
                   </div>
@@ -109,9 +118,12 @@ export const V3WhySafaqatSection: React.FC = () => {
                 </div>
 
                 {/* مؤشر بصري خفيف أسفل البطاقة */}
-                <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400 font-medium">
-                  <span>{isAr ? 'معيار مؤسسي رسمي' : 'Norme Institutionnelle'}</span>
-                  <div className="w-6 h-0.5 bg-slate-200 rounded-full group-hover:bg-[#006233] transition-colors" />
+                <div className="relative z-10 mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400 font-medium">
+                  <span className="inline-flex items-center gap-1.5 text-slate-500 group-hover:text-emerald-800 transition-colors">
+                    <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    <span>{isAr ? 'معيار مؤسسي رسمي' : 'Norme Institutionnelle'}</span>
+                  </span>
+                  <div className="w-8 h-1 bg-slate-200 rounded-full group-hover:bg-[#006233] transition-all duration-300" />
                 </div>
               </div>
             );

@@ -86,8 +86,8 @@ export const V3ComplianceTrustSection: React.FC<V3ComplianceTrustSectionProps> =
 
           <p className="mt-3.5 text-sm sm:text-base text-slate-600 font-medium leading-relaxed max-w-2xl mx-auto">
             {isAr
-              ? 'ضمانات تشريعية وأمنية صارمة تضمن سلامة الأموال العمومية ونزاهة كافة العمليات التعاقدية.'
-              : 'Garanties juridiques et de cybersécurité assurant l’intégrité des deniers publics et des transactions contractuelles.'}
+              ? 'ضمانات تشريعية وأمنية صارمة تضمن سلامة الأموال العمومية ونزاهة كافة العمليات التعاقدية'
+              : 'Garanties juridiques et de cybersécurité assurant l’intégrité des deniers publics et des transactions contractuelles'}
           </p>
         </div>
 
@@ -155,7 +155,7 @@ export const V3ComplianceTrustSection: React.FC<V3ComplianceTrustSectionProps> =
                 <p className="text-sm text-slate-600 font-medium leading-relaxed">
                   {isAr
                     ? 'منصة رقمية جزائرية تدعم رقمنة الصفقات العمومية والشفافية والامتثال'
-                    : 'Plateforme numérique algérienne soutenant la dématérialisation des marchés publics, la transparence et la conformité.'}
+                    : 'Plateforme numérique algérienne soutenant la dématérialisation des marchés publics, la transparence et la conformité'}
                 </p>
               </div>
             </div>

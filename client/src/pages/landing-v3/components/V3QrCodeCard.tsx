@@ -1,6 +1,6 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
-import { Smartphone, QrCode } from 'lucide-react';
+import { Smartphone, QrCode, Copy, Check } from 'lucide-react';
 import { useI18n } from '@/i18n';
 import { getPlatformSiteUrl } from '@/config/site';
 
@@ -15,8 +15,19 @@ export const V3QrCodeCard: React.FC<V3QrCodeCardProps> = ({
 }) => {
   const { lang, dir } = useI18n();
   const isAr = lang === 'ar';
+  const [copied, setCopied] = useState(false);
 
   const siteUrl = useMemo(() => getPlatformSiteUrl(), []);
+
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(siteUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Fallback if clipboard API is unavailable
+    }
+  };
 
   const headingText = isAr
     ? 'امسح للدخول إلى المنصة'
@@ -33,7 +44,7 @@ export const V3QrCodeCard: React.FC<V3QrCodeCardProps> = ({
   return (
     <div
       dir={dir}
-      className={`group relative rounded-2xl border border-slate-200/90 bg-white p-5 sm:p-6 shadow-xs hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 flex flex-col items-center justify-between text-center overflow-hidden ${className}`}
+      className={`group relative rounded-2xl border border-slate-200/90 bg-white p-5 sm:p-6 shadow-xs hover:shadow-md hover:border-emerald-300 hover:-translate-y-0.5 transition-all duration-300 flex flex-col items-center justify-between text-center overflow-hidden ${className}`}
     >
       {/* لمسة خلفية خفيفة جداً من درجات الزليج الهادئة */}
       <div
@@ -55,19 +66,27 @@ export const V3QrCodeCard: React.FC<V3QrCodeCardProps> = ({
           </h3>
         </div>
 
-        {/* إطار رمز QR الأبيض النقي مع هوامش مريحة وقابلية مسح عالية */}
-        <div className="mx-auto w-fit rounded-2xl border border-slate-200 bg-white p-3 shadow-2xs group-hover:border-emerald-300 group-hover:shadow-xs transition-all">
-          <QRCodeSVG
-            value={siteUrl}
-            size={size}
-            level="M"
-            bgColor="#ffffff"
-            fgColor="#0f172a"
-            marginSize={1}
-            role="img"
-            aria-label={qrAlt}
-            title={headingText}
-          />
+        {/* إطار رمز QR الأبيض النقي مع حواف كاميرا الماسح الضوئي (Viewfinder brackets) */}
+        <div className="relative mx-auto w-fit p-1">
+          {/* حواف الماسح الأربعة */}
+          <div className="absolute top-0 start-0 size-3 border-t-2 border-s-2 border-emerald-600 rounded-tl-sm pointer-events-none" />
+          <div className="absolute top-0 end-0 size-3 border-t-2 border-e-2 border-emerald-600 rounded-tr-sm pointer-events-none" />
+          <div className="absolute bottom-0 start-0 size-3 border-b-2 border-s-2 border-emerald-600 rounded-bl-sm pointer-events-none" />
+          <div className="absolute bottom-0 end-0 size-3 border-b-2 border-e-2 border-emerald-600 rounded-br-sm pointer-events-none" />
+
+          <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-2xs group-hover:border-emerald-300 group-hover:shadow-xs transition-all">
+            <QRCodeSVG
+              value={siteUrl}
+              size={size}
+              level="M"
+              bgColor="#ffffff"
+              fgColor="#0f172a"
+              marginSize={1}
+              role="img"
+              aria-label={qrAlt}
+              title={headingText}
+            />
+          </div>
         </div>
 
         {/* وصف توجيهي هادئ وخالٍ من الفواصل والنقاط */}
@@ -75,11 +94,25 @@ export const V3QrCodeCard: React.FC<V3QrCodeCardProps> = ({
           {descText}
         </p>
 
-        {/* شارة توضيحية للرابط */}
-        <div className="mt-2.5 inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-slate-50 border border-slate-200/80 text-[10px] font-mono font-semibold text-slate-500">
-          <QrCode className="size-3 text-emerald-700" />
-          <span className="truncate max-w-[180px]">safaqat-frontend.onrender.com</span>
-        </div>
+        {/* زر نسخ الرابط وشارة العنوان */}
+        <button
+          type="button"
+          onClick={handleCopyLink}
+          className="mt-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-50 hover:bg-emerald-50 border border-slate-200/90 hover:border-emerald-300 text-[11px] font-mono font-semibold text-slate-700 hover:text-emerald-800 transition-colors shadow-2xs cursor-pointer active:scale-95"
+          title={isAr ? 'نسخ رابط المنصة' : 'Copier le lien'}
+        >
+          {copied ? (
+            <>
+              <Check className="size-3 text-emerald-600" />
+              <span className="font-sans font-bold text-emerald-700">{isAr ? 'تم النسخ' : 'Copié'}</span>
+            </>
+          ) : (
+            <>
+              <Copy className="size-3 text-slate-400 group-hover:text-emerald-600" />
+              <span className="truncate max-w-[150px]">{siteUrl.replace(/^https?:\/\//, '')}</span>
+            </>
+          )}
+        </button>
       </div>
     </div>
   );

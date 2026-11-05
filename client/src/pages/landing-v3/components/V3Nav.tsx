@@ -28,8 +28,8 @@ export const V3Nav: React.FC = () => {
   return (
     <nav
       dir={dir}
-      className={`sticky top-0 z-40 w-full bg-[#ffffff] transition-all duration-200 ${
-        scrolled ? 'border-b border-[#d8d8d8]' : 'border-b border-transparent'
+      className={`sticky top-0 z-40 w-full bg-white/95 backdrop-blur-md transition-all duration-200 ${
+        scrolled ? 'border-b border-[#d8d8d8] shadow-xs' : 'border-b border-transparent'
       }`}
       style={{ height: '56px' }}
     >

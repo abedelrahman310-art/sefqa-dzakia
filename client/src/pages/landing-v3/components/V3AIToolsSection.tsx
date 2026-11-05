@@ -19,44 +19,48 @@ export const V3AIToolsSection: React.FC = () => {
       id: 'matcher',
       title: isAr ? 'مطابقة الفرص الذكية' : 'Correspondance Intelligente des Opportunités',
       role: isAr ? 'مساعد المتعامل الاقتصادي' : 'Assistant Opérateur',
+      techBadge: isAr ? 'خوارزمية مطابقة v2' : 'Matching v2',
       desc: isAr
-        ? 'تحليل فوري لمجال تخصص المؤسسة ورموز السجل التجاري وربطها التلقائي بالصفقات الملائمة لزيادة فرص الفوز بالعطاءات.'
-        : 'Analyse en temps réel de votre registre du commerce pour identifier automatiquement les marchés les plus pertinents.',
+        ? 'تحليل فوري لمجال تخصص المؤسسة ورموز السجل التجاري وربطها التلقائي بالصفقات الملائمة لزيادة فرص الفوز بالعطاءات'
+        : 'Analyse en temps réel de votre registre du commerce pour identifier automatiquement les marchés les plus pertinents',
       icon: Sparkles,
-      accent: 'border-emerald-200/90 hover:border-emerald-500',
+      accent: 'border-emerald-200/90 hover:border-emerald-400',
       iconBox: 'text-emerald-700 bg-emerald-50 border-emerald-100',
     },
     {
       id: 'specs-analyzer',
       title: isAr ? 'تحليل دفاتر الشروط' : 'Analyse des Cahiers des Charges',
       role: isAr ? 'مساعد قراءة الدفاتر' : 'Synthèse Réglementaire',
+      techBadge: isAr ? 'معالجة لغوية NLP' : 'NLP Juridique',
       desc: isAr
-        ? 'قراءة واستخلاص المعايير الفنية والمالية والجدول الزمني من دفاتر الشروط المعقدة وتقديم ملخص تنفيذي دقيق.'
-        : 'Extraction automatique des critères techniques, financiers et des délais contractuels en une synthèse claire.',
+        ? 'قراءة واستخلاص المعايير الفنية والمالية والجدول الزمني من دفاتر الشروط المعقدة وتقديم ملخص تنفيذي دقيق'
+        : 'Extraction automatique des critères techniques, financiers et des délais contractuels en une synthèse claire',
       icon: BookOpenCheck,
-      accent: 'border-teal-200/90 hover:border-teal-500',
+      accent: 'border-teal-200/90 hover:border-teal-400',
       iconBox: 'text-teal-700 bg-teal-50 border-teal-100',
     },
     {
       id: 'compliance-shield',
       title: isAr ? 'الدرع الامتثالي قبل الإيداع' : 'Bouclier de Conformité Préalable',
       role: isAr ? 'مساعد التدقيق الشكلي' : 'Vérification Préventive',
+      techBadge: isAr ? 'فحص تدقيقي فوري' : 'Audit Automatisé',
       desc: isAr
-        ? 'فحص قبلي شامل لملف الترشح والشهادات الجبائية وشبه الجبائية لتدارك الأخطاء والنواقص وتجنب الإقصاء الإداري.'
-        : 'Contrôle préventif des pièces obligatoires (CNAS, CASNOS, impôts, caution) pour éviter tout rejet administratif.',
+        ? 'فحص قبلي شامل لملف الترشح والشهادات الجبائية وشبه الجبائية لتدارك الأخطاء والنواقص وتجنب الإقصاء الإداري'
+        : 'Contrôle préventif des pièces obligatoires (CNAS, CASNOS, impôts, caution) pour éviter tout rejet administratif',
       icon: ShieldCheck,
-      accent: 'border-blue-200/90 hover:border-blue-500',
+      accent: 'border-blue-200/90 hover:border-blue-400',
       iconBox: 'text-blue-700 bg-blue-50 border-blue-100',
     },
     {
       id: 'anti-collusion',
       title: isAr ? 'رادار مكافحة التواطؤ' : 'Radar Anti-Collusion',
       role: isAr ? 'مساعد الرقابة والنزاهة' : 'Support Analytique',
+      techBadge: isAr ? 'كشف الأنماط المشبوهة' : 'Détection de Motifs',
       desc: isAr
-        ? 'تحليل مؤشرات المخاطر ودعم رصد السلوكيات المشبوهة كأداة تحليلية واستشارية مساندة لأجهزة الرقابة، دون إصدار أي قرار قانوني.'
-        : 'Analyse des indicateurs de risque et appui à la détection des comportements suspects, en tant qu’outil consultatif sans décision juridique.',
+        ? 'تحليل مؤشرات المخاطر ودعم رصد السلوكيات المشبوهة كأداة تحليلية واستشارية مساندة لأجهزة الرقابة دون إصدار أي قرار قانوني'
+        : 'Analyse des indicateurs de risque et appui à la détection des comportements suspects, en tant qu’outil consultatif sans décision juridique',
       icon: ScanSearch,
-      accent: 'border-amber-200/90 hover:border-amber-500',
+      accent: 'border-amber-200/90 hover:border-amber-400',
       iconBox: 'text-amber-700 bg-amber-50 border-amber-200',
     },
   ];
@@ -81,8 +85,8 @@ export const V3AIToolsSection: React.FC = () => {
 
           <p className="mt-3.5 text-sm sm:text-base text-slate-600 font-medium leading-relaxed max-w-2xl mx-auto">
             {isAr
-              ? 'أدوات خوارزمية ذكية لمساندة المتعاملين والمصالح المتعاقدة وأجهزة الرقابة مع إبقاء القرار البشري سيد الموقف.'
-              : 'Des technologies avancées pour assister les acteurs publics et privés sans jamais se substituer à la décision humaine.'}
+              ? 'أدوات خوارزمية ذكية لمساندة المتعاملين والمصالح المتعاقدة وأجهزة الرقابة مع إبقاء القرار البشري سيد الموقف'
+              : 'Des technologies avancées pour assister les acteurs publics et privés sans jamais se substituer à la décision humaine'}
           </p>
         </div>
 
@@ -93,11 +97,11 @@ export const V3AIToolsSection: React.FC = () => {
             return (
               <div
                 key={tool.id}
-                className={`group bg-white rounded-2xl border ${tool.accent} p-7 sm:p-8 shadow-xs hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 flex flex-col justify-between`}
+                className={`group bg-white rounded-2xl border ${tool.accent} p-7 sm:p-8 shadow-xs hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between`}
               >
                 <div>
                   <div className="flex items-center justify-between gap-3 mb-5">
-                    <div className={`size-12 rounded-xl border flex items-center justify-center ${tool.iconBox} shadow-2xs`}>
+                    <div className={`size-12 rounded-xl border flex items-center justify-center ${tool.iconBox} shadow-2xs group-hover:scale-110 transition-transform duration-300`}>
                       <Icon className="size-6" strokeWidth={1.75} />
                     </div>
                     <div className="flex items-center gap-2">
@@ -108,9 +112,14 @@ export const V3AIToolsSection: React.FC = () => {
                     </div>
                   </div>
 
-                  <h3 className="text-lg sm:text-xl font-bold text-slate-900 mb-3 leading-snug group-hover:text-[#006233] transition-colors">
-                    {tool.title}
-                  </h3>
+                  <div className="flex items-center justify-between gap-2 mb-2">
+                    <h3 className="text-lg sm:text-xl font-bold text-slate-900 leading-snug group-hover:text-[#006233] transition-colors">
+                      {tool.title}
+                    </h3>
+                    <span className="text-[10px] font-mono font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200/60 shrink-0">
+                      {tool.techBadge}
+                    </span>
+                  </div>
 
                   <p className="text-sm text-slate-600 leading-relaxed font-medium">
                     {tool.desc}
@@ -133,8 +142,8 @@ export const V3AIToolsSection: React.FC = () => {
         {/* تنبيه أخلاقي ورسمي في أسفل القسم */}
         <div className="mt-10 max-w-2xl mx-auto text-center px-4 py-3 rounded-xl bg-slate-50 border border-slate-200/80 text-xs sm:text-sm text-slate-600 font-medium">
           {isAr
-            ? 'الذكاء الاصطناعي في صفقات ذكية يقدم تحليلات استشارية مساعدة، ويبقى الإنسان وحده المسؤول عن القرار النهائي.'
-            : 'L’intelligence artificielle fournit des analyses d’aide à la décision; l’humain demeure seul responsable de la décision finale.'}
+            ? 'الذكاء الاصطناعي في صفقات ذكية يقدم تحليلات استشارية مساعدة ويبقى الإنسان وحده المسؤول عن القرار النهائي'
+            : 'L’intelligence artificielle fournit des analyses d’aide à la décision; l’humain demeure seul responsable de la décision finale'}
         </div>
       </div>
     </section>

@@ -134,8 +134,8 @@ export const V3FivePortalsSection: React.FC = () => {
 
           <p className="mt-3.5 text-sm sm:text-base text-slate-600 font-medium leading-relaxed max-w-2xl mx-auto">
             {isAr
-              ? 'بيئة عمل حكومية موحدة توفر واجهات مخصصة لكل متدخل في مسار الطلبيات والمشتريات العمومية.'
-              : 'Un écosystème numérique unifié offrant des espaces de travail dédiés avec une gouvernance rigoureuse.'}
+              ? 'بيئة عمل حكومية موحدة توفر واجهات مخصصة لكل متدخل في مسار الطلبيات والمشتريات العمومية'
+              : 'Un écosystème numérique unifié offrant des espaces de travail dédiés avec une gouvernance rigoureuse'}
           </p>
         </div>
 
@@ -146,7 +146,7 @@ export const V3FivePortalsSection: React.FC = () => {
             return (
               <div
                 key={portal.id}
-                className={`group rounded-2xl p-6 sm:p-7 bg-white border border-slate-200/90 shadow-2xs hover:shadow-md ${portal.hoverBorder} hover:-translate-y-0.5 transition-all duration-300 flex flex-col justify-between relative overflow-hidden`}
+                className={`group rounded-2xl p-6 sm:p-7 bg-white border border-slate-200/90 shadow-2xs hover:shadow-md ${portal.hoverBorder} hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between relative overflow-hidden`}
               >
                 {/* شريط تمييز علوي بلون البوابة */}
                 <div
@@ -154,9 +154,14 @@ export const V3FivePortalsSection: React.FC = () => {
                   style={{ backgroundColor: portal.accentColor }}
                 />
 
-                <div>
+                {/* أيقونة علامة مائية خافتة جداً في زاوية البطاقة تمنح عمقاً بصرياً */}
+                <div className="absolute -bottom-6 -end-6 pointer-events-none opacity-[0.03] group-hover:opacity-[0.08] transition-all duration-500 group-hover:scale-110">
+                  <Icon className="size-36" strokeWidth={1} />
+                </div>
+
+                <div className="relative z-10">
                   <div className="flex items-center justify-between gap-3 mb-5">
-                    <div className={`size-11 rounded-xl flex items-center justify-center ${portal.iconBox}`}>
+                    <div className={`size-11 rounded-xl flex items-center justify-center ${portal.iconBox} shadow-2xs group-hover:scale-105 transition-transform`}>
                       <Icon className="size-5" strokeWidth={1.75} />
                     </div>
                     <span className={`text-[11px] font-bold px-2.5 py-1 rounded-full ${portal.tagClass}`}>
@@ -180,7 +185,9 @@ export const V3FivePortalsSection: React.FC = () => {
                     <ul className="space-y-2.5">
                       {portal.features.map((feature, idx) => (
                         <li key={idx} className="flex items-center gap-2 text-xs sm:text-sm font-semibold text-slate-700">
-                          <Check className="size-4 shrink-0 text-emerald-600" strokeWidth={2.5} />
+                          <span className="size-5 rounded-full bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0 border border-emerald-100/80">
+                            <Check className="size-3" strokeWidth={3} />
+                          </span>
                           <span>{feature}</span>
                         </li>
                       ))}
@@ -188,7 +195,7 @@ export const V3FivePortalsSection: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="pt-2">
+                <div className="pt-2 relative z-10">
                   <Link
                     href={portal.link}
                     className={`inline-flex items-center justify-between w-full px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 ${portal.btnClass} group/btn cursor-pointer`}
