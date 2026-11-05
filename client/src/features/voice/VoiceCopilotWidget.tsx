@@ -287,7 +287,7 @@ export function VoiceCopilotWidget({ isOpen, onClose }: VoiceCopilotWidgetProps)
             <Button
               size="sm"
               onClick={() => executeCommand(detectedCommand)}
-              className="w-full bg-navy-900 hover:bg-navy-800 text-white font-bold text-xs rounded-xl shadow-sm gap-2"
+              className="w-full bg-[#006233] hover:bg-[#004d28] text-white font-bold text-xs rounded-xl shadow-xs gap-2 cursor-pointer"
             >
               <span>تنفيذ والانتقال فوراً</span>
               <ArrowRight className="w-3.5 h-3.5 rtl:rotate-180" />

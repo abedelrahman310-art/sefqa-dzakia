@@ -63,7 +63,7 @@ export function AIInsightsPanel({ className = '' }: AIInsightsPanelProps) {
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-border pb-4">
         <div className="space-y-1">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="p-1.5 rounded-lg bg-navy-900 text-gold-400">
+            <span className="p-1.5 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200">
               <Brain className="w-4 h-4" />
             </span>
             <h2 className="text-lg font-extrabold text-navy-900">
@@ -99,7 +99,7 @@ export function AIInsightsPanel({ className = '' }: AIInsightsPanelProps) {
             size="sm"
             disabled={generateMutation.isPending}
             onClick={() => generateMutation.mutate()}
-            className="h-8 text-xs font-bold gap-1.5 bg-navy-900 text-white hover:bg-navy-800 shadow-xs"
+            className="h-8 text-xs font-bold gap-1.5 bg-[#006233] text-white hover:bg-[#004d28] shadow-xs"
           >
             <Sparkles className="w-3.5 h-3.5 text-gold-400" />
             <span>
@@ -117,7 +117,7 @@ export function AIInsightsPanel({ className = '' }: AIInsightsPanelProps) {
           onClick={() => setActiveTab('all')}
           className={`px-3 py-1.5 rounded-xl font-bold transition-all shrink-0 flex items-center gap-1.5 ${
             activeTab === 'all'
-              ? 'bg-navy-900 text-white shadow-xs'
+              ? 'bg-[#006233] text-white shadow-xs'
               : 'bg-muted/40 text-muted-foreground hover:bg-muted hover:text-navy-900'
           }`}
         >

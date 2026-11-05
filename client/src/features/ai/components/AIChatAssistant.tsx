@@ -145,7 +145,7 @@ export function AIChatAssistant({
           <SheetHeader className="p-4 border-b border-border bg-card">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div className="p-2 rounded-xl bg-navy-900 text-gold-400">
+                <div className="p-2 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200">
                   <Bot className="w-5 h-5" />
                 </div>
                 <div>
@@ -204,7 +204,7 @@ export function AIChatAssistant({
                 <div
                   className={`max-w-[82%] rounded-2xl p-3 space-y-1.5 ${
                     msg.role === 'user'
-                      ? 'bg-navy-900 text-white rounded-tr-xs'
+                      ? 'bg-[#006233] text-white rounded-tr-xs'
                       : 'bg-muted/50 border border-border text-navy-950 rounded-tl-xs shadow-2xs'
                   }`}
                 >
@@ -287,7 +287,7 @@ export function AIChatAssistant({
                 type="submit"
                 size="sm"
                 disabled={chatMutation.isPending || !inputValue.trim()}
-                className="h-9 px-3 bg-navy-900 text-white hover:bg-navy-800"
+                className="h-9 px-3 bg-[#006233] text-white hover:bg-[#004d28]"
               >
                 <Send className="w-3.5 h-3.5" />
               </Button>

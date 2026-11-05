@@ -345,7 +345,7 @@ export function AuthorityAssistantView() {
                 <div
                   className={`size-8 rounded-full flex items-center justify-center shrink-0 ${
                     isUser
-                      ? 'bg-navy-900 text-white'
+                      ? 'bg-[#006233] text-white'
                       : 'bg-emerald-600 text-white shadow-xs'
                   }`}
                 >
@@ -355,7 +355,7 @@ export function AuthorityAssistantView() {
                 <div
                   className={`max-w-[85%] rounded-2xl p-4 text-sm leading-relaxed space-y-2.5 ${
                     isUser
-                      ? 'bg-navy-900 text-white rounded-tr-none'
+                      ? 'bg-[#006233] text-white rounded-tr-none'
                       : 'bg-white border border-gray-200 text-gray-800 shadow-xs rounded-tl-none'
                   }`}
                 >

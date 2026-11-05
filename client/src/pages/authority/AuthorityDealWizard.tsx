@@ -701,7 +701,7 @@ export function AuthorityDealWizard() {
                   onClick={() => setCurrentStep(s.step)}
                   className={`w-full text-start p-3 rounded-xl transition-all flex items-center gap-3 border ${
                     isActive
-                      ? 'bg-navy-900 text-white border-navy-900 shadow-sm'
+                      ? 'bg-[#006233] text-white border-[#006233] shadow-sm'
                       : isPassed
                       ? 'bg-emerald-50/70 text-emerald-900 border-emerald-200 hover:bg-emerald-100/60'
                       : 'bg-gray-50/70 text-gray-600 border-gray-100 hover:bg-gray-100'
@@ -943,7 +943,7 @@ export function AuthorityDealWizard() {
                 }
                 setCurrentStep(2);
               }}
-              className="bg-navy-900 hover:bg-navy-800 text-white font-bold px-6 py-2.5 rounded-xl shadow-sm text-sm flex items-center gap-2"
+              className="bg-[#006233] hover:bg-[#004d28] text-white font-bold px-6 py-2.5 rounded-xl shadow-sm text-sm flex items-center gap-2"
             >
               <span>{t('authority.wizard.s1_btn_next')}</span>
               <ChevronLeft className="w-4 h-4 rtl:rotate-180" />
@@ -1126,7 +1126,7 @@ export function AuthorityDealWizard() {
                   <Button
                     type="button"
                     onClick={applyManualDraft}
-                    className="bg-navy-900 hover:bg-navy-800 text-white rounded-xl text-xs font-bold"
+                    className="bg-[#006233] hover:bg-[#004d28] text-white rounded-xl text-xs font-bold"
                   >
                     {t('authority.wizard.s2_continue_manual')}
                   </Button>
@@ -1189,7 +1189,7 @@ export function AuthorityDealWizard() {
                             className={`rounded-xl text-xs font-bold ${
                               isSelected
                                 ? 'bg-emerald-700 text-white hover:bg-emerald-800'
-                                : 'bg-navy-900 text-white hover:bg-navy-800'
+                                : 'bg-[#006233] text-white hover:bg-[#004d28]'
                             }`}
                           >
                             {isSelected ? (
@@ -1229,7 +1229,7 @@ export function AuthorityDealWizard() {
                 }
                 setCurrentStep(3);
               }}
-              className="bg-navy-900 hover:bg-navy-800 text-white font-bold px-6 py-2.5 rounded-xl shadow-sm text-sm flex items-center gap-2"
+              className="bg-[#006233] hover:bg-[#004d28] text-white font-bold px-6 py-2.5 rounded-xl shadow-sm text-sm flex items-center gap-2"
             >
               <span>{t('authority.wizard.s2_btn_next')}</span>
               <ChevronLeft className="w-4 h-4 rtl:rotate-180" />
@@ -1258,7 +1258,7 @@ export function AuthorityDealWizard() {
                 type="button"
                 onClick={handleRunComplianceCheck}
                 disabled={complianceChecking}
-                className="bg-navy-900 hover:bg-navy-800 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-xs shrink-0"
+                className="bg-[#006233] hover:bg-[#004d28] text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-xs shrink-0"
               >
                 <Scale className="w-3.5 h-3.5" />
                 <span>{complianceChecking ? t('authority.wizard.s3_compliance_checking') : t('authority.wizard.s3_compliance_btn')}</span>
@@ -1509,7 +1509,7 @@ export function AuthorityDealWizard() {
                   type="button"
                   size="sm"
                   onClick={handleAddCustomDoc}
-                  className="bg-navy-900 hover:bg-navy-800 text-white rounded-xl text-xs font-bold"
+                  className="bg-[#006233] hover:bg-[#004d28] text-white rounded-xl text-xs font-bold"
                 >
                   {t('authority.wizard.s3_doc_add_btn')}
                 </Button>
@@ -1530,7 +1530,7 @@ export function AuthorityDealWizard() {
             <Button
               type="button"
               onClick={() => setCurrentStep(4)}
-              className="bg-navy-900 hover:bg-navy-800 text-white font-bold px-6 py-2.5 rounded-xl shadow-sm text-sm flex items-center gap-2"
+              className="bg-[#006233] hover:bg-[#004d28] text-white font-bold px-6 py-2.5 rounded-xl shadow-sm text-sm flex items-center gap-2"
             >
               <span>{t('authority.wizard.s3_btn_next')}</span>
               <ChevronLeft className="w-4 h-4 rtl:rotate-180" />
@@ -1709,7 +1709,7 @@ export function AuthorityDealWizard() {
                   }
                 }}
                 disabled={saving}
-                className="bg-navy-900 hover:bg-navy-800 text-white rounded-xl text-xs font-bold px-5 py-2.5 flex items-center justify-center gap-2 shadow-xs"
+                className="bg-[#006233] hover:bg-[#004d28] text-white rounded-xl text-xs font-bold px-5 py-2.5 flex items-center justify-center gap-2 shadow-xs"
               >
                 <Save className="w-4 h-4" />
                 <span>{saving ? t('authority.wizard.btn_saving') : t('authority.wizard.btn_save_draft')}</span>

@@ -169,34 +169,40 @@ export function AuthoritySpace() {
       {activeInjunction && (
         <div
           role="alert"
-          className={`mb-4 mx-4 md:mx-6 rounded-xl p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 shadow-md border ${
+          className={`mb-4 mx-4 md:mx-6 rounded-2xl p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 shadow-xs border ${
             activeInjunction.status === 'escalated_to_court'
-              ? 'bg-rose-950/95 text-rose-100 border-rose-700/80 ring-1 ring-rose-600/50'
-              : 'bg-amber-950/95 text-amber-100 border-amber-700/80 ring-1 ring-amber-600/50'
+              ? 'bg-rose-50 text-rose-950 border-rose-200'
+              : 'bg-amber-50 text-amber-950 border-amber-200'
           }`}
         >
           <div className="flex items-start gap-3">
             <div
-              className={`p-2 rounded-lg shrink-0 ${
+              className={`p-2 rounded-xl shrink-0 ${
                 activeInjunction.status === 'escalated_to_court'
-                  ? 'bg-rose-900/60 text-rose-300'
-                  : 'bg-amber-900/60 text-amber-300'
+                  ? 'bg-rose-100 text-rose-700'
+                  : 'bg-amber-100 text-amber-700'
               }`}
             >
               <AlertOctagon className="w-5 h-5 animate-pulse" />
             </div>
             <div>
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="font-bold text-sm tracking-wide">
+                <span className="font-black text-sm tracking-wide">
                   {activeInjunction.status === 'escalated_to_court'
                     ? (lang === 'ar' ? '🚨 إعذار إداري رقابي محال للقضاء ومجلس المحاسبة' : '🚨 Injonction administrative transmise à la justice')
                     : (lang === 'ar' ? '⚠️ إعذار إداري رقابي ملزم من الإدارة المركزية (عين الصقر)' : '⚠️ Injonction administrative impérative de régularisation (Hawk Eye)')}
                 </span>
-                <span className="text-xs px-2 py-0.5 rounded-full font-mono font-bold bg-white/10 text-white border border-white/20">
+                <span className={`text-xs px-2 py-0.5 rounded-full font-mono font-bold border ${
+                  activeInjunction.status === 'escalated_to_court'
+                    ? 'bg-rose-100/90 text-rose-800 border-rose-300'
+                    : 'bg-amber-100/90 text-amber-800 border-amber-300'
+                }`}>
                   {activeInjunction.reference}
                 </span>
               </div>
-              <p className="text-xs mt-1 text-white/90">
+              <p className={`text-xs mt-1.5 leading-relaxed font-medium ${
+                activeInjunction.status === 'escalated_to_court' ? 'text-rose-800' : 'text-amber-800'
+              }`}>
                 {activeInjunction.status === 'escalated_to_court'
                   ? (lang === 'ar'
                       ? `تمت إحالة الملف للجهات القضائية ومجلس المحاسبة لعدم الاستجابة خلال المهلة القانونية بخصوص (${activeInjunction.violation_type_display || activeInjunction.violation_type}).`
@@ -211,10 +217,10 @@ export function AuthoritySpace() {
             <button
               type="button"
               onClick={() => setLocation('/authority/audit?tab=injunctions')}
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-colors shadow-sm flex items-center gap-1.5 ${
+              className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer active:scale-95 ${
                 activeInjunction.status === 'escalated_to_court'
-                  ? 'bg-rose-600 hover:bg-rose-500 text-white'
-                  : 'bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold'
+                  ? 'bg-rose-600 hover:bg-rose-700 text-white'
+                  : 'bg-amber-600 hover:bg-amber-700 text-white'
               }`}
             >
               <span>{lang === 'ar' ? 'رفع تقرير التصحيح والرد' : 'Soumettre le rapport de régularisation'}</span>

@@ -618,14 +618,14 @@ export function CahierSpecsEditor({ draftId }: CahierSpecsEditorProps) {
               onClick={() => setActiveSection(key)}
               className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-2 ${
                 isActive
-                  ? 'bg-navy-900 text-white shadow-sm'
+                  ? 'bg-[#006233] text-white shadow-sm'
                   : 'bg-card text-muted-foreground hover:bg-muted/70 hover:text-navy-900 border border-border/80'
               }`}
             >
               <span>{t(`specs.section.${key}` as any)}</span>
               <span
                 className={`text-xs px-1.5 py-0.5 rounded-full ${
-                  isActive ? 'bg-navy-800 text-gold-300' : 'bg-muted text-muted-foreground'
+                  isActive ? 'bg-[#004d28] text-emerald-200' : 'bg-muted text-muted-foreground'
                 }`}
               >
                 {count}
@@ -723,7 +723,7 @@ export function CahierSpecsEditor({ draftId }: CahierSpecsEditorProps) {
                   {/* Clause Header & Provenance */}
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-border/60 pb-3">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-mono text-xs font-extrabold px-2 py-1 rounded-lg bg-navy-900 text-white">
+                      <span className="font-mono text-xs font-extrabold px-2 py-1 rounded-lg bg-[#006233] text-white">
                         {clause.clauseCode}
                       </span>
                       <h4 className="text-sm font-bold text-navy-900">{clause.title}</h4>
@@ -804,7 +804,7 @@ export function CahierSpecsEditor({ draftId }: CahierSpecsEditorProps) {
                             size="sm"
                             disabled={savingClause}
                             onClick={() => handleSaveClause(clause.id)}
-                            className="bg-navy-900 hover:bg-navy-800 text-white font-bold text-xs rounded-xl"
+                            className="bg-[#006233] hover:bg-[#004d28] text-white font-bold text-xs rounded-xl"
                           >
                             {savingClause ? t('specs.saving_justification') : t('specs.save_clause')}
                           </Button>

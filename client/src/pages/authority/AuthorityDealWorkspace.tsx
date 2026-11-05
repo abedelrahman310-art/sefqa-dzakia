@@ -1509,7 +1509,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
           onClick={() => setActiveTab('basics')}
           className={`px-5 py-2.5 rounded-xl transition-all flex items-center gap-2 ${
             activeTab === 'basics'
-              ? 'bg-navy-900 text-white shadow-sm'
+              ? 'bg-[#006233] text-white shadow-sm'
               : 'bg-white text-gray-600 hover:bg-gray-100 border border-[#D5DDEA]'
           }`}
         >
@@ -1522,7 +1522,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
           onClick={() => setActiveTab('specs')}
           className={`px-5 py-2.5 rounded-xl transition-all flex items-center gap-2 ${
             activeTab === 'specs'
-              ? 'bg-navy-900 text-white shadow-sm'
+              ? 'bg-[#006233] text-white shadow-sm'
               : 'bg-white text-gray-600 hover:bg-gray-100 border border-[#D5DDEA]'
           }`}
         >
@@ -1535,7 +1535,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
           onClick={() => setActiveTab('documents')}
           className={`px-5 py-2.5 rounded-xl transition-all flex items-center gap-2 ${
             activeTab === 'documents'
-              ? 'bg-navy-900 text-white shadow-sm'
+              ? 'bg-[#006233] text-white shadow-sm'
               : 'bg-white text-gray-600 hover:bg-gray-100 border border-[#D5DDEA]'
           }`}
         >
@@ -1548,7 +1548,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
           onClick={() => setActiveTab('avenants')}
           className={`px-5 py-2.5 rounded-xl transition-all flex items-center gap-2 ${
             activeTab === 'avenants'
-              ? 'bg-navy-900 text-white shadow-sm'
+              ? 'bg-[#006233] text-white shadow-sm'
               : 'bg-white text-gray-600 hover:bg-gray-100 border border-[#D5DDEA]'
           }`}
         >
@@ -1561,7 +1561,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
           onClick={() => setActiveTab('notices')}
           className={`px-5 py-2.5 rounded-xl transition-all flex items-center gap-2 ${
             activeTab === 'notices'
-              ? 'bg-navy-900 text-white shadow-sm'
+              ? 'bg-[#006233] text-white shadow-sm'
               : 'bg-white text-gray-600 hover:bg-gray-100 border border-[#D5DDEA]'
           }`}
         >
@@ -1574,7 +1574,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
           onClick={() => setActiveTab('specs_buyers')}
           className={`px-5 py-2.5 rounded-xl transition-all flex items-center gap-2 ${
             activeTab === 'specs_buyers'
-              ? 'bg-navy-900 text-white shadow-sm'
+              ? 'bg-[#006233] text-white shadow-sm'
               : 'bg-white text-gray-600 hover:bg-gray-100 border border-[#D5DDEA]'
           }`}
         >
@@ -1601,7 +1601,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                   <Button
                     onClick={handleSaveBasics}
                     disabled={savingBasics}
-                    className="bg-navy-900 hover:bg-navy-800 text-white rounded-xl text-xs font-bold px-4 py-2 flex items-center gap-1.5"
+                    className="bg-[#006233] hover:bg-[#004d28] text-white rounded-xl text-xs font-bold px-4 py-2 flex items-center gap-1.5"
                   >
                     <Save className="w-3.5 h-3.5" />
                     <span>{savingBasics ? t('authority.workspace.btn_saving_basics') : t('authority.workspace.btn_save_basics')}</span>
@@ -2047,7 +2047,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                       onClick={() => setActiveSection(key)}
                       className={`px-3.5 py-1.5 rounded-xl font-bold transition-all whitespace-nowrap ${
                         isActive
-                          ? 'bg-navy-900 text-white shadow-sm'
+                          ? 'bg-[#006233] text-white shadow-sm'
                           : 'bg-white text-gray-700 hover:bg-gray-100 border border-[#D5DDEA]'
                       }`}
                     >
@@ -2114,7 +2114,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                           {/* Clause Header & Provenance */}
                           <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-gray-100 pb-3">
                             <div className="flex items-center gap-2 flex-wrap">
-                              <span className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-navy-900 text-white">
+                              <span className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-900 border border-emerald-300">
                                 {clause.clauseCode}
                               </span>
                               <h3 className="text-sm font-bold text-navy-900">{clause.title}</h3>
@@ -2175,7 +2175,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                                     size="sm"
                                     disabled={savingClause}
                                     onClick={() => handleSaveClause(clause)}
-                                    className="bg-navy-900 hover:bg-navy-800 text-white rounded-xl text-xs font-bold"
+                                    className="bg-[#006233] hover:bg-[#004d28] text-white rounded-xl text-xs font-bold"
                                   >
                                     {savingClause ? t('authority.workspace.btn_saving_basics') : t('authority.workspace.btn_save_clause')}
                                   </Button>
@@ -2445,7 +2445,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                       setNewCustomDocName('');
                       toast.success(t('authority.workspace.toast_doc_added'));
                     }}
-                    className="bg-navy-900 hover:bg-navy-800 text-white rounded-xl text-xs font-bold shrink-0"
+                    className="bg-[#006233] hover:bg-[#004d28] text-white rounded-xl text-xs font-bold shrink-0"
                   >
                     <Plus className="w-3.5 h-3.5 me-1" />{t('authority.workspace.btn_add_doc')}</Button>
                 </div>
@@ -2508,7 +2508,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                       size="sm"
                       onClick={handleExportPdf}
                       disabled={exportingPdf}
-                      className="bg-navy-900 hover:bg-navy-800 text-white rounded-xl text-xs font-bold shrink-0"
+                      className="bg-[#006233] hover:bg-[#004d28] text-white rounded-xl text-xs font-bold shrink-0"
                     >
                       <Download className="w-3.5 h-3.5 me-1" />{t('authority.workspace.btn_download_pdf')}</Button>
                   </div>
@@ -2622,7 +2622,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                   onClick={handleExplainProcurementMethod}
                   className={`rounded-xl text-xs font-bold h-auto py-2 px-2 flex flex-col items-center justify-center text-center gap-1 border transition-all ${
                     activeAssistantTool === 'method_explain'
-                      ? 'bg-navy-900 text-white border-navy-900'
+                      ? 'bg-[#006233] text-white border-[#006233]'
                       : 'border-gray-200 text-navy-900 hover:bg-navy-50'
                   }`}
                 >
@@ -2637,7 +2637,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                   onClick={handleRecommendTemplate}
                   className={`rounded-xl text-xs font-bold h-auto py-2 px-2 flex flex-col items-center justify-center text-center gap-1 border transition-all ${
                     activeAssistantTool === 'template_advisor'
-                      ? 'bg-navy-900 text-white border-navy-900'
+                      ? 'bg-[#006233] text-white border-[#006233]'
                       : 'border-gray-200 text-navy-900 hover:bg-navy-50'
                   }`}
                 >
@@ -2663,7 +2663,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                   onClick={handleRunGapAudit}
                   className={`rounded-xl text-xs font-bold h-auto py-2 px-2 flex flex-col items-center justify-center text-center gap-1 border transition-all ${
                     activeAssistantTool === 'gap_analysis'
-                      ? 'bg-navy-900 text-white border-navy-900'
+                      ? 'bg-[#006233] text-white border-[#006233]'
                       : 'border-gray-200 text-navy-900 hover:bg-navy-50'
                   }`}
                 >
@@ -2727,7 +2727,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                       );
                       toast.success(t('authority.workspace.toast_legal_basis_copied'));
                     }}
-                    className="w-full text-xs font-bold bg-navy-900 hover:bg-navy-800 text-white rounded-lg"
+                    className="w-full text-xs font-bold bg-[#006233] hover:bg-[#004d28] text-white rounded-lg"
                   >{t('authority.workspace.btn_copy_legal_basis')}</Button>
                 )}
               </div>
@@ -2859,7 +2859,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                     size="sm"
                     disabled={priceEstimating}
                     onClick={handleEstimateMarketPrice}
-                    className="w-full text-xs font-bold bg-navy-900 hover:bg-navy-800 text-white"
+                    className="w-full text-xs font-bold bg-[#006233] hover:bg-[#004d28] text-white"
                   >
                     {priceEstimating ? t('authority.workspace.estimating_price') : t('authority.workspace.btn_estimate_price')}
                   </Button>
@@ -2902,7 +2902,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                     size="sm"
                     disabled={complianceChecking}
                     onClick={handleRunComplianceCheck}
-                    className="w-full text-xs font-bold bg-navy-900 hover:bg-navy-800 text-white"
+                    className="w-full text-xs font-bold bg-[#006233] hover:bg-[#004d28] text-white"
                   >
                     {complianceChecking ? t('authority.workspace.running_compliance') : t('authority.workspace.btn_run_compliance')}
                   </Button>
@@ -2948,7 +2948,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
                     size="sm"
                     disabled={summarizingDoc}
                     onClick={handleSummarizeDoc}
-                    className="w-full text-xs font-bold bg-navy-900 hover:bg-navy-800 text-white"
+                    className="w-full text-xs font-bold bg-[#006233] hover:bg-[#004d28] text-white"
                   >
                     {summarizingDoc ? t('authority.workspace.summarizing_ai') : t('authority.workspace.btn_generate_summary')}
                   </Button>
@@ -3061,7 +3061,7 @@ export function AuthorityDealWorkspace({ initialTab }: AuthorityDealWorkspacePro
               <Button
                 size="sm"
                 onClick={handleConfirmProcedureChange}
-                className="bg-navy-900 hover:bg-navy-800 text-white rounded-xl text-xs font-bold"
+                className="bg-[#006233] hover:bg-[#004d28] text-white rounded-xl text-xs font-bold"
               >{t('authority.workspace.modal_change_method_confirm')}</Button>
             </div>
           </div>

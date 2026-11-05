@@ -99,7 +99,7 @@ export function DraftsList() {
               onClick={() => setFilter('all')}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors whitespace-nowrap ${
                 filter === 'all'
-                  ? 'bg-navy-900 text-white'
+                  ? 'bg-[#006233] text-white'
                   : 'bg-muted/60 text-muted-foreground hover:bg-muted'
               }`}
             >
@@ -110,7 +110,7 @@ export function DraftsList() {
               onClick={() => setFilter('draft')}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors whitespace-nowrap ${
                 filter === 'draft'
-                  ? 'bg-navy-900 text-white'
+                  ? 'bg-[#006233] text-white'
                   : 'bg-muted/60 text-muted-foreground hover:bg-muted'
               }`}
             >
@@ -240,7 +240,7 @@ export function DraftsList() {
                   )}
                   <Button
                     size="sm"
-                    className="bg-navy-900 hover:bg-navy-800 text-white text-xs rounded-xl px-3 py-1.5 shadow-sm font-medium"
+                    className="bg-[#006233] hover:bg-[#004d28] text-white text-xs rounded-xl px-3 py-1.5 shadow-sm font-medium"
                     onClick={() => setLocation(`/authority/drafts/${draft.id}/specs`)}
                   >
                     {t('specs.view_specs')}

@@ -82,26 +82,26 @@ export function SettingsView() {
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
       {/* Banner */}
-      <section className="rounded-2xl p-6 md:p-8 text-white bg-navy-900 border border-navy-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <section className="rounded-2xl p-6 md:p-8 bg-white border border-slate-200/90 text-slate-900 shadow-xs flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div className="space-y-1.5">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold text-navy-100">
+            <span className="text-xs font-bold text-emerald-800">
               {t('authority.topbar.brand_sub')}
             </span>
-            <Badge variant="outline" className="text-xs bg-white/10 text-white border-white/20">
+            <Badge variant="outline" className="text-xs bg-emerald-50 text-emerald-800 border-emerald-200 font-semibold">
               {t('authority.settings.badge_profile')}
             </Badge>
           </div>
-          <h1 className="text-xl md:text-2xl font-bold text-white">
+          <h1 className="text-xl md:text-2xl font-black text-slate-900">
             {t('authority.settings.title')}
           </h1>
-          <p className="text-xs md:text-sm text-navy-100 max-w-2xl">
+          <p className="text-xs md:text-sm text-slate-600 max-w-2xl leading-relaxed font-medium">
             {t('authority.settings.subtitle')}
           </p>
         </div>
 
         <div className="flex items-center gap-2">
-          <Badge className="bg-emerald-500/20 text-emerald-300 border-emerald-400/30 px-3 py-1 text-xs flex items-center gap-1.5">
+          <Badge className="bg-emerald-50 text-emerald-800 border-emerald-200 px-3 py-1 text-xs flex items-center gap-1.5 font-bold shadow-2xs">
             <ShieldCheck className="w-3.5 h-3.5" />
             <span>{t('authority.settings.badge_verified')}</span>
           </Badge>

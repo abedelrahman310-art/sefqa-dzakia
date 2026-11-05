@@ -349,7 +349,7 @@ export function ProjectDelayPredictor() {
                     {/* الاستهلاك الزمني */}
                     <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
                       <div
-                        className="bg-navy-800 h-full rounded-full transition-all duration-500"
+                        className="bg-sky-600 h-full rounded-full transition-all duration-500"
                         style={{ width: `${Math.min(100, p.elapsed_percentage)}%` }}
                       />
                     </div>

@@ -145,7 +145,7 @@ export function AuthoritySessionManager() {
 
           <Button
             onClick={handleOpenDialog}
-            className="bg-navy-900 hover:bg-navy-800 text-white font-bold text-xs gap-2 rounded-xl shadow-sm"
+            className="bg-[#006233] hover:bg-[#004d28] text-white font-bold text-xs gap-2 rounded-xl shadow-sm"
           >
             <Plus className="w-4 h-4" />
             <span>{t("opening.schedule_new")}</span>
@@ -182,7 +182,7 @@ export function AuthoritySessionManager() {
           </div>
           <Button
             onClick={handleOpenDialog}
-            className="bg-navy-900 hover:bg-navy-800 text-white font-bold text-xs gap-2 rounded-xl"
+            className="bg-[#006233] hover:bg-[#004d28] text-white font-bold text-xs gap-2 rounded-xl"
           >
             <Plus className="w-4 h-4" />
             <span>{t("opening.schedule_new")}</span>
@@ -254,7 +254,7 @@ export function AuthoritySessionManager() {
                     <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2 overflow-hidden">
                       <div
                         className={`h-full transition-all duration-500 ${
-                          isLive ? "bg-red-600" : "bg-navy-900"
+                          isLive ? "bg-red-600" : "bg-[#006233]"
                         }`}
                         style={{ width: `${progress}%` }}
                       />
@@ -266,7 +266,7 @@ export function AuthoritySessionManager() {
                       onClick={() =>
                         setLocation(`/authority/opening-sessions/${session.id}`)
                       }
-                      className="bg-navy-900 hover:bg-navy-800 text-white font-bold text-xs gap-2 rounded-xl"
+                      className="bg-[#006233] hover:bg-[#004d28] text-white font-bold text-xs gap-2 rounded-xl"
                     >
                       <Sliders className="w-3.5 h-3.5" />
                       <span>{t("opening.btn_manage_session_panel")}</span>
@@ -389,7 +389,7 @@ export function AuthoritySessionManager() {
               <Button
                 type="submit"
                 disabled={scheduleMutation.isPending}
-                className="bg-navy-900 hover:bg-navy-800 text-white font-bold text-xs rounded-xl"
+                className="bg-[#006233] hover:bg-[#004d28] text-white font-bold text-xs rounded-xl"
               >
                 {scheduleMutation.isPending ? t("opening.scheduling") : t("opening.btn_confirm_schedule")}
               </Button>

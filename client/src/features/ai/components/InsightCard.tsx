@@ -281,7 +281,7 @@ export function InsightCard({
               variant="outline"
               disabled={isResolving}
               onClick={handleOpenResolve}
-              className="h-7 px-3 text-xs font-bold border-navy-300 hover:bg-navy-900 hover:text-white transition-colors"
+              className="h-7 px-3 text-xs font-bold border-navy-300 hover:bg-[#006233] hover:text-white transition-colors"
             >
               <CheckSquare className="w-3 h-3 ms-1" />
               <span>{t('ai.resolve')}</span>
@@ -352,7 +352,7 @@ export function InsightCard({
               size="sm"
               disabled={isResolving || notes.trim().length < 10}
               onClick={handleSubmitResolve}
-              className="bg-navy-900 text-white hover:bg-navy-800"
+              className="bg-[#006233] text-white hover:bg-[#004d28]"
             >
               {isResolving ? t('common.saving') : t('ai.confirm_resolution')}
             </Button>

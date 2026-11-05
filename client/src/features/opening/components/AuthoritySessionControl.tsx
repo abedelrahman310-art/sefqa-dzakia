@@ -483,7 +483,7 @@ export function AuthoritySessionControl() {
                               className={`font-bold text-xs gap-1.5 rounded-xl whitespace-nowrap shadow-xs ${
                                 !isUnlocked
                                   ? "bg-slate-300 dark:bg-slate-800 text-slate-600 dark:text-slate-400 cursor-not-allowed"
-                                  : "bg-navy-900 hover:bg-navy-800 text-white"
+                                  : "bg-[#006233] hover:bg-[#004d28] text-white"
                               }`}
                             >
                               <FileText className="w-3.5 h-3.5" />

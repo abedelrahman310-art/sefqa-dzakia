@@ -395,37 +395,37 @@ export function EvaluationWorkspace() {
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
       {/* Banner */}
-      <section className="rounded-2xl p-6 md:p-8 text-white bg-navy-900 border border-navy-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <section className="rounded-2xl p-6 md:p-8 bg-white border border-slate-200/90 text-slate-900 shadow-xs flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <Button
               variant="ghost"
               size="sm"
-              className="text-white hover:bg-white/10 p-1.5 h-auto rounded-lg"
+              className="text-slate-600 hover:text-slate-900 hover:bg-slate-100 p-1.5 h-auto rounded-lg cursor-pointer"
               onClick={() => setLocation('/authority/opening-sessions')}
             >
               <ArrowIcon className="w-4 h-4" />
             </Button>
-            <span className="text-xs font-semibold text-navy-100">
+            <span className="text-xs font-bold text-emerald-800">
               {t('lifecycle.opening.decree_ref')}
             </span>
           </div>
-          <h2 className="text-xl md:text-2xl font-bold text-white">
+          <h2 className="text-xl md:text-2xl font-black text-slate-900">
             {t('lifecycle.eval.title')}
           </h2>
-          <p className="text-xs text-navy-100">
-            {t('authority.eval.deal_label')} <span className="font-bold text-white">{deal?.title}</span>
+          <p className="text-xs text-slate-600 font-medium">
+            {t('authority.eval.deal_label')} <span className="font-bold text-slate-900">{deal?.title}</span>
           </p>
         </div>
 
         {/* Status Pill */}
-        <div className="bg-white/10 backdrop-blur border border-white/20 rounded-xl px-5 py-3 flex items-center gap-3">
-          <div className="p-2.5 rounded-xl border bg-emerald-500/20 text-emerald-300 border-emerald-400/30">
+        <div className="bg-slate-50 border border-slate-200 rounded-xl px-5 py-3 flex items-center gap-3 shadow-2xs">
+          <div className="p-2.5 rounded-xl border bg-emerald-50 text-emerald-700 border-emerald-200">
             <Trophy className="w-5 h-5" />
           </div>
           <div>
-            <div className="text-xs text-navy-100">{t('authority.eval.eval_stage_label')}</div>
-            <div className="text-sm font-bold text-white">
+            <div className="text-xs text-slate-500 font-semibold">{t('authority.eval.eval_stage_label')}</div>
+            <div className="text-sm font-black text-slate-900">
               {isAwardConcluded ? t('authority.eval.awarded_status') : t('authority.eval.examining_status')}
             </div>
           </div>
@@ -485,10 +485,10 @@ export function EvaluationWorkspace() {
               <button
                 type="button"
                 onClick={() => setViewMode('matrix')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                   viewMode === 'matrix'
-                    ? 'bg-navy-900 text-white shadow-sm'
-                    : 'text-muted-foreground hover:text-navy-900'
+                    ? 'bg-[#006233] text-white shadow-xs'
+                    : 'text-muted-foreground hover:text-slate-900'
                 }`}
               >
                 <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
@@ -497,10 +497,10 @@ export function EvaluationWorkspace() {
               <button
                 type="button"
                 onClick={() => setViewMode('cards')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                   viewMode === 'cards'
-                    ? 'bg-navy-900 text-white shadow-sm'
-                    : 'text-muted-foreground hover:text-navy-900'
+                    ? 'bg-[#006233] text-white shadow-xs'
+                    : 'text-muted-foreground hover:text-slate-900'
                 }`}
               >
                 <CheckSquare className="w-3.5 h-3.5" />
@@ -510,7 +510,7 @@ export function EvaluationWorkspace() {
           </div>
 
           <div className="flex items-center gap-3">
-            <span className="text-xs text-muted-foreground">
+            <span className="text-xs text-muted-foreground font-medium">
               {t('authority.eval.offers_under_study', { count: offers.length })}
             </span>
             <Button
@@ -518,7 +518,7 @@ export function EvaluationWorkspace() {
               size="sm"
               onClick={() => void runPriceAnalysis()}
               disabled={offers.length === 0}
-              className="gap-1.5 rounded-xl bg-navy-900 text-xs font-bold text-white hover:bg-navy-800"
+              className="gap-1.5 rounded-xl bg-[#006233] text-xs font-bold text-white hover:bg-[#004d28] shadow-xs cursor-pointer"
             >
               <Sparkles className="w-4 h-4" aria-hidden="true" />
               {t('authority.eval.smart_price_analysis')}

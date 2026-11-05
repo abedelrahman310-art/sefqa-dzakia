@@ -39,15 +39,15 @@ export function SpecsIndex() {
 
   return (
     <div className="space-y-6">
-      <section className="rounded-2xl p-6 md:p-8 text-white bg-navy-900 border border-navy-800">
+      <section className="rounded-2xl p-6 md:p-8 bg-white border border-slate-200/90 text-slate-900 shadow-xs">
         <div className="space-y-2 max-w-2xl">
-          <span className="text-xs font-semibold text-navy-100">
+          <span className="text-xs font-bold text-emerald-800">
             {t('specs.index.sanad_eyebrow')}
           </span>
-          <h2 className="text-xl md:text-2xl font-bold text-white">
+          <h2 className="text-xl md:text-2xl font-black text-slate-900">
             {t('specs.index.title')}
           </h2>
-          <p className="text-sm text-navy-100 leading-relaxed">
+          <p className="text-sm text-slate-600 leading-relaxed font-medium">
             {t('specs.index.desc')}
           </p>
         </div>
@@ -121,7 +121,7 @@ export function SpecsIndex() {
 
                   <Button
                     size="sm"
-                    className="bg-navy-900 hover:bg-navy-800 text-white text-xs rounded-xl px-4 py-1.5 shadow-sm flex items-center gap-1.5"
+                    className="bg-[#006233] hover:bg-[#004d28] text-white text-xs rounded-xl px-4 py-1.5 shadow-xs flex items-center gap-1.5 font-bold cursor-pointer"
                   >
                     <span>{t('specs.view_specs')}</span>
                     <ArrowRight className="w-3.5 h-3.5 rtl:rotate-180" />

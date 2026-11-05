@@ -231,11 +231,11 @@ export function GPSFieldVerificationModal({
             </div>
 
             {/* بطاقة إحداثيات الـ GPS الحية */}
-            <div className="bg-navy-950 text-white p-4 rounded-2xl border border-navy-800 space-y-3">
+            <div className="bg-slate-50 text-slate-900 p-4 rounded-2xl border border-slate-200/90 space-y-3 shadow-2xs">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Compass className={`w-4 h-4 text-emerald-400 ${locating ? 'animate-spin' : ''}`} />
-                  <span className="text-xs font-bold text-slate-200">{isAr ? "إحداثيات الموقع بالقمر الصناعي:" : "Coordonnées satellite GPS :"}</span>
+                  <span className="text-xs font-bold text-slate-800">{isAr ? "إحداثيات الموقع بالقمر الصناعي:" : "Coordonnées satellite GPS :"}</span>
                 </div>
                 <Button
                   type="button"
@@ -243,7 +243,7 @@ export function GPSFieldVerificationModal({
                   variant="ghost"
                   onClick={requestLocation}
                   disabled={locating}
-                  className="text-xs h-7 text-emerald-400 hover:text-white hover:bg-white/10"
+                  className="text-xs h-7 text-emerald-700 hover:text-emerald-800 hover:bg-emerald-50 font-bold"
                 >
                   {locating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : (isAr ? 'إعادة تحديد الإحداثيات' : 'Actualiser le GPS')}
                 </Button>
@@ -251,20 +251,20 @@ export function GPSFieldVerificationModal({
 
               {gpsCoords ? (
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs font-mono">
-                  <div className="bg-white/10 p-2 rounded-xl">
-                    <span className="text-slate-400 block text-[10px]">{isAr ? "خط العرض (Lat)" : "Latitude (Lat)"}</span>
+                  <div className="bg-white border border-slate-200 p-2.5 rounded-xl shadow-2xs">
+                    <span className="text-slate-500 block text-[10px] font-semibold">{isAr ? "خط العرض (Lat)" : "Latitude (Lat)"}</span>
                     <strong className="text-white text-xs">{gpsCoords.latitude.toFixed(6)}°</strong>
                   </div>
-                  <div className="bg-white/10 p-2 rounded-xl">
-                    <span className="text-slate-400 block text-[10px]">{isAr ? "خط الطول (Lng)" : "Longitude (Lng)"}</span>
+                  <div className="bg-white border border-slate-200 p-2.5 rounded-xl shadow-2xs">
+                    <span className="text-slate-500 block text-[10px] font-semibold">{isAr ? "خط الطول (Lng)" : "Longitude (Lng)"}</span>
                     <strong className="text-white text-xs">{gpsCoords.longitude.toFixed(6)}°</strong>
                   </div>
-                  <div className="bg-white/10 p-2 rounded-xl">
-                    <span className="text-slate-400 block text-[10px]">{isAr ? "دقة التحديد (Accuracy)" : "Précision"}</span>
+                  <div className="bg-white border border-slate-200 p-2.5 rounded-xl shadow-2xs">
+                    <span className="text-slate-500 block text-[10px] font-semibold">{isAr ? "دقة التحديد (Accuracy)" : "Précision"}</span>
                     <strong className="text-emerald-400 text-xs">± {gpsCoords.accuracy} متر</strong>
                   </div>
-                  <div className="bg-white/10 p-2 rounded-xl">
-                    <span className="text-slate-400 block text-[10px]">{isAr ? "الارتفاع (Altitude)" : "Altitude"}</span>
+                  <div className="bg-white border border-slate-200 p-2.5 rounded-xl shadow-2xs">
+                    <span className="text-slate-500 block text-[10px] font-semibold">{isAr ? "الارتفاع (Altitude)" : "Altitude"}</span>
                     <strong className="text-white text-xs">{gpsCoords.altitude ? `${gpsCoords.altitude} م` : '{isAr ? "سطح البحر" : "Niveau de la mer"}'}</strong>
                   </div>
                 </div>
@@ -394,7 +394,7 @@ export function GPSFieldVerificationModal({
                 size="sm"
                 onClick={handleSubmitProof}
                 disabled={!gpsCoords}
-                className="bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs rounded-xl gap-2 px-5 shadow-sm"
+                className="bg-emerald-700 hover:bg-emerald-800 text-slate-900 font-bold text-xs rounded-xl gap-2 px-5 shadow-sm"
               >
                 <ShieldCheck className="w-4 h-4" />
                 <span>اعتماد التوثيق الميداني بالختم المشفر</span>

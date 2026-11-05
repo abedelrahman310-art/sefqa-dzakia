@@ -268,20 +268,20 @@ export function AuditView() {
   return (
     <div className="space-y-6 max-w-6xl mx-auto" dir={dir}>
       {/* Banner */}
-      <section className="rounded-2xl p-6 md:p-8 text-white bg-navy-900 border border-navy-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <section className="rounded-2xl p-6 md:p-8 bg-white border border-slate-200/90 text-slate-900 shadow-xs flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div className="space-y-1.5">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold text-navy-100">
+            <span className="text-xs font-bold text-emerald-800">
               {t('authority.audit.tagline')}
             </span>
-            <Badge variant="outline" className="text-xs bg-white/10 text-white border-white/20">
+            <Badge variant="outline" className="text-xs bg-emerald-50 text-emerald-800 border-emerald-200 font-semibold">
               {t('authority.audit.law_badge')}
             </Badge>
           </div>
-          <h1 className="text-xl md:text-2xl font-bold text-white">
+          <h1 className="text-xl md:text-2xl font-black text-slate-900">
             {activeTab === 'audit' ? t('authority.audit.title') : t('authority.injunctions.title')}
           </h1>
-          <p className="text-xs md:text-sm text-navy-100 max-w-2xl">
+          <p className="text-xs md:text-sm text-slate-600 max-w-2xl leading-relaxed font-medium">
             {activeTab === 'audit'
               ? t('authority.audit.subtitle')
               : (lang === 'ar'
@@ -291,7 +291,7 @@ export function AuditView() {
         </div>
 
         <div className="flex items-center gap-2.5 flex-wrap">
-          <Badge className="bg-emerald-500/20 text-emerald-300 border-emerald-400/30 px-3 py-1 text-xs flex items-center gap-1.5">
+          <Badge className="bg-emerald-50 text-emerald-800 border-emerald-200 px-3 py-1 text-xs flex items-center gap-1.5 font-bold shadow-2xs">
             <Archive className="w-3.5 h-3.5" />
             <span>{t('authority.audit.immutable')}</span>
           </Badge>
@@ -303,7 +303,7 @@ export function AuditView() {
               else loadInjunctions();
             }}
             disabled={loading || injunctionsLoading}
-            className="text-white border-white/20 bg-white/10 hover:bg-white/20 text-xs gap-1.5"
+            className="text-slate-700 border-slate-200 bg-white hover:bg-slate-50 text-xs gap-1.5 shadow-2xs font-bold cursor-pointer"
           >
             <RotateCw className={`w-3.5 h-3.5 ${(loading || injunctionsLoading) ? 'animate-spin' : ''}`} />
             <span>{t('authority.audit.refresh')}</span>

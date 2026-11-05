@@ -144,7 +144,7 @@ export function DraftForm({ id }: { id?: string }) {
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
       {/* Header Banner */}
-      <section className="rounded-2xl p-6 md:p-8 text-white bg-navy-900 border border-navy-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <section className="rounded-2xl p-6 md:p-8 bg-white border border-slate-200/90 text-slate-900 shadow-xs flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <Button
@@ -155,14 +155,14 @@ export function DraftForm({ id }: { id?: string }) {
             >
               <ArrowIcon className="w-4 h-4" />
             </Button>
-            <span className="text-xs font-semibold text-navy-100">
+            <span className="text-xs font-bold text-emerald-800">
               {id ? (status === 'published' ? t('authority.drafts.preview_published') : t('authority.drafts.edit_draft')) : t('authority.drafts.create_new')}
             </span>
           </div>
-          <h2 className="text-xl md:text-2xl font-bold text-white">
+          <h2 className="text-xl md:text-2xl font-black text-slate-900">
             {id ? title || t('drafts.btn.edit') : t('drafts.new')}
           </h2>
-          <p className="text-xs text-navy-100">
+          <p className="text-xs text-slate-600 font-medium leading-relaxed">
             {status === 'published'
               ? t('authority.drafts.published_frozen_notice')
               : t('authority.drafts.draft_initial_notice')}
@@ -171,7 +171,7 @@ export function DraftForm({ id }: { id?: string }) {
 
         <div className="flex items-center gap-2 self-end md:self-center">
           {status === 'published' ? (
-            <span className="text-xs bg-emerald-500/20 text-emerald-100 border border-emerald-400/30 px-3 py-1.5 rounded-xl font-bold">
+            <span className="text-xs bg-emerald-50 text-emerald-800 border border-emerald-200 px-3 py-1.5 rounded-xl font-bold shadow-2xs">
               {t('authority.drafts.badge.published')}
             </span>
           ) : (
@@ -372,7 +372,7 @@ export function DraftForm({ id }: { id?: string }) {
                       <Input
                         type="file"
                         accept="application/pdf"
-                        className="text-xs w-auto file:rounded-lg file:border-0 file:bg-navy-900 file:text-white file:text-xs file:font-semibold"
+                        className="text-xs w-auto file:rounded-lg file:border-0 file:bg-[#006233] file:text-white file:text-xs file:font-semibold"
                         onChange={async (e) => {
                           const file = e.target.files?.[0];
                           if (!file) return;
@@ -432,7 +432,7 @@ export function DraftForm({ id }: { id?: string }) {
               <Button
                 type="submit"
                 disabled={submitting}
-                className="bg-navy-900 hover:bg-navy-800 text-white font-bold text-xs rounded-xl px-5"
+                className="bg-[#006233] hover:bg-[#004d28] text-white font-bold text-xs rounded-xl px-5 shadow-xs cursor-pointer"
               >
                 {submitting ? t('common.saving') : t('drafts.btn.save')}
               </Button>

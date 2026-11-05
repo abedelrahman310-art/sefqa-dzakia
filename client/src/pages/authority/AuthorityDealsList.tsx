@@ -221,7 +221,7 @@ export function AuthorityDealsList({ initialView = 'deals' }: AuthorityDealsList
           onClick={() => setActiveView('deals')}
           className={`px-4 py-2.5 rounded-xl transition-all flex items-center gap-2 whitespace-nowrap ${
             activeView === 'deals'
-              ? 'bg-navy-900 text-white shadow-sm'
+              ? 'bg-[#006233] text-white shadow-sm'
               : 'bg-card text-foreground hover:bg-muted border border-border'
           }`}
         >
@@ -234,7 +234,7 @@ export function AuthorityDealsList({ initialView = 'deals' }: AuthorityDealsList
           onClick={() => setActiveView('specs')}
           className={`px-4 py-2.5 rounded-xl transition-all flex items-center gap-2 whitespace-nowrap ${
             activeView === 'specs'
-              ? 'bg-navy-900 text-white shadow-sm'
+              ? 'bg-[#006233] text-white shadow-sm'
               : 'bg-card text-foreground hover:bg-muted border border-border'
           }`}
         >
@@ -247,7 +247,7 @@ export function AuthorityDealsList({ initialView = 'deals' }: AuthorityDealsList
           onClick={() => setActiveView('docs')}
           className={`px-4 py-2.5 rounded-xl transition-all flex items-center gap-2 whitespace-nowrap ${
             activeView === 'docs'
-              ? 'bg-navy-900 text-white shadow-sm'
+              ? 'bg-[#006233] text-white shadow-sm'
               : 'bg-card text-foreground hover:bg-muted border border-border'
           }`}
         >
@@ -285,7 +285,7 @@ export function AuthorityDealsList({ initialView = 'deals' }: AuthorityDealsList
                   onClick={() => setStageFilter('all')}
                   className={`px-3.5 py-1.5 rounded-xl font-bold transition-all whitespace-nowrap ${
                     stageFilter === 'all'
-                      ? 'bg-navy-900 text-white shadow-sm'
+                      ? 'bg-[#006233] text-white shadow-sm'
                       : 'bg-muted text-foreground hover:bg-muted/80'
                   }`}
                 >
@@ -329,7 +329,7 @@ export function AuthorityDealsList({ initialView = 'deals' }: AuthorityDealsList
                   onClick={() => setStageFilter('awarded')}
                   className={`px-3.5 py-1.5 rounded-xl font-bold transition-all whitespace-nowrap ${
                     stageFilter === 'awarded'
-                      ? 'bg-navy-900 text-white shadow-sm'
+                      ? 'bg-[#006233] text-white shadow-sm'
                       : 'bg-slate-50 text-slate-800 hover:bg-slate-100 border border-slate-200'
                   }`}
                 >
@@ -455,7 +455,7 @@ export function AuthorityDealsList({ initialView = 'deals' }: AuthorityDealsList
                               <Button
                                 size="sm"
                                 onClick={() => setLocation(`/authority/deals/${deal.id}`)}
-                                className="h-8 px-3 rounded-lg bg-navy-900 hover:bg-navy-800 text-white font-semibold text-xs flex items-center gap-1.5 shrink-0 transition-colors"
+                                className="h-8 px-3 rounded-lg bg-[#006233] hover:bg-[#004d28] text-white font-semibold text-xs flex items-center gap-1.5 shrink-0 transition-colors"
                               >
                                 <span>{t('authority.deals.open_deal_file')}</span>
                                 <ChevronRight className="size-3 shrink-0 rtl:rotate-180" />
@@ -523,7 +523,7 @@ export function AuthorityDealsList({ initialView = 'deals' }: AuthorityDealsList
                   <Button
                     size="sm"
                     onClick={() => setLocation(`/authority/deals/${d.id}`)}
-                    className="bg-navy-900 hover:bg-navy-800 text-white rounded-xl text-xs font-bold flex items-center gap-1"
+                    className="bg-[#006233] hover:bg-[#004d28] text-white rounded-xl text-xs font-bold flex items-center gap-1"
                   >
                     <span>{t('authority.deals.open_cahier')}</span>
                     <ChevronRight className="w-3.5 h-3.5 rtl:rotate-180" />
