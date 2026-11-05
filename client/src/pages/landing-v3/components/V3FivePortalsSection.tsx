@@ -2,15 +2,16 @@ import React from 'react';
 import { Link } from 'wouter';
 import { useI18n } from '@/i18n';
 import {
-  Briefcase,
+  Building2,
   Landmark,
-  Eye,
+  ShieldCheck,
+  Check,
   ArrowLeft,
   ArrowRight,
   Layers,
 } from 'lucide-react';
 
-/* ─── بداية القسم 2: بوابات منظومة الصفقات ─── */
+/* ─── بداية القسم 2: بوابات المنصة ─── */
 export const V3FivePortalsSection: React.FC = () => {
   const { lang, dir } = useI18n();
   const isAr = lang === 'ar';
@@ -20,59 +21,86 @@ export const V3FivePortalsSection: React.FC = () => {
     {
       id: 'operator',
       title: isAr ? 'بوابة المتعامل الاقتصادي' : 'Portail Opérateur Économique',
-      tag: isAr ? 'المؤسسات والمقاولون' : 'Entreprises & Fournisseurs',
+      tag: isAr ? 'للمقاولين والموردين' : 'Entreprises & Fournisseurs',
       desc: isAr
-        ? 'فضاء المؤسسات والموردين لدراسة دفاتر الشروط، تحضير العروض المالية والتقنية، وإيداع الأظرفة المشفرة.'
-        : 'Espace dédié aux entreprises pour retirer les cahiers des charges, préparer les offres et soumissionner sous pli scellé.',
-      icon: Briefcase,
+        ? 'استكشف الفرص وطابق نشاطك مع الصفقات المناسبة وجهّز عرضك التقني والمالي وأودعه في أظرفة رقمية محمية'
+        : 'Explorez les opportunités, préparez vos offres techniques et financières et soumissionnez sous plis scellés et sécurisés.',
+      icon: Building2,
       link: '/operator',
-      cardClass: 'bg-gradient-to-br from-[#0284c7] via-[#0369a1] to-[#075985] text-white border-sky-600/40 shadow-sm hover:shadow-lg',
-      titleClass: 'text-white',
-      descClass: 'text-sky-100',
-      tagClass: 'bg-white/20 text-white border border-white/30',
-      iconBox: 'bg-white text-[#0284c7] shadow-2xs',
-      btnClass: 'bg-white hover:bg-sky-50 text-[#0284c7] hover:text-[#0369a1] border border-white shadow-2xs font-bold',
-      dividerClass: 'border-white/15',
-      noteText: isAr ? 'لون القائمة الجانبية للمتعامل' : 'Thème barre latérale opérateur',
-      noteClass: 'text-sky-200',
+      accentColor: '#0284c7',
+      hoverBorder: 'hover:border-sky-300',
+      iconBox: 'bg-sky-50 text-[#0284c7] border border-sky-200/90',
+      tagClass: 'bg-sky-50 text-[#0284c7] border border-sky-200/80',
+      btnClass: 'bg-sky-50/70 hover:bg-[#0284c7] text-[#0284c7] hover:text-white border border-sky-200/90 hover:border-[#0284c7] shadow-2xs',
+      features: isAr
+        ? [
+            'مطابقة ذكية للفرص',
+            'تحليل دفاتر الشروط',
+            'درع امتثال قبل الإيداع',
+            'أظرفة رقمية مشفرة',
+          ]
+        : [
+            'Correspondance intelligente des opportunités',
+            'Analyse des cahiers des charges',
+            'Bouclier de conformité pré-dépôt',
+            'Plis numériques chiffrés',
+          ],
     },
     {
       id: 'authority',
       title: isAr ? 'بوابة المصلحة المتعاقدة' : 'Portail Service Contractant',
-      tag: isAr ? 'الهيئات العمومية' : 'Services Publics',
+      tag: isAr ? 'للإدارات والمؤسسات العمومية' : 'Administrations & Établissements Publics',
       desc: isAr
-        ? 'فضاء الإدارات والهيئات العمومية لإعداد الصفقات، حساب التقدير الإداري، وتنظيم جلسات فتح وتقييم العروض.'
-        : 'Outil de gestion pour les administrations publiques: estimation B.O.Q, commission d’ouverture et attribution.',
+        ? 'أنشئ الصفقات وجهّز دفاتر الشروط وقّيم العروض وأشرف على التنفيذ من منصة واحدة منظمة وآمنة'
+        : 'Créez vos marchés, élaborez les cahiers des charges, évaluez les offres et supervisez l’exécution en toute sécurité.',
       icon: Landmark,
       link: '/authority',
-      cardClass: 'bg-gradient-to-br from-[#0b4348] via-[#0d4f55] to-[#072f33] text-white border-teal-700/40 shadow-sm hover:shadow-lg',
-      titleClass: 'text-white',
-      descClass: 'text-teal-100',
-      tagClass: 'bg-white/20 text-white border border-white/30',
-      iconBox: 'bg-white text-[#0b4348] shadow-2xs',
-      btnClass: 'bg-white hover:bg-teal-50 text-[#0b4348] hover:text-[#072f33] border border-white shadow-2xs font-bold',
-      dividerClass: 'border-white/15',
-      noteText: isAr ? 'لون القائمة الجانبية للمصلحة' : 'Thème barre latérale service',
-      noteClass: 'text-teal-200',
+      accentColor: '#006233',
+      hoverBorder: 'hover:border-emerald-300',
+      iconBox: 'bg-emerald-50 text-[#006233] border border-emerald-200/90',
+      tagClass: 'bg-emerald-50 text-[#006233] border border-emerald-200/80',
+      btnClass: 'bg-emerald-50/70 hover:bg-[#006233] text-[#006233] hover:text-white border border-emerald-200/90 hover:border-[#006233] shadow-2xs',
+      features: isAr
+        ? [
+            'إنشاء الصفقات خطوة بخطوة',
+            'تقدير مالي وتوليد BOQ',
+            'فتح الأظرفة وتقييم العروض',
+            'متابعة التنفيذ والفوترة',
+          ]
+        : [
+            'Création guidée étape par étape',
+            'Estimation financière et génération BOQ',
+            'Ouverture des plis et évaluation des offres',
+            'Suivi d’exécution et facturation',
+          ],
     },
     {
       id: 'central',
       title: isAr ? 'بوابة الرقابة المركزية عين الصقر' : 'Supervision Centrale Œil de Faucon',
-      tag: isAr ? 'الرقابة والنزاهة' : 'Supervision & Audit',
+      tag: isAr ? 'للرقابة والنزاهة' : 'Contrôle & Conformité',
       desc: isAr
-        ? 'منصة القيادة والنزاهة للجهات الرقابية والمفتشية العامة لتحليل مؤشرات الصفقات ورصد شبهات التواطؤ.'
-        : 'Tableau de bord pour les autorités de contrôle afin de suivre les flux budgétaires et détecter les collusions.',
-      icon: Eye,
+        ? 'راقب الصفقات العمومية عبر مؤشرات لحظية وتحليلات للمخاطر وخرائط جغرافية وتنبيهات استباقية'
+        : 'Supervisez les marchés publics via des indicateurs en temps réel, analyses de risques et cartographies géographiques.',
+      icon: ShieldCheck,
       link: '/central',
-      cardClass: 'bg-gradient-to-br from-[#0f3154] via-[#143d66] to-[#0a233c] text-white border-slate-700/50 shadow-sm hover:shadow-lg',
-      titleClass: 'text-white',
-      descClass: 'text-slate-200',
-      tagClass: 'bg-amber-400/20 text-amber-300 border border-amber-400/40',
-      iconBox: 'bg-amber-400 text-[#0f3154] shadow-2xs',
-      btnClass: 'bg-amber-400 hover:bg-amber-300 text-[#0f3154] hover:text-black border border-amber-400 shadow-2xs font-bold',
-      dividerClass: 'border-white/15',
-      noteText: isAr ? 'لون القائمة الجانبية للرقابة' : 'Thème barre latérale contrôle',
-      noteClass: 'text-amber-200/90',
+      accentColor: '#d97706',
+      hoverBorder: 'hover:border-amber-300',
+      iconBox: 'bg-amber-50 text-amber-800 border border-amber-200/90',
+      tagClass: 'bg-amber-50 text-amber-800 border border-amber-200/80',
+      btnClass: 'bg-amber-50/70 hover:bg-amber-700 text-amber-800 hover:text-white border border-amber-200/90 hover:border-amber-700 shadow-2xs',
+      features: isAr
+        ? [
+            'رصد لحظي للصفقات',
+            'تحليل مؤشرات المخاطر',
+            'خريطة جغرافية للولايات',
+            'تقارير وتنبيهات للرقابة',
+          ]
+        : [
+            'Suivi des marchés en temps réel',
+            'Analyse des indicateurs de risque',
+            'Cartographie géospatiale des wilayas',
+            'Rapports d’audit et alertes préventives',
+          ],
     },
   ];
 
@@ -82,16 +110,26 @@ export const V3FivePortalsSection: React.FC = () => {
       dir={dir}
       className="relative w-full bg-[#f8fafc] py-16 sm:py-20 px-4 sm:px-6 overflow-hidden"
     >
+      {/* خلفية زليج جزائري خفيفة وهادئة جداً */}
+      <div
+        className="absolute inset-0 pointer-events-none opacity-[0.02]"
+        style={{
+          backgroundImage: `radial-gradient(#006233 0.75px, transparent 0.75px), radial-gradient(#d21034 0.75px, #f8fafc 0.75px)`,
+          backgroundSize: '32px 32px',
+          backgroundPosition: '0 0, 16px 16px',
+        }}
+      />
+
       <div className="relative max-w-[1200px] mx-auto">
         {/* رأس القسم: مؤطر وقصير وخالي تماماً من الفواصل والنقاط في العنوان الكبير */}
         <div className="text-center max-w-3xl mx-auto mb-12 sm:mb-16">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-slate-200 bg-white text-slate-800 text-xs sm:text-sm font-bold shadow-2xs mb-4">
             <Layers className="size-3.5 text-[#006233]" strokeWidth={1.75} />
-            <span>{isAr ? 'فضاءات العمل المتخصصة' : 'Espaces Dédiés'}</span>
+            <span>{isAr ? 'ثلاث فضاءات متكاملة' : 'Trois Espaces Dédiés'}</span>
           </div>
 
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-slate-900 tracking-tight leading-snug">
-            {isAr ? 'بوابات منظومة الصفقات' : 'Portails de la Plateforme'}
+            {isAr ? 'بوابات المنصة' : 'Portails de la Plateforme'}
           </h2>
 
           <p className="mt-3.5 text-sm sm:text-base text-slate-600 font-medium leading-relaxed max-w-2xl mx-auto">
@@ -101,15 +139,21 @@ export const V3FivePortalsSection: React.FC = () => {
           </p>
         </div>
 
-        {/* شبكة البوابات الثلاث التنفيذية بهوية القائمة الجانبية لكل فضاء */}
+        {/* شبكة البوابات الثلاث: متجاوبة 1 في الهاتف، 2 في المتوسط، 3 في الكبير */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-7">
           {portals.map((portal) => {
             const Icon = portal.icon;
             return (
               <div
                 key={portal.id}
-                className={`group rounded-2xl p-6 sm:p-7 ${portal.cardClass} hover:-translate-y-0.5 transition-all duration-300 flex flex-col justify-between`}
+                className={`group rounded-2xl p-6 sm:p-7 bg-white border border-slate-200/90 shadow-2xs hover:shadow-md ${portal.hoverBorder} hover:-translate-y-0.5 transition-all duration-300 flex flex-col justify-between relative overflow-hidden`}
               >
+                {/* شريط تمييز علوي بلون البوابة */}
+                <div
+                  className="absolute top-0 inset-x-0 h-1.5"
+                  style={{ backgroundColor: portal.accentColor }}
+                />
+
                 <div>
                   <div className="flex items-center justify-between gap-3 mb-5">
                     <div className={`size-11 rounded-xl flex items-center justify-center ${portal.iconBox}`}>
@@ -120,27 +164,37 @@ export const V3FivePortalsSection: React.FC = () => {
                     </span>
                   </div>
 
-                  <h3 className={`text-lg sm:text-xl font-bold mb-2.5 leading-snug ${portal.titleClass}`}>
+                  <h3 className="text-lg sm:text-xl font-bold text-slate-900 mb-2.5 leading-snug group-hover:text-slate-950 transition-colors">
                     {portal.title}
                   </h3>
 
-                  <p className={`text-sm leading-relaxed font-medium mb-6 ${portal.descClass}`}>
+                  <p className="text-sm leading-relaxed font-medium text-slate-600 mb-6">
                     {portal.desc}
                   </p>
+
+                  {/* كتلة أبرز الميزات */}
+                  <div className="pt-4 mb-6 border-t border-slate-100">
+                    <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">
+                      {isAr ? 'أبرز الميزات' : 'Points clés'}
+                    </h4>
+                    <ul className="space-y-2.5">
+                      {portal.features.map((feature, idx) => (
+                        <li key={idx} className="flex items-center gap-2 text-xs sm:text-sm font-semibold text-slate-700">
+                          <Check className="size-4 shrink-0 text-emerald-600" strokeWidth={2.5} />
+                          <span>{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 </div>
 
-                <div>
-                  <div className={`pt-3 mb-4 border-t ${portal.dividerClass} flex items-center justify-between text-xs font-medium`}>
-                    <span className={portal.noteClass}>{portal.noteText}</span>
-                    <span className="size-1.5 rounded-full bg-white/70" />
-                  </div>
-
+                <div className="pt-2">
                   <Link
                     href={portal.link}
-                    className={`inline-flex items-center justify-between w-full px-4 py-2.5 rounded-xl text-sm transition-all duration-200 ${portal.btnClass} group/btn`}
+                    className={`inline-flex items-center justify-between w-full px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 ${portal.btnClass} group/btn cursor-pointer`}
                   >
                     <span>{isAr ? 'استكشاف البوابة' : 'Explorer le portail'}</span>
-                    <ArrowIcon className="size-4 transition-transform group-hover/btn:translate-x-1 rtl:group-hover/btn:-translate-x-1" strokeWidth={1.75} />
+                    <ArrowIcon className="size-4 transition-transform group-hover/btn:translate-x-1 rtl:group-hover/btn:-translate-x-1" strokeWidth={2} />
                   </Link>
                 </div>
               </div>
@@ -151,6 +205,6 @@ export const V3FivePortalsSection: React.FC = () => {
     </section>
   );
 };
-/* ─── نهاية القسم 2: بوابات منظومة الصفقات ─── */
+/* ─── نهاية القسم 2: بوابات المنصة ─── */
 
 export default V3FivePortalsSection;

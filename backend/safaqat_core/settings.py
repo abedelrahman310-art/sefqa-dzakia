@@ -23,6 +23,9 @@ IS_TESTING = (
 # DEBUG must default to False in production
 DEBUG = os.environ.get('DJANGO_DEBUG', 'False').lower() in ('true', '1', 'yes')
 
+# Control whether demo/mock data seeding is permitted (disabled by default in production)
+ENABLE_DEMO_DATA = os.environ.get('ENABLE_DEMO_DATA', 'False').lower() in ('true', '1', 'yes')
+
 # SECRET_KEY: No hardcoded fallback. Required; startup must fail if missing.
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
 if not SECRET_KEY:

@@ -29,7 +29,16 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
-        # 1. فحص بيئة الإنتاج
+        # 1. فحص سياسة منع البيانات الوهمية في الإنتاج
+        enable_demo = getattr(settings, 'ENABLE_DEMO_DATA', False)
+        if not enable_demo and not options.get('allow_production'):
+            self.stdout.write(self.style.WARNING(
+                '⚠️ [تنبيه إنتاجي]: بذر البيانات الرقابية التجريبية معطّل حالياً (ENABLE_DEMO_DATA=False). '
+                'المنصة مهيأة للعمل الفعلي النظيف، ولن يتم حقن أي شبهات أو صفقات رقابية وهمية.'
+            ))
+            return
+
+        # 2. فحص بيئة الإنتاج الصارم
         if not settings.DEBUG and not options.get("allow_production"):
             raise CommandError(
                 "تم رفض التنفيذ: بيئة التشغيل إنتاجية (DEBUG=False). "

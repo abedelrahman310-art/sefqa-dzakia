@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 from datetime import timedelta
@@ -11,6 +12,13 @@ class Command(BaseCommand):
     help = 'Seed the database with sample tender data'
 
     def handle(self, *args, **kwargs):
+        enable_demo = getattr(settings, 'ENABLE_DEMO_DATA', False)
+        if not enable_demo and not settings.DEBUG:
+            self.stdout.write(self.style.WARNING(
+                '⚠️ [Notice]: Demo data seeding is disabled (ENABLE_DEMO_DATA=False). Skipping tender seed.'
+            ))
+            return
+
         self.stdout.write('Seeding tender data...')
 
         # Get or create a test user

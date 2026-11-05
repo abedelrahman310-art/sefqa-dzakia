@@ -30,11 +30,20 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
-        # 1. فحص بيئة الإنتاج
+        # 1. فحص سياسة منع البيانات الوهمية في الإنتاج
+        enable_demo = getattr(settings, 'ENABLE_DEMO_DATA', False)
+        if not enable_demo and not options.get('allow_production'):
+            self.stdout.write(self.style.WARNING(
+                '⚠️ [تنبيه إنتاجي]: بذر البيانات التجريبية معطّل حالياً (ENABLE_DEMO_DATA=False). '
+                'المنصة مهيأة للعمل الفعلي النظيف، ولن يتم حقن أي صفقات أو بيانات وهمية.'
+            ))
+            return
+
+        # 2. فحص بيئة الإنتاج الصارم
         if not settings.DEBUG and not options.get('allow_production'):
             raise CommandError(
                 'تم رفض التنفيذ: بيئة التشغيل إنتاجية (DEBUG=False). '
-                'لا يمكن بذر بيانات تجريبية في الإنتاج إلا بتمرير الراية --allow-production صراحة.'
+                'لا يمكن بذر بيانات تجريبية في الإنتاج إلا بتفعيل ENABLE_DEMO_DATA=true وتمرير الراية --allow-production صراحة.'
             )
 
         # 2. تحديد كلمة المرور مع تحذير أمني واضح إذا كانت الافتراضية

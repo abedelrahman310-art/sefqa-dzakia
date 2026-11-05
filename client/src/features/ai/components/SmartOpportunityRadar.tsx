@@ -88,36 +88,8 @@ export function SmartOpportunityRadar({
       const activeDeals = rawList.filter((d) => !isDealExpired(d) && (!d.current_stage || (d.current_stage >= 3 && d.current_stage <= 5)));
       setDeals(activeDeals);
     } catch (err: any) {
-      console.warn('Fallback to standard deals fetching for Radar:', err);
-      try {
-        const fallback = await api.get('/procurements/deals/?status=active');
-        const items = Array.isArray(fallback.data) ? fallback.data : fallback.data?.results || [];
-        const mapped: RecommendedDeal[] = items
-          .filter((d: any) => !isDealExpired(d) && d.current_stage >= 3 && d.current_stage <= 5)
-          .map((d: any) => ({
-            id: String(d.id),
-            deal_id: String(d.id),
-            reference_number: d.reference_number || `DZ-${String(d.id).slice(0, 6)}`,
-            title: d.title,
-            description: d.description || '',
-            authority_name: d.authority?.organization_name || d.authority?.display_name || t('operator.radar.default_authority'),
-            wilaya: d.wilaya || t('operator.radar.default_wilaya'),
-            estimated_budget: d.estimated_budget ? String(d.estimated_budget) : null,
-            submission_deadline: d.submission_deadline || null,
-            is_expired: false,
-            days_left: d.days_left ?? 0,
-            current_stage: d.current_stage,
-            current_stage_display: t('operator.radar.stage_published'),
-            match_score: 92,
-            match_level: 'excellent',
-            level_display: t('operator.radar.level_excellent'),
-            reasons: [t('operator.radar.reason_sector'), t('operator.radar.reason_region')],
-            warnings: [],
-          }));
-        setDeals(mapped);
-      } catch (fallbackErr) {
-        setError(t('operator.radar.error'));
-      }
+      // وضع الإنتاج النظيف: خلو تام من أي صفقات أو نسب تطابق وهمية
+      setDeals([]);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -140,7 +112,7 @@ export function SmartOpportunityRadar({
   return (
     <div className={`space-y-4 ${className}`} dir={dir}>
       {/* ─── 1. ترويسة الرادار التنبؤي ─── */}
-      <div className="relative overflow-hidden rounded-2xl border border-slate-200/90 bg-gradient-to-br from-white via-slate-50/60 to-emerald-50/40 p-5 text-slate-900 shadow-xs">
+      <div className="relative overflow-hidden rounded-2xl border border-slate-200/90 bg-white p-5 text-slate-900 shadow-xs">
         {/* رادار الخلفية المتحرك */}
         <div className="pointer-events-none absolute -end-10 -top-10 size-48 rounded-full border border-emerald-500/15 opacity-60 animate-ping duration-1000" />
         <div className="pointer-events-none absolute -end-24 -bottom-24 size-72 rounded-full border border-teal-500/10" />

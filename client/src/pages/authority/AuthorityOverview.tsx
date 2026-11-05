@@ -99,7 +99,7 @@ export function AuthorityOverview() {
         <Link href="/authority/opening-sessions" className="block focus:outline-none focus:ring-2 focus:ring-[var(--stamp-gold-700)] rounded-xl">
           <KpiCard
             eyebrow={t('authority.preview.stat_eval_label')}
-            value="—"
+            value={0}
             icon={Award}
             accent="gold"
             description={t('authority.overview.stat_eval_desc')}

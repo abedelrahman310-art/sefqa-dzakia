@@ -23,9 +23,13 @@ fi
 echo "Applying database migrations..."
 python manage.py migrate --noinput
 
-# Seed institutional demo accounts (idempotent)
-echo "Ensuring institutional demo accounts exist..."
-python manage.py seed_procurement_data --allow-production || true
+# Seed institutional demo accounts ONLY if explicitly enabled (default: false in production)
+if [ "$ENABLE_DEMO_DATA" = "true" ]; then
+    echo "ENABLE_DEMO_DATA is true. Seeding institutional demo accounts..."
+    python manage.py seed_procurement_data --allow-production || true
+else
+    echo "ENABLE_DEMO_DATA is false (default). Clean production mode: skipping demo seeds."
+fi
 
 # Collect Static Files
 echo "Collecting static files..."
