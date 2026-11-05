@@ -5,14 +5,12 @@ import {
   Briefcase,
   Landmark,
   Eye,
-  Globe,
-  ShieldCheck,
   ArrowLeft,
   ArrowRight,
   Layers,
 } from 'lucide-react';
 
-/* ─── بداية القسم 2: البوابات الخمس ─── */
+/* ─── بداية القسم 2: بوابات منظومة الصفقات ─── */
 export const V3FivePortalsSection: React.FC = () => {
   const { lang, dir } = useI18n();
   const isAr = lang === 'ar';
@@ -76,44 +74,6 @@ export const V3FivePortalsSection: React.FC = () => {
       noteText: isAr ? 'لون القائمة الجانبية للرقابة' : 'Thème barre latérale contrôle',
       noteClass: 'text-amber-200/90',
     },
-    {
-      id: 'national',
-      title: isAr ? 'البوابة الوطنية' : 'Portail National',
-      tag: isAr ? 'وصول عام' : 'Accès Public',
-      desc: isAr
-        ? 'استعراض شامل لجميع الاستشارات وطلبات العروض والمناقصات الوطنية عبر 69 ولاية جزائرية في الوقت الفعلي.'
-        : 'Consultation libre de tous les avis d’appels d’offres et consultations nationales à travers les 69 wilayas.',
-      icon: Globe,
-      link: '/tenders',
-      cardClass: 'bg-white text-slate-900 border border-slate-200/90 shadow-xs hover:shadow-md',
-      titleClass: 'text-slate-900 group-hover:text-[#006233]',
-      descClass: 'text-slate-600',
-      tagClass: 'bg-slate-50 text-slate-600 border border-slate-200/80',
-      iconBox: 'text-emerald-700 bg-emerald-50 border border-emerald-100 shadow-2xs',
-      btnClass: 'bg-slate-50 hover:bg-[#006233] text-slate-700 hover:text-white border border-slate-200/90 hover:border-[#006233] font-bold',
-      dividerClass: 'border-slate-100',
-      noteText: isAr ? 'دليل الصفقات العامة' : 'Consultation publique',
-      noteClass: 'text-slate-400',
-    },
-    {
-      id: 'auth',
-      title: isAr ? 'بوابة الهوية والتحقق الموحد' : 'Portail Identité & Authentification',
-      tag: isAr ? 'التوثيق السيادي' : 'Authentification Sécurisée',
-      desc: isAr
-        ? 'منظومة الدخول الموحد والتحقق الرقمي الدقيق من السجلات التجارية وأرقام NIF والنطاقات الإدارية الرسمية.'
-        : 'Point d’accès unifié vérifiant le registre de commerce, le code NIF et les domaines administratifs officiels.',
-      icon: ShieldCheck,
-      link: '/login',
-      cardClass: 'bg-white text-slate-900 border border-slate-200/90 shadow-xs hover:shadow-md',
-      titleClass: 'text-slate-900 group-hover:text-[#006233]',
-      descClass: 'text-slate-600',
-      tagClass: 'bg-slate-50 text-slate-600 border border-slate-200/80',
-      iconBox: 'text-slate-700 bg-slate-100 border border-slate-200 shadow-2xs',
-      btnClass: 'bg-slate-50 hover:bg-slate-800 text-slate-700 hover:text-white border border-slate-200/90 hover:border-slate-800 font-bold',
-      dividerClass: 'border-slate-100',
-      noteText: isAr ? 'التوثيق الرقمي السيادي' : 'Authentification officielle',
-      noteClass: 'text-slate-400',
-    },
   ];
 
   return (
@@ -131,7 +91,7 @@ export const V3FivePortalsSection: React.FC = () => {
           </div>
 
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-slate-900 tracking-tight leading-snug">
-            {isAr ? 'البوابات الخمس لمنظومة الصفقات' : 'Les Cinq Portails de la Plateforme'}
+            {isAr ? 'بوابات منظومة الصفقات' : 'Portails de la Plateforme'}
           </h2>
 
           <p className="mt-3.5 text-sm sm:text-base text-slate-600 font-medium leading-relaxed max-w-2xl mx-auto">
@@ -141,9 +101,9 @@ export const V3FivePortalsSection: React.FC = () => {
           </p>
         </div>
 
-        {/* الصف الأول: البوابات الثلاث التنفيذية بهوية القائمة الجانبية لكل فضاء */}
+        {/* شبكة البوابات الثلاث التنفيذية بهوية القائمة الجانبية لكل فضاء */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-7">
-          {portals.slice(0, 3).map((portal) => {
+          {portals.map((portal) => {
             const Icon = portal.icon;
             return (
               <div
@@ -187,57 +147,10 @@ export const V3FivePortalsSection: React.FC = () => {
             );
           })}
         </div>
-
-        {/* الصف الثاني: البوابتان المتبقيتان (البوابة الوطنية + بوابة الهوية والتحقق الموحد) */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-7 mt-6 sm:mt-7 max-w-4xl mx-auto">
-          {portals.slice(3, 5).map((portal) => {
-            const Icon = portal.icon;
-            return (
-              <div
-                key={portal.id}
-                className={`group rounded-2xl p-6 sm:p-7 ${portal.cardClass} hover:-translate-y-0.5 transition-all duration-300 flex flex-col justify-between`}
-              >
-                <div>
-                  <div className="flex items-center justify-between gap-3 mb-5">
-                    <div className={`size-11 rounded-xl flex items-center justify-center ${portal.iconBox}`}>
-                      <Icon className="size-5" strokeWidth={1.75} />
-                    </div>
-                    <span className={`text-[11px] font-bold px-2.5 py-1 rounded-full ${portal.tagClass}`}>
-                      {portal.tag}
-                    </span>
-                  </div>
-
-                  <h3 className={`text-lg sm:text-xl font-bold mb-2.5 leading-snug ${portal.titleClass} transition-colors`}>
-                    {portal.title}
-                  </h3>
-
-                  <p className={`text-sm leading-relaxed font-medium mb-6 ${portal.descClass}`}>
-                    {portal.desc}
-                  </p>
-                </div>
-
-                <div>
-                  <div className={`pt-3 mb-4 border-t ${portal.dividerClass} flex items-center justify-between text-xs font-medium`}>
-                    <span className={portal.noteClass}>{portal.noteText}</span>
-                    <span className="size-1.5 rounded-full bg-slate-300" />
-                  </div>
-
-                  <Link
-                    href={portal.link}
-                    className={`inline-flex items-center justify-between w-full px-4 py-2.5 rounded-xl text-sm transition-all duration-200 ${portal.btnClass} group/btn`}
-                  >
-                    <span>{isAr ? 'استكشاف البوابة' : 'Explorer le portail'}</span>
-                    <ArrowIcon className="size-4 transition-transform group-hover/btn:translate-x-1 rtl:group-hover/btn:-translate-x-1" strokeWidth={1.75} />
-                  </Link>
-                </div>
-              </div>
-            );
-          })}
-        </div>
       </div>
     </section>
   );
 };
-/* ─── نهاية القسم 2: البوابات الخمس ─── */
+/* ─── نهاية القسم 2: بوابات منظومة الصفقات ─── */
 
 export default V3FivePortalsSection;

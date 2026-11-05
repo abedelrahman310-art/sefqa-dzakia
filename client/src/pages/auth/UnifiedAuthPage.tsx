@@ -481,7 +481,7 @@ export function UnifiedAuthPage({ initialMode = 'operator' }: UnifiedAuthPagePro
             {t('register.neumorphic.brand_name') || 'صفقات ذكية'}
           </h1>
           <p className="mt-2 text-sm font-bold text-emerald-800">
-            {t('register.neumorphic.brand_tagline') || 'البوابة الوطنية الموحدة للصفقات العمومية'}
+            {t('register.neumorphic.brand_tagline') || 'المنظومة الموحدة للصفقات العمومية'}
           </p>
           <p className="mt-3 text-xs text-slate-500 font-medium leading-relaxed max-w-xs mx-auto">
             المنظومة الرقمية السيادية المعتمدة وفق أحكام القانون 23-12 والمرسوم الرئاسي 15-247
@@ -1133,7 +1133,7 @@ export function UnifiedAuthPage({ initialMode = 'operator' }: UnifiedAuthPagePro
                       <Link href="/terms" className="font-bold text-emerald-700 hover:underline">
                         شروط الاستخدام
                       </Link>{' '}
-                      والمطابقة للمنظومة الوطنية للصفقات العمومية وفق القانون 23-12.
+                      والمطابقة لمنظومة الصفقات العمومية وفق القانون 23-12.
                     </span>
                   </label>
                 </div>

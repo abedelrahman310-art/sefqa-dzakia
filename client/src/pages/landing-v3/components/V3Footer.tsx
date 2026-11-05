@@ -38,8 +38,8 @@ export const V3Footer: React.FC = () => {
 
             <p className="text-[13px] text-[#5a5a5a] leading-relaxed max-w-[360px]">
               {isAr
-                ? 'المنظومة الوطنية الموحدة لإدارة وتجريد ومراقبة الصفقات العمومية، مصممة وفق أحدث معايير الأمان والتشفير لحماية المال العام.'
-                : 'Plateforme nationale souveraine de dématérialisation et de supervision des marchés publics en Algérie.'}
+                ? 'المنظومة الموحدة لإدارة وتجريد ومراقبة الصفقات العمومية، مصممة وفق أحدث معايير الأمان والتشفير لحماية المال العام.'
+                : 'Plateforme unifiée et souveraine de dématérialisation et de supervision des marchés publics en Algérie.'}
             </p>
 
             <div className="flex items-center gap-2 text-[13px] text-[#5a5a5a] font-mono">
@@ -103,11 +103,6 @@ export const V3Footer: React.FC = () => {
                   {isAr ? 'الأسئلة الشائعة والدعم' : 'Foire aux questions'}
                 </Link>
               </li>
-              <li>
-                <a href="#compliance" className="hover:text-[#146ef5] transition-colors">
-                  {isAr ? 'المادة 67: التجريد المادي' : 'Article 67 Dématérialisation'}
-                </a>
-              </li>
             </ul>
           </div>
 
@@ -125,27 +120,6 @@ export const V3Footer: React.FC = () => {
                   <Sparkles className="size-3.5 text-[#006233] shrink-0" />
                   <span>{isAr ? 'قوة الذكاء الاصطناعي' : 'Puissance de l’IA'}</span>
                 </Link>
-              </li>
-
-              <li>
-                <a href="#features" className="hover:text-[#146ef5] transition-colors">
-                  {isAr ? 'درع الامتثال' : 'Bouclier IA'}
-                </a>
-              </li>
-              <li>
-                <a href="#features" className="hover:text-[#146ef5] transition-colors">
-                  {isAr ? 'دفاتر الشروط' : 'Cahier des charges'}
-                </a>
-              </li>
-              <li>
-                <a href="#features" className="hover:text-[#146ef5] transition-colors">
-                  {isAr ? 'رادار كشف التواطؤ' : 'Radar anti-collusion'}
-                </a>
-              </li>
-              <li>
-                <a href="#live-demo" className="hover:text-[#146ef5] transition-colors">
-                  {isAr ? 'الختم التشفيري' : 'Scellement AES-256'}
-                </a>
               </li>
             </ul>
           </div>

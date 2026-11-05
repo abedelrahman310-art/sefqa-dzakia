@@ -213,7 +213,7 @@ export function AcceptInvite({ token: propToken }: AcceptInviteProps) {
               </h2>
               <p className="text-xs text-slate-300 leading-relaxed max-w-sm mx-auto">
                 {lang === 'ar'
-                  ? 'تم تسجيل حسابكم وتعيين صلاحياتكم الرقابية في المنظومة الوطنية للصفقات العمومية. يمكنك الآن تسجيل الدخول مباشرة لممارسة مهامك.'
+                  ? 'تم تسجيل حسابكم وتعيين صلاحياتكم الرقابية في المنظومة الموحدة للصفقات العمومية. يمكنك الآن تسجيل الدخول مباشرة لممارسة مهامك.'
                   : 'Votre compte officiel a été activé. Vous pouvez dès maintenant vous connecter au portail central.'}
               </p>
             </div>

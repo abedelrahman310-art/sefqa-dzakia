@@ -205,7 +205,7 @@ export const AIPowerPage: React.FC = () => {
     },
     {
       id: 'national-price-benchmark',
-      title: isAr ? 'بنك الأسعار المرجعية الوطنية عبر 69 ولاية' : 'Observatoire National des Prix de Référence',
+      title: isAr ? 'بنك الأسعار المرجعية عبر 69 ولاية' : 'Observatoire des Prix de Référence',
       target: isAr ? 'الرقابة المركزية وكافة الإدارات' : 'Supervision & Administrations',
       targetColor: 'text-slate-800 bg-slate-100 border-slate-200',
       status: isAr ? 'قيد التطوير' : 'En Développement',

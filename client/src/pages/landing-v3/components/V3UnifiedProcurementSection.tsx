@@ -121,7 +121,7 @@ export const V3UnifiedProcurementSection: React.FC = () => {
 
       // الرقابة المركزية
       centralRole: isAr
-        ? 'رصد النشر العادل في البوابة الوطنية، والتحقق الصارم من احترام الآجال القانونية لسحب الدفاتر.'
+        ? 'رصد النشر العادل في بوابة الصفقات، والتحقق الصارم من احترام الآجال القانونية لسحب الدفاتر.'
         : 'Surveillance de la diffusion équitable et respect scrupuleux des délais légaux de retrait.',
       centralDetail: isAr
         ? 'تتبع آلي لآجال تحضير العروض ومنع أي تقليص غير قانوني للمهل الزمنية للمتعاملين.'
@@ -133,7 +133,7 @@ export const V3UnifiedProcurementSection: React.FC = () => {
       authorityTitle: isAr ? 'النشر والإشهار الرسمي' : 'Avis et publication officielle',
       authorityTitleFr: 'Avis et publication officielle',
       authorityRole: isAr
-        ? 'إشهار طلب العروض عبر البوابة الوطنية وتحديد رزنامة الإجراءات بدقة.'
+        ? 'إشهار طلب العروض عبر بوابة الصفقات وتحديد رزنامة الإجراءات بدقة.'
         : 'Publication de l’avis sur le portail national et fixation du calendrier officiel.',
       authorityDetail: isAr
         ? 'توفير دفتر الشروط رقمياً وتسجيل عمليات السحب والإجابة عن استفسارات المتعهدين.'

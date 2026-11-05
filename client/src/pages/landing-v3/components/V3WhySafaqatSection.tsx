@@ -61,7 +61,7 @@ export const V3WhySafaqatSection: React.FC = () => {
         <div className="text-center max-w-3xl mx-auto mb-12 sm:mb-16">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-emerald-200/90 bg-emerald-50/80 text-emerald-900 text-xs sm:text-sm font-bold shadow-2xs mb-4">
             <Sparkles className="size-3.5 text-emerald-700" strokeWidth={1.75} />
-            <span>{isAr ? 'القيمة الوطنية المضافة' : 'Valeur Nationale Ajoutée'}</span>
+            <span>{isAr ? 'القيمة المضافة للمنظومة' : 'Valeur Ajoutée'}</span>
           </div>
 
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-slate-900 tracking-tight leading-snug">

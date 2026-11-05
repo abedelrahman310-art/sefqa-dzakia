@@ -70,7 +70,7 @@ const FAQ_DATA: FAQItem[] = [
     question: 'كيف يساعد محرك الذكاء الاصطناعي في تدقيق العروض وكشف الأسعار غير المتوازنة؟',
     questionFr: 'Comment l’IA assiste-t-elle à l’évaluation et détecte-t-elle les prix anormaux ?',
     answer:
-      'يعمل محرك الذكاء الاصطناعي السيادي كمساعد قانوني للجان التقييم؛ حيث يقوم بفرز ومقارنة العروض مع بنك الأسعار المرجعية الوطنية وكشف العروض المنخفضة بشكل غير طبيعي (Offres anormalement basses) أو المفرطة، بالإضافة إلى رصد أنماط التواطؤ بين المتعهدين، وتوليد تقرير استرشادي معلل وفق معايير القانون رقم 23-12.',
+      'يعمل محرك الذكاء الاصطناعي السيادي كمساعد قانوني للجان التقييم؛ حيث يقوم بفرز ومقارنة العروض مع بنك الأسعار المرجعية وكشف العروض المنخفضة بشكل غير طبيعي (Offres anormalement basses) أو المفرطة، بالإضافة إلى رصد أنماط التواطؤ بين المتعهدين، وتوليد تقرير استرشادي معلل وفق معايير القانون رقم 23-12.',
     answerFr:
       'Le moteur d’IA souverain assiste les commissions d’évaluation en comparant les devis avec les référentiels de prix nationaux. Il identifie automatiquement les offres anormalement basses ou excessives, signale les anomalies de concurrence et génère un rapport d’audit conforme aux dispositions de la loi 23-12.',
   },

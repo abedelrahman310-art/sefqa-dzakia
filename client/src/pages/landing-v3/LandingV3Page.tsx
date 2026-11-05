@@ -11,7 +11,7 @@ import V3Footer from './components/V3Footer';
 import V3SectionDivider from './components/V3SectionDivider';
 
 /**
- * صفحة الهبوط الوطنية المعمارية الموحدة — منصة «صفقات ذكية»
+ * صفحة الهبوط المعمارية الموحدة — منصة «صفقات ذكية»
  *
  * الهيكلية المعتمدة بدقة:
  * 1. الشريط العلوي الرئاسي (V3TopBanner)
@@ -29,8 +29,8 @@ export function LandingV3Page() {
   useEffect(() => {
     document.title =
       lang === 'ar'
-        ? 'صفقات ذكية — المنظومة الوطنية الموحدة للصفقات العمومية'
-        : 'Safaqat Dhakia — Plateforme Nationale des Marchés Publics';
+        ? 'صفقات ذكية — المنظومة الموحدة للصفقات العمومية'
+        : 'Safaqat Dhakia — Plateforme Unifiée des Marchés Publics';
   }, [lang]);
 
   // دعم التمرير السلس للروابط

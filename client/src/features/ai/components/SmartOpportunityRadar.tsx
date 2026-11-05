@@ -140,14 +140,14 @@ export function SmartOpportunityRadar({
   return (
     <div className={`space-y-4 ${className}`} dir={dir}>
       {/* ─── 1. ترويسة الرادار التنبؤي ─── */}
-      <div className="relative overflow-hidden rounded-2xl border border-emerald-200/80 bg-gradient-to-r from-emerald-950 via-[#0f3154] to-slate-900 p-5 text-white shadow-md">
+      <div className="relative overflow-hidden rounded-2xl border border-slate-200/90 bg-gradient-to-br from-white via-slate-50/60 to-emerald-50/40 p-5 text-slate-900 shadow-xs">
         {/* رادار الخلفية المتحرك */}
-        <div className="pointer-events-none absolute -end-10 -top-10 size-48 rounded-full border border-emerald-500/20 opacity-50 animate-ping duration-1000" />
-        <div className="pointer-events-none absolute -end-24 -bottom-24 size-72 rounded-full border border-sky-400/20" />
+        <div className="pointer-events-none absolute -end-10 -top-10 size-48 rounded-full border border-emerald-500/15 opacity-60 animate-ping duration-1000" />
+        <div className="pointer-events-none absolute -end-24 -bottom-24 size-72 rounded-full border border-teal-500/10" />
 
         <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div className="flex items-center gap-3.5">
-            <div className="relative flex size-12 items-center justify-center rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-400 text-white shadow-md">
+            <div className="relative flex size-12 items-center justify-center rounded-2xl bg-gradient-to-tr from-[#006233] to-teal-600 text-white shadow-sm">
               <Radio className="size-6 animate-pulse" />
               <span className="absolute -top-1 -end-1 flex size-3">
                 <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-300 opacity-75" />
@@ -156,15 +156,15 @@ export function SmartOpportunityRadar({
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="rounded-full bg-emerald-500/20 border border-emerald-400/30 px-2 py-0.5 text-[10px] font-extrabold text-emerald-300 uppercase tracking-wider">
+                <span className="rounded-full bg-emerald-50 border border-emerald-200/90 px-2 py-0.5 text-[10px] font-extrabold text-emerald-800 uppercase tracking-wider">
                   {t('operator.radar.badge_algorithm')}
                 </span>
-                <span className="text-xs text-slate-300">{t('operator.radar.status_active')}</span>
+                <span className="text-xs text-slate-500 font-semibold">{t('operator.radar.status_active')}</span>
               </div>
-              <h2 className="text-lg sm:text-xl font-black tracking-tight text-white mt-0.5">
+              <h2 className="text-lg sm:text-xl font-black tracking-tight text-slate-900 mt-0.5">
                 {t('operator.radar.title')}
               </h2>
-              <p className="text-xs text-slate-300 mt-0.5 max-w-xl leading-relaxed">
+              <p className="text-xs text-slate-600 mt-0.5 max-w-xl leading-relaxed font-medium">
                 {t('operator.radar.subtitle')}
               </p>
             </div>
@@ -174,7 +174,7 @@ export function SmartOpportunityRadar({
             type="button"
             onClick={() => loadRecommendedDeals(true)}
             disabled={refreshing || loading}
-            className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-3.5 py-2 text-xs font-bold text-white shadow-xs backdrop-blur-md transition-all hover:bg-white/20 active:scale-95 disabled:opacity-50 cursor-pointer"
+            className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 px-3.5 py-2 text-xs font-bold text-slate-700 shadow-2xs transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
           >
             <RefreshCw className={`size-3.5 ${refreshing ? 'animate-spin' : ''}`} />
             <span>{t('operator.radar.refresh')}</span>
@@ -182,8 +182,8 @@ export function SmartOpportunityRadar({
         </div>
 
         {/* فلاتر الرادار */}
-        <div className="relative z-10 mt-5 flex flex-wrap items-center gap-2 border-t border-white/10 pt-3 text-xs">
-          <span className="text-slate-300 font-semibold text-[11px] me-1 flex items-center gap-1">
+        <div className="relative z-10 mt-5 flex flex-wrap items-center gap-2 border-t border-slate-200/80 pt-3 text-xs">
+          <span className="text-slate-500 font-semibold text-[11px] me-1 flex items-center gap-1">
             <Filter className="size-3" /> {t('operator.radar.match_level')}
           </span>
           <button
@@ -191,8 +191,8 @@ export function SmartOpportunityRadar({
             onClick={() => setFilterLevel('all')}
             className={`rounded-lg px-2.5 py-1 text-xs font-bold transition-all cursor-pointer ${
               filterLevel === 'all'
-                ? 'bg-emerald-500 text-white shadow-xs'
-                : 'bg-white/10 text-slate-200 hover:bg-white/20'
+                ? 'bg-[#006233] text-white shadow-xs'
+                : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'
             }`}
           >
             {t('operator.radar.filter_all', { count: deals.length })}
@@ -202,8 +202,8 @@ export function SmartOpportunityRadar({
             onClick={() => setFilterLevel('excellent')}
             className={`rounded-lg px-2.5 py-1 text-xs font-bold transition-all cursor-pointer ${
               filterLevel === 'excellent'
-                ? 'bg-emerald-500 text-white shadow-xs'
-                : 'bg-white/10 text-slate-200 hover:bg-white/20'
+                ? 'bg-[#006233] text-white shadow-xs'
+                : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'
             }`}
           >
             {t('operator.radar.filter_excellent', { count: deals.filter((d) => d.match_score >= 80).length })}
@@ -213,8 +213,8 @@ export function SmartOpportunityRadar({
             onClick={() => setFilterLevel('good')}
             className={`rounded-lg px-2.5 py-1 text-xs font-bold transition-all cursor-pointer ${
               filterLevel === 'good'
-                ? 'bg-emerald-500 text-white shadow-xs'
-                : 'bg-white/10 text-slate-200 hover:bg-white/20'
+                ? 'bg-[#006233] text-white shadow-xs'
+                : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'
             }`}
           >
             {t('operator.radar.filter_good', { count: deals.filter((d) => d.match_score >= 60).length })}

@@ -21,7 +21,7 @@ export const V3PortalsSection: React.FC = () => {
       id: 'operator',
       title: isAr ? 'بوابة المتعامل الاقتصادي' : 'Opérateur Économique',
       desc: isAr
-        ? 'تصفح الصفقات الوطنية، التدقيق بدرع الامتثال القانوني، وتشفير وإيداع العروض المالية بختم AES-256 وسحب الدفاتر رقمياً دون ورق.'
+        ? 'تصفح الصفقات المنشورة، التدقيق بدرع الامتثال القانوني، وتشفير وإيداع العروض المالية بختم AES-256 وسحب الدفاتر رقمياً دون ورق.'
         : 'Explorez les marchés publics, auditez vos dossiers administratifs et chiffrez vos offres financières en toute sécurité.',
       icon: Briefcase,
       link: '/operator/deals',

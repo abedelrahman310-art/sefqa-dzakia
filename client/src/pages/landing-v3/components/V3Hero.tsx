@@ -20,7 +20,7 @@ export const V3Hero: React.FC = () => {
           <div className="flex items-center justify-center w-full">
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-emerald-200/80 bg-emerald-50/80 text-emerald-900 text-xs sm:text-sm font-bold shadow-2xs">
               <span className="size-2 rounded-full bg-emerald-600 animate-ping" />
-              <span>{isAr ? 'المنظومة الرقمية الوطنية المعتمدة' : 'Plateforme Nationale Certifiée'}</span>
+              <span>{isAr ? 'المنظومة الرقمية المعتمدة' : 'Plateforme Numérique Certifiée'}</span>
             </div>
           </div>
 
@@ -66,8 +66,8 @@ export const V3Hero: React.FC = () => {
                 <div className="mt-3 sm:mt-5 max-w-2xl mx-auto">
                   <p className="text-base sm:text-xl lg:text-2xl font-bold text-slate-700 leading-snug">
                     {isAr
-                      ? 'المنظومة الرقمية الوطنية الموحدة لإدارة ورقمنة الصفقات العمومية'
-                      : 'Plateforme Numérique Nationale Unifiée des Marchés Publics'}
+                      ? 'المنظومة الرقمية الموحدة لإدارة ورقمنة الصفقات العمومية'
+                      : 'Plateforme Numérique Unifiée des Marchés Publics'}
                   </p>
                 </div>
 
