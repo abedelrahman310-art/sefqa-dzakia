@@ -9,7 +9,6 @@ import V3WorkflowSection from './components/V3WorkflowSection';
 import V3FivePortalsSection from './components/V3FivePortalsSection';
 import V3PlatformShowcaseSection from './components/V3PlatformShowcaseSection';
 import V3AIToolsSection from './components/V3AIToolsSection';
-import V3InteroperabilitySection from './components/V3InteroperabilitySection';
 import V3FAQSection from './components/V3FAQSection';
 import V3ComplianceTrustSection from './components/V3ComplianceTrustSection';
 import V3QrCodeCard from './components/V3QrCodeCard';
@@ -29,10 +28,9 @@ import V3SectionDivider from './components/V3SectionDivider';
  * 7. القسم 3: بوابات المنصة الثلاث (V3FivePortalsSection)
  * 8. القسم 4: المعاينة الحية للشاشات ولوحات التحكم (V3PlatformShowcaseSection)
  * 9. القسم 5: أدوات الذكاء الاصطناعي المساعد (V3AIToolsSection)
- * 10. القسم 6: الربط البيني والتكامل الحكومي (V3InteroperabilitySection)
- * 11. القسم 7: الأسئلة الشائعة وضمانات المنظومة (V3FAQSection)
- * 12. القسم 8: الامتثال والثقة وبطاقة QR والدخول الموحد (V3ComplianceTrustSection)
- * 13. التذييل المؤسسي الراقي المعتمد (V3Footer)
+ * 10. القسم 6: الأسئلة الشائعة وضمانات المنظومة (V3FAQSection)
+ * 11. القسم 7: الامتثال والثقة وبطاقة QR والدخول الموحد (V3ComplianceTrustSection)
+ * 12. التذييل المؤسسي الراقي المعتمد (V3Footer)
  */
 export function LandingV3Page() {
   const { lang, dir } = useI18n();
@@ -114,12 +112,6 @@ export function LandingV3Page() {
 
         {/* ─── القسم 3: أدوات الذكاء الاصطناعي ─── */}
         <V3AIToolsSection />
-
-        {/* فاصل وطني سيادي مزدوج */}
-        <V3SectionDivider bg="bg-[#f8fafc]" />
-
-        {/* ─── الإضافة 5: منظومة التكامل والربط البيني الحكومي ─── */}
-        <V3InteroperabilitySection />
 
         {/* فاصل وطني سيادي مزدوج */}
         <V3SectionDivider bg="bg-[#ffffff]" />

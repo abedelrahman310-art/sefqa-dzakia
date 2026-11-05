@@ -14,6 +14,8 @@ import { OperatorArchiveView } from './OperatorArchiveView';
 import { OperatorSettingsView } from './OperatorSettingsView';
 import { OperatorNotificationsView } from './OperatorNotificationsView';
 import { OperatorAssistantView } from './OperatorAssistantView';
+import { OperatorPassportView } from './OperatorPassportView';
+import { PriceRevisionCalculator } from '@/features/pricing/PriceRevisionCalculator';
 import { RequirementsResponse } from './RequirementsResponse';
 import { OperatorSessionList } from '@/features/opening/components/OperatorSessionList';
 import { OperatorSessionLive } from '@/features/opening/components/OperatorSessionLive';
@@ -28,6 +30,8 @@ import {
   Scale,
   Users,
   FileSignature,
+  ShieldCheck,
+  Calculator,
 } from 'lucide-react';
 
 export function OperatorSpace() {
@@ -50,6 +54,10 @@ export function OperatorSpace() {
   const [isObjectionsActive] = useRoute('/operator/objections');
   const [isSmartSpecsActive] = useRoute('/operator/smart-specs');
   const [isSettingsActive] = useRoute('/operator/settings');
+  const [isPassportActive] = useRoute('/operator/passport');
+  const [isPriceRevisionActive] = useRoute('/operator/price-revision');
+
+  const isAr = lang === 'ar';
 
   const navItems: OperatorNavItem[] = [
     {
@@ -57,6 +65,13 @@ export function OperatorSpace() {
       href: '/operator',
       icon: LayoutDashboard,
       isActive: isOverviewActive || isOverviewAliasActive,
+      group: 'home',
+    },
+    {
+      label: isAr ? 'جواز السفر الرقمي' : 'Passeport Numérique',
+      href: '/operator/passport',
+      icon: ShieldCheck,
+      isActive: isPassportActive,
       group: 'home',
     },
     {
@@ -88,6 +103,13 @@ export function OperatorSpace() {
       group: 'activity',
     },
     {
+      label: isAr ? 'مراجعة الأسعار' : 'Révision des Prix',
+      href: '/operator/price-revision',
+      icon: Calculator,
+      isActive: isPriceRevisionActive,
+      group: 'activity',
+    },
+    {
       label: t('nav.operator.objections'),
       href: '/operator/objections',
       icon: Scale,
@@ -112,6 +134,8 @@ export function OperatorSpace() {
         <Route path="/operator/assistant" component={OperatorAssistantView} />
         <Route path="/operator/deals" component={OperatorOpportunities} />
         <Route path="/operator/opportunities" component={OperatorOpportunities} />
+        <Route path="/operator/passport" component={OperatorPassportView} />
+        <Route path="/operator/price-revision">{() => <PriceRevisionCalculator />}</Route>
         <Route path="/operator/profile" component={OperatorProfileView} />
         <Route path="/operator/smart-specs" component={OperatorSmartSpecsView} />
         <Route path="/operator/archive" component={OperatorArchiveView} />

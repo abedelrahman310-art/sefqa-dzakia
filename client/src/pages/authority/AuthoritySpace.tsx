@@ -18,6 +18,7 @@ import { ReportsView } from './ReportsView';
 import { AuditView } from './AuditView';
 import { SettingsView } from './SettingsView';
 import { AuthorityAssistantView } from './AuthorityAssistantView';
+import { PriceRevisionCalculator } from '@/features/pricing/PriceRevisionCalculator';
 import { OperatorNotificationsView } from '@/pages/operator/OperatorNotificationsView';
 import { PortalShell } from '@/components/layout/PortalShell';
 import { PortalSidebar } from '@/components/layout/PortalSidebar';
@@ -32,6 +33,7 @@ import {
   Shield,
   Scale,
   AlertOctagon,
+  Calculator,
 } from 'lucide-react';
 
 export function AuthoritySpace() {
@@ -91,6 +93,7 @@ export function AuthoritySpace() {
   const [isObjectionsActive] = useRoute('/authority/objections');
   const [isReportsActive] = useRoute('/authority/reports');
   const [isAuditActive] = useRoute('/authority/audit');
+  const [isPriceRevisionActive] = useRoute('/authority/price-revision');
 
   // Final Approved Unified Navigation: "Deals" is the unified entry point
   const navItems = [
@@ -131,6 +134,12 @@ export function AuthoritySpace() {
       href: '/authority/offers',
       icon: Inbox,
       isActive: isOffersActive || isOffersDetailActive,
+    },
+    {
+      label: lang === 'ar' ? 'مراجعة الأسعار والملاحق' : 'Révision des Prix',
+      href: '/authority/price-revision',
+      icon: Calculator,
+      isActive: isPriceRevisionActive,
     },
     {
       label: t('authority.nav.objections'),
@@ -252,6 +261,7 @@ export function AuthoritySpace() {
         <Route path="/authority/assistant" component={AuthorityAssistantView} />
         <Route path="/authority/committee" component={DealCommitteeManager} />
         <Route path="/authority/offers" component={ReceivedOffers} />
+        <Route path="/authority/price-revision">{() => <PriceRevisionCalculator />}</Route>
         <Route path="/authority/objections" component={AuthorityObjectionsView} />
         <Route path="/authority/evaluation/:tenderId" component={EvaluationWorkspace} />
         <Route path="/authority/reports" component={ReportsView} />
