@@ -299,7 +299,7 @@ class CentralHeatmapView(APIView):
 class CentralDashboardView(APIView):
     """
     GET /api/central/dashboard/
-    المؤشرات الحقيقية للوحة قيادة الإدارة المركزية (عين الصقر):
+    المؤشرات الحقيقية للوحة قيادة الإدارة المركزية للرقابة:
     - إجمالي الصفقات الجارية
     - الصفقات بانتظار التأشيرة
     - عدد المصالح النشطة

@@ -293,7 +293,7 @@ class LegalNoticeSerializer(serializers.ModelSerializer):
 
 class AdministrativeNoticeSerializer(serializers.ModelSerializer):
     """
-    محدد بيانات الإعذار الإداري الرقابي الصادر من الإدارة المركزية (عين الصقر)
+    محدد بيانات الإعذار الإداري الرقابي الصادر من الإدارة المركزية
     وفقاً لأحكام القانون رقم 23-12 والمرسوم الرئاسي 15-247.
     """
     authority_name = serializers.SerializerMethodField()

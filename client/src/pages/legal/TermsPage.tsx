@@ -74,7 +74,7 @@ export function TermsPage() {
                 : 'الإدارات والمؤسسات العمومية والهيئات المحلية المخولة قانوناً بإبرام وتنفيذ الصفقات العمومية.'}
             </li>
             <li>
-              <strong className="font-bold">{isFr ? 'L’Administration Centrale :' : 'الإدارة المركزية (عين الصقر):'}</strong>{' '}
+              <strong className="font-bold">{isFr ? 'L’Administration Centrale :' : 'الإدارة المركزية للرقابة:'}</strong>{' '}
               {isFr
                 ? 'L’autorité de contrôle stratégique et de supervision de conformité en temps réel.'
                 : 'المستوى الرقابي السيادي المخول بالتدقيق والمتابعة المستمرة لمؤشرات الشفافية والامتثال القانوني.'}

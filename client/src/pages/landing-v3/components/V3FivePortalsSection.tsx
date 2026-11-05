@@ -76,7 +76,7 @@ export const V3FivePortalsSection: React.FC = () => {
     },
     {
       id: 'central',
-      title: isAr ? 'بوابة الرقابة المركزية عين الصقر' : 'Supervision Centrale Œil de Faucon',
+      title: isAr ? 'بوابة الرقابة المركزية' : 'Portail du Contrôle Central',
       tag: isAr ? 'للرقابة والنزاهة' : 'Contrôle & Conformité',
       desc: isAr
         ? 'راقب الصفقات العمومية عبر مؤشرات لحظية وتحليلات للمخاطر وخرائط جغرافية وتنبيهات استباقية'

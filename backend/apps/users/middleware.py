@@ -20,7 +20,7 @@ class WorkspaceStatusMiddleware:
                     # فقط إذا حاول الوصول لمسارات /api/authority/*
                     if request.path.startswith('/api/authority/'):
                         status_labels = {
-                            'pending_approval': 'حساب المصلحة قيد المراجعة والاعتماد من قبل الإدارة المركزية (عين الصقر).',
+                            'pending_approval': 'حساب المصلحة قيد المراجعة والاعتماد من قبل الإدارة المركزية للرقابة.',
                             'rejected': 'تم رفض طلب اعتماد هذه المصلحة المتعاقدة. يرجى مراجعة المفتشية العامة.',
                             'suspended': 'حساب هذه المصلحة المتعاقدة معلق مؤقتاً بقرار رقابي.',
                         }

@@ -354,7 +354,7 @@ export function CentralPermissions() {
       {/* 2. بطاقات المؤشرات الأساسية (KPI Matrix) */}
       <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
         <KpiCard
-          eyebrow={lang === 'ar' ? 'فريق عمل عين الصقر' : 'Équipe de contrôle central'}
+          eyebrow={lang === 'ar' ? 'فريق الرقابة المركزية' : 'Équipe de contrôle central'}
           value={formatNumber(staffData?.total_staff ?? 0)}
           description={lang === 'ar' ? 'موظف مسجل بالإدارة المركزية' : 'Agents officiels enregistrés'}
           icon={Users}

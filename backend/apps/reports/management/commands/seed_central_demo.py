@@ -14,7 +14,7 @@ from apps.ai_gateway.services.suspicion_detector import get_all_suspicions
 
 
 class Command(BaseCommand):
-    help = "بذر البيانات التجريبية لمحرك الذكاء الاصطناعي السيادي وبوابة الإدارة المركزية (عين الصقر) وفق القانون 23-12"
+    help = "بذر البيانات التجريبية لمحرك الذكاء الاصطناعي السيادي وبوابة الإدارة المركزية (الرقابة المركزية) وفق القانون 23-12"
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -46,7 +46,7 @@ class Command(BaseCommand):
             )
 
         test_password = os.getenv("SEPAQAT_SEED_PASSWORD", "Safaqat@2026")
-        self.stdout.write(self.style.NOTICE("بدء تهيئة البيانات التجريبية لمحرك الذكاء الاصطناعي (عين الصقر)..."))
+        self.stdout.write(self.style.NOTICE("بدء تهيئة البيانات التجريبية لمحرك الذكاء الاصطناعي (الرقابة المركزية)..."))
 
         # 2. إنشاء المستخدمين المعنيين بالسيناريوهات الرقابية
         admin_user, _ = CustomUser.objects.get_or_create(

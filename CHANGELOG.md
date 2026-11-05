@@ -173,7 +173,7 @@ tests/test_central_and_zero_paper_verification.py::...::test_heuristic_analysis_
 
 - اللغة الافتراضية تُكتشف من `localStorage` ثم `navigator` ثم `htmlTag`، وتُحفظ تحت المفتاح `lang`.
 - عند تبديل اللغة يُحدَّث `document.documentElement.lang` و`dir` و`class` (خط عربي/فرنسي) تلقائياً.
-- `CanUseAILegalChat` تستبعد `central_admin` من المساعد القانوني، لأن لديها منظومة رقابة مستقلة (Hawk Eye).
+- `CanUseAILegalChat` تستبعد `central_admin` من المساعد القانوني، لأن لديها منظومة رقابة مستقلة (الرقابة المركزية).
 
 ---
 

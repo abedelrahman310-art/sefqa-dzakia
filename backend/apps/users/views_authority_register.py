@@ -33,7 +33,7 @@ class AuthoritySelfRegistrationView(views.APIView):
     2. إنشاء مستخدم جديد (role='ordonnateur').
     3. إنشاء كائن Authority بحالة 'pending_approval' وربطه بالمستخدم.
     4. تسجيل العملية في سجل التدقيق المحصن AuditLog وفق أحكام القانون 23-12.
-    5. إشعار مسؤولي الإدارة المركزية (عين الصقر) للمراجعة والاعتماد.
+    5. إشعار مسؤولي الإدارة المركزية للرقابة للمراجعة والاعتماد.
     6. إرجاع رسالة تأكيد تفيد بأن الحساب "قيد المراجعة والاعتماد".
     """
     permission_classes = []
@@ -134,7 +134,7 @@ class AuthoritySelfRegistrationView(views.APIView):
         except Exception as e:
             logger.warning(f"Could not write audit log for authority self-registration: {e}")
 
-        # 5. إشعار مسؤولي الإدارة المركزية (عين الصقر)
+        # 5. إشعار مسؤولي الإدارة المركزية للرقابة
         try:
             central_admins = CustomUser.objects.filter(role='central_admin')[:5]
             for admin_user in central_admins:
@@ -150,7 +150,7 @@ class AuthoritySelfRegistrationView(views.APIView):
 
         # 6. إرجاع رسالة "قيد المراجعة"
         return Response({
-            'message': 'تم استلام طلب تسجيل المصلحة المتعاقدة بنجاح. الحساب حالياً قيد المراجعة والتدقيق الإداري من قبل الإدارة المركزية (عين الصقر)، وسيتم إشعاركم فور اعتماده رسمياً.',
+            'message': 'تم استلام طلب تسجيل المصلحة المتعاقدة بنجاح. الحساب حالياً قيد المراجعة والتدقيق الإداري من قبل الإدارة المركزية للرقابة، وسيتم إشعاركم فور اعتماده رسمياً.',
             'status': 'pending_approval',
             'authority_id': str(authority.id),
             'authority_name': authority.name,

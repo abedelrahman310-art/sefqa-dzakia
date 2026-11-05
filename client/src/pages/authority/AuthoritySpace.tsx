@@ -190,7 +190,7 @@ export function AuthoritySpace() {
                 <span className="font-black text-sm tracking-wide">
                   {activeInjunction.status === 'escalated_to_court'
                     ? (lang === 'ar' ? '🚨 إعذار إداري رقابي محال للقضاء ومجلس المحاسبة' : '🚨 Injonction administrative transmise à la justice')
-                    : (lang === 'ar' ? '⚠️ إعذار إداري رقابي ملزم من الإدارة المركزية (عين الصقر)' : '⚠️ Injonction administrative impérative de régularisation (Hawk Eye)')}
+                    : (lang === 'ar' ? '⚠️ إعذار إداري رقابي ملزم من الإدارة المركزية' : '⚠️ Injonction administrative impérative de régularisation')}
                 </span>
                 <span className={`text-xs px-2 py-0.5 rounded-full font-mono font-bold border ${
                   activeInjunction.status === 'escalated_to_court'

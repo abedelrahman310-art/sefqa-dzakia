@@ -50,7 +50,7 @@ export const V3AIToolsSection: React.FC = () => {
     },
     {
       id: 'anti-collusion',
-      title: isAr ? 'رادار مكافحة التواطؤ عين الصقر' : 'Radar Anti-Collusion Œil de Faucon',
+      title: isAr ? 'رادار مكافحة التواطؤ' : 'Radar Anti-Collusion',
       role: isAr ? 'مساعد الرقابة والنزاهة' : 'Support Analytique',
       desc: isAr
         ? 'تحليل مؤشرات المخاطر ودعم رصد السلوكيات المشبوهة كأداة تحليلية واستشارية مساندة لأجهزة الرقابة، دون إصدار أي قرار قانوني.'

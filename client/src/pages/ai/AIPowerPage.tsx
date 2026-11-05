@@ -181,7 +181,7 @@ export const AIPowerPage: React.FC = () => {
     {
       id: 'anti-collusion-radar',
       portalKey: 'central',
-      title: isAr ? 'رادار مكافحة التواطؤ عين الصقر' : 'Radar Anti-Collusion Œil de Faucon',
+      title: isAr ? 'رادار مكافحة التواطؤ' : 'Radar Anti-Collusion',
       target: isAr ? 'بوابة الرقابة المركزية' : 'Supervision Centrale',
       targetColor: 'text-amber-800 bg-amber-50 border-amber-200',
       status: isAr ? 'متاحة ومفعلة' : 'Opérationnelle',

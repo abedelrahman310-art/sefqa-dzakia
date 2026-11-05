@@ -285,8 +285,8 @@ export function AuditView() {
             {activeTab === 'audit'
               ? t('authority.audit.subtitle')
               : (lang === 'ar'
-                  ? 'متابعة الإعذارات الإدارية الملزمة الصادرة من عين الصقر وتقديم تقارير التصحيح لتفادي الإحالة القضائية'
-                  : 'Suivi des injonctions de régularisation émises par Hawk Eye et soumission des rapports correctifs')}
+                  ? 'متابعة الإعذارات الإدارية الملزمة الصادرة من الإدارة المركزية وتقديم تقارير التصحيح لتفادي الإحالة القضائية'
+                  : 'Suivi des injonctions de régularisation émises par l\'Administration Centrale et soumission des rapports correctifs')}
           </p>
         </div>
 
@@ -336,7 +336,7 @@ export function AuditView() {
           }`}
         >
           <Gavel className="w-4 h-4" />
-          <span>{lang === 'ar' ? 'الإعذارات الرقابية المركزية (عين الصقر)' : 'Injonctions Hawk Eye'}</span>
+          <span>{lang === 'ar' ? 'الإعذارات الرقابية المركزية' : 'Injonctions administratives centrales'}</span>
           {(injunctionStats.active > 0 || injunctionStats.escalated > 0) && (
             <span
               className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${

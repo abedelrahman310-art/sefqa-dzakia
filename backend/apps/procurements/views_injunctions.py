@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 class CentralInjunctionsView(views.APIView):
     """
-    إدارة واستعراض الإعذارات الإدارية الرقابية من قبل الإدارة المركزية (عين الصقر):
+    إدارة واستعراض الإعذارات الإدارية الرقابية من قبل الإدارة المركزية للرقابة:
     - GET /api/reports/central/injunctions/ و /api/central/injunctions/
     - POST /api/reports/central/injunctions/ و /api/central/injunctions/
     """
@@ -29,7 +29,7 @@ class CentralInjunctionsView(views.APIView):
         user = request.user
         if not user.is_staff and getattr(user, 'role', None) != 'central_admin':
             return Response(
-                {'error': 'استعراض سجل الإعذارات المركزية مقصور على مسؤولي ومفتشي عين الصقر.'},
+                {'error': 'استعراض سجل الإعذارات المركزية مقصور على مسؤولي ومفتشي الإدارة المركزية للرقابة.'},
                 status=status.HTTP_403_FORBIDDEN
             )
 
@@ -171,7 +171,7 @@ class CentralInjunctionsView(views.APIView):
                 user=authority,
                 title=f"⚠️ إعذار إداري رقابي عاجل رقم {notice.reference}",
                 text=(
-                    f"أصدرت الإدارة المركزية (عين الصقر) إعذاراً إدارياً رقابياً ملزماً برقم {notice.reference} "
+                    f"أصدرت الإدارة المركزية للرقابة إعذاراً إدارياً رقابياً ملزماً برقم {notice.reference} "
                     f"بشأن مخالفة '{notice.get_violation_type_display()}'. "
                     f"المهلة الممنوحة لتقديم تقرير التصحيح هي {notice.deadline_days} يوماً (حتى {notice.deadline_date})."
                 ),

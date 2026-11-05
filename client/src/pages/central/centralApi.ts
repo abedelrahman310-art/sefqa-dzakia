@@ -3,7 +3,7 @@ import { api } from '@/lib/api';
 import type { ProcurementDealApi } from '@/lib/procurementApiTypes';
 
 /**
- * طبقة البيانات الخاصة ببوابة الإدارة المركزية (عين الصقر).
+ * طبقة البيانات الخاصة ببوابة الإدارة المركزية والرقابة.
  *
  * كل الدوال هنا تقرأ من واجهات REST الفعلية في `backend/apps/reports/central_views.py`
  * و`backend/apps/contracts/views.py` و`backend/apps/audit/views.py`

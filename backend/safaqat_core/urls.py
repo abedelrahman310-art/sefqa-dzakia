@@ -112,7 +112,7 @@ urlpatterns = [
     path('api/ai/analyze-tender/', AIAnalyzeTenderView.as_view(), name='direct_ai_analyze_tender'),
     path('api/ai/analyze-tender', AIAnalyzeTenderView.as_view(), name='direct_ai_analyze_tender_no_slash'),
 
-    # 7. Central Hawk Eye (عين الصقر - الرقابة والإدارة المركزية)
+    # 7. Central Oversight (الإدارة المركزية والرقابة)
     path('api/central/', include('apps.reports.central_urls')),
 
     # 8. Remote Opening Sessions (WebSockets / SSE / Events API)

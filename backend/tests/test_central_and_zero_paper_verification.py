@@ -78,7 +78,7 @@ class TestZeroPaperCompliance:
 
 
 @pytest.mark.django_db
-class TestCentralHawkEyeEndpointsRealData:
+class TestCentralOversightEndpointsRealData:
     def test_central_authorities_queries_real_users_only(self, central_admin, authority_user):
         client = APIClient()
         client.force_authenticate(user=central_admin)

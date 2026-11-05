@@ -156,7 +156,7 @@ export function AcceptInvite({ token: propToken }: AcceptInviteProps) {
               </span>
             </div>
             <h1 className="text-xl sm:text-2xl font-black text-white mt-1">
-              {lang === 'ar' ? 'بوابة الإدارة المركزية والرقابة (عين الصقر)' : 'Portail de Contrôle Central (Œil du Faucon)'}
+              {lang === 'ar' ? 'بوابة الإدارة المركزية والرقابة' : 'Portail de l\'Administration Centrale et du Contrôle'}
             </h1>
             <p className="text-xs text-slate-400 mt-0.5">
               {lang === 'ar' ? 'تفعيل حساب موظف رسمي وفق أحكام القانون 23-12' : 'Activation de compte officiel (Loi 23-12)'}

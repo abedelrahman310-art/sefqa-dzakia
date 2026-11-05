@@ -8,7 +8,7 @@ from apps.audit.models import AuditLog
 
 
 @pytest.mark.django_db
-class TestCentralHawkEyeEndpoints:
+class TestCentralOversightEndpoints:
     @pytest.fixture(autouse=True)
     def setup_data(self):
         self.client = APIClient()

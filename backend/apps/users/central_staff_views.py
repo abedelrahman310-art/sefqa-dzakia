@@ -38,7 +38,7 @@ def build_invite_url(token, request=None):
 
 def send_invitation_email(invitation, invite_url):
     """إرسال بريد تفعيل الحساب ثنائي اللغة (عربي/فرنسي)"""
-    subject = f"دعوة انضمام لبوابة الإدارة المركزية (عين الصقر) — منصة صفقات ذكية"
+    subject = f"دعوة انضمام لبوابة الإدارة المركزية والرقابة — منصة صفقات ذكية"
     
     html_content = f"""
     <div dir="rtl" style="font-family: Arial, sans-serif; color: #0f172a; max-width: 600px; margin: auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;">
@@ -50,7 +50,7 @@ def send_invitation_email(invitation, invite_url):
       <p style="font-size: 15px;">السيد(ة) المحترم(ة): <strong>{invitation.full_name}</strong>،</p>
       
       <p style="font-size: 14px; line-height: 1.6;">
-        تمت دعوتكم رسمياً للانضمام إلى فريق عمل <strong>بوابة الإدارة المركزية والرقابة الوطنية (عين الصقر)</strong> وفق أحكام القانون رقم 23-12، وذلك بالدور والصلاحيات الرقابية التالية:
+        تمت دعوتكم رسمياً للانضمام إلى فريق عمل <strong>بوابة الإدارة المركزية والرقابة</strong> وفق أحكام القانون رقم 23-12، وذلك بالدور والصلاحيات الرقابية التالية:
       </p>
       
       <div style="margin: 16px 0; padding: 12px 18px; background-color: #f1f5f9; border-inline-start: 4px solid #006233; border-radius: 4px;">
@@ -91,7 +91,7 @@ def send_invitation_email(invitation, invite_url):
 
     plain_message = f"""
 الجمهورية الجزائرية الديمقراطية الشعبية
-منصة صفقات ذكية — فضاء الإدارة المركزية والرقابة (عين الصقر)
+منصة صفقات ذكية — فضاء الإدارة المركزية والرقابة
 
 السيد(ة) المحترم(ة): {invitation.full_name}
 تمت دعوتكم للانضمام إلى بوابة الإدارة المركزية بالدور: {invitation.get_role_display()}.

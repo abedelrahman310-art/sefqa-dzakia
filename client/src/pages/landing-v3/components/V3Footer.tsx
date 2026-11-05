@@ -71,7 +71,7 @@ export const V3Footer: React.FC = () => {
               </li>
               <li>
                 <Link href="/central" className="hover:text-[#146ef5] transition-colors">
-                  {isAr ? 'عين الصقر المركزية' : 'Supervision'}
+                  {isAr ? 'الرقابة المركزية' : 'Contrôle Central'}
                 </Link>
               </li>
               <li>

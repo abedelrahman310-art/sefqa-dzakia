@@ -1030,7 +1030,7 @@ def generate_legal_notice_pdf(notice, user=None) -> bytes:
 def generate_administrative_injunction_pdf(injunction, user=None) -> bytes:
     """
     توليد وثيقة الإعذار الإداري الرقابي الرسمي (Injonction Administrative de Contrôle)
-    الصادر عن الإدارة المركزية (المفتشية العامة / عين الصقر) وفقاً للقانون 23-12 والمرسوم 15-247.
+    الصادر عن الإدارة المركزية (المفتشية العامة للرقابة) وفقاً للقانون 23-12 والمرسوم 15-247.
     """
     buffer = io.BytesIO()
     doc = SimpleDocTemplate(
@@ -1041,7 +1041,7 @@ def generate_administrative_injunction_pdf(injunction, user=None) -> bytes:
         topMargin=36,
         bottomMargin=40,
         title=f"Injonction_{injunction.reference}",
-        author="Safaqat Dhakia Central Hawk Eye",
+        author="Safaqat Dhakia Central Oversight",
     )
 
     styles = get_pdf_styles()
@@ -1050,7 +1050,7 @@ def generate_administrative_injunction_pdf(injunction, user=None) -> bytes:
     # 1. الترويسة الرسمية للجمهورية والإدارة المركزية
     story.append(Paragraph(ar("الجمهورية الجزائرية الديمقراطية الشعبية"), styles["HeaderRepublic"]))
     story.append(Paragraph(ar("وزارة المالية — المفتشية العامة للصفقات العمومية وتفويضات المرفق العام"), styles["HeaderSub"]))
-    story.append(Paragraph(ar("المنظومة الوطنية للرقابة المركزية والنزاهة التعاقدية (عين الصقر)"), styles["BodyBold"]))
+    story.append(Paragraph(ar("المنظومة المركزية للرقابة والنزاهة التعاقدية"), styles["BodyBold"]))
     story.append(Spacer(1, 8))
 
     # 2. خط أحمر فاصل وعنوان الإعذار الرقابي
@@ -1073,7 +1073,7 @@ def generate_administrative_injunction_pdf(injunction, user=None) -> bytes:
     # 3. الأسانيد القانونية الآمرة
     story.append(Paragraph(ar("• بمقتضى القانون رقم 23-12 المؤرخ في 5 أوت 2023 المحدد للقواعد العامة للصفقات العمومية، لا سيما المواد 13 (حظر تجزئة الصفقات)، 67 (التبليغ الإلكتروني)، و75 (إقصاء المخالفين)؛"), styles["MetaValue"]))
     story.append(Paragraph(ar("• بمقتضى المرسوم الرئاسي رقم 15-247 المؤرخ في 16 سبتمبر 2015 المنظم للصفقات العمومية، لا سيما المادتين 138 و139 (ضوابط الملاحق)؛"), styles["MetaValue"]))
-    story.append(Paragraph(ar("• وبناءً على مخرجات التدقيق الرقابي الآلي والتحريات الجنائية المنجزة عبر منظومة عين الصقر المركزية."), styles["MetaValue"]))
+    story.append(Paragraph(ar("• وبناءً على مخرجات التدقيق الرقابي الآلي والتحريات المنجزة عبر منظومة الرقابة المركزية."), styles["MetaValue"]))
     story.append(Spacer(1, 10))
 
     # 4. جدول بيانات المصلحة والصفقة المعنية
@@ -1150,7 +1150,7 @@ def generate_administrative_injunction_pdf(injunction, user=None) -> bytes:
     # 8. التوقيع والأختام الرسمية
     sig_headers = [
         Paragraph(ar("المصلحة المتعاقدة الآمرة بالصرف (التسلم والاطلاع الرسمي)"), styles["StampBold"]),
-        Paragraph(ar("المفتشية العامة للرقابة والنزاهة عين الصقر (الاعتماد والختم الرقمي)"), styles["StampBold"]),
+        Paragraph(ar("المفتشية العامة للرقابة والنزاهة (الاعتماد والختم الرقمي)"), styles["StampBold"]),
     ]
     ack_info = f"تم الاستلام: {injunction.acknowledged_at.strftime('%Y-%m-%d %H:%M')}" if injunction.acknowledged_at else "مبلّغ إلكترونياً عبر المنصة الرقمية"
     sig_space = [
