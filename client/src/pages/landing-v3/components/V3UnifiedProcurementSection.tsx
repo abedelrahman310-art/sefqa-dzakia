@@ -28,32 +28,32 @@ interface MilestoneItem {
   id: number;
   stepNumber: string;
   title: string;
-  titleFr: string;
+  titleFr?: string;
   badge: string;
-  badgeFr: string;
+  badgeFr?: string;
 
   // الرقابة المركزية بالذكاء الاصطناعي (Supervision & Audit)
   centralRole: string;
-  centralRoleFr: string;
+  centralRoleFr?: string;
   centralDetail: string;
-  centralDetailFr: string;
+  centralDetailFr?: string;
 
   // المصلحة المتعاقدة (Contracting Authority)
   authorityTitle: string;
-  authorityTitleFr: string;
+  authorityTitleFr?: string;
   authorityRole: string;
-  authorityRoleFr: string;
+  authorityRoleFr?: string;
   authorityDetail: string;
-  authorityDetailFr: string;
+  authorityDetailFr?: string;
   authorityIcon: React.ComponentType<{ className?: string }>;
 
   // المتعامل الاقتصادي (Economic Operator)
   operatorTitle: string;
-  operatorTitleFr: string;
+  operatorTitleFr?: string;
   operatorRole: string;
-  operatorRoleFr: string;
+  operatorRoleFr?: string;
   operatorDetail: string;
-  operatorDetailFr: string;
+  operatorDetailFr?: string;
   operatorIcon: React.ComponentType<{ className?: string }>;
 }
 

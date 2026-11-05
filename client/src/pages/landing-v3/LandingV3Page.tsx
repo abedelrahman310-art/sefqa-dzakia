@@ -7,6 +7,7 @@ import V3WhySafaqatSection from './components/V3WhySafaqatSection';
 import V3FivePortalsSection from './components/V3FivePortalsSection';
 import V3AIToolsSection from './components/V3AIToolsSection';
 import V3ComplianceTrustSection from './components/V3ComplianceTrustSection';
+import V3QrCodeCard from './components/V3QrCodeCard';
 import V3Footer from './components/V3Footer';
 import V3SectionDivider from './components/V3SectionDivider';
 
@@ -96,7 +97,7 @@ export function LandingV3Page() {
         <V3SectionDivider bg="bg-[#f8fafc]" />
 
         {/* ─── بداية القسم 4: الامتثال والثقة ─── */}
-        <V3ComplianceTrustSection />
+        <V3ComplianceTrustSection qrSlot={<V3QrCodeCard />} />
         {/* ─── نهاية القسم 4: الامتثال والثقة ─── */}
 
         {/* فاصل وطني سيادي ختامي قبل التذييل */}

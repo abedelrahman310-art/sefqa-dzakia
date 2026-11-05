@@ -52,12 +52,14 @@ export function GPSFieldVerificationModal({
   onClose,
   dealTitle,
   dealReference,
-  milestoneTitle = isAr ? 'معاينة تقدم الأشغال والمطابقة الميدانية' : 'Constat d’avancement des travaux et conformité sur site',
-  wilaya = isAr ? 'الجزائر' : 'Alger',
+  milestoneTitle: customMilestoneTitle,
+  wilaya: customWilaya,
   onSaveVerification,
 }: GPSFieldVerificationModalProps) {
   const { dir, lang } = useI18n();
   const isAr = lang === 'ar';
+  const milestoneTitle = customMilestoneTitle || (isAr ? 'معاينة تقدم الأشغال والمطابقة الميدانية' : 'Constat d’avancement des travaux et conformité sur site');
+  const wilaya = customWilaya || (isAr ? 'الجزائر' : 'Alger');
 
   const [locating, setLocating] = useState(false);
   const [gpsCoords, setGpsCoords] = useState<{

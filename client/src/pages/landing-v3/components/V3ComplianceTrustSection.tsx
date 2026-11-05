@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'wouter';
 import { useI18n } from '@/i18n';
+import { V3QrCodeCard } from './V3QrCodeCard';
 import {
   Scale,
   FileText,
@@ -12,8 +13,12 @@ import {
   ShieldCheck,
 } from 'lucide-react';
 
+interface V3ComplianceTrustSectionProps {
+  qrSlot?: React.ReactNode;
+}
+
 /* ─── بداية القسم 4: الامتثال والثقة ─── */
-export const V3ComplianceTrustSection: React.FC = () => {
+export const V3ComplianceTrustSection: React.FC<V3ComplianceTrustSectionProps> = ({ qrSlot }) => {
   const { lang, dir } = useI18n();
   const isAr = lang === 'ar';
   const ArrowIcon = dir === 'rtl' ? ArrowLeft : ArrowRight;
@@ -124,33 +129,41 @@ export const V3ComplianceTrustSection: React.FC = () => {
         </div>
 
         {/* ══════════════════════════════════════════════════════════════════════
-            بطاقة مشروع رقمي جزائري مبتكر
+            بطاقة مشروع رقمي جزائري مبتكر وبجانبها بطاقة رمز QR للدخول السريع
             تصميم فاتح ونظيف ومحتوى وطني مؤسسي دقيق
             ══════════════════════════════════════════════════════════════════════ */}
-        <div className="relative bg-white rounded-2xl border border-emerald-200/80 p-6 sm:p-8 shadow-xs hover:shadow-md transition-all duration-300 max-w-4xl mx-auto overflow-hidden">
-          {/* لمسة زليج هندسية خفيفة جداً في زاوية البطاقة */}
-          <div
-            className="absolute top-0 right-0 w-36 h-36 pointer-events-none opacity-[0.035]"
-            style={{
-              backgroundImage: `radial-gradient(#006233 1px, transparent 1px)`,
-              backgroundSize: '12px 12px',
-            }}
-          />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 max-w-4xl mx-auto items-stretch">
+          {/* بطاقة مشروع رقمي جزائري مبتكر */}
+          <div className="lg:col-span-2 relative bg-white rounded-2xl border border-emerald-200/80 p-6 sm:p-8 shadow-xs hover:shadow-md transition-all duration-300 overflow-hidden flex flex-col justify-center">
+            {/* لمسة زليج هندسية خفيفة جداً في زاوية البطاقة */}
+            <div
+              className="absolute top-0 right-0 w-36 h-36 pointer-events-none opacity-[0.035]"
+              style={{
+                backgroundImage: `radial-gradient(#006233 1px, transparent 1px)`,
+                backgroundSize: '12px 12px',
+              }}
+            />
 
-          <div className="relative flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-5">
-            <div className="size-12 rounded-2xl bg-emerald-50 border border-emerald-200/90 flex items-center justify-center text-[#006233] shrink-0 shadow-2xs">
-              <Sparkles className="size-6" strokeWidth={1.75} />
+            <div className="relative flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-5">
+              <div className="size-12 rounded-2xl bg-emerald-50 border border-emerald-200/90 flex items-center justify-center text-[#006233] shrink-0 shadow-2xs">
+                <Sparkles className="size-6" strokeWidth={1.75} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="text-lg sm:text-xl font-bold text-slate-900 mb-1.5">
+                  {isAr ? 'مشروع رقمي جزائري مبتكر' : 'Projet Numérique Algérien Innovant'}
+                </h3>
+                <p className="text-sm text-slate-600 font-medium leading-relaxed">
+                  {isAr
+                    ? 'منصة رقمية جزائرية تدعم رقمنة الصفقات العمومية والشفافية والامتثال'
+                    : 'Plateforme numérique algérienne soutenant la dématérialisation des marchés publics, la transparence et la conformité.'}
+                </p>
+              </div>
             </div>
-            <div className="flex-1 min-w-0">
-              <h3 className="text-lg sm:text-xl font-bold text-slate-900 mb-1.5">
-                {isAr ? 'مشروع رقمي جزائري مبتكر' : 'Projet Numérique Algérien Innovant'}
-              </h3>
-              <p className="text-sm text-slate-600 font-medium leading-relaxed">
-                {isAr
-                  ? 'منصة رقمية جزائرية تدعم رقمنة الصفقات العمومية والشفافية والامتثال'
-                  : 'Plateforme numérique algérienne soutenant la dématérialisation des marchés publics, la transparence et la conformité.'}
-              </p>
-            </div>
+          </div>
+
+          {/* بطاقة رمز QR للدخول المباشر إلى المنصة */}
+          <div className="lg:col-span-1 flex">
+            {qrSlot || <V3QrCodeCard className="w-full h-full" />}
           </div>
         </div>
 

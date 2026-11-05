@@ -280,7 +280,7 @@ export const AIBOQEstimatorModal: React.FC<AIBOQEstimatorModalProps> = ({
                   >
                     {ALGERIA_69_WILAYAS.map((w) => (
                       <option key={w.code} value={w.code}>
-                        {w.code} - {isAr ? (w.name_ar || (w as any).ar) : (w.name_fr || (w as any).fr || (w as any).ar)}
+                        {w.code} - {isAr ? w.ar : w.fr}
                       </option>
                     ))}
                   </select>
