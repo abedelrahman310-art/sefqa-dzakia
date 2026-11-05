@@ -39,13 +39,15 @@ export function AbnormallyLowBidModal({
   data,
   onSendInquiry,
 }: AbnormallyLowBidModalProps) {
-  const { dir } = useI18n();
+  const { dir, lang } = useI18n();
+  const isAr = lang === 'ar';
   const [copied, setCopied] = useState(false);
   const [responseDays, setResponseDays] = useState(7);
 
   if (!isOpen || !data) return null;
 
-  const letterText = `الجمهورية الجزائرية الديمقراطية الشعبية
+  const letterText = isAr
+    ? `الجمهورية الجزائرية الديمقراطية الشعبية
 ${data.authorityName}
 لجنة فتح الأظرفة وتقييم العروض (COP)
 
@@ -70,7 +72,33 @@ ${data.authorityName}
 وتقبلوا فائق عبارات التقدير والاحترام.
 
 رئيس لجنة فتح الأظرفة وتقييم العروض
-الختم والتوقيع:`;
+الختم والتوقيع:`
+    : `RÉPUBLIQUE ALGÉRIENNE DÉMOCRATIQUE ET POPULAIRE
+${data.authorityName}
+Commission d'ouverture des plis et d'évaluation des offres (COP)
+
+Réf : ${data.dealReference}
+Date : ${new Date().toLocaleDateString('fr-DZ')}
+
+À l'attention de : Représentant de l'entreprise ${data.operatorName}
+Objet : Demande d'éclaircissements et de justification d'offre anormalement basse (Art. 72 de la loi 23-12)
+Marché : ${data.dealTitle}
+
+Madame, Monsieur,
+
+Dans le cadre de l'examen et de l'évaluation des offres financières relatives au marché référencé ci-dessus par la commission d'ouverture des plis et d'évaluation des offres, il a été constaté que le montant global proposé par votre entreprise, s'élevant à [ ${formatCurrency(data.financialAmount)} ], présente un écart négatif de (${Math.abs(data.deviationPercent).toFixed(1)}%) par rapport à la moyenne des offres recevables et à l'estimation administrative du service contractant.
+
+En application des dispositions de l'article 72 de la loi n° 23-12 fixant les règles générales relatives aux marchés publics, nous vous prions de bien vouloir fournir des justifications écrites détaillées et étayées par des pièces justificatives concernant :
+1. Les modes de calcul des prix unitaires jugés anormalement bas et les conditions d'approvisionnement en matériaux et équipements.
+2. Les solutions techniques retenues garantissant la bonne exécution des prestations contractuelles.
+3. Le respect des obligations découlant de la législation sociale et fiscale en vigueur.
+
+Un délai de (${responseDays}) jours ouvrables à compter de la date de réception de la présente vous est accordé pour déposer vos justifications auprès du secrétariat de la commission. À défaut de réponse ou en cas de justifications jugées insuffisantes, votre offre financière sera rejetée conformément aux dispositions réglementaires.
+
+Veuillez agréer, Madame, Monsieur, l'expression de nos salutations distinguées.
+
+Le Président de la Commission d'ouverture et d'évaluation des offres
+Cachet et signature :`;
 
   const handleCopy = () => {
     navigator.clipboard.writeText(letterText);
@@ -104,17 +132,17 @@ ${data.authorityName}
             <div>
               <div className="flex items-center gap-2">
                 <span className="rounded-full bg-amber-200/80 px-2.5 py-0.5 text-[10px] font-black text-amber-900">
-                  تطبيق أحكام المادة 72 (القانون 23-12)
+                  {isAr ? 'تطبيق أحكام المادة 72 (القانون 23-12)' : 'Application de l\'article 72 (Loi 23-12)'}
                 </span>
                 <span className="text-xs text-amber-800 font-bold">
-                  انحراف: {Math.abs(data.deviationPercent).toFixed(1)}%-
+                  {isAr ? `انحراف: ${Math.abs(data.deviationPercent).toFixed(1)}%-` : `Écart : -${Math.abs(data.deviationPercent).toFixed(1)}%`}
                 </span>
               </div>
               <h2 className="text-base sm:text-lg font-black text-slate-900 mt-1">
-                توليد استفسار رسمي لعرض منخفض بشكل غير طبيعي
+                {isAr ? 'توليد استفسار رسمي لعرض منخفض بشكل غير طبيعي' : 'Demande officielle de justification d’une offre anormalement basse'}
               </h2>
               <p className="text-xs text-slate-600 mt-0.5">
-                المتعهد: <strong className="text-slate-900">{data.operatorName}</strong> — المبلغ المقترح:{' '}
+                {isAr ? 'المتعهد:' : 'Soumissionnaire :'} <strong className="text-slate-900">{data.operatorName}</strong> — {isAr ? 'المبلغ المقترح:' : 'Montant proposé :'}{' '}
                 <strong className="text-amber-800">{formatCurrency(data.financialAmount)}</strong>
               </p>
             </div>
@@ -124,7 +152,9 @@ ${data.authorityName}
         {/* ─── محتوى الخطاب الرسمي ─── */}
         <div className="p-6 space-y-4 flex-1">
           <div className="flex items-center justify-between text-xs">
-            <label className="font-bold text-slate-700">المهلة القانونية الممنوحة للرد (أيام):</label>
+            <label className="font-bold text-slate-700">
+              {isAr ? 'المهلة القانونية الممنوحة للرد (أيام):' : 'Délai légal accordé pour la réponse (jours) :'}
+            </label>
             <div className="flex items-center gap-2">
               {[5, 7, 10].map((days) => (
                 <button
@@ -137,7 +167,7 @@ ${data.authorityName}
                       : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                   }`}
                 >
-                  {days} أيام
+                  {isAr ? `${days} أيام` : `${days} jours`}
                 </button>
               ))}
             </div>
@@ -156,7 +186,7 @@ ${data.authorityName}
               className="absolute top-3 end-3 inline-flex items-center gap-1.5 rounded-lg bg-white border border-slate-200 px-3 py-1.5 text-xs font-bold text-slate-700 shadow-2xs hover:bg-slate-50 transition-all cursor-pointer"
             >
               {copied ? <Check className="size-3.5 text-emerald-600" /> : <Copy className="size-3.5" />}
-              <span>{copied ? 'تم النسخ' : 'نسخ الخطاب'}</span>
+              <span>{copied ? (isAr ? 'تم النسخ' : 'Copié') : (isAr ? 'نسخ الخطاب' : 'Copier')}</span>
             </button>
           </div>
         </div>
@@ -164,7 +194,9 @@ ${data.authorityName}
         {/* ─── التذييل ─── */}
         <div className="p-4 border-t border-slate-100 bg-slate-50/80 rounded-b-3xl flex items-center justify-between">
           <span className="text-xs text-slate-500">
-            سيتم إرسال هذا الإشعار رسمياً إلى فضاء المتعامل وتوثيقه في سجل التدقيق.
+            {isAr
+              ? 'سيتم إرسال هذا الإشعار رسمياً إلى فضاء المتعامل وتوثيقه في سجل التدقيق.'
+              : 'Cette notification sera transmise officiellement à l\'opérateur et consignée dans le registre d\'audit.'}
           </span>
 
           <div className="flex items-center gap-2">
@@ -173,7 +205,7 @@ ${data.authorityName}
               onClick={onClose}
               className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
             >
-              إلغاء
+              {isAr ? 'إلغاء' : 'Annuler'}
             </button>
 
             <button
@@ -185,7 +217,7 @@ ${data.authorityName}
               className="inline-flex items-center gap-2 rounded-xl bg-amber-600 px-5 py-2 text-xs font-bold text-white shadow-md hover:bg-amber-700 transition-all cursor-pointer"
             >
               <Send className="size-3.5" />
-              <span>إرسال الاستفسار للمتعامل</span>
+              <span>{isAr ? 'إرسال الاستفسار للمتعامل' : 'Transmettre à l\'opérateur'}</span>
             </button>
           </div>
         </div>

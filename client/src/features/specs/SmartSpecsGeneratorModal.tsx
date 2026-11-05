@@ -38,7 +38,8 @@ export function SmartSpecsGeneratorModal({
   onClose,
   onApplyGeneratedClauses,
 }: SmartSpecsGeneratorModalProps) {
-  const { dir } = useI18n();
+  const { dir, lang } = useI18n();
+  const isAr = lang === 'ar';
   const isRtl = dir === 'rtl';
 
   const [step, setStep] = useState<1 | 2 | 3>(1);
@@ -124,7 +125,7 @@ export function SmartSpecsGeneratorModal({
           content:
             evaluationSystem === 'technical_financial_ratio'
               ? `يتم اختيار العرض الأفضل اقتصادياً بناءً على ترجيح التنقيط التقني (70%) والتنقيط المالي (30%). تطبق لجنة فتح الأظرفة وتقييم العروض أحكام المادة 72 من القانون 23-12 بشأن العروض المنخفضة بشكل غير طبيعي، ويُلزم المتعهد بتقديم تبريرات كتابية مفصلة عن كلفة موارده وأسعاره الأحادية متى قل عرضه بنسبة تتجاوز 25% عن المتوسط المعتمد.`
-              : `يُمنح المشروع للمتعهد صاحب العرض الأقل ثمناً من بين العروض المقبولة تقنياً والمستوفية للشروط الإدارية والمالية وفق المادة 72، بعد التحقق من واقعية الأسعار ومطابقتها للمعايير المعمول بها.`,
+              : `يُمنح المشروع للمتعهد صاحب العرض {isAr ? "الأقل ثمناً من بين العروض المقبولة تقنياً" : "Moins-disant parmi les offres techniquement recevables"} والمستوفية للشروط الإدارية والمالية وفق المادة 72، بعد التحقق من واقعية الأسعار ومطابقتها للمعايير المعمول بها.`,
           isMandatory: true,
         },
         {
@@ -232,7 +233,7 @@ export function SmartSpecsGeneratorModal({
 
               {/* عنوان المشروع */}
               <div>
-                <label className="mb-1 block text-xs font-bold text-slate-700">عنوان وموضوع الصفقة:</label>
+                <label className="mb-1 block text-xs font-bold text-slate-700">{isAr ? "عنوان وموضوع الصفقة:" : "Objet et intitulé du marché :"}</label>
                 <input
                   type="text"
                   value={projectTitle}
@@ -244,7 +245,7 @@ export function SmartSpecsGeneratorModal({
               {/* الميزانية التقديرية ومدة الإنجاز */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 <div>
-                  <label className="mb-1 block text-xs font-bold text-slate-700">الغلاف المالي التقديري (د.ج):</label>
+                  <label className="mb-1 block text-xs font-bold text-slate-700">{isAr ? "الغلاف المالي التقديري (د.ج):" : "Montant prévisionnel estimé (DZD) :"}</label>
                   <input
                     type="number"
                     value={estimatedBudget}
@@ -253,7 +254,7 @@ export function SmartSpecsGeneratorModal({
                   />
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-bold text-slate-700">مدة الإنجاز التعاقدية (بالأشهر):</label>
+                  <label className="mb-1 block text-xs font-bold text-slate-700">{isAr ? "مدة الإنجاز التعاقدية (بالأشهر):" : "Délai d’exécution contractuel (en mois) :"}</label>
                   <input
                     type="number"
                     value={executionMonths}
@@ -267,7 +268,7 @@ export function SmartSpecsGeneratorModal({
 
           {step === 2 && (
             <div className="space-y-4">
-              <h3 className="text-sm font-bold text-slate-900">الخطوة 2: الشروط القانونية الإلزامية ومعايير الاختيار</h3>
+              <h3 className="text-sm font-bold text-slate-900">{isAr ? "الخطوة 2: الشروط القانونية الإلزامية ومعايير الاختيار" : "Étape 2 : Clauses obligatoires et critères d’évaluation"}</h3>
 
               <div className="space-y-3">
                 {/* التفضيل الوطني */}
@@ -280,7 +281,7 @@ export function SmartSpecsGeneratorModal({
                   />
                   <div>
                     <strong className="text-xs font-bold text-slate-900 block">
-                      إدراج بند هامش التفضيل الوطني 25% (المادة 85)
+                      {isAr ? "إدراج بند هامش التفضيل الوطني 25% (المادة 85)" : "Clause de préférence nationale de 25% (Article 85)"}
                     </strong>
                     <span className="text-[11px] text-slate-500 leading-snug">
                       منح أفضلية سعرية للمنتجات والمؤسسات الوطنية ذات المنشأ الجزائري لدعم الإنتاج الوطني.
@@ -298,7 +299,7 @@ export function SmartSpecsGeneratorModal({
                   />
                   <div>
                     <strong className="text-xs font-bold text-slate-900 block">
-                      إدراج بند حصة المؤسسات المصغرة والناشئة 20% (المادة 87)
+                      {isAr ? "إدراج بند حصة المؤسسات المصغرة والناشئة 20% (المادة 87)" : "Quota réservé aux start-up et PME 20% (Article 87)"}
                     </strong>
                     <span className="text-[11px] text-slate-500 leading-snug">
                       تخصيص حصة للمؤسسات الناشئة مع إعفائها من كفالة التعهد المالي لتسهيل ولوجها للصفقات العمومية.
@@ -319,7 +320,7 @@ export function SmartSpecsGeneratorModal({
                           : 'border-slate-200 bg-white text-slate-700'
                       }`}
                     >
-                      <span className="block text-xs font-bold">الأفضل اقتصادياً (ترجيح تقني 70% + مالي 30%)</span>
+                      <span className="block text-xs font-bold">{isAr ? "الأفضل اقتصادياً (ترجيح تقني 70% + مالي 30%)" : "Mieux-disant (Technique 70% + Financier 30%)"}</span>
                       <span className="text-[10px] text-slate-500 mt-0.5 block">موصى به للمشاريع ذات التعقيد الفني</span>
                     </button>
 
@@ -346,7 +347,7 @@ export function SmartSpecsGeneratorModal({
               <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                 <div>
                   <h3 className="text-sm font-bold text-slate-900">
-                    الخطوة 3: معاينة البنود المولّدة وفحص السلامة القانونية
+                    {isAr ? "الخطوة 3: معاينة البنود المولّدة وفحص السلامة القانونية" : "Étape 3 : Aperçu des clauses générées et contrôle de conformité"}
                   </h3>
                   <p className="text-xs text-slate-500">
                     تم توليد ({generatedClauses.length}) بنود نموذجية مطابقة بنسبة 100% لنماذج القانون 23-12.
@@ -401,7 +402,7 @@ export function SmartSpecsGeneratorModal({
               className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
             >
               {isRtl ? <ArrowRight className="size-4" /> : <ArrowLeft className="size-4" />}
-              <span>السابق</span>
+              <span>{isAr ? "السابق" : "Précédent"}</span>
             </button>
           ) : (
             <div />

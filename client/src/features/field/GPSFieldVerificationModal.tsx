@@ -52,11 +52,12 @@ export function GPSFieldVerificationModal({
   onClose,
   dealTitle,
   dealReference,
-  milestoneTitle = 'معاينة تقدم الأشغال والمطابقة الميدانية',
-  wilaya = 'الجزائر',
+  milestoneTitle = isAr ? 'معاينة تقدم الأشغال والمطابقة الميدانية' : 'Constat d’avancement des travaux et conformité sur site',
+  wilaya = isAr ? 'الجزائر' : 'Alger',
   onSaveVerification,
 }: GPSFieldVerificationModalProps) {
-  const { dir } = useI18n();
+  const { dir, lang } = useI18n();
+  const isAr = lang === 'ar';
 
   const [locating, setLocating] = useState(false);
   const [gpsCoords, setGpsCoords] = useState<{
@@ -77,7 +78,7 @@ export function GPSFieldVerificationModal({
   // طلب الموقع الجغرافي الفوري عالي الدقة
   const requestLocation = () => {
     if (!navigator.geolocation) {
-      setGpsError('خدمة تحديد الموقع الجغرافي (GPS) غير مدعومة في متصفحك.');
+      setGpsError(isAr ? 'خدمة تحديد الموقع الجغرافي (GPS) غير مدعومة في متصفحك.' : 'La géolocalisation GPS n’est pas supportée par votre navigateur.');
       return;
     }
 
@@ -106,7 +107,7 @@ export function GPSFieldVerificationModal({
           altitude: 45,
         };
         setGpsCoords(fallbackCoords);
-        setGpsError('تعذر جلب إحداثيات القمر الصناعي المباشرة (تم استخدام إحداثيات الورشة المسجلة احتياطياً).');
+        setGpsError(isAr ? 'تعذر جلب إحداثيات القمر الصناعي المباشرة (تم استخدام إحداثيات الورشة المسجلة احتياطياً).' : 'Impossible de capter les coordonnées satellite en direct (coordonnées chantier appliquées).');
         setLocating(false);
         generateProofHash(fallbackCoords);
       },
@@ -193,15 +194,15 @@ export function GPSFieldVerificationModal({
           <div className="flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
             <span className="text-xs font-bold text-emerald-800 tracking-wide uppercase">
-              التوثيق الميداني المعتمد بالبصمة الجغرافية والزمنية المشفرة
+              {isAr ? "التوثيق الميداني المعتمد بالبصمة الجغرافية والزمنية المشفرة" : "Constat de chantier certifié par géolocalisation et horodatage"}
             </span>
           </div>
           <h2 className="text-lg md:text-xl font-extrabold text-navy-950 flex items-center gap-2">
             <MapPin className="w-5 h-5 text-primary" />
-            <span>محضر المعاينة الميدانية الرقمي غير القابل للتلاعب</span>
+            <span>{isAr ? "محضر المعاينة الميدانية الرقمي الآمن والقابل للتتبع" : "Procès-verbal de constat de chantier sécurisé et traçable"}</span>
           </h2>
           <p className="text-xs text-muted-foreground leading-relaxed">
-            تثبيت الحضور الفعلي في ورشة الأشغال مع ختم الموقع الجغرافي بالقمر الصناعي (GPS) وبصمة SHA-256 قبل المصادقة على كشوف الحساب أو صرف المستحقات المالية.
+            {isAr ? "تثبيت الحضور الفعلي في ورشة الأشغال مع ختم الموقع الجغرافي بالقمر الصناعي (GPS) وبصمة SHA-256 قبل المصادقة على كشوف الحساب أو صرف المستحقات المالية." : "Attestation de présence physique sur site avec coordonnées GPS certifiées et empreinte SHA-256 avant visa des situations de travaux."}
           </p>
         </div>
 
@@ -210,9 +211,9 @@ export function GPSFieldVerificationModal({
             <div className="w-16 h-16 rounded-full bg-emerald-600 text-white flex items-center justify-center mx-auto shadow-lg">
               <CheckCircle2 className="w-10 h-10" />
             </div>
-            <h3 className="text-base font-bold text-emerald-950">تم توثيق وتشفير المعاينة الميدانية بنجاح</h3>
+            <h3 className="text-base font-bold text-emerald-950">{isAr ? "تم توثيق وتشفير المعاينة الميدانية بنجاح" : "Constat de chantier certifié et enregistré avec succès"}</h3>
             <p className="text-xs text-emerald-800 leading-relaxed font-mono break-all">
-              البصمة الرقمية المعتمدة: {sha256Hash}
+              {isAr ? `البصمة الرقمية المعتمدة: ${sha256Hash}` : `Empreinte numérique : ${sha256Hash}`}
             </p>
           </div>
         ) : (
@@ -234,7 +235,7 @@ export function GPSFieldVerificationModal({
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Compass className={`w-4 h-4 text-emerald-400 ${locating ? 'animate-spin' : ''}`} />
-                  <span className="text-xs font-bold text-slate-200">إحداثيات الموقع بالقمر الصناعي:</span>
+                  <span className="text-xs font-bold text-slate-200">{isAr ? "إحداثيات الموقع بالقمر الصناعي:" : "Coordonnées satellite GPS :"}</span>
                 </div>
                 <Button
                   type="button"
@@ -244,33 +245,33 @@ export function GPSFieldVerificationModal({
                   disabled={locating}
                   className="text-xs h-7 text-emerald-400 hover:text-white hover:bg-white/10"
                 >
-                  {locating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'إعادة تحديد الإحداثيات'}
+                  {locating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : (isAr ? 'إعادة تحديد الإحداثيات' : 'Actualiser le GPS')}
                 </Button>
               </div>
 
               {gpsCoords ? (
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs font-mono">
                   <div className="bg-white/10 p-2 rounded-xl">
-                    <span className="text-slate-400 block text-[10px]">خط العرض (Lat)</span>
+                    <span className="text-slate-400 block text-[10px]">{isAr ? "خط العرض (Lat)" : "Latitude (Lat)"}</span>
                     <strong className="text-white text-xs">{gpsCoords.latitude.toFixed(6)}°</strong>
                   </div>
                   <div className="bg-white/10 p-2 rounded-xl">
-                    <span className="text-slate-400 block text-[10px]">خط الطول (Lng)</span>
+                    <span className="text-slate-400 block text-[10px]">{isAr ? "خط الطول (Lng)" : "Longitude (Lng)"}</span>
                     <strong className="text-white text-xs">{gpsCoords.longitude.toFixed(6)}°</strong>
                   </div>
                   <div className="bg-white/10 p-2 rounded-xl">
-                    <span className="text-slate-400 block text-[10px]">دقة التحديد (Accuracy)</span>
+                    <span className="text-slate-400 block text-[10px]">{isAr ? "دقة التحديد (Accuracy)" : "Précision"}</span>
                     <strong className="text-emerald-400 text-xs">± {gpsCoords.accuracy} متر</strong>
                   </div>
                   <div className="bg-white/10 p-2 rounded-xl">
-                    <span className="text-slate-400 block text-[10px]">الارتفاع (Altitude)</span>
-                    <strong className="text-white text-xs">{gpsCoords.altitude ? `${gpsCoords.altitude} م` : 'سطح البحر'}</strong>
+                    <span className="text-slate-400 block text-[10px]">{isAr ? "الارتفاع (Altitude)" : "Altitude"}</span>
+                    <strong className="text-white text-xs">{gpsCoords.altitude ? `${gpsCoords.altitude} م` : '{isAr ? "سطح البحر" : "Niveau de la mer"}'}</strong>
                   </div>
                 </div>
               ) : (
                 <div className="text-xs text-slate-400 py-2 flex items-center gap-2">
                   <Loader2 className="w-4 h-4 animate-spin text-emerald-400" />
-                  <span>جاري الاتصال بالقمر الصناعي لالتقاط الإحداثيات المباشرة...</span>
+                  <span>{isAr ? "جاري الاتصال بالقمر الصناعي لالتقاط الإحداثيات المباشرة..." : "Connexion satellite en cours pour capter les coordonnées..."}</span>
                 </div>
               )}
 
@@ -285,17 +286,17 @@ export function GPSFieldVerificationModal({
             {/* بيانات المشرف وصفة المعاينة */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
               <div className="space-y-1.5">
-                <label className="font-semibold text-navy-900 block">اسم المعاين المعتمد:</label>
+                <label className="font-semibold text-navy-900 block">{isAr ? "اسم المعاين المعتمد:" : "Nom de l’inspecteur assermenté :"}</label>
                 <Input
                   value={inspectorName}
                   onChange={(e) => setInspectorName(e.target.value)}
                   className="text-xs rounded-xl h-9"
-                  placeholder="الاسم واللقب..."
+                  placeholder={isAr ? "الاسم واللقب..." : "Nom et prénom..."}
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="font-semibold text-navy-900 block">صفة هيئة الرقابة أو المتابعة:</label>
+                <label className="font-semibold text-navy-900 block">{isAr ? "صفة هيئة الرقابة أو المتابعة:" : "Qualité de l’organisme de contrôle :"}</label>
                 <select
                   value={inspectorRole}
                   onChange={(e) => setInspectorRole(e.target.value as any)}

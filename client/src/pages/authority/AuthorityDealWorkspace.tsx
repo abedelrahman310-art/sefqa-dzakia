@@ -235,21 +235,27 @@ function SpecsBuyersManager({ dealId }: { dealId: string }) {
         <div className="p-4 rounded-2xl bg-white border border-[#D5DDEA] shadow-sm">
           <div className="text-xs font-bold text-gray-500">{t('authority.specs.total_buyers')}</div>
           <div className="text-2xl font-black text-navy-900 mt-1">{buyers.length}</div>
-          <div className="text-[11px] text-gray-400 mt-0.5">متعاملين سحبوا الدفتر رسمياً</div>
+          <div className="text-[11px] text-gray-400 mt-0.5">
+            {lang === 'ar' ? 'متعاملين سحبوا الدفتر رسمياً' : 'Opérateurs ayant retiré le cahier'}
+          </div>
         </div>
         <div className="p-4 rounded-2xl bg-white border border-[#D5DDEA] shadow-sm">
           <div className="text-xs font-bold text-gray-500">{t('authority.specs.price_label')}</div>
           <div className="text-2xl font-black text-navy-900 mt-1">
             {specsPrice.toLocaleString(lang === 'ar' ? 'ar-DZ' : 'fr-FR')} {t('common.dzd')}
           </div>
-          <div className="text-[11px] text-gray-400 mt-0.5">رسوم غير قابلة للاسترداد</div>
+          <div className="text-[11px] text-gray-400 mt-0.5">
+            {lang === 'ar' ? 'رسوم غير قابلة للاسترداد' : 'Frais non remboursables'}
+          </div>
         </div>
         <div className="p-4 rounded-2xl bg-emerald-50/60 border border-emerald-200 shadow-sm">
           <div className="text-xs font-bold text-emerald-800">{t('authority.specs.total_revenue')}</div>
           <div className="text-2xl font-black text-emerald-900 mt-1">
             {totalRevenue.toLocaleString(lang === 'ar' ? 'ar-DZ' : 'fr-FR')} {t('common.dzd')}
           </div>
-          <div className="text-[11px] text-emerald-700/80 mt-0.5">محصلة عبر Chargily Pay / CIB</div>
+          <div className="text-[11px] text-emerald-700/80 mt-0.5">
+            {lang === 'ar' ? 'محصلة عبر Chargily Pay / CIB' : 'Encaissé via Chargily Pay / CIB'}
+          </div>
         </div>
       </div>
 
@@ -262,7 +268,9 @@ function SpecsBuyersManager({ dealId }: { dealId: string }) {
               <span>{t('authority.specs.buyers_register')}</span>
             </h3>
             <p className="text-xs text-gray-500 mt-0.5">
-              سجل سحب دفاتر الشروط الرقمي وفقاً لأحكام المرسوم الرئاسي 15-247
+              {lang === 'ar'
+                ? 'سجل سحب دفاتر الشروط الرقمي وفقاً لأحكام المرسوم الرئاسي 15-247'
+                : 'Registre numérique de retrait du cahier des charges (Décret présidentiel 15-247)'}
             </p>
           </div>
           <Button
@@ -271,15 +279,19 @@ function SpecsBuyersManager({ dealId }: { dealId: string }) {
             onClick={loadBuyers}
             className="text-xs rounded-xl border-[#D5DDEA]"
           >
-            تحديث
+            {t('common.refresh')}
           </Button>
         </div>
 
         {loading ? (
-          <div className="py-12 text-center text-xs text-gray-400">جاري تحميل سجل السحب...</div>
+          <div className="py-12 text-center text-xs text-gray-400">
+            {lang === 'ar' ? 'جاري تحميل سجل السحب...' : 'Chargement du registre...'}
+          </div>
         ) : buyers.length === 0 ? (
           <div className="py-12 text-center text-xs text-gray-400 bg-gray-50/50 rounded-xl border border-dashed border-gray-200">
-            لم يقم أي متعامل اقتصادي بسحب دفتر الشروط بعد.
+            {lang === 'ar'
+              ? 'لم يقم أي متعامل اقتصادي بسحب دفتر الشروط بعد'
+              : "Aucun opérateur économique n'a encore retiré le cahier des charges"}
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -317,7 +329,7 @@ function SpecsBuyersManager({ dealId }: { dealId: string }) {
                         className="inline-flex items-center gap-1 text-emerald-700 hover:underline font-bold text-xs"
                       >
                         <FileText className="w-3.5 h-3.5" />
-                        <span>تحميل PDF</span>
+                        <span>{lang === 'ar' ? 'تحميل PDF' : 'Télécharger PDF'}</span>
                       </a>
                     </td>
                   </tr>

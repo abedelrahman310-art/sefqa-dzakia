@@ -114,21 +114,21 @@ export function SmartOpportunityRadar({
       {/* ─── 1. ترويسة الرادار التنبؤي ─── */}
       <div className="relative overflow-hidden rounded-2xl border border-slate-200/90 bg-white p-5 text-slate-900 shadow-xs">
         {/* رادار الخلفية المتحرك */}
-        <div className="pointer-events-none absolute -end-10 -top-10 size-48 rounded-full border border-emerald-500/15 opacity-60 animate-ping duration-1000" />
-        <div className="pointer-events-none absolute -end-24 -bottom-24 size-72 rounded-full border border-teal-500/10" />
+        <div className="pointer-events-none absolute -end-10 -top-10 size-48 rounded-full border border-sky-500/15 opacity-60 animate-ping duration-1000" />
+        <div className="pointer-events-none absolute -end-24 -bottom-24 size-72 rounded-full border border-sky-500/10" />
 
         <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div className="flex items-center gap-3.5">
-            <div className="relative flex size-12 items-center justify-center rounded-2xl bg-gradient-to-tr from-[#006233] to-teal-600 text-white shadow-sm">
+            <div className="relative flex size-12 items-center justify-center rounded-2xl bg-gradient-to-tr from-[#0284c7] to-sky-500 text-white shadow-sm">
               <Radio className="size-6 animate-pulse" />
               <span className="absolute -top-1 -end-1 flex size-3">
-                <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-300 opacity-75" />
-                <span className="relative inline-flex size-3 rounded-full bg-emerald-400" />
+                <span className="absolute inline-flex size-full animate-ping rounded-full bg-sky-300 opacity-75" />
+                <span className="relative inline-flex size-3 rounded-full bg-sky-400" />
               </span>
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="rounded-full bg-emerald-50 border border-emerald-200/90 px-2 py-0.5 text-[10px] font-extrabold text-emerald-800 uppercase tracking-wider">
+                <span className="rounded-full bg-sky-50 border border-sky-200/90 px-2 py-0.5 text-[10px] font-extrabold text-sky-800 uppercase tracking-wider">
                   {t('operator.radar.badge_algorithm')}
                 </span>
                 <span className="text-xs text-slate-500 font-semibold">{t('operator.radar.status_active')}</span>
@@ -163,7 +163,7 @@ export function SmartOpportunityRadar({
             onClick={() => setFilterLevel('all')}
             className={`rounded-lg px-2.5 py-1 text-xs font-bold transition-all cursor-pointer ${
               filterLevel === 'all'
-                ? 'bg-[#006233] text-white shadow-xs'
+                ? 'bg-[#0284c7] text-white shadow-xs'
                 : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'
             }`}
           >
@@ -174,7 +174,7 @@ export function SmartOpportunityRadar({
             onClick={() => setFilterLevel('excellent')}
             className={`rounded-lg px-2.5 py-1 text-xs font-bold transition-all cursor-pointer ${
               filterLevel === 'excellent'
-                ? 'bg-[#006233] text-white shadow-xs'
+                ? 'bg-[#0284c7] text-white shadow-xs'
                 : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'
             }`}
           >
@@ -185,7 +185,7 @@ export function SmartOpportunityRadar({
             onClick={() => setFilterLevel('good')}
             className={`rounded-lg px-2.5 py-1 text-xs font-bold transition-all cursor-pointer ${
               filterLevel === 'good'
-                ? 'bg-[#006233] text-white shadow-xs'
+                ? 'bg-[#0284c7] text-white shadow-xs'
                 : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'
             }`}
           >
@@ -197,7 +197,7 @@ export function SmartOpportunityRadar({
       {/* ─── 2. شبكة كروت الصفقات المرصودة ─── */}
       {loading ? (
         <div className="flex flex-col items-center justify-center p-12 text-center bg-white rounded-2xl border border-slate-200/80">
-          <div className="size-10 animate-spin rounded-full border-3 border-emerald-600 border-t-transparent mb-3" />
+          <div className="size-10 animate-spin rounded-full border-3 border-sky-600 border-t-transparent mb-3" />
           <p className="text-xs font-bold text-slate-700">{t('operator.radar.loading_title')}</p>
           <p className="text-[11px] text-slate-400 mt-0.5">{t('operator.radar.loading_subtitle')}</p>
         </div>
@@ -208,10 +208,10 @@ export function SmartOpportunityRadar({
         </div>
       ) : filteredDeals.length === 0 ? (
         <div className="p-12 text-center bg-white rounded-2xl border border-slate-200/80 shadow-2xs">
-          <div className="relative mx-auto mb-4 flex size-16 items-center justify-center rounded-2xl bg-emerald-50 border border-emerald-200/80 text-emerald-700">
+          <div className="relative mx-auto mb-4 flex size-16 items-center justify-center rounded-2xl bg-sky-50 border border-sky-200/80 text-sky-700">
             <Radio className="size-8" />
             <span className="absolute -top-1 -end-1 flex size-3">
-              <span className="relative inline-flex size-3 rounded-full bg-emerald-500" />
+              <span className="relative inline-flex size-3 rounded-full bg-sky-500" />
             </span>
           </div>
           <h4 className="text-base font-bold text-slate-900">

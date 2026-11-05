@@ -104,7 +104,8 @@ const SECTION_KEYS = [
 ] as const;
 
 export function CahierSpecsEditor({ draftId }: CahierSpecsEditorProps) {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
+  const isAr = lang === 'ar';
   const [, setLocation] = useLocation();
 
   const [loading, setLoading] = useState(true);
@@ -454,7 +455,7 @@ export function CahierSpecsEditor({ draftId }: CahierSpecsEditorProps) {
               className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-3 rounded-xl shadow transition-colors inline-flex items-center gap-2"
             >
               <Sparkles className="w-4 h-4 text-emerald-100" />
-              <span>توليد دفتر شروط ذكي ومطابق قانونياً (AI Generator)</span>
+              <span>{isAr ? "توليد دفتر شروط ذكي ومطابق قانونياً (AI Generator)" : "Générateur de cahier des charges IA conforme"}</span>
             </Button>
             <Button
               variant="outline"
@@ -514,7 +515,7 @@ export function CahierSpecsEditor({ draftId }: CahierSpecsEditorProps) {
               className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-sm flex items-center gap-1.5"
             >
               <Sparkles className="w-4 h-4 text-emerald-100" />
-              <span>توليد ذكي (AI Generator)</span>
+              <span>{isAr ? "توليد ذكي (AI Generator)" : "Générateur IA"}</span>
             </Button>
           )}
 

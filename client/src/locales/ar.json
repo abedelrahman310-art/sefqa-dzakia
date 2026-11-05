@@ -1579,7 +1579,7 @@
   "operator.radar.badge_algorithm": "خوارزمية المطابقة السيادية 2.0",
   "operator.radar.status_active": "نشط الآن",
   "operator.radar.title": "رادار الصفقات التنبؤي (Smart Opportunity Radar)",
-  "operator.radar.subtitle": "مسح آلي ذكي لصفقات ولايات الجزائر الـ 69 ومطابقتها اللحظية مع رموز نشاطك وسجلك التجاري لتفادي تفويت أي فرصة.",
+  "operator.radar.subtitle": "مسح آلي ذكي لصفقات ولايات الجزائر الـ 69 ومطابقتها اللحظية مع رموز نشاطك وسجلك التجاري لتفادي تفويت أي فرصة",
   "operator.radar.refresh": "تحديث المسح الراداري",
   "operator.radar.match_level": "درجة التطابق:",
   "operator.radar.filter_all": "جميع الفرص ({{count}})",

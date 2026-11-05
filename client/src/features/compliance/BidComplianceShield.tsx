@@ -64,6 +64,7 @@ export function BidComplianceShield({
 }: BidComplianceShieldProps) {
   const { t, dir, lang } = useI18n();
   const isRtl = dir === 'rtl';
+  const isAr = lang === 'ar';
 
   const [activeTab, setActiveTab] = useState<'all' | 'missing' | 'available' | 'expired'>('all');
   const [expandedDoc, setExpandedDoc] = useState<string | null>(null);
@@ -80,8 +81,10 @@ export function BidComplianceShield({
         badgeBg: 'bg-emerald-600 text-white',
         ringColor: 'stroke-emerald-600',
         trackColor: 'stroke-emerald-100',
-        title: 'عرض محمي من الإقصاء الشكلي بنسبة 100%',
-        subtitle: 'كافة الوثائق الإلزامية لملف الترشح والعرضين التقني والمالي مستوفاة وسارية المفعول وفق القانون 23-12.',
+        title: isAr ? 'عرض محمي من الإقصاء الشكلي بنسبة 100%' : "Offre protégée contre l'élimination formelle à 100%",
+        subtitle: isAr
+          ? 'كافة الوثائق الإلزامية لملف الترشح والعرضين التقني والمالي مستوفاة وسارية المفعول وفق القانون 23-12.'
+          : 'Tous les documents obligatoires du dossier de candidature, des offres technique et financière sont conformes et valides selon la loi 23-12.',
         icon: ShieldCheck,
       };
     }
@@ -91,8 +94,10 @@ export function BidComplianceShield({
         badgeBg: 'bg-amber-600 text-white',
         ringColor: 'stroke-amber-500',
         trackColor: 'stroke-amber-100',
-        title: 'جاهزية مرتفعة مع مخاطر شكلية محتملة',
-        subtitle: 'تم استيفاء معظم الوثائق، لكن ينبغي استكمال البنود المتبقية لتفادي ملاحظات لجنة فتح الأظرفة.',
+        title: isAr ? 'جاهزية مرتفعة مع مخاطر شكلية محتملة' : 'Préparation avancée avec risques formels potentiels',
+        subtitle: isAr
+          ? 'تم استيفاء معظم الوثائق، لكن ينبغي استكمال البنود المتبقية لتفادي ملاحظات لجنة فتح الأظرفة.'
+          : "La majorité des documents est conforme, mais veuillez compléter les pièces restantes pour éviter les réserves de la commission d'ouverture des plis.",
         icon: AlertTriangle,
       };
     }
@@ -101,8 +106,10 @@ export function BidComplianceShield({
       badgeBg: 'bg-rose-600 text-white',
       ringColor: 'stroke-rose-600',
       trackColor: 'stroke-rose-100',
-      title: 'خطر إقصاء شكلي مباشر — ملف غير مكتمل',
-      subtitle: 'توجد وثائق إلزامية ناقصة وفق المادة 67 من القانون 23-12. الإيداع بهذا الوضع يعرض عرضك للرفض التلقائي.',
+      title: isAr ? 'خطر إقصاء شكلي مباشر — ملف غير مكتمل' : 'Risque élevé de rejet formel — Dossier incomplet',
+      subtitle: isAr
+        ? 'توجد وثائق إلزامية ناقصة وفق المادة 67 من القانون 23-12. الإيداع بهذا الوضع يعرض عرضك للرفض التلقائي.'
+        : "Documents obligatoires manquants selon l'article 67 de la loi 23-12. Le dépôt en l'état expose l'offre à un rejet systématique.",
       icon: ShieldAlert,
     };
   };
@@ -130,10 +137,10 @@ export function BidComplianceShield({
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-[11px] font-bold uppercase tracking-wider text-slate-600">
-                  درع مكافحة الإقصاء الشكلي (Bid Compliance Shield)
+                  {isAr ? 'درع مكافحة الإقصاء الشكلي (Bid Compliance Shield)' : 'Bouclier de conformité des offres (Bid Compliance Shield)'}
                 </span>
                 <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-extrabold ${theme.badgeBg}`}>
-                  {score}% جاهزية
+                  {score}% {isAr ? 'جاهزية' : 'Prêt'}
                 </span>
               </div>
               <h3 className="text-base sm:text-lg font-black text-slate-900 mt-0.5">
@@ -174,19 +181,25 @@ export function BidComplianceShield({
         <div className="mt-4 grid grid-cols-3 gap-2 border-t border-slate-200/60 pt-3 text-center">
           <div className="rounded-xl bg-white/80 p-2 border border-slate-200/60 shadow-2xs">
             <span className="block text-xs font-bold text-emerald-700">{available.length}</span>
-            <span className="text-[10px] font-semibold text-slate-600">وثائق مستوفاة ومقبولة</span>
+            <span className="text-[10px] font-semibold text-slate-600">
+              {isAr ? 'وثائق مستوفاة ومقبولة' : 'Documents conformes'}
+            </span>
           </div>
           <div className="rounded-xl bg-white/80 p-2 border border-slate-200/60 shadow-2xs">
             <span className={`block text-xs font-bold ${missing.length > 0 ? 'text-rose-600' : 'text-slate-700'}`}>
               {missing.length}
             </span>
-            <span className="text-[10px] font-semibold text-slate-600">وثائق ناقصة مطلوبة</span>
+            <span className="text-[10px] font-semibold text-slate-600">
+              {isAr ? 'وثائق ناقصة مطلوبة' : 'Documents manquants'}
+            </span>
           </div>
           <div className="rounded-xl bg-white/80 p-2 border border-slate-200/60 shadow-2xs">
             <span className={`block text-xs font-bold ${expired.length > 0 ? 'text-amber-600' : 'text-slate-700'}`}>
               {expired.length}
             </span>
-            <span className="text-[10px] font-semibold text-slate-600">وثائق منتهية الصلاحية</span>
+            <span className="text-[10px] font-semibold text-slate-600">
+              {isAr ? 'وثائق منتهية الصلاحية' : 'Documents expirés'}
+            </span>
           </div>
         </div>
       </div>
@@ -202,7 +215,7 @@ export function BidComplianceShield({
               : 'text-slate-500 hover:text-slate-800'
           }`}
         >
-          كافة الوثائق ({data.total_required})
+          {isAr ? `كافة الوثائق (${data.total_required})` : `Tous les documents (${data.total_required})`}
         </button>
         <button
           type="button"
@@ -213,7 +226,7 @@ export function BidComplianceShield({
               : 'text-slate-500 hover:text-rose-600'
           }`}
         >
-          الناقصة ({missing.length})
+          {isAr ? `الناقصة (${missing.length})` : `Manquants (${missing.length})`}
         </button>
         <button
           type="button"
@@ -224,7 +237,7 @@ export function BidComplianceShield({
               : 'text-slate-500 hover:text-emerald-700'
           }`}
         >
-          المستوفاة ({available.length})
+          {isAr ? `المستوفاة (${available.length})` : `Conformes (${available.length})`}
         </button>
         {expired.length > 0 && (
           <button
@@ -236,7 +249,7 @@ export function BidComplianceShield({
                 : 'text-slate-500 hover:text-amber-700'
             }`}
           >
-            المنتهية ({expired.length})
+            {isAr ? `المنتهية (${expired.length})` : `Expirés (${expired.length})`}
           </button>
         )}
       </div>
@@ -247,7 +260,9 @@ export function BidComplianceShield({
         {(activeTab === 'all' || activeTab === 'expired') && expired.length > 0 && (
           <div className="mb-3 space-y-2">
             <span className="block text-[11px] font-bold text-amber-800">
-              ⚠️ وثائق منتهية الصلاحية تحتاج إلى تجديد قبل تاريخ الإيداع:
+              {isAr
+                ? '⚠️ وثائق منتهية الصلاحية تحتاج إلى تجديد قبل تاريخ الإيداع:'
+                : '⚠️ Documents expirés nécessitant un renouvellement avant le dépôt :'}
             </span>
             {expired.map((doc) => (
               <div
@@ -268,7 +283,7 @@ export function BidComplianceShield({
                     className="inline-flex items-center gap-1 rounded-lg bg-amber-600 px-2.5 py-1 text-[11px] font-bold text-white hover:bg-amber-700 transition-colors shadow-2xs cursor-pointer"
                   >
                     <UploadCloud className="size-3" />
-                    <span>تحديث</span>
+                    <span>{isAr ? 'تحديث' : 'Mettre à jour'}</span>
                   </button>
                 )}
               </div>
@@ -281,7 +296,9 @@ export function BidComplianceShield({
           <div className="space-y-2">
             {activeTab === 'all' && (
               <span className="block text-[11px] font-bold text-rose-800">
-                ❌ وثائق مطلوبة غير موجودة في ملفك (تسبب الإقصاء الإجرائي):
+                {isAr
+                  ? '❌ وثائق مطلوبة غير موجودة في ملفك (تسبب الإقصاء الإجرائي):'
+                  : '❌ Documents obligatoires absents (motif de rejet formel) :'}
               </span>
             )}
             {missing.map((doc) => (
@@ -297,7 +314,7 @@ export function BidComplianceShield({
                         <strong className="text-xs text-slate-900 truncate">{doc.name}</strong>
                         {doc.is_mandatory && (
                           <span className="rounded-md bg-rose-100 px-1.5 py-0.2 text-[9px] font-extrabold text-rose-700">
-                            إلزامي
+                            {isAr ? 'إلزامي' : 'Obligatoire'}
                           </span>
                         )}
                       </div>
@@ -315,7 +332,7 @@ export function BidComplianceShield({
                         className="inline-flex items-center gap-1 rounded-lg bg-emerald-600 px-2.5 py-1 text-[11px] font-bold text-white hover:bg-emerald-700 transition-colors shadow-2xs cursor-pointer"
                       >
                         <UploadCloud className="size-3" />
-                        <span>إرفاق</span>
+                        <span>{isAr ? 'إرفاق' : 'Joindre'}</span>
                       </button>
                     )}
                     <button
@@ -330,7 +347,9 @@ export function BidComplianceShield({
 
                 {expandedDoc === doc.code && doc.description && (
                   <div className="mt-2.5 pt-2 border-t border-rose-100 text-[11px] text-slate-600 leading-relaxed bg-white/70 p-2.5 rounded-lg">
-                    <p className="font-semibold text-slate-700 mb-1">الإرشاد القانوني والشكلي:</p>
+                    <p className="font-semibold text-slate-700 mb-1">
+                      {isAr ? 'الإرشاد القانوني والشكلي:' : 'Orientation juridique et formelle :'}
+                    </p>
                     <p>{doc.description}</p>
                   </div>
                 )}
@@ -344,7 +363,7 @@ export function BidComplianceShield({
           <div className="space-y-2 mt-3">
             {activeTab === 'all' && (
               <span className="block text-[11px] font-bold text-emerald-800">
-                ✅ وثائق مستوفاة ومسجلة في المنظومة:
+                {isAr ? '✅ وثائق مستوفاة ومسجلة في المنظومة:' : '✅ Documents conformes enregistrés :'}
               </span>
             )}
             {available.map((doc) => (
@@ -362,7 +381,7 @@ export function BidComplianceShield({
                   </div>
                 </div>
                 <span className="rounded-md bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700 border border-emerald-200/60">
-                  معتمدة
+                  {isAr ? 'معتمدة' : 'Validé'}
                 </span>
               </div>
             ))}
@@ -373,8 +392,14 @@ export function BidComplianceShield({
         {activeTab === 'missing' && missing.length === 0 && (
           <div className="p-6 text-center text-xs text-slate-500">
             <CheckCircle2 className="size-8 text-emerald-600 mx-auto mb-2" />
-            <p className="font-bold text-slate-800">لا توجد وثائق ناقصة!</p>
-            <p className="text-[11px] mt-0.5">ملفك مستوفٍ لكافة متطلبات الترشح في هذه الصفقة.</p>
+            <p className="font-bold text-slate-800">
+              {isAr ? 'لا توجد وثائق ناقصة!' : 'Aucun document manquant !'}
+            </p>
+            <p className="text-[11px] mt-0.5">
+              {isAr
+                ? 'ملفك مستوفٍ لكافة متطلبات الترشح في هذه الصفقة.'
+                : 'Votre dossier répond à toutes les exigences de recevabilité de ce marché.'}
+            </p>
           </div>
         )}
       </div>
@@ -383,9 +408,15 @@ export function BidComplianceShield({
       <div className="border-t border-slate-100 bg-slate-50/80 p-3 text-[11px] text-slate-500 flex items-center justify-between">
         <div className="flex items-center gap-1.5">
           <Award className="size-3.5 text-emerald-700" />
-          <span>مطابق للمادة 67 من القانون 23-12 (ملف الترشح والعرضين التقني والمالي)</span>
+          <span>
+            {isAr
+              ? 'مطابق للمادة 67 من القانون 23-12 (ملف الترشح والعرضين التقني والمالي)'
+              : "Conforme à l'article 67 de la loi 23-12 (dossier de candidature, offres technique et financière)"}
+          </span>
         </div>
-        <span className="font-bold text-slate-600">صفقات ذكية 🇩🇿</span>
+        <span className="font-bold text-slate-600">
+          {isAr ? 'صفقات ذكية 🇩🇿' : 'Safaqat Dhakia 🇩🇿'}
+        </span>
       </div>
     </div>
   );

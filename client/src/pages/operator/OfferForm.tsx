@@ -268,6 +268,7 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
   const activeOppId = opportunityId || params.oppId;
 
   const { t, lang, dir } = useI18n();
+  const isAr = lang === 'ar';
   const [, setLocation] = useLocation();
 
   const [loading, setLoading] = useState(true);
@@ -1603,13 +1604,13 @@ export function OfferForm({ offerId, opportunityId }: OfferFormProps) {
                     />
                     <div className="space-y-1">
                       <div className="text-xs font-bold text-slate-800 flex items-center gap-1.5 flex-wrap">
-                        <span>التوقيع الإلكتروني المؤهل (القانون رقم 15-04)</span>
+                        <span>{isAr ? "التوقيع الإلكتروني المؤهل (القانون رقم 15-04)" : "Signature électronique qualifiée (Loi n° 15-04)"}</span>
                         <span className="text-[10px] bg-emerald-600 text-white font-bold px-2 py-0.5 rounded-full">
-                          حجية قانونية قاطعة
+                          {isAr ? "حجية قانونية قاطعة" : "Force probante légale"}
                         </span>
                       </div>
                       <p className="text-xs font-normal text-slate-600 leading-relaxed">
-                        تثبيت بصمة تشفيرية موحدة للوثائق والمبلغ المالي (SHA-256 + RSA-PSS) مع ختم زمني إلكتروني معتمد يضمن عدم إنكار العرض والالتزام الكامل بأحكامه.
+                        {isAr ? "تثبيت بصمة تشفيرية موحدة للوثائق والمبلغ المالي (SHA-256 + RSA-PSS) مع ختم زمني إلكتروني معتمد يضمن عدم إنكار العرض والالتزام الكامل بأحكامه." : "Génération d’une empreinte cryptographique unifiée (SHA-256 + RSA-PSS) avec horodatage certifié garantissant l’intégrité et la non-répudiation de l’offre."}
                       </p>
                     </div>
                   </label>

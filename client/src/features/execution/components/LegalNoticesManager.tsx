@@ -150,7 +150,7 @@ export const LegalNoticesManager: React.FC<LegalNoticesManagerProps> = ({
           onNoticesUpdated(payload.active_notices_count || 0);
         }
       } catch (e: any) {
-        setError(e?.message || err?.message || 'تعذر تحميل سجل الاعذارات القانونية');
+        setError(e?.message || err?.message || (isAr ? 'تعذر تحميل سجل الاعذارات القانونية' : 'Impossible de charger le registre des mises en demeure'));
       }
     } finally {
       setLoading(false);
@@ -164,19 +164,19 @@ export const LegalNoticesManager: React.FC<LegalNoticesManagerProps> = ({
   // Template generator helper
   const handleGenerateTemplate = (templateLang: 'ar' | 'fr') => {
     const days = formDays || '15';
-    const ref = dealReference || 'الصفقة المعنية';
-    const title = dealTitle || 'المشروع';
+    const ref = dealReference || (isAr ? 'الصفقة المعنية' : 'le marché concerné');
+    const title = dealTitle || (isAr ? 'المشروع' : 'le projet');
 
     if (templateLang === 'ar') {
       let specificReason = '';
       if (formType === 'delay') {
-        specificReason = 'تسجيل تأخر فادح وغير مبرر في وتيرة الإنجاز الميداني مقارنة بالجدول الزمني التعاقدي المعتمد، مما يهدد إتمام المشروع في آجاله.';
+        specificReason = isAr ? 'تسجيل تأخر فادح وغير مبرر في وتيرة الإنجاز الميداني مقارنة بالجدول الزمني التعاقدي المعتمد، مما يهدد إتمام المشروع في آجاله.' : 'Retard important et injustifié constaté dans le rythme d’exécution par rapport au planning contractuel approuvé, compromettant l’achèvement des prestations dans les délais.';
       } else if (formType === 'quality') {
-        specificReason = 'عدم مطابقة المواد والأشغال المنجزة للمواصفات التقنية ومعايير الجودة المنصوص عليها في دفتر الشروط.';
+        specificReason = isAr ? 'عدم مطابقة المواد والأشغال المنجزة للمواصفات التقنية ومعايير الجودة المنصوص عليها في دفتر الشروط.' : 'Non-conformité des matériaux et prestations exécutées aux prescriptions techniques et normes de qualité stipulées au cahier des charges.';
       } else if (formType === 'abandonment') {
-        specificReason = 'التوقف الكلي وغير المبرر للأشغال وشغور الورشة من العتاد والموارد البشرية اللازمة لمواصلة الإنجاز.';
+        specificReason = isAr ? 'التوقف الكلي وغير المبرر للأشغال وشغور الورشة من العتاد والموارد البشرية اللازمة لمواصلة الإنجاز.' : 'Arrêt total et injustifié des travaux et abandon du chantier sans moyens matériels ou humains nécessaires à la poursuite des prestations.';
       } else {
-        specificReason = 'عدم الامتثال للأوامر المصلحية والتعليمات الموجهة إليكم من طرف المصلحة المتعاقدة وهيئة المتابعة.';
+        specificReason = isAr ? 'عدم الامتثال للأوامر المصلحية والتعليمات الموجهة إليكم من طرف المصلحة المتعاقدة وهيئة المتابعة.' : 'Inobservation des ordres de service et instructions notifiés par le service contractant et l’organisme de suivi.';
       }
 
       setFormReason(
@@ -214,7 +214,7 @@ export const LegalNoticesManager: React.FC<LegalNoticesManagerProps> = ({
     e.preventDefault();
     setFormError('');
     if (!formReason.trim()) {
-      setFormError('يرجى كتابة نص الإعذار والحيثيات القانونية أو توليدها من القالب الرسمي.');
+      setFormError(isAr ? 'يرجى كتابة نص الإعذار والحيثيات القانونية أو توليدها من القالب الرسمي.' : 'Veuillez saisir le texte de la mise en demeure ou le générer à partir du modèle.');
       return;
     }
 
@@ -233,7 +233,7 @@ export const LegalNoticesManager: React.FC<LegalNoticesManagerProps> = ({
       }
 
       await api.post(`/execution/deals/${dealId}/notices/`, formData);
-      setSuccessMsg('تم إصدار الإعذار القانوني وتبليغه رسمياً عبر المنصة بنجاح.');
+      setSuccessMsg(isAr ? 'تم إصدار الإعذار القانوني وتبليغه رسمياً عبر المنصة بنجاح.' : 'Mise en demeure établie et notifiée officiellement avec succès.');
       setIsCreateOpen(false);
       setFormRef('');
       setFormReason('');
@@ -241,7 +241,7 @@ export const LegalNoticesManager: React.FC<LegalNoticesManagerProps> = ({
       setFormPdf(null);
       await loadNotices();
     } catch (err: any) {
-      setFormError(err?.message || 'تعذر إصدار الإعذار القانوني.');
+      setFormError(err?.message || (isAr ? 'تعذر إصدار الإعذار القانوني.' : 'Impossible d’émettre la mise en demeure.'));
     } finally {
       setSubmitting(false);
     }
@@ -253,10 +253,10 @@ export const LegalNoticesManager: React.FC<LegalNoticesManagerProps> = ({
     setError('');
     try {
       await api.patch(`/execution/notices/${noticeId}/acknowledge/`, {});
-      setSuccessMsg('تم تأكيد استلام الإعذار القانوني وتسجيل الإقرار الإلكتروني وفق المادة 67.');
+      setSuccessMsg(isAr ? 'تم تأكيد استلام الإعذار القانوني وتسجيل الإقرار الإلكتروني وفق المادة 67.' : 'Accusé de réception électronique confirmé conformément à l’article 67.');
       await loadNotices();
     } catch (err: any) {
-      setError(err?.message || 'تعذر تسجيل الإقرار بالاستلام.');
+      setError(err?.message || (isAr ? 'تعذر تسجيل الإقرار بالاستلام.' : 'Impossible d’enregistrer l’accusé de réception.'));
     } finally {
       setAcknowledgingId(null);
     }
@@ -269,14 +269,14 @@ export const LegalNoticesManager: React.FC<LegalNoticesManagerProps> = ({
     setIsResolving(true);
     try {
       await api.patch(`/execution/notices/${resolvingNotice.id}/resolve/`, {
-        notes: resolutionNotes.trim() || 'تم استدراك التأخر وتصحيح الوضعية التعاقدية ميدانياً.',
+        notes: resolutionNotes.trim() || (isAr ? 'تم استدراك التأخر وتصحيح الوضعية التعاقدية ميدانياً.' : 'Régularisation effective du retard et conformité constatée sur site.'),
       });
-      setSuccessMsg(`تمت تسوية الإعذار ${resolvingNotice.reference} ورفع الإنذار بنجاح.`);
+      setSuccessMsg(isAr ? `تمت تسوية الإعذار ${resolvingNotice.reference} ورفع الإنذار بنجاح.` : `Mise en demeure ${resolvingNotice.reference} levée avec succès.`);
       setResolvingNotice(null);
       setResolutionNotes('');
       await loadNotices();
     } catch (err: any) {
-      setError(err?.message || 'تعذر تسوية الإعذار.');
+      setError(err?.message || (isAr ? 'تعذر تسوية الإعذار.' : 'Impossible de lever la mise en demeure.'));
     } finally {
       setIsResolving(false);
     }
@@ -287,7 +287,7 @@ export const LegalNoticesManager: React.FC<LegalNoticesManagerProps> = ({
     e.preventDefault();
     if (!justifyingNotice) return;
     if (!justificationText.trim() && !justificationFile) {
-      setError('يرجى كتابة المبررات التعاقدية أو إرفاق ملف PDF للرد.');
+      setError(isAr ? 'يرجى كتابة المبررات التعاقدية أو إرفاق ملف PDF للرد.' : 'Veuillez saisir vos justifications ou joindre un fichier PDF de réponse.');
       return;
     }
     setIsJustifying(true);
@@ -301,13 +301,13 @@ export const LegalNoticesManager: React.FC<LegalNoticesManagerProps> = ({
       }
 
       await api.post(`/execution/notices/${justifyingNotice.id}/justification/`, formData);
-      setSuccessMsg('تم تقديم تبريراتكم بنجاح للمصلحة المتعاقدة.');
+      setSuccessMsg(isAr ? 'تم تقديم تبريراتكم بنجاح للمصلحة المتعاقدة.' : 'Justifications transmises avec succès au service contractant.');
       setJustifyingNotice(null);
       setJustificationText('');
       setJustificationFile(null);
       await loadNotices();
     } catch (err: any) {
-      setError(err?.message || 'تعذر إرسال التبريرات.');
+      setError(err?.message || (isAr ? 'تعذر إرسال التبريرات.' : 'Impossible d’envoyer les justifications.'));
     } finally {
       setIsJustifying(false);
     }
@@ -332,13 +332,13 @@ export const LegalNoticesManager: React.FC<LegalNoticesManagerProps> = ({
                 {t('execution.notices.status.expired') || 'إعذار قانوني منتهي المهلة — غرامات تأخير مطبقة'}
               </h4>
               <p className="text-xs text-rose-800 mt-0.5">
-                تجاوز المتعامل المهلة القانونية المحددة في الإعذار الرسمي (المادة 147 من المرسوم الرئاسي 15-247). الغرامة اليومية سارية بنسبة 1/1000 يومياً.
+                {isAr ? "تجاوز المتعامل المهلة القانونية المحددة في الإعذار الرسمي (المادة 147 من المرسوم الرئاسي 15-247). الغرامة اليومية سارية بنسبة 1/1000 يومياً." : "Dépassement du délai légal imparti par la mise en demeure (Art. 147 du décret 15-247). Pénalités de retard applicables à raison de 1/1000 par jour."}
               </p>
             </div>
           </div>
           <div className="flex items-center gap-2">
             <span className="px-3 py-1 bg-rose-200 text-rose-900 text-xs font-bold rounded-full">
-              إجراء ردعي ساري
+              {isAr ? "إجراء ردعي ساري" : "Mesure coercitive active"}
             </span>
           </div>
         </div>
@@ -357,16 +357,16 @@ export const LegalNoticesManager: React.FC<LegalNoticesManagerProps> = ({
                   {t('execution.notices.title') || 'الاعذارات القانونية وإدارة التأخيرات (Mises en Demeure)'}
                 </h3>
                 <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-slate-100 text-slate-700">
-                  {notices.length} إعذار
+                  {notices.length} {isAr ? "إعذار" : "mise(s) en demeure"}
                 </span>
                 {activeCount > 0 && (
                   <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-amber-100 text-amber-800 animate-pulse">
-                    {activeCount} نشط
+                    {activeCount} {isAr ? "نشط" : "active(s)"}
                   </span>
                 )}
               </div>
               <p className="text-xs text-slate-500 mt-0.5">
-                تتبع الإعذارات الرسمية والمهل القانونية (15 يوماً) واحتساب غرامات التأخير التلقائية وفقاً للمرسوم الرئاسي 15-247 والمادة 67 من القانون 23-12.
+                {isAr ? "تتبع الإعذارات الرسمية والمهل القانونية (15 يوماً) واحتساب غرامات التأخير التلقائية وفقاً للمرسوم الرئاسي 15-247 والمادة 67 من القانون 23-12." : "Suivi des mises en demeure réglementaires (délai de 15 jours) et calcul automatique des pénalités selon le décret 15-247 et l’article 67 de la loi 23-12."}
               </p>
             </div>
           </div>
@@ -417,14 +417,14 @@ export const LegalNoticesManager: React.FC<LegalNoticesManagerProps> = ({
         {loading ? (
           <div className="py-16 flex flex-col items-center justify-center gap-3 text-slate-400">
             <Loader2 className="size-7 animate-spin text-red-600" />
-            <span className="text-xs">جاري تحميل سجل الاعذارات القانونية والمهل...</span>
+            <span className="text-xs">{isAr ? "جاري تحميل سجل الاعذارات القانونية والمهل..." : "Chargement du registre des mises en demeure..."}</span>
           </div>
         ) : notices.length === 0 ? (
           <div className="py-16 flex flex-col items-center justify-center gap-2 text-slate-400">
             <FileCheck2 className="size-10 text-emerald-500/70" />
-            <p className="text-sm font-bold text-slate-700">لا توجد اعذارات قانونية مسجلة لهذه الصفقة</p>
+            <p className="text-sm font-bold text-slate-700">{isAr ? "لا توجد اعذارات قانونية مسجلة لهذه الصفقة" : "Aucune mise en demeure enregistrée pour ce marché"}</p>
             <p className="text-xs text-slate-500 max-w-sm text-center">
-              سير الأشغال والأداء التعاقدي منتظم ولم يتم إصدار أي إعذار رسمي لتدارك التأخر أو المخالفات.
+              {isAr ? "سير الأشغال والأداء التعاقدي منتظم ولم يتم إصدار أي إعذار رسمي لتدارك التأخر أو المخالفات." : "Le déroulement des prestations est régulier. Aucune mise en demeure n’a été notifiée."}
             </p>
           </div>
         ) : (
@@ -432,13 +432,13 @@ export const LegalNoticesManager: React.FC<LegalNoticesManagerProps> = ({
             <table className="w-full text-start text-xs border-collapse">
               <thead>
                 <tr className="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold">
-                  <th className="p-3 text-start">المرجع والتاريخ</th>
-                  <th className="p-3 text-start">طبيعة المخالفة</th>
-                  <th className="p-3 text-start">الحيثيات والسبب</th>
-                  <th className="p-3 text-center">المهلة والعداد التنازلي</th>
-                  <th className="p-3 text-center">الوضعية القانونية</th>
-                  <th className="p-3 text-center">غرامة التأخير</th>
-                  <th className="p-3 text-center">الإجراءات</th>
+                  <th className="p-3 text-start">{isAr ? "المرجع والتاريخ" : "Référence et Date"}</th>
+                  <th className="p-3 text-start">{isAr ? "طبيعة المخالفة" : "Nature du manquement"}</th>
+                  <th className="p-3 text-start">{isAr ? "الحيثيات والسبب" : "Motifs et constats"}</th>
+                  <th className="p-3 text-center">{isAr ? "المهلة والعداد التنازلي" : "Délai et décompte"}</th>
+                  <th className="p-3 text-center">{isAr ? "الوضعية القانونية" : "Statut légal"}</th>
+                  <th className="p-3 text-center">{isAr ? "غرامة التأخير" : "Pénalité de retard"}</th>
+                  <th className="p-3 text-center">{isAr ? "الإجراءات" : "Actions"}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -454,7 +454,7 @@ export const LegalNoticesManager: React.FC<LegalNoticesManagerProps> = ({
                         <div className="font-mono font-bold text-slate-900">{n.reference}</div>
                         <div className="flex items-center gap-1 text-[11px] text-slate-500 mt-0.5">
                           <Calendar className="size-3" />
-                          <span>تاريخ التبليغ: {formatDate(n.issued_date)}</span>
+                          <span>{isAr ? "تاريخ التبليغ:" : "Notifié le :"} {formatDate(n.issued_date)}</span>
                         </div>
                       </td>
 
@@ -477,7 +477,7 @@ export const LegalNoticesManager: React.FC<LegalNoticesManagerProps> = ({
                             className="mt-1 text-[10px] font-bold text-sky-700 hover:text-sky-900 flex items-center gap-1 underline underline-offset-2"
                           >
                             <FileText className="size-3" />
-                            <span>تم إيداع دفوعات المتعامل (معاينة)</span>
+                            <span>{isAr ? "تم إيداع دفوعات المتعامل (معاينة)" : "Mémoire en défense déposé (consulter)"}</span>
                           </button>
                         )}
                       </td>
@@ -488,12 +488,12 @@ export const LegalNoticesManager: React.FC<LegalNoticesManagerProps> = ({
                           {isResolved ? (
                             <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200 flex items-center gap-1">
                               <CheckCircle2 className="size-3 text-emerald-700" />
-                              <span>تمت التسوية</span>
+                              <span>{isAr ? "تمت التسوية" : "Levée"}</span>
                             </span>
                           ) : isExp ? (
                             <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-rose-100 text-rose-800 border border-rose-300 flex items-center gap-1 animate-pulse">
                               <AlertCircle className="size-3 text-rose-700" />
-                              <span>انتهت المهلة (تأخير)</span>
+                              <span>{isAr ? "انتهت المهلة (تأخير)" : "Délai expiré (Pénalités)"}</span>
                             </span>
                           ) : (
                             <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold flex items-center gap-1 ${
@@ -506,7 +506,7 @@ export const LegalNoticesManager: React.FC<LegalNoticesManagerProps> = ({
                             </span>
                           )}
                           <span className="text-[10px] text-slate-400">
-                            المهلة: {n.legal_deadline_days} يوماً (حتى {formatDate(n.deadline_date)})
+                            {isAr ? `المهلة: ${n.legal_deadline_days} يوماً (حتى ${formatDate(n.deadline_date)})` : `Délai : ${n.legal_deadline_days} j (jusqu au ${formatDate(n.deadline_date)})`}
                           </span>
                         </div>
                       </td>
@@ -525,8 +525,8 @@ export const LegalNoticesManager: React.FC<LegalNoticesManagerProps> = ({
                           {n.status_display || n.status}
                         </span>
                         {n.acknowledged_at && (
-                          <div className="text-[10px] text-slate-400 mt-0.5" title={`مستلم من: ${n.acknowledged_by_name || ''}`}>
-                            تم الإقرار: {formatDate(n.acknowledged_at)}
+                          <div className="text-[10px] text-slate-400 mt-0.5" title={isAr ? `مستلم من: ${n.acknowledged_by_name || ''}` : `Accusé par : ${n.acknowledged_by_name || ''}`}>
+                            {isAr ? "تم الإقرار:" : "Accusé le :"} {formatDate(n.acknowledged_at)}
                           </div>
                         )}
                       </td>
@@ -537,7 +537,7 @@ export const LegalNoticesManager: React.FC<LegalNoticesManagerProps> = ({
                           <div className="font-mono font-bold text-rose-700 text-xs">
                             {formatCurrency(penaltyNum)}
                             <div className="text-[9px] font-normal text-slate-500">
-                              (1/1000 يومياً م 147)
+                              (1/1000 j art. 147)
                             </div>
                           </div>
                         ) : (
@@ -556,14 +556,14 @@ export const LegalNoticesManager: React.FC<LegalNoticesManagerProps> = ({
                               onClick={() => handleAcknowledge(n.id)}
                               disabled={acknowledgingId === n.id}
                               className="h-7 text-[11px] font-bold text-indigo-700 border-indigo-200 hover:bg-indigo-50"
-                              title="إقرار رسمي باستلام هذا الإعذار وفق المادة 67"
+                              title={isAr ? "إقرار رسمي باستلام هذا الإعذار وفق المادة 67" : "Accusé de réception officiel (Art. 67)"}
                             >
                               {acknowledgingId === n.id ? (
                                 <Loader2 className="size-3 animate-spin" />
                               ) : (
                                 <Check className="size-3" />
                               )}
-                              <span>إقرار بالاستلام</span>
+                              <span>{isAr ? "إقرار بالاستلام" : "Accuser réception"}</span>
                             </Button>
                           )}
 
@@ -577,10 +577,10 @@ export const LegalNoticesManager: React.FC<LegalNoticesManagerProps> = ({
                                 setJustificationText(n.operator_justification || '');
                               }}
                               className="h-7 text-[11px] font-bold text-sky-700 border-sky-200 hover:bg-sky-50"
-                              title="تقديم تبريرات ودفوعات رسمية للمصلحة المتعاقدة"
+                              title={isAr ? "تقديم تبريرات ودفوعات رسمية للمصلحة المتعاقدة" : "Fournir des justifications au service contractant"}
                             >
                               <Send className="size-3" />
-                              <span>{n.operator_justification ? 'تعديل التبريرات' : 'تقديم تبريرات'}</span>
+                              <span>{n.operator_justification ? (isAr ? 'تعديل التبريرات' : 'Modifier les justifications') : (isAr ? 'تقديم تبريرات' : 'Fournir justifications')}</span>
                             </Button>
                           )}
 
@@ -594,10 +594,10 @@ export const LegalNoticesManager: React.FC<LegalNoticesManagerProps> = ({
                                 setResolutionNotes('');
                               }}
                               className="h-7 text-[11px] font-bold text-emerald-700 border-emerald-300 hover:bg-emerald-50"
-                              title="تسوية الإعذار بعد تدارك المتعامل للتأخر ميدانياً"
+                              title={isAr ? "تسوية الإعذار بعد تدارك المتعامل للتأخر ميدانياً" : "Levée de la mise en demeure après régularisation"}
                             >
                               <CheckCircle2 className="size-3" />
-                              <span>تسوية الإعذار</span>
+                              <span>{isAr ? "تسوية الإعذار" : "Lever la mise en demeure"}</span>
                             </Button>
                           )}
 
@@ -607,7 +607,7 @@ export const LegalNoticesManager: React.FC<LegalNoticesManagerProps> = ({
                             variant="ghost"
                             onClick={() => handleDownloadPdf(n.id, n.reference)}
                             className="h-7 text-[11px] font-bold text-slate-700 hover:bg-slate-100"
-                            title="تحميل وثيقة الإعذار الرسمية PDF"
+                            title={isAr ? "تحميل وثيقة الإعذار الرسمية PDF" : "Télécharger la mise en demeure officielle (PDF)"}
                           >
                             <Download className="size-3" />
                             <span>PDF</span>
@@ -639,7 +639,7 @@ export const LegalNoticesManager: React.FC<LegalNoticesManagerProps> = ({
                     {t('execution.notices.issue') || 'إصدار إعذار قانوني رسمي (Mise en Demeure)'}
                   </h3>
                   <p className="text-xs text-slate-500">
-                    تبليغ رسمي إلكتروني ملزم قانوناً وفقاً للمرسوم 15-247 والمادة 67 من القانون 23-12
+                    {isAr ? "تبليغ رسمي إلكتروني ملزم قانوناً وفقاً للمرسوم 15-247 والمادة 67 من القانون 23-12" : "Notification électronique officielle conforme au décret 15-247 et à l’article 67 de la loi 23-12"}
                   </p>
                 </div>
               </div>
@@ -663,22 +663,22 @@ export const LegalNoticesManager: React.FC<LegalNoticesManagerProps> = ({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {/* Notice Type */}
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-bold text-slate-700">طبيعة الإعذار والمخالفة *</Label>
+                  <Label className="text-xs font-bold text-slate-700">{isAr ? "طبيعة الإعذار والمخالفة *" : "Objet de la mise en demeure *"}</Label>
                   <select
                     value={formType}
                     onChange={(e: any) => setFormType(e.target.value)}
                     className="w-full text-xs font-semibold rounded-lg border border-slate-300 p-2 focus:ring-2 focus:ring-red-500 focus:outline-none"
                   >
-                    <option value="delay">تأخر في وتيرة التنفيذ والإنجاز</option>
-                    <option value="quality">إخلال بمعايير الجودة ودفتر الشروط</option>
-                    <option value="abandonment">توقف غير مبرر للورشة والأشغال</option>
-                    <option value="non_compliance">عدم الامتثال للأوامر المصلحية والتعليمات</option>
+                    <option value="delay">{isAr ? "تأخر في وتيرة التنفيذ والإنجاز" : "Retard dans le rythme d’exécution"}</option>
+                    <option value="quality">{isAr ? "إخلال بمعايير الجودة ودفتر الشروط" : "Non-respect des normes de qualité et du cahier des charges"}</option>
+                    <option value="abandonment">{isAr ? "توقف غير مبرر للورشة والأشغال" : "Arrêt injustifié du chantier"}</option>
+                    <option value="non_compliance">{isAr ? "عدم الامتثال للأوامر المصلحية والتعليمات" : "Inobservation des ordres de service"}</option>
                   </select>
                 </div>
 
                 {/* Legal Deadline Days */}
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-bold text-slate-700">المهلة القانونية الممنوحة (بالأيام) *</Label>
+                  <Label className="text-xs font-bold text-slate-700">{isAr ? "المهلة القانونية الممنوحة (بالأيام) *" : "Délai imparti pour régulariser (en jours) *"}</Label>
                   <Input
                     type="number"
                     min="1"
@@ -688,19 +688,19 @@ export const LegalNoticesManager: React.FC<LegalNoticesManagerProps> = ({
                     className="text-xs font-mono font-bold"
                     placeholder="15"
                   />
-                  <span className="text-[10px] text-slate-500">المهلة النموذجية القانونية: 15 يوماً</span>
+                  <span className="text-[10px] text-slate-500">{isAr ? "المهلة النموذجية القانونية: 15 يوماً" : "Délai réglementaire standard : 15 jours"}</span>
                 </div>
               </div>
 
               {/* Reference */}
               <div className="space-y-1.5">
-                <Label className="text-xs font-bold text-slate-700">رقم الإعذار الرسمي (اختياري، يولد تلقائياً)</Label>
+                <Label className="text-xs font-bold text-slate-700">{isAr ? "رقم الإعذار الرسمي (اختياري، يولد تلقائياً)" : "Réf officielle de la mise en demeure (optionnel)"}</Label>
                 <Input
                   type="text"
                   value={formRef}
                   onChange={(e) => setFormRef(e.target.value)}
                   className="text-xs font-mono"
-                  placeholder="مثال: MD-2026-DZ-001"
+                  placeholder={isAr ? "مثال: MD-2026-DZ-001" : "Ex : MD-2026-DZ-001"}
                 />
               </div>
 
@@ -709,7 +709,7 @@ export const LegalNoticesManager: React.FC<LegalNoticesManagerProps> = ({
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
                     <Sparkles className="size-3.5 text-amber-600" />
-                    <span>المولد الذكي لنصوص الإعذار الرسمي (وفق المرسوم 15-247):</span>
+                    <span>{isAr ? "المولد الذكي لنصوص الإعذار الرسمي (وفق المرسوم 15-247):" : "Générateur réglementaire de mise en demeure (Décret 15-247) :"}</span>
                   </span>
                   <div className="flex items-center gap-2">
                     <Button
@@ -719,7 +719,7 @@ export const LegalNoticesManager: React.FC<LegalNoticesManagerProps> = ({
                       onClick={() => handleGenerateTemplate('ar')}
                       className="h-6 text-[11px] font-bold text-slate-700 border-slate-300 hover:bg-slate-100"
                     >
-                      توليد النص بالعربية
+                      {isAr ? "توليد النص بالعربية" : "Générer en arabe"}
                     </Button>
                     <Button
                       type="button"
@@ -736,20 +736,20 @@ export const LegalNoticesManager: React.FC<LegalNoticesManagerProps> = ({
 
               {/* Reason / Full Legal Text */}
               <div className="space-y-1.5">
-                <Label className="text-xs font-bold text-slate-700">نص الإعذار والحيثيات القانونية والتقنية *</Label>
+                <Label className="text-xs font-bold text-slate-700">{isAr ? "نص الإعذار والحيثيات القانونية والتقنية *" : "Texte et motifs juridiques de la mise en demeure *"}</Label>
                 <Textarea
                   value={formReason}
                   onChange={(e) => setFormReason(e.target.value)}
                   rows={6}
                   className="text-xs leading-relaxed font-sans"
-                  placeholder="أدخل حيثيات الإعذار، المخالفات المعاينة ميدانياً، والإنذارات الموجهة للمتعامل..."
+                  placeholder={isAr ? "أدخل حيثيات الإعذار، المخالفات المعاينة ميدانياً، والإنذارات الموجهة للمتعامل..." : "Détaillez les motifs de la mise en demeure, constats de chantier..."}
                   required
                 />
               </div>
 
               {/* PDF Document Attachment */}
               <div className="space-y-1.5">
-                <Label className="text-xs font-bold text-slate-700">محضر المعاينة الميدانية أو وثيقة الإعذار (اختياري PDF)</Label>
+                <Label className="text-xs font-bold text-slate-700">{isAr ? "محضر المعاينة الميدانية أو وثيقة الإعذار (اختياري PDF)" : "Procès-verbal de constat ou document PDF (optionnel)"}</Label>
                 <Input
                   type="file"
                   accept=".pdf"
@@ -762,7 +762,7 @@ export const LegalNoticesManager: React.FC<LegalNoticesManagerProps> = ({
               <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-950 flex items-start gap-2">
                 <Info className="size-4 text-amber-700 shrink-0 mt-0.5" />
                 <div>
-                  <span className="font-bold">أثر التبليغ الرقمي:</span> يُعتد بهذا الإعذار كإشعار رسمي نافذ بمجرد التبليغ عبر المنصة (المادة 67). في حال عدم التدارك خلال {formDays || 15} يوماً، تُطبّق تلقائياً غرامات التأخير اليومية بنسبة 1/1000 من قيمة الصفقة (سقف 10% بموجب المادة 147).
+                  <span className="font-bold">{isAr ? "أثر التبليغ الرقمي:" : "Effet de la notification :"}</span> {isAr ? `يُعتد بهذا الإعذار كإشعار رسمي نافذ بمجرد التبليغ عبر المنصة (المادة 67). في حال عدم التدارك خلال ${formDays || 15} يوماً، تُطبّق تلقائياً غرامات التأخير اليومية بنسبة 1/1000 من قيمة الصفقة (سقف 10% بموجب المادة 147).` : `Cette mise en demeure prend effet dès sa notification (Art. 67). À défaut de régularisation sous ${formDays || 15} jours, des pénalités journalières de 1/1000 s'appliquent (plafonnées à 10% selon l'Art. 147).`}
                 </div>
               </div>
 
@@ -775,7 +775,7 @@ export const LegalNoticesManager: React.FC<LegalNoticesManagerProps> = ({
                   disabled={submitting}
                   className="text-xs"
                 >
-                  إلغاء
+                  {isAr ? "إلغاء" : "Annuler"}
                 </Button>
                 <Button
                   type="submit"
@@ -785,12 +785,12 @@ export const LegalNoticesManager: React.FC<LegalNoticesManagerProps> = ({
                   {submitting ? (
                     <>
                       <Loader2 className="size-3.5 animate-spin" />
-                      <span>جاري الإصدار والتبليغ...</span>
+                      <span>{isAr ? "جاري الإصدار والتبليغ..." : "Émission et notification en cours..."}</span>
                     </>
                   ) : (
                     <>
                       <Send className="size-3.5" />
-                      <span>إصدار الإعذار وتبليغه رسمياً</span>
+                      <span>{isAr ? "إصدار الإعذار وتبليغه رسمياً" : "Émettre et notifier la mise en demeure"}</span>
                     </>
                   )}
                 </Button>
@@ -812,7 +812,7 @@ export const LegalNoticesManager: React.FC<LegalNoticesManagerProps> = ({
                   <CheckCircle2 className="size-5" />
                 </div>
                 <h3 className="text-base font-bold text-slate-900">
-                  تسوية الإعذار القانوني رقم {resolvingNotice.reference}
+                  {isAr ? `تسوية الإعذار القانوني رقم ${resolvingNotice.reference}` : `Levée de la mise en demeure n° ${resolvingNotice.reference}`}
                 </h3>
               </div>
               <button
@@ -825,18 +825,18 @@ export const LegalNoticesManager: React.FC<LegalNoticesManagerProps> = ({
             </div>
 
             <p className="text-xs text-slate-600">
-              تأكيد استدراك المتعامل الاقتصادي للتأخر المسجل وتصحيحه للمخالفات ميدانياً. سيتم إغلاق الإعذار ووقف أي احتساب إضافي لغرامات التأخير.
+              {isAr ? "تأكيد استدراك المتعامل الاقتصادي للتأخر المسجل وتصحيحه للمخالفات ميدانياً. سيتم إغلاق الإعذار ووقف أي احتساب إضافي لغرامات التأخير." : "Confirmation de la régularisation du retard par l’opérateur sur site. La mise en demeure sera clôturée et le décompte des pénalités suspendu."}
             </p>
 
             <form onSubmit={handleResolveNotice} className="space-y-4">
               <div className="space-y-1.5">
-                <Label className="text-xs font-bold text-slate-700">ملاحظات وتقرير التسوية الميدانية *</Label>
+                <Label className="text-xs font-bold text-slate-700">{isAr ? "ملاحظات وتقرير التسوية الميدانية *" : "Rapport de constat et observations de levée *"}</Label>
                 <Textarea
                   value={resolutionNotes}
                   onChange={(e) => setResolutionNotes(e.target.value)}
                   rows={4}
                   className="text-xs"
-                  placeholder="مثال: بناءً على محضر المعاينة المؤرخ في ...، تم استدراك وتيرة الأشغال وتصحيح العيوب بالكامل."
+                  placeholder={isAr ? "مثال: بناءً على محضر المعاينة المؤرخ في ...، تم استدراك وتيرة الأشغال وتصحيح العيوب بالكامل." : "Ex : Vu le PV de constat en date du ..., les travaux ont repris conformément au planning."}
                   required
                 />
               </div>
@@ -849,7 +849,7 @@ export const LegalNoticesManager: React.FC<LegalNoticesManagerProps> = ({
                   disabled={isResolving}
                   className="text-xs"
                 >
-                  إلغاء
+                  {isAr ? "إلغاء" : "Annuler"}
                 </Button>
                 <Button
                   type="submit"
@@ -861,7 +861,7 @@ export const LegalNoticesManager: React.FC<LegalNoticesManagerProps> = ({
                   ) : (
                     <CheckCircle2 className="size-3.5" />
                   )}
-                  <span>تأكيد التسوية ورفع الإعذار</span>
+                  <span>{isAr ? "تأكيد التسوية ورفع الإعذار" : "Confirmer la levée de la mise en demeure"}</span>
                 </Button>
               </div>
             </form>
@@ -881,7 +881,7 @@ export const LegalNoticesManager: React.FC<LegalNoticesManagerProps> = ({
                   <Send className="size-5" />
                 </div>
                 <h3 className="text-base font-bold text-slate-900">
-                  تقديم دفوعات وتبريرات بخصوص الإعذار {justifyingNotice.reference}
+                  {isAr ? `تقديم دفوعات وتبريرات بخصوص الإعذار ${justifyingNotice.reference}` : `Mémoire en réponse à la mise en demeure n° ${justifyingNotice.reference}`}
                 </h3>
               </div>
               <button
@@ -894,23 +894,23 @@ export const LegalNoticesManager: React.FC<LegalNoticesManagerProps> = ({
             </div>
 
             <p className="text-xs text-slate-600">
-              يمكنك كتابة أسباب وتبريرات التأخر (ظروف طارئة، أوامر توقيف، إلخ) وإرفاق ملف PDF للرد الرسمي على المصلحة المتعاقدة.
+              {isAr ? "يمكنك كتابة أسباب وتبريرات التأخر (ظروف طارئة، أوامر توقيف، إلخ) وإرفاق ملف PDF للرد الرسمي على المصلحة المتعاقدة." : "Vous pouvez exposer les motifs et justifications du retard (sujétions imprévues, ordres d’arrêt, intempéries) et joindre un mémoire PDF officiel."}
             </p>
 
             <form onSubmit={handleJustificationSubmit} className="space-y-4">
               <div className="space-y-1.5">
-                <Label className="text-xs font-bold text-slate-700">التبريرات والدفوعات التعاقدية *</Label>
+                <Label className="text-xs font-bold text-slate-700">{isAr ? "التبريرات والدفوعات التعاقدية *" : "Exposé des motifs et justifications contractuelles *"}</Label>
                 <Textarea
                   value={justificationText}
                   onChange={(e) => setJustificationText(e.target.value)}
                   rows={4}
                   className="text-xs"
-                  placeholder="اكتب التبريرات والمستندات الداعمة لموقفك التعاقدي..."
+                  placeholder={isAr ? "اكتب التبريرات والمستندات الداعمة لموقفك التعاقدي..." : "Exposez vos arguments et pièces à l'appui..."}
                 />
               </div>
 
               <div className="space-y-1.5">
-                <Label className="text-xs font-bold text-slate-700">ملف التبريرات الرسمي (PDF اختياري)</Label>
+                <Label className="text-xs font-bold text-slate-700">{isAr ? "ملف التبريرات الرسمي (PDF اختياري)" : "Mémoire justificatif officiel (PDF optionnel)"}</Label>
                 <Input
                   type="file"
                   accept=".pdf"
@@ -927,7 +927,7 @@ export const LegalNoticesManager: React.FC<LegalNoticesManagerProps> = ({
                   disabled={isJustifying}
                   className="text-xs"
                 >
-                  إلغاء
+                  {isAr ? "إلغاء" : "Annuler"}
                 </Button>
                 <Button
                   type="submit"
@@ -939,7 +939,7 @@ export const LegalNoticesManager: React.FC<LegalNoticesManagerProps> = ({
                   ) : (
                     <Send className="size-3.5" />
                   )}
-                  <span>إرسال التبريرات للمصلحة</span>
+                  <span>{isAr ? "إرسال التبريرات للمصلحة" : "Transmettre les justifications"}</span>
                 </Button>
               </div>
             </form>
@@ -957,7 +957,7 @@ export const LegalNoticesManager: React.FC<LegalNoticesManagerProps> = ({
               <div className="flex items-center gap-2">
                 <FileText className="size-5 text-sky-600" />
                 <h3 className="text-base font-bold text-slate-900">
-                  دفوعات المتعامل للإعذار {viewingJustification.reference}
+                  {isAr ? `دفوعات المتعامل للإعذار ${viewingJustification.reference}` : `Justifications présentées pour la mise en demeure n° ${viewingJustification.reference}`}
                 </h3>
               </div>
               <button
@@ -971,10 +971,10 @@ export const LegalNoticesManager: React.FC<LegalNoticesManagerProps> = ({
 
             <div className="space-y-3">
               <div className="text-[11px] text-slate-500">
-                تاريخ تقديم التبريرات: {formatDate(viewingJustification.justification_submitted_at)}
+                {isAr ? "تاريخ تقديم التبريرات:" : "Déposé le :"} {formatDate(viewingJustification.justification_submitted_at)}
               </div>
               <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 text-xs text-slate-800 whitespace-pre-wrap leading-relaxed">
-                {viewingJustification.operator_justification || 'لا يوجد نص مكتوب.'}
+                {viewingJustification.operator_justification || (isAr ? 'لا يوجد نص مكتوب.' : 'Aucun texte fourni.')}
               </div>
               {viewingJustification.operator_justification_file && (
                 <a
@@ -984,7 +984,7 @@ export const LegalNoticesManager: React.FC<LegalNoticesManagerProps> = ({
                   className="inline-flex items-center gap-1.5 text-xs font-bold text-sky-700 hover:text-sky-900 bg-sky-50 px-3 py-1.5 rounded-lg border border-sky-200"
                 >
                   <Download className="size-3.5" />
-                  <span>تحميل ملف التبريرات المرفق (PDF)</span>
+                  <span>{isAr ? "تحميل ملف التبريرات المرفق (PDF)" : "Télécharger la pièce jointe (PDF)"}</span>
                 </a>
               )}
             </div>
@@ -996,7 +996,7 @@ export const LegalNoticesManager: React.FC<LegalNoticesManagerProps> = ({
                 onClick={() => setViewingJustification(null)}
                 className="text-xs"
               >
-                إغلاق
+                {isAr ? "إغلاق" : "Fermer"}
               </Button>
             </div>
           </div>

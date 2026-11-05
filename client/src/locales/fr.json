@@ -1579,7 +1579,7 @@
   "operator.radar.badge_algorithm": "Algorithme de matching souverain 2.0",
   "operator.radar.status_active": "Actif maintenant",
   "operator.radar.title": "Radar prédictif des marchés (Smart Opportunity Radar)",
-  "operator.radar.subtitle": "Veille automatisée des marchés des 69 wilayas d'Algérie et matching en temps réel avec vos codes d'activité et votre registre commercial pour ne manquer aucune opportunité.",
+  "operator.radar.subtitle": "Veille automatisée des marchés des 69 wilayas d'Algérie et matching en temps réel avec vos codes d'activité et votre registre commercial pour ne manquer aucune opportunité",
   "operator.radar.refresh": "Actualiser le scan radar",
   "operator.radar.match_level": "Niveau de correspondance :",
   "operator.radar.filter_all": "Toutes les opportunités ({{count}})",

@@ -23,7 +23,8 @@ interface Props {
 }
 
 export function CommitteeQuorumCeremony({ session }: Props) {
-  const { t, dir } = useI18n();
+  const { t, dir, lang } = useI18n();
+  const isAr = lang === 'ar';
 
   // عدم عرض مراسم التشفير التعددي إذا كانت غير مفعلة للجلسة ولم يتم إنشاء حصص لها
   if (session.require_committee_ceremony === false && (!session.committee_shares || session.committee_shares.length === 0)) {
@@ -38,27 +39,27 @@ export function CommitteeQuorumCeremony({ session }: Props) {
   const shares = session.committee_shares && session.committee_shares.length > 0 ? session.committee_shares : [
     {
       id: "president",
-      member_name: session.authority_name || "رئيس المصلحة المتعاقدة",
+      member_name: session.authority_name || (isAr ? "رئيس المصلحة المتعاقدة" : "Président du service contractant"),
       member_role: "president",
-      role_display: "رئيس المصلحة المتعاقدة (رئيس اللجنة)",
+      role_display: isAr ? "رئيس المصلحة المتعاقدة (رئيس اللجنة)" : "Président du service contractant (Président)",
       share_index: 1,
       is_submitted: Boolean(isUnlocked),
       submitted_at: null,
     },
     {
       id: "finance_rep",
-      member_name: "أمين الخزينة / ممثل المصلحة المالية",
+      member_name: isAr ? "أمين الخزينة / ممثل المصلحة المالية" : "Trésorier / Représentant financier",
       member_role: "finance_rep",
-      role_display: "ممثل المصلحة المالية والمحاسبة",
+      role_display: isAr ? "ممثل المصلحة المالية والمحاسبة" : "Représentant du service financier",
       share_index: 2,
       is_submitted: Boolean(isUnlocked),
       submitted_at: null,
     },
     {
       id: "technical_rep",
-      member_name: "الخبير التقني المختص",
+      member_name: isAr ? "الخبير التقني المختص" : "Expert technique qualifié",
       member_role: "technical_rep",
-      role_display: "ممثل المصلحة التقنية المختصة",
+      role_display: isAr ? "ممثل المصلحة التقنية المختصة" : "Représentant du service technique",
       share_index: 3,
       is_submitted: false,
       submitted_at: null,
@@ -97,13 +98,11 @@ export function CommitteeQuorumCeremony({ session }: Props) {
                 }`}
               />
               <span>
-                لجنة فتح الأظرفة ومراسم فك الختم التعددي (Shamir Threshold Ceremony)
+                {isAr ? "لجنة فتح الأظرفة ومراسم فك الختم التعددي (Shamir Threshold Ceremony)" : "Commission d’ouverture des plis et protocole de déverrouillage (Cérémonie de Shamir)"}
               </span>
             </CardTitle>
             <CardDescription className="text-xs leading-relaxed text-slate-600 dark:text-slate-400">
-              المادة 70 من القانون 23-12 والمادتان 70-71 من المرسوم الرئاسي 15-247: لا
-              تفتح الأظرفة إلا باكتمال النصاب القانوني (حضور وعتبة {k} من {n}{" "}
-              أعضاء).
+              {isAr ? `المادة 70 من القانون 23-12 والمادتان 70-71 من المرسوم الرئاسي 15-247: لا تفتح الأظرفة إلا باكتمال النصاب القانوني (حضور وعتبة ${k} من ${n} أعضاء).` : `Art. 70 de la loi 23-12 et art. 70-71 du décret 15-247 : ouverture des plis conditionnée au quorum réglementaire (${k} sur ${n} membres requis).`}
             </CardDescription>
           </div>
 
@@ -117,13 +116,13 @@ export function CommitteeQuorumCeremony({ session }: Props) {
             {isUnlocked ? (
               <span className="flex items-center gap-1.5">
                 <Unlock className="w-3.5 h-3.5" />
-                <span>النصاب مكتمل (الأظرفة مفكوكة)</span>
+                <span>{isAr ? "النصاب مكتمل (الأظرفة مفكوكة)" : "Quorum atteint (Plis déverrouillés)"}</span>
               </span>
             ) : (
               <span className="flex items-center gap-1.5">
                 <Lock className="w-3.5 h-3.5" />
                 <span>
-                  النصاب مطلوب: {submittedCount} / {k} حصص
+                  {isAr ? `النصاب مطلوب: ${submittedCount} / ${k} حصص` : `Quorum requis : ${submittedCount} / ${k} parts`}
                 </span>
               </span>
             )}
@@ -135,9 +134,9 @@ export function CommitteeQuorumCeremony({ session }: Props) {
         {/* Quorum Progress Bar */}
         <div className="space-y-1.5">
           <div className="flex justify-between text-xs font-semibold text-slate-700 dark:text-slate-300">
-            <span>تقدم النصاب القانوني للجنة:</span>
+            <span>{isAr ? "تقدم النصاب القانوني للجنة:" : "Progression du quorum de la commission :"}</span>
             <span className="font-mono">
-              {submittedCount} من {k} حصص معتمدة (الإجمالي: {n})
+              {isAr ? `${submittedCount} من ${k} حصص معتمدة (الإجمالي: ${n})` : `${submittedCount} sur ${k} parts validées (Total : ${n})`}
             </span>
           </div>
           <div className="w-full bg-slate-200 dark:bg-slate-800 rounded-full h-2.5 overflow-hidden">
@@ -166,19 +165,19 @@ export function CommitteeQuorumCeremony({ session }: Props) {
               <div className="space-y-1">
                 <div className="flex items-center justify-between gap-1">
                   <span className="text-[11px] font-mono font-bold text-slate-500">
-                    عضو #{share.share_index}
+                    {isAr ? `عضو #${share.share_index}` : `Membre #${share.share_index}`}
                   </span>
                   {share.is_submitted ? (
                     <Badge className="bg-emerald-100 text-emerald-800 border border-emerald-200 text-[10px] px-1.5 py-0">
                       <CheckCircle2 className="w-3 h-3 me-0.5" />
-                      مؤكد
+                      {isAr ? "مؤكد" : "Confirmé"}
                     </Badge>
                   ) : (
                     <Badge
                       variant="outline"
                       className="text-amber-700 border-amber-300 bg-amber-50 text-[10px] px-1.5 py-0"
                     >
-                      بانتظار التأكيد
+                      {isAr ? "بانتظار التأكيد" : "En attente"}
                     </Badge>
                   )}
                 </div>
@@ -199,12 +198,12 @@ export function CommitteeQuorumCeremony({ session }: Props) {
                   className="w-full text-xs font-bold gap-1.5 border-amber-500/40 hover:bg-amber-50 text-amber-900 dark:text-amber-200 h-8 rounded-lg"
                 >
                   <KeyRound className="w-3.5 h-3.5 text-amber-600" />
-                  <span>تقديم الحصة وتأكيد الحضور</span>
+                  <span>{isAr ? "تقديم الحصة وتأكيد الحضور" : "Valider la part et confirmer la présence"}</span>
                 </Button>
               ) : (
                 <div className="text-[11px] text-emerald-700 dark:text-emerald-400 font-medium flex items-center gap-1">
                   <CheckCircle2 className="w-3.5 h-3.5" />
-                  <span>تم الختم التعددي بالحصة الرقمية</span>
+                  <span>{isAr ? "تم الختم التعددي بالحصة الرقمية" : "Part numérique scellée"}</span>
                 </div>
               )}
             </div>

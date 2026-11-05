@@ -104,7 +104,7 @@ export const AvenantsManager: React.FC<AvenantsManagerProps> = ({
       setData(response.data);
     } catch (err: unknown) {
       const resp = (err as { response?: { data?: { error?: string; detail?: string } } })?.response?.data;
-      setError(resp?.error || resp?.detail || 'تعذر تحميل ملاحق الصفقة.');
+      setError(resp?.error || resp?.detail || (isAr ? 'تعذر تحميل ملاحق الصفقة.' : 'Impossible de charger les avenants du marché.'));
     } finally {
       setLoading(false);
     }
@@ -120,7 +120,7 @@ export const AvenantsManager: React.FC<AvenantsManagerProps> = ({
     setFormError('');
 
     if (!formReason.trim()) {
-      setFormError('يرجى تحديد سبب ومبرر الملحق التعاقدي.');
+      setFormError(isAr ? 'يرجى تحديد سبب ومبرر الملحق التعاقدي.' : 'Veuillez préciser le motif de l’avenant contractuel.');
       return;
     }
 
@@ -132,7 +132,7 @@ export const AvenantsManager: React.FC<AvenantsManagerProps> = ({
 
     if (projectedPercentage > 25.0) {
       setFormError(
-        `ممنوع قانوناً: سيصل مجموع الملاحق إلى ${projectedPercentage.toFixed(1)}% وهو ما يتجاوز الحد الأقصى المطلق (25%) المنصوص عليه في المرسوم الرئاسي 15-247.`
+        isAr ? `ممنوع قانوناً: سيصل مجموع الملاحق إلى ${projectedPercentage.toFixed(1)}% وهو ما يتجاوز الحد الأقصى المطلق (25%) المنصوص عليه في المرسوم الرئاسي 15-247.` : `Légalement interdit : le cumul des avenants atteindra ${projectedPercentage.toFixed(1)}%, dépassant le plafond absolu (25%) fixé par le décret 15-247.`
       );
       return;
     }
@@ -152,7 +152,7 @@ export const AvenantsManager: React.FC<AvenantsManagerProps> = ({
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
-      setSuccessMsg('تم إنشاء الملحق التعاقدي بنجاح وإدراجه في جدول المتابعة.');
+      setSuccessMsg(isAr ? 'تم إنشاء الملحق التعاقدي بنجاح وإدراجه في جدول المتابعة.' : 'Avenant contractuel créé avec succès et inscrit au suivi.');
       setIsModalOpen(false);
       setFormRef('');
       setFormReason('');
@@ -170,10 +170,10 @@ export const AvenantsManager: React.FC<AvenantsManagerProps> = ({
         } else if (typeof firstErr === 'string') {
           setFormError(firstErr);
         } else {
-          setFormError('فشل إنشاء الملحق. تأكد من صحة البيانات والحدود القانونية.');
+          setFormError(isAr ? 'فشل إنشاء الملحق. تأكد من صحة البيانات والحدود القانونية.' : 'Échec de création. Vérifiez la validité des données et les plafonds légaux.');
         }
       } else {
-        setFormError('فشل إنشاء الملحق. تأكد من صحة البيانات.');
+        setFormError(isAr ? 'فشل إنشاء الملحق. تأكد من صحة البيانات.' : 'Échec de création de l’avenant. Vérifiez les données.');
       }
     } finally {
       setSubmitting(false);
@@ -188,13 +188,13 @@ export const AvenantsManager: React.FC<AvenantsManagerProps> = ({
       await api.patch(`/procurements/avenants/${avenantId}/approve/`, {
         committee_approval_ref: approvalCommitteeRef.trim() || undefined,
       });
-      setSuccessMsg('تمت مصادقة لجنة الصفقات على الملحق وتحديث وضعيته رسمياً.');
+      setSuccessMsg(isAr ? 'تمت مصادقة لجنة الصفقات على الملحق وتحديث وضعيته رسمياً.' : 'Avenant validé par la commission des marchés et statut actualisé.');
       setApprovingId(null);
       setApprovalCommitteeRef('');
       await loadAvenants();
     } catch (err: unknown) {
       const resp = (err as { response?: { data?: { error?: string } } })?.response?.data;
-      setError(resp?.error || 'فشلت عملية المصادقة على الملحق.');
+      setError(resp?.error || (isAr ? 'فشلت عملية المصادقة على الملحق.' : 'Échec de la validation de l’avenant.'));
     } finally {
       setIsApproving(false);
     }
@@ -345,14 +345,14 @@ export const AvenantsManager: React.FC<AvenantsManagerProps> = ({
       {/* ─── 3. ملخص المبالغ والنسب ─── */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
         <div className="bg-slate-50 p-3 rounded-xl border border-slate-200">
-          <span className="block font-medium text-slate-500">المبلغ الأصلي للصفقة:</span>
+          <span className="block font-medium text-slate-500">{isAr ? "المبلغ الأصلي للصفقة:" : "Montant initial du marché :"}</span>
           <strong className="block text-sm font-bold font-mono text-slate-900 mt-1">
             {formatCurrency(effectiveBaseAmount)}
           </strong>
         </div>
 
         <div className="bg-slate-50 p-3 rounded-xl border border-slate-200">
-          <span className="block font-medium text-slate-500">مجموع الأثر المالي للملاحق:</span>
+          <span className="block font-medium text-slate-500">{isAr ? "مجموع الأثر المالي للملاحق:" : "Incidence financière cumulée :"}</span>
           <strong
             className={`block text-sm font-bold font-mono mt-1 ${
               currentTotalAmount >= 0 ? 'text-emerald-700' : 'text-rose-700'
@@ -363,7 +363,7 @@ export const AvenantsManager: React.FC<AvenantsManagerProps> = ({
         </div>
 
         <div className="bg-slate-50 p-3 rounded-xl border border-slate-200">
-          <span className="block font-medium text-slate-500">الحد الأقصى المسموح به (20% / 25%):</span>
+          <span className="block font-medium text-slate-500">{isAr ? "الحد الأقصى المسموح به (20% / 25%):" : "Plafond légal autorisé (20% / 25%) :"}</span>
           <strong className="block text-sm font-bold font-mono text-slate-800 mt-1">
             {formatCurrency(effectiveBaseAmount * 0.2)} — {formatCurrency(effectiveBaseAmount * 0.25)}
           </strong>
@@ -374,7 +374,7 @@ export const AvenantsManager: React.FC<AvenantsManagerProps> = ({
       {loading ? (
         <div className="py-12 flex flex-col items-center justify-center gap-2 text-slate-400">
           <Loader2 className="w-6 h-6 animate-spin text-emerald-700" />
-          <span className="text-xs font-medium">جاري تحميل بيانات الملاحق...</span>
+          <span className="text-xs font-medium">{isAr ? "جاري تحميل بيانات الملاحق..." : "Chargement des avenants..."}</span>
         </div>
       ) : avenantsList.length === 0 ? (
         <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/50 p-8 text-center space-y-2">
@@ -434,7 +434,7 @@ export const AvenantsManager: React.FC<AvenantsManagerProps> = ({
                       <p className="line-clamp-2">{av.reason}</p>
                       {av.committee_approval_ref && (
                         <span className="inline-block mt-0.5 text-[10px] text-emerald-800 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
-                          مرجع اللجنة: {av.committee_approval_ref}
+                          {isAr ? "مرجع اللجنة:" : "Réf commission :"} {av.committee_approval_ref}
                         </span>
                       )}
                     </td>
@@ -454,7 +454,7 @@ export const AvenantsManager: React.FC<AvenantsManagerProps> = ({
                       {av.time_extension_days > 0 ? (
                         <span className="inline-flex items-center gap-1 text-slate-800 font-bold">
                           <Calendar className="w-3.5 h-3.5 text-slate-400" />
-                          <span>{av.time_extension_days} يوماً</span>
+                          <span>{av.time_extension_days} {isAr ? "يوماً" : "jours"}</span>
                         </span>
                       ) : (
                         <span className="text-slate-400">—</span>
@@ -505,7 +505,7 @@ export const AvenantsManager: React.FC<AvenantsManagerProps> = ({
                           target="_blank"
                           rel="noopener noreferrer"
                           className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-slate-600 hover:text-emerald-800 hover:bg-slate-100 text-[11px] font-semibold transition-colors"
-                          title="تحميل وثيقة الملحق الرسمية (PDF)"
+                          title={isAr ? "تحميل وثيقة الملحق الرسمية (PDF)" : "Télécharger l’avenant officiel (PDF)"}
                         >
                           <Download className="w-3.5 h-3.5" />
                           <span>PDF</span>
@@ -549,11 +549,11 @@ export const AvenantsManager: React.FC<AvenantsManagerProps> = ({
 
               {/* رقم المرجع */}
               <div className="space-y-1">
-                <Label className="text-xs font-bold text-slate-700">رقم الملحق (المرجع التعاقدي):</Label>
+                <Label className="text-xs font-bold text-slate-700">{isAr ? "رقم الملحق (المرجع التعاقدي):" : "Numéro d’avenant (Réf contractuelle) :"}</Label>
                 <Input
                   value={formRef}
                   onChange={(e) => setFormRef(e.target.value)}
-                  placeholder="مثال: AV-001"
+                  placeholder={isAr ? "مثال: AV-001" : "Ex : AV-001"}
                   required
                   className="rounded-xl text-xs font-mono"
                 />
@@ -561,11 +561,11 @@ export const AvenantsManager: React.FC<AvenantsManagerProps> = ({
 
               {/* أسباب ومبررات الملحق */}
               <div className="space-y-1">
-                <Label className="text-xs font-bold text-slate-700">سبب ومبررات الملحق التقنية والإدارية:</Label>
+                <Label className="text-xs font-bold text-slate-700">{isAr ? "سبب ومبررات الملحق التقنية والإدارية:" : "Motifs techniques et administratifs de l’avenant :"}</Label>
                 <Textarea
                   value={formReason}
                   onChange={(e) => setFormReason(e.target.value)}
-                  placeholder="وضح مبررات التعديل في الكميات أو المواصفات أو الظروف الطارئة وفق القانون 23-12..."
+                  placeholder={isAr ? "وضح مبررات التعديل في الكميات أو المواصفات أو الظروف الطارئة وفق القانون 23-12..." : "Justifiez les modifications de quantités, spécifications ou sujétions imprévues..."}
                   required
                   rows={3}
                   className="rounded-xl text-xs"
@@ -575,7 +575,7 @@ export const AvenantsManager: React.FC<AvenantsManagerProps> = ({
               {/* الأثر المالي وتمديد المدة */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <Label className="text-xs font-bold text-slate-700">الأثر المالي بالزيادة أو النقصان (دج):</Label>
+                  <Label className="text-xs font-bold text-slate-700">{isAr ? "الأثر المالي بالزيادة أو النقصان (دج):" : "Incidence financière (plus-value / moins-value DZD) :"}</Label>
                   <Input
                     type="number"
                     step="any"
@@ -586,12 +586,12 @@ export const AvenantsManager: React.FC<AvenantsManagerProps> = ({
                     className="rounded-xl text-xs font-mono"
                   />
                   <span className="text-[10px] text-slate-400 block">
-                    يمكن إدخال قيمة سالبة في حال تخفيض الكميات.
+                    {isAr ? "يمكن إدخال قيمة سالبة في حال تخفيض الكميات." : "Une valeur négative peut être saisie en cas de moins-value."}
                   </span>
                 </div>
 
                 <div className="space-y-1">
-                  <Label className="text-xs font-bold text-slate-700">تمديد الآجال التعاقدية (بالأيام):</Label>
+                  <Label className="text-xs font-bold text-slate-700">{isAr ? "تمديد الآجال التعاقدية (بالأيام):" : "Prolongation des délais contractuels (en jours) :"}</Label>
                   <Input
                     type="number"
                     min="0"
@@ -605,17 +605,17 @@ export const AvenantsManager: React.FC<AvenantsManagerProps> = ({
 
               {/* مرجع موافقة اللجنة والملف المرفق */}
               <div className="space-y-1">
-                <Label className="text-xs font-bold text-slate-700">مرجع موافقة لجنة الصفقات (إن وجد):</Label>
+                <Label className="text-xs font-bold text-slate-700">{isAr ? "مرجع موافقة لجنة الصفقات (إن وجد):" : "Réf approbation commission des marchés (le cas échéant) :"}</Label>
                 <Input
                   value={formCommitteeRef}
                   onChange={(e) => setFormCommitteeRef(e.target.value)}
-                  placeholder="مثال: PV-COM-2026-084"
+                  placeholder={isAr ? "مثال: PV-COM-2026-084" : "Ex : PV-COM-2026-084"}
                   className="rounded-xl text-xs"
                 />
               </div>
 
               <div className="space-y-1">
-                <Label className="text-xs font-bold text-slate-700">وثيقة الملحق الموقعة (PDF اختياري):</Label>
+                <Label className="text-xs font-bold text-slate-700">{isAr ? "وثيقة الملحق الموقعة (PDF اختياري):" : "Document d’avenant signé (PDF optionnel) :"}</Label>
                 <Input
                   type="file"
                   accept="application/pdf"
@@ -631,7 +631,7 @@ export const AvenantsManager: React.FC<AvenantsManagerProps> = ({
                   onClick={() => setIsModalOpen(false)}
                   className="rounded-xl text-xs"
                 >
-                  إلغاء
+                  {isAr ? 'إلغاء' : 'Annuler'}
                 </Button>
                 <Button
                   type="submit"
@@ -639,7 +639,7 @@ export const AvenantsManager: React.FC<AvenantsManagerProps> = ({
                   className="bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-bold flex items-center gap-1.5"
                 >
                   {submitting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-                  <span>حفظ الملحق</span>
+                  <span>{isAr ? "حفظ الملحق" : "Enregistrer l’avenant"}</span>
                 </Button>
               </div>
             </form>
@@ -653,17 +653,17 @@ export const AvenantsManager: React.FC<AvenantsManagerProps> = ({
           <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-sm w-full p-5 space-y-4">
             <div className="flex items-center gap-2 text-emerald-800 font-bold text-sm">
               <CheckCircle2 className="w-5 h-5 text-emerald-600" />
-              <span>مصادقة لجنة الصفقات على الملحق</span>
+              <span>{isAr ? "مصادقة لجنة الصفقات على الملحق" : "Validation de l’avenant par la commission des marchés"}</span>
             </div>
             <p className="text-xs text-slate-600 leading-relaxed">
-              يرجى إدخال مرجع محضر اجتماع لجنة الصفقات المختصة لتأكيد اعتماد الملحق وإبرامه رسمياً:
+              {isAr ? "يرجى إدخال مرجع محضر اجتماع لجنة الصفقات المختصة لتأكيد اعتماد الملحق وإبرامه رسمياً:" : "Veuillez saisir la référence du PV de la commission pour entériner l’avenant :"}
             </p>
             <div className="space-y-1">
-              <Label className="text-xs font-bold text-slate-700">مرجع المحضر / التأشيرة:</Label>
+              <Label className="text-xs font-bold text-slate-700">{isAr ? "مرجع المحضر / التأشيرة:" : "Référence du PV / Visa :"}</Label>
               <Input
                 value={approvalCommitteeRef}
                 onChange={(e) => setApprovalCommitteeRef(e.target.value)}
-                placeholder="مثال: PV-COM-2026/12"
+                placeholder={isAr ? "مثال: PV-COM-2026/12" : "Ex : PV-COM-2026/12"}
                 className="rounded-xl text-xs"
               />
             </div>
@@ -674,7 +674,7 @@ export const AvenantsManager: React.FC<AvenantsManagerProps> = ({
                 onClick={() => setApprovingId(null)}
                 className="rounded-xl text-xs"
               >
-                إلغاء
+                {isAr ? 'إلغاء' : 'Annuler'}
               </Button>
               <Button
                 size="sm"
@@ -683,7 +683,7 @@ export const AvenantsManager: React.FC<AvenantsManagerProps> = ({
                 className="bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-bold"
               >
                 {isApproving && <Loader2 className="w-3.5 h-3.5 animate-spin mr-1" />}
-                <span>تأكيد الاعتماد</span>
+                <span>{isAr ? "تأكيد الاعتماد" : "Confirmer la validation"}</span>
               </Button>
             </div>
           </div>

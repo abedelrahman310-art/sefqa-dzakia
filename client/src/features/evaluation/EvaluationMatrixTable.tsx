@@ -51,7 +51,8 @@ export function EvaluationMatrixTable({
   onSendInquiry,
   className = '',
 }: EvaluationMatrixTableProps) {
-  const { dir } = useI18n();
+  const { dir, lang } = useI18n();
+  const isAr = lang === 'ar';
 
   // نظام التقييم: الأفضل اقتصادياً (70/30) أم الأقل ثمناً
   const [method, setMethod] = useState<'ratio' | 'lowest'>('ratio');
@@ -108,13 +109,17 @@ export function EvaluationMatrixTable({
         }
       }
 
-      let recommendation = 'مقبول';
+      let recommendation = isAr ? 'مقبول' : 'Recevable';
       if (!isTechPassed) {
-        recommendation = `مقصى تقنياً (أقل من ${minTechScore} نقطة)`;
+        recommendation = isAr
+          ? `مقصى تقنياً (أقل من ${minTechScore} نقطة)`
+          : `Éliminé techniquement (< ${minTechScore} pts)`;
       } else if (isAbnormallyLow) {
-        recommendation = 'يستوجب استفسار المادة 72 (سعر منخفض جداً)';
+        recommendation = isAr
+          ? 'يستوجب استفسار المادة 72 (سعر منخفض جداً)'
+          : 'Justification art. 72 requise (offre anormalement basse)';
       } else {
-        recommendation = 'مؤهل للمنح المؤقت';
+        recommendation = isAr ? 'مؤهل للمنح المؤقت' : 'Éligible à l’attribution provisoire';
       }
 
       return {
@@ -132,7 +137,7 @@ export function EvaluationMatrixTable({
       if (!a.isTechPassed && b.isTechPassed) return 1;
       return b.combinedScore - a.combinedScore;
     });
-  }, [offers, minTechScore, baselineAmount, method]);
+  }, [offers, minTechScore, baselineAmount, method, isAr]);
 
   return (
     <div className={`space-y-4 rounded-3xl border border-slate-200 bg-white p-5 shadow-xs ${className}`} dir={dir}>
@@ -141,15 +146,19 @@ export function EvaluationMatrixTable({
         <div>
           <div className="flex items-center gap-2">
             <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-[10px] font-black text-emerald-800 border border-emerald-200">
-              مصفوفة الفرز الآلي (AI Evaluation Matrix)
+              {isAr ? 'مصفوفة الفرز الآلي (AI Evaluation Matrix)' : 'Matrice de dépouillement IA (AI Evaluation Matrix)'}
             </span>
-            <span className="text-xs text-slate-500 font-bold">لجنة تقييم العروض (COP)</span>
+            <span className="text-xs text-slate-500 font-bold">
+              {isAr ? 'لجنة تقييم العروض (COP)' : 'Commission d’évaluation des plis (COP)'}
+            </span>
           </div>
           <h3 className="text-lg font-black text-slate-900 mt-0.5">
-            مصفوفة المقارنة التفاعلية وكاشف العروض المنخفضة (المادة 72)
+            {isAr
+              ? 'مصفوفة المقارنة التفاعلية وكاشف العروض المنخفضة (المادة 72)'
+              : 'Matrice comparative interactive et détecteur d’offres anormalement basses (Art. 72)'}
           </h3>
           <p className="text-xs text-slate-500 mt-0.5">
-            المرجع: <span className="font-mono font-bold text-slate-700">{dealReference}</span> — المتوسط المرجعي:{' '}
+            {isAr ? 'المرجع:' : 'Réf :'} <span className="font-mono font-bold text-slate-700">{dealReference}</span> — {isAr ? 'المتوسط المرجعي:' : 'Moyenne de référence :'}{' '}
             <strong className="text-slate-900">{formatCurrency(averageAmount)}</strong>
           </p>
         </div>
@@ -165,7 +174,7 @@ export function EvaluationMatrixTable({
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
-            الأفضل اقتصادياً (70/30)
+            {isAr ? 'الأفضل اقتصادياً (70/30)' : 'Mieux-disant (70/30)'}
           </button>
           <button
             type="button"
@@ -176,7 +185,7 @@ export function EvaluationMatrixTable({
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
-            الأقل ثمناً
+            {isAr ? 'الأقل ثمناً' : 'Moins-disant'}
           </button>
         </div>
       </div>
@@ -186,16 +195,16 @@ export function EvaluationMatrixTable({
         <table className="w-full text-xs text-start">
           <thead className="bg-slate-50/90 text-slate-600 font-bold border-b border-slate-200">
             <tr>
-              <th className="py-3 px-3 text-start">الرتبة</th>
-              <th className="py-3 px-3 text-start">اسم المتعهد / المؤسسة</th>
-              <th className="py-3 px-3 text-start">ملف الترشح</th>
-              <th className="py-3 px-3 text-center">التنقيط التقني</th>
-              <th className="py-3 px-3 text-start">المبلغ المالي (د.ج)</th>
-              <th className="py-3 px-3 text-center">الانحراف عن المرجع</th>
-              <th className="py-3 px-3 text-center">المادة 72</th>
-              <th className="py-3 px-3 text-center">النتيجة الإجمالية</th>
-              <th className="py-3 px-3 text-start">التوصية القانونية</th>
-              <th className="py-3 px-3 text-end">الإجراءات</th>
+              <th className="py-3 px-3 text-start">{isAr ? 'الرتبة' : 'Rang'}</th>
+              <th className="py-3 px-3 text-start">{isAr ? 'اسم المتعهد / المؤسسة' : 'Soumissionnaire / Entreprise'}</th>
+              <th className="py-3 px-3 text-start">{isAr ? 'ملف الترشح' : 'Candidature'}</th>
+              <th className="py-3 px-3 text-center">{isAr ? 'التنقيط التقني' : 'Score technique'}</th>
+              <th className="py-3 px-3 text-start">{isAr ? 'المبلغ المالي (د.ج)' : 'Montant financier (DZD)'}</th>
+              <th className="py-3 px-3 text-center">{isAr ? 'الانحراف عن المرجع' : 'Écart / Référence'}</th>
+              <th className="py-3 px-3 text-center">{isAr ? 'المادة 72' : 'Art. 72'}</th>
+              <th className="py-3 px-3 text-center">{isAr ? 'النتيجة الإجمالية' : 'Score global'}</th>
+              <th className="py-3 px-3 text-start">{isAr ? 'التوصية القانونية' : 'Recommandation légale'}</th>
+              <th className="py-3 px-3 text-end">{isAr ? 'الإجراءات' : 'Actions'}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100 font-medium">
@@ -241,12 +250,12 @@ export function EvaluationMatrixTable({
                     {offer.isCandidacyCompliant ? (
                       <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700">
                         <CheckCircle2 className="size-3.5" />
-                        <span>مستوفٍ</span>
+                        <span>{isAr ? 'مستوفٍ' : 'Conforme'}</span>
                       </span>
                     ) : (
                       <span className="inline-flex items-center gap-1 text-[11px] font-bold text-rose-700">
                         <XCircle className="size-3.5" />
-                        <span>نواقص</span>
+                        <span>{isAr ? 'نواقص' : 'Incomplet'}</span>
                       </span>
                     )}
                   </td>
@@ -306,21 +315,25 @@ export function EvaluationMatrixTable({
                           })
                         }
                         className="inline-flex items-center gap-1 rounded-full bg-amber-100 border border-amber-300 px-2 py-0.5 text-[10px] font-black text-amber-900 shadow-2xs hover:bg-amber-200 cursor-pointer"
-                        title="اضغط لتوليد استفسار كتابي رسمي عملاً بالمادة 72"
+                        title={
+                          isAr
+                            ? 'اضغط لتوليد استفسار كتابي رسمي عملاً بالمادة 72'
+                            : 'Demande d’éclaircissements et de justification selon l’art. 72'
+                        }
                       >
                         <AlertTriangle className="size-3 text-amber-700" />
-                        <span>منخفض جداً ⚠️</span>
+                        <span>{isAr ? 'منخفض جداً ⚠️' : 'Anormalement basse ⚠️'}</span>
                       </button>
                     ) : (
                       <span className="inline-flex items-center gap-1 text-[10px] font-bold text-slate-500">
-                        <span>طبيعي</span>
+                        <span>{isAr ? 'طبيعي' : 'Normale'}</span>
                       </span>
                     )}
                   </td>
 
                   {/* النتيجة الإجمالية */}
                   <td className="py-3.5 px-3 text-center font-black text-xs text-slate-900">
-                    {offer.isTechPassed ? `${offer.combinedScore} نقطة` : '—'}
+                    {offer.isTechPassed ? `${offer.combinedScore} ${isAr ? 'نقطة' : 'pts'}` : '—'}
                   </td>
 
                   {/* التوصية */}
@@ -361,7 +374,7 @@ export function EvaluationMatrixTable({
                           }
                           className="rounded-lg bg-amber-500 px-2.5 py-1 text-[11px] font-bold text-white shadow-2xs hover:bg-amber-600 cursor-pointer"
                         >
-                          طلب تبرير (م72)
+                          {isAr ? 'طلب تبرير (م72)' : 'Justification (Art. 72)'}
                         </button>
                       )}
 
@@ -371,7 +384,7 @@ export function EvaluationMatrixTable({
                           onClick={() => onSelectWinner(offer.id)}
                           className="rounded-lg bg-emerald-600 px-3 py-1 text-[11px] font-bold text-white shadow-2xs hover:bg-emerald-700 cursor-pointer"
                         >
-                          اعتماد المنح المؤقت
+                          {isAr ? 'اعتماد المنح المؤقت' : 'Attribution provisoire'}
                         </button>
                       )}
                     </div>
