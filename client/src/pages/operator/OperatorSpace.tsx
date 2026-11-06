@@ -1,25 +1,7 @@
-import { useEffect } from 'react';
+import { useEffect, lazy, Suspense } from 'react';
 import { Redirect, Route, Switch, useRoute } from 'wouter';
 import { useI18n } from '@/i18n';
 import i18n from '@/lib/i18n';
-import { OperatorOverview } from './OperatorOverview';
-import { OperatorOpportunities } from './OperatorOpportunities';
-import { OpportunityDetails } from './OpportunityDetails';
-import { OffersList } from './OffersList';
-import { OfferForm } from './OfferForm';
-import { OperatorContractsView } from './OperatorContractsView';
-import { OperatorProfileView } from './OperatorProfileView';
-import { OperatorSmartSpecsView } from './OperatorSmartSpecsView';
-import { OperatorArchiveView } from './OperatorArchiveView';
-import { OperatorSettingsView } from './OperatorSettingsView';
-import { OperatorNotificationsView } from './OperatorNotificationsView';
-import { OperatorAssistantView } from './OperatorAssistantView';
-import { OperatorPassportView } from './OperatorPassportView';
-import { PriceRevisionCalculator } from '@/features/pricing/PriceRevisionCalculator';
-import { RequirementsResponse } from './RequirementsResponse';
-import { OperatorSessionList } from '@/features/opening/components/OperatorSessionList';
-import { OperatorSessionLive } from '@/features/opening/components/OperatorSessionLive';
-import { OperatorObjectionsView } from '@/features/objections/components/OperatorObjectionsView';
 import { PortalNotFound } from '@/components/common/PortalNotFound';
 import { OperatorShell, type OperatorNavItem } from './OperatorShell';
 import {
@@ -33,6 +15,34 @@ import {
   ShieldCheck,
   Calculator,
 } from 'lucide-react';
+
+// Code Splitting: Lazy-load portal subviews to accelerate workspace launch
+const OperatorOverview = lazy(() => import('./OperatorOverview').then((m) => ({ default: m.OperatorOverview })));
+const OperatorOpportunities = lazy(() => import('./OperatorOpportunities').then((m) => ({ default: m.OperatorOpportunities })));
+const OpportunityDetails = lazy(() => import('./OpportunityDetails').then((m) => ({ default: m.OpportunityDetails })));
+const OffersList = lazy(() => import('./OffersList').then((m) => ({ default: m.OffersList })));
+const OfferForm = lazy(() => import('./OfferForm').then((m) => ({ default: m.OfferForm })));
+const OperatorContractsView = lazy(() => import('./OperatorContractsView').then((m) => ({ default: m.OperatorContractsView })));
+const OperatorProfileView = lazy(() => import('./OperatorProfileView').then((m) => ({ default: m.OperatorProfileView })));
+const OperatorSmartSpecsView = lazy(() => import('./OperatorSmartSpecsView').then((m) => ({ default: m.OperatorSmartSpecsView })));
+const OperatorArchiveView = lazy(() => import('./OperatorArchiveView').then((m) => ({ default: m.OperatorArchiveView })));
+const OperatorSettingsView = lazy(() => import('./OperatorSettingsView').then((m) => ({ default: m.OperatorSettingsView })));
+const OperatorNotificationsView = lazy(() => import('./OperatorNotificationsView').then((m) => ({ default: m.OperatorNotificationsView })));
+const OperatorAssistantView = lazy(() => import('./OperatorAssistantView').then((m) => ({ default: m.OperatorAssistantView })));
+const OperatorPassportView = lazy(() => import('./OperatorPassportView').then((m) => ({ default: m.OperatorPassportView })));
+const PriceRevisionCalculator = lazy(() => import('@/features/pricing/PriceRevisionCalculator').then((m) => ({ default: m.PriceRevisionCalculator })));
+const RequirementsResponse = lazy(() => import('./RequirementsResponse').then((m) => ({ default: m.RequirementsResponse })));
+const OperatorSessionList = lazy(() => import('@/features/opening/components/OperatorSessionList').then((m) => ({ default: m.OperatorSessionList })));
+const OperatorSessionLive = lazy(() => import('@/features/opening/components/OperatorSessionLive').then((m) => ({ default: m.OperatorSessionLive })));
+const OperatorObjectionsView = lazy(() => import('@/features/objections/components/OperatorObjectionsView').then((m) => ({ default: m.OperatorObjectionsView })));
+
+function PortalLoadingFallback() {
+  return (
+    <div className="flex min-h-[50vh] w-full items-center justify-center p-6">
+      <div className="size-7 animate-spin rounded-full border-2 border-emerald-600 border-t-transparent" />
+    </div>
+  );
+}
 
 export function OperatorSpace() {
   const { t, lang } = useI18n();
@@ -127,44 +137,46 @@ export function OperatorSpace() {
 
   return (
     <OperatorShell navItems={navItems} mobileTitle={t('common.operator_mobile_title')}>
-      <Switch>
-        <Route path="/operator/opening-sessions/:id" component={OperatorSessionLive} />
-        <Route path="/operator/opening-sessions" component={OperatorSessionList} />
-        <Route path="/operator/objections" component={OperatorObjectionsView} />
-        <Route path="/operator/assistant" component={OperatorAssistantView} />
-        <Route path="/operator/deals" component={OperatorOpportunities} />
-        <Route path="/operator/opportunities" component={OperatorOpportunities} />
-        <Route path="/operator/passport" component={OperatorPassportView} />
-        <Route path="/operator/price-revision">{() => <PriceRevisionCalculator />}</Route>
-        <Route path="/operator/profile" component={OperatorProfileView} />
-        <Route path="/operator/smart-specs" component={OperatorSmartSpecsView} />
-        <Route path="/operator/archive" component={OperatorArchiveView} />
-        <Route path="/operator/notifications" component={OperatorNotificationsView} />
-        <Route path="/operator/settings" component={OperatorSettingsView} />
-        <Route path="/operator/opportunities/:oppId/requirements" component={RequirementsResponse} />
-        <Route path="/operator/opportunities/:oppId/offer">
-          {(params) => <OfferForm opportunityId={params.oppId} />}
-        </Route>
-        <Route path="/operator/opportunities/:id" component={OpportunityDetails} />
-        <Route path="/operator/offers" component={OffersList} />
-        <Route path="/operator/offers/new">
-          <Redirect to="/operator/opportunities" />
-        </Route>
-        <Route path="/operator/offers/:id">
-          {(params) => <OfferForm offerId={params.id} />}
-        </Route>
-        <Route path="/operator/contracts/:dealId">
-          {(params) => <OperatorContractsView dealId={params.dealId} />}
-        </Route>
-        <Route path="/operator/contracts">
-          {() => <OperatorContractsView />}
-        </Route>
-        <Route path="/operator/overview" component={OperatorOverview} />
-        <Route path="/operator" component={OperatorOverview} />
-        <Route>
-          <PortalNotFound basePath="/operator" baseTitle={t('common.operator_not_found')} />
-        </Route>
-      </Switch>
+      <Suspense fallback={<PortalLoadingFallback />}>
+        <Switch>
+          <Route path="/operator/opening-sessions/:id" component={OperatorSessionLive} />
+          <Route path="/operator/opening-sessions" component={OperatorSessionList} />
+          <Route path="/operator/objections" component={OperatorObjectionsView} />
+          <Route path="/operator/assistant" component={OperatorAssistantView} />
+          <Route path="/operator/deals" component={OperatorOpportunities} />
+          <Route path="/operator/opportunities" component={OperatorOpportunities} />
+          <Route path="/operator/passport" component={OperatorPassportView} />
+          <Route path="/operator/price-revision">{() => <PriceRevisionCalculator />}</Route>
+          <Route path="/operator/profile" component={OperatorProfileView} />
+          <Route path="/operator/smart-specs" component={OperatorSmartSpecsView} />
+          <Route path="/operator/archive" component={OperatorArchiveView} />
+          <Route path="/operator/notifications" component={OperatorNotificationsView} />
+          <Route path="/operator/settings" component={OperatorSettingsView} />
+          <Route path="/operator/opportunities/:oppId/requirements" component={RequirementsResponse} />
+          <Route path="/operator/opportunities/:oppId/offer">
+            {(params) => <OfferForm opportunityId={params.oppId} />}
+          </Route>
+          <Route path="/operator/opportunities/:id" component={OpportunityDetails} />
+          <Route path="/operator/offers" component={OffersList} />
+          <Route path="/operator/offers/new">
+            <Redirect to="/operator/opportunities" />
+          </Route>
+          <Route path="/operator/offers/:id">
+            {(params) => <OfferForm offerId={params.id} />}
+          </Route>
+          <Route path="/operator/contracts/:dealId">
+            {(params) => <OperatorContractsView dealId={params.dealId} />}
+          </Route>
+          <Route path="/operator/contracts">
+            {() => <OperatorContractsView />}
+          </Route>
+          <Route path="/operator/overview" component={OperatorOverview} />
+          <Route path="/operator" component={OperatorOverview} />
+          <Route>
+            <PortalNotFound basePath="/operator" baseTitle={t('common.operator_not_found')} />
+          </Route>
+        </Switch>
+      </Suspense>
     </OperatorShell>
   );
 }

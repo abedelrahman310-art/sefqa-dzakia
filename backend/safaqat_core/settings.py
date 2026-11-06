@@ -306,6 +306,9 @@ else:
         }
     }
 
+# Session Engine: Use fast in-memory cache (Redis/LocMem) instead of synchronous DB disk writes
+SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+
 # ═══ Production Security Hardening (Priority 1) ═══
 if not DEBUG and not IS_TESTING:
     SECURE_SSL_REDIRECT = os.environ.get('DJANGO_SECURE_SSL_REDIRECT', 'True').lower() in ('true', '1', 'yes')

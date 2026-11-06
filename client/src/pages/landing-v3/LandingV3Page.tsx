@@ -67,7 +67,14 @@ export function LandingV3Page() {
     <div
       dir={dir}
       lang={lang}
-      className="min-h-screen bg-[#ffffff] text-[#080808] font-sans antialiased selection:bg-[#006233] selection:text-white"
+      className="min-h-screen relative overflow-hidden bg-[#2563EB] text-[#080808] font-sans antialiased selection:bg-white selection:text-[#1E40AF]"
+      style={{
+        backgroundImage: `
+          radial-gradient(circle at 70% 30%, #3B82F6 0%, transparent 50%),
+          radial-gradient(circle at 20% 80%, #1E40AF 0%, transparent 50%),
+          linear-gradient(135deg, #2563EB 0%, #1E40AF 100%)
+        `,
+      }}
     >
       {/* ─── الشريط العلوي الرئاسي ─── */}
       <V3TopBanner />
@@ -84,49 +91,49 @@ export function LandingV3Page() {
         <V3QuickSearchSection />
 
         {/* فاصل وطني سيادي مزدوج */}
-        <V3SectionDivider bg="bg-[#ffffff]" />
+        <V3SectionDivider bg="bg-transparent" />
 
         {/* ─── القسم 1: لماذا صفقات ذكية؟ ─── */}
         <V3WhySafaqatSection />
 
         {/* فاصل وطني سيادي مزدوج */}
-        <V3SectionDivider bg="bg-[#ffffff]" />
+        <V3SectionDivider bg="bg-transparent" />
 
         {/* ─── الإضافة 1: مسار الصفقة العمومية خطوة بخطوة ─── */}
         <V3WorkflowSection />
 
         {/* فاصل وطني سيادي مزدوج */}
-        <V3SectionDivider bg="bg-[#f8fafc]" />
+        <V3SectionDivider bg="bg-transparent" />
 
         {/* ─── القسم 2: بوابات المنصة الثلاث ─── */}
         <V3FivePortalsSection />
 
         {/* فاصل وطني سيادي مزدوج */}
-        <V3SectionDivider bg="bg-[#f8fafc]" />
+        <V3SectionDivider bg="bg-transparent" />
 
         {/* ─── الإضافة 3: المعاينة الحية لواجهات المنصة ─── */}
         <V3PlatformShowcaseSection />
 
         {/* فاصل وطني سيادي مزدوج */}
-        <V3SectionDivider bg="bg-[#ffffff]" />
+        <V3SectionDivider bg="bg-transparent" />
 
         {/* ─── القسم 3: أدوات الذكاء الاصطناعي ─── */}
         <V3AIToolsSection />
 
         {/* فاصل وطني سيادي مزدوج */}
-        <V3SectionDivider bg="bg-[#ffffff]" />
+        <V3SectionDivider bg="bg-transparent" />
 
         {/* ─── الإضافة 4: الأسئلة الشائعة وضمانات المنظومة ─── */}
         <V3FAQSection />
 
         {/* فاصل وطني سيادي مزدوج */}
-        <V3SectionDivider bg="bg-[#f8fafc]" />
+        <V3SectionDivider bg="bg-transparent" />
 
         {/* ─── القسم 4: الامتثال والثقة وبطاقة QR وزر الدخول الموحد ─── */}
         <V3ComplianceTrustSection qrSlot={<V3QrCodeCard />} />
 
         {/* فاصل وطني سيادي ختامي قبل التذييل */}
-        <V3SectionDivider bg="bg-[#ffffff]" />
+        <V3SectionDivider bg="bg-transparent" />
       </main>
 
       {/* ─── التذييل المؤسسي الراقي المعتمد ─── */}

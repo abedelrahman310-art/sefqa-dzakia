@@ -73,6 +73,18 @@ export function UnifiedAuthPage({ initialMode = 'operator' }: UnifiedAuthPagePro
     }
   }, [location]);
 
+  // تسريع الانتقال: التحميل الاستباقي للوحدات البرمجية لمساحات العمل أثناء التواجد في شاشة الدخول
+  useEffect(() => {
+    if (mode === 'login') {
+      const timer = setTimeout(() => {
+        void import('@/pages/operator/OperatorSpace');
+        void import('@/pages/authority/AuthoritySpace');
+        void import('@/pages/central/CentralSpace');
+      }, 150);
+      return () => clearTimeout(timer);
+    }
+  }, [mode]);
+
   // التبديل وتحديث شريط العنوان دون إعادة تحميل كاملة
   const handleModeChange = (newMode: AuthMode) => {
     setMode(newMode);

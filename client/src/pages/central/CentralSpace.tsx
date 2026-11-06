@@ -1,22 +1,31 @@
-import { useEffect } from 'react';
+import { useEffect, lazy, Suspense } from 'react';
 import { useI18n } from '@/i18n';
 import i18n from '@/lib/i18n';
 import { Route, Switch, useRoute, useLocation } from 'wouter';
-import { CentralOverview } from './CentralOverview';
-import { CentralMapView } from './CentralMapView';
-import { CentralDeals } from './CentralDeals';
-import { CentralAuthorities } from './CentralAuthorities';
-import { CentralOperators } from './CentralOperators';
-import { CentralAppeals } from './CentralAppeals';
-import { CentralReports } from './CentralReports';
-import { CentralPermissions } from './CentralPermissions';
-import { CentralIntegrityView } from './CentralIntegrityView';
-import { CentralInjunctions } from './CentralInjunctions';
-import { OperatorNotificationsView } from '@/pages/operator/OperatorNotificationsView';
 import { PortalNotFound } from '@/components/common/PortalNotFound';
 import CentralAdminTopBar from '@/components/layout/CentralAdminTopBar';
 import { PortalShell } from '@/components/layout/PortalShell';
 import { PortalSidebar } from '@/components/layout/PortalSidebar';
+
+const CentralOverview = lazy(() => import('./CentralOverview').then((m) => ({ default: m.CentralOverview })));
+const CentralMapView = lazy(() => import('./CentralMapView').then((m) => ({ default: m.CentralMapView })));
+const CentralDeals = lazy(() => import('./CentralDeals').then((m) => ({ default: m.CentralDeals })));
+const CentralAuthorities = lazy(() => import('./CentralAuthorities').then((m) => ({ default: m.CentralAuthorities })));
+const CentralOperators = lazy(() => import('./CentralOperators').then((m) => ({ default: m.CentralOperators })));
+const CentralAppeals = lazy(() => import('./CentralAppeals').then((m) => ({ default: m.CentralAppeals })));
+const CentralReports = lazy(() => import('./CentralReports').then((m) => ({ default: m.CentralReports })));
+const CentralPermissions = lazy(() => import('./CentralPermissions').then((m) => ({ default: m.CentralPermissions })));
+const CentralIntegrityView = lazy(() => import('./CentralIntegrityView').then((m) => ({ default: m.CentralIntegrityView })));
+const CentralInjunctions = lazy(() => import('./CentralInjunctions').then((m) => ({ default: m.CentralInjunctions })));
+const OperatorNotificationsView = lazy(() => import('@/pages/operator/OperatorNotificationsView').then((m) => ({ default: m.OperatorNotificationsView })));
+
+function PortalLoadingFallback() {
+  return (
+    <div className="flex min-h-[50vh] w-full items-center justify-center p-6">
+      <div className="size-7 animate-spin rounded-full border-2 border-emerald-600 border-t-transparent" />
+    </div>
+  );
+}
 import {
   LayoutDashboard,
   Map as MapIcon,
@@ -146,25 +155,27 @@ export function CentralSpace() {
         />
       }
     >
-      <Switch>
-        <Route path="/central/dashboard" component={CentralOverview} />
-        <Route path="/central/map" component={CentralMapView} />
-        <Route path="/central/deals" component={CentralDeals} />
-        <Route path="/central/authorities" component={CentralAuthorities} />
-        <Route path="/central/operators" component={CentralOperators} />
-        <Route path="/central/appeals" component={CentralAppeals} />
-        <Route path="/central/reports" component={CentralReports} />
-        <Route path="/central/injunctions" component={CentralInjunctions} />
-        <Route path="/central/integrity" component={CentralIntegrityView} />
-        <Route path="/central/permissions" component={CentralPermissions} />
-        <Route path="/central/settings" component={CentralPermissions} />
-        <Route path="/central/notifications" component={OperatorNotificationsView} />
-        <Route path="/central/overview" component={CentralOverview} />
-        <Route path="/central" component={CentralOverview} />
-        <Route>
-          <PortalNotFound basePath="/central" baseTitle={t('common.central_not_found')} />
-        </Route>
-      </Switch>
+      <Suspense fallback={<PortalLoadingFallback />}>
+        <Switch>
+          <Route path="/central/dashboard" component={CentralOverview} />
+          <Route path="/central/map" component={CentralMapView} />
+          <Route path="/central/deals" component={CentralDeals} />
+          <Route path="/central/authorities" component={CentralAuthorities} />
+          <Route path="/central/operators" component={CentralOperators} />
+          <Route path="/central/appeals" component={CentralAppeals} />
+          <Route path="/central/reports" component={CentralReports} />
+          <Route path="/central/injunctions" component={CentralInjunctions} />
+          <Route path="/central/integrity" component={CentralIntegrityView} />
+          <Route path="/central/permissions" component={CentralPermissions} />
+          <Route path="/central/settings" component={CentralPermissions} />
+          <Route path="/central/notifications" component={OperatorNotificationsView} />
+          <Route path="/central/overview" component={CentralOverview} />
+          <Route path="/central" component={CentralOverview} />
+          <Route>
+            <PortalNotFound basePath="/central" baseTitle={t('common.central_not_found')} />
+          </Route>
+        </Switch>
+      </Suspense>
     </PortalShell>
   );
 }

@@ -1,4 +1,5 @@
 from apps.procurements.views_injunctions import CentralInjunctionsView, InjunctionPdfView
+from safaqat_core.views_health import PlatformHealthDetailView
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from apps.users.views import ExcludedOperatorViewSet
@@ -23,6 +24,10 @@ excluded_router = DefaultRouter()
 excluded_router.register(r'excluded-operators', ExcludedOperatorViewSet, basename='central-excluded-operators')
 
 urlpatterns = [
+    # 0. لوحة مراقبة صحة المنصة (Platform Health Operations Dashboard)
+    path('platform-health/', PlatformHealthDetailView.as_view(), name='central-platform-health'),
+    path('platform-health', PlatformHealthDetailView.as_view(), name='central-platform-health-no-slash'),
+
     # 11. إدارة الموظفين والصلاحيات (Staff & Role Management API)
     path('staff/', CentralStaffListView.as_view(), name='central-staff-list'),
     path('staff', CentralStaffListView.as_view(), name='central-staff-list-no-slash'),

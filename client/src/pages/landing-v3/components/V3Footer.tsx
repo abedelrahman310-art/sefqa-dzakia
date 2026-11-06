@@ -15,34 +15,34 @@ export const V3Footer: React.FC = () => {
   return (
     <footer
       dir={dir}
-      className="w-full bg-[#ffffff] text-[#080808] pt-16 pb-12 border-t border-[#d8d8d8]"
+      className="w-full bg-[#172554]/95 text-white pt-16 pb-12 border-t border-white/20 backdrop-blur-xl"
     >
       <div className="max-w-[1200px] mx-auto px-4 sm:px-6 space-y-12">
         
         {/* Top Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 pb-12 border-b border-[#d8d8d8]">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 pb-12 border-b border-white/10">
           
           {/* Brand Info (4 cols) */}
           <div className="md:col-span-5 space-y-4">
             <div className="flex items-center gap-2.5">
-              <div className="flex items-center justify-center size-8 rounded-[4px] bg-[#146ef5] text-white">
+              <div className="flex items-center justify-center size-8 rounded-[4px] bg-[#3b82f6] text-white shadow-xs">
                 <Logo size={20} />
               </div>
               <div className="flex items-baseline gap-1.5">
-                <span className="text-[18px] font-bold text-[#080808] tracking-tight">
+                <span className="text-[18px] font-bold text-white tracking-tight">
                   {isAr ? 'صفقات ذكية' : 'Safaqat'}
                 </span>
-                <span className="size-1.5 rounded-full bg-[#146ef5]" />
+                <span className="size-1.5 rounded-full bg-emerald-400" />
               </div>
             </div>
 
-            <p className="text-[13px] text-[#5a5a5a] leading-relaxed max-w-[360px]">
+            <p className="text-[13px] text-blue-100/80 leading-relaxed max-w-[360px]">
               {isAr
                 ? 'المنظومة الموحدة لإدارة وتجريد ومراقبة الصفقات العمومية، مصممة وفق أحدث معايير الأمان والتشفير لحماية المال العام.'
                 : 'Plateforme unifiée et souveraine de dématérialisation et de supervision des marchés publics en Algérie.'}
             </p>
 
-            <div className="flex items-center gap-2 text-[13px] text-[#5a5a5a] font-mono">
+            <div className="flex items-center gap-2 text-[13px] text-blue-200/70 font-mono">
               <span>ALGERIA</span>
               <span>•</span>
               <span>LAW 23-12</span>
@@ -55,27 +55,27 @@ export const V3Footer: React.FC = () => {
 
           {/* Links Column 1: Portals */}
           <div className="md:col-span-2 space-y-3">
-            <h4 className="text-[13px] font-semibold text-[#080808] uppercase tracking-wider font-mono">
+            <h4 className="text-[13px] font-semibold text-white uppercase tracking-wider font-mono">
               {isAr ? 'البوابات' : 'Portails'}
             </h4>
-            <ul className="space-y-2 text-[13px] text-[#5a5a5a]">
+            <ul className="space-y-2 text-[13px] text-blue-100/80">
               <li>
-                <Link href="/operator/deals" className="hover:text-[#146ef5] transition-colors">
+                <Link href="/operator/deals" className="hover:text-white transition-colors">
                   {isAr ? 'المتعامل الاقتصادي' : 'Opérateur'}
                 </Link>
               </li>
               <li>
-                <Link href="/authority/deals" className="hover:text-[#146ef5] transition-colors">
+                <Link href="/authority/deals" className="hover:text-white transition-colors">
                   {isAr ? 'المصلحة المتعاقدة' : 'Autorité'}
                 </Link>
               </li>
               <li>
-                <Link href="/central" className="hover:text-[#146ef5] transition-colors">
+                <Link href="/central" className="hover:text-white transition-colors">
                   {isAr ? 'الرقابة المركزية' : 'Contrôle Central'}
                 </Link>
               </li>
               <li>
-                <Link href="/login" className="hover:text-[#146ef5] transition-colors">
+                <Link href="/login" className="hover:text-white transition-colors">
                   {isAr ? 'تسجيل الدخول' : 'Connexion'}
                 </Link>
               </li>
@@ -84,22 +84,22 @@ export const V3Footer: React.FC = () => {
 
           {/* Links Column 2: Legal & Compliance */}
           <div className="md:col-span-3 space-y-3">
-            <h4 className="text-[13px] font-semibold text-[#080808] uppercase tracking-wider font-mono">
+            <h4 className="text-[13px] font-semibold text-white uppercase tracking-wider font-mono">
               {isAr ? 'المرجعية القانونية' : 'Cadre Légal'}
             </h4>
-            <ul className="space-y-2 text-[13px] text-[#5a5a5a]">
+            <ul className="space-y-2 text-[13px] text-blue-100/80">
               <li>
-                <Link href="/terms" className="hover:text-[#146ef5] transition-colors">
+                <Link href="/terms" className="hover:text-white transition-colors">
                   {isAr ? 'شروط الخدمة والامتثال' : 'Conditions d’utilisation'}
                 </Link>
               </li>
               <li>
-                <Link href="/accessibility" className="hover:text-[#146ef5] transition-colors">
+                <Link href="/accessibility" className="hover:text-white transition-colors">
                   {isAr ? 'إمكانية الوصول والمطابقة' : 'Accessibilité'}
                 </Link>
               </li>
               <li>
-                <Link href="/faq" className="hover:text-[#146ef5] transition-colors">
+                <Link href="/faq" className="hover:text-white transition-colors">
                   {isAr ? 'الأسئلة الشائعة والدعم' : 'Foire aux questions'}
                 </Link>
               </li>
@@ -108,16 +108,16 @@ export const V3Footer: React.FC = () => {
 
           {/* Links Column 3: Platform Tools */}
           <div className="md:col-span-2 space-y-3">
-            <h4 className="text-[13px] font-semibold text-[#080808] uppercase tracking-wider font-mono">
+            <h4 className="text-[13px] font-semibold text-white uppercase tracking-wider font-mono">
               {isAr ? 'الترسانة الذكية' : 'Outils IA'}
             </h4>
-            <ul className="space-y-2 text-[13px] text-[#5a5a5a]">
+            <ul className="space-y-2 text-[13px] text-blue-100/80">
               <li>
                 <Link
                   href="/ai-capabilities"
-                  className="inline-flex items-center gap-1.5 font-bold text-[#006233] hover:text-[#004d28] transition-colors"
+                  className="inline-flex items-center gap-1.5 font-bold text-emerald-300 hover:text-emerald-200 transition-colors"
                 >
-                  <Sparkles className="size-3.5 text-[#006233] shrink-0" />
+                  <Sparkles className="size-3.5 text-emerald-300 shrink-0" />
                   <span>{isAr ? 'قوة الذكاء الاصطناعي' : 'Puissance de l’IA'}</span>
                 </Link>
               </li>
@@ -127,7 +127,7 @@ export const V3Footer: React.FC = () => {
         </div>
 
         {/* Bottom Strip */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-[13px] text-[#5a5a5a]">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-[13px] text-blue-200/70">
           <p>
             {isAr
               ? '© 2026 الجمهورية الجزائرية الديمقراطية الشعبية — جميع الحقوق محفوظة لمنظومة صفقات ذكية.'
@@ -136,7 +136,7 @@ export const V3Footer: React.FC = () => {
 
           <div className="flex items-center gap-4">
             <span className="flex items-center gap-1.5">
-              <span className="size-1.5 rounded-full bg-[#146ef5]" />
+              <span className="size-1.5 rounded-full bg-emerald-400" />
               <span>{isAr ? 'البيئة التشغيلية: آمنة ومشفرة' : 'Système opérationnel chiffré'}</span>
             </span>
           </div>

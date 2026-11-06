@@ -10,7 +10,7 @@ export const V3Hero: React.FC = () => {
     <header
       id="overview"
       dir={dir}
-      className="w-full bg-[#ffffff] pt-10 sm:pt-14 pb-12 sm:pb-16"
+      className="w-full bg-transparent pt-10 sm:pt-14 pb-12 sm:pb-16"
     >
       <div className="max-w-[1200px] mx-auto px-4 sm:px-6">
         {/* Centered Hero Stack: Flex Column with perfect horizontal alignment */}
@@ -18,14 +18,14 @@ export const V3Hero: React.FC = () => {
           
           {/* Framed Short Eyebrow: Isolated Centered Row */}
           <div className="flex items-center justify-center w-full">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-emerald-200/80 bg-emerald-50/90 text-emerald-900 text-xs sm:text-sm font-bold shadow-2xs">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/30 bg-white/15 backdrop-blur-md text-white text-xs sm:text-sm font-bold shadow-sm">
               <span className="relative flex size-2">
                 <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-                <span className="relative inline-flex size-2 rounded-full bg-emerald-600" />
+                <span className="relative inline-flex size-2 rounded-full bg-emerald-300" />
               </span>
               <span>{isAr ? 'المنظومة الرقمية المعتمدة' : 'Plateforme Numérique Certifiée'}</span>
-              <span className="text-emerald-300 select-none">|</span>
-              <span className="text-[11px] font-semibold text-emerald-800">{isAr ? 'جاهزة للخدمة' : 'Opérationnelle'}</span>
+              <span className="text-white/40 select-none">|</span>
+              <span className="text-[11px] font-semibold text-emerald-200">{isAr ? 'جاهزة للخدمة' : 'Opérationnelle'}</span>
             </div>
           </div>
 

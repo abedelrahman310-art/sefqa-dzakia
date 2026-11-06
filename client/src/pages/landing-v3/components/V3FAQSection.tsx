@@ -56,29 +56,20 @@ export const V3FAQSection: React.FC = () => {
   ];
 
   return (
-    <section id="faq" dir={dir} className="relative w-full bg-[#ffffff] py-16 sm:py-20 px-4 sm:px-6 overflow-hidden">
-      {/* خلفية زليج خفيفة */}
-      <div
-        className="absolute inset-0 pointer-events-none opacity-[0.02]"
-        style={{
-          backgroundImage: `radial-gradient(#006233 0.75px, transparent 0.75px)`,
-          backgroundSize: '24px 24px',
-        }}
-      />
-
+    <section id="faq" dir={dir} className="relative w-full bg-transparent py-16 sm:py-20 px-4 sm:px-6 overflow-hidden">
       <div className="relative max-w-[1200px] mx-auto">
         {/* رأس القسم */}
         <div className="text-center max-w-3xl mx-auto mb-12 sm:mb-16">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-slate-200 bg-slate-50 text-slate-800 text-xs sm:text-sm font-bold shadow-2xs mb-4">
-            <HelpCircle className="size-3.5 text-[#006233]" strokeWidth={2} />
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-white/30 bg-white/15 backdrop-blur-md text-white text-xs sm:text-sm font-bold shadow-sm mb-4">
+            <HelpCircle className="size-3.5 text-emerald-300" strokeWidth={2} />
             <span>{isAr ? 'النزاهة والشفافية' : 'Questions Fréquentes'}</span>
           </div>
 
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-slate-900 tracking-tight leading-snug">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-white tracking-tight leading-snug">
             {isAr ? 'الأسئلة الشائعة وضمانات المنظومة' : 'Garanties et Questions Fréquentes'}
           </h2>
 
-          <p className="mt-3.5 text-sm sm:text-base text-slate-600 font-medium leading-relaxed max-w-2xl mx-auto">
+          <p className="mt-3.5 text-sm sm:text-base text-blue-100 font-medium leading-relaxed max-w-2xl mx-auto">
             {isAr
               ? 'إجابات واضحة وموثوقة تؤكد الالتزام التام بأحكام القانون 23-12 والمرسوم الرئاسي 15-247'
               : 'Éclaircissements juridiques et techniques sur le fonctionnement souverain de la plateforme'}

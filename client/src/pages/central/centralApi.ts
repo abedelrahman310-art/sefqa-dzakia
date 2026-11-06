@@ -447,4 +447,81 @@ export async function revokeToggleCentralStaff(
   return data;
 }
 
+// ─── لوحة مراقبة صحة المنصة (Platform Health Operations) ───────────────────
+// GET /api/central/platform-health/
+
+export type HealthCheckStatus = 'operational' | 'degraded' | 'down' | 'not_configured' | 'unknown';
+
+export interface DatabaseHealth {
+  status: HealthCheckStatus;
+  latency_ms?: number | null;
+  engine?: string;
+  name?: string;
+  error?: string;
+}
+
+export interface CacheHealth {
+  status: HealthCheckStatus;
+  latency_ms?: number | null;
+  backend?: string;
+  error?: string;
+}
+
+export interface AiEngineHealth {
+  status: HealthCheckStatus;
+  provider?: string;
+  provider_key?: string;
+  latency_ms?: number | null;
+  error?: string;
+}
+
+export interface ServerHealth {
+  status: HealthCheckStatus;
+  cpu_percent?: number;
+  cpu_cores?: number;
+  ram_percent?: number;
+  ram_used_gb?: number;
+  ram_total_gb?: number;
+  disk_percent?: number;
+  disk_free_gb?: number;
+  disk_total_gb?: number;
+  platform?: string;
+  error?: string;
+}
+
+export interface RealtimeChannelsHealth {
+  status: HealthCheckStatus;
+  backend?: string;
+}
+
+export interface CeleryHealth {
+  status: HealthCheckStatus;
+  workers?: number;
+  note?: string;
+}
+
+export interface PlatformHealthResponse {
+  overall_status: 'operational' | 'degraded' | 'critical';
+  checks: {
+    database: DatabaseHealth;
+    cache: CacheHealth;
+    ai_engine: AiEngineHealth;
+    server: ServerHealth;
+    realtime_channels?: RealtimeChannelsHealth;
+    celery?: CeleryHealth;
+  };
+  recent_incidents_24h: number;
+  critical_ai_insights: number;
+  total_actions_24h: number;
+  server_time: string;
+  platform_version: string;
+  environment: string;
+}
+
+export async function fetchPlatformHealth(): Promise<PlatformHealthResponse> {
+  const { data } = await api.get<PlatformHealthResponse>('/central/platform-health/');
+  return data;
+}
+
+
 

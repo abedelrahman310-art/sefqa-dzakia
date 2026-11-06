@@ -69,21 +69,21 @@ export const V3AIToolsSection: React.FC = () => {
     <section
       id="ai-tools"
       dir={dir}
-      className="relative w-full bg-[#ffffff] py-16 sm:py-20 px-4 sm:px-6 overflow-hidden"
+      className="relative w-full bg-transparent py-16 sm:py-20 px-4 sm:px-6 overflow-hidden"
     >
       <div className="relative max-w-[1200px] mx-auto">
         {/* رأس القسم: مؤطر وقصير وخالي تماماً من الفواصل والنقاط في العنوان الكبير */}
         <div className="text-center max-w-3xl mx-auto mb-12 sm:mb-16">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-emerald-200 bg-emerald-50/90 text-emerald-900 text-xs sm:text-sm font-bold shadow-2xs mb-4">
-            <Bot className="size-3.5 text-[#006233]" strokeWidth={1.75} />
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-white/30 bg-white/15 backdrop-blur-md text-white text-xs sm:text-sm font-bold shadow-sm mb-4">
+            <Bot className="size-3.5 text-emerald-300" strokeWidth={1.75} />
             <span>{isAr ? 'ذكاء اصطناعي مساعد' : 'Intelligence Artificielle Assistive'}</span>
           </div>
 
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-slate-900 tracking-tight leading-snug">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-white tracking-tight leading-snug">
             {isAr ? 'أدوات الذكاء الاصطناعي المساعد' : 'Outils d’Intelligence Artificielle Assistive'}
           </h2>
 
-          <p className="mt-3.5 text-sm sm:text-base text-slate-600 font-medium leading-relaxed max-w-2xl mx-auto">
+          <p className="mt-3.5 text-sm sm:text-base text-blue-100 font-medium leading-relaxed max-w-2xl mx-auto">
             {isAr
               ? 'أدوات خوارزمية ذكية لمساندة المتعاملين والمصالح المتعاقدة وأجهزة الرقابة مع إبقاء القرار البشري سيد الموقف'
               : 'Des technologies avancées pour assister les acteurs publics et privés sans jamais se substituer à la décision humaine'}

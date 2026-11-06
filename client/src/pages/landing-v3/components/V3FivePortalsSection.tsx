@@ -108,31 +108,21 @@ export const V3FivePortalsSection: React.FC = () => {
     <section
       id="portals"
       dir={dir}
-      className="relative w-full bg-[#f8fafc] py-16 sm:py-20 px-4 sm:px-6 overflow-hidden"
+      className="relative w-full bg-transparent py-16 sm:py-20 px-4 sm:px-6 overflow-hidden"
     >
-      {/* خلفية زليج جزائري خفيفة وهادئة جداً */}
-      <div
-        className="absolute inset-0 pointer-events-none opacity-[0.02]"
-        style={{
-          backgroundImage: `radial-gradient(#006233 0.75px, transparent 0.75px), radial-gradient(#d21034 0.75px, #f8fafc 0.75px)`,
-          backgroundSize: '32px 32px',
-          backgroundPosition: '0 0, 16px 16px',
-        }}
-      />
-
       <div className="relative max-w-[1200px] mx-auto">
         {/* رأس القسم: مؤطر وقصير وخالي تماماً من الفواصل والنقاط في العنوان الكبير */}
         <div className="text-center max-w-3xl mx-auto mb-12 sm:mb-16">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-slate-200 bg-white text-slate-800 text-xs sm:text-sm font-bold shadow-2xs mb-4">
-            <Layers className="size-3.5 text-[#006233]" strokeWidth={1.75} />
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-white/30 bg-white/15 backdrop-blur-md text-white text-xs sm:text-sm font-bold shadow-sm mb-4">
+            <Layers className="size-3.5 text-emerald-300" strokeWidth={1.75} />
             <span>{isAr ? 'ثلاث فضاءات متكاملة' : 'Trois Espaces Dédiés'}</span>
           </div>
 
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-slate-900 tracking-tight leading-snug">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-white tracking-tight leading-snug">
             {isAr ? 'بوابات المنصة' : 'Portails de la Plateforme'}
           </h2>
 
-          <p className="mt-3.5 text-sm sm:text-base text-slate-600 font-medium leading-relaxed max-w-2xl mx-auto">
+          <p className="mt-3.5 text-sm sm:text-base text-blue-100 font-medium leading-relaxed max-w-2xl mx-auto">
             {isAr
               ? 'بيئة عمل حكومية موحدة توفر واجهات مخصصة لكل متدخل في مسار الطلبيات والمشتريات العمومية'
               : 'Un écosystème numérique unifié offrant des espaces de travail dédiés avec une gouvernance rigoureuse'}

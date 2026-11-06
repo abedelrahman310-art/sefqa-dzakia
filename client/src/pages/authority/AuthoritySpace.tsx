@@ -1,25 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, lazy, Suspense } from 'react';
 import { useI18n } from '@/i18n';
 import i18n from '@/lib/i18n';
 import { api } from '@/lib/api';
 import { Redirect, Route, Switch, useLocation, useRoute } from 'wouter';
-import { AuthorityOverview } from './AuthorityOverview';
-import { AuthorityDealsList } from './AuthorityDealsList';
-import { AuthorityDealWizard } from './AuthorityDealWizard';
-import { AuthorityDealWorkspace } from './AuthorityDealWorkspace';
-import { ReceivedOffers } from './ReceivedOffers';
-import { EvaluationWorkspace } from './EvaluationWorkspace';
-import { DealCommitteeManager } from './DealCommitteeManager';
 import { PortalNotFound } from '@/components/common/PortalNotFound';
-import { AuthoritySessionManager } from '@/features/opening/components/AuthoritySessionManager';
-import { AuthoritySessionControl } from '@/features/opening/components/AuthoritySessionControl';
-import { AuthorityObjectionsView } from '@/features/objections/components/AuthorityObjectionsView';
-import { ReportsView } from './ReportsView';
-import { AuditView } from './AuditView';
-import { SettingsView } from './SettingsView';
-import { AuthorityAssistantView } from './AuthorityAssistantView';
-import { PriceRevisionCalculator } from '@/features/pricing/PriceRevisionCalculator';
-import { OperatorNotificationsView } from '@/pages/operator/OperatorNotificationsView';
 import { PortalShell } from '@/components/layout/PortalShell';
 import { PortalSidebar } from '@/components/layout/PortalSidebar';
 import ServiceTopBar from '@/components/layout/ServiceTopBar';
@@ -35,6 +19,32 @@ import {
   AlertOctagon,
   Calculator,
 } from 'lucide-react';
+
+// Code Splitting: Lazy-load authority subviews for instant portal transition
+const AuthorityOverview = lazy(() => import('./AuthorityOverview').then((m) => ({ default: m.AuthorityOverview })));
+const AuthorityDealsList = lazy(() => import('./AuthorityDealsList').then((m) => ({ default: m.AuthorityDealsList })));
+const AuthorityDealWizard = lazy(() => import('./AuthorityDealWizard').then((m) => ({ default: m.AuthorityDealWizard })));
+const AuthorityDealWorkspace = lazy(() => import('./AuthorityDealWorkspace').then((m) => ({ default: m.AuthorityDealWorkspace })));
+const ReceivedOffers = lazy(() => import('./ReceivedOffers').then((m) => ({ default: m.ReceivedOffers })));
+const EvaluationWorkspace = lazy(() => import('./EvaluationWorkspace').then((m) => ({ default: m.EvaluationWorkspace })));
+const DealCommitteeManager = lazy(() => import('./DealCommitteeManager').then((m) => ({ default: m.DealCommitteeManager })));
+const AuthoritySessionManager = lazy(() => import('@/features/opening/components/AuthoritySessionManager').then((m) => ({ default: m.AuthoritySessionManager })));
+const AuthoritySessionControl = lazy(() => import('@/features/opening/components/AuthoritySessionControl').then((m) => ({ default: m.AuthoritySessionControl })));
+const AuthorityObjectionsView = lazy(() => import('@/features/objections/components/AuthorityObjectionsView').then((m) => ({ default: m.AuthorityObjectionsView })));
+const ReportsView = lazy(() => import('./ReportsView').then((m) => ({ default: m.ReportsView })));
+const AuditView = lazy(() => import('./AuditView').then((m) => ({ default: m.AuditView })));
+const SettingsView = lazy(() => import('./SettingsView').then((m) => ({ default: m.SettingsView })));
+const AuthorityAssistantView = lazy(() => import('./AuthorityAssistantView').then((m) => ({ default: m.AuthorityAssistantView })));
+const PriceRevisionCalculator = lazy(() => import('@/features/pricing/PriceRevisionCalculator').then((m) => ({ default: m.PriceRevisionCalculator })));
+const OperatorNotificationsView = lazy(() => import('@/pages/operator/OperatorNotificationsView').then((m) => ({ default: m.OperatorNotificationsView })));
+
+function PortalLoadingFallback() {
+  return (
+    <div className="flex min-h-[50vh] w-full items-center justify-center p-6">
+      <div className="size-7 animate-spin rounded-full border-2 border-emerald-600 border-t-transparent" />
+    </div>
+  );
+}
 
 export function AuthoritySpace() {
   const { t, lang } = useI18n();
@@ -238,50 +248,52 @@ export function AuthoritySpace() {
           </div>
         </div>
       )}
-      <Switch>
-        {/* ═══ Unified Deals Hub Routes ═══ */}
-        <Route path="/authority/deals/new" component={AuthorityDealWizard} />
-        <Route path="/authority/deals/:id">
-          {(params) => <AuthorityDealWorkspace key={params.id} />}
-        </Route>
-        <Route path="/authority/deals">{() => <AuthorityDealsList />}</Route>
+      <Suspense fallback={<PortalLoadingFallback />}>
+        <Switch>
+          {/* ═══ Unified Deals Hub Routes ═══ */}
+          <Route path="/authority/deals/new" component={AuthorityDealWizard} />
+          <Route path="/authority/deals/:id">
+            {(params) => <AuthorityDealWorkspace key={params.id} />}
+          </Route>
+          <Route path="/authority/deals">{() => <AuthorityDealsList />}</Route>
 
-        {/* ═══ Backward Compatibility Routes (Absorbed Drafts & Specs) ═══ */}
-        <Route path="/authority/drafts/new" component={AuthorityDealWizard} />
-        <Route path="/authority/drafts/:id/specs">
-          {(params) => <AuthorityDealWorkspace key={params.id} initialTab="specs" />}
-        </Route>
-        <Route path="/authority/drafts/:id/edit">
-          {(params) => <AuthorityDealWorkspace key={params.id} initialTab="basics" />}
-        </Route>
-        <Route path="/authority/drafts">{() => <AuthorityDealsList />}</Route>
-        <Route path="/authority/specs">{() => <AuthorityDealsList initialView="specs" />}</Route>
+          {/* ═══ Backward Compatibility Routes (Absorbed Drafts & Specs) ═══ */}
+          <Route path="/authority/drafts/new" component={AuthorityDealWizard} />
+          <Route path="/authority/drafts/:id/specs">
+            {(params) => <AuthorityDealWorkspace key={params.id} initialTab="specs" />}
+          </Route>
+          <Route path="/authority/drafts/:id/edit">
+            {(params) => <AuthorityDealWorkspace key={params.id} initialTab="basics" />}
+          </Route>
+          <Route path="/authority/drafts">{() => <AuthorityDealsList />}</Route>
+          <Route path="/authority/specs">{() => <AuthorityDealsList initialView="specs" />}</Route>
 
-        {/* ═══ Rest of Authority Portal Sections (Preserved Untouched) ═══ */}
-        <Route path="/authority/assistant" component={AuthorityAssistantView} />
-        <Route path="/authority/committee" component={DealCommitteeManager} />
-        <Route path="/authority/offers" component={ReceivedOffers} />
-        <Route path="/authority/price-revision">{() => <PriceRevisionCalculator />}</Route>
-        <Route path="/authority/objections" component={AuthorityObjectionsView} />
-        <Route path="/authority/evaluation/:tenderId" component={EvaluationWorkspace} />
-        <Route path="/authority/reports" component={ReportsView} />
-        <Route path="/authority/audit" component={AuditView} />
-        <Route path="/authority/settings" component={SettingsView} />
-        <Route path="/authority/notifications" component={OperatorNotificationsView} />
-        <Route path="/authority/opportunities/:id/received-offers" component={ReceivedOffers} />
-        <Route path="/authority/opportunities/:id/committee" component={DealCommitteeManager} />
-        <Route path="/authority/opportunities/:id/evaluation" component={EvaluationWorkspace} />
-        <Route path="/authority/opening-sessions/:id" component={AuthoritySessionControl} />
-        <Route path="/authority/opening-sessions" component={AuthoritySessionManager} />
-        <Route path="/authority/dashboard">
-          <Redirect to="/authority/overview" />
-        </Route>
-        <Route path="/authority/overview" component={AuthorityOverview} />
-        <Route path="/authority" component={AuthorityOverview} />
-        <Route>
-          <PortalNotFound basePath="/authority" baseTitle={t('common.authority_not_found')} />
-        </Route>
-      </Switch>
+          {/* ═══ Rest of Authority Portal Sections (Preserved Untouched) ═══ */}
+          <Route path="/authority/assistant" component={AuthorityAssistantView} />
+          <Route path="/authority/committee" component={DealCommitteeManager} />
+          <Route path="/authority/offers" component={ReceivedOffers} />
+          <Route path="/authority/price-revision">{() => <PriceRevisionCalculator />}</Route>
+          <Route path="/authority/objections" component={AuthorityObjectionsView} />
+          <Route path="/authority/evaluation/:tenderId" component={EvaluationWorkspace} />
+          <Route path="/authority/reports" component={ReportsView} />
+          <Route path="/authority/audit" component={AuditView} />
+          <Route path="/authority/settings" component={SettingsView} />
+          <Route path="/authority/notifications" component={OperatorNotificationsView} />
+          <Route path="/authority/opportunities/:id/received-offers" component={ReceivedOffers} />
+          <Route path="/authority/opportunities/:id/committee" component={DealCommitteeManager} />
+          <Route path="/authority/opportunities/:id/evaluation" component={EvaluationWorkspace} />
+          <Route path="/authority/opening-sessions/:id" component={AuthoritySessionControl} />
+          <Route path="/authority/opening-sessions" component={AuthoritySessionManager} />
+          <Route path="/authority/dashboard">
+            <Redirect to="/authority/overview" />
+          </Route>
+          <Route path="/authority/overview" component={AuthorityOverview} />
+          <Route path="/authority" component={AuthorityOverview} />
+          <Route>
+            <PortalNotFound basePath="/authority" baseTitle={t('common.authority_not_found')} />
+          </Route>
+        </Switch>
+      </Suspense>
     </PortalShell>
   );
 }

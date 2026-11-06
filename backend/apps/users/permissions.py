@@ -19,6 +19,10 @@ class IsCentralAdminBase(BasePermission):
         )
 
 
+# Alias for clean and standard importing across administrative modules
+IsCentralAdmin = IsCentralAdminBase
+
+
 class IsInspectorGeneral(BasePermission):
     """
     المفتش العام ومدير النظام أو المشرف العام:

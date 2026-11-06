@@ -1,5 +1,5 @@
 from apps.procurements.views_specs_payment import ChargilyWebhookView
-from safaqat_core.views_health import HealthCheckView
+from safaqat_core.views_health import HealthCheckView, PlatformHealthDetailView
 from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
@@ -45,6 +45,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/health/', HealthCheckView.as_view(), name='health-check'),
     path('api/health', HealthCheckView.as_view(), name='health-check-no-slash'),
+    path('api/health/detail/', PlatformHealthDetailView.as_view(), name='health-check-detail'),
+    path('api/health/detail', PlatformHealthDetailView.as_view(), name='health-check-detail-no-slash'),
     
     # OpenAPI Documentation
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),

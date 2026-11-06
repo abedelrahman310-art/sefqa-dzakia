@@ -44,31 +44,21 @@ export const V3WhySafaqatSection: React.FC = () => {
     <section
       id="why-safaqat"
       dir={dir}
-      className="relative w-full bg-[#ffffff] py-16 sm:py-20 px-4 sm:px-6 overflow-hidden"
+      className="relative w-full bg-transparent py-16 sm:py-20 px-4 sm:px-6 overflow-hidden"
     >
-      {/* خلفية زليج جزائري خفيفة وهادئة جداً (Subtle Algerian Zellige Pattern) */}
-      <div
-        className="absolute inset-0 pointer-events-none opacity-[0.025]"
-        style={{
-          backgroundImage: `radial-gradient(#006233 0.75px, transparent 0.75px), radial-gradient(#d21034 0.75px, #ffffff 0.75px)`,
-          backgroundSize: '32px 32px',
-          backgroundPosition: '0 0, 16px 16px',
-        }}
-      />
-
       <div className="relative max-w-[1200px] mx-auto">
         {/* رأس القسم: مؤطر وقصير وخالي تماماً من الفواصل والنقاط في العنوان الكبير */}
         <div className="text-center max-w-3xl mx-auto mb-12 sm:mb-16">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-emerald-200/90 bg-emerald-50/80 text-emerald-900 text-xs sm:text-sm font-bold shadow-2xs mb-4">
-            <Sparkles className="size-3.5 text-emerald-700" strokeWidth={1.75} />
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-white/30 bg-white/15 backdrop-blur-md text-white text-xs sm:text-sm font-bold shadow-sm mb-4">
+            <Sparkles className="size-3.5 text-emerald-300" strokeWidth={1.75} />
             <span>{isAr ? 'القيمة المضافة للمنظومة' : 'Valeur Ajoutée'}</span>
           </div>
 
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-slate-900 tracking-tight leading-snug">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-white tracking-tight leading-snug">
             {isAr ? 'لماذا صفقات ذكية' : 'Pourquoi Safaqat Dhakia'}
           </h2>
 
-          <p className="mt-3.5 text-sm sm:text-base text-slate-600 font-medium leading-relaxed max-w-2xl mx-auto">
+          <p className="mt-3.5 text-sm sm:text-base text-blue-100 font-medium leading-relaxed max-w-2xl mx-auto">
             {isAr
               ? 'منظومة سيادية موحدة تكرس مبادئ النزاهة وتكافؤ الفرص في إدارة الصفقات والمشتريات العمومية للدولة الجزائرية.'
               : 'Une plateforme souveraine unifiée consacrant la transparence et l’égalité des chances pour la commande publique algérienne.'}
