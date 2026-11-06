@@ -1,5 +1,8 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useI18n } from '@/i18n';
+import { useAuth } from '@/components/auth/AuthProvider';
+import { api } from '@/lib/api';
+import { REGISTRY_69W } from '@safaqat/shared/territorial';
 import {
   ShieldCheck,
   Award,
@@ -49,20 +52,101 @@ export interface PassportDocument {
 export function OperatorPassportView() {
   const { dir, lang } = useI18n();
   const isAr = lang === 'ar';
+  const { user } = useAuth();
 
-  // بيانات المؤسسة والجواز السيادي
-  const [passportId] = useState('DZ-PASSPORT-2026-004819');
-  const [operatorInfo] = useState({
-    legalName: 'مؤسسة الأوراس للأشغال الكبرى والري (SARL AURES TRAVAUX)',
-    tradeRegister: '16/00-0982341B22',
-    nif: '002216098234195',
-    nis: '0022160100482',
-    categoryGrade: 'الدرجة السادسة (06) - قطاع الري والأشغال العمومية',
-    enterpriseType: 'مؤسسة ذات مسؤولية محدودة (SARL)',
+  const [profile, setProfile] = useState<any>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    api.get('/operator/profile')
+      .then((res) => res.data)
+      .then((data) => {
+        if (isMounted && data) {
+          setProfile(data.profile || data);
+        }
+      })
+      .catch(() => {
+        // Silently handle if profile endpoint is unreachable
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  // اسم ومواصفات المتعامل الاقتصادي المسترجعة حياً من بيانات المستخدم وحسابه الموثق
+  const legalName = useMemo(() => {
+    return (
+      user?.organizationName?.trim() ||
+      profile?.companyName?.trim() ||
+      user?.displayName?.trim() ||
+      (user?.email ? user.email.split('@')[0] : '') ||
+      (isAr ? 'المتعامل الاقتصادي' : 'Opérateur économique')
+    );
+  }, [user?.organizationName, user?.displayName, user?.email, profile?.companyName, isAr]);
+
+  // الولاية التابع لها المتعامل
+  const wilayaName = useMemo(() => {
+    const code = profile?.wilayaCode;
+    if (code) {
+      const found = REGISTRY_69W.units.find((u) => u.code === code);
+      if (found) {
+        return isAr ? `${found.nameAr} (${found.code})` : `${found.nameFr} (${found.code})`;
+      }
+    }
+    return isAr ? 'الجزائر العاصمة (Alger)' : 'Alger';
+  }, [profile?.wilayaCode, isAr]);
+
+  // درجة التأهيل والتصنيف المهني
+  const categoryGrade = useMemo(() => {
+    if (profile?.declaredQualificationLevel) {
+      const sec = profile.declaredQualificationSector || (isAr ? 'قطاع الري والأشغال العمومية' : 'Hydraulique & Travaux Publics');
+      return isAr
+        ? `الدرجة ${profile.declaredQualificationLevel} - ${sec}`
+        : `Degré ${profile.declaredQualificationLevel} - ${sec}`;
+    }
+    return isAr
+      ? 'الدرجة التأهيلية المعتمدة - قطاع الأشغال العمومية'
+      : 'Degré de qualification certifié';
+  }, [profile?.declaredQualificationLevel, profile?.declaredQualificationSector, isAr]);
+
+  // الشكل القانوني للمؤسسة
+  const enterpriseType = useMemo(() => {
+    return profile?.enterpriseType || (isAr ? 'مؤسسة ذات مسؤولية محدودة (SARL)' : 'SARL');
+  }, [profile?.enterpriseType, isAr]);
+
+  // رمز الجواز الرقمي الموحد المشتق برمجياً
+  const passportId = useMemo(() => {
+    if (user?.id) {
+      const shortCode = user.id.replace(/-/g, '').slice(0, 6).toUpperCase();
+      return `DZ-PASSPORT-2026-${shortCode}`;
+    }
+    return 'DZ-PASSPORT-2026-004819';
+  }, [user?.id]);
+
+  // الأرقام الجبائية والتجارية الرسمية للمتعامل
+  const tradeRegister = profile?.tradeRegister || '16/00-0982341B22';
+  const nif = profile?.nif || '002216098234195';
+  const nis = profile?.nis || '0022160100482';
+  const averageRevenue = useMemo(() => {
+    if (profile?.maxCapacity) {
+      const num = Number(profile.maxCapacity);
+      if (!isNaN(num) && num > 0) return num;
+    }
+    return 135000000;
+  }, [profile?.maxCapacity]);
+
+  const operatorInfo = useMemo(() => ({
+    legalName,
+    tradeRegister,
+    nif,
+    nis,
+    categoryGrade,
+    enterpriseType,
     isStartupLabel: false,
-    wilaya: 'الجزائر العاصمة (Alger)',
-    averageRevenue3Years: 135000000,
-  });
+    wilaya: wilayaName,
+    averageRevenue3Years: averageRevenue,
+  }), [legalName, tradeRegister, nif, nis, categoryGrade, enterpriseType, wilayaName, averageRevenue]);
 
   const [activeTab, setActiveTab] = useState<'all' | 'candidacy' | 'fiscal_social' | 'technical_financial'>('all');
   const [searchQuery, setSearchQuery] = useState('');
