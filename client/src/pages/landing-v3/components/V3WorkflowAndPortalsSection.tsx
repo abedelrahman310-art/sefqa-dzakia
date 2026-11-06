@@ -181,16 +181,16 @@ export const V3WorkflowAndPortalsSection: React.FC = () => {
             1. رأس القسم الموحد: مسار الإبرام الرقمي وبوابات المنصة
             ══════════════════════════════════════════════════════════════════ */}
         <div className="text-center max-w-3xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-white/30 bg-white/15 backdrop-blur-md text-white text-xs sm:text-sm font-bold shadow-sm mb-4">
-            <Workflow className="size-3.5 text-emerald-300" strokeWidth={2} />
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-emerald-200/80 bg-white/80 backdrop-blur-md text-emerald-800 text-xs sm:text-sm font-bold shadow-xs mb-4">
+            <Workflow className="size-3.5 text-emerald-600" strokeWidth={2} />
             <span>{isAr ? 'مسار الإبرام الرقمي والفضاءات المتكاملة' : 'Cycle de Vie & Espaces Dédiés'}</span>
           </div>
 
-          <h2 className="text-2xl sm:text-3xl md:text-5xl font-black text-white tracking-tight leading-tight">
+          <h2 className="text-2xl sm:text-3xl md:text-5xl font-black text-slate-900 tracking-tight leading-tight">
             {isAr ? 'كيف تعمل المنظومة وبواباتها' : 'Fonctionnement et Portails Dédiés'}
           </h2>
 
-          <p className="mt-3.5 sm:mt-4 text-sm sm:text-base text-blue-100 font-medium leading-relaxed max-w-2xl mx-auto">
+          <p className="mt-3.5 sm:mt-4 text-sm sm:text-base text-slate-600 font-medium leading-relaxed max-w-2xl mx-auto">
             {isAr
               ? 'دورة تعاقدية رقمية كاملة من الإعداد إلى المنح النهائي عبر أربع مراحل متسلسلة تنفذ بسلاسة داخل ثلاث بوابات حكومية متخصصة.'
               : 'Un cycle de passation numérique complet en quatre étapes transparentes, orchestré à travers trois portails institutionnels interconnectés.'}
@@ -201,14 +201,14 @@ export const V3WorkflowAndPortalsSection: React.FC = () => {
             2. مسار الصفقة العمومية خطوة بخطوة (المراحل الأربع)
             ══════════════════════════════════════════════════════════════════ */}
         <div className="space-y-6">
-          <div className="flex items-center justify-between gap-3 border-b border-white/20 pb-3">
-            <div className="flex items-center gap-2 text-white">
-              <span className="size-2 rounded-full bg-emerald-400 animate-pulse" />
-              <h3 className="text-sm sm:text-base font-bold uppercase tracking-wider font-mono text-emerald-200">
+          <div className="flex items-center justify-between gap-3 border-b border-slate-200 pb-3">
+            <div className="flex items-center gap-2 text-slate-900">
+              <span className="size-2 rounded-full bg-emerald-500 animate-pulse" />
+              <h3 className="text-sm sm:text-base font-bold uppercase tracking-wider font-mono text-emerald-800">
                 {isAr ? 'المسار القانوني والإجرائي خطوة بخطوة' : 'Étapes Réglementaires du Marché'}
               </h3>
             </div>
-            <span className="text-xs font-semibold text-blue-200 font-mono">
+            <span className="text-xs font-semibold text-slate-500 font-mono">
               {isAr ? 'القانون 23-12 · المرسوم الرئاسي 15-247' : 'Conforme Loi 23-12'}
             </span>
           </div>
@@ -268,10 +268,10 @@ export const V3WorkflowAndPortalsSection: React.FC = () => {
             ══════════════════════════════════════════════════════════════════ */}
         <div className="relative flex items-center justify-center my-4">
           <div className="absolute inset-0 flex items-center" aria-hidden="true">
-            <div className="w-full border-t border-white/20" />
+            <div className="w-full border-t border-slate-200" />
           </div>
-          <div className="relative inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/30 bg-[#1e40af]/80 backdrop-blur-md text-white text-xs font-bold shadow-sm">
-            <Layers className="size-3.5 text-emerald-300" />
+          <div className="relative inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-emerald-200/80 bg-white/90 backdrop-blur-md text-emerald-800 text-xs font-bold shadow-xs">
+            <Layers className="size-3.5 text-emerald-600" />
             <span>{isAr ? 'البوابات الرسمية المتخصصة لتنفيذ المسار' : 'Portails Officiels Dédiés'}</span>
           </div>
         </div>
@@ -285,7 +285,7 @@ export const V3WorkflowAndPortalsSection: React.FC = () => {
             return (
               <div
                 key={portal.id}
-                className={`group rounded-2xl p-6 sm:p-7 bg-white border border-white/95 shadow-md hover:shadow-2xl ${portal.hoverBorder} hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between relative overflow-hidden`}
+                className={`group rounded-2xl p-6 sm:p-7 bg-white/80 backdrop-blur-md border border-slate-200/80 shadow-xs hover:shadow-md ${portal.hoverBorder} hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between relative overflow-hidden`}
               >
                 {/* شريط تمييز علوي بلون البوابة */}
                 <div

@@ -18,14 +18,14 @@ export const V3Hero: React.FC = () => {
           
           {/* Framed Short Eyebrow: Isolated Centered Row */}
           <div className="flex items-center justify-center w-full">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/30 bg-white/15 backdrop-blur-md text-white text-xs sm:text-sm font-bold shadow-sm">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-emerald-200/80 bg-white/80 backdrop-blur-md text-emerald-800 text-xs sm:text-sm font-bold shadow-xs">
               <span className="relative flex size-2">
-                <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-                <span className="relative inline-flex size-2 rounded-full bg-emerald-300" />
+                <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-500 opacity-75" />
+                <span className="relative inline-flex size-2 rounded-full bg-emerald-600" />
               </span>
               <span>{isAr ? 'المنظومة الرقمية المعتمدة' : 'Plateforme Numérique Certifiée'}</span>
-              <span className="text-white/40 select-none">|</span>
-              <span className="text-[11px] font-semibold text-emerald-200">{isAr ? 'جاهزة للخدمة' : 'Opérationnelle'}</span>
+              <span className="text-slate-300 select-none">|</span>
+              <span className="text-[11px] font-semibold text-emerald-700">{isAr ? 'جاهزة للخدمة' : 'Opérationnelle'}</span>
             </div>
           </div>
 
@@ -36,10 +36,10 @@ export const V3Hero: React.FC = () => {
           <div className="w-full flex items-center justify-center my-1">
             <div className="relative w-full max-w-[940px] mx-auto">
               {/* Algerian Tricolor Ambient Border Glow with Gentle Breathing Effect */}
-              <div className="absolute -inset-3 rounded-3xl bg-gradient-to-r from-[#006233]/25 via-emerald-100/40 to-[#d21034]/25 blur-2xl pointer-events-none transition-all duration-1000" />
+              <div className="absolute -inset-3 rounded-3xl bg-gradient-to-r from-[#006233]/15 via-emerald-100/30 to-[#d21034]/15 blur-2xl pointer-events-none transition-all duration-1000" />
 
               {/* The Glassmorphic Floating Card */}
-              <div className="relative w-full rounded-3xl border border-white/95 bg-white/90 backdrop-blur-2xl shadow-xl px-6 py-10 sm:px-14 sm:py-14 md:py-16 overflow-hidden flex flex-col items-center justify-center text-center">
+              <div className="relative w-full rounded-3xl border border-slate-200/70 bg-white/80 backdrop-blur-2xl shadow-xl px-6 py-10 sm:px-14 sm:py-14 md:py-16 overflow-hidden flex flex-col items-center justify-center text-center">
                 {/* Top National Ribbon Accent: 50% Green, 50% Red */}
                 <div className="absolute top-0 left-0 right-0 h-2 flex">
                   <div className="w-1/2 bg-[#006233]" />
@@ -63,13 +63,13 @@ export const V3Hero: React.FC = () => {
                 </div>
 
                 {/* Monumental Platform Name inside the Glass Card */}
-                <h1 className="text-5xl sm:text-7xl lg:text-8xl font-black text-[#0f3154] leading-[1.08] tracking-tight font-sans my-2 sm:my-3 text-center w-full">
+                <h1 className="text-5xl sm:text-7xl lg:text-8xl font-black text-slate-900 leading-[1.08] tracking-tight font-sans my-2 sm:my-3 text-center w-full">
                   {isAr ? 'صفقات ذكية' : 'Safaqat Dhakia'}
                 </h1>
 
                 {/* Short & Concise Platform Definition inside the Card */}
                 <div className="mt-3 sm:mt-5 max-w-2xl mx-auto">
-                  <p className="text-base sm:text-xl lg:text-2xl font-bold text-slate-700 leading-snug">
+                  <p className="text-base sm:text-xl lg:text-2xl font-bold text-slate-600 leading-snug">
                     {isAr
                       ? 'المنظومة الرقمية الموحدة لإدارة ورقمنة الصفقات العمومية'
                       : 'Plateforme Numérique Unifiée des Marchés Publics'}

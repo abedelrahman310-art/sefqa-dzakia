@@ -6,7 +6,7 @@ import V3Hero from './components/V3Hero';
 import V3QuickSearchSection from './components/V3QuickSearchSection';
 import V3WhySafaqatSection from './components/V3WhySafaqatSection';
 import V3WorkflowAndPortalsSection from './components/V3WorkflowAndPortalsSection';
-import V3PlatformShowcaseSection from './components/V3PlatformShowcaseSection';
+import V3WorkspacesPreview from './components/V3WorkspacesPreview';
 import V3AIToolsSection from './components/V3AIToolsSection';
 import V3FAQSection from './components/V3FAQSection';
 import V3ComplianceTrustSection from './components/V3ComplianceTrustSection';
@@ -66,15 +66,11 @@ export function LandingV3Page() {
     <div
       dir={dir}
       lang={lang}
-      className="min-h-screen relative overflow-hidden bg-[#2563EB] text-[#080808] font-sans antialiased selection:bg-white selection:text-[#1E40AF]"
-      style={{
-        backgroundImage: `
-          radial-gradient(circle at 70% 30%, #3B82F6 0%, transparent 50%),
-          radial-gradient(circle at 20% 80%, #1E40AF 0%, transparent 50%),
-          linear-gradient(135deg, #2563EB 0%, #1E40AF 100%)
-        `,
-      }}
+      className="min-h-screen bg-slate-50 text-slate-900 relative overflow-hidden font-sans antialiased selection:bg-emerald-700 selection:text-white"
     >
+      {/* تدرج علوي خفيف جداً يعطي إيحاء بالعمق دون إجهاد العين */}
+      <div className="absolute top-0 left-0 right-0 h-[500px] bg-gradient-to-b from-emerald-50/50 to-transparent pointer-events-none" />
+
       {/* ─── الشريط العلوي الرئاسي ─── */}
       <V3TopBanner />
 
@@ -105,7 +101,7 @@ export function LandingV3Page() {
         <V3SectionDivider bg="bg-transparent" />
 
         {/* ─── الإضافة 3: المعاينة الحية لواجهات المنصة ─── */}
-        <V3PlatformShowcaseSection />
+        <V3WorkspacesPreview />
 
         {/* فاصل وطني سيادي مزدوج */}
         <V3SectionDivider bg="bg-transparent" />

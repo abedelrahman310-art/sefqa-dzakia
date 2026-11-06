@@ -12,7 +12,7 @@ export const V3TopBanner: React.FC = () => {
   return (
     <aside
       aria-label={isAr ? 'الإعلان المؤسسي' : 'Bandeau institutionnel'}
-      className="w-full bg-[#1e40af]/90 backdrop-blur-md text-white border-b border-white/10 px-4 py-2 text-[13px] font-medium transition-all select-none"
+      className="w-full bg-[#006233] text-white border-b border-emerald-800/40 px-4 py-2 text-[13px] font-medium transition-all select-none"
     >
       <div className="max-w-[1200px] mx-auto flex items-center gap-4">
         <div className="flex items-center gap-2 flex-1 min-w-0 justify-center sm:justify-start">
