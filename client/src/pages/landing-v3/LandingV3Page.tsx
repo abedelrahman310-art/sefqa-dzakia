@@ -5,8 +5,7 @@ import V3Nav from './components/V3Nav';
 import V3Hero from './components/V3Hero';
 import V3QuickSearchSection from './components/V3QuickSearchSection';
 import V3WhySafaqatSection from './components/V3WhySafaqatSection';
-import V3WorkflowSection from './components/V3WorkflowSection';
-import V3FivePortalsSection from './components/V3FivePortalsSection';
+import V3WorkflowAndPortalsSection from './components/V3WorkflowAndPortalsSection';
 import V3PlatformShowcaseSection from './components/V3PlatformShowcaseSection';
 import V3AIToolsSection from './components/V3AIToolsSection';
 import V3FAQSection from './components/V3FAQSection';
@@ -99,14 +98,8 @@ export function LandingV3Page() {
         {/* فاصل وطني سيادي مزدوج */}
         <V3SectionDivider bg="bg-transparent" />
 
-        {/* ─── الإضافة 1: مسار الصفقة العمومية خطوة بخطوة ─── */}
-        <V3WorkflowSection />
-
-        {/* فاصل وطني سيادي مزدوج */}
-        <V3SectionDivider bg="bg-transparent" />
-
-        {/* ─── القسم 2: بوابات المنصة الثلاث ─── */}
-        <V3FivePortalsSection />
+        {/* ─── القسم 2: مسار الإبرام الرقمي وبوابات المنظومة (مدمج وموحد) ─── */}
+        <V3WorkflowAndPortalsSection />
 
         {/* فاصل وطني سيادي مزدوج */}
         <V3SectionDivider bg="bg-transparent" />

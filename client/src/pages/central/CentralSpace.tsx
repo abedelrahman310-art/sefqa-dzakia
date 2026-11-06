@@ -17,6 +17,7 @@ const CentralReports = lazy(() => import('./CentralReports').then((m) => ({ defa
 const CentralPermissions = lazy(() => import('./CentralPermissions').then((m) => ({ default: m.CentralPermissions })));
 const CentralIntegrityView = lazy(() => import('./CentralIntegrityView').then((m) => ({ default: m.CentralIntegrityView })));
 const CentralInjunctions = lazy(() => import('./CentralInjunctions').then((m) => ({ default: m.CentralInjunctions })));
+const CentralPlatformHealth = lazy(() => import('./CentralPlatformHealth').then((m) => ({ default: m.CentralPlatformHealth })));
 const OperatorNotificationsView = lazy(() => import('@/pages/operator/OperatorNotificationsView').then((m) => ({ default: m.OperatorNotificationsView })));
 
 function PortalLoadingFallback() {
@@ -36,6 +37,7 @@ import {
   BarChart,
   Shield,
   Gavel,
+  Activity,
 } from 'lucide-react';
 
 export function CentralSpace() {
@@ -59,6 +61,8 @@ export function CentralSpace() {
   const [isPermissionsActive] = useRoute('/central/permissions');
   const [isIntegrityActive] = useRoute('/central/integrity');
   const [isInjunctionsActive] = useRoute('/central/injunctions');
+  const [isPlatformHealthActive] = useRoute('/central/platform-health');
+  const [isHealthActive] = useRoute('/central/health');
 
   const navItems = [
     {
@@ -131,6 +135,13 @@ export function CentralSpace() {
       icon: Shield,
       isActive: isPermissionsActive,
     },
+    {
+      id: 'platform-health',
+      label: t('nav.central.health'),
+      href: '/central/platform-health',
+      icon: Activity,
+      isActive: isPlatformHealthActive || isHealthActive,
+    },
   ];
 
   const isMapRoute = location === '/central/map';
@@ -166,6 +177,8 @@ export function CentralSpace() {
           <Route path="/central/reports" component={CentralReports} />
           <Route path="/central/injunctions" component={CentralInjunctions} />
           <Route path="/central/integrity" component={CentralIntegrityView} />
+          <Route path="/central/platform-health" component={CentralPlatformHealth} />
+          <Route path="/central/health" component={CentralPlatformHealth} />
           <Route path="/central/permissions" component={CentralPermissions} />
           <Route path="/central/settings" component={CentralPermissions} />
           <Route path="/central/notifications" component={OperatorNotificationsView} />

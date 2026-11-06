@@ -18,6 +18,7 @@ const CENTRAL_NAV_ITEMS = (t: (key: TranslationKey) => string): PortalNavItem[] 
   { path: '/central/integrity', label: t('central.integrity.nav_label') },
   { path: '/central/injunctions', label: t('central.injunctions.title') },
   { path: '/central/permissions', label: t('nav.central.permissions') },
+  { path: '/central/platform-health', label: t('nav.central.health') },
 ];
 
 export function CentralAdminTopBar({

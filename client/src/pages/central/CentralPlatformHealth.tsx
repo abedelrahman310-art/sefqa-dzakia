@@ -34,7 +34,7 @@ function StatusBadge({
 
   const configs: Record<
     string,
-    { bg: string; text: string; border: string; label: string; icon: any }
+    { bg: string; border: string; label: string; icon: any }
   > = {
     operational: {
       bg: 'bg-emerald-50 text-emerald-700',

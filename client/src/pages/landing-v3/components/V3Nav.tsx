@@ -20,8 +20,7 @@ export const V3Nav: React.FC = () => {
 
   const navLinks = [
     { label: isAr ? 'لماذا صفقات ذكية' : 'Pourquoi Safaqat', href: '#why-safaqat' },
-    { label: isAr ? 'مسار الصفقة' : 'Fonctionnement', href: '#workflow' },
-    { label: isAr ? 'بوابات المنصة' : 'Portails', href: '#portals' },
+    { label: isAr ? 'مسار العمل والبوابات' : 'Fonctionnement & Portails', href: '#workflow' },
     { label: isAr ? 'أدوات الذكاء الاصطناعي' : 'Outils IA', href: '#ai-tools' },
     { label: isAr ? 'الأسئلة الشائعة' : 'FAQ', href: '#faq' },
     { label: isAr ? 'الامتثال' : 'Conformité', href: '#compliance' },
